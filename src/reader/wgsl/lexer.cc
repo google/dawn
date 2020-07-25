@@ -527,8 +527,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImport, source, "import"};
   if (str == "in")
     return {Token::Type::kIn, source, "in"};
-  if (str == "kill")
-    return {Token::Type::kKill, source, "kill"};
   if (str == "location")
     return {Token::Type::kLocation, source, "location"};
   if (str == "loop")

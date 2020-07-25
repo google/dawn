@@ -2192,7 +2192,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     }
       return true;
     case SpvOpKill:
-      // For now, assume SPIR-V OpKill has same semantics as WGSL kill.
+      // For now, assume SPIR-V OpKill has same semantics as WGSL discard.
       // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
       AddStatement(std::make_unique<ast::DiscardStatement>());
       return true;

@@ -295,6 +295,9 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsContinue()) {
     return true;
   }
+  if (stmt->IsDiscard()) {
+    return true;
+  }
   if (stmt->IsElse()) {
     auto* e = stmt->AsElse();
     return DetermineResultType(e->condition()) &&
@@ -315,9 +318,6 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
         return false;
       }
     }
-    return true;
-  }
-  if (stmt->IsKill()) {
     return true;
   }
   if (stmt->IsLoop()) {

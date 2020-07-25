@@ -22,28 +22,28 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
-  auto* p = parser("loop { kill; }");
+  auto* p = parser("loop { discard; }");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsKill());
+  EXPECT_TRUE(e->body()[0]->IsDiscard());
 
   EXPECT_EQ(e->continuing().size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
-  auto* p = parser("loop { kill; continuing { kill; }}");
+  auto* p = parser("loop { discard; continuing { discard; }}");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsKill());
+  EXPECT_TRUE(e->body()[0]->IsDiscard());
 
   EXPECT_EQ(e->continuing().size(), 1u);
-  EXPECT_TRUE(e->continuing()[0]->IsKill());
+  EXPECT_TRUE(e->continuing()[0]->IsDiscard());
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
@@ -56,17 +56,17 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
-  auto* p = parser("loop { continuing { kill; }}");
+  auto* p = parser("loop { continuing { discard; }}");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_EQ(e->body().size(), 0u);
   ASSERT_EQ(e->continuing().size(), 1u);
-  EXPECT_TRUE(e->continuing()[0]->IsKill());
+  EXPECT_TRUE(e->continuing()[0]->IsDiscard());
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
-  auto* p = parser("loop kill; }");
+  auto* p = parser("loop discard; }");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -74,27 +74,27 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
-  auto* p = parser("loop { kill; ");
+  auto* p = parser("loop { discard; ");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:14: missing } for loop");
+  EXPECT_EQ(p->error(), "1:17: missing } for loop");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
-  auto* p = parser("loop { kill }");
+  auto* p = parser("loop { discard }");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:13: missing ;");
+  EXPECT_EQ(p->error(), "1:16: missing ;");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
-  auto* p = parser("loop { continuing { kill }}");
+  auto* p = parser("loop { continuing { discard }}");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:26: missing ;");
+  EXPECT_EQ(p->error(), "1:29: missing ;");
 }
 
 }  // namespace

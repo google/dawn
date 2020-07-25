@@ -25,7 +25,6 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
@@ -75,10 +74,6 @@ bool Statement::IsFallthrough() const {
 }
 
 bool Statement::IsIf() const {
-  return false;
-}
-
-bool Statement::IsKill() const {
   return false;
 }
 
@@ -141,11 +136,6 @@ const FallthroughStatement* Statement::AsFallthrough() const {
 const IfStatement* Statement::AsIf() const {
   assert(IsIf());
   return static_cast<const IfStatement*>(this);
-}
-
-const KillStatement* Statement::AsKill() const {
-  assert(IsKill());
-  return static_cast<const KillStatement*>(this);
 }
 
 const LoopStatement* Statement::AsLoop() const {
@@ -211,11 +201,6 @@ FallthroughStatement* Statement::AsFallthrough() {
 IfStatement* Statement::AsIf() {
   assert(IsIf());
   return static_cast<IfStatement*>(this);
-}
-
-KillStatement* Statement::AsKill() {
-  assert(IsKill());
-  return static_cast<KillStatement*>(this);
 }
 
 LoopStatement* Statement::AsLoop() {

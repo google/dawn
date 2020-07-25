@@ -22,19 +22,19 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinuingStmt) {
-  auto* p = parser("continuing { kill; }");
+  auto* p = parser("continuing { discard; }");
   auto e = p->continuing_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 1u);
-  ASSERT_TRUE(e[0]->IsKill());
+  ASSERT_TRUE(e[0]->IsDiscard());
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
-  auto* p = parser("continuing { kill }");
+  auto* p = parser("continuing { discard }");
   auto e = p->continuing_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e.size(), 0u);
-  EXPECT_EQ(p->error(), "1:19: missing ;");
+  EXPECT_EQ(p->error(), "1:22: missing ;");
 }
 
 }  // namespace

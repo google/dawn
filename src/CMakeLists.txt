@@ -94,8 +94,6 @@ set(TINT_LIB_SRCS
   ast/int_literal.h
   ast/intrinsic.cc
   ast/intrinsic.h
-  ast/kill_statement.cc
-  ast/kill_statement.h
   ast/literal.h
   ast/literal.cc
   ast/location_decoration.cc
@@ -300,7 +298,6 @@ set(TINT_TEST_SRCS
   ast/if_statement_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
-  ast/kill_statement_test.cc
   ast/location_decoration_test.cc
   ast/loop_statement_test.cc
   ast/member_accessor_expression_test.cc
@@ -465,7 +462,6 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_ident_expression_test.cc
     writer/spirv/builder_if_test.cc
     writer/spirv/builder_intrinsic_test.cc
-    writer/spirv/builder_kill_test.cc
     writer/spirv/builder_literal_test.cc
     writer/spirv/builder_loop_test.cc
     writer/spirv/builder_return_test.cc
@@ -501,7 +497,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_if_test.cc
     writer/wgsl/generator_impl_import_test.cc
-    writer/wgsl/generator_impl_kill_test.cc
     writer/wgsl/generator_impl_loop_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc
     writer/wgsl/generator_impl_return_test.cc
@@ -532,7 +527,6 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_identifier_test.cc
     writer/msl/generator_impl_if_test.cc
     writer/msl/generator_impl_import_test.cc
-    writer/msl/generator_impl_kill_test.cc
     writer/msl/generator_impl_loop_test.cc
     writer/msl/generator_impl_member_accessor_test.cc
     writer/msl/generator_impl_module_constant_test.cc

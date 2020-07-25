@@ -23,11 +23,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, Statements) {
-  auto* p = parser("kill; return;");
+  auto* p = parser("discard; return;");
   auto e = p->statements();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 2u);
-  EXPECT_TRUE(e[0]->IsKill());
+  EXPECT_TRUE(e[0]->IsDiscard());
   EXPECT_TRUE(e[1]->IsReturn());
 }
 

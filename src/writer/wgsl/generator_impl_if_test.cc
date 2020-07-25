@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/kill_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -29,7 +29,7 @@ using WgslGeneratorImplTest = testing::Test;
 TEST_F(WgslGeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
 
@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
-    kill;
+    discard;
   }
 )");
 }
@@ -47,7 +47,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
   ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::KillStatement>());
+  else_body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
@@ -55,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
@@ -65,23 +65,23 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
-    kill;
+    discard;
   } elseif (else_cond) {
-    kill;
+    discard;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
   ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::KillStatement>());
+  else_body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_body)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
@@ -91,9 +91,9 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
-    kill;
+    discard;
   } else {
-    kill;
+    discard;
   }
 )");
 }
@@ -102,10 +102,10 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
   ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::KillStatement>());
+  else_body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::StatementList else_body_2;
-  else_body_2.push_back(std::make_unique<ast::KillStatement>());
+  else_body_2.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
@@ -114,7 +114,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
@@ -124,11 +124,11 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
-    kill;
+    discard;
   } elseif (else_cond) {
-    kill;
+    discard;
   } else {
-    kill;
+    discard;
   }
 )");
 }

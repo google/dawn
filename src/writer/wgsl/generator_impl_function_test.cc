@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/function.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -31,7 +31,7 @@ using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
@@ -43,7 +43,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 
   ASSERT_TRUE(g.EmitFunction(&func));
   EXPECT_EQ(g.result(), R"(  fn my_func() -> void {
-    kill;
+    discard;
     return;
   }
 )");
@@ -51,7 +51,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());
 
   ast::type::F32Type f32;
@@ -71,7 +71,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 
   ASSERT_TRUE(g.EmitFunction(&func));
   EXPECT_EQ(g.result(), R"(  fn my_func(a : f32, b : i32) -> void {
-    kill;
+    discard;
     return;
   }
 )");

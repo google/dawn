@@ -16,9 +16,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
@@ -36,7 +36,7 @@ using MslGeneratorImplTest = testing::Test;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
 
@@ -53,7 +53,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::StatementList continuing;
   continuing.push_back(std::make_unique<ast::ReturnStatement>());
@@ -83,7 +83,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::StatementList continuing;
   continuing.push_back(std::make_unique<ast::ReturnStatement>());

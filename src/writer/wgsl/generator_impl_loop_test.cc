@@ -15,7 +15,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/kill_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -28,7 +28,7 @@ using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
 
@@ -37,17 +37,17 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
   EXPECT_EQ(g.result(), R"(  loop {
-    kill;
+    discard;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::KillStatement>());
+  body.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::KillStatement>());
+  continuing.push_back(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 
@@ -56,10 +56,10 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
   EXPECT_EQ(g.result(), R"(  loop {
-    kill;
+    discard;
 
     continuing {
-      kill;
+      discard;
     }
   }
 )");

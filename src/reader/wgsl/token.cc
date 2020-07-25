@@ -163,8 +163,6 @@ std::string Token::TypeToName(Type type) {
       return "import";
     case Token::Type::kIn:
       return "in";
-    case Token::Type::kKill:
-      return "kill";
     case Token::Type::kLocation:
       return "location";
     case Token::Type::kLoop:

@@ -440,7 +440,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"image", Token::Type::kImage},
                     TokenData{"import", Token::Type::kImport},
                     TokenData{"in", Token::Type::kIn},
-                    TokenData{"kill", Token::Type::kKill},
                     TokenData{"location", Token::Type::kLocation},
                     TokenData{"loop", Token::Type::kLoop},
                     TokenData{"mat2x2", Token::Type::kMat2x2},

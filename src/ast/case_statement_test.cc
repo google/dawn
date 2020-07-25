@@ -15,8 +15,8 @@
 #include "src/ast/case_statement.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
@@ -35,16 +35,16 @@ TEST_F(CaseStatementTest, Creation_i32) {
   b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
 
   auto* int_ptr = b.back().get();
-  auto* kill_ptr = stmts[0].get();
+  auto* discard_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
   ASSERT_EQ(c.selectors().size(), 1u);
   EXPECT_EQ(c.selectors()[0].get(), int_ptr);
   ASSERT_EQ(c.body().size(), 1u);
-  EXPECT_EQ(c.body()[0].get(), kill_ptr);
+  EXPECT_EQ(c.body()[0].get(), discard_ptr);
 }
 
 TEST_F(CaseStatementTest, Creation_u32) {
@@ -54,16 +54,16 @@ TEST_F(CaseStatementTest, Creation_u32) {
   b.push_back(std::make_unique<UintLiteral>(&u32, 2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
 
   auto* int_ptr = b.back().get();
-  auto* kill_ptr = stmts[0].get();
+  auto* discard_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
   ASSERT_EQ(c.selectors().size(), 1u);
   EXPECT_EQ(c.selectors()[0].get(), int_ptr);
   ASSERT_EQ(c.body().size(), 1u);
-  EXPECT_EQ(c.body()[0].get(), kill_ptr);
+  EXPECT_EQ(c.body()[0].get(), discard_ptr);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
@@ -72,7 +72,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
   b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
 
   CaseStatement c(Source{20, 2}, std::move(b), std::move(stmts));
   auto src = c.source();
@@ -82,7 +82,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 
 TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
 
   CaseStatement c;
   c.set_body(std::move(stmts));
@@ -115,7 +115,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
   stmts.push_back(nullptr);
 
   CaseStatement c(std::move(b), std::move(stmts));
@@ -140,13 +140,13 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
   b.push_back(std::make_unique<SintLiteral>(&i32, -2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Case -2{
-    Kill{}
+    Discard{}
   }
 )");
 }
@@ -157,13 +157,13 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   b.push_back(std::make_unique<UintLiteral>(&u32, 2));
 
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Case 2{
-    Kill{}
+    Discard{}
   }
 )");
 }
@@ -175,26 +175,26 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   b.push_back(std::make_unique<SintLiteral>(&i32, 1));
   b.push_back(std::make_unique<SintLiteral>(&i32, 2));
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
   CaseStatement c(std::move(b), std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Case 1, 2{
-    Kill{}
+    Discard{}
   }
 )");
 }
 
 TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
   StatementList stmts;
-  stmts.push_back(std::make_unique<KillStatement>());
+  stmts.push_back(std::make_unique<DiscardStatement>());
   CaseStatement c(CaseSelectorList{}, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Default{
-    Kill{}
+    Discard{}
   }
 )");
 }

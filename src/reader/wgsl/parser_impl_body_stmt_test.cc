@@ -23,13 +23,13 @@ namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
   auto* p = parser(R"({
-  kill;
+  discard;
   return 1 + b / 2;
 })");
   auto e = p->body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 2u);
-  EXPECT_TRUE(e[0]->IsKill());
+  EXPECT_TRUE(e[0]->IsDiscard());
   EXPECT_TRUE(e[1]->IsReturn());
 }
 

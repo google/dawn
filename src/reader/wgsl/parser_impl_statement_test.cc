@@ -142,7 +142,7 @@ TEST_F(ParserImplTest, Statement_Loop) {
 }
 
 TEST_F(ParserImplTest, Statement_Loop_Invalid) {
-  auto* p = parser("loop kill; }");
+  auto* p = parser("loop discard; }");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -203,22 +203,6 @@ TEST_F(ParserImplTest, Statement_Continue_MissingSemicolon) {
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:9: missing ;");
-}
-
-TEST_F(ParserImplTest, Statement_Kill) {
-  auto* p = parser("kill;");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsKill());
-}
-
-TEST_F(ParserImplTest, Statement_Kill_MissingSemicolon) {
-  auto* p = parser("kill");
-  auto e = p->statement();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:5: missing ;");
 }
 
 TEST_F(ParserImplTest, Statement_Discard) {

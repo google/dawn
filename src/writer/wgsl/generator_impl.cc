@@ -652,9 +652,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsIf()) {
     return EmitIf(stmt->AsIf());
   }
-  if (stmt->IsKill()) {
-    return EmitKill(stmt->AsKill());
-  }
   if (stmt->IsLoop()) {
     return EmitLoop(stmt->AsLoop());
   }
@@ -774,12 +771,6 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
 bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
   make_indent();
   out_ << "discard;" << std::endl;
-  return true;
-}
-
-bool GeneratorImpl::EmitKill(ast::KillStatement*) {
-  make_indent();
-  out_ << "kill;" << std::endl;
   return true;
 }
 

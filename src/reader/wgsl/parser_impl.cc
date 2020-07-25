@@ -35,7 +35,6 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -1428,7 +1427,6 @@ ast::StatementList ParserImpl::statements() {
 //   | break_stmt SEMICOLON
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
-//   | KILL SEMICOLON
 //   | assignment_stmt SEMICOLON
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
   auto t = peek();
@@ -1525,18 +1523,6 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
       return nullptr;
     }
     return std::make_unique<ast::DiscardStatement>(source);
-  }
-
-  if (t.IsKill()) {
-    auto source = t.source();
-    next();  // Consume the peek
-
-    t = next();
-    if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
-      return nullptr;
-    }
-    return std::make_unique<ast::KillStatement>(source);
   }
 
   auto assign = assignment_stmt();

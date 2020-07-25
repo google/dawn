@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
-#include "src/ast/kill_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/type/f32_type.h"
@@ -189,7 +189,7 @@ TEST_F(FunctionTest, IsValid) {
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
   StatementList body;
-  body.push_back(std::make_unique<KillStatement>());
+  body.push_back(std::make_unique<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
   f.set_body(std::move(body));
@@ -252,7 +252,7 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
   StatementList body;
-  body.push_back(std::make_unique<KillStatement>());
+  body.push_back(std::make_unique<DiscardStatement>());
   body.push_back(nullptr);
 
   Function f("func", std::move(params), &void_type);
@@ -269,7 +269,7 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
   StatementList body;
-  body.push_back(std::make_unique<KillStatement>());
+  body.push_back(std::make_unique<DiscardStatement>());
   body.push_back(nullptr);
 
   Function f("func", std::move(params), &void_type);
@@ -282,7 +282,7 @@ TEST_F(FunctionTest, ToStr) {
   type::I32Type i32;
 
   StatementList body;
-  body.push_back(std::make_unique<KillStatement>());
+  body.push_back(std::make_unique<DiscardStatement>());
 
   Function f("func", {}, &void_type);
   f.set_body(std::move(body));
@@ -292,7 +292,7 @@ TEST_F(FunctionTest, ToStr) {
   EXPECT_EQ(out.str(), R"(  Function func -> __void
   ()
   {
-    Kill{}
+    Discard{}
   }
 )");
 }
@@ -306,7 +306,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
   StatementList body;
-  body.push_back(std::make_unique<KillStatement>());
+  body.push_back(std::make_unique<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
   f.set_body(std::move(body));
@@ -322,7 +322,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
     }
   )
   {
-    Kill{}
+    Discard{}
   }
 )");
 }

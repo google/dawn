@@ -174,8 +174,6 @@ class Token {
     kImport,
     /// A 'in'
     kIn,
-    /// A 'kill'
-    kKill,
     /// A 'location'
     kLocation,
     /// A 'loop'
@@ -429,8 +427,6 @@ class Token {
   bool IsImport() const { return type_ == Type::kImport; }
   /// @returns true if token is a 'in'
   bool IsIn() const { return type_ == Type::kIn; }
-  /// @returns true if token is a 'kill'
-  bool IsKill() const { return type_ == Type::kKill; }
   /// @returns true if token is a 'location'
   bool IsLocation() const { return type_ == Type::kLocation; }
   /// @returns true if token is a 'loop'

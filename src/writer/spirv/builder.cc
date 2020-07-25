@@ -106,7 +106,7 @@ bool LastIsTerminator(const ast::StatementList& stmts) {
 
   auto* last = stmts.back().get();
   return last->IsBreak() || last->IsContinue() || last->IsDiscard() ||
-         last->IsReturn() || last->IsKill() || last->IsFallthrough();
+         last->IsReturn() || last->IsFallthrough();
 }
 
 uint32_t IndexFromName(char name) {
@@ -277,14 +277,6 @@ bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
 // haven't been defined for WGSL yet. So, this may need to change.
 // https://github.com/gpuweb/gpuweb/issues/676
 bool Builder::GenerateDiscardStatement(ast::DiscardStatement*) {
-  push_function_inst(spv::Op::OpKill, {});
-  return true;
-}
-
-// TODO(dsinclair): This is generating an OpKill but the semantics of kill
-// haven't been defined for WGSL yet. So, this may need to change.
-// https://github.com/gpuweb/gpuweb/issues/676
-bool Builder::GenerateKillStatement(ast::KillStatement*) {
   push_function_inst(spv::Op::OpKill, {});
   return true;
 }
@@ -1833,9 +1825,6 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsIf()) {
     return GenerateIfStatement(stmt->AsIf());
-  }
-  if (stmt->IsKill()) {
-    return GenerateKillStatement(stmt->AsKill());
   }
   if (stmt->IsLoop()) {
     return GenerateLoopStatement(stmt->AsLoop());
