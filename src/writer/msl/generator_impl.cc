@@ -400,6 +400,43 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   return name;
 }
 
+std::string GeneratorImpl::generate_intrinsic_name(const std::string& name) {
+  if (name == "any") {
+    return "any";
+  }
+  if (name == "all") {
+    return "all";
+  }
+  if (name == "dot") {
+    return "dot";
+  }
+  if (name == "is_finite") {
+    return "isfinite";
+  }
+  if (name == "is_inf") {
+    return "isinf";
+  }
+  if (name == "is_nan") {
+    return "isnan";
+  }
+  if (name == "is_normal") {
+    return "isnormal";
+  }
+  if (name == "select") {
+    return "select";
+  }
+  if (name == "dpdy" || name == "dpdy_fine" || name == "dpdy_coarse") {
+    return "dfdy";
+  }
+  if (name == "dpdx" || name == "dpdx_fine" || name == "dpdx_coarse") {
+    return "dfdx";
+  }
+  if (name == "fwidth" || name == "fwidth_fine" || name == "fwidth_coarse") {
+    return "fwidth";
+  }
+  return "";
+}
+
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   if (!expr->func()->IsIdentifier()) {
     error_ = "invalid function name";
@@ -407,11 +444,86 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   auto* ident = expr->func()->AsIdentifier();
-
   if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
-    // TODO(dsinclair): Generate intrinsic
-    error_ = "intrinsics not generated yet";
-    return false;
+    const auto& params = expr->params();
+    if (ident->name() == "outer_product") {
+      error_ = "outer_product not supported yet";
+      return false;
+      // TODO(dsinclair): This gets tricky. We need to generate two variables to
+      // hold the outer_product expressions, but we maybe inside an expression
+      // ourselves. So, this will need to, possibly, output the variables
+      // _before_ the expression which contains the outer product.
+      //
+      // This then has the follow on, what if we have `(false &&
+      // outer_product())` in that case, we shouldn't evaluate the expressions
+      // at all because of short circuting.
+      //
+      // So .... this turns out to be hard ...
+
+      // // We create variables to hold the two parameters in case they're
+      // // function calls with side effects.
+      // auto* param0 = param[0].get();
+      // auto* name0 = generate_name("outer_product_expr_0");
+
+      // auto* param1 = param[1].get();
+      // auto* name1 = generate_name("outer_product_expr_1");
+
+      // make_indent();
+      // if (!EmitType(expr->result_type(), "")) {
+      //   return false;
+      // }
+      // out_ << "(";
+
+      // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
+      // if (!param1_type->IsVector()) {
+      //   error_ = "invalid param type in outer_product got: " +
+      //            param1_type->type_name();
+      //   return false;
+      // }
+
+      // for (uint32_t i = 0; i < param1_type->AsVector()->size(); ++i) {
+      //   if (i > 0) {
+      //     out_ << ", ";
+      //   }
+
+      //   if (!EmitExpression(params[0].get())) {
+      //     return false;
+      //   }
+      //   out_ << " * ";
+
+      //   if (!EmitExpression(params[1].get())) {
+      //     return false;
+      //   }
+      //   out_ << "[" << i << "]";
+      // }
+
+      // out_ << ")";
+    } else {
+      auto name = generate_intrinsic_name(ident->name());
+      if (name.empty()) {
+        error_ = "unable to determine intrinsic name for intrinsic: " +
+                 ident->name();
+        return false;
+      }
+
+      make_indent();
+      out_ << name << "(";
+
+      bool first = true;
+      for (const auto& param : params) {
+        if (!first) {
+          out_ << ", ";
+        }
+        first = false;
+
+        if (!EmitExpression(param.get())) {
+          return false;
+        }
+      }
+
+      out_ << ")";
+    }
+    return true;
   }
 
   if (!ident->has_path()) {

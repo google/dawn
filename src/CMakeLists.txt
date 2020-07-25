@@ -527,6 +527,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_identifier_test.cc
     writer/msl/generator_impl_if_test.cc
     writer/msl/generator_impl_import_test.cc
+    writer/msl/generator_impl_intrinsic_test.cc
     writer/msl/generator_impl_loop_test.cc
     writer/msl/generator_impl_member_accessor_test.cc
     writer/msl/generator_impl_module_constant_test.cc
