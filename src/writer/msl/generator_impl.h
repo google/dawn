@@ -97,6 +97,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitContinue(ast::ContinueStatement* stmt);
+  /// Handles generating a discard statement
+  /// @param stmt the discard statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitDiscard(ast::DiscardStatement* stmt);
   /// Handles generating an else statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

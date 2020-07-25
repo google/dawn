@@ -1389,6 +1389,14 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
+  make_indent();
+  // TODO(dsinclair): Verify this is correct when the discard semantics are
+  // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
+  out_ << "discard_fragment();" << std::endl;
+  return true;
+}
+
 bool GeneratorImpl::EmitKill(ast::KillStatement*) {
   make_indent();
   // TODO(dsinclair): Verify this is correct when the kill semantics are defined
@@ -1508,6 +1516,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
+  }
+  if (stmt->IsDiscard()) {
+    return EmitDiscard(stmt->AsDiscard());
   }
   if (stmt->IsFallthrough()) {
     make_indent();
