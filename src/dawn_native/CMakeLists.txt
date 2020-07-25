@@ -202,6 +202,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/PipelineLayoutD3D12.h"
         "d3d12/PlatformFunctions.cpp"
         "d3d12/PlatformFunctions.h"
+        "d3d12/QuerySetD3D12.cpp"
+        "d3d12/QuerySetD3D12.h"
         "d3d12/QueueD3D12.cpp"
         "d3d12/QueueD3D12.h"
         "d3d12/RenderPassBuilderD3D12.cpp"
