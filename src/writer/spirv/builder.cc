@@ -105,8 +105,8 @@ bool LastIsTerminator(const ast::StatementList& stmts) {
   }
 
   auto* last = stmts.back().get();
-  return last->IsBreak() || last->IsContinue() || last->IsReturn() ||
-         last->IsKill() || last->IsFallthrough();
+  return last->IsBreak() || last->IsContinue() || last->IsDiscard() ||
+         last->IsReturn() || last->IsKill() || last->IsFallthrough();
 }
 
 uint32_t IndexFromName(char name) {
@@ -270,6 +270,14 @@ bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
     return false;
   }
   push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_stack_.back())});
+  return true;
+}
+
+// TODO(dsinclair): This is generating an OpKill but the semantics of kill
+// haven't been defined for WGSL yet. So, this may need to change.
+// https://github.com/gpuweb/gpuweb/issues/676
+bool Builder::GenerateDiscardStatement(ast::DiscardStatement*) {
+  push_function_inst(spv::Op::OpKill, {});
   return true;
 }
 
@@ -1815,6 +1823,9 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsContinue()) {
     return GenerateContinueStatement(stmt->AsContinue());
+  }
+  if (stmt->IsDiscard()) {
+    return GenerateDiscardStatement(stmt->AsDiscard());
   }
   if (stmt->IsFallthrough()) {
     // Do nothing here, the fallthrough gets handled by the switch code.

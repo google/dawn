@@ -803,6 +803,7 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/builder_call_test.cc",
     "src/writer/spirv/builder_cast_expression_test.cc",
     "src/writer/spirv/builder_constructor_expression_test.cc",
+    "src/writer/spirv/builder_discard_test.cc",
     "src/writer/spirv/builder_entry_point_test.cc",
     "src/writer/spirv/builder_function_test.cc",
     "src/writer/spirv/builder_function_variable_test.cc",

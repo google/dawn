@@ -175,6 +175,10 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateContinueStatement(ast::ContinueStatement* stmt);
+  /// Generates a discard statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateDiscardStatement(ast::DiscardStatement* stmt);
   /// Generates a kill statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated
