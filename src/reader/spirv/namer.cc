@@ -42,6 +42,7 @@ const char* kWGSLReservedWords[] = {
     "constant_id",
     "continue",
     "default",
+    "discard",
     "do",
     "else",
     "elseif",
@@ -62,7 +63,6 @@ const char* kWGSLReservedWords[] = {
     "image",
     "import",
     "in",
-    "kill",
     "let",
     "location",
     "loop",
@@ -106,7 +106,8 @@ const char* kWGSLReservedWords[] = {
     "while",
     "workgroup",
 };
-}
+
+}  // namespace
 
 Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {
   for (const auto* reserved : kWGSLReservedWords) {

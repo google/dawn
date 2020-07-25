@@ -38,11 +38,11 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -2194,7 +2194,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     case SpvOpKill:
       // For now, assume SPIR-V OpKill has same semantics as WGSL kill.
       // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
-      AddStatement(std::make_unique<ast::KillStatement>());
+      AddStatement(std::make_unique<ast::DiscardStatement>());
       return true;
     case SpvOpUnreachable:
       // Translate as if it's a return. This avoids the problem where WGSL

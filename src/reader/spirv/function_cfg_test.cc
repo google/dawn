@@ -9947,7 +9947,7 @@ TEST_F(SpvParserTest, EmitBody_Kill_TopLevel) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Kill{}
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Discard{}
 )")) << ToString(fe.ast_body());
 }
 
@@ -9976,10 +9976,10 @@ TEST_F(SpvParserTest, EmitBody_Kill_InsideIf) {
     ScalarConstructor{false}
   )
   {
-    Kill{}
+    Discard{}
   }
 }
-Kill{}
+Discard{}
 )")) << ToString(fe.ast_body());
 }
 
@@ -10010,9 +10010,9 @@ TEST_F(SpvParserTest, EmitBody_Kill_InsideLoop) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
-  Kill{}
+  Discard{}
 }
-Kill{}
+Discard{}
 )")) << ToString(fe.ast_body());
 }
 
