@@ -643,6 +643,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
   }
+  if (stmt->IsDiscard()) {
+    return EmitDiscard(stmt->AsDiscard());
+  }
   if (stmt->IsFallthrough()) {
     return EmitFallthrough(stmt->AsFallthrough());
   }
@@ -765,6 +768,12 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   }
   out_ << std::endl;
 
+  return true;
+}
+
+bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
+  make_indent();
+  out_ << "discard;" << std::endl;
   return true;
 }
 

@@ -944,6 +944,7 @@ source_set("tint_unittests_wgsl_writer_src") {
     "src/writer/wgsl/generator_impl_cast_test.cc",
     "src/writer/wgsl/generator_impl_constructor_test.cc",
     "src/writer/wgsl/generator_impl_continue_test.cc",
+    "src/writer/wgsl/generator_impl_discard_test.cc",
     "src/writer/wgsl/generator_impl_entry_point_test.cc",
     "src/writer/wgsl/generator_impl_fallthrough_test.cc",
     "src/writer/wgsl/generator_impl_function_test.cc",

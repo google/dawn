@@ -127,6 +127,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
   bool EmitConstructor(ast::ConstructorExpression* expr);
+  /// Handles generating a discard statement
+  /// @param stmt the discard statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitDiscard(ast::DiscardStatement* stmt);
   /// Handles generating a kill statement
   /// @param stmt the kill statement
   /// @returns true if the statement was successfully emitted
