@@ -167,6 +167,10 @@ class Builder {
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateAssignStatement(ast::AssignmentStatement* assign);
+  /// Generates a block statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateBlockStatement(ast::BlockStatement* stmt);
   /// Generates a break statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated

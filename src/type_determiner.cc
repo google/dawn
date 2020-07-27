@@ -22,6 +22,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
@@ -239,6 +240,19 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   return true;
 }
 
+bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
+  for (const auto& stmt : *stmts) {
+    if (!DetermineVariableStorageClass(stmt.get())) {
+      return false;
+    }
+
+    if (!DetermineResultType(stmt.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool TypeDeterminer::DetermineStatements(const ast::StatementList& stmts) {
   for (const auto& stmt : stmts) {
     if (!DetermineVariableStorageClass(stmt.get())) {
@@ -281,6 +295,9 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     auto* a = stmt->AsAssign();
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
+  }
+  if (stmt->IsBlock()) {
+    return DetermineStatements(stmt->AsBlock());
   }
   if (stmt->IsBreak()) {
     return true;
@@ -347,7 +364,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(v->variable()->constructor());
   }
 
-  set_error(stmt->source(), "unknown statement type for type determination");
+  set_error(stmt->source(),
+            "unknown statement type for type determination: " + stmt->str());
   return false;
 }
 

@@ -24,6 +24,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
@@ -63,7 +64,7 @@ namespace {
 class FakeStmt : public ast::Statement {
  public:
   bool IsValid() const override { return true; }
-  void to_str(std::ostream&, size_t) const override {}
+  void to_str(std::ostream& out, size_t) const override { out << "Fake"; }
 };
 
 class FakeExpr : public ast::Expression {
@@ -97,7 +98,8 @@ TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
   s.set_source(Source{0, 0});
 
   EXPECT_FALSE(td()->DetermineResultType(&s));
-  EXPECT_EQ(td()->error(), "unknown statement type for type determination");
+  EXPECT_EQ(td()->error(),
+            "unknown statement type for type determination: Fake");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
@@ -106,7 +108,7 @@ TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
 
   EXPECT_FALSE(td()->DetermineResultType(&s));
   EXPECT_EQ(td()->error(),
-            "2:30: unknown statement type for type determination");
+            "2:30: unknown statement type for type determination: Fake");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Assign) {
@@ -152,6 +154,29 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ast::CaseStatement cse(std::move(lit), std::move(body));
 
   EXPECT_TRUE(td()->DetermineResultType(&cse));
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
+  EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Block) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+  auto* lhs_ptr = lhs.get();
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto* rhs_ptr = rhs.get();
+
+  ast::BlockStatement block;
+  block.append(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                          std::move(rhs)));
+
+  EXPECT_TRUE(td()->DetermineResultType(&block));
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());

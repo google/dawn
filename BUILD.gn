@@ -800,6 +800,7 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/builder_as_expression_test.cc",
     "src/writer/spirv/builder_assign_test.cc",
     "src/writer/spirv/builder_binary_expression_test.cc",
+    "src/writer/spirv/builder_block_test.cc",
     "src/writer/spirv/builder_call_test.cc",
     "src/writer/spirv/builder_cast_expression_test.cc",
     "src/writer/spirv/builder_constructor_expression_test.cc",

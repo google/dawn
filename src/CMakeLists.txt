@@ -454,6 +454,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_as_expression_test.cc
     writer/spirv/builder_assign_test.cc
     writer/spirv/builder_binary_expression_test.cc
+    writer/spirv/builder_block_test.cc
     writer/spirv/builder_call_test.cc
     writer/spirv/builder_cast_expression_test.cc
     writer/spirv/builder_constructor_expression_test.cc

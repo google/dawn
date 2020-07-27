@@ -23,6 +23,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
@@ -1338,6 +1339,18 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   return result_id;
 }
 
+bool Builder::GenerateBlockStatement(ast::BlockStatement* stmt) {
+  scope_stack_.push_scope();
+  for (const auto& block_stmt : *stmt) {
+    if (!GenerateStatement(block_stmt.get())) {
+      return false;
+    }
+  }
+  scope_stack_.pop_scope();
+
+  return true;
+}
+
 uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   if (!expr->func()->IsIdentifier()) {
     error_ = "invalid function name";
@@ -1807,6 +1820,9 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return GenerateAssignStatement(stmt->AsAssign());
   }
+  if (stmt->IsBlock()) {
+    return GenerateBlockStatement(stmt->AsBlock());
+  }
   if (stmt->IsBreak()) {
     return GenerateBreakStatement(stmt->AsBreak());
   }
@@ -1839,7 +1855,7 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
     return GenerateVariableDeclStatement(stmt->AsVariableDecl());
   }
 
-  error_ = "Unknown statement";
+  error_ = "Unknown statement: " + stmt->str();
   return false;
 }
 
