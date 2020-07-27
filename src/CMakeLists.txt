@@ -487,6 +487,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_as_test.cc
     writer/wgsl/generator_impl_assign_test.cc
     writer/wgsl/generator_impl_binary_test.cc
+    writer/wgsl/generator_impl_block_test.cc
     writer/wgsl/generator_impl_break_test.cc
     writer/wgsl/generator_impl_call_test.cc
     writer/wgsl/generator_impl_case_test.cc

@@ -937,6 +937,7 @@ source_set("tint_unittests_wgsl_writer_src") {
     "src/writer/wgsl/generator_impl_as_test.cc",
     "src/writer/wgsl/generator_impl_assign_test.cc",
     "src/writer/wgsl/generator_impl_binary_test.cc",
+    "src/writer/wgsl/generator_impl_block_test.cc",
     "src/writer/wgsl/generator_impl_break_test.cc",
     "src/writer/wgsl/generator_impl_call_test.cc",
     "src/writer/wgsl/generator_impl_case_test.cc",
