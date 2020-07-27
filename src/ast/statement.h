@@ -24,6 +24,7 @@ namespace tint {
 namespace ast {
 
 class AssignmentStatement;
+class BlockStatement;
 class BreakStatement;
 class CallStatement;
 class CaseStatement;
@@ -44,6 +45,8 @@ class Statement : public Node {
 
   /// @returns true if this is an assign statement
   virtual bool IsAssign() const;
+  /// @returns true if this is a block statement
+  virtual bool IsBlock() const;
   /// @returns true if this is a break statement
   virtual bool IsBreak() const;
   /// @returns true if this is a call statement
@@ -71,6 +74,8 @@ class Statement : public Node {
 
   /// @returns the statement as a const assign statement
   const AssignmentStatement* AsAssign() const;
+  /// @returns the statement as a const block statement
+  const BlockStatement* AsBlock() const;
   /// @returns the statement as a const break statement
   const BreakStatement* AsBreak() const;
   /// @returns the statement as a const call statement
@@ -98,6 +103,8 @@ class Statement : public Node {
 
   /// @returns the statement as an assign statement
   AssignmentStatement* AsAssign();
+  /// @returns the statement as a block statement
+  BlockStatement* AsBlock();
   /// @returns the statement as a break statement
   BreakStatement* AsBreak();
   /// @returns the statement as a call statement

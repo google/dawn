@@ -48,6 +48,8 @@ set(TINT_LIB_SRCS
   ast/binary_expression.h
   ast/binding_decoration.cc
   ast/binding_decoration.h
+  ast/block_statement.cc
+  ast/block_statement.h
   ast/bool_literal.h
   ast/bool_literal.cc
   ast/break_statement.cc
@@ -278,6 +280,7 @@ set(TINT_TEST_SRCS
   ast/as_expression_test.cc
   ast/assignment_statement_test.cc
   ast/binding_decoration_test.cc
+  ast/block_statement_test.cc
   ast/bool_literal_test.cc
   ast/break_statement_test.cc
   ast/builtin_decoration_test.cc

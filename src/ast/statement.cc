@@ -17,6 +17,7 @@
 #include <assert.h>
 
 #include "src/ast/assignment_statement.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
@@ -42,6 +43,10 @@ Statement::Statement(Statement&&) = default;
 Statement::~Statement() = default;
 
 bool Statement::IsAssign() const {
+  return false;
+}
+
+bool Statement::IsBlock() const {
   return false;
 }
 
@@ -96,6 +101,11 @@ bool Statement::IsVariableDecl() const {
 const AssignmentStatement* Statement::AsAssign() const {
   assert(IsAssign());
   return static_cast<const AssignmentStatement*>(this);
+}
+
+const BlockStatement* Statement::AsBlock() const {
+  assert(IsBlock());
+  return static_cast<const BlockStatement*>(this);
 }
 
 const BreakStatement* Statement::AsBreak() const {
@@ -161,6 +171,11 @@ const VariableDeclStatement* Statement::AsVariableDecl() const {
 AssignmentStatement* Statement::AsAssign() {
   assert(IsAssign());
   return static_cast<AssignmentStatement*>(this);
+}
+
+BlockStatement* Statement::AsBlock() {
+  assert(IsBlock());
+  return static_cast<BlockStatement*>(this);
 }
 
 BreakStatement* Statement::AsBreak() {
