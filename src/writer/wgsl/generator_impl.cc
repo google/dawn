@@ -771,12 +771,12 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
     if (!EmitExpression(stmt->condition())) {
       return false;
     }
-    out_ << ")";
+    out_ << ") ";
   } else {
-    out_ << " else";
+    out_ << " else ";
   }
 
-  return EmitStatementBlock(stmt->body());
+  return EmitBlock(stmt->body());
 }
 
 bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
@@ -792,9 +792,9 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   if (!EmitExpression(stmt->condition())) {
     return false;
   }
-  out_ << ")";
+  out_ << ") ";
 
-  if (!EmitStatementBlock(stmt->body())) {
+  if (!EmitBlock(stmt->body())) {
     return false;
   }
 

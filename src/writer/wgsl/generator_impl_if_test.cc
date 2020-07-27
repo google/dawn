@@ -28,8 +28,8 @@ using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
 
@@ -45,17 +45,16 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
-
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
                                                        std::move(else_body)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
@@ -73,15 +72,15 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_body)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
@@ -101,11 +100,11 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::DiscardStatement>());
 
-  ast::StatementList else_body_2;
-  else_body_2.push_back(std::make_unique<ast::DiscardStatement>());
+  auto else_body_2 = std::make_unique<ast::BlockStatement>();
+  else_body_2->append(std::make_unique<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
@@ -113,8 +112,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_body_2)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));

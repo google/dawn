@@ -1600,7 +1600,7 @@ uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
 
 bool Builder::GenerateConditionalBlock(
     ast::Expression* cond,
-    const ast::StatementList& true_body,
+    const ast::BlockStatement* true_body,
     size_t cur_else_idx,
     const ast::ElseStatementList& else_stmts) {
   auto cond_id = GenerateExpression(cond);
@@ -1629,7 +1629,7 @@ bool Builder::GenerateConditionalBlock(
 
   // Output true block
   GenerateLabel(true_block_id);
-  if (!GenerateStatementList(true_body)) {
+  if (!GenerateBlockStatement(true_body)) {
     return false;
   }
   // We only branch if the last element of the body didn't already branch.
@@ -1644,7 +1644,7 @@ bool Builder::GenerateConditionalBlock(
     auto* else_stmt = else_stmts[cur_else_idx].get();
     // Handle the else case by just outputting the statements.
     if (!else_stmt->HasCondition()) {
-      if (!GenerateStatementList(else_stmt->body())) {
+      if (!GenerateBlockStatement(else_stmt->body())) {
         return false;
       }
     } else {

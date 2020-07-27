@@ -1516,12 +1516,12 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
     if (!EmitExpression(stmt->condition())) {
       return false;
     }
-    out_ << ")";
+    out_ << ") ";
   } else {
-    out_ << " else";
+    out_ << " else ";
   }
 
-  return EmitStatementBlock(stmt->body());
+  return EmitBlock(stmt->body());
 }
 
 bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
@@ -1531,9 +1531,9 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   if (!EmitExpression(stmt->condition())) {
     return false;
   }
-  out_ << ")";
+  out_ << ") ";
 
-  if (!EmitStatementBlock(stmt->body())) {
+  if (!EmitBlock(stmt->body())) {
     return false;
   }
 
@@ -1577,7 +1577,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   out_ << "{" << std::endl;
   increment_indent();
 

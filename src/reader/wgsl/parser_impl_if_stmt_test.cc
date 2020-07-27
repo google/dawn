@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, IfStmt) {
   ASSERT_TRUE(e->IsIf());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
-  EXPECT_EQ(e->body().size(), 2u);
+  EXPECT_EQ(e->body()->size(), 2u);
   EXPECT_EQ(e->else_statements().size(), 0u);
 }
 
@@ -46,15 +46,15 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
   ASSERT_TRUE(e->IsIf());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
-  EXPECT_EQ(e->body().size(), 2u);
+  EXPECT_EQ(e->body()->size(), 2u);
 
   ASSERT_EQ(e->else_statements().size(), 2u);
   ASSERT_NE(e->else_statements()[0]->condition(), nullptr);
   ASSERT_TRUE(e->else_statements()[0]->condition()->IsIdentifier());
-  EXPECT_EQ(e->else_statements()[0]->body().size(), 1u);
+  EXPECT_EQ(e->else_statements()[0]->body()->size(), 1u);
 
   ASSERT_EQ(e->else_statements()[1]->condition(), nullptr);
-  EXPECT_EQ(e->else_statements()[1]->body().size(), 0u);
+  EXPECT_EQ(e->else_statements()[1]->body()->size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {

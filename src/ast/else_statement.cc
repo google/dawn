@@ -17,21 +17,45 @@
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement() : Statement() {}
+ElseStatement::ElseStatement()
+    : Statement(), body_(std::make_unique<ast::BlockStatement>()) {}
 
-ElseStatement::ElseStatement(StatementList body)
+ElseStatement::ElseStatement(std::unique_ptr<BlockStatement> body)
     : Statement(), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
                              StatementList body)
+    : Statement(),
+      condition_(std::move(condition)),
+      body_(std::make_unique<BlockStatement>()) {
+  set_body(std::move(body));
+}
+
+ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
+                             std::unique_ptr<BlockStatement> body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(const Source& source, StatementList body)
+    : Statement(source), body_(std::make_unique<BlockStatement>()) {
+  set_body(std::move(body));
+}
+
+ElseStatement::ElseStatement(const Source& source,
+                             std::unique_ptr<BlockStatement> body)
     : Statement(source), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(const Source& source,
                              std::unique_ptr<Expression> condition,
                              StatementList body)
+    : Statement(source),
+      condition_(std::move(condition)),
+      body_(std::make_unique<BlockStatement>()) {
+  set_body(std::move(body));
+}
+
+ElseStatement::ElseStatement(const Source& source,
+                             std::unique_ptr<Expression> condition,
+                             std::unique_ptr<BlockStatement> body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}
@@ -40,19 +64,21 @@ ElseStatement::ElseStatement(ElseStatement&&) = default;
 
 ElseStatement::~ElseStatement() = default;
 
+void ElseStatement::set_body(StatementList body) {
+  for (auto& stmt : body) {
+    body_->append(std::move(stmt));
+  }
+}
+
 bool ElseStatement::IsElse() const {
   return true;
 }
 
 bool ElseStatement::IsValid() const {
-  for (const auto& stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
+  if (body_ == nullptr || !body_->IsValid()) {
+    return false;
   }
-  if (condition_)
-    return condition_->IsValid();
-
-  return true;
+  return condition_ == nullptr || condition_->IsValid();
 }
 
 void ElseStatement::to_str(std::ostream& out, size_t indent) const {
@@ -71,8 +97,11 @@ void ElseStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
-  for (const auto& stmt : body_)
-    stmt->to_str(out, indent + 4);
+  if (body_ != nullptr) {
+    for (const auto& stmt : *body_) {
+      stmt->to_str(out, indent + 4);
+    }
+  }
 
   make_indent(out, indent + 2);
   out << "}" << std::endl;

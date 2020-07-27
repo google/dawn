@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, ElseStmt) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsElse());
   ASSERT_EQ(e->condition(), nullptr);
-  EXPECT_EQ(e->body().size(), 2u);
+  EXPECT_EQ(e->body()->size(), 2u);
 }
 
 TEST_F(ParserImplTest, ElseStmt_InvalidBody) {

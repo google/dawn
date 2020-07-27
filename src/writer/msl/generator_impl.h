@@ -76,7 +76,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles a block statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBlock(ast::BlockStatement* stmt);
+  bool EmitBlock(const ast::BlockStatement* stmt);
   /// Handles a block statement with a newline at the end
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

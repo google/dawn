@@ -19,15 +19,25 @@
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement() : Statement() {}
+IfStatement::IfStatement()
+    : Statement(), body_(std::make_unique<BlockStatement>()) {}
 
 IfStatement::IfStatement(std::unique_ptr<Expression> condition,
-                         StatementList body)
+                         std::unique_ptr<BlockStatement> body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
 IfStatement::IfStatement(const Source& source,
                          std::unique_ptr<Expression> condition,
                          StatementList body)
+    : Statement(source),
+      condition_(std::move(condition)),
+      body_(std::make_unique<BlockStatement>()) {
+  set_body(std::move(body));
+}
+
+IfStatement::IfStatement(const Source& source,
+                         std::unique_ptr<Expression> condition,
+                         std::unique_ptr<BlockStatement> body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}
@@ -36,17 +46,22 @@ IfStatement::IfStatement(IfStatement&&) = default;
 
 IfStatement::~IfStatement() = default;
 
+void IfStatement::set_body(StatementList body) {
+  for (auto& stmt : body) {
+    body_->append(std::move(stmt));
+  }
+}
+
 bool IfStatement::IsIf() const {
   return true;
 }
 
 bool IfStatement::IsValid() const {
-  if (condition_ == nullptr || !condition_->IsValid())
+  if (condition_ == nullptr || !condition_->IsValid()) {
     return false;
-
-  for (const auto& stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
+  }
+  if (body_ == nullptr || !body_->IsValid()) {
+    return false;
   }
 
   bool found_else = false;
@@ -83,8 +98,11 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
-  for (const auto& stmt : body_)
-    stmt->to_str(out, indent + 4);
+  if (body_ != nullptr) {
+    for (const auto& stmt : *body_) {
+      stmt->to_str(out, indent + 4);
+    }
+  }
 
   // Close the if body
   make_indent(out, indent + 2);

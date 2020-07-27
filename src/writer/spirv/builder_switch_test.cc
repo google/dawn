@@ -489,8 +489,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::BreakStatement>());
+  auto if_body = std::make_unique<ast::BlockStatement>();
+  if_body->append(std::make_unique<ast::BreakStatement>());
 
   auto case_1_body = std::make_unique<ast::BlockStatement>();
   case_1_body->append(std::make_unique<ast::IfStatement>(

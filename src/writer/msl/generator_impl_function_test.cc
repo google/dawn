@@ -971,8 +971,9 @@ TEST_F(MslGeneratorImplTest,
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 1.0f))));
 
-  ast::StatementList list;
-  list.push_back(std::make_unique<ast::ReturnStatement>());
+  auto list = std::make_unique<ast::BlockStatement>();
+  list->append(std::make_unique<ast::ReturnStatement>());
+
   body->append(std::make_unique<ast::IfStatement>(
       std::make_unique<ast::BinaryExpression>(
           ast::BinaryOp::kEqual,

@@ -26,22 +26,22 @@ using IfStatementTest = testing::Test;
 
 TEST_F(IfStatementTest, Creation) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   auto* cond_ptr = cond.get();
-  auto* stmt_ptr = body[0].get();
+  auto* stmt_ptr = body->get(0);
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_EQ(stmt.condition(), cond_ptr);
-  ASSERT_EQ(stmt.body().size(), 1u);
-  EXPECT_EQ(stmt.body()[0].get(), stmt_ptr);
+  ASSERT_EQ(stmt.body()->size(), 1u);
+  EXPECT_EQ(stmt.body()->get(0), stmt_ptr);
 }
 
 TEST_F(IfStatementTest, Creation_WithSource) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   IfStatement stmt(Source{20, 2}, std::move(cond), std::move(body));
   auto src = stmt.source();
@@ -56,8 +56,8 @@ TEST_F(IfStatementTest, IsIf) {
 
 TEST_F(IfStatementTest, IsValid) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_TRUE(stmt.IsValid());
@@ -65,8 +65,8 @@ TEST_F(IfStatementTest, IsValid) {
 
 TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());
@@ -79,8 +79,8 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
 }
 
 TEST_F(IfStatementTest, IsValid_MissingCondition) {
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   IfStatement stmt(nullptr, std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -88,8 +88,8 @@ TEST_F(IfStatementTest, IsValid_MissingCondition) {
 
 TEST_F(IfStatementTest, IsValid_InvalidCondition) {
   auto cond = std::make_unique<IdentifierExpression>("");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -97,9 +97,9 @@ TEST_F(IfStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
-  body.push_back(nullptr);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
+  body->append(nullptr);
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -107,9 +107,9 @@ TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
 
 TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
-  body.push_back(std::make_unique<IfStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
+  body->append(std::make_unique<IfStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -117,8 +117,8 @@ TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());
@@ -133,8 +133,8 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
 
 TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());
@@ -147,8 +147,8 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
 
 TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());
@@ -161,8 +161,8 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
 
 TEST_F(IfStatementTest, IsValid_ElseNotLast) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());
@@ -176,8 +176,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
 
 TEST_F(IfStatementTest, ToStr) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
 
@@ -196,15 +196,15 @@ TEST_F(IfStatementTest, ToStr) {
 
 TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<DiscardStatement>());
 
-  StatementList else_if_body;
-  else_if_body.push_back(std::make_unique<DiscardStatement>());
+  auto else_if_body = std::make_unique<BlockStatement>();
+  else_if_body->append(std::make_unique<DiscardStatement>());
 
-  StatementList else_body;
-  else_body.push_back(std::make_unique<DiscardStatement>());
-  else_body.push_back(std::make_unique<DiscardStatement>());
+  auto else_body = std::make_unique<BlockStatement>();
+  else_body->append(std::make_unique<DiscardStatement>());
+  else_body->append(std::make_unique<DiscardStatement>());
 
   ElseStatementList else_stmts;
   else_stmts.push_back(std::make_unique<ElseStatement>());

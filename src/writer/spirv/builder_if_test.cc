@@ -48,7 +48,8 @@ TEST_F(BuilderTest, If_Empty) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), ast::StatementList{});
+  ast::IfStatement expr(std::move(cond),
+                        std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -81,8 +82,8 @@ TEST_F(BuilderTest, If_WithStatements) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
@@ -133,14 +134,14 @@ TEST_F(BuilderTest, If_WithElse) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
@@ -201,14 +202,14 @@ TEST_F(BuilderTest, If_WithElseIf) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
@@ -281,23 +282,23 @@ TEST_F(BuilderTest, If_WithMultiple) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
-  ast::StatementList elseif_1_body;
-  elseif_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto elseif_1_body = std::make_unique<ast::BlockStatement>();
+  elseif_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
-  ast::StatementList elseif_2_body;
-  elseif_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto elseif_2_body = std::make_unique<ast::BlockStatement>();
+  elseif_2_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 4))));
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 5))));
@@ -384,8 +385,8 @@ TEST_F(BuilderTest, If_WithBreak) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::BreakStatement>());
+  auto if_body = std::make_unique<ast::BlockStatement>();
+  if_body->append(std::make_unique<ast::BreakStatement>());
 
   auto if_stmt =
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
@@ -437,16 +438,15 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::StatementList if_body;
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::BreakStatement>());
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::BreakStatement>());
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(
       std::make_unique<ast::ElseStatement>(std::move(else_body)));
 
-  auto if_stmt =
-      std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto if_stmt = std::make_unique<ast::IfStatement>(
+      std::move(cond), std::make_unique<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
   ast::StatementList loop_body;
@@ -497,8 +497,8 @@ TEST_F(BuilderTest, If_WithContinue) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::ContinueStatement>());
+  auto if_body = std::make_unique<ast::BlockStatement>();
+  if_body->append(std::make_unique<ast::ContinueStatement>());
 
   auto if_stmt =
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
@@ -550,16 +550,15 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::StatementList if_body;
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::ContinueStatement>());
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::ContinueStatement>());
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(
       std::make_unique<ast::ElseStatement>(std::move(else_body)));
 
-  auto if_stmt =
-      std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto if_stmt = std::make_unique<ast::IfStatement>(
+      std::move(cond), std::make_unique<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
   ast::StatementList loop_body;
@@ -608,8 +607,8 @@ TEST_F(BuilderTest, If_WithReturn) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
 
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto if_body = std::make_unique<ast::BlockStatement>();
+  if_body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
 
@@ -645,8 +644,8 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   auto cond2 = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, false));
 
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::ReturnStatement>(std::move(cond2)));
+  auto if_body = std::make_unique<ast::BlockStatement>();
+  if_body->append(std::make_unique<ast::ReturnStatement>(std::move(cond2)));
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
 

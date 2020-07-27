@@ -18,6 +18,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/ast/block_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/statement.h"
@@ -33,7 +34,8 @@ class IfStatement : public Statement {
   /// Constructor
   /// @param condition the if condition
   /// @param body the if body
-  IfStatement(std::unique_ptr<Expression> condition, StatementList body);
+  IfStatement(std::unique_ptr<Expression> condition,
+              std::unique_ptr<BlockStatement> body);
   /// Constructor
   /// @param source the source information
   /// @param condition the if condition
@@ -41,6 +43,13 @@ class IfStatement : public Statement {
   IfStatement(const Source& source,
               std::unique_ptr<Expression> condition,
               StatementList body);
+  /// Constructor
+  /// @param source the source information
+  /// @param condition the if condition
+  /// @param body the if body
+  IfStatement(const Source& source,
+              std::unique_ptr<Expression> condition,
+              std::unique_ptr<BlockStatement> body);
   /// Move constructor
   IfStatement(IfStatement&&);
   ~IfStatement() override;
@@ -55,9 +64,14 @@ class IfStatement : public Statement {
 
   /// Sets the if body
   /// @param body the if body
-  void set_body(StatementList body) { body_ = std::move(body); }
+  void set_body(StatementList body);
+  /// Sets the if body
+  /// @param body the if body
+  void set_body(std::unique_ptr<BlockStatement> body) {
+    body_ = std::move(body);
+  }
   /// @returns the if body
-  const StatementList& body() const { return body_; }
+  const BlockStatement* body() const { return body_.get(); }
 
   /// Sets the else statements
   /// @param else_statements the else statements to set
@@ -84,7 +98,7 @@ class IfStatement : public Statement {
   IfStatement(const IfStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  StatementList body_;
+  std::unique_ptr<BlockStatement> body_;
   ElseStatementList else_statements_;
 };
 

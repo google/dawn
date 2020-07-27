@@ -195,9 +195,9 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* rhs_ptr = rhs.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
-                                                            std::move(rhs)));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                          std::move(rhs)));
 
   ast::ElseStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
                               std::make_unique<ast::SintLiteral>(&i32, 3)),
@@ -224,8 +224,8 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* else_rhs_ptr = else_rhs.get();
 
-  ast::StatementList else_body;
-  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto else_body = std::make_unique<ast::BlockStatement>();
+  else_body->append(std::make_unique<ast::AssignmentStatement>(
       std::move(else_lhs), std::move(else_rhs)));
 
   auto else_stmt = std::make_unique<ast::ElseStatement>(
@@ -244,9 +244,9 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* rhs_ptr = rhs.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
-                                                            std::move(rhs)));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                          std::move(rhs)));
 
   ast::IfStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
                             std::make_unique<ast::SintLiteral>(&i32, 3)),

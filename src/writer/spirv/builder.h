@@ -308,7 +308,7 @@ class Builder {
   /// @param else_stmts the list of all else statements
   /// @returns true on success, false on failure
   bool GenerateConditionalBlock(ast::Expression* cond,
-                                const ast::StatementList& true_body,
+                                const ast::BlockStatement* true_body,
                                 size_t cur_else_idx,
                                 const ast::ElseStatementList& else_stmts);
   /// Generates a statement
