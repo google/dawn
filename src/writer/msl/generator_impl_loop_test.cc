@@ -35,8 +35,8 @@ namespace {
 using MslGeneratorImplTest = testing::Test;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
 
@@ -52,11 +52,11 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
-  ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::ReturnStatement>());
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::ReturnStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 
@@ -82,20 +82,23 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
-  ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::ReturnStatement>());
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::ReturnStatement>());
 
   auto inner = std::make_unique<ast::LoopStatement>(std::move(body),
                                                     std::move(continuing));
 
-  body.push_back(std::move(inner));
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::move(inner));
 
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
-  continuing.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::AssignmentStatement>(
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
@@ -138,16 +141,17 @@ TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::VariableDeclStatement>(
       std::make_unique<ast::Variable>("other", ast::StorageClass::kFunction,
                                       &f32)));
 
-  ast::StatementList continuing;
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
-  continuing.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::AssignmentStatement>(
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
@@ -172,6 +176,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
   }
 )");
 }
+
 }  // namespace
 }  // namespace msl
 }  // namespace writer

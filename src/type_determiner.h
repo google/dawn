@@ -65,10 +65,6 @@ class TypeDeterminer {
   /// @param stmts the statements to check
   /// @returns true if the determination was successful
   bool DetermineStatements(const ast::BlockStatement* stmts);
-  /// Determines type information for a set of statements
-  /// @param stmts the statements to check
-  /// @returns true if the determination was successful
-  bool DetermineStatements(const ast::StatementList& stmts);
   /// Determines type information for a statement
   /// @param stmt the statement to check
   /// @returns true if the determination was successful

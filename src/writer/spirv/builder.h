@@ -315,10 +315,6 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true if the statement was generated
   bool GenerateStatement(ast::Statement* stmt);
-  /// Generates a list of statements
-  /// @param list the statement list to generate
-  /// @returns true on successful generation
-  bool GenerateStatementList(const ast::StatementList& list);
   /// Geneates an OpLoad
   /// @param type the type to load
   /// @param id the variable id to load

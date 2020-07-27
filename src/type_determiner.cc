@@ -253,19 +253,6 @@ bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
   return true;
 }
 
-bool TypeDeterminer::DetermineStatements(const ast::StatementList& stmts) {
-  for (const auto& stmt : stmts) {
-    if (!DetermineVariableStorageClass(stmt.get())) {
-      return false;
-    }
-
-    if (!DetermineResultType(stmt.get())) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
   if (!stmt->IsVariableDecl()) {
     return true;

@@ -84,7 +84,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles a block statement with a newline at the end
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBlockAndNewline(ast::BlockStatement* stmt);
+  bool EmitBlockAndNewline(const ast::BlockStatement* stmt);
   /// Handles a break statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -177,14 +177,6 @@ class GeneratorImpl : public TextGenerator {
   /// Handles emitting a pipeline stage name
   /// @param stage the stage to emit
   void EmitStage(ast::PipelineStage stage);
-  /// Handles a brace-enclosed list of statements.
-  /// @param statements the statements to output
-  /// @returns true if the statements were emitted
-  bool EmitStatementBlock(const ast::StatementList& statements);
-  /// Handles a brace-enclosed list of statements and trailing newline.
-  /// @param statements the statements to output
-  /// @returns true if the statements were emitted
-  bool EmitStatementBlockAndNewline(const ast::StatementList& statements);
   /// Handles statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

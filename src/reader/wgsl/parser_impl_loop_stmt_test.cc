@@ -27,10 +27,10 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsDiscard());
+  ASSERT_EQ(e->body()->size(), 1u);
+  EXPECT_TRUE(e->body()->get(0)->IsDiscard());
 
-  EXPECT_EQ(e->continuing().size(), 0u);
+  EXPECT_EQ(e->continuing()->size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
@@ -39,11 +39,11 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsDiscard());
+  ASSERT_EQ(e->body()->size(), 1u);
+  EXPECT_TRUE(e->body()->get(0)->IsDiscard());
 
-  EXPECT_EQ(e->continuing().size(), 1u);
-  EXPECT_TRUE(e->continuing()[0]->IsDiscard());
+  EXPECT_EQ(e->continuing()->size(), 1u);
+  EXPECT_TRUE(e->continuing()->get(0)->IsDiscard());
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
@@ -51,8 +51,8 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_EQ(e->body().size(), 0u);
-  ASSERT_EQ(e->continuing().size(), 0u);
+  ASSERT_EQ(e->body()->size(), 0u);
+  ASSERT_EQ(e->continuing()->size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
@@ -60,9 +60,9 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_EQ(e->body().size(), 0u);
-  ASSERT_EQ(e->continuing().size(), 1u);
-  EXPECT_TRUE(e->continuing()[0]->IsDiscard());
+  ASSERT_EQ(e->body()->size(), 0u);
+  ASSERT_EQ(e->continuing()->size(), 1u);
+  EXPECT_TRUE(e->continuing()->get(0)->IsDiscard());
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {

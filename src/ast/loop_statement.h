@@ -17,6 +17,7 @@
 
 #include <utility>
 
+#include "src/ast/block_statement.h"
 #include "src/ast/statement.h"
 
 namespace tint {
@@ -30,7 +31,8 @@ class LoopStatement : public Statement {
   /// Constructor
   /// @param body the body statements
   /// @param continuing the continuing statements
-  LoopStatement(StatementList body, StatementList continuing);
+  LoopStatement(std::unique_ptr<BlockStatement> body,
+                std::unique_ptr<BlockStatement> continuing);
   /// Constructor
   /// @param source the loop statement source
   /// @param body the body statements
@@ -38,25 +40,42 @@ class LoopStatement : public Statement {
   LoopStatement(const Source& source,
                 StatementList body,
                 StatementList continuing);
+  /// Constructor
+  /// @param source the loop statement source
+  /// @param body the body statements
+  /// @param continuing the continuing statements
+  LoopStatement(const Source& source,
+                std::unique_ptr<BlockStatement> body,
+                std::unique_ptr<BlockStatement> continuing);
   /// Move constructor
   LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
 
   /// Sets the body statements
   /// @param body the body statements
-  void set_body(StatementList body) { body_ = std::move(body); }
+  void set_body(std::unique_ptr<BlockStatement> body) {
+    body_ = std::move(body);
+  }
+  /// Sets the body statements
+  /// @param body the body statements
+  void set_body(StatementList body);
   /// @returns the body statements
-  const StatementList& body() const { return body_; }
+  const BlockStatement* body() const { return body_.get(); }
 
   /// Sets the continuing statements
   /// @param continuing the continuing statements
-  void set_continuing(StatementList continuing) {
+  void set_continuing(std::unique_ptr<BlockStatement> continuing) {
     continuing_ = std::move(continuing);
   }
+  /// Sets the continuing statements
+  /// @param continuing the continuing statements
+  void set_continuing(StatementList continuing);
   /// @returns the continuing statements
-  const StatementList& continuing() const { return continuing_; }
+  const BlockStatement* continuing() const { return continuing_.get(); }
   /// @returns true if there are continuing statements in the loop
-  bool has_continuing() const { return !continuing_.empty(); }
+  bool has_continuing() const {
+    return continuing_ != nullptr && !continuing_->empty();
+  }
 
   /// @returns true if this is a loop statement
   bool IsLoop() const override;
@@ -72,8 +91,8 @@ class LoopStatement : public Statement {
  private:
   LoopStatement(const LoopStatement&) = delete;
 
-  StatementList body_;
-  StatementList continuing_;
+  std::unique_ptr<BlockStatement> body_;
+  std::unique_ptr<BlockStatement> continuing_;
 };
 
 }  // namespace ast

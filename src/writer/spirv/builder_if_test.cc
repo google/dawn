@@ -391,10 +391,11 @@ TEST_F(BuilderTest, If_WithBreak) {
   auto if_stmt =
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
 
-  ast::StatementList loop_body;
-  loop_body.push_back(std::move(if_stmt));
+  auto loop_body = std::make_unique<ast::BlockStatement>();
+  loop_body->append(std::move(if_stmt));
 
-  ast::LoopStatement expr(std::move(loop_body), {});
+  ast::LoopStatement expr(std::move(loop_body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -449,10 +450,11 @@ TEST_F(BuilderTest, If_WithElseBreak) {
       std::move(cond), std::make_unique<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
-  ast::StatementList loop_body;
-  loop_body.push_back(std::move(if_stmt));
+  auto loop_body = std::make_unique<ast::BlockStatement>();
+  loop_body->append(std::move(if_stmt));
 
-  ast::LoopStatement expr(std::move(loop_body), {});
+  ast::LoopStatement expr(std::move(loop_body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -503,10 +505,11 @@ TEST_F(BuilderTest, If_WithContinue) {
   auto if_stmt =
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
 
-  ast::StatementList loop_body;
-  loop_body.push_back(std::move(if_stmt));
+  auto loop_body = std::make_unique<ast::BlockStatement>();
+  loop_body->append(std::move(if_stmt));
 
-  ast::LoopStatement expr(std::move(loop_body), {});
+  ast::LoopStatement expr(std::move(loop_body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -561,10 +564,11 @@ TEST_F(BuilderTest, If_WithElseContinue) {
       std::move(cond), std::make_unique<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
-  ast::StatementList loop_body;
-  loop_body.push_back(std::move(if_stmt));
+  auto loop_body = std::make_unique<ast::BlockStatement>();
+  loop_body->append(std::move(if_stmt));
 
-  ast::LoopStatement expr(std::move(loop_body), {});
+  ast::LoopStatement expr(std::move(loop_body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;

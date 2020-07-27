@@ -72,14 +72,14 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList continuing;
-  ast::LoopStatement expr(std::move(body), std::move(continuing));
+  ast::LoopStatement expr(std::move(body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -124,14 +124,14 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
@@ -174,11 +174,11 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ContinueStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ContinueStatement>());
 
-  ast::StatementList continuing;
-  ast::LoopStatement expr(std::move(body), std::move(continuing));
+  ast::LoopStatement expr(std::move(body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;
@@ -206,11 +206,11 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
 
-  ast::StatementList continuing;
-  ast::LoopStatement expr(std::move(body), std::move(continuing));
+  ast::LoopStatement expr(std::move(body),
+                          std::make_unique<ast::BlockStatement>());
 
   Context ctx;
   ast::Module mod;

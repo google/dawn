@@ -27,9 +27,8 @@ namespace {
 using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
-
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
   ast::LoopStatement l(std::move(body), {});
 
   GeneratorImpl g;
@@ -43,11 +42,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
 
-  ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::DiscardStatement>());
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 

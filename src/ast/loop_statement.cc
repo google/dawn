@@ -17,14 +17,28 @@
 namespace tint {
 namespace ast {
 
-LoopStatement::LoopStatement() : Statement() {}
+LoopStatement::LoopStatement()
+    : Statement(),
+      body_(std::make_unique<BlockStatement>()),
+      continuing_(std::make_unique<BlockStatement>()) {}
 
-LoopStatement::LoopStatement(StatementList body, StatementList continuing)
+LoopStatement::LoopStatement(std::unique_ptr<BlockStatement> body,
+                             std::unique_ptr<BlockStatement> continuing)
     : Statement(), body_(std::move(body)), continuing_(std::move(continuing)) {}
 
 LoopStatement::LoopStatement(const Source& source,
                              StatementList body,
                              StatementList continuing)
+    : Statement(source),
+      body_(std::make_unique<BlockStatement>()),
+      continuing_(std::make_unique<BlockStatement>()) {
+  set_body(std::move(body));
+  set_continuing(std::move(continuing));
+}
+
+LoopStatement::LoopStatement(const Source& source,
+                             std::unique_ptr<BlockStatement> body,
+                             std::unique_ptr<BlockStatement> continuing)
     : Statement(source),
       body_(std::move(body)),
       continuing_(std::move(continuing)) {}
@@ -33,18 +47,28 @@ LoopStatement::LoopStatement(LoopStatement&&) = default;
 
 LoopStatement::~LoopStatement() = default;
 
+void LoopStatement::set_body(StatementList body) {
+  for (auto& stmt : body) {
+    body_->append(std::move(stmt));
+  }
+}
+
+void LoopStatement::set_continuing(StatementList continuing) {
+  for (auto& stmt : continuing) {
+    continuing_->append(std::move(stmt));
+  }
+}
+
 bool LoopStatement::IsLoop() const {
   return true;
 }
 
 bool LoopStatement::IsValid() const {
-  for (const auto& stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
+  if (body_ == nullptr || !body_->IsValid()) {
+    return false;
   }
-  for (const auto& stmt : continuing_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
+  if (continuing_ == nullptr || !continuing_->IsValid()) {
+    return false;
   }
   return true;
 }
@@ -53,15 +77,19 @@ void LoopStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Loop{" << std::endl;
 
-  for (const auto& stmt : body_)
-    stmt->to_str(out, indent + 2);
+  if (body_ != nullptr) {
+    for (const auto& stmt : *body_) {
+      stmt->to_str(out, indent + 2);
+    }
+  }
 
-  if (continuing_.size() > 0) {
+  if (continuing_ != nullptr && continuing_->size() > 0) {
     make_indent(out, indent + 2);
     out << "continuing {" << std::endl;
 
-    for (const auto& stmt : continuing_)
+    for (const auto& stmt : *continuing_) {
       stmt->to_str(out, indent + 4);
+    }
 
     make_indent(out, indent + 2);
     out << "}" << std::endl;

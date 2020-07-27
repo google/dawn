@@ -278,9 +278,9 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* body_rhs_ptr = body_rhs.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
-      std::move(body_lhs), std::move(body_rhs)));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(std::move(body_lhs),
+                                                          std::move(body_rhs)));
 
   auto continuing_lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
@@ -290,8 +290,8 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* continuing_rhs_ptr = continuing_rhs.get();
 
-  ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto continuing = std::make_unique<ast::BlockStatement>();
+  continuing->append(std::make_unique<ast::AssignmentStatement>(
       std::move(continuing_lhs), std::move(continuing_rhs)));
 
   ast::LoopStatement stmt(std::move(body), std::move(continuing));

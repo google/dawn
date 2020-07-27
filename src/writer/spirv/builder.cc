@@ -110,16 +110,6 @@ bool LastIsTerminator(const ast::BlockStatement* stmts) {
          last->IsReturn() || last->IsFallthrough();
 }
 
-bool LastIsTerminator(const ast::StatementList& stmts) {
-  if (stmts.empty()) {
-    return false;
-  }
-
-  auto* last = stmts.back().get();
-  return last->IsBreak() || last->IsContinue() || last->IsDiscard() ||
-         last->IsReturn() || last->IsFallthrough();
-}
-
 uint32_t IndexFromName(char name) {
   switch (name) {
     case 'x':
@@ -1794,7 +1784,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
 
   push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)});
   GenerateLabel(body_block_id);
-  if (!GenerateStatementList(stmt->body())) {
+  if (!GenerateBlockStatement(stmt->body())) {
     return false;
   }
 
@@ -1804,7 +1794,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   }
 
   GenerateLabel(continue_block_id);
-  if (!GenerateStatementList(stmt->continuing())) {
+  if (!GenerateBlockStatement(stmt->continuing())) {
     return false;
   }
   push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
@@ -1814,15 +1804,6 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
 
   GenerateLabel(merge_block_id);
 
-  return true;
-}
-
-bool Builder::GenerateStatementList(const ast::StatementList& list) {
-  for (const auto& inst : list) {
-    if (!GenerateStatement(inst.get())) {
-      return false;
-    }
-  }
   return true;
 }
 

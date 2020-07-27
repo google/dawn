@@ -1471,9 +1471,9 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
 
   if (stmt->has_continuing()) {
     make_indent();
-    out_ << "if (!" << guard << ")";
+    out_ << "if (!" << guard << ") ";
 
-    if (!EmitStatementBlockAndNewline(stmt->continuing())) {
+    if (!EmitBlockAndNewline(stmt->continuing())) {
       return false;
     }
 
@@ -1482,7 +1482,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     out_ << std::endl;
   }
 
-  for (const auto& s : stmt->body()) {
+  for (const auto& s : *(stmt->body())) {
     if (!EmitStatement(s.get())) {
       return false;
     }
@@ -1594,7 +1594,7 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
   const bool result = EmitBlock(stmt);
   if (result) {
     out_ << std::endl;
@@ -1605,33 +1605,6 @@ bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
 bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
   make_indent();
   const bool result = EmitBlock(stmt);
-  if (result) {
-    out_ << std::endl;
-  }
-  return result;
-}
-
-bool GeneratorImpl::EmitStatementBlock(const ast::StatementList& statements) {
-  out_ << " {" << std::endl;
-
-  increment_indent();
-
-  for (const auto& s : statements) {
-    if (!EmitStatement(s.get())) {
-      return false;
-    }
-  }
-
-  decrement_indent();
-  make_indent();
-  out_ << "}";
-
-  return true;
-}
-
-bool GeneratorImpl::EmitStatementBlockAndNewline(
-    const ast::StatementList& statements) {
-  const bool result = EmitStatementBlock(statements);
   if (result) {
     out_ << std::endl;
   }
