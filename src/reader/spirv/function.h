@@ -293,7 +293,7 @@ class FunctionEmitter {
   /// Returns the body of the function.  It is the bottom of the statement
   /// stack.
   /// @returns the body of the function.
-  const ast::StatementList& ast_body();
+  const ast::BlockStatement* ast_body();
 
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
@@ -713,7 +713,7 @@ class FunctionEmitter {
     StatementBlock(const Construct* construct,
                    uint32_t end_id,
                    CompletionAction completion_action,
-                   ast::StatementList statements,
+                   std::unique_ptr<ast::BlockStatement> statements,
                    std::unique_ptr<ast::CaseStatementList> cases);
     StatementBlock(StatementBlock&&);
     ~StatementBlock();
@@ -730,7 +730,7 @@ class FunctionEmitter {
     // Only one of |statements| or |cases| is active.
 
     // The list of statements being built, if this construct is not a switch.
-    ast::StatementList statements_;
+    std::unique_ptr<ast::BlockStatement> statements_;
     // The list of switch cases being built, if this construct is a switch.
     // The algorithm will cache a pointer to the vector.  We want that pointer
     // to be stable no matter how |statements_stack_| is resized.  That's

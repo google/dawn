@@ -70,9 +70,9 @@ using SpvParserTest = SpvParserTestBase<::testing::Test>;
 /// Returns the string dump of a function body.
 /// @param body the statement in the body
 /// @returnss the string dump of a function body.
-inline std::string ToString(const ast::StatementList& body) {
+inline std::string ToString(const ast::BlockStatement* body) {
   std::ostringstream outs;
-  for (const auto& stmt : body) {
+  for (const auto& stmt : *body) {
     stmt->to_str(outs, 0);
   }
   return outs.str();

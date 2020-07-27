@@ -460,7 +460,7 @@ FunctionEmitter::StatementBlock::StatementBlock(
     const Construct* construct,
     uint32_t end_id,
     CompletionAction completion_action,
-    ast::StatementList statements,
+    std::unique_ptr<ast::BlockStatement> statements,
     std::unique_ptr<ast::CaseStatementList> cases)
     : construct_(construct),
       end_id_(end_id),
@@ -476,7 +476,8 @@ void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             uint32_t end_id,
                                             CompletionAction action) {
   statements_stack_.emplace_back(
-      StatementBlock{construct, end_id, action, ast::StatementList{}, nullptr});
+      StatementBlock{construct, end_id, action,
+                     std::make_unique<ast::BlockStatement>(), nullptr});
 }
 
 void FunctionEmitter::PushGuard(const std::string& guard_name,
@@ -509,9 +510,9 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
                         });
 }
 
-const ast::StatementList& FunctionEmitter::ast_body() {
+const ast::BlockStatement* FunctionEmitter::ast_body() {
   assert(!statements_stack_.empty());
-  return statements_stack_[0].statements_;
+  return statements_stack_[0].statements_.get();
 }
 
 ast::Statement* FunctionEmitter::AddStatement(
@@ -519,7 +520,7 @@ ast::Statement* FunctionEmitter::AddStatement(
   assert(!statements_stack_.empty());
   auto* result = statement.get();
   if (result != nullptr) {
-    statements_stack_.back().statements_.emplace_back(std::move(statement));
+    statements_stack_.back().statements_->append(std::move(statement));
   }
   return result;
 }
@@ -527,8 +528,8 @@ ast::Statement* FunctionEmitter::AddStatement(
 ast::Statement* FunctionEmitter::LastStatement() {
   assert(!statements_stack_.empty());
   const auto& statement_list = statements_stack_.back().statements_;
-  assert(!statement_list.empty());
-  return statement_list.back().get();
+  assert(!statement_list->empty());
+  return statement_list->last();
 }
 
 bool FunctionEmitter::Emit() {
@@ -554,7 +555,7 @@ bool FunctionEmitter::Emit() {
                      "element but has "
                   << statements_stack_.size();
   }
-  ast::StatementList body(std::move(statements_stack_[0].statements_));
+  auto body = std::move(statements_stack_[0].statements_);
   parser_impl_.get_module().functions().back()->set_body(std::move(body));
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
@@ -1984,7 +1985,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // Push the else clause onto the stack first.
     PushNewStatementBlock(construct, else_end, [if_stmt](StatementBlock* s) {
       // Only set the else-clause if there are statements to fill it.
-      if (!s->statements_.empty()) {
+      if (!s->statements_->empty()) {
         // The "else" consists of the statement list from the top of statments
         // stack, without an elseif condition.
         ast::ElseStatementList else_stmts;
@@ -2136,8 +2137,8 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     if ((default_info == clause_heads[i]) && has_selectors &&
         construct->ContainsPos(default_info->pos)) {
       // Generate a default clause with a just fallthrough.
-      ast::StatementList stmts;
-      stmts.emplace_back(std::make_unique<ast::FallthroughStatement>());
+      auto stmts = std::make_unique<ast::BlockStatement>();
+      stmts->append(std::make_unique<ast::FallthroughStatement>());
       auto case_stmt = std::make_unique<ast::CaseStatement>();
       case_stmt->set_body(std::move(stmts));
       cases->emplace_back(std::move(case_stmt));
@@ -2362,13 +2363,13 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeSimpleIf(
   auto if_stmt = std::make_unique<ast::IfStatement>();
   if_stmt->set_condition(std::move(condition));
   if (then_stmt != nullptr) {
-    ast::StatementList stmts;
-    stmts.emplace_back(std::move(then_stmt));
+    auto stmts = std::make_unique<ast::BlockStatement>();
+    stmts->append(std::move(then_stmt));
     if_stmt->set_body(std::move(stmts));
   }
   if (else_stmt != nullptr) {
-    ast::StatementList stmts;
-    stmts.emplace_back(std::move(else_stmt));
+    auto stmts = std::make_unique<ast::BlockStatement>();
+    stmts->append(std::move(else_stmt));
     ast::ElseStatementList else_stmts;
     else_stmts.emplace_back(
         std::make_unique<ast::ElseStatement>(nullptr, std::move(stmts)));

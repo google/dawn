@@ -51,6 +51,10 @@ class BlockStatement : public Statement {
   const ast::Statement* last() const {
     return statements_.empty() ? nullptr : statements_.back().get();
   }
+  /// @returns the last statement in the block or nullptr if block empty
+  ast::Statement* last() {
+    return statements_.empty() ? nullptr : statements_.back().get();
+  }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
