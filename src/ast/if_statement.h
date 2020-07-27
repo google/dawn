@@ -42,13 +42,6 @@ class IfStatement : public Statement {
   /// @param body the if body
   IfStatement(const Source& source,
               std::unique_ptr<Expression> condition,
-              StatementList body);
-  /// Constructor
-  /// @param source the source information
-  /// @param condition the if condition
-  /// @param body the if body
-  IfStatement(const Source& source,
-              std::unique_ptr<Expression> condition,
               std::unique_ptr<BlockStatement> body);
   /// Move constructor
   IfStatement(IfStatement&&);
@@ -62,9 +55,6 @@ class IfStatement : public Statement {
   /// @returns the if condition or nullptr if none set
   Expression* condition() const { return condition_.get(); }
 
-  /// Sets the if body
-  /// @param body the if body
-  void set_body(StatementList body);
   /// Sets the if body
   /// @param body the if body
   void set_body(std::unique_ptr<BlockStatement> body) {

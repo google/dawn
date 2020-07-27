@@ -37,27 +37,12 @@ class ElseStatement : public Statement {
   /// Constructor
   /// @param condition the else condition
   /// @param body the else body
-  ElseStatement(std::unique_ptr<Expression> condition, StatementList body);
-  /// Constructor
-  /// @param condition the else condition
-  /// @param body the else body
   ElseStatement(std::unique_ptr<Expression> condition,
                 std::unique_ptr<BlockStatement> body);
   /// Constructor
   /// @param source the source information
   /// @param body the else body
-  ElseStatement(const Source& source, StatementList body);
-  /// Constructor
-  /// @param source the source information
-  /// @param body the else body
   ElseStatement(const Source& source, std::unique_ptr<BlockStatement> body);
-  /// Constructor
-  /// @param source the source information
-  /// @param condition the else condition
-  /// @param body the else body
-  ElseStatement(const Source& source,
-                std::unique_ptr<Expression> condition,
-                StatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the else condition
@@ -100,10 +85,6 @@ class ElseStatement : public Statement {
 
  private:
   ElseStatement(const ElseStatement&) = delete;
-
-  /// Sets the else body
-  /// @param body the else body
-  void set_body(StatementList body);
 
   std::unique_ptr<Expression> condition_;
   std::unique_ptr<BlockStatement> body_;

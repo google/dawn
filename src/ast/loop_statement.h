@@ -38,13 +38,6 @@ class LoopStatement : public Statement {
   /// @param body the body statements
   /// @param continuing the continuing statements
   LoopStatement(const Source& source,
-                StatementList body,
-                StatementList continuing);
-  /// Constructor
-  /// @param source the loop statement source
-  /// @param body the body statements
-  /// @param continuing the continuing statements
-  LoopStatement(const Source& source,
                 std::unique_ptr<BlockStatement> body,
                 std::unique_ptr<BlockStatement> continuing);
   /// Move constructor
@@ -56,9 +49,6 @@ class LoopStatement : public Statement {
   void set_body(std::unique_ptr<BlockStatement> body) {
     body_ = std::move(body);
   }
-  /// Sets the body statements
-  /// @param body the body statements
-  void set_body(StatementList body);
   /// @returns the body statements
   const BlockStatement* body() const { return body_.get(); }
 
@@ -67,9 +57,6 @@ class LoopStatement : public Statement {
   void set_continuing(std::unique_ptr<BlockStatement> continuing) {
     continuing_ = std::move(continuing);
   }
-  /// Sets the continuing statements
-  /// @param continuing the continuing statements
-  void set_continuing(StatementList continuing);
   /// @returns the continuing statements
   const BlockStatement* continuing() const { return continuing_.get(); }
   /// @returns true if there are continuing statements in the loop

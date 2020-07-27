@@ -124,9 +124,6 @@ class Function : public Node {
 
   /// Sets the body of the function
   /// @param body the function body
-  void set_body(StatementList body);
-  /// Sets the body of the function
-  /// @param body the function body
   void set_body(std::unique_ptr<BlockStatement> body) {
     body_ = std::move(body);
   }

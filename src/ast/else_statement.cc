@@ -24,34 +24,12 @@ ElseStatement::ElseStatement(std::unique_ptr<BlockStatement> body)
     : Statement(), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
-                             StatementList body)
-    : Statement(),
-      condition_(std::move(condition)),
-      body_(std::make_unique<BlockStatement>()) {
-  set_body(std::move(body));
-}
-
-ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
                              std::unique_ptr<BlockStatement> body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
-
-ElseStatement::ElseStatement(const Source& source, StatementList body)
-    : Statement(source), body_(std::make_unique<BlockStatement>()) {
-  set_body(std::move(body));
-}
 
 ElseStatement::ElseStatement(const Source& source,
                              std::unique_ptr<BlockStatement> body)
     : Statement(source), body_(std::move(body)) {}
-
-ElseStatement::ElseStatement(const Source& source,
-                             std::unique_ptr<Expression> condition,
-                             StatementList body)
-    : Statement(source),
-      condition_(std::move(condition)),
-      body_(std::make_unique<BlockStatement>()) {
-  set_body(std::move(body));
-}
 
 ElseStatement::ElseStatement(const Source& source,
                              std::unique_ptr<Expression> condition,
@@ -63,12 +41,6 @@ ElseStatement::ElseStatement(const Source& source,
 ElseStatement::ElseStatement(ElseStatement&&) = default;
 
 ElseStatement::~ElseStatement() = default;
-
-void ElseStatement::set_body(StatementList body) {
-  for (auto& stmt : body) {
-    body_->append(std::move(stmt));
-  }
-}
 
 bool ElseStatement::IsElse() const {
   return true;

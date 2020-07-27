@@ -58,10 +58,6 @@ class ValidatorImpl {
   /// @param block the statements to check
   /// @returns true if the validation was successful
   bool ValidateStatements(const ast::BlockStatement& block);
-  /// Validates a set of statements
-  /// @param stmts the statements to check
-  /// @returns true if the validation was successful
-  bool ValidateStatements(const ast::StatementList& stmts);
   /// Validates a statement
   /// @param stmt the statement to check
   /// @returns true if the validation was successful

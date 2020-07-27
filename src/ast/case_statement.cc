@@ -38,12 +38,6 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
 
-void CaseStatement::set_body(StatementList body) {
-  for (auto& stmt : body) {
-    body_->append(std::move(stmt));
-  }
-}
-
 bool CaseStatement::IsCase() const {
   return true;
 }

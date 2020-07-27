@@ -27,16 +27,6 @@ LoopStatement::LoopStatement(std::unique_ptr<BlockStatement> body,
     : Statement(), body_(std::move(body)), continuing_(std::move(continuing)) {}
 
 LoopStatement::LoopStatement(const Source& source,
-                             StatementList body,
-                             StatementList continuing)
-    : Statement(source),
-      body_(std::make_unique<BlockStatement>()),
-      continuing_(std::make_unique<BlockStatement>()) {
-  set_body(std::move(body));
-  set_continuing(std::move(continuing));
-}
-
-LoopStatement::LoopStatement(const Source& source,
                              std::unique_ptr<BlockStatement> body,
                              std::unique_ptr<BlockStatement> continuing)
     : Statement(source),
@@ -46,18 +36,6 @@ LoopStatement::LoopStatement(const Source& source,
 LoopStatement::LoopStatement(LoopStatement&&) = default;
 
 LoopStatement::~LoopStatement() = default;
-
-void LoopStatement::set_body(StatementList body) {
-  for (auto& stmt : body) {
-    body_->append(std::move(stmt));
-  }
-}
-
-void LoopStatement::set_continuing(StatementList continuing) {
-  for (auto& stmt : continuing) {
-    continuing_->append(std::move(stmt));
-  }
-}
 
 bool LoopStatement::IsLoop() const {
   return true;

@@ -28,15 +28,6 @@ IfStatement::IfStatement(std::unique_ptr<Expression> condition,
 
 IfStatement::IfStatement(const Source& source,
                          std::unique_ptr<Expression> condition,
-                         StatementList body)
-    : Statement(source),
-      condition_(std::move(condition)),
-      body_(std::make_unique<BlockStatement>()) {
-  set_body(std::move(body));
-}
-
-IfStatement::IfStatement(const Source& source,
-                         std::unique_ptr<Expression> condition,
                          std::unique_ptr<BlockStatement> body)
     : Statement(source),
       condition_(std::move(condition)),
@@ -45,12 +36,6 @@ IfStatement::IfStatement(const Source& source,
 IfStatement::IfStatement(IfStatement&&) = default;
 
 IfStatement::~IfStatement() = default;
-
-void IfStatement::set_body(StatementList body) {
-  for (auto& stmt : body) {
-    body_->append(std::move(stmt));
-  }
-}
 
 bool IfStatement::IsIf() const {
   return true;

@@ -156,12 +156,6 @@ void Function::add_ancestor_entry_point(const std::string& ep) {
   ancestor_entry_points_.push_back(ep);
 }
 
-void Function::set_body(StatementList body) {
-  for (auto& stmt : body) {
-    body_->append(std::move(stmt));
-  }
-}
-
 bool Function::IsValid() const {
   for (const auto& param : params_) {
     if (param == nullptr || !param->IsValid())

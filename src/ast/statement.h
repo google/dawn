@@ -143,9 +143,6 @@ class Statement : public Node {
   Statement(const Statement&) = delete;
 };
 
-/// A list of unique statements
-using StatementList = std::vector<std::unique_ptr<Statement>>;
-
 }  // namespace ast
 }  // namespace tint
 

@@ -67,9 +67,6 @@ class CaseStatement : public Statement {
 
   /// Sets the case body
   /// @param body the case body
-  void set_body(StatementList body);
-  /// Sets the case body
-  /// @param body the case body
   void set_body(std::unique_ptr<BlockStatement> body) {
     body_ = std::move(body);
   }

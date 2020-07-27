@@ -57,15 +57,6 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement& block) {
   return true;
 }
 
-bool ValidatorImpl::ValidateStatements(const ast::StatementList& stmts) {
-  for (const auto& stmt : stmts) {
-    if (!ValidateStatement(*(stmt.get()))) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool ValidatorImpl::ValidateStatement(const ast::Statement& stmt) {
   if (stmt.IsAssign() && !ValidateAssign(*(stmt.AsAssign())))
     return false;
