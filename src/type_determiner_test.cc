@@ -734,10 +734,9 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::move(my_var),
       std::make_unique<ast::IdentifierExpression>("my_var")));
 
@@ -756,12 +755,12 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto my_var = std::make_unique<ast::IdentifierExpression>("my_var");
   auto* my_var_ptr = my_var.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
                                       &f32)));
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::move(my_var),
       std::make_unique<ast::IdentifierExpression>("my_var")));
 
@@ -823,17 +822,17 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
       std::make_unique<ast::Function>("my_func", std::move(params), &f32);
   auto* func_ptr = func.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("out_var"),
       std::make_unique<ast::IdentifierExpression>("in_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("wg_var"),
       std::make_unique<ast::IdentifierExpression>("wg_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("sb_var"),
       std::make_unique<ast::IdentifierExpression>("sb_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("priv_var"),
       std::make_unique<ast::IdentifierExpression>("priv_var")));
   func->set_body(std::move(body));
@@ -882,17 +881,17 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("out_var"),
       std::make_unique<ast::IdentifierExpression>("in_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("wg_var"),
       std::make_unique<ast::IdentifierExpression>("wg_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("sb_var"),
       std::make_unique<ast::IdentifierExpression>("sb_var")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("priv_var"),
       std::make_unique<ast::IdentifierExpression>("priv_var")));
   func->set_body(std::move(body));
@@ -901,7 +900,9 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   auto func2 = std::make_unique<ast::Function>("func", std::move(params), &f32);
   auto* func2_ptr = func2.get();
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("out_var"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("my_func"),
@@ -933,9 +934,9 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
       std::make_unique<ast::Function>("my_func", std::move(params), &f32);
   auto* func_ptr = func.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("var"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 1.f))));
@@ -1990,9 +1991,10 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 
   auto func =
       std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
-  ast::StatementList stmts;
-  stmts.push_back(std::move(stmt));
-  func->set_body(std::move(stmts));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::move(stmt));
+  func->set_body(std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -2011,9 +2013,10 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 
   auto func =
       std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
-  ast::StatementList stmts;
-  stmts.push_back(std::move(stmt));
-  func->set_body(std::move(stmts));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::move(stmt));
+  func->set_body(std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -2030,9 +2033,10 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
 
   auto func =
       std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
-  ast::StatementList stmts;
-  stmts.push_back(std::move(stmt));
-  func->set_body(std::move(stmts));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::move(stmt));
+  func->set_body(std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -3963,13 +3967,14 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints) {
   auto func_b = std::make_unique<ast::Function>("b", std::move(params), &f32);
   auto* func_b_ptr = func_b.get();
 
-  ast::StatementList body;
+  auto body = std::make_unique<ast::BlockStatement>();
   func_b->set_body(std::move(body));
 
   auto func_c = std::make_unique<ast::Function>("c", std::move(params), &f32);
   auto* func_c_ptr = func_c.get();
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("second"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("b"),
@@ -3979,7 +3984,8 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints) {
   auto func_a = std::make_unique<ast::Function>("a", std::move(params), &f32);
   auto* func_a_ptr = func_a.get();
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("first"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("c"),
@@ -3990,12 +3996,13 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints) {
       std::make_unique<ast::Function>("ep_1_func", std::move(params), &f32);
   auto* ep_1_func_ptr = ep_1_func.get();
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("call_a"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("a"),
           ast::ExpressionList{})));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("call_b"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("b"),
@@ -4006,7 +4013,8 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints) {
       std::make_unique<ast::Function>("ep_2_func", std::move(params), &f32);
   auto* ep_2_func_ptr = ep_2_func.get();
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("call_c"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("c"),

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "src/ast/binding_decoration.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/expression.h"
 #include "src/ast/location_decoration.h"
@@ -123,9 +124,14 @@ class Function : public Node {
 
   /// Sets the body of the function
   /// @param body the function body
-  void set_body(StatementList body) { body_ = std::move(body); }
+  void set_body(StatementList body);
+  /// Sets the body of the function
+  /// @param body the function body
+  void set_body(std::unique_ptr<BlockStatement> body) {
+    body_ = std::move(body);
+  }
   /// @returns the function body
-  const StatementList& body() const { return body_; }
+  BlockStatement* body() const { return body_.get(); }
 
   /// @returns true if the name and type are both present
   bool IsValid() const override;
@@ -144,7 +150,7 @@ class Function : public Node {
   std::string name_;
   VariableList params_;
   type::Type* return_type_ = nullptr;
-  StatementList body_;
+  std::unique_ptr<BlockStatement> body_;
   std::vector<Variable*> referenced_module_vars_;
   std::vector<std::string> ancestor_entry_points_;
 };

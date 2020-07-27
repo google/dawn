@@ -1231,11 +1231,11 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
   }
 
-  out_ << ")";
+  out_ << ") ";
 
   current_ep_name_ = ep_name;
 
-  if (!EmitStatementBlockAndNewline(func->body())) {
+  if (!EmitBlockAndNewline(func->body())) {
     return false;
   }
 
@@ -1395,7 +1395,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   }
 
   generating_entry_point_ = true;
-  for (const auto& s : func->body()) {
+  for (const auto& s : *(func->body())) {
     if (!EmitStatement(s.get())) {
       return false;
     }
@@ -1578,8 +1578,6 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
-  make_indent();
-
   out_ << "{" << std::endl;
   increment_indent();
 
@@ -1597,6 +1595,15 @@ bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
+  const bool result = EmitBlock(stmt);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
+}
+
+bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
+  make_indent();
   const bool result = EmitBlock(stmt);
   if (result) {
     out_ << std::endl;
@@ -1636,7 +1643,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitAssign(stmt->AsAssign());
   }
   if (stmt->IsBlock()) {
-    return EmitBlockAndNewline(stmt->AsBlock());
+    return EmitIndentedBlockAndNewline(stmt->AsBlock());
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());

@@ -48,6 +48,11 @@ class BlockStatement : public Statement {
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
+  ast::Statement* get(size_t idx) { return statements_[idx].get(); }
+
+  /// Retrieves the statement at |idx|
+  /// @param idx the index. The index is not bounds checked.
+  /// @returns the statement at |idx|
   ast::Statement* operator[](size_t idx) { return statements_[idx].get(); }
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.

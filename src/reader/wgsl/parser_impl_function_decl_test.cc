@@ -40,8 +40,9 @@ TEST_F(ParserImplTest, FunctionDecl) {
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->IsVoid());
 
-  ASSERT_EQ(f->body().size(), 1u);
-  EXPECT_TRUE(f->body()[0]->IsReturn());
+  auto* body = f->body();
+  ASSERT_EQ(body->size(), 1u);
+  EXPECT_TRUE(body->get(0)->IsReturn());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {

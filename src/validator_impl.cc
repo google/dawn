@@ -43,8 +43,17 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
 }
 
 bool ValidatorImpl::ValidateFunction(const ast::Function& func) {
-  if (!ValidateStatements(func.body()))
+  if (!ValidateStatements(*(func.body())))
     return false;
+  return true;
+}
+
+bool ValidatorImpl::ValidateStatements(const ast::BlockStatement& block) {
+  for (const auto& stmt : block) {
+    if (!ValidateStatement(*(stmt.get()))) {
+      return false;
+    }
+  }
   return true;
 }
 

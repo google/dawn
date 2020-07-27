@@ -54,6 +54,10 @@ class ValidatorImpl {
   /// @param func the function to check
   /// @returns true if the validation was successful
   bool ValidateFunction(const ast::Function& func);
+  /// Validates a block of statements
+  /// @param block the statements to check
+  /// @returns true if the validation was successful
+  bool ValidateStatements(const ast::BlockStatement& block);
   /// Validates a set of statements
   /// @param stmts the statements to check
   /// @returns true if the validation was successful

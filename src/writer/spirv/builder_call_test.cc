@@ -142,8 +142,8 @@ TEST_F(BuilderTest, Expression_Call) {
 
   ast::Function a_func("a_func", std::move(func_params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::BinaryExpression>(
           ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("a"),
           std::make_unique<ast::IdentifierExpression>("b"))));
@@ -210,8 +210,8 @@ TEST_F(BuilderTest, Statement_Call) {
 
   ast::Function a_func("a_func", std::move(func_params), &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::BinaryExpression>(
           ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("a"),
           std::make_unique<ast::IdentifierExpression>("b"))));

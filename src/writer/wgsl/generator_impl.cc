@@ -346,7 +346,8 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return false;
   }
 
-  return EmitStatementBlockAndNewline(func->body());
+  out_ << " ";
+  return EmitBlockAndNewline(func->body());
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
@@ -600,8 +601,6 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
 }
 
 bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
-  make_indent();
-
   out_ << "{" << std::endl;
   increment_indent();
 
@@ -616,6 +615,15 @@ bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
   out_ << "}";
 
   return true;
+}
+
+bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
+  make_indent();
+  const bool result = EmitBlock(stmt);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
 }
 
 bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
@@ -658,7 +666,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitAssign(stmt->AsAssign());
   }
   if (stmt->IsBlock()) {
-    return EmitBlockAndNewline(stmt->AsBlock());
+    return EmitIndentedBlockAndNewline(stmt->AsBlock());
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());

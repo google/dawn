@@ -80,6 +80,10 @@ class GeneratorImpl : public TextGenerator {
   /// Handles a block statement with a newline at the end
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
+  bool EmitIndentedBlockAndNewline(ast::BlockStatement* stmt);
+  /// Handles a block statement with a newline at the end
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
   bool EmitBlockAndNewline(ast::BlockStatement* stmt);
   /// Handles a break statement
   /// @param stmt the statement to emit

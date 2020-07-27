@@ -30,9 +30,9 @@ namespace {
 using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
@@ -50,9 +50,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::DiscardStatement>());
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::type::F32Type f32;
   ast::type::I32Type i32;

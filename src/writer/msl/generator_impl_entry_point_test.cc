@@ -73,11 +73,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Input) {
   auto func =
       std::make_unique<ast::Function>("vtx_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -139,11 +139,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Output) {
   auto func =
       std::make_unique<ast::Function>("vtx_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -205,11 +205,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Input) {
   auto func =
       std::make_unique<ast::Function>("frag_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -271,11 +271,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Output) {
   auto func =
       std::make_unique<ast::Function>("frag_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -334,11 +334,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Input) {
   auto func =
       std::make_unique<ast::Function>("comp_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -392,11 +392,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Output) {
   auto func =
       std::make_unique<ast::Function>("comp_main", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("foo"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("bar")));
   func->set_body(std::move(body));
@@ -460,8 +460,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Builtins) {
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("depth"),
       std::make_unique<ast::MemberAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("coord"),

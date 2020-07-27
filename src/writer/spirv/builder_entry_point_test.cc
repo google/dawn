@@ -168,15 +168,16 @@ TEST_F(BuilderTest, EntryPoint_WithUsedInterfaceIds) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("my_out"),
       std::make_unique<ast::IdentifierExpression>("my_in")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("my_wg"),
       std::make_unique<ast::IdentifierExpression>("my_wg")));
   // Add duplicate usages so we show they don't get output multiple times.
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("my_out"),
       std::make_unique<ast::IdentifierExpression>("my_in")));
   func.set_body(std::move(body));

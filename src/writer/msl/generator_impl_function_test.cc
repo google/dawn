@@ -53,8 +53,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   ast::Module m;
@@ -79,8 +79,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   auto func =
       std::make_unique<ast::Function>("main", ast::VariableList{}, &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   ast::Module m;
@@ -113,8 +113,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   ast::Module m;
@@ -184,11 +184,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -254,13 +254,13 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("depth"),
       std::make_unique<ast::MemberAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("coord"),
           std::make_unique<ast::IdentifierExpression>("x"))));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -319,9 +319,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
       std::make_unique<ast::IdentifierExpression>("coord"),
       std::make_unique<ast::IdentifierExpression>("x")));
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -375,9 +375,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_With_StorageBuffer) {
       std::make_unique<ast::IdentifierExpression>("coord"),
       std::make_unique<ast::IdentifierExpression>("x")));
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -439,14 +439,14 @@ TEST_F(MslGeneratorImplTest,
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("param")));
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::IdentifierExpression>("foo")));
   sub_func->set_body(std::move(body));
 
@@ -458,12 +458,14 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("sub_func"),
           std::move(expr))));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -530,8 +532,8 @@ TEST_F(MslGeneratorImplTest,
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
@@ -543,12 +545,14 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("depth"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("sub_func"),
           std::move(expr))));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -617,13 +621,13 @@ TEST_F(MslGeneratorImplTest,
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("depth"),
       std::make_unique<ast::MemberAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("coord"),
           std::make_unique<ast::IdentifierExpression>("x"))));
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
@@ -635,12 +639,14 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("depth"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("sub_func"),
           std::move(expr))));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -700,8 +706,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_By_EntryPoint_With_Uniform) {
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::MemberAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("coord"),
           std::make_unique<ast::IdentifierExpression>("x"))));
@@ -722,8 +728,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_By_EntryPoint_With_Uniform) {
       std::make_unique<ast::IdentifierExpression>("sub_func"),
       std::move(expr)));
 
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -778,8 +785,8 @@ TEST_F(MslGeneratorImplTest,
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::MemberAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("coord"),
           std::make_unique<ast::IdentifierExpression>("x"))));
@@ -800,8 +807,9 @@ TEST_F(MslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("sub_func"),
       std::move(expr)));
 
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   mod.AddFunction(std::move(func));
@@ -857,11 +865,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_Two_EntryPoints_WithGlobals) {
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::IdentifierExpression>("foo")));
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::IdentifierExpression>("foo")));
   sub_func->set_body(std::move(body));
 
@@ -870,12 +878,13 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_Two_EntryPoints_WithGlobals) {
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
 
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::CallExpression>(
           std::make_unique<ast::IdentifierExpression>("sub_func"),
           ast::ExpressionList{})));
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -956,15 +965,15 @@ TEST_F(MslGeneratorImplTest,
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("bar"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 1.0f))));
 
   ast::StatementList list;
   list.push_back(std::make_unique<ast::ReturnStatement>());
-  body.push_back(std::make_unique<ast::IfStatement>(
+  body->append(std::make_unique<ast::IfStatement>(
       std::make_unique<ast::BinaryExpression>(
           ast::BinaryOp::kEqual,
           std::make_unique<ast::ScalarConstructorExpression>(
@@ -973,7 +982,7 @@ TEST_F(MslGeneratorImplTest,
               std::make_unique<ast::SintLiteral>(&i32, 1))),
       std::move(list)));
 
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -1017,8 +1026,8 @@ TEST_F(MslGeneratorImplTest,
   auto sub_func =
       std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 1.0))));
   sub_func->set_body(std::move(body));
@@ -1028,15 +1037,15 @@ TEST_F(MslGeneratorImplTest,
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
 
-  body.push_back(std::make_unique<ast::VariableDeclStatement>(
-      std::make_unique<ast::Variable>("foo", ast::StorageClass::kFunction,
-                                      &f32)));
-  body.back()->AsVariableDecl()->variable()->set_constructor(
-      std::make_unique<ast::CallExpression>(
-          std::make_unique<ast::IdentifierExpression>("sub_func"),
-          ast::ExpressionList{}));
+  auto var = std::make_unique<ast::Variable>(
+      "foo", ast::StorageClass::kFunction, &f32);
+  var->set_constructor(std::make_unique<ast::CallExpression>(
+      std::make_unique<ast::IdentifierExpression>("sub_func"),
+      ast::ExpressionList{}));
 
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
   mod.AddFunction(std::move(func_1));
@@ -1126,8 +1135,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
   ast::Module m;

@@ -188,11 +188,11 @@ TEST_F(FunctionTest, IsValid) {
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
-  f.set_body(std::move(body));
+  f.set_body(std::move(block));
   EXPECT_TRUE(f.IsValid());
 }
 
@@ -251,12 +251,12 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
-  body.push_back(nullptr);
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
+  block->append(nullptr);
 
   Function f("func", std::move(params), &void_type);
-  f.set_body(std::move(body));
+  f.set_body(std::move(block));
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -268,12 +268,12 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
-  body.push_back(nullptr);
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
+  block->append(nullptr);
 
   Function f("func", std::move(params), &void_type);
-  f.set_body(std::move(body));
+  f.set_body(std::move(block));
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -281,11 +281,11 @@ TEST_F(FunctionTest, ToStr) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
 
   Function f("func", {}, &void_type);
-  f.set_body(std::move(body));
+  f.set_body(std::move(block));
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -305,11 +305,11 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  StatementList body;
-  body.push_back(std::make_unique<DiscardStatement>());
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
-  f.set_body(std::move(body));
+  f.set_body(std::move(block));
 
   std::ostringstream out;
   f.to_str(out, 2);

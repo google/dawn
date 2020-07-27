@@ -426,7 +426,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
 
-  for (const auto& stmt : func->body()) {
+  for (const auto& stmt : *(func->body())) {
     if (!GenerateStatement(stmt.get())) {
       return false;
     }

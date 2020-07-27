@@ -29,7 +29,8 @@ Function::Function(const std::string& name,
     : Node(),
       name_(name),
       params_(std::move(params)),
-      return_type_(return_type) {}
+      return_type_(return_type),
+      body_(std::make_unique<BlockStatement>()) {}
 
 Function::Function(const Source& source,
                    const std::string& name,
@@ -38,7 +39,8 @@ Function::Function(const Source& source,
     : Node(source),
       name_(name),
       params_(std::move(params)),
-      return_type_(return_type) {}
+      return_type_(return_type),
+      body_(std::make_unique<BlockStatement>()) {}
 
 Function::Function(Function&&) = default;
 
@@ -154,16 +156,20 @@ void Function::add_ancestor_entry_point(const std::string& ep) {
   ancestor_entry_points_.push_back(ep);
 }
 
+void Function::set_body(StatementList body) {
+  for (auto& stmt : body) {
+    body_->append(std::move(stmt));
+  }
+}
+
 bool Function::IsValid() const {
   for (const auto& param : params_) {
     if (param == nullptr || !param->IsValid())
       return false;
   }
-  for (const auto& stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
+  if (body_ == nullptr || !body_->IsValid()) {
+    return false;
   }
-
   if (name_.length() == 0) {
     return false;
   }
@@ -194,7 +200,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "{" << std::endl;
 
-  for (const auto& stmt : body_)
+  for (const auto& stmt : *body_)
     stmt->to_str(out, indent + 2);
 
   make_indent(out, indent);

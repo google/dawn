@@ -67,8 +67,8 @@ TEST_F(BuilderTest, Function_WithParams) {
 
   ast::Function func("a_func", std::move(params), &f32);
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>(
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(
       std::make_unique<ast::IdentifierExpression>("a")));
   func.set_body(std::move(body));
 
@@ -93,8 +93,8 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_WithBody) {
   ast::type::VoidType void_type;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::ReturnStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::Function func("a_func", {}, &void_type);
   func.set_body(std::move(body));

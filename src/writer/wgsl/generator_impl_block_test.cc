@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitBlock(&b)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  EXPECT_EQ(g.result(), R"({
     discard;
   })");
 }
