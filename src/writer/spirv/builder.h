@@ -170,7 +170,7 @@ class Builder {
   /// Generates a block statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated
-  bool GenerateBlockStatement(ast::BlockStatement* stmt);
+  bool GenerateBlockStatement(const ast::BlockStatement* stmt);
   /// Generates a break statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated

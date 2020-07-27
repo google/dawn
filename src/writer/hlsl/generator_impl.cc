@@ -31,12 +31,12 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
-  if (stmts.empty()) {
+bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
+  if (stmts->empty()) {
     return false;
   }
 
-  return stmts.back()->IsBreak() || stmts.back()->IsFallthrough();
+  return stmts->last()->IsBreak() || stmts->last()->IsFallthrough();
 }
 
 }  // namespace
@@ -207,7 +207,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : stmt->body()) {
+  for (const auto& s : *(stmt->body())) {
     if (!EmitStatement(s.get())) {
       return false;
     }

@@ -36,8 +36,8 @@ TEST_F(SwitchStatementTest, Creation) {
 
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
 
   auto* ident_ptr = ident.get();
   auto* case_ptr = body[0].get();
@@ -70,8 +70,8 @@ TEST_F(SwitchStatementTest, IsValid) {
 
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_TRUE(stmt.IsValid());
@@ -84,8 +84,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
 
   SwitchStatement stmt;
   stmt.set_body(std::move(body));
@@ -100,8 +100,8 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 
   auto ident = std::make_unique<IdentifierExpression>("");
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -115,8 +115,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
   body.push_back(nullptr);
 
   SwitchStatement stmt(std::move(ident), std::move(body));
@@ -126,8 +126,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
 
-  StatementList case_body;
-  case_body.push_back(nullptr);
+  auto case_body = std::make_unique<ast::BlockStatement>();
+  case_body->append(nullptr);
 
   CaseStatementList body;
   body.push_back(std::make_unique<CaseStatement>(CaseSelectorList{},
@@ -159,8 +159,8 @@ TEST_F(SwitchStatementTest, ToStr) {
 
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
+  body.push_back(std::make_unique<CaseStatement>(
+      std::move(lit), std::make_unique<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   std::ostringstream out;

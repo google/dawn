@@ -85,14 +85,14 @@ TEST_F(BuilderTest, Switch_WithCase) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList case_1_body;
-  case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_1_body = std::make_unique<ast::BlockStatement>();
+  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));
 
-  ast::StatementList case_2_body;
-  case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_2_body = std::make_unique<ast::BlockStatement>();
+  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
@@ -170,8 +170,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList default_body;
-  default_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto default_body = std::make_unique<ast::BlockStatement>();
+  default_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));
@@ -239,20 +239,20 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList case_1_body;
-  case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_1_body = std::make_unique<ast::BlockStatement>();
+  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));
 
-  ast::StatementList case_2_body;
-  case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_2_body = std::make_unique<ast::BlockStatement>();
+  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList default_body;
-  default_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto default_body = std::make_unique<ast::BlockStatement>();
+  default_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
@@ -340,21 +340,21 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList case_1_body;
-  case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_1_body = std::make_unique<ast::BlockStatement>();
+  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));
-  case_1_body.push_back(std::make_unique<ast::FallthroughStatement>());
+  case_1_body->append(std::make_unique<ast::FallthroughStatement>());
 
-  ast::StatementList case_2_body;
-  case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_2_body = std::make_unique<ast::BlockStatement>();
+  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  ast::StatementList default_body;
-  default_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto default_body = std::make_unique<ast::BlockStatement>();
+  default_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 3))));
@@ -437,12 +437,12 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   auto a =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  ast::StatementList case_1_body;
-  case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  auto case_1_body = std::make_unique<ast::BlockStatement>();
+  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));
-  case_1_body.push_back(std::make_unique<ast::FallthroughStatement>());
+  case_1_body->append(std::make_unique<ast::FallthroughStatement>());
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
@@ -492,13 +492,13 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   ast::StatementList if_body;
   if_body.push_back(std::make_unique<ast::BreakStatement>());
 
-  ast::StatementList case_1_body;
-  case_1_body.push_back(std::make_unique<ast::IfStatement>(
+  auto case_1_body = std::make_unique<ast::BlockStatement>();
+  case_1_body->append(std::make_unique<ast::IfStatement>(
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::BoolLiteral>(&bool_type, true)),
       std::move(if_body)));
 
-  case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
+  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1))));

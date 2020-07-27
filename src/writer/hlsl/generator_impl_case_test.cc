@@ -34,8 +34,8 @@ using HlslGeneratorImplTest = testing::Test;
 TEST_F(HlslGeneratorImplTest, Emit_Case) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
@@ -55,11 +55,9 @@ TEST_F(HlslGeneratorImplTest, Emit_Case) {
 TEST_F(HlslGeneratorImplTest, Emit_Case_BreaksByDefault) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
-  ast::CaseStatement c(std::move(lit), std::move(body));
+  ast::CaseStatement c(std::move(lit), std::make_unique<ast::BlockStatement>());
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -75,8 +73,8 @@ TEST_F(HlslGeneratorImplTest, Emit_Case_BreaksByDefault) {
 TEST_F(HlslGeneratorImplTest, Emit_Case_WithFallthrough) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::FallthroughStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::FallthroughStatement>());
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
@@ -96,8 +94,8 @@ TEST_F(HlslGeneratorImplTest, Emit_Case_WithFallthrough) {
 TEST_F(HlslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
@@ -119,9 +117,8 @@ TEST_F(HlslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 TEST_F(HlslGeneratorImplTest, Emit_Case_Default) {
   ast::CaseStatement c;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
-
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
   c.set_body(std::move(body));
 
   ast::Module m;

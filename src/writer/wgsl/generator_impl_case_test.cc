@@ -32,8 +32,8 @@ using WgslGeneratorImplTest = testing::Test;
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
@@ -52,8 +52,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
@@ -73,9 +73,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
   ast::CaseStatement c;
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::BreakStatement>());
-
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::BreakStatement>());
   c.set_body(std::move(body));
 
   GeneratorImpl g;

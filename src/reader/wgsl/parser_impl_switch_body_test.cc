@@ -29,8 +29,8 @@ TEST_F(ParserImplTest, SwitchBody_Case) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsCase());
   EXPECT_FALSE(e->IsDefault());
-  ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsAssign());
+  ASSERT_EQ(e->body()->size(), 1u);
+  EXPECT_TRUE(e->body()->get(0)->IsAssign());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
@@ -96,8 +96,8 @@ TEST_F(ParserImplTest, SwitchBody_Default) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsCase());
   EXPECT_TRUE(e->IsDefault());
-  ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsAssign());
+  ASSERT_EQ(e->body()->size(), 1u);
+  EXPECT_TRUE(e->body()->get(0)->IsAssign());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {

@@ -600,7 +600,7 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   out_ << "{" << std::endl;
   increment_indent();
 
@@ -617,7 +617,8 @@ bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitIndentedBlockAndNewline(
+    const ast::BlockStatement* stmt) {
   make_indent();
   const bool result = EmitBlock(stmt);
   if (result) {
@@ -626,7 +627,7 @@ bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
   return result;
 }
 
-bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
+bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
   const bool result = EmitBlock(stmt);
   if (result) {
     out_ << std::endl;
@@ -736,7 +737,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   make_indent();
 
   if (stmt->IsDefault()) {
-    out_ << "default:";
+    out_ << "default";
   } else {
     out_ << "case ";
 
@@ -752,10 +753,10 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
       }
     }
 
-    out_ << ":";
   }
+  out_ << ": ";
 
-  return EmitStatementBlockAndNewline(stmt->body());
+  return EmitBlockAndNewline(stmt->body());
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {

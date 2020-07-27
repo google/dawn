@@ -200,8 +200,11 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "{" << std::endl;
 
-  for (const auto& stmt : *body_)
-    stmt->to_str(out, indent + 2);
+  if (body_ != nullptr) {
+    for (const auto& stmt : *body_) {
+      stmt->to_str(out, indent + 2);
+    }
+  }
 
   make_indent(out, indent);
   out << "}" << std::endl;

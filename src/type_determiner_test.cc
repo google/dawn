@@ -145,9 +145,9 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* rhs_ptr = rhs.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
-                                                            std::move(rhs)));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                          std::move(rhs)));
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));
@@ -339,9 +339,9 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* rhs_ptr = rhs.get();
 
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
-                                                            std::move(rhs)));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                          std::move(rhs)));
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));

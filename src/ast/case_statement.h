@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/block_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/statement.h"
@@ -37,18 +38,19 @@ class CaseStatement : public Statement {
   /// Constructor
   /// Creates a default case statement
   /// @param body the case body
-  explicit CaseStatement(StatementList body);
+  explicit CaseStatement(std::unique_ptr<BlockStatement> body);
   /// Constructor
   /// @param selectors the case selectors
   /// @param body the case body
-  CaseStatement(CaseSelectorList selectors, StatementList body);
+  CaseStatement(CaseSelectorList selectors,
+                std::unique_ptr<BlockStatement> body);
   /// Constructor
   /// @param source the source information
   /// @param selectors the case selectors
   /// @param body the case body
   CaseStatement(const Source& source,
                 CaseSelectorList selectors,
-                StatementList body);
+                std::unique_ptr<BlockStatement> body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
@@ -65,9 +67,14 @@ class CaseStatement : public Statement {
 
   /// Sets the case body
   /// @param body the case body
-  void set_body(StatementList body) { body_ = std::move(body); }
+  void set_body(StatementList body);
+  /// Sets the case body
+  /// @param body the case body
+  void set_body(std::unique_ptr<BlockStatement> body) {
+    body_ = std::move(body);
+  }
   /// @returns the case body
-  const StatementList& body() const { return body_; }
+  const BlockStatement* body() const { return body_.get(); }
 
   /// @returns true if this is a case statement
   bool IsCase() const override;
@@ -84,7 +91,7 @@ class CaseStatement : public Statement {
   CaseStatement(const CaseStatement&) = delete;
 
   CaseSelectorList selectors_;
-  StatementList body_;
+  std::unique_ptr<BlockStatement> body_;
 };
 
 /// A list of unique case statements

@@ -93,13 +93,23 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
   return model;
 }
 
-bool LastIsFallthrough(const ast::StatementList& stmts) {
-  return !stmts.empty() && stmts.back()->IsFallthrough();
+bool LastIsFallthrough(const ast::BlockStatement* stmts) {
+  return !stmts->empty() && stmts->last()->IsFallthrough();
 }
 
 // A terminator is anything which will case a SPIR-V terminator to be emitted.
 // This means things like breaks, fallthroughs and continues which all emit an
 // OpBranch or return for the OpReturn emission.
+bool LastIsTerminator(const ast::BlockStatement* stmts) {
+  if (stmts->empty()) {
+    return false;
+  }
+
+  auto* last = stmts->last();
+  return last->IsBreak() || last->IsContinue() || last->IsDiscard() ||
+         last->IsReturn() || last->IsFallthrough();
+}
+
 bool LastIsTerminator(const ast::StatementList& stmts) {
   if (stmts.empty()) {
     return false;
@@ -1339,7 +1349,7 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   return result_id;
 }
 
-bool Builder::GenerateBlockStatement(ast::BlockStatement* stmt) {
+bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
   scope_stack_.push_scope();
   for (const auto& block_stmt : *stmt) {
     if (!GenerateStatement(block_stmt.get())) {
@@ -1720,7 +1730,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
     }
 
     GenerateLabel(case_ids[i]);
-    if (!GenerateStatementList(item->body())) {
+    if (!GenerateBlockStatement(item->body())) {
       return false;
     }
 

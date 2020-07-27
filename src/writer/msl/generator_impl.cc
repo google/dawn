@@ -66,12 +66,12 @@ const char kOutStructNameSuffix[] = "out";
 const char kTintStructInVarPrefix[] = "tint_in";
 const char kTintStructOutVarPrefix[] = "tint_out";
 
-bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
-  if (stmts.empty()) {
+bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
+  if (stmts->empty()) {
     return false;
   }
 
-  return stmts.back()->IsBreak() || stmts.back()->IsFallthrough();
+  return stmts->last()->IsBreak() || stmts->last()->IsFallthrough();
 }
 
 uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
@@ -755,7 +755,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : stmt->body()) {
+  for (const auto& s : *(stmt->body())) {
     if (!EmitStatement(s.get())) {
       return false;
     }

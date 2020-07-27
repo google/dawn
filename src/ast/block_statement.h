@@ -42,13 +42,20 @@ class BlockStatement : public Statement {
     statements_.push_back(std::move(stmt));
   }
 
+  /// @returns true if the block is empty
+  bool empty() const { return statements_.empty(); }
   /// @returns the number of statements directly in the block
   size_t size() const { return statements_.size(); }
+
+  /// @returns the last statement in the block or nullptr if block empty
+  const ast::Statement* last() const {
+    return statements_.empty() ? nullptr : statements_.back().get();
+  }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  ast::Statement* get(size_t idx) { return statements_[idx].get(); }
+  const ast::Statement* get(size_t idx) const { return statements_[idx].get(); }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.

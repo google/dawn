@@ -17,17 +17,19 @@
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement() : Statement() {}
+CaseStatement::CaseStatement()
+    : Statement(), body_(std::make_unique<BlockStatement>()) {}
 
-CaseStatement::CaseStatement(StatementList body)
+CaseStatement::CaseStatement(std::unique_ptr<BlockStatement> body)
     : Statement(), body_(std::move(body)) {}
 
-CaseStatement::CaseStatement(CaseSelectorList selectors, StatementList body)
+CaseStatement::CaseStatement(CaseSelectorList selectors,
+                             std::unique_ptr<BlockStatement> body)
     : Statement(), selectors_(std::move(selectors)), body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(const Source& source,
                              CaseSelectorList selectors,
-                             StatementList body)
+                             std::unique_ptr<BlockStatement> body)
     : Statement(source),
       selectors_(std::move(selectors)),
       body_(std::move(body)) {}
@@ -36,16 +38,18 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
 
+void CaseStatement::set_body(StatementList body) {
+  for (auto& stmt : body) {
+    body_->append(std::move(stmt));
+  }
+}
+
 bool CaseStatement::IsCase() const {
   return true;
 }
 
 bool CaseStatement::IsValid() const {
-  for (const auto& stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
-  }
-  return true;
+  return body_ != nullptr && body_->IsValid();
 }
 
 void CaseStatement::to_str(std::ostream& out, size_t indent) const {
@@ -66,8 +70,11 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
     out << "{" << std::endl;
   }
 
-  for (const auto& stmt : body_)
-    stmt->to_str(out, indent + 2);
+  if (body_ != nullptr) {
+    for (const auto& stmt : *body_) {
+      stmt->to_str(out, indent + 2);
+    }
+  }
 
   make_indent(out, indent);
   out << "}" << std::endl;

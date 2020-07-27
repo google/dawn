@@ -33,16 +33,16 @@ using HlslGeneratorImplTest = testing::Test;
 
 TEST_F(HlslGeneratorImplTest, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();
-  ast::StatementList def_body;
-  def_body.push_back(std::make_unique<ast::BreakStatement>());
+  auto def_body = std::make_unique<ast::BlockStatement>();
+  def_body->append(std::make_unique<ast::BreakStatement>());
   def->set_body(std::move(def_body));
 
   ast::type::I32Type i32;
   ast::CaseSelectorList case_val;
   case_val.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
 
-  ast::StatementList case_body;
-  case_body.push_back(std::make_unique<ast::BreakStatement>());
+  auto case_body = std::make_unique<ast::BlockStatement>();
+  case_body->append(std::make_unique<ast::BreakStatement>());
 
   auto case_stmt = std::make_unique<ast::CaseStatement>(std::move(case_val),
                                                         std::move(case_body));
