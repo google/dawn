@@ -19,6 +19,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
@@ -1576,6 +1577,33 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitBlock(ast::BlockStatement* stmt) {
+  make_indent();
+
+  out_ << "{" << std::endl;
+  increment_indent();
+
+  for (const auto& s : *stmt) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitBlockAndNewline(ast::BlockStatement* stmt) {
+  const bool result = EmitBlock(stmt);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
+}
+
 bool GeneratorImpl::EmitStatementBlock(const ast::StatementList& statements) {
   out_ << " {" << std::endl;
 
@@ -1606,6 +1634,9 @@ bool GeneratorImpl::EmitStatementBlockAndNewline(
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
+  }
+  if (stmt->IsBlock()) {
+    return EmitBlockAndNewline(stmt->AsBlock());
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
