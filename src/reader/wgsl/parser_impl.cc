@@ -1351,7 +1351,7 @@ ast::PipelineStage ParserImpl::pipeline_stage() {
 
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
-ast::StatementList ParserImpl::body_stmt() {
+std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
   auto t = peek();
   if (!t.IsBraceLeft())
     return {};
@@ -1400,8 +1400,8 @@ std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
 
 // statements
 //   : statement*
-ast::StatementList ParserImpl::statements() {
-  ast::StatementList ret;
+std::unique_ptr<ast::BlockStatement> ParserImpl::statements() {
+  auto ret = std::make_unique<ast::BlockStatement>();
 
   for (;;) {
     auto stmt = statement();
@@ -1410,7 +1410,7 @@ ast::StatementList ParserImpl::statements() {
     if (stmt == nullptr)
       break;
 
-    ret.push_back(std::move(stmt));
+    ret->append(std::move(stmt));
   }
 
   return ret;
@@ -1857,8 +1857,8 @@ ast::CaseSelectorList ParserImpl::case_selectors() {
 //   :
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
-ast::StatementList ParserImpl::case_body() {
-  ast::StatementList ret;
+std::unique_ptr<ast::BlockStatement> ParserImpl::case_body() {
+  auto ret = std::make_unique<ast::BlockStatement>();
   for (;;) {
     auto t = peek();
     if (t.IsFallthrough()) {
@@ -1871,7 +1871,7 @@ ast::StatementList ParserImpl::case_body() {
         return {};
       }
 
-      ret.push_back(std::make_unique<ast::FallthroughStatement>(source));
+      ret->append(std::make_unique<ast::FallthroughStatement>(source));
       break;
     }
 
@@ -1881,7 +1881,7 @@ ast::StatementList ParserImpl::case_body() {
     if (stmt == nullptr)
       break;
 
-    ret.push_back(std::move(stmt));
+    ret->append(std::move(stmt));
   }
 
   return ret;
@@ -1980,10 +1980,11 @@ std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
 
 // continuing_stmt
 //   : CONTINUING body_stmt
-ast::StatementList ParserImpl::continuing_stmt() {
+std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
   auto t = peek();
-  if (!t.IsContinuing())
-    return {};
+  if (!t.IsContinuing()) {
+    return std::make_unique<ast::BlockStatement>();
+  }
 
   next();  // Consume the peek
   return body_stmt();

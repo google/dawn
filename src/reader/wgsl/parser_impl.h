@@ -177,13 +177,13 @@ class ParserImpl {
   ast::PipelineStage pipeline_stage();
   /// Parses a `body_stmt` grammar element
   /// @returns the parsed statements
-  ast::StatementList body_stmt();
+  std::unique_ptr<ast::BlockStatement> body_stmt();
   /// Parses a `paren_rhs_stmt` grammar element
   /// @returns the parsed element or nullptr
   std::unique_ptr<ast::Expression> paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
-  ast::StatementList statements();
+  std::unique_ptr<ast::BlockStatement> statements();
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::Statement> statement();
@@ -219,7 +219,7 @@ class ParserImpl {
   ast::CaseSelectorList case_selectors();
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
-  ast::StatementList case_body();
+  std::unique_ptr<ast::BlockStatement> case_body();
   /// Parses a `func_call_stmt` grammar element
   /// @returns the parsed function call or nullptr
   std::unique_ptr<ast::CallStatement> func_call_stmt();
@@ -228,7 +228,7 @@ class ParserImpl {
   std::unique_ptr<ast::LoopStatement> loop_stmt();
   /// Parses a `continuing_stmt` grammar element
   /// @returns the parsed statements
-  ast::StatementList continuing_stmt();
+  std::unique_ptr<ast::BlockStatement> continuing_stmt();
   /// Parses a `const_literal` grammar element
   /// @returns the const literal parsed or nullptr if none found
   std::unique_ptr<ast::Literal> const_literal();

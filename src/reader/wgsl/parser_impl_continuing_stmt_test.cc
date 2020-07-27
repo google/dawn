@@ -25,15 +25,15 @@ TEST_F(ParserImplTest, ContinuingStmt) {
   auto* p = parser("continuing { discard; }");
   auto e = p->continuing_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 1u);
-  ASSERT_TRUE(e[0]->IsDiscard());
+  ASSERT_EQ(e->size(), 1u);
+  ASSERT_TRUE(e->get(0)->IsDiscard());
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
   auto* p = parser("continuing { discard }");
   auto e = p->continuing_stmt();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e.size(), 0u);
+  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:22: missing ;");
 }
 

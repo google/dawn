@@ -28,16 +28,16 @@ TEST_F(ParserImplTest, BodyStmt) {
 })");
   auto e = p->body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 2u);
-  EXPECT_TRUE(e[0]->IsDiscard());
-  EXPECT_TRUE(e[1]->IsReturn());
+  ASSERT_EQ(e->size(), 2u);
+  EXPECT_TRUE(e->get(0)->IsDiscard());
+  EXPECT_TRUE(e->get(1)->IsReturn());
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
   auto* p = parser("{}");
   auto e = p->body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e.size(), 0u);
+  EXPECT_EQ(e->size(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
