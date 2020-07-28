@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/BufferVk.h"
 
+#include "dawn_native/CommandBuffer.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceHeapVk.h"
@@ -323,6 +324,22 @@ namespace dawn_native { namespace vulkan {
         }
 
         if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            InitializeToZero(recordingContext);
+        }
+    }
+
+    void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+                                                    const CopyTextureToBufferCmd* copy) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return;
+        }
+
+        if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
             SetIsDataInitialized();
         } else {
             InitializeToZero(recordingContext);

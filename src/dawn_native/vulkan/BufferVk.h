@@ -47,6 +47,8 @@ namespace dawn_native { namespace vulkan {
         void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                 uint64_t offset,
                                                 uint64_t size);
+        void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+                                                const CopyTextureToBufferCmd* copy);
 
       private:
         ~Buffer() override;

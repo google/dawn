@@ -484,6 +484,9 @@ namespace dawn_native { namespace vulkan {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
+                    ToBackend(dst.buffer)
+                        ->EnsureDataInitializedAsDestination(recordingContext, copy);
+
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(dst, src, copy->copySize);
                     VkImageSubresourceLayers subresource = region.imageSubresource;

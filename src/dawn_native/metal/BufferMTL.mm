@@ -15,6 +15,7 @@
 #include "dawn_native/metal/BufferMTL.h"
 
 #include "common/Math.h"
+#include "dawn_native/CommandBuffer.h"
 #include "dawn_native/metal/CommandRecordingContext.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
@@ -170,6 +171,22 @@ namespace dawn_native { namespace metal {
         }
 
         if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            InitializeToZero(commandContext);
+        }
+    }
+
+    void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                    const CopyTextureToBufferCmd* copy) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return;
+        }
+
+        if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
             SetIsDataInitialized();
         } else {
             InitializeToZero(commandContext);

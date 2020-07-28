@@ -35,6 +35,8 @@ namespace dawn_native { namespace metal {
         void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                 uint64_t offset,
                                                 uint64_t size);
+        void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                const CopyTextureToBufferCmd* copy);
 
       private:
         using BufferBase::BufferBase;

@@ -25,6 +25,8 @@
 
 namespace dawn_native {
 
+    struct CopyTextureToBufferCmd;
+
     enum class MapType : uint32_t;
 
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);

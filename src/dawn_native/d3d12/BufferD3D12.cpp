@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/CommandBuffer.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Error.h"
@@ -363,6 +364,24 @@ namespace dawn_native { namespace d3d12 {
         }
 
         if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            DAWN_TRY(InitializeToZero(commandContext));
+        }
+
+        return {};
+    }
+
+    MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                          const CopyTextureToBufferCmd* copy) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return {};
+        }
+
+        if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
             SetIsDataInitialized();
         } else {
             DAWN_TRY(InitializeToZero(commandContext));

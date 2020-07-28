@@ -611,6 +611,8 @@ namespace dawn_native { namespace opengl {
                         UNREACHABLE();
                     }
 
+                    buffer->EnsureDataInitializedAsDestination(copy);
+
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                     SubresourceRange subresources = {src.mipLevel, 1, src.origin.z,
                                                      copy->copySize.depth};

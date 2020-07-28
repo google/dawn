@@ -14,6 +14,7 @@
 
 #include "dawn_native/opengl/BufferGL.h"
 
+#include "dawn_native/CommandBuffer.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
 namespace dawn_native { namespace opengl {
@@ -71,6 +72,21 @@ namespace dawn_native { namespace opengl {
         }
 
         if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            InitializeToZero();
+        }
+    }
+
+    void Buffer::EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return;
+        }
+
+        if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
             SetIsDataInitialized();
         } else {
             InitializeToZero();

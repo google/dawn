@@ -48,6 +48,8 @@ namespace dawn_native { namespace d3d12 {
         MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                       uint64_t offset,
                                                       uint64_t size);
+        MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                      const CopyTextureToBufferCmd* copy);
 
       private:
         ~Buffer() override;

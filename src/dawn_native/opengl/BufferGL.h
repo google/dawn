@@ -31,6 +31,7 @@ namespace dawn_native { namespace opengl {
 
         void EnsureDataInitialized();
         void EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size);
+        void EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* copy);
 
       private:
         ~Buffer() override;

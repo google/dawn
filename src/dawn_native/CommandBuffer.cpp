@@ -15,6 +15,7 @@
 #include "dawn_native/CommandBuffer.h"
 
 #include "common/BitSetIterator.h"
+#include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Format.h"
@@ -145,4 +146,33 @@ namespace dawn_native {
         }
     }
 
+    // TODO(jiawei.shao@intel.com): support copying with depth stencil textures
+    bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy) {
+        ASSERT(copy != nullptr);
+
+        if (copy->destination.offset > 0) {
+            return false;
+        }
+
+        if (copy->destination.rowsPerImage > copy->copySize.height) {
+            return false;
+        }
+
+        const TextureBase* texture = copy->source.texture.Get();
+        const uint64_t copyTextureDataSizePerRow = copy->copySize.width /
+                                                   texture->GetFormat().blockWidth *
+                                                   texture->GetFormat().blockByteSize;
+        if (copy->destination.bytesPerRow > copyTextureDataSizePerRow) {
+            return false;
+        }
+
+        const uint64_t overwrittenRangeSize =
+            copyTextureDataSizePerRow * (copy->copySize.height / texture->GetFormat().blockHeight) *
+            copy->copySize.depth;
+        if (copy->destination.buffer->GetSize() > overwrittenRangeSize) {
+            return false;
+        }
+
+        return true;
+    }
 }  // namespace dawn_native

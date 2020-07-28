@@ -724,6 +724,8 @@ namespace dawn_native { namespace d3d12 {
                     Texture* texture = ToBackend(copy->source.texture.Get());
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
+                    DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
+
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                     SubresourceRange subresources = {copy->source.mipLevel, 1,
                                                      copy->source.origin.z, copy->copySize.depth};

@@ -25,6 +25,7 @@
 namespace dawn_native {
 
     struct BeginRenderPassCmd;
+    struct CopyTextureToBufferCmd;
     struct TextureCopy;
 
     class CommandBufferBase : public ObjectBase {
@@ -47,6 +48,8 @@ namespace dawn_native {
                                                    const Extent3D& copySize);
 
     void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
+
+    bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
 
 }  // namespace dawn_native
 
