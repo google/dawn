@@ -14,7 +14,6 @@ vars = {
   'chromium_git':  'https://chromium.googlesource.com',
   'github': '/external/github.com',
 
-  'binutils_revision': '2566778206fdacdff455b2d96df3d52a18d439d4',
   'build_revision': '9b01e295f87e0cbdef297148e2b14efdd5f9d699',
   'buildtools_revision': 'eb3987ec709b39469423100c1e77f0446890e059',
   'clang_revision': '6412135b3979b680c20cf007ab242d968025fc3e',
@@ -48,9 +47,6 @@ deps = {
 
   'tools/clang': Var('chromium_git') + '/chromium/src/tools/clang@' +
       Var('clang_revision'),
-
-  'third_party/binutils': Var('chromium_git') +
-      '/chromium/src/third_party/binutils@' + Var('binutils_revision'),
 
   # Dependencies required for testing
   'testing': Var('chromium_git') + '/chromium/src/testing@' +
@@ -137,16 +133,6 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-browser-clang/rc',
                 '-s', 'build/toolchain/win/rc/win/rc.exe.sha1',
-    ],
-  },
-  # Pull binutils for linux hermetic builds
-  {
-    'name': 'binutils',
-    'pattern': 'src/third_party/binutils',
-    'condition': 'host_os == "linux"',
-    'action': [
-        'python',
-        'third_party/binutils/download.py',
     ],
   },
   # Update build/util/LASTCHANGE.
