@@ -540,6 +540,8 @@ source_set("libtint_hlsl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint") {
@@ -681,6 +683,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/cast_expression_test.cc",
     "src/ast/continue_statement_test.cc",
     "src/ast/decorated_variable_test.cc",
+    "src/ast/discard_statement_test.cc",
     "src/ast/else_statement_test.cc",
     "src/ast/entry_point_test.cc",
     "src/ast/expression_test.cc",
@@ -1061,6 +1064,13 @@ source_set("tint_unittests_hlsl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_hlsl_writer_src",
+  ]
 }
 
 source_set("tint_unittests_src") {
