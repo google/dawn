@@ -65,8 +65,8 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement& stmt) {
 }
 
 bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement& a) {
-  auto lhs_result_type = a.lhs()->result_type()->UnwrapAliasPtrAlias();
-  auto rhs_result_type = a.rhs()->result_type()->UnwrapAliasPtrAlias();
+  auto* lhs_result_type = a.lhs()->result_type()->UnwrapAliasPtrAlias();
+  auto* rhs_result_type = a.rhs()->result_type()->UnwrapAliasPtrAlias();
   if (lhs_result_type != rhs_result_type) {
     // TODO(sarahM0): figur out what should be the error number.
     set_error(a.source(), "v-000x: invalid assignment of '" +

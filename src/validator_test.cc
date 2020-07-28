@@ -123,10 +123,10 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
 
   ast::Variable var("a", ast::StorageClass::kPrivate, &i32);
   auto lhs = std::make_unique<ast::IdentifierExpression>("a");
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
                                   std::move(rhs));

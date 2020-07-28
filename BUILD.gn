@@ -253,6 +253,8 @@ source_set("libtint_core_src") {
     "src/ast/continue_statement.h",
     "src/ast/decorated_variable.cc",
     "src/ast/decorated_variable.h",
+    "src/ast/discard_statement.cc",
+    "src/ast/discard_statement.h",
     "src/ast/else_statement.cc",
     "src/ast/else_statement.h",
     "src/ast/entry_point.cc",
