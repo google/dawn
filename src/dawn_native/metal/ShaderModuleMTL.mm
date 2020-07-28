@@ -187,18 +187,27 @@ namespace dawn_native { namespace metal {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
             NSString* mslSource;
+            std::string msl;
             if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
                 shaderc_spvc::CompilationResult result;
                 DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
                                           "Unable to compile MSL shader"));
-                std::string result_str;
-                DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&result_str),
+                DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&msl),
                                           "Unable to get MSL shader text"));
-                mslSource = [[NSString alloc] initWithUTF8String:result_str.c_str()];
             } else {
-                std::string msl = compiler->compile();
-                mslSource = [[NSString alloc] initWithUTF8String:msl.c_str()];
+                msl = compiler->compile();
             }
+            // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
+            // category. -Wunused-variable in particular comes up a lot in generated code, and some
+            // (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError instead
+            // of a warning.
+            msl = R"(\
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wall"
+#endif
+)" + msl;
+            mslSource = [[NSString alloc] initWithUTF8String:msl.c_str()];
+
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
             NSError* error = nil;
             id<MTLLibrary> library = [mtlDevice newLibraryWithSource:mslSource
