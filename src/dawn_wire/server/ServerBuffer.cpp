@@ -118,50 +118,52 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoDeviceCreateBufferMapped(WGPUDevice device,
-                                            const WGPUBufferDescriptor* descriptor,
-                                            ObjectHandle bufferResult,
-                                            uint64_t handleCreateInfoLength,
-                                            const uint8_t* handleCreateInfo) {
-        if (handleCreateInfoLength > std::numeric_limits<size_t>::max()) {
-            // This is the size of data deserialized from the command stream, which must be
-            // CPU-addressable.
-            return false;
-        }
-
+    bool Server::DoDeviceCreateBuffer(WGPUDevice device,
+                                      const WGPUBufferDescriptor* descriptor,
+                                      ObjectHandle bufferResult,
+                                      uint64_t handleCreateInfoLength,
+                                      const uint8_t* handleCreateInfo) {
+        // Create and register the buffer object.
         auto* resultData = BufferObjects().Allocate(bufferResult.id);
         if (resultData == nullptr) {
             return false;
         }
         resultData->generation = bufferResult.generation;
+        resultData->handle = mProcs.deviceCreateBuffer(device, descriptor);
 
-        WGPUCreateBufferMappedResult result = mProcs.deviceCreateBufferMapped(device, descriptor);
-        ASSERT(result.buffer != nullptr);
-        if (result.data == nullptr && result.dataLength != 0) {
-            // Non-zero dataLength but null data is used to indicate an allocation error.
-            // Don't return false because this is not fatal. result.buffer is an ErrorBuffer
-            // and subsequent operations will be errors.
-            // This should only happen when fuzzing with the Null backend.
-            resultData->mapWriteState = BufferMapWriteState::MapError;
-        } else {
-            // Deserialize metadata produced from the client to create a companion server handle.
-            MemoryTransferService::WriteHandle* writeHandle = nullptr;
-            if (!mMemoryTransferService->DeserializeWriteHandle(
-                    handleCreateInfo, static_cast<size_t>(handleCreateInfoLength), &writeHandle)) {
-                return false;
-            }
-            ASSERT(writeHandle != nullptr);
-
-            // Set the target of the WriteHandle to the mapped GPU memory.
-            writeHandle->SetTarget(result.data, result.dataLength);
-
-            // The buffer is mapped and has a valid mappedData pointer.
-            // The buffer may still be an error with fake staging data.
-            resultData->mapWriteState = BufferMapWriteState::Mapped;
-            resultData->writeHandle =
-                std::unique_ptr<MemoryTransferService::WriteHandle>(writeHandle);
+        // If the buffer isn't mapped at creation, we are done.
+        if (!descriptor->mappedAtCreation) {
+            return handleCreateInfoLength == 0;
         }
-        resultData->handle = result.buffer;
+
+        // This is the size of data deserialized from the command stream to create the write handle,
+        // which must be CPU-addressable.
+        if (handleCreateInfoLength > std::numeric_limits<size_t>::max()) {
+            return false;
+        }
+
+        void* mapping = mProcs.bufferGetMappedRange(resultData->handle, 0, descriptor->size);
+        if (mapping == nullptr) {
+            // A zero mapping is used to indicate an allocation error of an error buffer. This is a
+            // valid case and isn't fatal. Remember the buffer is an error so as to skip subsequent
+            // mapping operations.
+            resultData->mapWriteState = BufferMapWriteState::MapError;
+            return true;
+        }
+
+        // Deserialize metadata produced from the client to create a companion server handle.
+        MemoryTransferService::WriteHandle* writeHandle = nullptr;
+        if (!mMemoryTransferService->DeserializeWriteHandle(
+                handleCreateInfo, static_cast<size_t>(handleCreateInfoLength), &writeHandle)) {
+            return false;
+        }
+
+        // Set the target of the WriteHandle to the mapped GPU memory.
+        ASSERT(writeHandle != nullptr);
+        writeHandle->SetTarget(mapping, descriptor->size);
+
+        resultData->mapWriteState = BufferMapWriteState::Mapped;
+        resultData->writeHandle.reset(writeHandle);
 
         return true;
     }

@@ -38,7 +38,7 @@
             { "name": "write flush info length", "type": "uint64_t" },
             { "name": "write flush info", "type": "uint8_t", "annotation": "const*", "length": "write flush info length", "skip_serialize": true}
         ],
-        "device create buffer mapped": [
+        "device create buffer": [
             { "name": "device", "type": "device" },
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
@@ -108,6 +108,8 @@
             "BufferSetSubData",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
+            "DeviceCreateBuffer",
+            "DeviceCreateBufferMapped",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
@@ -119,8 +121,6 @@
         "client_handwritten_commands": [
             "BufferDestroy",
             "BufferUnmap",
-            "DeviceCreateBuffer",
-            "DeviceCreateBufferMapped",
             "DeviceCreateErrorBuffer",
             "DeviceGetDefaultQueue",
             "DeviceInjectError",

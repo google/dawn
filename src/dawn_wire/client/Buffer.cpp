@@ -29,89 +29,61 @@ namespace dawn_wire { namespace client {
             return device_->CreateErrorBuffer();
         }
 
+        std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
+        void* writeData = nullptr;
+        size_t writeHandleCreateInfoLength = 0;
+
+        // If the buffer is mapped at creation, create a write handle that will represent the
+        // mapping of the whole buffer.
+        if (descriptor->mappedAtCreation) {
+            // Create the handle.
+            writeHandle.reset(
+                wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
+            if (writeHandle == nullptr) {
+                device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+                return device_->CreateErrorBuffer();
+            }
+
+            // Open the handle, it may fail by returning a nullptr in writeData.
+            size_t writeDataLength = 0;
+            std::tie(writeData, writeDataLength) = writeHandle->Open();
+            if (writeData == nullptr) {
+                device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+                return device_->CreateErrorBuffer();
+            }
+            ASSERT(writeDataLength == descriptor->size);
+
+            // Get the serialization size of the write handle.
+            writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
+        }
+
+        // Create the buffer and send the creation command.
         auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device_);
         Buffer* buffer = bufferObjectAndSerial->object.get();
-        // Store the size of the buffer so that mapping operations can allocate a
-        // MemoryTransfer handle of the proper size.
         buffer->mSize = descriptor->size;
 
         DeviceCreateBufferCmd cmd;
-        cmd.self = ToAPI(device_);
-        cmd.descriptor = descriptor;
-        cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
-
-        wireClient->SerializeCommand(cmd);
-
-        return ToAPI(buffer);
-    }
-
-    // static
-    WGPUCreateBufferMappedResult Buffer::CreateMapped(Device* device_,
-                                                      const WGPUBufferDescriptor* descriptor) {
-        Client* wireClient = device_->GetClient();
-
-        WGPUCreateBufferMappedResult result;
-        result.data = nullptr;
-        result.dataLength = 0;
-
-        // This buffer is too large to be mapped and to make a WriteHandle for.
-        if (descriptor->size > std::numeric_limits<size_t>::max()) {
-            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for mapping");
-            result.buffer = device_->CreateErrorBuffer();
-            return result;
-        }
-
-        // Create a WriteHandle for the map request. This is the client's intent to write GPU
-        // memory.
-        std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle =
-            std::unique_ptr<MemoryTransferService::WriteHandle>(
-                wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
-
-        if (writeHandle == nullptr) {
-            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
-            result.buffer = device_->CreateErrorBuffer();
-            return result;
-        }
-
-        // CreateBufferMapped is synchronous and the staging buffer for upload should be immediately
-        // available.
-        // Open the WriteHandle. This returns a pointer and size of mapped memory.
-        // |result.data| may be null on error.
-        std::tie(result.data, result.dataLength) = writeHandle->Open();
-        if (result.data == nullptr) {
-            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
-            result.buffer = device_->CreateErrorBuffer();
-            return result;
-        }
-
-        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device_);
-        Buffer* buffer = bufferObjectAndSerial->object.get();
-        buffer->mSize = descriptor->size;
-        // Successfully created staging memory. The buffer now owns the WriteHandle.
-        buffer->mWriteHandle = std::move(writeHandle);
-        buffer->mMappedData = result.data;
-        buffer->mMapOffset = 0;
-        buffer->mMapSize = descriptor->size;
-
-        result.buffer = ToAPI(buffer);
-
-        // Get the serialization size of the WriteHandle.
-        size_t handleCreateInfoLength = buffer->mWriteHandle->SerializeCreateSize();
-
-        DeviceCreateBufferMappedCmd cmd;
         cmd.device = ToAPI(device_);
         cmd.descriptor = descriptor;
         cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
-        cmd.handleCreateInfoLength = handleCreateInfoLength;
+        cmd.handleCreateInfoLength = writeHandleCreateInfoLength;
         cmd.handleCreateInfo = nullptr;
 
-        char* writeHandleSpace =
-            buffer->device->GetClient()->SerializeCommand(cmd, handleCreateInfoLength);
+        char* writeHandleSpace = wireClient->SerializeCommand(cmd, writeHandleCreateInfoLength);
 
-        // Serialize the WriteHandle into the space after the command.
-        buffer->mWriteHandle->SerializeCreate(writeHandleSpace);
+        if (descriptor->mappedAtCreation) {
+            // Serialize the WriteHandle into the space after the command.
+            writeHandle->SerializeCreate(writeHandleSpace);
 
-        return result;
+            // Set the buffer state for the mapping at creation. The buffer now owns the write
+            // handle..
+            buffer->mWriteHandle = std::move(writeHandle);
+            buffer->mMappedData = writeData;
+            buffer->mMapOffset = 0;
+            buffer->mMapSize = buffer->mSize;
+        }
+
+        return ToAPI(buffer);
     }
 
     // static
