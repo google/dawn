@@ -19,37 +19,6 @@
 
 namespace dawn_wire { namespace client {
 
-    namespace {
-        template <typename Handle>
-        void SerializeBufferMapAsync(const Buffer* buffer,
-                                     uint32_t serial,
-                                     Handle* handle,
-                                     size_t size) {
-            // TODO(enga): Remove the template when Read/Write handles are combined in a tagged
-            // pointer.
-            constexpr bool isWrite =
-                std::is_same<Handle, MemoryTransferService::WriteHandle>::value;
-
-            // Get the serialization size of the handle.
-            size_t handleCreateInfoLength = handle->SerializeCreateSize();
-
-            BufferMapAsyncCmd cmd;
-            cmd.bufferId = buffer->id;
-            cmd.requestSerial = serial;
-            cmd.mode = isWrite ? WGPUMapMode_Write : WGPUMapMode_Read;
-            cmd.handleCreateInfoLength = handleCreateInfoLength;
-            cmd.handleCreateInfo = nullptr;
-            cmd.offset = 0;
-            cmd.size = size;
-
-            char* writeHandleSpace =
-                buffer->device->GetClient()->SerializeCommand(cmd, handleCreateInfoLength);
-
-            // Serialize the handle into the space after the command.
-            handle->SerializeCreate(writeHandleSpace);
-        }
-    }  // namespace
-
     // static
     WGPUBuffer Buffer::Create(Device* device_, const WGPUBufferDescriptor* descriptor) {
         Client* wireClient = device_->GetClient();
@@ -165,85 +134,83 @@ namespace dawn_wire { namespace client {
 
     void Buffer::ClearMapRequests(WGPUBufferMapAsyncStatus status) {
         for (auto& it : mRequests) {
-            if (it.second.writeHandle) {
-                it.second.writeCallback(status, nullptr, 0, it.second.userdata);
-            } else {
-                it.second.readCallback(status, nullptr, 0, it.second.userdata);
+            if (it.second.callback) {
+                it.second.callback(status, it.second.userdata);
             }
         }
         mRequests.clear();
     }
 
     void Buffer::MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata) {
-        uint32_t serial = mRequestSerial++;
-        ASSERT(mRequests.find(serial) == mRequests.end());
+        struct ProxyData {
+            WGPUBufferMapReadCallback callback;
+            void* userdata;
+            Buffer* self;
+        };
+        ProxyData* proxy = new ProxyData;
+        proxy->callback = callback;
+        proxy->userdata = userdata;
+        proxy->self = this;
 
-        if (mSize > std::numeric_limits<size_t>::max()) {
-            // On buffer creation, we check that mappable buffers do not exceed this size.
-            // So this buffer must not have mappable usage. Inject a validation error.
-            device->InjectError(WGPUErrorType_Validation, "Buffer needs the correct map usage bit");
-            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
-            return;
-        }
+        MapAsync(
+            WGPUMapMode_Read, 0, mSize,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                Buffer* self = proxy->self;
 
-        // Create a ReadHandle for the map request. This is the client's intent to read GPU
-        // memory.
-        MemoryTransferService::ReadHandle* readHandle =
-            device->GetClient()->GetMemoryTransferService()->CreateReadHandle(
-                static_cast<size_t>(mSize));
-        if (readHandle == nullptr) {
-            device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
-            return;
-        }
+                if (status == WGPUBufferMapAsyncStatus_Success) {
+                    // On buffer creation we assert that a mappable buffer cannot be bigger than
+                    // MAX_SIZE_T so we should never have a successful mapping in this case.
+                    ASSERT(self->mSize <= std::numeric_limits<size_t>::max());
+                    self->mMapOffset = 0;
+                    self->mMapSize = self->mSize;
+                }
 
-        Buffer::MapRequestData request = {};
-        request.readCallback = callback;
-        request.userdata = userdata;
-        // The handle is owned by the MapRequest until the callback returns.
-        request.readHandle = std::unique_ptr<MemoryTransferService::ReadHandle>(readHandle);
+                if (proxy->callback) {
+                    const void* data = self->GetConstMappedRange(0, self->mSize);
+                    uint64_t dataLength = data == nullptr ? 0 : self->mSize;
+                    proxy->callback(status, data, dataLength, proxy->userdata);
+                }
 
-        // Store a mapping from serial -> MapRequest. The client can map/unmap before the map
-        // operations are returned by the server so multiple requests may be in flight.
-        mRequests[serial] = std::move(request);
-
-        SerializeBufferMapAsync(this, serial, readHandle, mSize);
+                delete proxy;
+            },
+            proxy);
     }
 
     void Buffer::MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata) {
-        uint32_t serial = mRequestSerial++;
-        ASSERT(mRequests.find(serial) == mRequests.end());
+        struct ProxyData {
+            WGPUBufferMapWriteCallback callback;
+            void* userdata;
+            Buffer* self;
+        };
+        ProxyData* proxy = new ProxyData;
+        proxy->callback = callback;
+        proxy->userdata = userdata;
+        proxy->self = this;
 
-        if (mSize > std::numeric_limits<size_t>::max()) {
-            // On buffer creation, we check that mappable buffers do not exceed this size.
-            // So this buffer must not have mappable usage. Inject a validation error.
-            device->InjectError(WGPUErrorType_Validation, "Buffer needs the correct map usage bit");
-            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
-            return;
-        }
+        MapAsync(
+            WGPUMapMode_Write, 0, mSize,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                Buffer* self = proxy->self;
 
-        // Create a WriteHandle for the map request. This is the client's intent to write GPU
-        // memory.
-        MemoryTransferService::WriteHandle* writeHandle =
-            device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(
-                static_cast<size_t>(mSize));
-        if (writeHandle == nullptr) {
-            device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
-            return;
-        }
+                if (status == WGPUBufferMapAsyncStatus_Success) {
+                    // On buffer creation we assert that a mappable buffer cannot be bigger than
+                    // MAX_SIZE_T so we should never have a successful mapping in this case.
+                    ASSERT(self->mSize <= std::numeric_limits<size_t>::max());
+                    self->mMapOffset = 0;
+                    self->mMapSize = self->mSize;
+                }
 
-        Buffer::MapRequestData request = {};
-        request.writeCallback = callback;
-        request.userdata = userdata;
-        // The handle is owned by the MapRequest until the callback returns.
-        request.writeHandle = std::unique_ptr<MemoryTransferService::WriteHandle>(writeHandle);
+                if (proxy->callback) {
+                    void* data = self->GetMappedRange(0, self->mSize);
+                    uint64_t dataLength = data == nullptr ? 0 : self->mSize;
+                    proxy->callback(status, data, dataLength, proxy->userdata);
+                }
 
-        // Store a mapping from serial -> MapRequest. The client can map/unmap before the map
-        // operations are returned by the server so multiple requests may be in flight.
-        mRequests[serial] = std::move(request);
-
-        SerializeBufferMapAsync(this, serial, writeHandle, mSize);
+                delete proxy;
+            },
+            proxy);
     }
 
     void Buffer::MapAsync(WGPUMapModeFlags mode,
@@ -251,17 +218,16 @@ namespace dawn_wire { namespace client {
                           size_t size,
                           WGPUBufferMapCallback callback,
                           void* userdata) {
-        // Do early validation for mode because it needs to be correct for the proxying to
-        // MapReadAsync or MapWriteAsync to work.
+        // Handle the defaulting of size required by WebGPU.
+        if (size == 0 && offset < mSize) {
+            size = mSize - offset;
+        }
+
         bool isReadMode = mode & WGPUMapMode_Read;
         bool isWriteMode = mode & WGPUMapMode_Write;
-        bool modeOk = isReadMode ^ isWriteMode;
-        // Do early validation of offset and size because it isn't checked by MapReadAsync /
-        // MapWriteAsync.
-        bool offsetOk = (uint64_t(offset) <= mSize) && offset % 4 == 0;
-        bool sizeOk = (uint64_t(size) <= mSize - uint64_t(offset)) && size % 4 == 0;
 
-        if (!(modeOk && offsetOk && sizeOk)) {
+        // Step 1. Do early validation of READ ^ WRITE because the server rejects mode = 0.
+        if (!(isReadMode ^ isWriteMode)) {
             device->InjectError(WGPUErrorType_Validation, "MapAsync error (you figure out :P)");
             if (callback != nullptr) {
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
@@ -269,51 +235,63 @@ namespace dawn_wire { namespace client {
             return;
         }
 
-        // The structure to keep arguments so we can forward the MapReadAsync and MapWriteAsync to
-        // `callback`
-        struct ProxyData {
-            WGPUBufferMapCallback callback;
-            void* userdata;
-            size_t mapOffset;
-            size_t mapSize;
-            Buffer* self;
-        };
-        ProxyData* proxy = new ProxyData;
-        proxy->callback = callback;
-        proxy->userdata = userdata;
-        proxy->mapOffset = offset;
-        proxy->mapSize = size;
-        proxy->self = this;
-        // Note technically we should keep the buffer alive until the callback is fired but the
-        // client doesn't have good facilities to do that yet.
+        // Step 2. Create the request structure that will hold information while this mapping is
+        // in flight.
+        uint32_t serial = mRequestSerial++;
+        ASSERT(mRequests.find(serial) == mRequests.end());
 
-        // Call MapReadAsync or MapWriteAsync and forward the callback.
+        Buffer::MapRequestData request = {};
+        request.callback = callback;
+        request.userdata = userdata;
+        request.size = size;
+        request.offset = offset;
+
+        // Step 2a: Create the read / write handles for this request.
         if (isReadMode) {
-            MapReadAsync(
-                [](WGPUBufferMapAsyncStatus status, const void*, uint64_t, void* userdata) {
-                    ProxyData* proxy = static_cast<ProxyData*>(userdata);
-                    proxy->self->mMapOffset = proxy->mapOffset;
-                    proxy->self->mMapSize = proxy->mapSize;
-                    if (proxy->callback) {
-                        proxy->callback(status, proxy->userdata);
-                    }
-                    delete proxy;
-                },
-                proxy);
+            request.readHandle.reset(
+                device->GetClient()->GetMemoryTransferService()->CreateReadHandle(size));
+            if (request.readHandle == nullptr) {
+                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                callback(WGPUBufferMapAsyncStatus_Error, userdata);
+                return;
+            }
         } else {
             ASSERT(isWriteMode);
-            MapWriteAsync(
-                [](WGPUBufferMapAsyncStatus status, void*, uint64_t, void* userdata) {
-                    ProxyData* proxy = static_cast<ProxyData*>(userdata);
-                    proxy->self->mMapOffset = proxy->mapOffset;
-                    proxy->self->mMapSize = proxy->mapSize;
-                    if (proxy->callback) {
-                        proxy->callback(status, proxy->userdata);
-                    }
-                    delete proxy;
-                },
-                proxy);
+            request.writeHandle.reset(
+                device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(size));
+            if (request.writeHandle == nullptr) {
+                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                callback(WGPUBufferMapAsyncStatus_Error, userdata);
+                return;
+            }
         }
+
+        // Step 3. Serialize the command to send to the server.
+        BufferMapAsyncCmd cmd;
+        cmd.bufferId = this->id;
+        cmd.requestSerial = serial;
+        cmd.mode = mode;
+        cmd.offset = offset;
+        cmd.size = size;
+        cmd.handleCreateInfo = nullptr;
+
+        // Step 3a. Fill the handle create info in the command.
+        if (isReadMode) {
+            cmd.handleCreateInfoLength = request.readHandle->SerializeCreateSize();
+            char* handleCreateInfoSpace =
+                device->GetClient()->SerializeCommand(cmd, cmd.handleCreateInfoLength);
+            request.readHandle->SerializeCreate(handleCreateInfoSpace);
+        } else {
+            ASSERT(isWriteMode);
+            cmd.handleCreateInfoLength = request.writeHandle->SerializeCreateSize();
+            char* handleCreateInfoSpace =
+                device->GetClient()->SerializeCommand(cmd, cmd.handleCreateInfoLength);
+            request.writeHandle->SerializeCreate(handleCreateInfoSpace);
+        }
+
+        // Step 4. Register this request so that we can retrieve it from its serial when the server
+        // sends the callback.
+        mRequests[serial] = std::move(request);
     }
 
     bool Buffer::OnMapAsyncCallback(uint32_t requestSerial,
@@ -332,13 +310,8 @@ namespace dawn_wire { namespace client {
         mRequests.erase(requestIt);
 
         auto FailRequest = [&request]() -> bool {
-            if (request.readCallback != nullptr) {
-                request.readCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
-                                     request.userdata);
-            }
-            if (request.writeCallback != nullptr) {
-                request.writeCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
-                                      request.userdata);
+            if (request.callback != nullptr) {
+                request.callback(WGPUBufferMapAsyncStatus_DeviceLost, request.userdata);
             }
             return false;
         };
@@ -389,14 +362,11 @@ namespace dawn_wire { namespace client {
             mWriteHandle = std::move(request.writeHandle);
         }
 
+        mMapOffset = request.offset;
+        mMapSize = request.size;
         mMappedData = const_cast<void*>(mappedData);
-
-        if (isRead) {
-            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
-                                 static_cast<uint64_t>(mappedDataLength), request.userdata);
-        } else {
-            request.writeCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
-                                  static_cast<uint64_t>(mappedDataLength), request.userdata);
+        if (request.callback) {
+            request.callback(static_cast<WGPUBufferMapAsyncStatus>(status), request.userdata);
         }
 
         return true;
@@ -406,7 +376,7 @@ namespace dawn_wire { namespace client {
         if (!IsMappedForWriting() || !CheckGetMappedRangeOffsetSize(offset, size)) {
             return nullptr;
         }
-        return static_cast<uint8_t*>(mMappedData) + offset;
+        return static_cast<uint8_t*>(mMappedData) + (offset - mMapOffset);
     }
 
     const void* Buffer::GetConstMappedRange(size_t offset, size_t size) {
@@ -414,7 +384,7 @@ namespace dawn_wire { namespace client {
             !CheckGetMappedRangeOffsetSize(offset, size)) {
             return nullptr;
         }
-        return static_cast<uint8_t*>(mMappedData) + offset;
+        return static_cast<uint8_t*>(mMappedData) + (offset - mMapOffset);
     }
 
     void Buffer::Unmap() {

@@ -64,10 +64,10 @@ namespace dawn_wire { namespace client {
         // map request in flight at a single time and need to track them separately.
         // On well-behaved applications, only one request should exist at a single time.
         struct MapRequestData {
-            // TODO(enga): Use a tagged pointer to save space.
-            WGPUBufferMapReadCallback readCallback = nullptr;
-            WGPUBufferMapWriteCallback writeCallback = nullptr;
+            WGPUBufferMapCallback callback = nullptr;
             void* userdata = nullptr;
+            size_t offset = 0;
+            size_t size = 0;
             // TODO(enga): Use a tagged pointer to save space.
             std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
             std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
