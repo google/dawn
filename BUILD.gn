@@ -1099,6 +1099,10 @@ source_set("tint_unittests_src") {
     deps += [ ":tint_unittests_msl_writer_src" ]
   }
 
+  if (tint_build_hlsl_writer) {
+    deps += [ ":tint_unittests_hlsl_writer_src" ]
+  }
+
   configs += [
     ":tint_common_config",
     ":tint_unittests_config",
