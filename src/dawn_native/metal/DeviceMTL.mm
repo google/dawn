@@ -282,7 +282,6 @@ namespace dawn_native { namespace metal {
         ASSERT(dataLayout.rowsPerImage == (copySize.height));
         ASSERT(dataLayout.bytesPerRow == (copySize.width) / blockWidth * blockSize);
 
-        // TODO(tommek@google.com): Add tests for this in TextureZeroInitTests.
         EnsureDestinationTextureInitialized(texture, *dst, copySize);
 
         // Metal validation layer requires that if the texture's pixel format is a compressed

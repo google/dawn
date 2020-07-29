@@ -52,8 +52,6 @@ namespace dawn_native { namespace vulkan {
                                               device->GetPendingCommandSerial()));
             ASSERT(uploadHandle.mappedBuffer != nullptr);
 
-            // TODO(tommek@google.com): Add an optimization to do a single memcpy if the data
-            // is already correctly packed.
             uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
             const uint8_t* srcPointer = static_cast<const uint8_t*>(data);
             srcPointer += dataLayout->offset;
@@ -72,14 +70,10 @@ namespace dawn_native { namespace vulkan {
             ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
             uint64_t imageAdditionalStride =
                 dataLayout->bytesPerRow * (dataRowsPerImageInBlock - alignedRowsPerImageInBlock);
-            for (uint32_t d = 0; d < writeSize->depth; ++d) {
-                for (uint32_t h = 0; h < alignedRowsPerImageInBlock; ++h) {
-                    memcpy(dstPointer, srcPointer, alignedBytesPerRow);
-                    dstPointer += optimallyAlignedBytesPerRow;
-                    srcPointer += dataLayout->bytesPerRow;
-                }
-                srcPointer += imageAdditionalStride;
-            }
+
+            CopyTextureData(dstPointer, srcPointer, writeSize->depth, alignedRowsPerImageInBlock,
+                            imageAdditionalStride, alignedBytesPerRow, optimallyAlignedBytesPerRow,
+                            dataLayout->bytesPerRow);
 
             return uploadHandle;
         }

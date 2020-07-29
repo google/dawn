@@ -281,4 +281,38 @@ namespace dawn_native {
         return {};
     }
 
+    void CopyTextureData(uint8_t* dstPointer,
+                         const uint8_t* srcPointer,
+                         uint32_t depth,
+                         uint32_t rowsPerImageInBlock,
+                         uint64_t imageAdditionalStride,
+                         uint32_t actualBytesPerRow,
+                         uint32_t dstBytesPerRow,
+                         uint32_t srcBytesPerRow) {
+        bool copyWholeLayer =
+            actualBytesPerRow == dstBytesPerRow && dstBytesPerRow == srcBytesPerRow;
+        bool copyWholeData = copyWholeLayer && imageAdditionalStride == 0;
+
+        if (!copyWholeLayer) {  // copy row by row
+            for (uint32_t d = 0; d < depth; ++d) {
+                for (uint32_t h = 0; h < rowsPerImageInBlock; ++h) {
+                    memcpy(dstPointer, srcPointer, actualBytesPerRow);
+                    dstPointer += dstBytesPerRow;
+                    srcPointer += srcBytesPerRow;
+                }
+                srcPointer += imageAdditionalStride;
+            }
+        } else {
+            uint64_t layerSize = rowsPerImageInBlock * actualBytesPerRow;
+            if (!copyWholeData) {  // copy layer by layer
+                for (uint32_t d = 0; d < depth; ++d) {
+                    memcpy(dstPointer, srcPointer, layerSize);
+                    dstPointer += layerSize;
+                    srcPointer += layerSize + imageAdditionalStride;
+                }
+            } else {  // do a single copy
+                memcpy(dstPointer, srcPointer, layerSize * depth);
+            }
+        }
+    }
 }  // namespace dawn_native
