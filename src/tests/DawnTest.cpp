@@ -368,6 +368,7 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
     const {
     auto instance = std::make_unique<dawn_native::Instance>();
     instance->EnableBackendValidation(mEnableBackendValidation);
+    instance->EnableGPUBasedBackendValidation(mEnableBackendValidation);
     instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
 
     instance->DiscoverDefaultAdapters();

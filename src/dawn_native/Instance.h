@@ -60,6 +60,9 @@ namespace dawn_native {
         void EnableBackendValidation(bool enableBackendValidation);
         bool IsBackendValidationEnabled() const;
 
+        void EnableGPUBasedBackendValidation(bool enableGPUBasedBackendValidation);
+        bool IsGPUBasedBackendValidationEnabled() const;
+
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
 
@@ -88,6 +91,7 @@ namespace dawn_native {
 
         bool mEnableBackendValidation = false;
         bool mBeginCaptureOnStartup = false;
+        bool mEnableGPUValidation = false;
 
         dawn_platform::Platform* mPlatform = nullptr;
 

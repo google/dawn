@@ -149,6 +149,10 @@ namespace dawn_native {
         mImpl->EnableBackendValidation(enableBackendValidation);
     }
 
+    void Instance::EnableGPUBasedBackendValidation(bool enableGPUBasedBackendValidation) {
+        mImpl->EnableGPUBasedBackendValidation(enableGPUBasedBackendValidation);
+    }
+
     void Instance::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
         mImpl->EnableBeginCaptureOnStartup(beginCaptureOnStartup);
     }

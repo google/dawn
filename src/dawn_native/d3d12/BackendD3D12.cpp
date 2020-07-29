@@ -26,7 +26,8 @@ namespace dawn_native { namespace d3d12 {
 
         ResultOrError<ComPtr<IDXGIFactory4>> CreateFactory(const PlatformFunctions* functions,
                                                            bool enableBackendValidation,
-                                                           bool beginCaptureOnStartup) {
+                                                           bool beginCaptureOnStartup,
+                                                           bool enableGPUBasedBackendValidation) {
             ComPtr<IDXGIFactory4> factory;
 
             uint32_t dxgiFactoryFlags = 0;
@@ -39,7 +40,8 @@ namespace dawn_native { namespace d3d12 {
                             functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                         ASSERT(debugController != nullptr);
                         debugController->EnableDebugLayer();
-                        debugController->SetEnableGPUBasedValidation(true);
+                        debugController->SetEnableGPUBasedValidation(
+                            enableGPUBasedBackendValidation);
 
                         // Enable additional debug layers.
                         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
@@ -96,7 +98,8 @@ namespace dawn_native { namespace d3d12 {
 
         DAWN_TRY_ASSIGN(mFactory,
                         CreateFactory(mFunctions.get(), instance->IsBackendValidationEnabled(),
-                                      instance->IsBeginCaptureOnStartupEnabled()));
+                                      instance->IsBeginCaptureOnStartupEnabled(),
+                                      instance->IsGPUBasedBackendValidationEnabled()));
 
         return {};
     }
