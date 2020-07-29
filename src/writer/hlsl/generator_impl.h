@@ -110,6 +110,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
   bool EmitIdentifier(ast::IdentifierExpression* expr);
+  /// Handles a member accessor expression
+  /// @param expr the member accessor expression
+  /// @returns true if the member accessor was emitted
+  bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted

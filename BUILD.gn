@@ -1053,6 +1053,7 @@ source_set("tint_unittests_hlsl_writer_src") {
     "src/writer/hlsl/generator_impl_continue_test.cc",
     "src/writer/hlsl/generator_impl_discard_test.cc",
     "src/writer/hlsl/generator_impl_identifier_test.cc",
+    "src/writer/hlsl/generator_impl_member_accessor_test.cc",
     "src/writer/hlsl/generator_impl_return_test.cc",
     "src/writer/hlsl/generator_impl_switch_test.cc",
     "src/writer/hlsl/generator_impl_test.cc",
