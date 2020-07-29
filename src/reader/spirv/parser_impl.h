@@ -182,13 +182,23 @@ class ParserImpl : Reader {
   DecorationList GetDecorationsForMember(uint32_t id,
                                          uint32_t member_index) const;
 
-  /// Converts a SPIR-V decoration. If the decoration is recognized but
-  /// deliberately dropped, then returns nullptr without a diagnostic.
-  /// On failure, emits a diagnostic and returns nullptr.
+  /// Converts a SPIR-V struct member decoration. If the decoration is
+  /// recognized but deliberately dropped, then returns nullptr without a
+  /// diagnostic. On failure, emits a diagnostic and returns nullptr.
+  /// @param struct_type_id the ID of the struct type
+  /// @param member_index the index of the member
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the corresponding ast::StructuMemberDecoration
   std::unique_ptr<ast::StructMemberDecoration> ConvertMemberDecoration(
+      uint32_t struct_type_id,
+      uint32_t member_index,
       const Decoration& decoration);
+
+  /// Returns a string for the given type.  If the type ID is invalid,
+  /// then the resulting string only names the type ID.
+  /// @param type_id the SPIR-V ID for the type
+  /// @returns a string description of the type.
+  std::string ShowType(uint32_t type_id);
 
   /// Builds the internal representation of the SPIR-V module.
   /// Assumes the module is somewhat well-formed.  Normally you

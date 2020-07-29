@@ -1336,6 +1336,78 @@ S -> __struct_S
 })")) << module_str;
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 ColMajor
+     %float = OpTypeFloat 32
+     %v2float = OpTypeVector %float 2
+     %m3v2float = OpTypeMatrix %v2float 3
+
+     %s = OpTypeStruct %m3v2float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  }
+S -> __struct_S
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 MatrixStride 8
+     %float = OpTypeFloat 32
+     %v2float = OpTypeVector %float 2
+     %m3v2float = OpTypeMatrix %v2float 3
+
+     %s = OpTypeStruct %m3v2float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  }
+S -> __struct_S
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 RowMajor
+     %float = OpTypeFloat 32
+     %v2float = OpTypeVector %float 2
+     %m3v2float = OpTypeMatrix %v2float 3
+
+     %s = OpTypeStruct %m3v2float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_THAT(
+      p->error(),
+      Eq(R"(WGSL does not support row-major matrices: can't translate member 0 of %2 = OpTypeStruct %5)"))
+      << p->error();
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

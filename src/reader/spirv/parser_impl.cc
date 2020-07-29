@@ -360,8 +360,20 @@ DecorationList ParserImpl::GetDecorationsForMember(
   return result;
 }
 
+std::string ParserImpl::ShowType(uint32_t type_id) {
+  if (def_use_mgr_) {
+    const auto* type_inst = def_use_mgr_->GetDef(type_id);
+    if (type_inst) {
+      return type_inst->PrettyPrint();
+    }
+  }
+  return "SPIR-V type " + std::to_string(type_id);
+}
+
 std::unique_ptr<ast::StructMemberDecoration>
-ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
+ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
+                                    uint32_t member_index,
+                                    const Decoration& decoration) {
   if (decoration.empty()) {
     Fail() << "malformed SPIR-V decoration: it's empty";
     return nullptr;
@@ -371,7 +383,8 @@ ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
       if (decoration.size() != 2) {
         Fail()
             << "malformed Offset decoration: expected 1 literal operand, has "
-            << decoration.size() - 1;
+            << decoration.size() - 1 << ": member " << member_index << " of "
+            << ShowType(struct_type_id);
         return nullptr;
       }
       return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1]);
@@ -380,11 +393,33 @@ ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
       // TODO(dneto): Drop these for now.
       // https://github.com/gpuweb/gpuweb/issues/935
       return nullptr;
+    case SpvDecorationColMajor:
+      // WGSL only supports column major matrices.
+      return nullptr;
+    case SpvDecorationRowMajor:
+      Fail() << "WGSL does not support row-major matrices: can't "
+                "translate member "
+             << member_index << " of " << ShowType(struct_type_id);
+      return nullptr;
+    case SpvDecorationMatrixStride: {
+      if (decoration.size() != 2) {
+        Fail() << "malformed MatrixStride decoration: expected 1 literal "
+                  "operand, has "
+               << decoration.size() - 1 << ": member " << member_index << " of "
+               << ShowType(struct_type_id);
+        return nullptr;
+      }
+      // TODO(dneto): Fail if the matrix stride is not allocation size of the
+      // column vector of the underlying matrix.  This would need to unpack
+      // any levels of array-ness.
+      return nullptr;
+    }
     default:
       // TODO(dneto): Support the remaining member decorations.
       break;
   }
-  Fail() << "unhandled member decoration: " << decoration[0];
+  Fail() << "unhandled member decoration: " << decoration[0] << " on member "
+         << member_index << " of " << ShowType(struct_type_id);
   return nullptr;
 }
 
@@ -748,7 +783,8 @@ ast::type::Type* ParserImpl::ConvertType(
         Fail() << "unrecognized builtin " << decoration[1];
         return nullptr;
       } else {
-        auto ast_member_decoration = ConvertMemberDecoration(decoration);
+        auto ast_member_decoration =
+            ConvertMemberDecoration(type_id, member_index, decoration);
         if (!success_) {
           return nullptr;
         }
