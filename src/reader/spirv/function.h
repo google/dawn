@@ -319,13 +319,13 @@ class FunctionEmitter {
 
   /// Verifies that terminators only branch to labels in the current function.
   /// Assumes basic blocks have been registered.
-  /// @returns true if terminators are sane
-  bool TerminatorsAreSane();
+  /// @returns true if terminators are valid
+  bool TerminatorsAreValid();
 
   /// Populates merge-header cross-links and the |is_continue_entire_loop|
   /// member of BlockInfo.  Also verifies that merge instructions go to blocks
   /// in the same function.  Assumes basic blocks have been registered, and
-  /// terminators are sane.
+  /// terminators are valid.
   /// @returns false if registration fails
   bool RegisterMerges();
 
@@ -346,7 +346,7 @@ class FunctionEmitter {
 
   /// Labels each basic block with its nearest enclosing structured construct.
   /// Populates the |construct| member of BlockInfo, and the |constructs_| list.
-  /// Assumes terminators are sane and merges have been registered, block
+  /// Assumes terminators are valid and merges have been registered, block
   /// order has been computed, and each block is labeled with its position.
   /// Checks nesting of structured control flow constructs.
   /// @returns false if bad nesting has been detected

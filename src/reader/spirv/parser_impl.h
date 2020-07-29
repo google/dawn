@@ -55,7 +55,7 @@ using DecorationList = std::vector<Decoration>;
 
 /// An AST expression with its type.
 struct TypedExpression {
-  /// Dummy constructor
+  /// Constructor
   TypedExpression();
   /// Constructor
   /// @param t the type

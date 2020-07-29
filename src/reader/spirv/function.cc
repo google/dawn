@@ -630,7 +630,7 @@ ast::type::Type* FunctionEmitter::GetVariableStoreType(
 bool FunctionEmitter::EmitBody() {
   RegisterBasicBlocks();
 
-  if (!TerminatorsAreSane()) {
+  if (!TerminatorsAreValid()) {
     return false;
   }
   if (!RegisterMerges()) {
@@ -674,7 +674,7 @@ void FunctionEmitter::RegisterBasicBlocks() {
   }
 }
 
-bool FunctionEmitter::TerminatorsAreSane() {
+bool FunctionEmitter::TerminatorsAreValid() {
   if (failed()) {
     return false;
   }
@@ -1261,7 +1261,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
 
     for (const auto dest : successors) {
       const auto* dest_info = GetBlockInfo(dest);
-      // We've already checked terminators are sane.
+      // We've already checked terminators are valid.
       assert(dest_info);
       const auto dest_pos = dest_info->pos;
 

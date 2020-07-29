@@ -122,7 +122,7 @@ bool FlowFindIfSelectionInternalHeaders(FunctionEmitter* fe) {
   return fe->FindIfSelectionInternalHeaders();
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_SingleBlock) {
+TEST_F(SpvParserTest, TerminatorsAreValid_SingleBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -134,10 +134,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_SingleBlock) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Sequence) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Sequence) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -152,10 +152,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Sequence) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane()) << p->error();
+  EXPECT_TRUE(fe.TerminatorsAreValid()) << p->error();
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_If) {
+TEST_F(SpvParserTest, TerminatorsAreValid_If) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -177,10 +177,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_If) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane()) << p->error();
+  EXPECT_TRUE(fe.TerminatorsAreValid()) << p->error();
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Switch) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Switch) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -205,10 +205,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Switch) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Loop_SingleBlock) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Loop_SingleBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -227,10 +227,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Loop_SingleBlock) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Loop_Simple) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Loop_Simple) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -255,10 +255,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Loop_Simple) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Kill) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Kill) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -270,10 +270,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Kill) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_Unreachable) {
+TEST_F(SpvParserTest, TerminatorsAreValid_Unreachable) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -285,10 +285,10 @@ TEST_F(SpvParserTest, TerminatorsAreSane_Unreachable) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_TRUE(fe.TerminatorsAreSane());
+  EXPECT_TRUE(fe.TerminatorsAreValid());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_MissingTerminator) {
+TEST_F(SpvParserTest, TerminatorsAreValid_MissingTerminator) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -300,7 +300,7 @@ TEST_F(SpvParserTest, TerminatorsAreSane_MissingTerminator) {
   EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_DisallowLoopToEntryBlock) {
+TEST_F(SpvParserTest, TerminatorsAreValid_DisallowLoopToEntryBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -315,11 +315,11 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowLoopToEntryBlock) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_FALSE(fe.TerminatorsAreValid());
   EXPECT_THAT(p->error(), Eq("Block 20 branches to function entry block 10"));
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_DisallowNonBlock) {
+TEST_F(SpvParserTest, TerminatorsAreValid_DisallowNonBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -331,13 +331,13 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowNonBlock) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_FALSE(fe.TerminatorsAreValid());
   EXPECT_THAT(p->error(),
               Eq("Block 10 in function 100 branches to 999 which is "
                  "not a block in the function"));
 }
 
-TEST_F(SpvParserTest, TerminatorsAreSane_DisallowBlockInDifferentFunction) {
+TEST_F(SpvParserTest, TerminatorsAreValid_DisallowBlockInDifferentFunction) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -357,7 +357,7 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowBlockInDifferentFunction) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
-  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_FALSE(fe.TerminatorsAreValid());
   EXPECT_THAT(p->error(), Eq("Block 10 in function 100 branches to 210 which "
                              "is not a block in the function"));
 }
