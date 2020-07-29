@@ -46,6 +46,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
   bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
+  /// Handles generating an as expression
+  /// @param expr the as expression
+  /// @returns true if the as was emitted
+  bool EmitAs(ast::AsExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

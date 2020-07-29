@@ -15,6 +15,7 @@
 #include "src/writer/hlsl/generator_impl.h"
 
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
@@ -114,6 +115,25 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
   }
   out_ << "]";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
+  if (!expr->type()->IsF32() && !expr->type()->IsI32() &&
+      !expr->type()->IsU32()) {
+    error_ = "Unable to do as cast to type " + expr->type()->type_name();
+    return false;
+  }
+
+  out_ << "as";
+  if (!EmitType(expr->type(), "")) {
+    return false;
+  }
+  out_ << "(";
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+  out_ << ")";
   return true;
 }
 
@@ -368,6 +388,9 @@ bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsAs()) {
+    return EmitAs(expr->AsAs());
+  }
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
   }
