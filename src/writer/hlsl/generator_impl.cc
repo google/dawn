@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+/// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -217,6 +217,40 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
 
   out_ << ")";
   return true;
+}
+
+bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
+  out_ << "{" << std::endl;
+  increment_indent();
+
+  for (const auto& s : *stmt) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
+  const bool result = EmitBlock(stmt);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
+}
+
+bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
+  make_indent();
+  const bool result = EmitBlock(stmt);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
 }
 
 bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
@@ -451,6 +485,9 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
+  }
+  if (stmt->IsBlock()) {
+    return EmitIndentedBlockAndNewline(stmt->AsBlock());
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());

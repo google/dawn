@@ -54,6 +54,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles a block statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitBlock(const ast::BlockStatement* stmt);
+  /// Handles a block statement with a newline at the end
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitIndentedBlockAndNewline(ast::BlockStatement* stmt);
+  /// Handles a block statement with a newline at the end
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitBlockAndNewline(const ast::BlockStatement* stmt);
   /// Handles a break statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

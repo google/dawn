@@ -553,6 +553,7 @@ if (${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator_impl_array_accessor_test.cc
     writer/hlsl/generator_impl_assign_test.cc
     writer/hlsl/generator_impl_binary_test.cc
+    writer/hlsl/generator_impl_block_test.cc
     writer/hlsl/generator_impl_break_test.cc
     writer/hlsl/generator_impl_case_test.cc
     writer/hlsl/generator_impl_constructor_test.cc
