@@ -17,6 +17,8 @@
 
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
+#include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/hlsl/namer.h"
 #include "src/writer/text_generator.h"
@@ -52,6 +54,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(ast::CaseStatement* stmt);
+  /// Handles generating constructor expressions
+  /// @param expr the constructor expression
+  /// @returns true if the expression was emitted
+  bool EmitConstructor(ast::ConstructorExpression* expr);
+  /// Handles generating a scalar constructor
+  /// @param expr the scalar constructor expression
+  /// @returns true if the scalar constructor is emitted
+  bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
+  /// Handles emitting a type constructor
+  /// @param expr the type constructor expression
+  /// @returns true if the constructor is emitted
+  bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -89,6 +103,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
+  /// Emits the zero value for the given type
+  /// @param type the type to emit the value for
+  /// @returns true if the zero value was successfully emitted.
+  bool EmitZeroValue(ast::type::Type* type);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

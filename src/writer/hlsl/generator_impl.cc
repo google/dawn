@@ -233,6 +233,56 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
+  if (expr->IsScalarConstructor()) {
+    return EmitScalarConstructor(expr->AsScalarConstructor());
+  }
+  return EmitTypeConstructor(expr->AsTypeConstructor());
+}
+
+bool GeneratorImpl::EmitScalarConstructor(
+    ast::ScalarConstructorExpression* expr) {
+  return EmitLiteral(expr->literal());
+}
+
+bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
+  if (expr->type()->IsArray()) {
+    out_ << "{";
+  } else {
+    if (!EmitType(expr->type(), "")) {
+      return false;
+    }
+    out_ << "(";
+  }
+
+  // If the type constructor is empty then we need to construct with the zero
+  // value for all components.
+  if (expr->values().empty()) {
+    if (!EmitZeroValue(expr->type())) {
+      return false;
+    }
+  } else {
+    bool first = true;
+    for (const auto& e : expr->values()) {
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(e.get())) {
+        return false;
+      }
+    }
+  }
+
+  if (expr->type()->IsArray()) {
+    out_ << "}";
+  } else {
+    out_ << ")";
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
   make_indent();
   out_ << "continue;" << std::endl;
@@ -242,6 +292,9 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsConstructor()) {
+    return EmitConstructor(expr->AsConstructor());
   }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
@@ -305,6 +358,24 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
     out_ << lit->AsUint()->value() << "u";
   } else {
     error_ = "unknown literal type";
+    return false;
+  }
+  return true;
+}
+
+bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
+  if (type->IsBool()) {
+    out_ << "false";
+  } else if (type->IsF32()) {
+    out_ << "0.0f";
+  } else if (type->IsI32()) {
+    out_ << "0";
+  } else if (type->IsU32()) {
+    out_ << "0u";
+  } else if (type->IsVector()) {
+    return EmitZeroValue(type->AsVector()->type());
+  } else {
+    error_ = "Invalid type for zero emission: " + type->type_name();
     return false;
   }
   return true;
