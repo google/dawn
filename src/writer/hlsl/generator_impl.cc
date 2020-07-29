@@ -22,7 +22,15 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/alias_type.h"
+#include "src/ast/type/array_type.h"
+#include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 
@@ -368,6 +376,98 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   decrement_indent();
   make_indent();
   out_ << "}" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
+  if (type->IsAlias()) {
+    auto* alias = type->AsAlias();
+    out_ << namer_.NameFor(alias->name());
+  } else if (type->IsArray()) {
+    auto* ary = type->AsArray();
+
+    ast::type::Type* base_type = ary;
+    std::vector<uint32_t> sizes;
+    while (base_type->IsArray()) {
+      if (base_type->AsArray()->IsRuntimeArray()) {
+        // TODO(dsinclair): Support runtime arrays
+        // https://bugs.chromium.org/p/tint/issues/detail?id=185
+        error_ = "runtime array not supported yet.";
+        return false;
+      } else {
+        sizes.push_back(base_type->AsArray()->size());
+      }
+      base_type = base_type->AsArray()->type();
+    }
+    if (!EmitType(base_type, "")) {
+      return false;
+    }
+    if (!name.empty()) {
+      out_ << " " << namer_.NameFor(name);
+    }
+    for (uint32_t size : sizes) {
+      out_ << "[" << size << "]";
+    }
+  } else if (type->IsBool()) {
+    out_ << "bool";
+  } else if (type->IsF32()) {
+    out_ << "float";
+  } else if (type->IsI32()) {
+    out_ << "int";
+  } else if (type->IsMatrix()) {
+    auto* mat = type->AsMatrix();
+    out_ << "matrix<";
+    if (!EmitType(mat->type(), "")) {
+      return false;
+    }
+    out_ << ", " << mat->rows() << ", " << mat->columns() << ">";
+  } else if (type->IsPointer()) {
+    // TODO(dsinclair): What do we do with pointers in HLSL?
+    // https://bugs.chromium.org/p/tint/issues/detail?id=183
+    error_ = "pointers not supported in HLSL";
+    return false;
+  } else if (type->IsStruct()) {
+    auto* str = type->AsStruct()->impl();
+    // TODO(dsinclair): Block decoration?
+    // if (str->decoration() != ast::StructDecoration::kNone) {
+    // }
+    out_ << "struct {" << std::endl;
+
+    increment_indent();
+    for (const auto& mem : str->members()) {
+      make_indent();
+      // TODO(dsinclair): Handle [[offset]] annotation on structs
+      // https://bugs.chromium.org/p/tint/issues/detail?id=184
+
+      if (!EmitType(mem->type(), mem->name())) {
+        return false;
+      }
+      // Array member name will be output with the type
+      if (!mem->type()->IsArray()) {
+        out_ << " " << namer_.NameFor(mem->name());
+      }
+      out_ << ";" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+
+    out_ << "}";
+  } else if (type->IsU32()) {
+    out_ << "uint";
+  } else if (type->IsVector()) {
+    auto* vec = type->AsVector();
+    out_ << "vector<";
+    if (!EmitType(vec->type(), "")) {
+      return false;
+    }
+    out_ << ", " << vec->size() << ">";
+  } else if (type->IsVoid()) {
+    out_ << "void";
+  } else {
+    error_ = "unknown type in EmitType";
+    return false;
+  }
 
   return true;
 }

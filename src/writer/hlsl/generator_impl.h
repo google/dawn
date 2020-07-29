@@ -80,6 +80,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitSwitch(ast::SwitchStatement* stmt);
+  /// Handles generating type
+  /// @param type the type to generate
+  /// @param name the name of the variable, only used for array emission
+  /// @returns true if the type is emitted
+  bool EmitType(ast::type::Type* type, const std::string& name);
   /// Handles a unary op expression
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
