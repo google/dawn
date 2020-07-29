@@ -50,9 +50,9 @@ namespace dawn_native { namespace d3d12 {
         D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureOptions5 = {};
         if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
                 D3D12_FEATURE_D3D12_OPTIONS5, &featureOptions5, sizeof(featureOptions5)))) {
-            // Performance regressions been observed when using a render pass on Intel graphics with
-            // RENDER_PASS_TIER_1 available, so fall back to a software emulated render pass on
-            // these platforms.
+            // Performance regressions been observed when using a render pass on Intel graphics
+            // with RENDER_PASS_TIER_1 available, so fall back to a software emulated render
+            // pass on these platforms.
             if (featureOptions5.RenderPassesTier < D3D12_RENDER_PASS_TIER_1 ||
                 !gpu_info::IsIntel(adapter.GetPCIInfo().vendorId)) {
                 info.supportsRenderPass = true;
@@ -63,59 +63,46 @@ namespace dawn_native { namespace d3d12 {
                                                                {D3D_SHADER_MODEL_6_1},
                                                                {D3D_SHADER_MODEL_6_0},
                                                                {D3D_SHADER_MODEL_5_1}};
+        uint32_t driverShaderModel = 0;
         for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
             if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
                     D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))) {
-                if (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_5_1) {
-                    return DAWN_INTERNAL_ERROR(
-                        "Driver could not support Shader Model 5.1 or higher");
-                }
-
-                switch (shaderModel.HighestShaderModel) {
-                    case D3D_SHADER_MODEL_6_2: {
-                        info.shaderModel = 62;
-                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_2";
-                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_2";
-                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_2";
-
-                        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
-                        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-                                D3D12_FEATURE_D3D12_OPTIONS4, &featureData4,
-                                sizeof(featureData4)))) {
-                            info.supportsShaderFloat16 =
-                                shaderModel.HighestShaderModel >= D3D_SHADER_MODEL_6_2 &&
-                                featureData4.Native16BitShaderOpsSupported;
-                        }
-                        break;
-                    }
-                    case D3D_SHADER_MODEL_6_1: {
-                        info.shaderModel = 61;
-                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_1";
-                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_1";
-                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_1";
-                        break;
-                    }
-                    case D3D_SHADER_MODEL_6_0: {
-                        info.shaderModel = 60;
-                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_0";
-                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_0";
-                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_0";
-                        break;
-                    }
-                    default: {
-                        info.shaderModel = 51;
-                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_5_1";
-                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_5_1";
-                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_5_1";
-                        break;
-                    }
-                }
-
-                // Successfully find the maximum supported shader model.
+                driverShaderModel = shaderModel.HighestShaderModel;
                 break;
             }
         }
 
+        if (driverShaderModel < D3D_SHADER_MODEL_5_1) {
+            return DAWN_INTERNAL_ERROR("Driver doesn't support Shader Model 5.1 or higher");
+        }
+
+        // D3D_SHADER_MODEL is encoded as 0xMm with M the major version and m the minor version
+        ASSERT(driverShaderModel <= 0xFF);
+        uint32_t shaderModelMajor = (driverShaderModel & 0xF0) >> 4;
+        uint32_t shaderModelMinor = (driverShaderModel & 0xF);
+
+        ASSERT(shaderModelMajor < 10);
+        ASSERT(shaderModelMinor < 10);
+        info.shaderModel = 10 * shaderModelMajor + shaderModelMinor;
+
+        // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add
+        // it to each of the stage's suffix.
+        std::wstring profileSuffix = L"s_M_n";
+        profileSuffix[2] = wchar_t('0' + shaderModelMajor);
+        profileSuffix[4] = wchar_t('0' + shaderModelMinor);
+
+        info.shaderProfiles[SingleShaderStage::Vertex] = L"v" + profileSuffix;
+        info.shaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
+        info.shaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
+        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                D3D12_FEATURE_D3D12_OPTIONS4, &featureData4, sizeof(featureData4)))) {
+            info.supportsShaderFloat16 = info.shaderModel >= D3D_SHADER_MODEL_6_2 &&
+                                         featureData4.Native16BitShaderOpsSupported;
+        }
+
         return std::move(info);
     }
+
 }}  // namespace dawn_native::d3d12
