@@ -57,6 +57,16 @@ bool GeneratorImpl::Generate() {
   for (const auto& global : module_->global_variables()) {
     global_variables_.set(global->name(), global.get());
   }
+
+  for (auto* const alias : module_->alias_types()) {
+    if (!EmitAliasType(alias)) {
+      return false;
+    }
+  }
+  if (!module_->alias_types().empty()) {
+    out_ << std::endl;
+  }
+
   return true;
 }
 
@@ -79,6 +89,17 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
     }
   }
   return name;
+}
+
+bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
+  make_indent();
+  out_ << "typedef ";
+  if (!EmitType(alias->type(), "")) {
+    return false;
+  }
+  out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+
+  return true;
 }
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {

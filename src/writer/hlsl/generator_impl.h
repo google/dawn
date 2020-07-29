@@ -38,6 +38,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
+  /// Handles generating an alias
+  /// @param alias the alias to generate
+  /// @returns true if the alias was emitted
+  bool EmitAliasType(const ast::type::AliasType* alias);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
