@@ -155,20 +155,24 @@ class WireMemoryTransferServiceTests : public WireTest {
         return std::make_pair(apiBuffer, buffer);
     }
 
-    std::pair<WGPUBuffer, WGPUBuffer> CreateBufferMapped() {
+    std::pair<WGPUCreateBufferMappedResult, WGPUCreateBufferMappedResult> CreateBufferMapped() {
         WGPUBufferDescriptor descriptor = {};
         descriptor.size = sizeof(mBufferContent);
-        descriptor.mappedAtCreation = true;
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-        WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+        WGPUCreateBufferMappedResult apiResult;
+        apiResult.buffer = apiBuffer;
+        apiResult.data = reinterpret_cast<uint8_t*>(&mMappedBufferContent);
+        apiResult.dataLength = sizeof(mMappedBufferContent);
 
-        EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-        EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, sizeof(mBufferContent)))
-            .WillOnce(Return(&mMappedBufferContent));
+        WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
-        return std::make_pair(apiBuffer, buffer);
+        EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+            .WillOnce(Return(apiResult))
+            .RetiresOnSaturation();
+
+        return std::make_pair(apiResult, result);
     }
 
     ClientReadHandle* ExpectReadHandleCreation() {
@@ -887,8 +891,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
     }
 }
 
-// Test successful buffer creation with mappedAtCreation = true.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationSuccess) {
+// Test successful CreateBufferMapped.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedSuccess) {
     // The client should create and serialize a WriteHandle on createBufferMapped.
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
 
@@ -900,9 +904,9 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationSuccess) {
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
-    WGPUBuffer buffer;
-    WGPUBuffer apiBuffer;
-    std::tie(apiBuffer, buffer) = CreateBufferMapped();
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
+    std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient();
 
     // Update the mapped contents.
@@ -912,33 +916,35 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationSuccess) {
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    wgpuBufferUnmap(buffer);
+    wgpuBufferUnmap(result.buffer);
 
     // The server deserializes the Flush message.
     ExpectServerWriteHandleDeserializeFlush(serverHandle, mUpdatedBufferContent);
 
     // After the handle is updated it can be destroyed.
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
-    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+    EXPECT_CALL(api, BufferUnmap(apiResult.buffer)).Times(1);
 
     FlushClient();
 }
 
-// Test buffer creation with mappedAtCreation WriteHandle creation failure.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationWriteHandleCreationFailure) {
+// Test CreateBufferMapped WriteHandle creation failure.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedWriteHandleCreationFailure) {
     // Mock a WriteHandle creation failure
     MockWriteHandleCreationFailure();
 
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = sizeof(mBufferContent);
-    descriptor.mappedAtCreation = true;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
-    EXPECT_EQ(nullptr, wgpuBufferGetMappedRange(buffer, 0, sizeof(mBufferContent)));
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
+
+    // TODO(enga): Check that the client generated a context lost.
+    EXPECT_EQ(result.data, nullptr);
+    EXPECT_EQ(result.dataLength, 0u);
 }
 
-// Test buffer creation with mappedAtCreation DeserializeWriteHandle failure.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeWriteHandleFailure) {
+// Test CreateBufferMapped DeserializeWriteHandle failure.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDeserializeWriteHandleFailure) {
     // The client should create and serialize a WriteHandle on createBufferMapped.
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
 
@@ -950,16 +956,16 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeWriteHandleFai
     // The server should then deserialize the WriteHandle from the client.
     MockServerWriteHandleDeserializeFailure();
 
-    WGPUBuffer buffer;
-    WGPUBuffer apiBuffer;
-    std::tie(apiBuffer, buffer) = CreateBufferMapped();
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
+    std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient(false);
 
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 }
 
-// Test buffer creation with mappedAtCreation handle Open failure.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationHandleOpenFailure) {
+// Test CreateBufferMapped handle Open failure.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedHandleOpenFailure) {
     // The client should create a WriteHandle on createBufferMapped.
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
 
@@ -973,14 +979,16 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationHandleOpenFailure) {
 
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = sizeof(mBufferContent);
-    descriptor.mappedAtCreation = true;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
-    EXPECT_EQ(nullptr, wgpuBufferGetMappedRange(buffer, 0, sizeof(mBufferContent)));
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
+
+    // TODO(enga): Check that the client generated a context lost.
+    EXPECT_EQ(result.data, nullptr);
+    EXPECT_EQ(result.dataLength, 0u);
 }
 
-// Test buffer creation with mappedAtCreation = true DeserializeFlush failure.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeFlushFailure) {
+// Test CreateBufferMapped DeserializeFlush failure.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDeserializeFlushFailure) {
     // The client should create and serialize a WriteHandle on createBufferMapped.
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
 
@@ -992,9 +1000,9 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeFlushFailure) 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
-    WGPUBuffer buffer;
-    WGPUBuffer apiBuffer;
-    std::tie(apiBuffer, buffer) = CreateBufferMapped();
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
+    std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient();
 
     // Update the mapped contents.
@@ -1004,7 +1012,7 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeFlushFailure) 
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    wgpuBufferUnmap(buffer);
+    wgpuBufferUnmap(result.buffer);
 
     // The server deserializes the Flush message. Mock a deserialization failure.
     MockServerWriteHandleDeserializeFlushFailure(serverHandle);
@@ -1014,8 +1022,8 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeFlushFailure) 
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
 }
 
-// Test mappedAtCreation=true destroying the buffer before unmapping on the client side.
-TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDestroyBeforeUnmap) {
+// Test CreateBufferMapped destroying the buffer before unmapping on the client side.
+TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDestroyBeforeUnmap) {
     // The client should create and serialize a WriteHandle on createBufferMapped.
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
 
@@ -1027,9 +1035,9 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDestroyBeforeUnmap) {
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
-    WGPUBuffer buffer;
-    WGPUBuffer apiBuffer;
-    std::tie(apiBuffer, buffer) = CreateBufferMapped();
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
+    std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient();
 
     // Update the mapped contents.
@@ -1039,16 +1047,16 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDestroyBeforeUnmap) {
     // immediately, both in the client and server side.
     {
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
-        wgpuBufferDestroy(buffer);
+        wgpuBufferDestroy(result.buffer);
 
         EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
-        EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
+        EXPECT_CALL(api, BufferDestroy(apiResult.buffer)).Times(1);
         FlushClient();
 
         // The handle is already destroyed so unmap only results in a server unmap call.
-        wgpuBufferUnmap(buffer);
+        wgpuBufferUnmap(result.buffer);
 
-        EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
+        EXPECT_CALL(api, BufferUnmap(apiResult.buffer)).Times(1);
         FlushClient();
     }
 }

@@ -146,20 +146,16 @@ namespace dawn_wire { namespace client {
     }
 
     WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
-        return Buffer::Create(this, descriptor);
+        if (descriptor->mappedAtCreation) {
+            return CreateBufferMapped(descriptor).buffer;
+        } else {
+            return Buffer::Create(this, descriptor);
+        }
     }
 
     WGPUCreateBufferMappedResult Device::CreateBufferMapped(
         const WGPUBufferDescriptor* descriptor) {
-        WGPUBufferDescriptor descMappedAtCreation = *descriptor;
-        descMappedAtCreation.mappedAtCreation = true;
-
-        WGPUCreateBufferMappedResult result;
-        result.buffer = CreateBuffer(&descMappedAtCreation);
-        result.data = FromAPI(result.buffer)->GetMappedRange(0, descriptor->size);
-        result.dataLength = result.data == nullptr ? 0 : descriptor->size;
-
-        return result;
+        return Buffer::CreateMapped(this, descriptor);
     }
 
     WGPUBuffer Device::CreateErrorBuffer() {

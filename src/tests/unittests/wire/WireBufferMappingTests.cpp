@@ -477,72 +477,84 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
     FlushClient();
 }
 
-// Test successful buffer creation with mappedAtCreation=true
-TEST_F(WireBufferMappingTests, MappedAtCreationSuccess) {
+// Test successful CreateBufferMapped
+TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
-    descriptor.mappedAtCreation = true;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 1234;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
-    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
 
     FlushClient();
 
-    wgpuBufferUnmap(buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
 }
 
-// Test that releasing a buffer mapped at creation does not call Unmap
-TEST_F(WireBufferMappingTests, MappedAtCreationReleaseBeforeUnmap) {
+// Test that releasing after CreateBufferMapped does not call Unmap
+TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
-    descriptor.mappedAtCreation = true;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 1234;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
-    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
 
     FlushClient();
 
-    wgpuBufferRelease(buffer);
+    wgpuBufferRelease(result.buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
 
     FlushClient();
 }
 
-// Test that it is valid to map a buffer after it is mapped at creation and unmapped
-TEST_F(WireBufferMappingTests, MappedAtCreationThenMapSuccess) {
+// Test that it is valid to map a buffer after CreateBufferMapped and Unmap
+TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
-    descriptor.mappedAtCreation = true;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
-    uint32_t apiBufferData = 1234;
+    WGPUCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 9863;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
-    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
 
     FlushClient();
 
-    wgpuBufferUnmap(buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
 
-    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t zero = 0;
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
@@ -560,23 +572,27 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapSuccess) {
     FlushServer();
 }
 
-// Test that it is invalid to map a buffer after mappedAtCreation but before Unmap
-TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
+// Test that it is invalid to map a buffer after CreateBufferMapped before Unmap
+TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
-    descriptor.mappedAtCreation = true;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
-    uint32_t apiBufferData = 1234;
+    WGPUCreateBufferMappedResult apiResult;
+    uint32_t apiBufferData = 9863;
+    apiResult.buffer = apiBuffer;
+    apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
+    apiResult.dataLength = 4;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
-    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
+    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
+        .WillOnce(Return(apiResult))
+        .RetiresOnSaturation();
 
     FlushClient();
 
-    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
@@ -589,7 +605,7 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
 
     FlushServer();
 
-    wgpuBufferUnmap(buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
