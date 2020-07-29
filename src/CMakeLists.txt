@@ -550,6 +550,7 @@ endif()
 if (${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/hlsl/generator_impl_alias_type_test.cc
+    writer/hlsl/generator_impl_array_accessor_test.cc
     writer/hlsl/generator_impl_assign_test.cc
     writer/hlsl/generator_impl_binary_test.cc
     writer/hlsl/generator_impl_break_test.cc

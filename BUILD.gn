@@ -1042,6 +1042,7 @@ source_set("tint_unittests_msl_writer_src") {
 source_set("tint_unittests_hlsl_writer_src") {
   sources = [
     "src/writer/hlsl/generator_impl_alias_type_test.cc",
+    "src/writer/hlsl/generator_impl_array_accessor_test.cc",
     "src/writer/hlsl/generator_impl_assign_test.cc",
     "src/writer/hlsl/generator_impl_binary_test.cc",
     "src/writer/hlsl/generator_impl_break_test.cc",

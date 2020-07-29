@@ -42,6 +42,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param alias the alias to generate
   /// @returns true if the alias was emitted
   bool EmitAliasType(const ast::type::AliasType* alias);
+  /// Handles an array accessor expression
+  /// @param expr the expression to emit
+  /// @returns true if the array accessor was emitted
+  bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

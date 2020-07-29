@@ -14,6 +14,7 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
@@ -98,6 +99,20 @@ bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
     return false;
   }
   out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
+  if (!EmitExpression(expr->array())) {
+    return false;
+  }
+  out_ << "[";
+
+  if (!EmitExpression(expr->idx_expr())) {
+    return false;
+  }
+  out_ << "]";
 
   return true;
 }
@@ -311,6 +326,9 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsArrayAccessor()) {
+    return EmitArrayAccessor(expr->AsArrayAccessor());
+  }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
   }
