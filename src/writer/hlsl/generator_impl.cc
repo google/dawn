@@ -325,6 +325,14 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
   return true;
 }
 
+bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
+  make_indent();
+  // TODO(dsinclair): Verify this is correct when the discard semantics are
+  // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
+  out_ << "discard;" << std::endl;
+  return true;
+}
+
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
@@ -449,6 +457,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
+  }
+  if (stmt->IsDiscard()) {
+    return EmitDiscard(stmt->AsDiscard());
   }
   if (stmt->IsFallthrough()) {
     make_indent();
