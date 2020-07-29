@@ -286,6 +286,7 @@ if (DAWN_ENABLE_METAL)
         "-framework IOKit"
         "-framework IOSurface"
         "-framework QuartzCore"
+        "-framework Metal"
     )
 endif()
 
