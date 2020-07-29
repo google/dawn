@@ -91,7 +91,8 @@ namespace dawn_native { namespace metal {
     MaybeError ShaderModule::GetFunction(const char* functionName,
                                          SingleShaderStage functionStage,
                                          const PipelineLayout* layout,
-                                         ShaderModule::MetalFunctionData* out) {
+                                         ShaderModule::MetalFunctionData* out,
+                                         uint32_t sampleMask) {
         ASSERT(!IsError());
         ASSERT(out);
         const std::vector<uint32_t>& spirv = GetSpirv();
@@ -101,9 +102,10 @@ namespace dawn_native { namespace metal {
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // Initializing the compiler is needed every call, because this method uses reflection
             // to mutate the compiler's IR.
-            DAWN_TRY(CheckSpvcSuccess(
-                mSpvcContext.InitializeForMsl(spirv.data(), spirv.size(), GetMSLCompileOptions()),
-                "Unable to initialize instance of spvc"));
+            DAWN_TRY(
+                CheckSpvcSuccess(mSpvcContext.InitializeForMsl(spirv.data(), spirv.size(),
+                                                               GetMSLCompileOptions(sampleMask)),
+                                 "Unable to initialize instance of spvc"));
             DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
                                       "Unable to get cross compiler"));
         } else {
@@ -121,6 +123,8 @@ namespace dawn_native { namespace metal {
             // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
             // the shader storage buffer lengths.
             options_msl.buffer_size_buffer_index = kBufferLengthBufferSlot;
+
+            options_msl.additional_fixed_sample_mask = sampleMask;
 
             compilerImpl = std::make_unique<spirv_cross::CompilerMSL>(spirv);
             compiler = compilerImpl.get();
@@ -245,7 +249,7 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    shaderc_spvc::CompileOptions ShaderModule::GetMSLCompileOptions() {
+    shaderc_spvc::CompileOptions ShaderModule::GetMSLCompileOptions(uint32_t sampleMask) {
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
         // be updated.
         shaderc_spvc::CompileOptions options = GetCompileOptions();
@@ -260,6 +264,8 @@ namespace dawn_native { namespace metal {
         // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
         // the shader storage buffer lengths.
         options.SetMSLBufferSizeBufferIndex(kBufferLengthBufferSlot);
+
+        options.SetMSLAdditionalFixedSampleMask(sampleMask);
 
         return options;
     }

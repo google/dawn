@@ -344,7 +344,8 @@ namespace dawn_native { namespace metal {
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData;
         DAWN_TRY(fragmentModule->GetFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
-                                             ToBackend(GetLayout()), &fragmentData));
+                                             ToBackend(GetLayout()), &fragmentData,
+                                             descriptor->sampleMask));
 
         descriptorMTL.fragmentFunction = fragmentData.function;
         if (fragmentData.needsStorageBufferLength) {

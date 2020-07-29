@@ -46,14 +46,15 @@ namespace dawn_native { namespace metal {
         MaybeError GetFunction(const char* functionName,
                                SingleShaderStage functionStage,
                                const PipelineLayout* layout,
-                               MetalFunctionData* out);
+                               MetalFunctionData* out,
+                               uint32_t sampleMask = 0xFFFFFFFF);
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize();
 
-        shaderc_spvc::CompileOptions GetMSLCompileOptions();
+        shaderc_spvc::CompileOptions GetMSLCompileOptions(uint32_t sampleMask = 0xFFFFFFFF);
     };
 
 }}  // namespace dawn_native::metal
