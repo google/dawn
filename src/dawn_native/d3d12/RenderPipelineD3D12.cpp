@@ -383,7 +383,7 @@ namespace dawn_native { namespace d3d12 {
         }
         descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 
-        descriptorD3D12.BlendState.AlphaToCoverageEnable = FALSE;
+        descriptorD3D12.BlendState.AlphaToCoverageEnable = descriptor->alphaToCoverageEnabled;
         descriptorD3D12.BlendState.IndependentBlendEnable = TRUE;
 
         descriptorD3D12.DepthStencilState =

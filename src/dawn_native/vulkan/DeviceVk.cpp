@@ -874,10 +874,10 @@ namespace dawn_native { namespace vulkan {
 
         ASSERT(mCommandsInFlight.Empty());
         for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
-             // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
-             // destroyed, but that's not the case in some drivers and the leak memory.
-             // So we call FreeCommandBuffers before DestroyCommandPool to be safe.
-             // TODO(enga): Only do this on a known list of bad drivers.
+            // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
+            // destroyed, but that's not the case in some drivers and the leak memory.
+            // So we call FreeCommandBuffers before DestroyCommandPool to be safe.
+            // TODO(enga): Only do this on a known list of bad drivers.
             fn.FreeCommandBuffers(mVkDevice, commands.pool, 1, &commands.commandBuffer);
             fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
         }

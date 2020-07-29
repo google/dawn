@@ -383,6 +383,7 @@ namespace dawn_native { namespace metal {
         [vertexDesc release];
 
         descriptorMTL.sampleCount = GetSampleCount();
+        descriptorMTL.alphaToCoverageEnabled = descriptor->alphaToCoverageEnabled;
 
         {
             NSError* error = nil;

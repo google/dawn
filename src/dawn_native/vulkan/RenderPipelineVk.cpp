@@ -416,7 +416,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(multisample.rasterizationSamples <= 32);
         VkSampleMask sampleMask = GetSampleMask();
         multisample.pSampleMask = &sampleMask;
-        multisample.alphaToCoverageEnable = VK_FALSE;
+        multisample.alphaToCoverageEnable = descriptor->alphaToCoverageEnabled;
         multisample.alphaToOneEnable = VK_FALSE;
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState =
