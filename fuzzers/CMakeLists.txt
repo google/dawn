@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(rharrison): Make a generic fuzzer target template once we have more
-#                  fuzzers.
-
-if ({TINT_BUILD_WGSL_READER})
-  add_executable(tint_wgsl_reader_fuzzer tint_wgsl_reader_fuzzer.cc)
+function(add_tint_fuzzer NAME)
+  add_executable(${NAME} ${NAME}.cc)
   target_link_libraries(tint_fuzz libtint)
   tint_default_compile_options(tint_fuzz)
   target_link_options(tint_fuzz PRIVATE
@@ -27,8 +24,12 @@ if ({TINT_BUILD_WGSL_READER})
     -g
   )
 
-  target_compile_options(tint_wgsl_reader_fuzzer PRIVATE
+  target_compile_options(${NAME} PRIVATE
     -fsanitize=fuzzer,address,undefined
     -Wno-missing-prototypes
   )
+endfunction()
+
+if ({TINT_BUILD_WGSL_READER})
+  add_tint_fuzzer(tint_wgsl_reader_fuzzer)
 endif()
