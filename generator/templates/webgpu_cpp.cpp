@@ -11,14 +11,14 @@
 //* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
-
 #include "dawn/webgpu_cpp.h"
 
 namespace wgpu {
-
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
+
+        // {{CppType}}
 
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
@@ -26,21 +26,23 @@ namespace wgpu {
         {% for value in type.values %}
             static_assert(static_cast<uint32_t>({{CppType}}::{{as_cppEnum(value.name)}}) == {{as_cEnum(type.name, value.name)}}, "value mismatch for {{CppType}}::{{as_cppEnum(value.name)}}");
         {% endfor %}
-
-    {% endfor %}
+    {% endfor -%}
 
     {% for type in by_category["bitmask"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) + "Flags" %}
 
+        // {{CppType}}
+
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
         {% for value in type.values %}
             static_assert(static_cast<uint32_t>({{CppType}}::{{as_cppEnum(value.name)}}) == {{as_cEnum(type.name, value.name)}}, "value mismatch for {{CppType}}::{{as_cppEnum(value.name)}}");
         {% endfor %}
-
     {% endfor %}
+
+    // ChainedStruct
 
     static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),
             "sizeof mismatch for ChainedStruct");
@@ -50,10 +52,11 @@ namespace wgpu {
             "offsetof mismatch for ChainedStruct::nextInChain");
     static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
             "offsetof mismatch for ChainedStruct::sType");
-
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
+
+        // {{CppType}}
 
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
@@ -67,17 +70,18 @@ namespace wgpu {
             static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
                     "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endfor %}
-
-    {% endfor %}
+    {% endfor -%}
 
     {% for type in by_category["object"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
 
+        // {{CppType}}
+
         static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
         static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
-        {% macro render_cpp_method_declaration(type, method) %}
+        {% macro render_cpp_method_declaration(type, method) -%}
             {% set CppType = as_cppType(type.name) %}
             {{as_cppType(method.return_type.name)}} {{CppType}}::{{method.name.CamelCase()}}(
                 {%- for arg in method.arguments -%}
@@ -89,9 +93,9 @@ namespace wgpu {
                     {%- endif -%}
                 {%- endfor -%}
             ) const
-        {%- endmacro %}
+        {%- endmacro -%}
 
-        {% macro render_cpp_to_c_method_call(type, method) -%}
+        {%- macro render_cpp_to_c_method_call(type, method) -%}
             {{as_cMethod(type.name, method.name)}}(Get()
                 {%- for arg in method.arguments -%},{{" "}}
                     {%- if arg.annotation == "value" -%}
@@ -109,9 +113,9 @@ namespace wgpu {
                     {%- endif -%}
                 {%- endfor -%}
             )
-        {%- endmacro %}
+        {%- endmacro -%}
 
-        {% for method in type.methods %}
+        {% for method in type.methods -%}
             {{render_cpp_method_declaration(type, method)}} {
                 {% if method.return_type.name.concatcase() == "void" %}
                     {{render_cpp_to_c_method_call(type, method)}};
@@ -131,8 +135,9 @@ namespace wgpu {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }
         }
-
     {% endfor %}
+
+    // Instance
 
     Instance CreateInstance(const InstanceDescriptor* descriptor) {
         const WGPUInstanceDescriptor* cDescriptor =
