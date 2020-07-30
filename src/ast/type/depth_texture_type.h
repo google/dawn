@@ -12,39 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/type/u32_type.h"
+#ifndef SRC_AST_TYPE_DEPTH_TEXTURE_TYPE_H_
+#define SRC_AST_TYPE_DEPTH_TEXTURE_TYPE_H_
 
-#include "gtest/gtest.h"
+#include <string>
+
+#include "src/ast/type/texture_type.h"
 
 namespace tint {
 namespace ast {
 namespace type {
-namespace {
 
-using U32TypeTest = testing::Test;
+/// A depth texture type.
+class DepthTextureType : public TextureType {
+ public:
+  /// Constructor
+  /// @param dim the dimensionality of the texture
+  explicit DepthTextureType(TextureDimension dim);
+  /// Move constructor
+  DepthTextureType(DepthTextureType&&);
+  ~DepthTextureType() override;
 
-TEST_F(U32TypeTest, Is) {
-  U32Type u;
-  EXPECT_FALSE(u.IsAlias());
-  EXPECT_FALSE(u.IsArray());
-  EXPECT_FALSE(u.IsBool());
-  EXPECT_FALSE(u.IsF32());
-  EXPECT_FALSE(u.IsI32());
-  EXPECT_FALSE(u.IsMatrix());
-  EXPECT_FALSE(u.IsPointer());
-  EXPECT_FALSE(u.IsSampler());
-  EXPECT_FALSE(u.IsStruct());
-  EXPECT_FALSE(u.IsTexture());
-  EXPECT_TRUE(u.IsU32());
-  EXPECT_FALSE(u.IsVector());
-}
+  /// @returns true if the type is a depth texture type
+  bool IsDepth() const override;
 
-TEST_F(U32TypeTest, TypeName) {
-  U32Type u;
-  EXPECT_EQ(u.type_name(), "__u32");
-}
+  /// @returns the name for this type
+  std::string type_name() const override;
+};
 
-}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint
+
+#endif  // SRC_AST_TYPE_DEPTH_TEXTURE_TYPE_H_

@@ -12,30 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/type/struct_type.h"
-
-#include <utility>
+#include "src/ast/type/sampled_texture_type.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/type/i32_type.h"
+#include "src/ast/type/f32_type.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using StructTypeTest = testing::Test;
+using SampledTextureTypeTest = testing::Test;
 
-TEST_F(StructTypeTest, Creation) {
-  auto impl = std::make_unique<Struct>();
-  auto* ptr = impl.get();
-  StructType s{std::move(impl)};
-  EXPECT_EQ(s.impl(), ptr);
-}
-
-TEST_F(StructTypeTest, Is) {
-  auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
+TEST_F(SampledTextureTypeTest, Is) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::kCube, &f32);
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());
@@ -44,17 +35,36 @@ TEST_F(StructTypeTest, Is) {
   EXPECT_FALSE(s.IsMatrix());
   EXPECT_FALSE(s.IsPointer());
   EXPECT_FALSE(s.IsSampler());
-  EXPECT_TRUE(s.IsStruct());
-  EXPECT_FALSE(s.IsTexture());
+  EXPECT_FALSE(s.IsStruct());
+  EXPECT_TRUE(s.IsTexture());
   EXPECT_FALSE(s.IsU32());
   EXPECT_FALSE(s.IsVector());
 }
 
-TEST_F(StructTypeTest, TypeName) {
-  auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
-  s.set_name("my_struct");
-  EXPECT_EQ(s.type_name(), "__struct_my_struct");
+TEST_F(SampledTextureTypeTest, IsTextureType) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::kCube, &f32);
+  EXPECT_FALSE(s.IsDepth());
+  EXPECT_TRUE(s.IsSampled());
+  EXPECT_FALSE(s.IsStorage());
+}
+
+TEST_F(SampledTextureTypeTest, Dim) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::k3d, &f32);
+  EXPECT_EQ(s.dim(), TextureDimension::k3d);
+}
+
+TEST_F(SampledTextureTypeTest, Type) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::k3d, &f32);
+  EXPECT_EQ(s.type(), &f32);
+}
+
+TEST_F(SampledTextureTypeTest, TypeName) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::k3d, &f32);
+  EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
 }  // namespace

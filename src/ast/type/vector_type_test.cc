@@ -43,6 +43,7 @@ TEST_F(VectorTypeTest, Is) {
   EXPECT_FALSE(v.IsPointer());
   EXPECT_FALSE(v.IsSampler());
   EXPECT_FALSE(v.IsStruct());
+  EXPECT_FALSE(v.IsTexture());
   EXPECT_FALSE(v.IsU32());
   EXPECT_TRUE(v.IsVector());
 }

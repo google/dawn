@@ -47,6 +47,7 @@ TEST_F(AliasTypeTest, Is) {
   EXPECT_FALSE(at.IsPointer());
   EXPECT_FALSE(at.IsSampler());
   EXPECT_FALSE(at.IsStruct());
+  EXPECT_FALSE(at.IsTexture());
   EXPECT_FALSE(at.IsU32());
   EXPECT_FALSE(at.IsVector());
 }

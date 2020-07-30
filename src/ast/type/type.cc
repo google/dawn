@@ -25,6 +25,7 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
@@ -89,6 +90,10 @@ bool Type::IsSampler() const {
 }
 
 bool Type::IsStruct() const {
+  return false;
+}
+
+bool Type::IsTexture() const {
   return false;
 }
 
@@ -189,6 +194,11 @@ const StructType* Type::AsStruct() const {
   return static_cast<const StructType*>(this);
 }
 
+const TextureType* Type::AsTexture() const {
+  assert(IsTexture());
+  return static_cast<const TextureType*>(this);
+}
+
 const U32Type* Type::AsU32() const {
   assert(IsU32());
   return static_cast<const U32Type*>(this);
@@ -247,6 +257,11 @@ SamplerType* Type::AsSampler() {
 StructType* Type::AsStruct() {
   assert(IsStruct());
   return static_cast<StructType*>(this);
+}
+
+TextureType* Type::AsTexture() {
+  assert(IsTexture());
+  return static_cast<TextureType*>(this);
 }
 
 U32Type* Type::AsU32() {

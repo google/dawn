@@ -45,6 +45,7 @@ TEST_F(SamplerTypeTest, Is) {
   EXPECT_FALSE(s.IsPointer());
   EXPECT_TRUE(s.IsSampler());
   EXPECT_FALSE(s.IsStruct());
+  EXPECT_FALSE(s.IsTexture());
   EXPECT_FALSE(s.IsU32());
   EXPECT_FALSE(s.IsVector());
 }

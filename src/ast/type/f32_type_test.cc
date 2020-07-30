@@ -34,6 +34,7 @@ TEST_F(F32TypeTest, Is) {
   EXPECT_FALSE(f.IsPointer());
   EXPECT_FALSE(f.IsSampler());
   EXPECT_FALSE(f.IsStruct());
+  EXPECT_FALSE(f.IsTexture());
   EXPECT_FALSE(f.IsU32());
   EXPECT_FALSE(f.IsVector());
 }

@@ -144,6 +144,8 @@ set(TINT_LIB_SRCS
   ast/type/array_type.h
   ast/type/bool_type.cc
   ast/type/bool_type.h
+  ast/type/depth_texture_type.cc
+  ast/type/depth_texture_type.h
   ast/type/f32_type.cc
   ast/type/f32_type.h
   ast/type/i32_type.cc
@@ -152,10 +154,16 @@ set(TINT_LIB_SRCS
   ast/type/matrix_type.h
   ast/type/pointer_type.cc
   ast/type/pointer_type.h
+  ast/type/sampled_texture_type.cc
+  ast/type/sampled_texture_type.h
   ast/type/sampler_type.cc
   ast/type/sampler_type.h
+  ast/type/storage_texture_type.cc
+  ast/type/storage_texture_type.h
   ast/type/struct_type.cc
   ast/type/struct_type.h
+  ast/type/texture_type.cc
+  ast/type/texture_type.h
   ast/type/type.cc
   ast/type/type.h
   ast/type/u32_type.cc
@@ -320,11 +328,14 @@ set(TINT_TEST_SRCS
   ast/type/alias_type_test.cc
   ast/type/array_type_test.cc
   ast/type/bool_type_test.cc
+  ast/type/depth_texture_type_test.cc
   ast/type/f32_type_test.cc
   ast/type/i32_type_test.cc
   ast/type/matrix_type_test.cc
   ast/type/pointer_type_test.cc
+  ast/type/sampled_texture_type_test.cc
   ast/type/sampler_type_test.cc
+  ast/type/storage_texture_type_test.cc
   ast/type/struct_type_test.cc
   ast/type/u32_type_test.cc
   ast/type/vector_type_test.cc
