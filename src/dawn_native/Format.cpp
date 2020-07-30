@@ -79,6 +79,47 @@ namespace dawn_native {
         return componentType == type;
     }
 
+    TexelBlockInfo Format::GetTexelBlockInfo(wgpu::TextureAspect aspect) const {
+        switch (aspect) {
+            case wgpu::TextureAspect::All:
+                switch (aspects) {
+                    case Aspect::Color:
+                    case Aspect::Depth:
+                    case Aspect::Stencil:
+                        break;
+                    default:
+                        UNREACHABLE();
+                }
+                return *this;
+
+            case wgpu::TextureAspect::DepthOnly:
+                ASSERT(HasDepth());
+                switch (format) {
+                    case wgpu::TextureFormat::Depth32Float:
+                        return *this;
+                    default:
+                        UNREACHABLE();
+                        break;
+                }
+                break;
+
+            case wgpu::TextureAspect::StencilOnly:
+                ASSERT(HasStencil());
+                switch (format) {
+                    case wgpu::TextureFormat::Depth24PlusStencil8:
+                        return {1, 1, 1};
+                    default:
+                        UNREACHABLE();
+                        break;
+                }
+                break;
+
+            default:
+                UNREACHABLE();
+                break;
+        }
+    }
+
     size_t Format::GetIndex() const {
         return ComputeFormatIndex(format);
     }

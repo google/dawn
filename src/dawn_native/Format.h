@@ -29,12 +29,18 @@ namespace dawn_native {
     enum class Aspect : uint8_t;
     class DeviceBase;
 
+    struct TexelBlockInfo {
+        uint32_t blockByteSize;
+        uint32_t blockWidth;
+        uint32_t blockHeight;
+    };
+
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
     static constexpr size_t kKnownFormatCount = 52;
 
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
-    struct Format {
+    struct Format : TexelBlockInfo {
         enum class Type {
             Float,
             Sint,
@@ -51,10 +57,6 @@ namespace dawn_native {
         Type type;
         Aspect aspects;
 
-        uint32_t blockByteSize;
-        uint32_t blockWidth;
-        uint32_t blockHeight;
-
         static Type TextureComponentTypeToFormatType(wgpu::TextureComponentType componentType);
         static wgpu::TextureComponentType FormatTypeToTextureComponentType(Type type);
 
@@ -63,6 +65,8 @@ namespace dawn_native {
         bool HasStencil() const;
         bool HasDepthOrStencil() const;
         bool HasComponentType(Type componentType) const;
+
+        TexelBlockInfo GetTexelBlockInfo(wgpu::TextureAspect aspect) const;
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)

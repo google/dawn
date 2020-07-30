@@ -53,7 +53,8 @@ namespace {
                               wgpu::Texture texture,
                               uint32_t texLevel,
                               wgpu::Origin3D texOrigin,
-                              wgpu::Extent3D size) {
+                              wgpu::Extent3D size,
+                              wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
             std::vector<uint8_t> data(dataSize);
 
             wgpu::TextureDataLayout textureDataLayout;
@@ -62,7 +63,7 @@ namespace {
             textureDataLayout.rowsPerImage = dataRowsPerImage;
 
             wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(texture, texLevel, texOrigin);
+                utils::CreateTextureCopyView(texture, texLevel, texOrigin, aspect);
 
             queue.WriteTexture(&textureCopyView, data.data(), dataSize, &textureDataLayout, &size);
         }
@@ -400,6 +401,71 @@ namespace {
         // Copy with bytesPerRow = 500
         TestWriteTextureExactDataSize(500, 2, destination, wgpu::TextureFormat::RGBA8Unorm,
                                       {0, 0, 1}, {4, 2, 3});
+    }
+
+    // Test it is invalid to write into a depth texture.
+    TEST_F(QueueWriteTextureValidationTest, WriteToDepthAspect) {
+        uint32_t bytesPerRow = sizeof(float) * 4;
+        const uint64_t dataSize = utils::RequiredBytesInCopy(bytesPerRow, 0, {4, 4, 1},
+                                                             wgpu::TextureFormat::Depth32Float);
+
+        // Invalid to write into depth32float
+        {
+            wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
+                {4, 4, 1}, 1, wgpu::TextureFormat::Depth32Float, wgpu::TextureUsage::CopyDst);
+
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All));
+
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1},
+                                                 wgpu::TextureAspect::DepthOnly));
+        }
+
+        // Invalid to write into depth24plus
+        {
+            wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
+                {4, 4, 1}, 1, wgpu::TextureFormat::Depth24Plus, wgpu::TextureUsage::CopyDst);
+
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All));
+
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1},
+                                                 wgpu::TextureAspect::DepthOnly));
+        }
+    }
+
+    // Test write texture to the stencil aspect
+    TEST_F(QueueWriteTextureValidationTest, WriteToStencilAspect) {
+        uint32_t bytesPerRow = 4;
+        const uint64_t dataSize =
+            utils::RequiredBytesInCopy(bytesPerRow, 0, {4, 4, 1}, wgpu::TextureFormat::R8Uint);
+
+        // It is valid to write into the stencil aspect of depth24plus-stencil8
+        {
+            wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
+                {4, 4, 1}, 1, wgpu::TextureFormat::Depth24PlusStencil8,
+                wgpu::TextureUsage::CopyDst);
+
+            TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0, {0, 0, 0}, {4, 4, 1},
+                             wgpu::TextureAspect::StencilOnly);
+
+            // And that it fails if the buffer is one byte too small
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize - 1, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1},
+                                                 wgpu::TextureAspect::StencilOnly));
+        }
+
+        // It is invalid to write into the stencil aspect of depth24plus (no stencil)
+        {
+            wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
+                {4, 4, 1}, 1, wgpu::TextureFormat::Depth24Plus, wgpu::TextureUsage::CopyDst);
+
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {4, 4, 1},
+                                                 wgpu::TextureAspect::StencilOnly));
+        }
     }
 
     class WriteTextureTest_CompressedTextureFormats : public QueueWriteTextureValidationTest {

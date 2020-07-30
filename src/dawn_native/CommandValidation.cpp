@@ -370,7 +370,7 @@ namespace dawn_native {
                static_cast<uint64_t>(maxStart);
     }
 
-    uint32_t ComputeRequiredBytesInCopy(const Format& textureFormat,
+    uint32_t ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
                                         const Extent3D& copySize,
                                         uint32_t bytesPerRow,
                                         uint32_t rowsPerImage) {
@@ -386,11 +386,11 @@ namespace dawn_native {
         ASSERT(copySize.height >= 1);
         ASSERT(copySize.depth >= 1);
 
-        uint64_t texelBlockRowsPerImage = rowsPerImage / textureFormat.blockHeight;
+        uint64_t texelBlockRowsPerImage = rowsPerImage / blockInfo.blockHeight;
         uint64_t bytesPerImage = bytesPerRow * texelBlockRowsPerImage;
         uint64_t bytesInLastSlice =
-            bytesPerRow * (copySize.height / textureFormat.blockHeight - 1) +
-            (copySize.width / textureFormat.blockWidth * textureFormat.blockByteSize);
+            bytesPerRow * (copySize.height / blockInfo.blockHeight - 1) +
+            (copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize);
         return bytesPerImage * (copySize.depth - 1) + bytesInLastSlice;
     }
 
@@ -408,15 +408,15 @@ namespace dawn_native {
 
     MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
                                          uint64_t byteSize,
-                                         const Format& format,
+                                         const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent) {
         // Validation for the texel block alignments:
-        if (layout.rowsPerImage % format.blockHeight != 0) {
+        if (layout.rowsPerImage % blockInfo.blockHeight != 0) {
             return DAWN_VALIDATION_ERROR(
                 "rowsPerImage must be a multiple of compressed texture format block height");
         }
 
-        if (layout.offset % format.blockByteSize != 0) {
+        if (layout.offset % blockInfo.blockByteSize != 0) {
             return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
         }
 
@@ -429,8 +429,8 @@ namespace dawn_native {
         // because the divisibility conditions are necessary for the algorithm to be valid.
         // TODO(tommek@google.com): to match the spec this should only be checked when
         // copyExtent.depth > 1.
-        uint32_t requiredBytesInCopy =
-            ComputeRequiredBytesInCopy(format, copyExtent, layout.bytesPerRow, layout.rowsPerImage);
+        uint32_t requiredBytesInCopy = ComputeRequiredBytesInCopy(
+            blockInfo, copyExtent, layout.bytesPerRow, layout.rowsPerImage);
 
         bool fitsInData =
             layout.offset <= byteSize && (requiredBytesInCopy <= (byteSize - layout.offset));
@@ -440,7 +440,8 @@ namespace dawn_native {
         }
 
         // Validation for other members in layout:
-        if (layout.bytesPerRow < copyExtent.width / format.blockWidth * format.blockByteSize) {
+        if (layout.bytesPerRow <
+            copyExtent.width / blockInfo.blockWidth * blockInfo.blockByteSize) {
             return DAWN_VALIDATION_ERROR(
                 "bytesPerRow must not be less than the number of bytes per row");
         }
@@ -482,6 +483,26 @@ namespace dawn_native {
                 "Offset.y must be a multiple of compressed texture format block height");
         }
 
+        switch (textureCopy.aspect) {
+            case wgpu::TextureAspect::All:
+                break;
+            case wgpu::TextureAspect::DepthOnly:
+                if ((textureCopy.texture->GetFormat().aspects & Aspect::Depth) == 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Texture does not have depth aspect for texture copy");
+                }
+                break;
+            case wgpu::TextureAspect::StencilOnly:
+                if ((textureCopy.texture->GetFormat().aspects & Aspect::Stencil) == 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Texture does not have stencil aspect for texture copy");
+                }
+                break;
+            default:
+                UNREACHABLE();
+                break;
+        }
+
         return {};
     }
 
@@ -520,6 +541,39 @@ namespace dawn_native {
                 "copySize.height must be a multiple of compressed texture format block height");
         }
 
+        return {};
+    }
+
+    MaybeError ValidateBufferToTextureCopyRestrictions(const TextureCopyView& dst) {
+        const Format& format = dst.texture->GetFormat();
+
+        bool depthSelected = false;
+        switch (dst.aspect) {
+            case wgpu::TextureAspect::All:
+                switch (format.aspects) {
+                    case Aspect::Color:
+                    case Aspect::Stencil:
+                        break;
+                    case Aspect::Depth:
+                        depthSelected = true;
+                        break;
+                    default:
+                        return DAWN_VALIDATION_ERROR(
+                            "A single aspect must be selected for multi planar formats in buffer "
+                            "to texture copies");
+                }
+                break;
+            case wgpu::TextureAspect::DepthOnly:
+                ASSERT(format.aspects & Aspect::Depth);
+                depthSelected = true;
+                break;
+            case wgpu::TextureAspect::StencilOnly:
+                ASSERT(format.aspects & Aspect::Stencil);
+                break;
+        }
+        if (depthSelected) {
+            return DAWN_VALIDATION_ERROR("Cannot copy into the depth aspect of a texture");
+        }
         return {};
     }
 

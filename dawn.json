@@ -1592,7 +1592,8 @@
             {"name": "texture", "type": "texture"},
             {"name": "mip level", "type": "uint32_t", "default": "0"},
             {"name": "array layer", "type": "uint32_t", "default": "0"},
-            {"name": "origin", "type": "origin 3D"}
+            {"name": "origin", "type": "origin 3D"},
+            {"name": "aspect", "type": "texture aspect", "default": "all"}
         ]
     },
     "texture data layout": {

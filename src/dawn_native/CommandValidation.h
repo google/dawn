@@ -27,6 +27,7 @@ namespace dawn_native {
     class QuerySetBase;
     struct BeginRenderPassCmd;
     struct PassResourceUsage;
+    struct TexelBlockInfo;
 
     MaybeError ValidateCanPopDebugGroup(uint64_t debugGroupStackSize);
     MaybeError ValidateFinalDebugGroupStackSize(uint64_t debugGroupStackSize);
@@ -40,17 +41,18 @@ namespace dawn_native {
 
     MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
 
-    uint32_t ComputeRequiredBytesInCopy(const Format& textureFormat,
+    uint32_t ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
                                         const Extent3D& copySize,
                                         uint32_t bytesPerRow,
                                         uint32_t rowsPerImage);
 
     MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
                                          uint64_t byteSize,
-                                         const Format& format,
+                                         const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent);
     MaybeError ValidateTextureCopyRange(const TextureCopyView& textureCopyView,
                                         const Extent3D& copySize);
+    MaybeError ValidateBufferToTextureCopyRestrictions(const TextureCopyView& dst);
 
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView);

@@ -276,11 +276,13 @@ namespace utils {
 
     wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
                                                 uint32_t mipLevel,
-                                                wgpu::Origin3D origin) {
+                                                wgpu::Origin3D origin,
+                                                wgpu::TextureAspect aspect) {
         wgpu::TextureCopyView textureCopyView;
         textureCopyView.texture = texture;
         textureCopyView.mipLevel = mipLevel;
         textureCopyView.origin = origin;
+        textureCopyView.aspect = aspect;
 
         return textureCopyView;
     }

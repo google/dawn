@@ -52,9 +52,11 @@ namespace utils {
                                               uint64_t offset,
                                               uint32_t bytesPerRow,
                                               uint32_t rowsPerImage);
-    wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
-                                                uint32_t level,
-                                                wgpu::Origin3D origin);
+    wgpu::TextureCopyView CreateTextureCopyView(
+        wgpu::Texture texture,
+        uint32_t level,
+        wgpu::Origin3D origin,
+        wgpu::TextureAspect aspect = wgpu::TextureAspect::All);
     wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
                                                     uint32_t bytesPerRow,
                                                     uint32_t rowsPerImage);
