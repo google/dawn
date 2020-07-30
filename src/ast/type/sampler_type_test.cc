@@ -12,30 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/type/struct_type.h"
-
-#include <utility>
+#include "src/ast/type/sampler_type.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using StructTypeTest = testing::Test;
+using SamplerTypeTest = testing::Test;
 
-TEST_F(StructTypeTest, Creation) {
-  auto impl = std::make_unique<Struct>();
-  auto* ptr = impl.get();
-  StructType s{std::move(impl)};
-  EXPECT_EQ(s.impl(), ptr);
+TEST_F(SamplerTypeTest, Creation) {
+  SamplerType s{SamplerKind::kSampler};
+  EXPECT_EQ(s.kind(), SamplerKind::kSampler);
 }
 
-TEST_F(StructTypeTest, Is) {
-  auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
+TEST_F(SamplerTypeTest, Creation_ComparisonSampler) {
+  SamplerType s{SamplerKind::kComparisonSampler};
+  EXPECT_EQ(s.kind(), SamplerKind::kComparisonSampler);
+  EXPECT_TRUE(s.IsComparison());
+}
+
+TEST_F(SamplerTypeTest, Is) {
+  SamplerType s{SamplerKind::kSampler};
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());
@@ -43,17 +43,20 @@ TEST_F(StructTypeTest, Is) {
   EXPECT_FALSE(s.IsI32());
   EXPECT_FALSE(s.IsMatrix());
   EXPECT_FALSE(s.IsPointer());
-  EXPECT_FALSE(s.IsSampler());
-  EXPECT_TRUE(s.IsStruct());
+  EXPECT_TRUE(s.IsSampler());
+  EXPECT_FALSE(s.IsStruct());
   EXPECT_FALSE(s.IsU32());
   EXPECT_FALSE(s.IsVector());
 }
 
-TEST_F(StructTypeTest, TypeName) {
-  auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
-  s.set_name("my_struct");
-  EXPECT_EQ(s.type_name(), "__struct_my_struct");
+TEST_F(SamplerTypeTest, TypeName_Sampler) {
+  SamplerType s{SamplerKind::kSampler};
+  EXPECT_EQ(s.type_name(), "__sampler_sampler");
+}
+
+TEST_F(SamplerTypeTest, TypeName_Comparison) {
+  SamplerType s{SamplerKind::kComparisonSampler};
+  EXPECT_EQ(s.type_name(), "__sampler_comparison");
 }
 
 }  // namespace

@@ -23,6 +23,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -80,6 +81,10 @@ bool Type::IsMatrix() const {
 }
 
 bool Type::IsPointer() const {
+  return false;
+}
+
+bool Type::IsSampler() const {
   return false;
 }
 
@@ -174,6 +179,11 @@ const PointerType* Type::AsPointer() const {
   return static_cast<const PointerType*>(this);
 }
 
+const SamplerType* Type::AsSampler() const {
+  assert(IsSampler());
+  return static_cast<const SamplerType*>(this);
+}
+
 const StructType* Type::AsStruct() const {
   assert(IsStruct());
   return static_cast<const StructType*>(this);
@@ -227,6 +237,11 @@ MatrixType* Type::AsMatrix() {
 PointerType* Type::AsPointer() {
   assert(IsPointer());
   return static_cast<PointerType*>(this);
+}
+
+SamplerType* Type::AsSampler() {
+  assert(IsSampler());
+  return static_cast<SamplerType*>(this);
 }
 
 StructType* Type::AsStruct() {

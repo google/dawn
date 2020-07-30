@@ -45,6 +45,7 @@ TEST_F(AliasTypeTest, Is) {
   EXPECT_FALSE(at.IsI32());
   EXPECT_FALSE(at.IsMatrix());
   EXPECT_FALSE(at.IsPointer());
+  EXPECT_FALSE(at.IsSampler());
   EXPECT_FALSE(at.IsStruct());
   EXPECT_FALSE(at.IsU32());
   EXPECT_FALSE(at.IsVector());

@@ -41,6 +41,7 @@ TEST_F(PointerTypeTest, Is) {
   EXPECT_FALSE(p.IsI32());
   EXPECT_FALSE(p.IsMatrix());
   EXPECT_TRUE(p.IsPointer());
+  EXPECT_FALSE(p.IsSampler());
   EXPECT_FALSE(p.IsStruct());
   EXPECT_FALSE(p.IsU32());
   EXPECT_FALSE(p.IsVector());

@@ -28,6 +28,7 @@ class F32Type;
 class I32Type;
 class MatrixType;
 class PointerType;
+class SamplerType;
 class StructType;
 class U32Type;
 class VectorType;
@@ -54,6 +55,8 @@ class Type {
   virtual bool IsMatrix() const;
   /// @returns true if the type is a ptr type
   virtual bool IsPointer() const;
+  /// @returns true if the type is a sampler
+  virtual bool IsSampler() const;
   /// @returns true if the type is a struct type
   virtual bool IsStruct() const;
   /// @returns true if the type is a u32 type
@@ -119,6 +122,8 @@ class Type {
   const MatrixType* AsMatrix() const;
   /// @returns the type as a pointer type
   const PointerType* AsPointer() const;
+  /// @returns the type as a sampler type
+  const SamplerType* AsSampler() const;
   /// @returns the type as a struct type
   const StructType* AsStruct() const;
   /// @returns the type as a u32 type
@@ -142,6 +147,8 @@ class Type {
   MatrixType* AsMatrix();
   /// @returns the type as a pointer type
   PointerType* AsPointer();
+  /// @returns the type as a sampler type
+  SamplerType* AsSampler();
   /// @returns the type as a struct type
   StructType* AsStruct();
   /// @returns the type as a u32 type

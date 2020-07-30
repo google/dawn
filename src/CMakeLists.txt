@@ -152,6 +152,8 @@ set(TINT_LIB_SRCS
   ast/type/matrix_type.h
   ast/type/pointer_type.cc
   ast/type/pointer_type.h
+  ast/type/sampler_type.cc
+  ast/type/sampler_type.h
   ast/type/struct_type.cc
   ast/type/struct_type.h
   ast/type/type.cc
@@ -322,6 +324,7 @@ set(TINT_TEST_SRCS
   ast/type/i32_type_test.cc
   ast/type/matrix_type_test.cc
   ast/type/pointer_type_test.cc
+  ast/type/sampler_type_test.cc
   ast/type/struct_type_test.cc
   ast/type/u32_type_test.cc
   ast/type/vector_type_test.cc

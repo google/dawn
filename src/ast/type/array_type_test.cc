@@ -54,6 +54,7 @@ TEST_F(ArrayTypeTest, Is) {
   EXPECT_FALSE(arr.IsI32());
   EXPECT_FALSE(arr.IsMatrix());
   EXPECT_FALSE(arr.IsPointer());
+  EXPECT_FALSE(arr.IsSampler());
   EXPECT_FALSE(arr.IsStruct());
   EXPECT_FALSE(arr.IsU32());
   EXPECT_FALSE(arr.IsVector());

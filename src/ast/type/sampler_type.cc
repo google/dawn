@@ -12,38 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/type/f32_type.h"
-
-#include "gtest/gtest.h"
+#include "src/ast/type/sampler_type.h"
 
 namespace tint {
 namespace ast {
 namespace type {
-namespace {
 
-using F32TypeTest = testing::Test;
-
-TEST_F(F32TypeTest, Is) {
-  F32Type f;
-  EXPECT_FALSE(f.IsAlias());
-  EXPECT_FALSE(f.IsArray());
-  EXPECT_FALSE(f.IsBool());
-  EXPECT_TRUE(f.IsF32());
-  EXPECT_FALSE(f.IsI32());
-  EXPECT_FALSE(f.IsMatrix());
-  EXPECT_FALSE(f.IsPointer());
-  EXPECT_FALSE(f.IsSampler());
-  EXPECT_FALSE(f.IsStruct());
-  EXPECT_FALSE(f.IsU32());
-  EXPECT_FALSE(f.IsVector());
+std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
+  switch (kind) {
+    case SamplerKind::kSampler:
+      out << "sampler";
+      break;
+    case SamplerKind::kComparisonSampler:
+      out << "comparison_sampler";
+      break;
+  }
+  return out;
 }
 
-TEST_F(F32TypeTest, TypeName) {
-  F32Type f;
-  EXPECT_EQ(f.type_name(), "__f32");
+SamplerType::SamplerType(SamplerKind kind) : kind_(kind) {}
+
+SamplerType::SamplerType(SamplerType&&) = default;
+
+SamplerType::~SamplerType() = default;
+
+bool SamplerType::IsSampler() const {
+  return true;
 }
 
-}  // namespace
+std::string SamplerType::type_name() const {
+  return std::string("__sampler_") +
+         (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

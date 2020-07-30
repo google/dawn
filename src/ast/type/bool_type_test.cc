@@ -32,6 +32,7 @@ TEST_F(BoolTypeTest, Is) {
   EXPECT_FALSE(b.IsI32());
   EXPECT_FALSE(b.IsMatrix());
   EXPECT_FALSE(b.IsPointer());
+  EXPECT_FALSE(b.IsSampler());
   EXPECT_FALSE(b.IsStruct());
   EXPECT_FALSE(b.IsU32());
   EXPECT_FALSE(b.IsVector());

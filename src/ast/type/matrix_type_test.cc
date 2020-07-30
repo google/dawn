@@ -42,6 +42,7 @@ TEST_F(MatrixTypeTest, Is) {
   EXPECT_FALSE(m.IsI32());
   EXPECT_TRUE(m.IsMatrix());
   EXPECT_FALSE(m.IsPointer());
+  EXPECT_FALSE(m.IsSampler());
   EXPECT_FALSE(m.IsStruct());
   EXPECT_FALSE(m.IsU32());
   EXPECT_FALSE(m.IsVector());
