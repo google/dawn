@@ -34,7 +34,7 @@ class ValidatorImpl {
   /// Runs the validator
   /// @param module the module to validate
   /// @returns true if the validation was successful
-  bool Validate(const ast::Module& module);
+  bool Validate(const ast::Module* module);
 
   /// @returns error messages from the validator
   const std::string& error() { return error_; }
@@ -53,23 +53,23 @@ class ValidatorImpl {
   /// Validates a function
   /// @param func the function to check
   /// @returns true if the validation was successful
-  bool ValidateFunction(const ast::Function& func);
+  bool ValidateFunction(const ast::Function* func);
   /// Validates a block of statements
   /// @param block the statements to check
   /// @returns true if the validation was successful
-  bool ValidateStatements(const ast::BlockStatement& block);
+  bool ValidateStatements(const ast::BlockStatement* block);
   /// Validates a statement
   /// @param stmt the statement to check
   /// @returns true if the validation was successful
-  bool ValidateStatement(const ast::Statement& stmt);
+  bool ValidateStatement(const ast::Statement* stmt);
   /// Validates an assignment
   /// @param a the assignment to check
   /// @returns true if the validation was successful
-  bool ValidateAssign(const ast::AssignmentStatement& a);
+  bool ValidateAssign(const ast::AssignmentStatement* a);
   /// Validates v-0001: Only allowed import is "GLSL.std.450"
   /// @param module the modele to check imports
   /// @returns ture if input complies with v-0001 rule
-  bool CheckImports(const ast::Module& module);
+  bool CheckImports(const ast::Module* module);
 
  private:
   std::string error_;

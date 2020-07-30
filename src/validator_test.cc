@@ -73,7 +73,7 @@ TEST_F(ValidatorTest, Import) {
   m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
 
   tint::ValidatorImpl v;
-  EXPECT_TRUE(v.CheckImports(m));
+  EXPECT_TRUE(v.CheckImports(&m));
 }
 
 TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
@@ -82,7 +82,7 @@ TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
       std::make_unique<ast::Import>(Source{12, 34}, "not.GLSL", "glsl"));
 
   tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(m));
+  EXPECT_FALSE(v.CheckImports(&m));
   ASSERT_TRUE(v.has_error());
   EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: not.GLSL");
 }
@@ -93,7 +93,7 @@ TEST_F(ValidatorTest, Import_Fail_Typo) {
       std::make_unique<ast::Import>(Source{12, 34}, "GLSL.std.4501", "glsl"));
 
   tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(m));
+  EXPECT_FALSE(v.CheckImports(&m));
   ASSERT_TRUE(v.has_error());
   EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: GLSL.std.4501");
 }
@@ -136,7 +136,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
   tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateAssign(assign));
+  EXPECT_FALSE(v.ValidateAssign(&assign));
   ASSERT_TRUE(v.has_error());
   // TODO(sarahM0): figure out what should be the error number.
   EXPECT_EQ(v.error(),
@@ -159,7 +159,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   td()->RegisterVariableForTesting(&var);
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
   tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateAssign(assign));
+  EXPECT_TRUE(v.ValidateAssign(&assign));
 }
 
 TEST_F(ValidatorTest, DISABLED_AssignToConstant_Fail) {

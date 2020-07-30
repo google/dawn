@@ -38,7 +38,7 @@ class Validator {
   /// Runs the validator
   /// @param module the module to validate
   /// @returns true if the validation was successful
-  bool Validate(const ast::Module& module);
+  bool Validate(const ast::Module* module);
 
   /// @returns error messages from the validator
   const std::string& error() { return error_; }

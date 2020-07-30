@@ -437,7 +437,7 @@ int main(int argc, const char** argv) {
   }
 
   tint::Validator v;
-  if (!v.Validate(mod)) {
+  if (!v.Validate(&mod)) {
     std::cerr << "Validation: " << v.error() << std::endl;
     return 1;
   }

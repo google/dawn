@@ -22,7 +22,7 @@ Validator::Validator() : impl_(std::make_unique<tint::ValidatorImpl>()) {}
 
 Validator::~Validator() = default;
 
-bool Validator::Validate(const ast::Module& module) {
+bool Validator::Validate(const ast::Module* module) {
   bool ret = impl_->Validate(module);
 
   if (impl_->has_error())
