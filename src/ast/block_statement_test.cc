@@ -38,6 +38,27 @@ TEST_F(BlockStatementTest, Creation) {
   EXPECT_EQ(b[0], ptr);
 }
 
+TEST_F(BlockStatementTest, Creation_WithInsert) {
+  auto s1 = std::make_unique<DiscardStatement>();
+  auto s2 = std::make_unique<DiscardStatement>();
+  auto s3 = std::make_unique<DiscardStatement>();
+  auto* p1 = s1.get();
+  auto* p2 = s2.get();
+  auto* p3 = s3.get();
+
+  BlockStatement b;
+  b.insert(0, std::move(s1));
+  b.insert(0, std::move(s2));
+  b.insert(1, std::move(s3));
+
+  // |b| should contain s2, s3, s1
+
+  ASSERT_EQ(b.size(), 3u);
+  EXPECT_EQ(b[0], p2);
+  EXPECT_EQ(b[1], p3);
+  EXPECT_EQ(b[2], p1);
+}
+
 TEST_F(BlockStatementTest, Creation_WithSource) {
   BlockStatement b(Source{20, 2});
   auto src = b.source();

@@ -57,6 +57,9 @@ class Module {
   /// @returns the global variables for the module
   const VariableList& global_variables() const { return global_variables_; }
 
+  /// @returns the global variables for the module
+  VariableList& global_variables() { return global_variables_; }
+
   /// Adds an entry point to the module
   /// @param ep the entry point to add
   void AddEntryPoint(std::unique_ptr<EntryPoint> ep) {

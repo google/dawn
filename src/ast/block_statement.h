@@ -42,6 +42,13 @@ class BlockStatement : public Statement {
     statements_.push_back(std::move(stmt));
   }
 
+  /// Insert a statement to the block
+  /// @param index the index to insert at
+  /// @param stmt the statement to insert
+  void insert(size_t index, std::unique_ptr<ast::Statement> stmt) {
+    statements_.insert(statements_.begin() + index, std::move(stmt));
+  }
+
   /// @returns true if the block is empty
   bool empty() const { return statements_.empty(); }
   /// @returns the number of statements directly in the block
