@@ -139,6 +139,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(ast::type::Type* type);
+  /// Handles generating a variable
+  /// @param var the variable to generate
+  /// @returns true if the variable was emitted
+  bool EmitVariable(ast::Variable* var);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

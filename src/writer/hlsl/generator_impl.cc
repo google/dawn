@@ -36,6 +36,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace writer {
@@ -544,6 +545,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsSwitch()) {
     return EmitSwitch(stmt->AsSwitch());
   }
+  if (stmt->IsVariableDecl()) {
+    return EmitVariable(stmt->AsVariableDecl()->variable());
+  }
 
   error_ = "unknown statement type: " + stmt->str();
   return false;
@@ -681,6 +685,36 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   }
 
   out_ << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitVariable(ast::Variable* var) {
+  make_indent();
+
+  // TODO(dsinclair): Handle variable decorations
+  if (var->IsDecorated()) {
+    error_ = "Variable decorations are not handled yet";
+    return false;
+  }
+
+  if (var->is_const()) {
+    out_ << "const ";
+  }
+  if (!EmitType(var->type(), var->name())) {
+    return false;
+  }
+  if (!var->type()->IsArray()) {
+    out_ << " " << var->name();
+  }
+
+  if (var->constructor() != nullptr) {
+    out_ << " = ";
+    if (!EmitExpression(var->constructor())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
 
   return true;
 }

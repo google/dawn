@@ -567,6 +567,7 @@ if (${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator_impl_test.cc
     writer/hlsl/generator_impl_type_test.cc
     writer/hlsl/generator_impl_unary_op_test.cc
+    writer/hlsl/generator_impl_variable_decl_statement_test.cc
     writer/hlsl/namer_test.cc
   )
 endif()
