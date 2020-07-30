@@ -25,16 +25,16 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/writer/msl/generator_impl.h"
+#include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace msl {
+namespace hlsl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using HlslGeneratorImplTest = testing::Test;
 
-TEST_F(MslGeneratorImplTest, Emit_Loop) {
+TEST_F(HlslGeneratorImplTest, Emit_Loop) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::DiscardStatement>());
 
@@ -46,12 +46,12 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
   EXPECT_EQ(g.result(), R"(  for(;;) {
-    discard_fragment();
+    discard;
   }
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
+TEST_F(HlslGeneratorImplTest, Emit_LoopWithContinuing) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::DiscardStatement>());
 
@@ -66,20 +66,20 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
   EXPECT_EQ(g.result(), R"(  {
-    bool tint_msl_is_first_1 = true;
+    bool tint_hlsl_is_first_1 = true;
     for(;;) {
-      if (!tint_msl_is_first_1) {
+      if (!tint_hlsl_is_first_1) {
         return;
       }
-      tint_msl_is_first_1 = false;
+      tint_hlsl_is_first_1 = false;
 
-      discard_fragment();
+      discard;
     }
   }
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
+TEST_F(HlslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -109,22 +109,22 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
   ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
   EXPECT_EQ(g.result(), R"(  {
-    bool tint_msl_is_first_1 = true;
+    bool tint_hlsl_is_first_1 = true;
     for(;;) {
-      if (!tint_msl_is_first_1) {
+      if (!tint_hlsl_is_first_1) {
         lhs = rhs;
       }
-      tint_msl_is_first_1 = false;
+      tint_hlsl_is_first_1 = false;
 
       {
-        bool tint_msl_is_first_2 = true;
+        bool tint_hlsl_is_first_2 = true;
         for(;;) {
-          if (!tint_msl_is_first_2) {
+          if (!tint_hlsl_is_first_2) {
             return;
           }
-          tint_msl_is_first_2 = false;
+          tint_hlsl_is_first_2 = false;
 
-          discard_fragment();
+          discard;
         }
       }
     }
@@ -134,7 +134,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
 // TODO(dsinclair): Handle pulling declared variables up and out of the for() if
 // there is a continuing block.
-TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
+TEST_F(HlslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
   ast::type::F32Type f32;
 
   auto var = std::make_unique<ast::Variable>(
@@ -164,12 +164,12 @@ TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
   ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
   EXPECT_EQ(g.result(), R"(  {
     float lhs;
-    bool tint_msl_is_first_1 = true;
+    bool tint_hlsl_is_first_1 = true;
     for(;;) {
-      if (!tint_msl_is_first_1) {
+      if (!tint_hlsl_is_first_1) {
         lhs = rhs;
       }
-      tint_msl_is_first_1 = false;
+      tint_hlsl_is_first_1 = false;
 
       lhs = 2.40000010f;
       float other;
@@ -179,6 +179,6 @@ TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
 }
 
 }  // namespace
-}  // namespace msl
+}  // namespace hlsl
 }  // namespace writer
 }  // namespace tint

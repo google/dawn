@@ -114,6 +114,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
   bool EmitLiteral(ast::Literal* lit);
+  /// Handles a loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitLoop(ast::LoopStatement* stmt);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
@@ -171,6 +175,7 @@ class GeneratorImpl : public TextGenerator {
   ast::Module* module_ = nullptr;
   std::string current_ep_name_;
   bool generating_entry_point_ = false;
+  uint32_t loop_emission_counter_ = 0;
   ScopeStack<ast::Variable*> global_variables_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
