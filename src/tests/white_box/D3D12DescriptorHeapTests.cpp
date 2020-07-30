@@ -220,6 +220,10 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
 
 // Verify shader-visible heaps can be recycled for multiple submits.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
+    // Use small heaps to count only pool-allocated switches.
+    DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
+        dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
     ShaderVisibleDescriptorAllocator* allocator =
         mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
@@ -253,6 +257,10 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
 
 // Verify shader-visible heaps do not recycle in a pending submit.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
+    // Use small heaps to count only pool-allocated switches.
+    DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
+        dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
     constexpr uint32_t kNumOfSwitches = 5;
 
     ShaderVisibleDescriptorAllocator* allocator =
@@ -280,6 +288,10 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
 // Verify switching shader-visible heaps do not recycle in a pending submit but do so
 // once no longer pending.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
+    // Use small heaps to count only pool-allocated switches.
+    DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
+        dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
     constexpr uint32_t kNumOfSwitches = 5;
 
     ShaderVisibleDescriptorAllocator* allocator =
@@ -317,6 +329,91 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
     // After switching-over |kNumOfSwitches| x 2, ensure no additional heaps exist.
     EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + kNumOfSwitches * 2);
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
+}
+
+// Verify shader-visible heaps do not recycle in multiple submits.
+TEST_P(D3D12DescriptorHeapTests, GrowHeapsInMultipleSubmits) {
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
+
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
+
+    // Growth: Allocate + Tick() and ensure heaps are always unique.
+    while (allocator->GetShaderVisiblePoolSizeForTesting() == 0) {
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
+        EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
+        heaps.insert(heap);
+        mD3DDevice->Tick();
+    }
+
+    // Verify the number of switches equals the size of heaps allocated (minus the initial).
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 1u);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + heaps.size() - 1);
+}
+
+// Verify shader-visible heaps do not recycle in a pending submit.
+TEST_P(D3D12DescriptorHeapTests, GrowHeapsInPendingSubmit) {
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
+
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
+
+    // Growth: Allocate new heaps.
+    while (allocator->GetShaderVisiblePoolSizeForTesting() == 0) {
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
+        EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
+        heaps.insert(heap);
+    }
+
+    // Verify the number of switches equals the size of heaps allocated (minus the initial).
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 1u);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + heaps.size() - 1);
+}
+
+// Verify switching shader-visible heaps do not recycle in a pending submit but do so
+// once no longer pending.
+// Switches over many times until |kNumOfPooledHeaps| heaps are pool-allocated.
+TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+
+    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
+
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
+
+    uint32_t kNumOfPooledHeaps = 5;
+    while (allocator->GetShaderVisiblePoolSizeForTesting() < kNumOfPooledHeaps) {
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
+        EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
+        heaps.insert(heap);
+    }
+
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfPooledHeaps);
+
+    // Ensure switched-over heaps can be recycled by advancing the GPU by at-least |kFrameDepth|.
+    for (uint32_t i = 0; i < kFrameDepth; i++) {
+        mD3DDevice->Tick();
+    }
+
+    // Switch-over the pool-allocated heaps.
+    for (uint32_t i = 0; i < kNumOfPooledHeaps; i++) {
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
+        EXPECT_FALSE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
+    }
+
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfPooledHeaps);
 }
 
 // Verify encoding multiple heaps worth of bindgroups.

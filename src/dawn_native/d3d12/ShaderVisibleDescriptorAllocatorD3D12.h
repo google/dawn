@@ -78,6 +78,9 @@ namespace dawn_native { namespace d3d12 {
             std::unique_ptr<ShaderVisibleDescriptorHeap> heap;
         };
 
+        ResultOrError<std::unique_ptr<ShaderVisibleDescriptorHeap>> AllocateHeap(
+            uint32_t descriptorCount) const;
+
         std::unique_ptr<ShaderVisibleDescriptorHeap> mHeap;
         RingBufferAllocator mAllocator;
         std::list<SerialDescriptorHeap> mPool;
@@ -91,6 +94,10 @@ namespace dawn_native { namespace d3d12 {
         Serial mHeapSerial = 0;
 
         uint32_t mSizeIncrement;
+
+        // The descriptor count is the current size of the heap in number of descriptors.
+        // This is stored on the allocator to avoid extra conversions.
+        uint32_t mDescriptorCount = 0;
     };
 }}  // namespace dawn_native::d3d12
 
