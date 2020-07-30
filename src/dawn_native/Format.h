@@ -17,12 +17,16 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include "common/ityp_bitset.h"
 #include "dawn_native/Error.h"
+
+#include "dawn_native/EnumClassBitmasks.h"
 
 #include <array>
 
 namespace dawn_native {
 
+    enum class Aspect : uint8_t;
     class DeviceBase;
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
@@ -31,14 +35,7 @@ namespace dawn_native {
 
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
     struct Format {
-        enum Aspect {
-            Color,
-            Depth,
-            Stencil,
-            DepthStencil,
-        };
-
-        enum Type {
+        enum class Type {
             Float,
             Sint,
             Uint,
@@ -51,8 +48,8 @@ namespace dawn_native {
         // A format can be known but not supported because it is part of a disabled extension.
         bool isSupported;
         bool supportsStorageUsage;
-        Aspect aspect;
         Type type;
+        Aspect aspects;
 
         uint32_t blockByteSize;
         uint32_t blockWidth;

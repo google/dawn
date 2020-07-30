@@ -15,6 +15,8 @@
 #ifndef DAWNNATIVE_TEXTURE_H_
 #define DAWNNATIVE_TEXTURE_H_
 
+#include "common/ityp_bitset.h"
+#include "dawn_native/EnumClassBitmasks.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
@@ -24,6 +26,31 @@
 #include <vector>
 
 namespace dawn_native {
+
+    enum class Aspect : uint8_t {
+        Color = 0x1,
+        Depth = 0x2,
+        Stencil = 0x4,
+    };
+
+    template <>
+    struct EnumBitmaskSize<Aspect> {
+        static constexpr unsigned value = 3;
+    };
+
+}  // namespace dawn_native
+
+namespace wgpu {
+
+    template <>
+    struct IsDawnBitmask<dawn_native::Aspect> {
+        static constexpr bool enable = true;
+    };
+
+}  // namespace wgpu
+
+namespace dawn_native {
+
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor);
     MaybeError ValidateTextureViewDescriptor(const TextureBase* texture,

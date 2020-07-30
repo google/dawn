@@ -67,6 +67,8 @@ target_sources(dawn_native PRIVATE
     "DynamicUploader.h"
     "EncodingContext.cpp"
     "EncodingContext.h"
+    "EnumClassBitmasks.h"
+    "EnumMaskIterator.h"
     "Error.cpp"
     "Error.h"
     "ErrorData.cpp"

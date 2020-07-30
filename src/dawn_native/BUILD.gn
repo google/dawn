@@ -192,6 +192,8 @@ source_set("dawn_native_sources") {
     "DynamicUploader.h",
     "EncodingContext.cpp",
     "EncodingContext.h",
+    "EnumClassBitmasks.h",
+    "EnumMaskIterator.h",
     "Error.cpp",
     "Error.h",
     "ErrorData.cpp",

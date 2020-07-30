@@ -39,14 +39,14 @@ namespace dawn_native {
         Format::Type SpirvCrossBaseTypeToFormatType(spirv_cross::SPIRType::BaseType spirvBaseType) {
             switch (spirvBaseType) {
                 case spirv_cross::SPIRType::Float:
-                    return Format::Float;
+                    return Format::Type::Float;
                 case spirv_cross::SPIRType::Int:
-                    return Format::Sint;
+                    return Format::Type::Sint;
                 case spirv_cross::SPIRType::UInt:
-                    return Format::Uint;
+                    return Format::Type::Uint;
                 default:
                     UNREACHABLE();
-                    return Format::Other;
+                    return Format::Type::Other;
             }
         }
 
@@ -463,7 +463,7 @@ namespace dawn_native {
                 UNREACHABLE();
         }
 
-        mFragmentOutputFormatBaseTypes.fill(Format::Other);
+        mFragmentOutputFormatBaseTypes.fill(Format::Type::Other);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
             mSpvcContext.SetUseSpvcParser(true);
         }

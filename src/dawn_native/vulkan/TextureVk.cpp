@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Math.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
@@ -193,20 +194,25 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which Vulkan texture aspects are relevant for the given Dawn format
-        VkImageAspectFlags VulkanAspectMask(const Format& format) {
-            switch (format.aspect) {
-                case Format::Aspect::Color:
-                    return VK_IMAGE_ASPECT_COLOR_BIT;
-                case Format::Aspect::Depth:
-                    return VK_IMAGE_ASPECT_DEPTH_BIT;
-                case Format::Aspect::Stencil:
-                    return VK_IMAGE_ASPECT_STENCIL_BIT;
-                case Format::Aspect::DepthStencil:
-                    return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-                default:
-                    UNREACHABLE();
-                    return 0;
+        VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
+            VkImageAspectFlags flags = 0;
+            for (Aspect aspect : IterateEnumMask(aspects)) {
+                switch (aspect) {
+                    case Aspect::Color:
+                        flags |= VK_IMAGE_ASPECT_COLOR_BIT;
+                        break;
+                    case Aspect::Depth:
+                        flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+                        break;
+                    case Aspect::Stencil:
+                        flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+                        break;
+                    default:
+                        UNREACHABLE();
+                        break;
+                }
             }
+            return flags;
         }
 
         VkImageMemoryBarrier BuildMemoryBarrier(const Format& format,
@@ -222,7 +228,7 @@ namespace dawn_native { namespace vulkan {
             barrier.oldLayout = VulkanImageLayout(lastUsage, format);
             barrier.newLayout = VulkanImageLayout(usage, format);
             barrier.image = image;
-            barrier.subresourceRange.aspectMask = VulkanAspectMask(format);
+            barrier.subresourceRange.aspectMask = VulkanAspectMask(format.aspects);
             barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
             barrier.subresourceRange.levelCount = range.levelCount;
             barrier.subresourceRange.baseArrayLayer = range.baseArrayLayer;
@@ -664,7 +670,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     VkImageAspectFlags Texture::GetVkAspectMask() const {
-        return VulkanAspectMask(GetFormat());
+        return VulkanAspectMask(GetFormat().aspects);
     }
 
     void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
@@ -1007,7 +1013,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.format = VulkanImageFormat(device, descriptor->format);
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetFormat());
+        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetFormat().aspects);
         createInfo.subresourceRange.baseMipLevel = descriptor->baseMipLevel;
         createInfo.subresourceRange.levelCount = descriptor->mipLevelCount;
         createInfo.subresourceRange.baseArrayLayer = descriptor->baseArrayLayer;

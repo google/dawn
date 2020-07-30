@@ -429,7 +429,7 @@ namespace dawn_native { namespace vulkan {
             descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorStateDescriptor* colorStateDescriptor = GetColorStateDescriptor(i);
-            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Other;
+            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Type::Other;
             colorBlendAttachments[i] =
                 ComputeColorDesc(colorStateDescriptor, isDeclaredInFragmentShader);
         }

@@ -13,8 +13,10 @@
 // limitations under the License.
 
 #include "dawn_native/Format.h"
+
 #include "dawn_native/Device.h"
 #include "dawn_native/Extensions.h"
+#include "dawn_native/Texture.h"
 
 #include <bitset>
 
@@ -58,19 +60,19 @@ namespace dawn_native {
     }
 
     bool Format::IsColor() const {
-        return aspect == Aspect::Color;
+        return aspects == Aspect::Color;
     }
 
     bool Format::HasDepth() const {
-        return aspect == Depth || aspect == DepthStencil;
+        return (aspects & Aspect::Depth) != 0;
     }
 
     bool Format::HasStencil() const {
-        return aspect == Stencil || aspect == DepthStencil;
+        return (aspects & Aspect::Stencil) != 0;
     }
 
     bool Format::HasDepthOrStencil() const {
-        return aspect != Color;
+        return (aspects & (Aspect::Depth | Aspect::Stencil)) != 0;
     }
 
     bool Format::HasComponentType(Type componentType) const {
@@ -98,7 +100,6 @@ namespace dawn_native {
         std::bitset<kKnownFormatCount> formatsSet;
 
         using Type = Format::Type;
-        using Aspect = Format::Aspect;
 
         auto AddFormat = [&table, &formatsSet](Format format) {
             size_t index = ComputeFormatIndex(format.format);
@@ -121,7 +122,7 @@ namespace dawn_native {
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = supportsStorageUsage;
-            internalFormat.aspect = Aspect::Color;
+            internalFormat.aspects = Aspect::Color;
             internalFormat.type = type;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = 1;
@@ -129,7 +130,7 @@ namespace dawn_native {
             AddFormat(internalFormat);
         };
 
-        auto AddDepthStencilFormat = [&AddFormat](wgpu::TextureFormat format, Format::Aspect aspect,
+        auto AddDepthStencilFormat = [&AddFormat](wgpu::TextureFormat format, Aspect aspects,
                                                   uint32_t byteSize) {
             Format internalFormat;
             internalFormat.format = format;
@@ -137,7 +138,7 @@ namespace dawn_native {
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = false;
-            internalFormat.aspect = aspect;
+            internalFormat.aspects = aspects;
             internalFormat.type = Type::Other;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = 1;
@@ -153,7 +154,7 @@ namespace dawn_native {
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = false;
-            internalFormat.aspect = Aspect::Depth;
+            internalFormat.aspects = Aspect::Depth;
             internalFormat.type = type;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = 1;
@@ -169,7 +170,7 @@ namespace dawn_native {
             internalFormat.isCompressed = true;
             internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
-            internalFormat.aspect = Aspect::Color;
+            internalFormat.aspects = Aspect::Color;
             internalFormat.type = Type::Float;
             internalFormat.blockByteSize = byteSize;
             internalFormat.blockWidth = width;
@@ -232,7 +233,8 @@ namespace dawn_native {
         AddDepthStencilFormat(wgpu::TextureFormat::Depth24Plus, Aspect::Depth, 4);
         // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
         // because its size isn't well defined, is it 4, 5 or 8?
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth24PlusStencil8, Aspect::DepthStencil, 4);
+        AddDepthStencilFormat(wgpu::TextureFormat::Depth24PlusStencil8,
+                              Aspect::Depth | Aspect::Stencil, 4);
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);

@@ -630,22 +630,16 @@ namespace dawn_native { namespace opengl {
                     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
 
                     GLenum glAttachment = 0;
-                    switch (format.aspect) {
-                        case Format::Aspect::Color:
-                            glAttachment = GL_COLOR_ATTACHMENT0;
-                            break;
-                        case Format::Aspect::Depth:
-                            glAttachment = GL_DEPTH_ATTACHMENT;
-                            break;
-                        case Format::Aspect::Stencil:
-                            glAttachment = GL_STENCIL_ATTACHMENT;
-                            break;
-                        case Format::Aspect::DepthStencil:
-                            glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-                            break;
-                        default:
-                            UNREACHABLE();
-                            break;
+                    if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
+                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                    } else if (format.aspects == Aspect::Depth) {
+                        glAttachment = GL_DEPTH_ATTACHMENT;
+                    } else if (format.aspects == Aspect::Stencil) {
+                        glAttachment = GL_STENCIL_ATTACHMENT;
+                    } else if (format.aspects == Aspect::Color) {
+                        glAttachment = GL_COLOR_ATTACHMENT0;
+                    } else {
+                        UNREACHABLE();
                     }
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
@@ -880,19 +874,14 @@ namespace dawn_native { namespace opengl {
                 GLenum glAttachment = 0;
                 // TODO(kainino@chromium.org): it may be valid to just always use
                 // GL_DEPTH_STENCIL_ATTACHMENT here.
-                switch (format.aspect) {
-                    case Format::Aspect::Depth:
-                        glAttachment = GL_DEPTH_ATTACHMENT;
-                        break;
-                    case Format::Aspect::Stencil:
-                        glAttachment = GL_STENCIL_ATTACHMENT;
-                        break;
-                    case Format::Aspect::DepthStencil:
-                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-                        break;
-                    default:
-                        UNREACHABLE();
-                        break;
+                if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
+                    glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                } else if (format.aspects == Aspect::Depth) {
+                    glAttachment = GL_DEPTH_ATTACHMENT;
+                } else if (format.aspects == Aspect::Stencil) {
+                    glAttachment = GL_STENCIL_ATTACHMENT;
+                } else {
+                    UNREACHABLE();
                 }
 
                 if (textureView->GetTexture()->GetArrayLayers() == 1) {

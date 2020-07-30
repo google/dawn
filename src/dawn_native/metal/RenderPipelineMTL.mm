@@ -371,7 +371,7 @@ namespace dawn_native { namespace metal {
             descriptorMTL.colorAttachments[i].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
             const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
-            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Other;
+            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Type::Other;
             ComputeBlendDesc(descriptorMTL.colorAttachments[i], descriptor,
                              isDeclaredInFragmentShader);
         }
