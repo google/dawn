@@ -98,10 +98,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitContinue(ast::ContinueStatement* stmt);
+  /// Handles generating an else statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitElse(ast::ElseStatement* stmt);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles an if statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitIf(ast::IfStatement* stmt);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted

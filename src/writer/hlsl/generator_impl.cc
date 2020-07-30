@@ -20,8 +20,10 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
@@ -447,6 +449,43 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
+  make_indent();
+
+  out_ << "if (";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") ";
+
+  if (!EmitBlock(stmt->body())) {
+    return false;
+  }
+
+  for (const auto& e : stmt->else_statements()) {
+    if (!EmitElse(e.get())) {
+      return false;
+    }
+  }
+  out_ << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
+  if (stmt->HasCondition()) {
+    out_ << " else if (";
+    if (!EmitExpression(stmt->condition())) {
+      return false;
+    }
+    out_ << ") ";
+  } else {
+    out_ << " else ";
+  }
+
+  return EmitBlock(stmt->body());
+}
+
 bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   if (lit->IsBool()) {
     out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
@@ -538,6 +577,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     make_indent();
     out_ << "/* fallthrough */" << std::endl;
     return true;
+  }
+  if (stmt->IsIf()) {
+    return EmitIf(stmt->AsIf());
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
