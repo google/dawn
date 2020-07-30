@@ -55,12 +55,9 @@ TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
   auto* p = parser(params.input);
 
-  auto deco = p->struct_decoration();
+  auto deco = p->struct_decoration(p->peek());
   ASSERT_FALSE(p->has_error());
   EXPECT_EQ(deco, params.result);
-
-  auto t = p->next();
-  EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          StructDecorationTest,
@@ -69,7 +66,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
   auto* p = parser("not-a-stage");
-  auto deco = p->struct_decoration();
+  auto deco = p->struct_decoration(p->peek());
   ASSERT_EQ(deco, ast::StructDecoration::kNone);
 
   auto t = p->next();

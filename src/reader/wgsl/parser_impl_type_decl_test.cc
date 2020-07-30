@@ -389,6 +389,85 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_FALSE(a->has_array_stride());
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
+  auto* p = parser("[[stride 16]] array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t->IsArray());
+
+  auto* a = t->AsArray();
+  ASSERT_FALSE(a->IsRuntimeArray());
+  ASSERT_EQ(a->size(), 5u);
+  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->has_array_stride());
+  EXPECT_EQ(a->array_stride(), 16u);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
+  auto* p = parser("[[stride 16]] array<f32>");
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t->IsArray());
+
+  auto* a = t->AsArray();
+  ASSERT_TRUE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->has_array_stride());
+  EXPECT_EQ(a->array_stride(), 16u);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
+  auto* p = parser("[[stride 16]] f32");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:15: found array decoration but no array");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingClosingAttr) {
+  auto* p = parser("[[stride 16 array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: missing ]] for array decoration");
+}
+
+// Note, this isn't an error because it could be a struct decoration, we just
+// don't have an array ...
+TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
+  auto* p = parser("[[unknown 16]] array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
+  auto* p = parser("[[stride]] array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: missing value for stride decoration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue) {
+  auto* p = parser("[[stride invalid]] array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:10: missing value for stride decoration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue_Negative) {
+  auto* p = parser("[[stride -1]] array<f32, 5>");
+  auto* t = p->type_decl();
+  ASSERT_EQ(t, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:10: invalid stride value: -1");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {

@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/type/alias_type.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
@@ -86,6 +87,26 @@ TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:20: missing struct declaration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Struct_WithStride) {
+  auto* p = parser(
+      "type a = [[block]] struct { [[offset 0]] data: [[stride 4]] array<f32>; "
+      "}");
+  auto* t = p->type_alias();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_NE(t, nullptr);
+  EXPECT_EQ(t->name(), "a");
+  ASSERT_TRUE(t->type()->IsStruct());
+
+  auto* s = t->type()->AsStruct();
+  EXPECT_EQ(s->impl()->members().size(), 1u);
+
+  const auto* ty = s->impl()->members()[0]->type();
+  ASSERT_TRUE(ty->IsArray());
+  const auto* arr = ty->AsArray();
+  EXPECT_TRUE(arr->has_array_stride());
+  EXPECT_EQ(arr->array_stride(), 4u);
 }
 
 }  // namespace

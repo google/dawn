@@ -686,8 +686,10 @@ ast::type::AliasType* ParserImpl::type_alias() {
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl GREATER_THAN
-//   | ARRAY LESS_THAN type_decl COMMA INT_LITERAL GREATER_THAN
-//   | ARRAY LESS_THAN type_decl GREATER_THAN
+//   | array_decoration_list? ARRAY LESS_THAN type_decl COMMA
+//          INT_LITERAL GREATER_THAN
+//   | array_decoration_list? ARRAY LESS_THAN type_decl
+//          GREATER_THAN
 //   | MAT2x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x4 LESS_THAN type_decl GREATER_THAN
@@ -730,8 +732,20 @@ ast::type::Type* ParserImpl::type_decl() {
   if (t.IsPtr()) {
     return type_decl_pointer(t);
   }
+
+  auto deco = array_decoration_list();
+  if (has_error()) {
+    return nullptr;
+  }
+  if (deco != 0) {
+    t = peek();
+  }
+  if (deco != 0 && !t.IsArray()) {
+    set_error(t, "found array decoration but no array");
+    return nullptr;
+  }
   if (t.IsArray()) {
-    return type_decl_array(t);
+    return type_decl_array(t, deco);
   }
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
@@ -815,7 +829,7 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
       std::make_unique<ast::type::VectorType>(subtype, count));
 }
 
-ast::type::Type* ParserImpl::type_decl_array(Token t) {
+ast::type::Type* ParserImpl::type_decl_array(Token t, uint32_t stride) {
   next();  // Consume the peek
 
   t = next();
@@ -852,8 +866,50 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
     return nullptr;
   }
 
-  return ctx_.type_mgr().Get(
-      std::make_unique<ast::type::ArrayType>(subtype, size));
+  auto ty = std::make_unique<ast::type::ArrayType>(subtype, size);
+  if (stride != 0) {
+    ty->set_array_stride(stride);
+  }
+  return ctx_.type_mgr().Get(std::move(ty));
+}
+
+// array_decoration_list
+//   : ATTR_LEFT (array_decoration COMMA)* array_decoration ATTR_RIGHT
+// array_decoration
+//   : STRIDE INT_LITERAL
+//
+// As there is currently only one decoration I'm combining these for now.
+// we can split apart later if needed.
+uint32_t ParserImpl::array_decoration_list() {
+  auto t = peek();
+  if (!t.IsAttrLeft()) {
+    return 0;
+  }
+  t = peek(1);
+  if (!t.IsStride()) {
+    return 0;
+  }
+
+  next();  // consume the peek of [[
+  next();  // consume the peek of stride
+
+  t = next();
+  if (!t.IsSintLiteral()) {
+    set_error(t, "missing value for stride decoration");
+    return 0;
+  }
+  if (t.to_i32() < 0) {
+    set_error(t, "invalid stride value: " + t.to_str());
+    return 0;
+  }
+
+  uint32_t stride = static_cast<uint32_t>(t.to_i32());
+  t = next();
+  if (!t.IsAttrRight()) {
+    set_error(t, "missing ]] for array decoration");
+    return 0;
+  }
+  return stride;
 }
 
 ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
@@ -985,15 +1041,15 @@ ast::StructDecoration ParserImpl::struct_decoration_decl() {
   if (!t.IsAttrLeft())
     return ast::StructDecoration::kNone;
 
-  next();  // Consume the peek
-
-  auto deco = struct_decoration();
+  auto deco = struct_decoration(peek(1));
   if (has_error())
     return ast::StructDecoration::kNone;
   if (deco == ast::StructDecoration::kNone) {
-    set_error(peek(), "unknown struct decoration");
-    return ast::StructDecoration::kNone;
+    return deco;
   }
+
+  next();  // Consume the peek of [[
+  next();  // Consume the peek from the struct_decoration
 
   t = next();
   if (!t.IsAttrRight()) {
@@ -1006,10 +1062,8 @@ ast::StructDecoration ParserImpl::struct_decoration_decl() {
 
 // struct_decoration
 //  : BLOCK
-ast::StructDecoration ParserImpl::struct_decoration() {
-  auto t = peek();
+ast::StructDecoration ParserImpl::struct_decoration(Token t) {
   if (t.IsBlock()) {
-    next();  // Consume the peek
     return ast::StructDecoration::kBlock;
   }
   return ast::StructDecoration::kNone;

@@ -563,6 +563,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kSet, source, "set"};
   if (str == "storage_buffer")
     return {Token::Type::kStorageBuffer, source, "storage_buffer"};
+  if (str == "stride")
+    return {Token::Type::kStride, source, "stride"};
   if (str == "struct")
     return {Token::Type::kStruct, source, "struct"};
   if (str == "switch")

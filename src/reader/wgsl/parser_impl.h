@@ -144,7 +144,7 @@ class ParserImpl {
   ast::StructDecoration struct_decoration_decl();
   /// Parses a `struct_decoration` grammar element
   /// @returns the struct decoration or StructDecoraton::kNone if none matched
-  ast::StructDecoration struct_decoration();
+  ast::StructDecoration struct_decoration(Token t);
   /// Parses a `struct_body_decl` grammar element
   /// @returns the struct members
   ast::StructMemberList struct_body_decl();
@@ -339,7 +339,8 @@ class ParserImpl {
  private:
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);
-  ast::type::Type* type_decl_array(Token t);
+  ast::type::Type* type_decl_array(Token t, uint32_t stride);
+  uint32_t array_decoration_list();
   ast::type::Type* type_decl_matrix(Token t);
 
   Context& ctx_;

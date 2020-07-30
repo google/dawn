@@ -458,6 +458,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"return", Token::Type::kReturn},
                     TokenData{"set", Token::Type::kSet},
                     TokenData{"storage_buffer", Token::Type::kStorageBuffer},
+                    TokenData{"stride", Token::Type::kStride},
                     TokenData{"struct", Token::Type::kStruct},
                     TokenData{"switch", Token::Type::kSwitch},
                     TokenData{"true", Token::Type::kTrue},

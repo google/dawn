@@ -210,6 +210,8 @@ class Token {
     kSet,
     /// A 'storage_buffer'
     kStorageBuffer,
+    /// A 'stride'
+    kStride,
     /// A 'struct'
     kStruct,
     /// A 'switch'
@@ -463,6 +465,8 @@ class Token {
   bool IsSet() const { return type_ == Type::kSet; }
   /// @returns true if token is a 'storage_buffer'
   bool IsStorageBuffer() const { return type_ == Type::kStorageBuffer; }
+  /// @returns true if token is a 'stride'
+  bool IsStride() const { return type_ == Type::kStride; }
   /// @returns true if token is a 'struct'
   bool IsStruct() const { return type_ == Type::kStruct; }
   /// @returns true if token is a 'switch'
