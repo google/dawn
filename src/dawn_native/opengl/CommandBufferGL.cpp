@@ -462,6 +462,10 @@ namespace dawn_native { namespace opengl {
                     texture->EnsureSubresourceContentInitialized(texture->GetAllSubresources());
                 }
             }
+
+            for (BufferBase* bufferBase : usages.buffers) {
+                ToBackend(bufferBase)->EnsureDataInitialized();
+            }
         };
 
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;

@@ -535,7 +535,8 @@ namespace dawn_native { namespace metal {
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
         size_t nextPassNumber = 0;
 
-        auto LazyClearForPass = [](const PassResourceUsage& usages) {
+        auto LazyClearForPass = [](const PassResourceUsage& usages,
+                                   CommandRecordingContext* commandContext) {
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 Texture* texture = ToBackend(usages.textures[i]);
                 // Clear textures that are not output attachments. Output attachments will be
@@ -545,6 +546,9 @@ namespace dawn_native { namespace metal {
                     texture->EnsureSubresourceContentInitialized(texture->GetAllSubresources());
                 }
             }
+            for (BufferBase* bufferBase : usages.buffers) {
+                ToBackend(bufferBase)->EnsureDataInitialized(commandContext);
+            }
         };
 
         Command type;
@@ -553,7 +557,7 @@ namespace dawn_native { namespace metal {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    LazyClearForPass(passResourceUsages[nextPassNumber]);
+                    LazyClearForPass(passResourceUsages[nextPassNumber], commandContext);
                     commandContext->EndBlit();
 
                     DAWN_TRY(EncodeComputePass(commandContext));
@@ -565,7 +569,7 @@ namespace dawn_native { namespace metal {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    LazyClearForPass(passResourceUsages[nextPassNumber]);
+                    LazyClearForPass(passResourceUsages[nextPassNumber], commandContext);
                     commandContext->EndBlit();
 
                     LazyClearRenderPassAttachments(cmd);

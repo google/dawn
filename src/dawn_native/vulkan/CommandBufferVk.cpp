@@ -387,6 +387,7 @@ namespace dawn_native { namespace vulkan {
 
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
+                buffer->EnsureDataInitialized(recordingContext);
                 buffer->TransitionUsageNow(recordingContext, usages.bufferUsages[i],
                                            &bufferBarriers, &srcStages, &dstStages);
             }
