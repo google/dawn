@@ -39,31 +39,31 @@ declare_args() {
 
   # Build the SPIR-V input reader
   if (!defined(tint_build_spv_reader)) {
-    tint_build_spv_reader = false
+    tint_build_spv_reader = true
   }
 
   # Build the SPIR-V output writer
   if (!defined(tint_build_spv_writer)) {
-    tint_build_spv_writer = false
+    tint_build_spv_writer = true
   }
 
   # Build the WGSL input reader
   if (!defined(tint_build_wgsl_reader)) {
-    tint_build_wgsl_reader = false
+    tint_build_wgsl_reader = true
   }
 
   # Build the WGSL output writer
   if (!defined(tint_build_wgsl_writer)) {
-    tint_build_wgsl_writer = false
+    tint_build_wgsl_writer = true
   }
 
   # Build the MSL output writer
   if (!defined(tint_build_msl_writer)) {
-    tint_build_msl_writer = false
+    tint_build_msl_writer = true
   }
 
   # Build the HLSL output writer
   if (!defined(tint_build_hlsl_writer)) {
-    tint_build_hlsl_writer = false
+    tint_build_hlsl_writer = true
   }
 }
