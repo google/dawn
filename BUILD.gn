@@ -1174,14 +1174,14 @@ if (build_with_chromium) {
 # Samples - Executables exposing command line functionality
 ###############################################################################
 
-config("tint_exe_config") {
+config("tint_config") {
   include_dirs = []
   if (tint_build_spv_reader || tint_build_spv_writer) {
     include_dirs += [ "${tint_spirv_tools_dir}/include/" ]
   }
 }
 
-executable("tint_exe") {
+executable("tint") {
   sources = [ "samples/main.cc" ]
   deps = [
     ":libtint",
@@ -1192,7 +1192,7 @@ executable("tint_exe") {
 
   configs += [
     ":tint_common_config",
-    ":tint_exe_config",
+    ":tint_config",
   ]
   public_configs = [ ":tint_public_config" ]
 
