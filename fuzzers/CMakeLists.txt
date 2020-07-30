@@ -14,9 +14,9 @@
 
 function(add_tint_fuzzer NAME)
   add_executable(${NAME} ${NAME}.cc)
-  target_link_libraries(tint_fuzz libtint)
-  tint_default_compile_options(tint_fuzz)
-  target_link_options(tint_fuzz PRIVATE
+  target_link_libraries(${NAME} libtint)
+  tint_default_compile_options(${NAME})
+  target_link_options(${NAME} PRIVATE
     -fno-omit-frame-pointer
     -fsanitize=fuzzer,address,undefined
     -fsanitize-address-use-after-scope
@@ -30,6 +30,10 @@ function(add_tint_fuzzer NAME)
   )
 endfunction()
 
-if ({TINT_BUILD_WGSL_READER})
+if (${TINT_BUILD_WGSL_READER})
   add_tint_fuzzer(tint_wgsl_reader_fuzzer)
+endif()
+
+if (${TINT_BUILD_SPV_READER})
+  add_tint_fuzzer(tint_spv_reader_fuzzer)
 endif()

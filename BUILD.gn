@@ -1157,16 +1157,32 @@ test("tint_unittests") {
 if (build_with_chromium) {
   import("//testing/libfuzzer/fuzzer_test.gni")
 
-  fuzzer_test("tint_wgsl_reader_fuzzer") {
-    sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
+  # fuzzer_test doesn't have configs members, so need to define them in an empty
+  # source_set.
 
+  source_set("tint_fuzzer_common") {
     configs += [ ":tint_common_config" ]
     public_configs = [ ":tint_public_config" ]
+  }
 
-    deps = [
-      ":libtint_wgsl_reader_src",
-      ":tint_wgsl_reader_fuzzer_src",
-    ]
+  if (tint_build_wgsl_reader) {
+    fuzzer_test("tint_wgsl_reader_fuzzer") {
+      sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
+      deps = [
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_spv_reader) {
+    fuzzer_test("tint_spv_reader_fuzzer") {
+      sources = [ "fuzzers/tint_spv_reader_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
   }
 }
 
