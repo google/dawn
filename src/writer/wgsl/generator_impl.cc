@@ -356,6 +356,11 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     out_ << alias->name();
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
+
+    if (ary->has_array_stride()) {
+      out_ << "[[stride " << ary->array_stride() << "]] ";
+    }
+
     out_ << "array<";
     if (!EmitType(ary->type())) {
       return false;

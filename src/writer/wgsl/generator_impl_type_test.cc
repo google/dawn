@@ -55,6 +55,16 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(g.result(), "array<bool, 4>");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitType_Array_WithStride) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b, 4);
+  a.set_array_stride(16);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&a)) << g.error();
+  EXPECT_EQ(g.result(), "[[stride 16]] array<bool, 4>");
+}
+
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
