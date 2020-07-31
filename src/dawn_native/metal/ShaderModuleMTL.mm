@@ -218,11 +218,10 @@ namespace dawn_native { namespace metal {
                                                              options:nil
                                                                error:&error];
             if (error != nil) {
-                // TODO(cwallez@chromium.org): Switch that NSLog to use dawn::InfoLog or even be
-                // folded in the DAWN_VALIDATION_ERROR
-                NSLog(@"MTLDevice newLibraryWithSource => %@", error);
                 if (error.code != MTLLibraryErrorCompileWarning) {
-                    return DAWN_VALIDATION_ERROR("Unable to create library object");
+                    const char* errorString = [error.localizedDescription UTF8String];
+                    return DAWN_VALIDATION_ERROR(std::string("Unable to create library object: ") +
+                                                 errorString);
                 }
             }
 
