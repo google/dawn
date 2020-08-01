@@ -51,6 +51,9 @@ namespace dawn_native {
 
     bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
 
+    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn_native::Color color);
+    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn_native::Color color);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDBUFFER_H_

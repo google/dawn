@@ -234,10 +234,27 @@ namespace dawn_native { namespace vulkan {
 
                     attachments[attachmentCount] = view->GetHandle();
 
-                    clearValues[attachmentCount].color.float32[0] = attachmentInfo.clearColor.r;
-                    clearValues[attachmentCount].color.float32[1] = attachmentInfo.clearColor.g;
-                    clearValues[attachmentCount].color.float32[2] = attachmentInfo.clearColor.b;
-                    clearValues[attachmentCount].color.float32[3] = attachmentInfo.clearColor.a;
+                    const Format& attachmentFormat = view->GetFormat();
+                    if (attachmentFormat.HasComponentType(Format::Type::Float)) {
+                        clearValues[attachmentCount].color.float32[0] = attachmentInfo.clearColor.r;
+                        clearValues[attachmentCount].color.float32[1] = attachmentInfo.clearColor.g;
+                        clearValues[attachmentCount].color.float32[2] = attachmentInfo.clearColor.b;
+                        clearValues[attachmentCount].color.float32[3] = attachmentInfo.clearColor.a;
+                    } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
+                        const std::array<uint32_t, 4> appliedClearColor =
+                            ConvertToUnsignedIntegerColor(attachmentInfo.clearColor);
+                        for (uint32_t i = 0; i < 4; ++i) {
+                            clearValues[attachmentCount].color.uint32[i] = appliedClearColor[i];
+                        }
+                    } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
+                        const std::array<int32_t, 4> appliedClearColor =
+                            ConvertToSignedIntegerColor(attachmentInfo.clearColor);
+                        for (uint32_t i = 0; i < 4; ++i) {
+                            clearValues[attachmentCount].color.int32[i] = appliedClearColor[i];
+                        }
+                    } else {
+                        UNREACHABLE();
+                    }
 
                     attachmentCount++;
                 }

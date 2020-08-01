@@ -913,13 +913,23 @@ namespace dawn_native { namespace opengl {
                 auto* attachmentInfo = &renderPass->colorAttachments[i];
 
                 // Load op - color
-                // TODO(cwallez@chromium.org): Choose the clear function depending on the
-                // componentType: things work for now because the clear color is always a float, but
-                // when that's fixed will lose precision on integer formats when converting to
-                // float.
                 if (attachmentInfo->loadOp == wgpu::LoadOp::Clear) {
                     gl.ColorMaski(i, true, true, true, true);
-                    gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo->clearColor.r);
+
+                    const Format& attachmentFormat = attachmentInfo->view->GetFormat();
+                    if (attachmentFormat.HasComponentType(Format::Type::Float)) {
+                        gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo->clearColor.r);
+                    } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
+                        const std::array<uint32_t, 4> appliedClearColor =
+                            ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
+                        gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
+                    } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
+                        const std::array<int32_t, 4> appliedClearColor =
+                            ConvertToSignedIntegerColor(attachmentInfo->clearColor);
+                        gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
+                    } else {
+                        UNREACHABLE();
+                    }
                 }
 
                 if (attachmentInfo->storeOp == wgpu::StoreOp::Clear) {

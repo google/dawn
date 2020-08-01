@@ -95,6 +95,44 @@ class RenderPassLoadOpTests : public DawnTest {
         blueQuad = DrawQuad(device, vsSource, fsSource);
     }
 
+    template <class T>
+    void TestIntegerClearColor(wgpu::TextureFormat format,
+                               const wgpu::Color& clearColor,
+                               const std::array<T, 4>& expectedPixelValue) {
+        constexpr wgpu::Extent3D kTextureSize = {1, 1, 1};
+
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+        textureDescriptor.size = kTextureSize;
+        textureDescriptor.usage =
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        textureDescriptor.format = format;
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.EndPass();
+
+        const uint64_t bufferSize = sizeof(T) * expectedPixelValue.size();
+        wgpu::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = bufferSize;
+        bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+        wgpu::BufferCopyView bufferCopyView =
+            utils::CreateBufferCopyView(buffer, 0, kTextureBytesPerRowAlignment, 0);
+        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &kTextureSize);
+
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(expectedPixelValue.data()),
+                                   buffer, 0, bufferSize / sizeof(uint32_t));
+    }
+
     wgpu::Texture renderTarget;
     wgpu::TextureView renderTargetView;
 
@@ -145,6 +183,57 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     // Right half should now be blue
     EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize,
                             0, 0);
+}
+
+// Test clearing a color attachment with signed and unsigned integer formats.
+TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
+    // RGBA8Uint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, 3.3f, 254.8f, 255.0f};
+        constexpr std::array<uint8_t, 4> kExpectedPixelValue = {2, 3, 254, 255};
+        TestIntegerClearColor<uint8_t>(wgpu::TextureFormat::RGBA8Uint, kClearColor,
+                                       kExpectedPixelValue);
+    }
+
+    // RGBA8Sint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, -3.3f, 126.8f, -128.0f};
+        constexpr std::array<int8_t, 4> kExpectedPixelValue = {2, -3, 126, -128};
+        TestIntegerClearColor<int8_t>(wgpu::TextureFormat::RGBA8Sint, kClearColor,
+                                      kExpectedPixelValue);
+    }
+
+    // RGBA16Uint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, 3.3f, 512.7f, 65535.f};
+        constexpr std::array<uint16_t, 4> kExpectedPixelValue = {2, 3, 512, 65535u};
+        TestIntegerClearColor<uint16_t>(wgpu::TextureFormat::RGBA16Uint, kClearColor,
+                                        kExpectedPixelValue);
+    }
+
+    // RGBA16Sint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, -3.3f, 32767.8f, -32768.0f};
+        constexpr std::array<int16_t, 4> kExpectedPixelValue = {2, -3, 32767, -32768};
+        TestIntegerClearColor<int16_t>(wgpu::TextureFormat::RGBA16Sint, kClearColor,
+                                       kExpectedPixelValue);
+    }
+
+    // RGBA32Uint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, 3.3f, 65534.8f, 65537.f};
+        constexpr std::array<uint32_t, 4> kExpectedPixelValue = {2, 3, 65534, 65537};
+        TestIntegerClearColor<uint32_t>(wgpu::TextureFormat::RGBA32Uint, kClearColor,
+                                        kExpectedPixelValue);
+    }
+
+    // RGBA32Sint
+    {
+        constexpr wgpu::Color kClearColor = {2.f, -3.3f, 65534.8f, -65537.f};
+        constexpr std::array<int32_t, 4> kExpectedPixelValue = {2, -3, 65534, -65537};
+        TestIntegerClearColor<int32_t>(wgpu::TextureFormat::RGBA32Sint, kClearColor,
+                                       kExpectedPixelValue);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
