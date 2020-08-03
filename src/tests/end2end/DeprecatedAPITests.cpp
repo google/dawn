@@ -207,9 +207,17 @@ TEST_P(TextureCopyViewArrayLayerDeprecationTests, DeprecationWarning) {
     EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texNewCopy, &texOldCopy, &copySize));
     EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texOldCopy, &bufCopy, &copySize));
     EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texOldCopy, &texNewCopy, &copySize));
+
     wgpu::CommandBuffer command = encoder.Finish();
 
     queue.Submit(1, &command);
+
+    // TODO(dawn:483): Add other backends after implementing WriteTexture in them.
+    if (IsMetal() || IsVulkan()) {
+        std::vector<uint32_t> data = {1};
+        EXPECT_DEPRECATION_WARNING(
+            queue.WriteTexture(&texOldCopy, data.data(), 4, &bufCopy.layout, &copySize));
+    }
 }
 
 // Test that using both TextureCopyView::arrayLayer and origin.z is an error.
@@ -233,30 +241,44 @@ TEST_P(TextureCopyViewArrayLayerDeprecationTests, BothArrayLayerAndOriginZIsErro
     encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&texErrorCopy, &texNewCopy, &copySize);
     ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // TODO(dawn:483): Add other backends after implementing WriteTexture in them.
+    if (IsMetal() || IsVulkan()) {
+        std::vector<uint32_t> data = {1};
+        ASSERT_DEVICE_ERROR(
+            queue.WriteTexture(&texErrorCopy, data.data(), 4, &bufCopy.layout, &copySize));
+    }
 }
 
 // Test that using TextureCopyView::arrayLayer is correctly taken into account
 TEST_P(TextureCopyViewArrayLayerDeprecationTests, StateTracking) {
-    wgpu::TextureCopyView texOOBCopy = MakeErrorTextureCopyView();
+    wgpu::TextureCopyView texOOBCopy = MakeOldTextureCopyView();
     texOOBCopy.arrayLayer = 2;  // Oh no, it is OOB!
     wgpu::TextureCopyView texNewCopy = MakeNewTextureCopyView();
     wgpu::BufferCopyView bufCopy = MakeBufferCopyView();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyBufferToTexture(&bufCopy, &texOOBCopy, &copySize);
+    EXPECT_DEPRECATION_WARNING(encoder.CopyBufferToTexture(&bufCopy, &texOOBCopy, &copySize));
     ASSERT_DEVICE_ERROR(encoder.Finish());
 
     encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToTexture(&texNewCopy, &texOOBCopy, &copySize);
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texNewCopy, &texOOBCopy, &copySize));
     ASSERT_DEVICE_ERROR(encoder.Finish());
 
     encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&texOOBCopy, &bufCopy, &copySize);
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texOOBCopy, &bufCopy, &copySize));
     ASSERT_DEVICE_ERROR(encoder.Finish());
 
     encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToTexture(&texOOBCopy, &texNewCopy, &copySize);
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texOOBCopy, &texNewCopy, &copySize));
     ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    // TODO(dawn:483): Add other backends after implementing WriteTexture in them.
+    if (IsMetal() || IsVulkan()) {
+        std::vector<uint32_t> data = {1};
+        EXPECT_DEPRECATION_WARNING(ASSERT_DEVICE_ERROR(
+            queue.WriteTexture(&texOOBCopy, data.data(), 4, &bufCopy.layout, &copySize)));
+    }
 }
 
 DAWN_INSTANTIATE_TEST(TextureCopyViewArrayLayerDeprecationTests,

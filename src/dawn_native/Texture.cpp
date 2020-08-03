@@ -649,4 +649,24 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mRange;
     }
+
+    ResultOrError<TextureCopyView> FixTextureCopyView(DeviceBase* device,
+                                                      const TextureCopyView* view) {
+        TextureCopyView fixedView = *view;
+
+        if (view->arrayLayer != 0) {
+            if (view->origin.z != 0) {
+                return DAWN_VALIDATION_ERROR("arrayLayer and origin.z cannot both be != 0");
+            } else {
+                fixedView.origin.z = fixedView.arrayLayer;
+                fixedView.arrayLayer = 1;
+                device->EmitDeprecationWarning(
+                    "wgpu::TextureCopyView::arrayLayer is deprecated in favor of "
+                    "::origin::z");
+            }
+        }
+
+        return fixedView;
+    }
+
 }  // namespace dawn_native
