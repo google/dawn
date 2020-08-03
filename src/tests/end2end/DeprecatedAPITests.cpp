@@ -132,6 +132,20 @@ TEST_P(DeprecationTests, TextureDescriptorArrayLayerCountStateTracking) {
     ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
 }
 
+// Test that using TextureDescriptor::arrayLayerCount = 0 is allowed
+TEST_P(DeprecationTests, TextureDescriptorArrayLayerCountZero) {
+    wgpu::TextureDescriptor desc;
+    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.size = {1, 1, 1};
+    desc.arrayLayerCount = 0;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.mipLevelCount = 1;
+    desc.sampleCount = 1;
+
+    device.CreateTexture(&desc);
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

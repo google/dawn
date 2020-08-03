@@ -331,9 +331,9 @@ namespace dawn_native {
                                                           const TextureDescriptor* desc) {
         TextureDescriptor fixedDesc = *desc;
 
-        if (desc->arrayLayerCount != 1) {
+        if (desc->arrayLayerCount >= 2) {
             if (desc->size.depth != 1) {
-                return DAWN_VALIDATION_ERROR("arrayLayerCount and size.depth cannot both be != 1");
+                return DAWN_VALIDATION_ERROR("arrayLayerCount and size.depth cannot both be set.");
             } else {
                 fixedDesc.size.depth = fixedDesc.arrayLayerCount;
                 fixedDesc.arrayLayerCount = 1;
