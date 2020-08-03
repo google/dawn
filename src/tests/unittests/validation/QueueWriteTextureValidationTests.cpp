@@ -280,6 +280,18 @@ namespace {
             TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {2, 2, 1}));
     }
 
+    // Test that WriteTexture cannot be run with a destroyed texture.
+    TEST_F(QueueWriteTextureValidationTest, DestroyedTexture) {
+        const uint64_t dataSize =
+            utils::RequiredBytesInCopy(256, 4, {4, 4, 1}, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::Texture destination = Create2DTexture({16, 16, 4}, 5, wgpu::TextureFormat::RGBA8Unorm,
+                                                    wgpu::TextureUsage::CopyDst);
+        destination.Destroy();
+
+        ASSERT_DEVICE_ERROR(
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {0, 0, 0}, {4, 4, 1}));
+    }
+
     // Test WriteTexture with texture in error state causes errors.
     TEST_F(QueueWriteTextureValidationTest, TextureInErrorState) {
         wgpu::TextureDescriptor errorTextureDescriptor;
@@ -289,14 +301,11 @@ namespace {
         wgpu::TextureCopyView errorTextureCopyView =
             utils::CreateTextureCopyView(errorTexture, 0, {0, 0, 0});
 
-        wgpu::Extent3D extent3D = {1, 1, 1};
+        wgpu::Extent3D extent3D = {0, 0, 0};
 
         {
             std::vector<uint8_t> data(4);
-            wgpu::TextureDataLayout textureDataLayout;
-            textureDataLayout.offset = 0;
-            textureDataLayout.bytesPerRow = 0;
-            textureDataLayout.rowsPerImage = 0;
+            wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 0, 0);
 
             ASSERT_DEVICE_ERROR(queue.WriteTexture(&errorTextureCopyView, data.data(), 4,
                                                    &textureDataLayout, &extent3D));

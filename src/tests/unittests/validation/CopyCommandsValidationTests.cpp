@@ -282,11 +282,13 @@ TEST_F(CopyCommandTest_B2B, UnalignedOffset) {
 TEST_F(CopyCommandTest_B2B, BuffersInErrorState) {
     wgpu::BufferDescriptor errorBufferDescriptor;
     errorBufferDescriptor.size = 4;
-    errorBufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc;
+    errorBufferDescriptor.usage =
+        wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
     constexpr uint64_t bufferSize = 4;
-    wgpu::Buffer validBuffer = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer validBuffer =
+        CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -588,7 +590,7 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     wgpu::TextureCopyView errorTextureCopyView =
         utils::CreateTextureCopyView(errorTexture, 0, {0, 0, 0});
 
-    wgpu::Extent3D extent3D = {1, 1, 1};
+    wgpu::Extent3D extent3D = {0, 0, 0};
 
     {
         wgpu::Texture destination = Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
@@ -990,7 +992,7 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
     wgpu::TextureCopyView errorTextureCopyView =
         utils::CreateTextureCopyView(errorTexture, 0, {0, 0, 0});
 
-    wgpu::Extent3D extent3D = {1, 1, 1};
+    wgpu::Extent3D extent3D = {0, 0, 0};
 
     {
         uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
