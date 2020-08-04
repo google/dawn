@@ -1157,6 +1157,7 @@ namespace detail {
     template class ExpectEq<uint8_t>;
     template class ExpectEq<uint16_t>;
     template class ExpectEq<uint32_t>;
+    template class ExpectEq<uint64_t>;
     template class ExpectEq<RGBA8>;
     template class ExpectEq<float>;
 }  // namespace detail

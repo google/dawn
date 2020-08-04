@@ -28,6 +28,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
+#include "dawn_native/d3d12/QuerySetD3D12.h"
 #include "dawn_native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
@@ -50,6 +51,19 @@ namespace dawn_native { namespace d3d12 {
                     return DXGI_FORMAT_R16_UINT;
                 case wgpu::IndexFormat::Uint32:
                     return DXGI_FORMAT_R32_UINT;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        D3D12_QUERY_TYPE D3D12QueryType(wgpu::QueryType type) {
+            switch (type) {
+                case wgpu::QueryType::Occlusion:
+                    return D3D12_QUERY_TYPE_OCCLUSION;
+                case wgpu::QueryType::PipelineStatistics:
+                    return D3D12_QUERY_TYPE_PIPELINE_STATISTICS;
+                case wgpu::QueryType::Timestamp:
+                    return D3D12_QUERY_TYPE_TIMESTAMP;
                 default:
                     UNREACHABLE();
             }
@@ -140,6 +154,14 @@ namespace dawn_native { namespace d3d12 {
                                                info.bufferOffset.y, info.bufferOffset.z,
                                                &textureLocation, &sourceRegion);
             }
+        }
+
+        void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList,
+                                     WriteTimestampCmd* cmd) {
+            QuerySet* querySet = ToBackend(cmd->querySet.Get());
+            ASSERT(D3D12QueryType(querySet->GetQueryType()) == D3D12_QUERY_TYPE_TIMESTAMP);
+            commandList->EndQuery(querySet->GetQueryHeap(), D3D12_QUERY_TYPE_TIMESTAMP,
+                                  cmd->queryIndex);
         }
     }  // anonymous namespace
 
@@ -846,11 +868,26 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 case Command::ResolveQuerySet: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                    Buffer* destination = ToBackend(cmd->destination.Get());
+
+                    commandList->ResolveQueryData(
+                        querySet->GetQueryHeap(), D3D12QueryType(querySet->GetQueryType()),
+                        cmd->firstQuery, cmd->queryCount, destination->GetD3D12Resource(),
+                        cmd->destinationOffset);
+
+                    // TODO(hao.x.li@intel.com): Add compute shader to convert the query result
+                    // (ticks) to timestamp (ns)
+
+                    break;
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(commandList, cmd);
+                    break;
                 }
 
                 default: {
@@ -964,7 +1001,10 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(commandList, cmd);
+                    break;
                 }
 
                 default: {
@@ -1384,7 +1424,10 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(commandList, cmd);
+                    break;
                 }
 
                 default: {

@@ -19,6 +19,21 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    namespace {
+        D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
+            switch (type) {
+                case wgpu::QueryType::Occlusion:
+                    return D3D12_QUERY_HEAP_TYPE_OCCLUSION;
+                case wgpu::QueryType::PipelineStatistics:
+                    return D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
+                case wgpu::QueryType::Timestamp:
+                    return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+                default:
+                    UNREACHABLE();
+            }
+        }
+    }  // anonymous namespace
+
     // static
     ResultOrError<QuerySet*> QuerySet::Create(Device* device,
                                               const QuerySetDescriptor* descriptor) {
@@ -29,20 +44,7 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError QuerySet::Initialize() {
         D3D12_QUERY_HEAP_DESC queryHeapDesc = {};
-        switch (GetQueryType()) {
-            case wgpu::QueryType::Occlusion:
-                queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
-                break;
-            case wgpu::QueryType::PipelineStatistics:
-                queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
-                break;
-            case wgpu::QueryType::Timestamp:
-                queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
-                break;
-            default:
-                UNREACHABLE();
-                break;
-        }
+        queryHeapDesc.Type = D3D12QueryHeapType(GetQueryType());
         queryHeapDesc.Count = GetQueryCount();
 
         ID3D12Device* d3d12Device = ToBackend(GetDevice())->GetD3D12Device();

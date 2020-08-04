@@ -30,29 +30,34 @@
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
 // so resources should have the CopySrc allowed usage bit if you want to add expectations on
 // them.
-#define EXPECT_BUFFER_U16_EQ(expected, buffer, offset)                         \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t), \
-                         new ::detail::ExpectEq<uint16_t>(expected))
 
-#define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count)                      \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t) * (count), \
-                         new ::detail::ExpectEq<uint16_t>(expected, count))
+#define EXPECT_BUFFER(buffer, offset, size, expectation) \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, size, expectation)
 
-#define EXPECT_BUFFER_U32_EQ(expected, buffer, offset)                         \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
-                         new ::detail::ExpectEq<uint32_t>(expected))
+#define EXPECT_BUFFER_U16_EQ(expected, buffer, offset) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint16_t), new ::detail::ExpectEq<uint16_t>(expected))
 
-#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count)                      \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * (count), \
-                         new ::detail::ExpectEq<uint32_t>(expected, count))
+#define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint16_t) * (count),       \
+                  new ::detail::ExpectEq<uint16_t>(expected, count))
 
-#define EXPECT_BUFFER_FLOAT_EQ(expected, buffer, offset)                       \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
-                         new ::detail::ExpectEq<float>(expected))
+#define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint32_t), new ::detail::ExpectEq<uint32_t>(expected))
 
-#define EXPECT_BUFFER_FLOAT_RANGE_EQ(expected, buffer, offset, count)                    \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * (count), \
-                         new ::detail::ExpectEq<float>(expected, count))
+#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint32_t) * (count),       \
+                  new ::detail::ExpectEq<uint32_t>(expected, count))
+
+#define EXPECT_BUFFER_U64_RANGE_EQ(expected, buffer, offset, count) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint64_t) * (count),       \
+                  new ::detail::ExpectEq<uint64_t>(expected, count))
+
+#define EXPECT_BUFFER_FLOAT_EQ(expected, buffer, offset) \
+    EXPECT_BUFFER(buffer, offset, sizeof(float), new ::detail::ExpectEq<float>(expected))
+
+#define EXPECT_BUFFER_FLOAT_RANGE_EQ(expected, buffer, offset, count) \
+    EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),            \
+                  new ::detail::ExpectEq<float>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y)                                  \
@@ -436,6 +441,7 @@ namespace detail {
     extern template class ExpectEq<uint8_t>;
     extern template class ExpectEq<int16_t>;
     extern template class ExpectEq<uint32_t>;
+    extern template class ExpectEq<uint64_t>;
     extern template class ExpectEq<RGBA8>;
     extern template class ExpectEq<float>;
 }  // namespace detail
