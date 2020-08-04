@@ -84,12 +84,14 @@ namespace dawn_native { namespace vulkan {
 
         region.bufferOffset = dataLayout.offset;
         // In Vulkan the row length is in texels while it is in bytes for Dawn
-        const Format& format = texture->GetFormat();
-        ASSERT(dataLayout.bytesPerRow % format.blockByteSize == 0);
-        region.bufferRowLength = dataLayout.bytesPerRow / format.blockByteSize * format.blockWidth;
+        const TexelBlockInfo& blockInfo =
+            texture->GetFormat().GetTexelBlockInfo(textureCopy.aspect);
+        ASSERT(dataLayout.bytesPerRow % blockInfo.blockByteSize == 0);
+        region.bufferRowLength =
+            dataLayout.bytesPerRow / blockInfo.blockByteSize * blockInfo.blockWidth;
         region.bufferImageHeight = dataLayout.rowsPerImage;
 
-        region.imageSubresource.aspectMask = texture->GetVkAspectMask();
+        region.imageSubresource.aspectMask = texture->GetVkAspectMask(textureCopy.aspect);
         region.imageSubresource.mipLevel = textureCopy.mipLevel;
 
         switch (textureCopy.texture->GetDimension()) {

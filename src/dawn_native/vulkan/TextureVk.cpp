@@ -669,8 +669,21 @@ namespace dawn_native { namespace vulkan {
         return mHandle;
     }
 
-    VkImageAspectFlags Texture::GetVkAspectMask() const {
-        return VulkanAspectMask(GetFormat().aspects);
+    VkImageAspectFlags Texture::GetVkAspectMask(wgpu::TextureAspect aspect) const {
+        // TODO(enga): These masks could be precomputed.
+        switch (aspect) {
+            case wgpu::TextureAspect::All:
+                return VulkanAspectMask(GetFormat().aspects);
+            case wgpu::TextureAspect::DepthOnly:
+                ASSERT(GetFormat().aspects & Aspect::Depth);
+                return VulkanAspectMask(Aspect::Depth);
+            case wgpu::TextureAspect::StencilOnly:
+                ASSERT(GetFormat().aspects & Aspect::Stencil);
+                return VulkanAspectMask(Aspect::Stencil);
+            default:
+                UNREACHABLE();
+                return 0;
+        }
     }
 
     void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
@@ -872,7 +885,7 @@ namespace dawn_native { namespace vulkan {
         TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
         if (GetFormat().isRenderable) {
             VkImageSubresourceRange imageRange = {};
-            imageRange.aspectMask = GetVkAspectMask();
+            imageRange.aspectMask = GetVkAspectMask(wgpu::TextureAspect::All);
             imageRange.levelCount = 1;
             imageRange.layerCount = 1;
 
@@ -943,10 +956,12 @@ namespace dawn_native { namespace vulkan {
                         continue;
                     }
 
+                    ASSERT(GetFormat().aspects == Aspect::Color);
                     dawn_native::TextureCopy textureCopy;
                     textureCopy.texture = this;
                     textureCopy.origin = {0, 0, layer};
                     textureCopy.mipLevel = level;
+                    textureCopy.aspect = wgpu::TextureAspect::All;
 
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);

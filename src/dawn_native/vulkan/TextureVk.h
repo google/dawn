@@ -59,7 +59,7 @@ namespace dawn_native { namespace vulkan {
                                                VkImage nativeImage);
 
         VkImage GetHandle() const;
-        VkImageAspectFlags GetVkAspectMask() const;
+        VkImageAspectFlags GetVkAspectMask(wgpu::TextureAspect aspect) const;
 
         // Transitions the texture to be used as `usage`, recording any necessary barrier in
         // `commands`.

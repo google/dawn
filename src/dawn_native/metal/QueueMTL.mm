@@ -33,10 +33,10 @@ namespace dawn_native { namespace metal {
             uint32_t alignedBytesPerRow,
             uint32_t alignedRowsPerImage,
             const TextureDataLayout* dataLayout,
-            const Format& textureFormat,
+            const TexelBlockInfo& blockInfo,
             const Extent3D* writeSize) {
             uint32_t newDataSize = ComputeRequiredBytesInCopy(
-                textureFormat, *writeSize, alignedBytesPerRow, alignedRowsPerImage);
+                blockInfo, *writeSize, alignedBytesPerRow, alignedRowsPerImage);
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
@@ -47,10 +47,10 @@ namespace dawn_native { namespace metal {
             const uint8_t* srcPointer = static_cast<const uint8_t*>(data);
             srcPointer += dataLayout->offset;
 
-            uint32_t alignedRowsPerImageInBlock = alignedRowsPerImage / textureFormat.blockHeight;
-            uint32_t dataRowsPerImageInBlock = dataLayout->rowsPerImage / textureFormat.blockHeight;
+            uint32_t alignedRowsPerImageInBlock = alignedRowsPerImage / blockInfo.blockHeight;
+            uint32_t dataRowsPerImageInBlock = dataLayout->rowsPerImage / blockInfo.blockHeight;
             if (dataRowsPerImageInBlock == 0) {
-                dataRowsPerImageInBlock = writeSize->height / textureFormat.blockHeight;
+                dataRowsPerImageInBlock = writeSize->height / blockInfo.blockHeight;
             }
 
             ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
@@ -91,19 +91,20 @@ namespace dawn_native { namespace metal {
                                        size_t dataSize,
                                        const TextureDataLayout* dataLayout,
                                        const Extent3D* writeSize) {
-        uint32_t blockSize = destination->texture->GetFormat().blockByteSize;
-        uint32_t blockWidth = destination->texture->GetFormat().blockWidth;
+        const TexelBlockInfo& blockInfo =
+            destination->texture->GetFormat().GetTexelBlockInfo(destination->aspect);
+
         // We are only copying the part of the data that will appear in the texture.
         // Note that validating texture copy range ensures that writeSize->width and
         // writeSize->height are multiples of blockWidth and blockHeight respectively.
-        uint32_t alignedBytesPerRow = (writeSize->width) / blockWidth * blockSize;
+        uint32_t alignedBytesPerRow =
+            (writeSize->width) / blockInfo.blockWidth * blockInfo.blockByteSize;
         uint32_t alignedRowsPerImage = writeSize->height;
 
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        UploadTextureDataAligningBytesPerRow(
-                            GetDevice(), data, dataSize, alignedBytesPerRow, alignedRowsPerImage,
-                            dataLayout, destination->texture->GetFormat(), writeSize));
+        DAWN_TRY_ASSIGN(uploadHandle, UploadTextureDataAligningBytesPerRow(
+                                          GetDevice(), data, dataSize, alignedBytesPerRow,
+                                          alignedRowsPerImage, dataLayout, blockInfo, writeSize));
 
         TextureDataLayout passDataLayout = *dataLayout;
         passDataLayout.offset = uploadHandle.startOffset;
@@ -114,6 +115,7 @@ namespace dawn_native { namespace metal {
         textureCopy.texture = destination->texture;
         textureCopy.mipLevel = destination->mipLevel;
         textureCopy.origin = destination->origin;
+        textureCopy.aspect = destination->aspect;
 
         return ToBackend(GetDevice())
             ->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, &textureCopy,

@@ -723,6 +723,7 @@ namespace dawn_native {
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
             copy->destination.mipLevel = destination->mipLevel;
+            copy->destination.aspect = destination->aspect;
             copy->copySize = *copySize;
 
             return {};
@@ -778,6 +779,7 @@ namespace dawn_native {
             copy->source.texture = source->texture;
             copy->source.origin = source->origin;
             copy->source.mipLevel = source->mipLevel;
+            copy->source.aspect = source->aspect;
             copy->destination.buffer = destination->buffer;
             copy->destination.offset = destination->layout.offset;
             copy->destination.bytesPerRow = destination->layout.bytesPerRow;
@@ -826,9 +828,11 @@ namespace dawn_native {
             copy->source.texture = source->texture;
             copy->source.origin = source->origin;
             copy->source.mipLevel = source->mipLevel;
+            copy->source.aspect = source->aspect;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
             copy->destination.mipLevel = destination->mipLevel;
+            copy->destination.aspect = destination->aspect;
             copy->copySize = *copySize;
 
             return {};

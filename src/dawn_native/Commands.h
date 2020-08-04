@@ -105,6 +105,7 @@ namespace dawn_native {
         Ref<TextureBase> texture;
         uint32_t mipLevel;
         Origin3D origin;  // Texels / array layer
+        wgpu::TextureAspect aspect;
     };
 
     struct CopyBufferToBufferCmd {

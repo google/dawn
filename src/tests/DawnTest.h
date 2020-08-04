@@ -60,23 +60,20 @@
                   new ::detail::ExpectEq<float>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
-#define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y)                                  \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, 0, sizeof(RGBA8), \
-                          new ::detail::ExpectEq<RGBA8>(expected))
+#define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, x, y)
 
-#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level, slice)     \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, slice, \
-                          sizeof(RGBA8),                                                  \
-                          new ::detail::ExpectEq<RGBA8>(expected, (width) * (height)))
+#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level, slice) \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, x, y, width, height, level, slice)
 
-#define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y)                                  \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, 0, sizeof(float), \
-                          new ::detail::ExpectEq<float>(expected))
+#define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y) \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, x, y)
 
-#define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, slice)     \
-    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, slice, \
-                          sizeof(float),                                                  \
-                          new ::detail::ExpectEq<float>(expected, (width) * (height)))
+#define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, slice) \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, x, y, width, height, level, slice)
+
+// TODO(enga): Migrate other texure expectation helpers to this common one.
+#define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
 
 // Should only be used to test validation of function that can't be tested by regular validation
 // tests;
@@ -163,6 +160,9 @@ namespace utils {
 
 namespace detail {
     class Expectation;
+
+    template <typename T>
+    class ExpectEq;
 }  // namespace detail
 
 namespace dawn_wire {
@@ -281,17 +281,39 @@ class DawnTestBase {
                                              uint64_t offset,
                                              uint64_t size,
                                              detail::Expectation* expectation);
+
+    template <typename T>
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
+                                              const T* expectedData,
                                               const wgpu::Texture& texture,
                                               uint32_t x,
                                               uint32_t y,
-                                              uint32_t width,
-                                              uint32_t height,
-                                              uint32_t level,
-                                              uint32_t slice,
-                                              uint32_t pixelSize,
-                                              detail::Expectation* expectation);
+                                              uint32_t width = 1,
+                                              uint32_t height = 1,
+                                              uint32_t level = 0,
+                                              uint32_t slice = 0,
+                                              wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+                                              uint32_t bytesPerRow = 0) {
+        return AddTextureExpectationImpl(
+            file, line, new detail::ExpectEq<T>(expectedData, width * height), texture, x, y, width,
+            height, level, slice, aspect, sizeof(T), bytesPerRow);
+    }
+
+    template <typename T>
+    std::ostringstream& AddTextureExpectation(const char* file,
+                                              int line,
+                                              const T& expectedData,
+                                              const wgpu::Texture& texture,
+                                              uint32_t x,
+                                              uint32_t y,
+                                              uint32_t level = 0,
+                                              uint32_t slice = 0,
+                                              wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+                                              uint32_t bytesPerRow = 0) {
+        return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T>(expectedData), texture,
+                                         x, y, 1, 1, level, slice, aspect, sizeof(T), bytesPerRow);
+    }
 
     void WaitABit();
     void FlushWire();
@@ -322,6 +344,20 @@ class DawnTestBase {
     static void OnDeviceLost(const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
+
+    std::ostringstream& AddTextureExpectationImpl(const char* file,
+                                                  int line,
+                                                  detail::Expectation* expectation,
+                                                  const wgpu::Texture& texture,
+                                                  uint32_t x,
+                                                  uint32_t y,
+                                                  uint32_t width,
+                                                  uint32_t height,
+                                                  uint32_t level,
+                                                  uint32_t slice,
+                                                  wgpu::TextureAspect aspect,
+                                                  uint32_t dataSize,
+                                                  uint32_t bytesPerRow);
 
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {

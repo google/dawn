@@ -68,7 +68,7 @@ namespace dawn_native { namespace vulkan {
             // TODO(jiawei.shao@intel.com): support 1D and 3D textures
             ASSERT(srcTexture->GetDimension() == wgpu::TextureDimension::e2D &&
                    dstTexture->GetDimension() == wgpu::TextureDimension::e2D);
-            region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask();
+            region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask(srcCopy.aspect);
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
             region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
             region.srcSubresource.layerCount = copySize.depth;
@@ -77,7 +77,7 @@ namespace dawn_native { namespace vulkan {
             region.srcOffset.y = srcCopy.origin.y;
             region.srcOffset.z = 0;
 
-            region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask();
+            region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask(dstCopy.aspect);
             region.dstSubresource.mipLevel = dstCopy.mipLevel;
             region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
             region.dstSubresource.layerCount = copySize.depth;

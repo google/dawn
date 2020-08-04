@@ -622,6 +622,9 @@ namespace dawn_native { namespace metal {
                         const MTLSize copyExtent =
                             MTLSizeMake(copyInfo.copyExtent.width, copyInfo.copyExtent.height, 1);
 
+                        MTLBlitOption blitOption =
+                            ComputeMTLBlitOption(texture->GetFormat(), dst.aspect);
+
                         uint64_t bufferOffset = copyInfo.bufferOffset;
                         for (uint32_t copyLayer = copyBaseLayer;
                              copyLayer < copyBaseLayer + copyLayerCount; ++copyLayer) {
@@ -633,7 +636,8 @@ namespace dawn_native { namespace metal {
                                                                toTexture:texture->GetMTLTexture()
                                                         destinationSlice:copyLayer
                                                         destinationLevel:dst.mipLevel
-                                                       destinationOrigin:textureOrigin];
+                                                       destinationOrigin:textureOrigin
+                                                                 options:blitOption];
                             bufferOffset += copyInfo.bytesPerImage;
                         }
                     }
@@ -668,6 +672,9 @@ namespace dawn_native { namespace metal {
                         const MTLSize copyExtent =
                             MTLSizeMake(copyInfo.copyExtent.width, copyInfo.copyExtent.height, 1);
 
+                        MTLBlitOption blitOption =
+                            ComputeMTLBlitOption(texture->GetFormat(), src.aspect);
+
                         uint64_t bufferOffset = copyInfo.bufferOffset;
                         for (uint32_t copyLayer = copyBaseLayer;
                              copyLayer < copyBaseLayer + copyLayerCount; ++copyLayer) {
@@ -679,7 +686,8 @@ namespace dawn_native { namespace metal {
                                                                  toBuffer:buffer->GetMTLBuffer()
                                                         destinationOffset:bufferOffset
                                                    destinationBytesPerRow:copyInfo.bytesPerRow
-                                                 destinationBytesPerImage:copyInfo.bytesPerImage];
+                                                 destinationBytesPerImage:copyInfo.bytesPerImage
+                                                                  options:blitOption];
                             bufferOffset += copyInfo.bytesPerImage;
                         }
                     }
