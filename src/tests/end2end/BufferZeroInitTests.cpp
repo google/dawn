@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 #define EXPECT_LAZY_CLEAR(N, statement)                                                       \
@@ -147,7 +148,8 @@ class BufferZeroInitTest : public DawnTest {
             }
         }
 
-        EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, 0, expectedValues.size());
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedValues.data(), buffer, 0,
+                                                           expectedValues.size()));
     }
 
     void TestBufferZeroInitInBindGroup(const char* computeShader,
@@ -182,10 +184,150 @@ class BufferZeroInitTest : public DawnTest {
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0, expectedBufferData.size());
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0,
+                                                         expectedBufferData.size()));
 
         constexpr RGBA8 kExpectedColor = {0, 255, 0, 255};
         EXPECT_PIXEL_RGBA8_EQ(kExpectedColor, outputTexture, 0u, 0u);
+    }
+
+    wgpu::RenderPipeline CreateRenderPipelineForTest(const char* vertexShader) {
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::ShaderModule vsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
+
+        wgpu::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                layout(location = 0) in vec4 i_color;
+                layout(location = 0) out vec4 fragColor;
+                void main() {
+                    fragColor = i_color;
+                })");
+
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.indexFormat = wgpu::IndexFormat::Uint16;
+        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        descriptor.cColorStates[0].format = kColorAttachmentFormat;
+        return device.CreateRenderPipeline(&descriptor);
+    }
+
+    void TestBufferZeroInitAsVertexBuffer(uint64_t vertexBufferOffset) {
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+        const char* vertexShader = R"(
+            #version 450
+            layout(location = 0) in vec4 pos;
+            layout(location = 0) out vec4 o_color;
+            void main() {
+                if (pos == vec4(0.f, 0.f, 0.f, 0.f)) {
+                    o_color = vec4(0.f, 1.f, 0.f, 1.f);
+                } else {
+                    o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                }
+                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+                gl_PointSize = 1.0f;
+            })";
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader);
+
+        constexpr uint64_t kVertexAttributeSize = sizeof(float) * 4;
+        const uint64_t vertexBufferSize = kVertexAttributeSize + vertexBufferOffset;
+        wgpu::Buffer vertexBuffer =
+            CreateBuffer(vertexBufferSize, wgpu::BufferUsage::Vertex | wgpu::BufferUsage::CopySrc |
+                                               wgpu::BufferUsage::CopyDst);
+        wgpu::Texture colorAttachment =
+            CreateAndInitializeTexture({1, 1, 1}, kColorAttachmentFormat);
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorAttachment.CreateView()});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+        // Bind the buffer with offset == vertexBufferOffset and size kVertexAttributeSize as the
+        // vertex buffer.
+        renderPass.SetVertexBuffer(0, vertexBuffer, vertexBufferOffset, kVertexAttributeSize);
+        renderPass.SetPipeline(renderPipeline);
+        renderPass.Draw(1);
+        renderPass.EndPass();
+
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+
+        // Although we just bind a part of the buffer, we still expect the whole buffer to be
+        // lazily initialized to 0.
+        const std::vector<float> expectedVertexBufferData(vertexBufferSize / sizeof(float), 0);
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedVertexBufferData.data(), vertexBuffer, 0,
+                                             expectedVertexBufferData.size()));
+
+        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
+        EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
+    }
+
+    void TestBufferZeroInitAsIndexBuffer(uint64_t indexBufferOffset) {
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+        const char* vertexShader = R"(
+            #version 450
+            layout(location = 0) out vec4 o_color;
+            void main() {
+                if (gl_VertexIndex == 0u) {
+                    o_color = vec4(0.f, 1.f, 0.f, 1.f);
+                } else {
+                    o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                }
+                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+                gl_PointSize = 1.0f;
+            })";
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader);
+
+        // It is not allowed to use an index buffer without a vertex buffer although the vertex
+        // buffer is not used. So here we use an initialized dummy buffer as vertex buffer.
+        constexpr std::array<float, 4> kVertexBufferData = {0, 0, 0, 0};
+        constexpr uint64_t kVertexBufferSize = sizeof(kVertexBufferData);
+        wgpu::Buffer vertexBuffer =
+            utils::CreateBufferFromData(device, kVertexBufferData.data(), kVertexBufferSize,
+                                        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::CopyDst);
+
+        // The buffer size cannot be less than 4
+        const uint64_t indexBufferSize = sizeof(uint32_t) + indexBufferOffset;
+        wgpu::Buffer indexBuffer =
+            CreateBuffer(indexBufferSize, wgpu::BufferUsage::Index | wgpu::BufferUsage::CopySrc |
+                                              wgpu::BufferUsage::CopyDst);
+
+        wgpu::Texture colorAttachment =
+            CreateAndInitializeTexture({1, 1, 1}, kColorAttachmentFormat);
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorAttachment.CreateView()});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetVertexBuffer(0, vertexBuffer, 0, kVertexBufferSize);
+        renderPass.SetPipeline(renderPipeline);
+
+        // Bind the buffer with offset == indexBufferOffset and size sizeof(uint32_t) as the index
+        // buffer.
+        renderPass.SetIndexBuffer(indexBuffer, indexBufferOffset, sizeof(uint32_t));
+        renderPass.DrawIndexed(1);
+        renderPass.EndPass();
+
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+
+        // Although we just bind a part of the buffer, we still expect the whole buffer to be
+        // lazily initialized to 0.
+        const std::vector<uint32_t> expectedIndexBufferData(indexBufferSize / sizeof(uint32_t), 0);
+        EXPECT_LAZY_CLEAR(0u,
+                          EXPECT_BUFFER_U32_RANGE_EQ(expectedIndexBufferData.data(), indexBuffer, 0,
+                                                     expectedIndexBufferData.size()));
+
+        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
+        EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
     }
 };
 
@@ -201,7 +343,8 @@ TEST_P(BufferZeroInitTest, WriteBufferToEntireBuffer) {
         {0x02020202u, 0x02020202u}};
     EXPECT_LAZY_CLEAR(0u, queue.WriteBuffer(buffer, 0, kExpectedData.data(), kBufferSize));
 
-    EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), buffer, 0, kBufferSize / sizeof(uint32_t));
+    EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), buffer, 0,
+                                                     kBufferSize / sizeof(uint32_t)));
 }
 
 // Test that calling writeBuffer to overwrite a part of buffer needs to lazily initialize the
@@ -221,8 +364,8 @@ TEST_P(BufferZeroInitTest, WriteBufferToSubBuffer) {
         EXPECT_LAZY_CLEAR(1u,
                           queue.WriteBuffer(buffer, kCopyOffset, &kCopyValue, sizeof(kCopyValue)));
 
-        EXPECT_BUFFER_U32_EQ(kCopyValue, buffer, kCopyOffset);
-        EXPECT_BUFFER_U32_EQ(0, buffer, kBufferSize - sizeof(kCopyValue));
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_EQ(kCopyValue, buffer, kCopyOffset));
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_EQ(0, buffer, kBufferSize - sizeof(kCopyValue)));
     }
 
     // offset > 0
@@ -233,8 +376,8 @@ TEST_P(BufferZeroInitTest, WriteBufferToSubBuffer) {
         EXPECT_LAZY_CLEAR(1u,
                           queue.WriteBuffer(buffer, kCopyOffset, &kCopyValue, sizeof(kCopyValue)));
 
-        EXPECT_BUFFER_U32_EQ(0, buffer, 0);
-        EXPECT_BUFFER_U32_EQ(kCopyValue, buffer, kCopyOffset);
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_EQ(0, buffer, 0));
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_EQ(kCopyValue, buffer, kCopyOffset));
     }
 }
 
@@ -264,8 +407,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferSource) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
+                                                         kBufferSize / sizeof(uint32_t)));
     }
 
     // Partial copy from the source buffer
@@ -280,8 +424,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferSource) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
+                                                         kBufferSize / sizeof(uint32_t)));
     }
 
     // srcOffset > 0 and srcOffset + copySize == srcBufferSize
@@ -295,8 +440,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferSource) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
+                                                         kBufferSize / sizeof(uint32_t)));
     }
 
     // srcOffset > 0 and srcOffset + copySize < srcBufferSize
@@ -310,8 +456,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferSource) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), srcBuffer, 0,
+                                                         kBufferSize / sizeof(uint32_t)));
     }
 }
 
@@ -339,8 +486,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
 
         EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kInitialData.data()),
-                                   dstBuffer, 0, kBufferSize / sizeof(uint32_t));
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kInitialData.data()),
+                                           dstBuffer, 0, kBufferSize / sizeof(uint32_t)));
     }
 
     // Partial copy from the source buffer needs lazy initialization.
@@ -362,8 +510,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
             expectedData[index] = kInitialData[index - kDstOffset];
         }
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()), dstBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
+                                           dstBuffer, 0, kBufferSize / sizeof(uint32_t)));
     }
 
     // offset > 0 and dstOffset + CopySize == kBufferSize
@@ -384,8 +533,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
             expectedData[index] = kInitialData[index - kDstOffset];
         }
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()), dstBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
+                                           dstBuffer, 0, kBufferSize / sizeof(uint32_t)));
     }
 
     // offset > 0 and dstOffset + CopySize < kBufferSize
@@ -406,8 +556,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
             expectedData[index] = kInitialData[index - kDstOffset];
         }
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()), dstBuffer, 0,
-                                   kBufferSize / sizeof(uint32_t));
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
+                                           dstBuffer, 0, kBufferSize / sizeof(uint32_t)));
     }
 }
 
@@ -473,8 +624,9 @@ TEST_P(BufferZeroInitTest, MapWriteAsync) {
         EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, 0, kBufferSize));
         buffer.Unmap();
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer,
-                                   0, kExpectedData.size());
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()),
+                                           buffer, 0, kExpectedData.size()));
     }
 
     // Map a range of a buffer
@@ -486,8 +638,9 @@ TEST_P(BufferZeroInitTest, MapWriteAsync) {
         EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
         buffer.Unmap();
 
-        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer,
-                                   0, kExpectedData.size());
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()),
+                                           buffer, 0, kExpectedData.size()));
     }
 }
 
@@ -503,8 +656,9 @@ TEST_P(BufferZeroInitTest, MapAtCreation) {
     buffer.Unmap();
 
     constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedData = {{0, 0, 0, 0}};
-    EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer, 0,
-                               kExpectedData.size());
+    EXPECT_LAZY_CLEAR(
+        0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()),
+                                       buffer, 0, kExpectedData.size()));
 }
 
 // Test that the code path of CopyBufferToTexture clears the source buffer correctly when it is the
@@ -538,9 +692,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        std::vector<uint32_t> expectedValues(totalBufferSize / sizeof(uint32_t), 0);
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedValues.data(), buffer, 0,
-                                   totalBufferSize / sizeof(uint32_t));
+        const std::vector<uint32_t> expectedValues(totalBufferSize / sizeof(uint32_t), 0);
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedValues.data(), buffer, 0,
+                                                         totalBufferSize / sizeof(uint32_t)));
     }
 
     // bufferOffset > 0
@@ -556,9 +710,9 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
-        std::vector<uint32_t> expectedValues(totalBufferSize / sizeof(uint32_t), 0);
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedValues.data(), buffer, 0,
-                                   totalBufferSize / sizeof(uint32_t));
+        const std::vector<uint32_t> expectedValues(totalBufferSize / sizeof(uint32_t), 0);
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedValues.data(), buffer, 0,
+                                                         totalBufferSize / sizeof(uint32_t)));
     }
 }
 
@@ -753,6 +907,36 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
         expected[kOffset / sizeof(uint32_t)] = 10u;
         expected[kOffset / sizeof(uint32_t) + 5u] = 20u;
         TestBufferZeroInitInBindGroup(computeShader, kOffset, kBoundBufferSize, expected);
+    }
+}
+
+// Test the buffer will be lazy initialized correctly when its first use is in SetVertexBuffer.
+TEST_P(BufferZeroInitTest, SetVertexBuffer) {
+    // Bind the whole buffer as a vertex buffer.
+    {
+        constexpr uint64_t kVertexBufferOffset = 0u;
+        TestBufferZeroInitAsVertexBuffer(kVertexBufferOffset);
+    }
+
+    // Bind the buffer as a vertex buffer with a non-zero offset.
+    {
+        constexpr uint64_t kVertexBufferOffset = 16u;
+        TestBufferZeroInitAsVertexBuffer(kVertexBufferOffset);
+    }
+}
+
+// Test the buffer will be lazy initialized correctly when its first use is in SetIndexBuffer.
+TEST_P(BufferZeroInitTest, SetIndexBuffer) {
+    // Bind the whole buffer as an index buffer.
+    {
+        constexpr uint64_t kIndexBufferOffset = 0u;
+        TestBufferZeroInitAsIndexBuffer(kIndexBufferOffset);
+    }
+
+    // Bind the buffer as an index buffer with a non-zero offset.
+    {
+        constexpr uint64_t kIndexBufferOffset = 16u;
+        TestBufferZeroInitAsIndexBuffer(kIndexBufferOffset);
     }
 }
 
