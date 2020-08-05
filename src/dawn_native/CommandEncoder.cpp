@@ -15,6 +15,7 @@
 #include "dawn_native/CommandEncoder.h"
 
 #include "common/BitSetIterator.h"
+#include "common/Math.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
@@ -713,12 +714,20 @@ namespace dawn_native {
                 defaultedRowsPerImage = copySize->height;
             }
 
+            // In the case of one row copy bytesPerRow might not contain enough bytes
+            uint32_t bytesPerRow = source->layout.bytesPerRow;
+            if (copySize->height <= 1 && copySize->depth <= 1) {
+                bytesPerRow =
+                    Align(copySize->width * destination->texture->GetFormat().blockByteSize,
+                          kTextureBytesPerRowAlignment);
+            }
+
             // Record the copy command.
             CopyBufferToTextureCmd* copy =
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
             copy->source.buffer = source->buffer;
             copy->source.offset = source->layout.offset;
-            copy->source.bytesPerRow = source->layout.bytesPerRow;
+            copy->source.bytesPerRow = bytesPerRow;
             copy->source.rowsPerImage = defaultedRowsPerImage;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
@@ -773,6 +782,13 @@ namespace dawn_native {
                 defaultedRowsPerImage = copySize->height;
             }
 
+            // In the case of one row copy bytesPerRow might not contain enough bytes
+            uint32_t bytesPerRow = destination->layout.bytesPerRow;
+            if (copySize->height <= 1 && copySize->depth <= 1) {
+                bytesPerRow = Align(copySize->width * source->texture->GetFormat().blockByteSize,
+                                    kTextureBytesPerRowAlignment);
+            }
+
             // Record the copy command.
             CopyTextureToBufferCmd* copy =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
@@ -782,7 +798,7 @@ namespace dawn_native {
             copy->source.aspect = source->aspect;
             copy->destination.buffer = destination->buffer;
             copy->destination.offset = destination->layout.offset;
-            copy->destination.bytesPerRow = destination->layout.bytesPerRow;
+            copy->destination.bytesPerRow = bytesPerRow;
             copy->destination.rowsPerImage = defaultedRowsPerImage;
             copy->copySize = *copySize;
 

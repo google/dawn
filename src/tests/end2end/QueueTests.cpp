@@ -462,6 +462,36 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
     }
 }
 
+// Test that writing with bytesPerRow = 0 and bytesPerRow < bytesInACompleteRow works
+// when we're copying one row only
+TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
+    constexpr uint32_t kWidth = 259;
+    constexpr uint32_t kHeight = 127;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    textureSpec.level = 0;
+
+    // bytesPerRow = 0
+    {
+        constexpr wgpu::Extent3D copyExtent = {5, 1, 1};
+
+        DataSpec dataSpec = MinimumDataSpec(copyExtent);
+        dataSpec.bytesPerRow = 0;
+        DoTest(textureSpec, dataSpec, copyExtent);
+    }
+
+    // bytesPerRow < bytesInACompleteRow
+    {
+        constexpr wgpu::Extent3D copyExtent = {259, 1, 1};
+
+        DataSpec dataSpec = MinimumDataSpec(copyExtent);
+        dataSpec.bytesPerRow = 256;
+        DoTest(textureSpec, dataSpec, copyExtent);
+    }
+}
+
 // Test with bytesPerRow greater than needed in a write to a texture array.
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     constexpr uint32_t kWidth = 257;

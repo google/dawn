@@ -667,6 +667,32 @@ TEST_P(CopyTests_T2B, RowPitchUnaligned) {
     }
 }
 
+// Test that copying with bytesPerRow = 0 and bytesPerRow < bytesInACompleteRow works
+// when we're copying one row only
+TEST_P(CopyTests_T2B, BytesPerRowWithOneRowCopy) {
+    constexpr uint32_t kWidth = 259;
+    constexpr uint32_t kHeight = 127;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    textureSpec.level = 0;
+
+    // bytesPerRow = 0
+    {
+        BufferSpec bufferSpec = MinimumBufferSpec(5, 1);
+        bufferSpec.bytesPerRow = 0;
+        DoTest(textureSpec, bufferSpec, {5, 1, 1});
+    }
+
+    // bytesPerRow < bytesInACompleteRow
+    {
+        BufferSpec bufferSpec = MinimumBufferSpec(259, 1);
+        bufferSpec.bytesPerRow = 256;
+        DoTest(textureSpec, bufferSpec, {259, 1, 1});
+    }
+}
+
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
     constexpr uint32_t kWidth = 256;
@@ -1073,6 +1099,32 @@ TEST_P(CopyTests_B2T, RowPitchUnaligned) {
         bufferSpec.bytesPerRow += 256;
         bufferSpec.size += 256 * kHeight;
         DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
+    }
+}
+
+// Test that copying with bytesPerRow = 0 and bytesPerRow < bytesInACompleteRow works
+// when we're copying one row only
+TEST_P(CopyTests_B2T, BytesPerRowWithOneRowCopy) {
+    constexpr uint32_t kWidth = 259;
+    constexpr uint32_t kHeight = 127;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    textureSpec.level = 0;
+
+    // bytesPerRow = 0
+    {
+        BufferSpec bufferSpec = MinimumBufferSpec(5, 1);
+        bufferSpec.bytesPerRow = 0;
+        DoTest(textureSpec, bufferSpec, {5, 1, 1});
+    }
+
+    // bytesPerRow < bytesInACompleteRow
+    {
+        BufferSpec bufferSpec = MinimumBufferSpec(259, 1);
+        bufferSpec.bytesPerRow = 256;
+        DoTest(textureSpec, bufferSpec, {259, 1, 1});
     }
 }
 

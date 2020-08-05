@@ -440,8 +440,9 @@ namespace dawn_native {
         }
 
         // Validation for other members in layout:
-        if (layout.bytesPerRow <
-            copyExtent.width / blockInfo.blockWidth * blockInfo.blockByteSize) {
+        if ((copyExtent.height > 1 || copyExtent.depth > 1) &&
+            layout.bytesPerRow <
+                copyExtent.width / blockInfo.blockWidth * blockInfo.blockByteSize) {
             return DAWN_VALIDATION_ERROR(
                 "bytesPerRow must not be less than the number of bytes per row");
         }

@@ -221,11 +221,33 @@ namespace {
         wgpu::Texture destination = Create2DTexture({3, 7, 1}, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // bytesPerRow = 0 is invalid
-        ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, 0, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+        // bytesPerRow = 0
+        {
+            // copyHeight > 1
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 0, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+
+            // copyDepth > 1
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 2}));
+
+            // copyHeight = 1 and copyDepth = 1
+            TestWriteTexture(128, 0, 0, 0, destination, 0, {0, 0, 0}, {3, 1, 1});
+        }
 
         // bytesPerRow = 11 is invalid since a row takes 12 bytes.
-        ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+        {
+            // copyHeight > 1
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+
+            // copyDepth > 1
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 2}));
+
+            // copyHeight = 1 and copyDepth = 1
+            TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 1, 1});
+        }
 
         // bytesPerRow = 12 is valid since a row takes 12 bytes.
         TestWriteTexture(128, 0, 12, 0, destination, 0, {0, 0, 0}, {3, 7, 1});
