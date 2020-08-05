@@ -356,13 +356,11 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        // TODO(rharrsion): Add this back in once multual dependencies are
-        // rolled into Chromium.
-        // tint::Validator validator;
-        // if (!validator.Validate(&module)) {
-        //    errorStream << "Validation: " << validator.error() << std::endl;
-        //    return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        // }
+        tint::Validator validator;
+        if (!validator.Validate(&module)) {
+            errorStream << "Validation: " << validator.error() << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
 
         return {};
     }
