@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/validator_impl.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 
@@ -26,12 +27,18 @@ void ValidatorImpl::set_error(const Source& src, const std::string& msg) {
 }
 
 bool ValidatorImpl::Validate(const ast::Module* module) {
-  if (!module)
+  if (!module) {
     return false;
-  if (!CheckImports(module))
+  }
+  for (const auto& var : module->global_variables()) {
+    variable_stack_.set_global(var->name(), var.get());
+  }
+  if (!CheckImports(module)) {
     return false;
-  if (!ValidateFunctions(module->functions()))
+  }
+  if (!ValidateFunctions(module->functions())) {
     return false;
+  }
   return true;
 }
 
@@ -45,13 +52,26 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
 }
 
 bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
-  if (!ValidateStatements(func->body()))
+  variable_stack_.push_scope();
+
+  for (const auto& param : func->params()) {
+    variable_stack_.set(param->name(), param.get());
+  }
+  if (!ValidateStatements(func->body())) {
     return false;
+  }
+
+  variable_stack_.pop_scope();
   return true;
 }
 
 bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
   for (const auto& stmt : *block) {
+    // TODO(sarahM0): move the folowing to a function
+    if (stmt->IsVariableDecl()) {
+      auto* v = stmt->AsVariableDecl();
+      variable_stack_.set(v->variable()->name(), v->variable());
+    }
     if (!ValidateStatement(stmt.get())) {
       return false;
     }

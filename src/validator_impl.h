@@ -21,6 +21,8 @@
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
+#include "src/ast/variable.h"
+#include "src/scope_stack.h"
 
 namespace tint {
 
@@ -73,6 +75,7 @@ class ValidatorImpl {
 
  private:
   std::string error_;
+  ScopeStack<ast::Variable*> variable_stack_;
 };
 
 }  // namespace tint
