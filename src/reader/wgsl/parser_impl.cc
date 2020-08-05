@@ -86,9 +86,6 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "frag_depth") {
     return ast::Builtin::kFragDepth;
   }
-  if (str == "num_workgroups") {
-    return ast::Builtin::kNumWorkgroups;
-  }
   if (str == "workgroup_size") {
     return ast::Builtin::kWorkgroupSize;
   }

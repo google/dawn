@@ -101,7 +101,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{"front_facing", ast::Builtin::kFrontFacing},
         BuiltinData{"frag_coord", ast::Builtin::kFragCoord},
         BuiltinData{"frag_depth", ast::Builtin::kFragDepth},
-        BuiltinData{"num_workgroups", ast::Builtin::kNumWorkgroups},
         BuiltinData{"workgroup_size", ast::Builtin::kWorkgroupSize},
         BuiltinData{"local_invocation_id", ast::Builtin::kLocalInvocationId},
         BuiltinData{"local_invocation_idx", ast::Builtin::kLocalInvocationIdx},

@@ -47,10 +47,6 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "frag_depth";
       break;
     }
-    case Builtin::kNumWorkgroups: {
-      out << "num_workgroups";
-      break;
-    }
     case Builtin::kWorkgroupSize: {
       out << "workgroup_size";
       break;

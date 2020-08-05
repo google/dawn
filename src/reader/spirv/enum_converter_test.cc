@@ -215,8 +215,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{SpvBuiltInFrontFacing, true, ast::Builtin::kFrontFacing},
         BuiltinCase{SpvBuiltInFragCoord, true, ast::Builtin::kFragCoord},
         BuiltinCase{SpvBuiltInFragDepth, true, ast::Builtin::kFragDepth},
-        BuiltinCase{SpvBuiltInNumWorkgroups, true,
-                    ast::Builtin::kNumWorkgroups},
         BuiltinCase{SpvBuiltInWorkgroupSize, true,
                     ast::Builtin::kWorkgroupSize},
         BuiltinCase{SpvBuiltInLocalInvocationId, true,
@@ -226,11 +224,12 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{SpvBuiltInGlobalInvocationId, true,
                     ast::Builtin::kGlobalInvocationId}));
 
-INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
-                         SpvBuiltinTest,
-                         testing::Values(BuiltinCase{
-                             static_cast<SpvBuiltIn>(9999), false,
-                             ast::Builtin::kNone}));
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterBad,
+    SpvBuiltinTest,
+    testing::Values(
+        BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::Builtin::kNone},
+        BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::Builtin::kNone}));
 
 }  // namespace
 }  // namespace spirv

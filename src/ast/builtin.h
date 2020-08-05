@@ -29,7 +29,6 @@ enum class Builtin {
   kFrontFacing,
   kFragCoord,
   kFragDepth,
-  kNumWorkgroups,
   kWorkgroupSize,
   kLocalInvocationId,
   kLocalInvocationIdx,

@@ -1258,10 +1258,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "position";
     case ast::Builtin::kFragDepth:
       return "depth(any)";
-    // TODO(dsinclair): Ignore for now, I believe it will be removed from WGSL
-    // https://github.com/gpuweb/gpuweb/issues/920
-    case ast::Builtin::kNumWorkgroups:
-      return "";
     // TODO(dsinclair): Ignore for now. This has been removed as a builtin
     // in the spec. Need to update Tint to match.
     // https://github.com/gpuweb/gpuweb/pull/824
