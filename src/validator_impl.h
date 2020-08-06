@@ -19,6 +19,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/expression.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/variable.h"
@@ -72,6 +73,18 @@ class ValidatorImpl {
   /// @param module the modele to check imports
   /// @returns ture if input complies with v-0001 rule
   bool CheckImports(const ast::Module* module);
+  /// Validates an expression
+  /// @param expr the expression to check
+  /// @return true if the expresssion is valid
+  bool ValidateExpression(const ast::Expression* expr);
+  /// Validates v-0006:Variables must be defined before use
+  /// @param ident the identifer to check if its in the scope
+  /// @return true if idnet was defined
+  bool ValidateIdentifier(const ast::IdentifierExpression* ident);
+  /// Validates if the input follows type checking rules
+  /// @param 'a' the assignment to check
+  /// @returns ture if successful
+  bool ValidateResultTypes(const ast::AssignmentStatement* a);
 
  private:
   std::string error_;

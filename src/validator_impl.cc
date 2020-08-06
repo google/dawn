@@ -66,6 +66,9 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
 }
 
 bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
+  if (!block) {
+    return false;
+  }
   for (const auto& stmt : *block) {
     // TODO(sarahM0): move the folowing to a function
     if (stmt->IsVariableDecl()) {
@@ -80,13 +83,35 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
 }
 
 bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
-  if (stmt->IsAssign() && !ValidateAssign(stmt->AsAssign()))
+  if (!stmt) {
     return false;
-
+  }
+  if (stmt->IsAssign()) {
+    return ValidateAssign(stmt->AsAssign());
+  }
   return true;
 }
 
 bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* a) {
+  if (!a) {
+    return false;
+  }
+  if (!(ValidateExpression(a->lhs()) && ValidateExpression(a->rhs()))) {
+    return false;
+  }
+  if (!ValidateResultTypes(a)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool ValidatorImpl::ValidateResultTypes(const ast::AssignmentStatement* a) {
+  if (!a->lhs()->result_type() || !a->rhs()->result_type()) {
+    set_error(a->source(), "result_type() is nullptr");
+    return false;
+  }
+
   auto* lhs_result_type = a->lhs()->result_type()->UnwrapAliasPtrAlias();
   auto* rhs_result_type = a->rhs()->result_type()->UnwrapAliasPtrAlias();
   if (lhs_result_type != rhs_result_type) {
@@ -94,6 +119,27 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* a) {
     set_error(a->source(), "v-000x: invalid assignment of '" +
                                lhs_result_type->type_name() + "' to '" +
                                rhs_result_type->type_name() + "'");
+    return false;
+  }
+  return true;
+}
+
+bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
+  if (!expr) {
+    return false;
+  }
+  if (expr->IsIdentifier()) {
+    return ValidateIdentifier(expr->AsIdentifier());
+  }
+
+  return true;
+}
+
+bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
+  ast::Variable* var;
+  if (!variable_stack_.get(ident->name(), &var)) {
+    set_error(ident->source(),
+              "v-0006: '" + ident->name() + "' is not declared");
     return false;
   }
   return true;
