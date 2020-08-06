@@ -193,28 +193,6 @@ namespace dawn_native { namespace vulkan {
             return flags;
         }
 
-        // Computes which Vulkan texture aspects are relevant for the given Dawn format
-        VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
-            VkImageAspectFlags flags = 0;
-            for (Aspect aspect : IterateEnumMask(aspects)) {
-                switch (aspect) {
-                    case Aspect::Color:
-                        flags |= VK_IMAGE_ASPECT_COLOR_BIT;
-                        break;
-                    case Aspect::Depth:
-                        flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
-                        break;
-                    case Aspect::Stencil:
-                        flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
-                        break;
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-            }
-            return flags;
-        }
-
         VkImageMemoryBarrier BuildMemoryBarrier(const Format& format,
                                                 const VkImage& image,
                                                 wgpu::TextureUsage lastUsage,
@@ -597,7 +575,7 @@ namespace dawn_native { namespace vulkan {
 
         // Don't clear imported texture if already cleared
         if (descriptor->isCleared) {
-            SetIsSubresourceContentInitialized(true, {0, 1, 0, 1});
+            SetIsSubresourceContentInitialized(true, GetAllSubresources());
         }
 
         // Success, acquire all the external objects.
@@ -700,7 +678,7 @@ namespace dawn_native { namespace vulkan {
             if (barriers->size() == transitionBarrierStart) {
                 barriers->push_back(BuildMemoryBarrier(
                     GetFormat(), mHandle, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                    SubresourceRange::SingleSubresource(0, 0)));
+                    SubresourceRange::SingleMipAndLayer(0, 0, GetFormat().aspects)));
             }
 
             // Transfer texture from external queue to graphics queue
@@ -714,7 +692,7 @@ namespace dawn_native { namespace vulkan {
             if (barriers->size() == transitionBarrierStart) {
                 barriers->push_back(BuildMemoryBarrier(
                     GetFormat(), mHandle, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                    SubresourceRange::SingleSubresource(0, 0)));
+                    SubresourceRange::SingleMipAndLayer(0, 0, GetFormat().aspects)));
             }
 
             // Transfer texture from graphics queue to external queue
@@ -781,24 +759,40 @@ namespace dawn_native { namespace vulkan {
         } else {
             for (uint32_t arrayLayer = 0; arrayLayer < GetArrayLayers(); ++arrayLayer) {
                 for (uint32_t mipLevel = 0; mipLevel < GetNumMipLevels(); ++mipLevel) {
-                    uint32_t index = GetSubresourceIndex(mipLevel, arrayLayer);
+                    wgpu::TextureUsage lastUsage = wgpu::TextureUsage::None;
+                    wgpu::TextureUsage usage = wgpu::TextureUsage::None;
+
+                    // Accumulate usage for all format aspects because we cannot transition
+                    // separately.
+                    // TODO(enga): Use VK_KHR_separate_depth_stencil_layouts.
+                    for (Aspect aspect : IterateEnumMask(GetFormat().aspects)) {
+                        uint32_t index = GetSubresourceIndex(mipLevel, arrayLayer, aspect);
+
+                        usage |= textureUsages.subresourceUsages[index];
+                        lastUsage |= mSubresourceLastUsages[index];
+                    }
 
                     // Avoid encoding barriers when it isn't needed.
-                    if (textureUsages.subresourceUsages[index] == wgpu::TextureUsage::None) {
+                    if (usage == wgpu::TextureUsage::None) {
                         continue;
                     }
 
-                    if (CanReuseWithoutBarrier(mSubresourceLastUsages[index],
-                                               textureUsages.subresourceUsages[index])) {
+                    if (CanReuseWithoutBarrier(lastUsage, usage)) {
                         continue;
                     }
-                    imageBarriers->push_back(BuildMemoryBarrier(
-                        format, mHandle, mSubresourceLastUsages[index],
-                        textureUsages.subresourceUsages[index],
-                        SubresourceRange::SingleSubresource(mipLevel, arrayLayer)));
-                    allLastUsages |= mSubresourceLastUsages[index];
-                    allUsages |= textureUsages.subresourceUsages[index];
-                    mSubresourceLastUsages[index] = textureUsages.subresourceUsages[index];
+
+                    allLastUsages |= lastUsage;
+                    allUsages |= usage;
+
+                    for (Aspect aspect : IterateEnumMask(GetFormat().aspects)) {
+                        uint32_t index = GetSubresourceIndex(mipLevel, arrayLayer, aspect);
+                        mSubresourceLastUsages[index] = usage;
+                    }
+
+                    imageBarriers->push_back(
+                        BuildMemoryBarrier(format, mHandle, lastUsage, usage,
+                                           SubresourceRange::SingleMipAndLayer(
+                                               mipLevel, arrayLayer, GetFormat().aspects)));
                 }
             }
         }
@@ -820,7 +814,6 @@ namespace dawn_native { namespace vulkan {
         const Format& format = GetFormat();
 
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
-        uint32_t subresourceCount = GetSubresourceCount();
 
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
@@ -829,7 +822,9 @@ namespace dawn_native { namespace vulkan {
         // are the same, then we can use one barrier to do state transition for all subresources.
         // Note that if the texture has only one mip level and one array slice, it will fall into
         // this category.
-        bool areAllSubresourcesCovered = range.levelCount * range.layerCount == subresourceCount;
+        bool areAllSubresourcesCovered = (range.levelCount == GetNumMipLevels() &&  //
+                                          range.layerCount == GetArrayLayers() &&   //
+                                          range.aspects == format.aspects);
         if (mSameLastUsagesAcrossSubresources && areAllSubresourcesCovered) {
             ASSERT(range.baseMipLevel == 0 && range.baseArrayLayer == 0);
             if (CanReuseWithoutBarrier(mSubresourceLastUsages[0], usage)) {
@@ -838,7 +833,7 @@ namespace dawn_native { namespace vulkan {
             barriers.push_back(
                 BuildMemoryBarrier(format, mHandle, mSubresourceLastUsages[0], usage, range));
             allLastUsages = mSubresourceLastUsages[0];
-            for (uint32_t i = 0; i < subresourceCount; ++i) {
+            for (uint32_t i = 0; i < GetSubresourceCount(); ++i) {
                 mSubresourceLastUsages[i] = usage;
             }
         } else {
@@ -846,17 +841,29 @@ namespace dawn_native { namespace vulkan {
                  layer < range.baseArrayLayer + range.layerCount; ++layer) {
                 for (uint32_t level = range.baseMipLevel;
                      level < range.baseMipLevel + range.levelCount; ++level) {
-                    uint32_t index = GetSubresourceIndex(level, layer);
+                    // Accumulate usage for all format aspects because we cannot transition
+                    // separately.
+                    // TODO(enga): Use VK_KHR_separate_depth_stencil_layouts.
+                    wgpu::TextureUsage lastUsage = wgpu::TextureUsage::None;
+                    for (Aspect aspect : IterateEnumMask(format.aspects)) {
+                        uint32_t index = GetSubresourceIndex(level, layer, aspect);
+                        lastUsage |= mSubresourceLastUsages[index];
+                    }
 
-                    if (CanReuseWithoutBarrier(mSubresourceLastUsages[index], usage)) {
+                    if (CanReuseWithoutBarrier(lastUsage, usage)) {
                         continue;
                     }
 
-                    barriers.push_back(
-                        BuildMemoryBarrier(format, mHandle, mSubresourceLastUsages[index], usage,
-                                           SubresourceRange::SingleSubresource(level, layer)));
-                    allLastUsages |= mSubresourceLastUsages[index];
-                    mSubresourceLastUsages[index] = usage;
+                    allLastUsages |= lastUsage;
+
+                    for (Aspect aspect : IterateEnumMask(format.aspects)) {
+                        uint32_t index = GetSubresourceIndex(level, layer, aspect);
+                        mSubresourceLastUsages[index] = usage;
+                    }
+
+                    barriers.push_back(BuildMemoryBarrier(
+                        format, mHandle, lastUsage, usage,
+                        SubresourceRange::SingleMipAndLayer(level, layer, format.aspects)));
                 }
             }
         }
@@ -885,7 +892,6 @@ namespace dawn_native { namespace vulkan {
         TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
         if (GetFormat().isRenderable) {
             VkImageSubresourceRange imageRange = {};
-            imageRange.aspectMask = GetVkAspectMask(wgpu::TextureAspect::All);
             imageRange.levelCount = 1;
             imageRange.layerCount = 1;
 
@@ -894,16 +900,25 @@ namespace dawn_native { namespace vulkan {
                 imageRange.baseMipLevel = level;
                 for (uint32_t layer = range.baseArrayLayer;
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                    if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(
-                            SubresourceRange::SingleSubresource(level, layer))) {
-                        // Skip lazy clears if already initialized.
+                    Aspect aspects = Aspect::None;
+                    for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                        if (clearValue == TextureBase::ClearValue::Zero &&
+                            IsSubresourceContentInitialized(
+                                SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
+                            // Skip lazy clears if already initialized.
+                            continue;
+                        }
+                        aspects |= aspect;
+                    }
+
+                    if (aspects == Aspect::None) {
                         continue;
                     }
 
+                    imageRange.aspectMask = VulkanAspectMask(aspects);
                     imageRange.baseArrayLayer = layer;
 
-                    if (GetFormat().HasDepthOrStencil()) {
+                    if (aspects & (Aspect::Depth | Aspect::Stencil)) {
                         VkClearDepthStencilValue clearDepthStencilValue[1];
                         clearDepthStencilValue[0].depth = fClearColor;
                         clearDepthStencilValue[0].stencil = clearColor;
@@ -912,6 +927,7 @@ namespace dawn_native { namespace vulkan {
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clearDepthStencilValue, 1,
                             &imageRange);
                     } else {
+                        ASSERT(aspects == Aspect::Color);
                         VkClearColorValue clearColorValue = {
                             {fClearColor, fClearColor, fClearColor, fClearColor}};
                         device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
@@ -943,6 +959,7 @@ namespace dawn_native { namespace vulkan {
             bufferCopy.offset = uploadHandle.startOffset;
             bufferCopy.bytesPerRow = bytesPerRow;
 
+            ASSERT(range.aspects == Aspect::Color);
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
                 Extent3D copySize = GetMipLevelVirtualSize(level);
@@ -951,7 +968,7 @@ namespace dawn_native { namespace vulkan {
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
                     if (clearValue == TextureBase::ClearValue::Zero &&
                         IsSubresourceContentInitialized(
-                            SubresourceRange::SingleSubresource(level, layer))) {
+                            SubresourceRange::SingleMipAndLayer(level, layer, Aspect::Color))) {
                         // Skip lazy clears if already initialized.
                         continue;
                     }
@@ -961,7 +978,7 @@ namespace dawn_native { namespace vulkan {
                     textureCopy.texture = this;
                     textureCopy.origin = {0, 0, layer};
                     textureCopy.mipLevel = level;
-                    textureCopy.aspect = wgpu::TextureAspect::All;
+                    textureCopy.aspect = GetFormat().aspects;
 
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
@@ -1028,11 +1045,13 @@ namespace dawn_native { namespace vulkan {
         createInfo.format = VulkanImageFormat(device, descriptor->format);
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-        createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetFormat().aspects);
-        createInfo.subresourceRange.baseMipLevel = descriptor->baseMipLevel;
-        createInfo.subresourceRange.levelCount = descriptor->mipLevelCount;
-        createInfo.subresourceRange.baseArrayLayer = descriptor->baseArrayLayer;
-        createInfo.subresourceRange.layerCount = descriptor->arrayLayerCount;
+
+        const SubresourceRange& subresources = GetSubresourceRange();
+        createInfo.subresourceRange.baseMipLevel = subresources.baseMipLevel;
+        createInfo.subresourceRange.levelCount = subresources.levelCount;
+        createInfo.subresourceRange.baseArrayLayer = subresources.baseArrayLayer;
+        createInfo.subresourceRange.layerCount = subresources.layerCount;
+        createInfo.subresourceRange.aspectMask = VulkanAspectMask(subresources.aspects);
 
         return CheckVkSuccess(
             device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),

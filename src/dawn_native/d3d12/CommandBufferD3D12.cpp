@@ -19,6 +19,7 @@
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
@@ -101,9 +102,11 @@ namespace dawn_native { namespace d3d12 {
                                                            uint64_t bufferBytesPerRow,
                                                            Texture* texture,
                                                            uint32_t textureMiplevel,
-                                                           uint32_t textureSlice) {
+                                                           uint32_t textureSlice,
+                                                           Aspect aspect) {
             const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice);
+                ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice,
+                                                     aspect);
 
             const uint64_t offset = baseCopySplit.offset + baseOffset;
 
@@ -132,9 +135,11 @@ namespace dawn_native { namespace d3d12 {
                                                            uint64_t bufferBytesPerRow,
                                                            Texture* texture,
                                                            uint32_t textureMiplevel,
-                                                           uint32_t textureSlice) {
+                                                           uint32_t textureSlice,
+                                                           Aspect aspect) {
             const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice);
+                ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice,
+                                                     aspect);
 
             const uint64_t offset = baseCopySplit.offset + baseOffset;
 
@@ -551,7 +556,8 @@ namespace dawn_native { namespace d3d12 {
                 ID3D12Resource* colorTextureHandle = colorTexture->GetD3D12Resource();
                 ID3D12Resource* resolveTextureHandle = resolveTexture->GetD3D12Resource();
                 const uint32_t resolveTextureSubresourceIndex = resolveTexture->GetSubresourceIndex(
-                    resolveTarget->GetBaseMipLevel(), resolveTarget->GetBaseArrayLayer());
+                    resolveTarget->GetBaseMipLevel(), resolveTarget->GetBaseArrayLayer(),
+                    Aspect::Color);
                 constexpr uint32_t kColorTextureSubresourceIndex = 0;
                 commandContext->GetCommandList()->ResolveSubresource(
                     resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
@@ -693,9 +699,9 @@ namespace dawn_native { namespace d3d12 {
                     DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    SubresourceRange subresources = {copy->destination.mipLevel, 1,
-                                                     copy->destination.origin.z,
-                                                     copy->copySize.depth};
+                    SubresourceRange subresources =
+                        GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
+
                     if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
                                                       copy->destination.mipLevel)) {
                         texture->SetIsSubresourceContentInitialized(true, subresources);
@@ -737,7 +743,7 @@ namespace dawn_native { namespace d3d12 {
                         RecordCopyBufferToTextureFromTextureCopySplit(
                             commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
                             copy->source.bytesPerRow, texture, copy->destination.mipLevel,
-                            copyTextureLayer);
+                            copyTextureLayer, subresources.aspects);
 
                         bufferOffsetsForNextSlice[splitIndex] +=
                             bytesPerSlice * copySplits.copies2D.size();
@@ -754,8 +760,9 @@ namespace dawn_native { namespace d3d12 {
                     DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    SubresourceRange subresources = {copy->source.mipLevel, 1,
-                                                     copy->source.origin.z, copy->copySize.depth};
+                    SubresourceRange subresources =
+                        GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
+
                     texture->EnsureSubresourceContentInitialized(commandContext, subresources);
 
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
@@ -793,7 +800,7 @@ namespace dawn_native { namespace d3d12 {
                         RecordCopyTextureToBufferFromTextureCopySplit(
                             commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
                             copy->destination.bytesPerRow, texture, copy->source.mipLevel,
-                            copyTextureLayer);
+                            copyTextureLayer, subresources.aspects);
 
                         bufferOffsetsForNextSlice[splitIndex] +=
                             bytesPerSlice * copySplits.copies2D.size();
@@ -808,10 +815,11 @@ namespace dawn_native { namespace d3d12 {
 
                     Texture* source = ToBackend(copy->source.texture.Get());
                     Texture* destination = ToBackend(copy->destination.texture.Get());
-                    SubresourceRange srcRange = {copy->source.mipLevel, 1, copy->source.origin.z,
-                                                 copy->copySize.depth};
-                    SubresourceRange dstRange = {copy->destination.mipLevel, 1,
-                                                 copy->destination.origin.z, copy->copySize.depth};
+
+                    SubresourceRange srcRange =
+                        GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
+                    SubresourceRange dstRange =
+                        GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
 
                     source->EnsureSubresourceContentInitialized(commandContext, srcRange);
                     if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
@@ -835,6 +843,7 @@ namespace dawn_native { namespace d3d12 {
                     destination->TrackUsageAndTransitionNow(commandContext,
                                                             wgpu::TextureUsage::CopyDst, dstRange);
 
+                    ASSERT(srcRange.aspects == dstRange.aspects);
                     if (CanUseCopyResource(source, destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
@@ -844,24 +853,28 @@ namespace dawn_native { namespace d3d12 {
                                destination->GetDimension() == wgpu::TextureDimension::e2D);
                         const dawn_native::Extent3D copyExtentOneSlice = {
                             copy->copySize.width, copy->copySize.height, 1u};
-                        for (uint32_t slice = 0; slice < copy->copySize.depth; ++slice) {
-                            D3D12_TEXTURE_COPY_LOCATION srcLocation =
-                                ComputeTextureCopyLocationForTexture(source, copy->source.mipLevel,
-                                                                     copy->source.origin.z + slice);
 
-                            D3D12_TEXTURE_COPY_LOCATION dstLocation =
-                                ComputeTextureCopyLocationForTexture(
-                                    destination, copy->destination.mipLevel,
-                                    copy->destination.origin.z + slice);
+                        for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
+                            for (uint32_t slice = 0; slice < copy->copySize.depth; ++slice) {
+                                D3D12_TEXTURE_COPY_LOCATION srcLocation =
+                                    ComputeTextureCopyLocationForTexture(
+                                        source, copy->source.mipLevel,
+                                        copy->source.origin.z + slice, aspect);
 
-                            Origin3D sourceOriginInSubresource = copy->source.origin;
-                            sourceOriginInSubresource.z = 0;
-                            D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
-                                sourceOriginInSubresource, copyExtentOneSlice);
+                                D3D12_TEXTURE_COPY_LOCATION dstLocation =
+                                    ComputeTextureCopyLocationForTexture(
+                                        destination, copy->destination.mipLevel,
+                                        copy->destination.origin.z + slice, aspect);
 
-                            commandList->CopyTextureRegion(&dstLocation, copy->destination.origin.x,
-                                                           copy->destination.origin.y, 0,
-                                                           &srcLocation, &sourceRegion);
+                                Origin3D sourceOriginInSubresource = copy->source.origin;
+                                sourceOriginInSubresource.z = 0;
+                                D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
+                                    sourceOriginInSubresource, copyExtentOneSlice);
+
+                                commandList->CopyTextureRegion(
+                                    &dstLocation, copy->destination.origin.x,
+                                    copy->destination.origin.y, 0, &srcLocation, &sourceRegion);
+                            }
                         }
                     }
                     break;

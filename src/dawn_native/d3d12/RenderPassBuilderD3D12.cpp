@@ -86,12 +86,14 @@ namespace dawn_native { namespace d3d12 {
         D3D12EndingAccessResolveSubresourceParameters(TextureView* resolveDestination) {
             D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS subresourceParameters;
             Texture* resolveDestinationTexture = ToBackend(resolveDestination->GetTexture());
+            ASSERT(resolveDestinationTexture->GetFormat().aspects == Aspect::Color);
 
             subresourceParameters.DstX = 0;
             subresourceParameters.DstY = 0;
             subresourceParameters.SrcSubresource = 0;
             subresourceParameters.DstSubresource = resolveDestinationTexture->GetSubresourceIndex(
-                resolveDestination->GetBaseMipLevel(), resolveDestination->GetBaseArrayLayer());
+                resolveDestination->GetBaseMipLevel(), resolveDestination->GetBaseArrayLayer(),
+                Aspect::Color);
             // Resolving a specified sub-rect is only valid on hardware that supports sample
             // positions. This means even {0, 0, width, height} would be invalid if unsupported. To
             // avoid this, we assume sub-rect resolves never work by setting them to all zeros or

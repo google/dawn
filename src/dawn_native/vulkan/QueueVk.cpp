@@ -142,7 +142,7 @@ namespace dawn_native { namespace vulkan {
         textureCopy.texture = destination->texture;
         textureCopy.mipLevel = destination->mipLevel;
         textureCopy.origin = destination->origin;
-        textureCopy.aspect = destination->aspect;
+        textureCopy.aspect = ConvertAspect(destination->texture->GetFormat(), destination->aspect);
 
         return ToBackend(GetDevice())
             ->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, &textureCopy,

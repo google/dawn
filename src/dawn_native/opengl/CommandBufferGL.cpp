@@ -525,8 +525,8 @@ namespace dawn_native { namespace opengl {
                     buffer->EnsureDataInitialized();
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    SubresourceRange subresources = {dst.mipLevel, 1, dst.origin.z,
-                                                     copy->copySize.depth};
+                    SubresourceRange subresources =
+                        GetSubresourcesAffectedByCopy(dst, copy->copySize);
                     if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
                         texture->SetIsSubresourceContentInitialized(true, subresources);
                     } else {
@@ -618,8 +618,8 @@ namespace dawn_native { namespace opengl {
                     buffer->EnsureDataInitializedAsDestination(copy);
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    SubresourceRange subresources = {src.mipLevel, 1, src.origin.z,
-                                                     copy->copySize.depth};
+                    SubresourceRange subresources =
+                        GetSubresourcesAffectedByCopy(src, copy->copySize);
                     texture->EnsureSubresourceContentInitialized(subresources);
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
@@ -699,10 +699,9 @@ namespace dawn_native { namespace opengl {
                     Extent3D copySize = ComputeTextureCopyExtent(dst, copy->copySize);
                     Texture* srcTexture = ToBackend(src.texture.Get());
                     Texture* dstTexture = ToBackend(dst.texture.Get());
-                    SubresourceRange srcRange = {src.mipLevel, 1, src.origin.z,
-                                                 copy->copySize.depth};
-                    SubresourceRange dstRange = {dst.mipLevel, 1, dst.origin.z,
-                                                 copy->copySize.depth};
+
+                    SubresourceRange srcRange = GetSubresourcesAffectedByCopy(src, copy->copySize);
+                    SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
                     srcTexture->EnsureSubresourceContentInitialized(srcRange);
                     if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {

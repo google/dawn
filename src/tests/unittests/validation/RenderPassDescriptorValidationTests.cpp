@@ -198,7 +198,7 @@ namespace {
         }
     }
 
-    // Depth and stencil storeOps must match
+    // Depth and stencil storeOps can be different
     TEST_F(RenderPassDescriptorValidationTest, DepthStencilStoreOpMismatch) {
         constexpr uint32_t kArrayLayers = 1;
         constexpr uint32_t kLevelCount = 1;
@@ -223,15 +223,7 @@ namespace {
         wgpu::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
         wgpu::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
 
-        // StoreOps mismatch causing the render pass to error
-        {
-            utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
-            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
-            AssertBeginRenderPassError(&renderPass);
-        }
-
-        // StoreOps match so render pass is a success
+        // Base case: StoreOps match so render pass is a success
         {
             utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
             renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
@@ -239,10 +231,18 @@ namespace {
             AssertBeginRenderPassSuccess(&renderPass);
         }
 
-        // StoreOps match so render pass is a success
+        // Base case: StoreOps match so render pass is a success
         {
             utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
             renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // StoreOps mismatch still is a success
+        {
+            utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
             renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
             AssertBeginRenderPassSuccess(&renderPass);
         }

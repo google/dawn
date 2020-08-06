@@ -67,6 +67,7 @@ namespace dawn_native {
         bool HasComponentType(Type componentType) const;
 
         TexelBlockInfo GetTexelBlockInfo(wgpu::TextureAspect aspect) const;
+        TexelBlockInfo GetTexelBlockInfo(Aspect aspect) const;
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)

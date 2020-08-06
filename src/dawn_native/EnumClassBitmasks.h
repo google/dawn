@@ -36,6 +36,13 @@ namespace dawn_native {
     using wgpu::operator|=;
     using wgpu::operator^=;
 
+    using wgpu::HasZeroOrOneBits;
+
+    template <typename T>
+    constexpr bool HasOneBit(T value) {
+        return HasZeroOrOneBits(value) && value != T(0);
+    }
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_ENUMCLASSBITMASK_H_

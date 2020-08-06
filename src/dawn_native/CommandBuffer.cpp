@@ -56,7 +56,7 @@ namespace dawn_native {
                                                    const Extent3D& copySize) {
         switch (copy.texture->GetDimension()) {
             case wgpu::TextureDimension::e2D:
-                return {copy.mipLevel, 1, copy.origin.z, copySize.depth};
+                return {copy.mipLevel, 1, copy.origin.z, copySize.depth, copy.aspect};
             default:
                 UNREACHABLE();
                 return {};
@@ -113,36 +113,31 @@ namespace dawn_native {
             ASSERT(view->GetLevelCount() == 1);
             SubresourceRange range = view->GetSubresourceRange();
 
+            SubresourceRange depthRange = range;
+            depthRange.aspects = range.aspects & Aspect::Depth;
+
+            SubresourceRange stencilRange = range;
+            stencilRange.aspects = range.aspects & Aspect::Stencil;
+
             // If the depth stencil texture has not been initialized, we want to use loadop
             // clear to init the contents to 0's
-            if (!view->GetTexture()->IsSubresourceContentInitialized(range)) {
-                if (view->GetTexture()->GetFormat().HasDepth() &&
-                    attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
-                    attachmentInfo.clearDepth = 0.0f;
-                    attachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
-                }
-                if (view->GetTexture()->GetFormat().HasStencil() &&
-                    attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
-                    attachmentInfo.clearStencil = 0u;
-                    attachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-                }
+            if (!view->GetTexture()->IsSubresourceContentInitialized(depthRange) &&
+                attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
+                attachmentInfo.clearDepth = 0.0f;
+                attachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
             }
 
-            // If these have different store ops, make them both Store because we can't track
-            // initialized state separately yet. TODO(crbug.com/dawn/145)
-            if (attachmentInfo.depthStoreOp != attachmentInfo.stencilStoreOp) {
-                attachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-                attachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            if (!view->GetTexture()->IsSubresourceContentInitialized(stencilRange) &&
+                attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
+                attachmentInfo.clearStencil = 0u;
+                attachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
             }
 
-            if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
-                attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
-                view->GetTexture()->SetIsSubresourceContentInitialized(true, range);
-            } else {
-                ASSERT(attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
-                       attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear);
-                view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
-            }
+            view->GetTexture()->SetIsSubresourceContentInitialized(
+                attachmentInfo.depthStoreOp == wgpu::StoreOp::Store, depthRange);
+
+            view->GetTexture()->SetIsSubresourceContentInitialized(
+                attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store, stencilRange);
         }
     }
 

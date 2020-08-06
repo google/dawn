@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
@@ -199,25 +200,25 @@ namespace dawn_native { namespace opengl {
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
         if (GetFormat().isRenderable) {
-            if (GetFormat().HasDepthOrStencil()) {
-                bool doDepthClear = GetFormat().HasDepth();
-                bool doStencilClear = GetFormat().HasStencil();
+            if ((range.aspects & (Aspect::Depth | Aspect::Stencil)) != 0) {
                 GLfloat depth = fClearColor;
                 GLint stencil = clearColor;
-                if (doDepthClear) {
+                if (range.aspects & Aspect::Depth) {
                     gl.DepthMask(GL_TRUE);
                 }
-                if (doStencilClear) {
+                if (range.aspects & Aspect::Stencil) {
                     gl.StencilMask(GetStencilMaskFromStencilFormat(GetFormat().format));
                 }
 
-                auto DoClear = [&]() {
-                    if (doDepthClear && doStencilClear) {
+                auto DoClear = [&](Aspect aspects) {
+                    if (aspects == (Aspect::Depth | Aspect::Stencil)) {
                         gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
-                    } else if (doDepthClear) {
+                    } else if (aspects == Aspect::Depth) {
                         gl.ClearBufferfv(GL_DEPTH, 0, &depth);
-                    } else if (doStencilClear) {
+                    } else if (aspects == Aspect::Stencil) {
                         gl.ClearBufferiv(GL_STENCIL, 0, &stencil);
+                    } else {
+                        UNREACHABLE();
                     }
                 };
 
@@ -230,23 +231,42 @@ namespace dawn_native { namespace opengl {
                     switch (GetDimension()) {
                         case wgpu::TextureDimension::e2D:
                             if (GetArrayLayers() == 1) {
-                                if (clearValue == TextureBase::ClearValue::Zero &&
-                                    IsSubresourceContentInitialized(
-                                        SubresourceRange::SingleSubresource(level, 0))) {
-                                    // Skip lazy clears if already initialized.
+                                Aspect aspectsToClear = Aspect::None;
+                                for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                                    if (clearValue == TextureBase::ClearValue::Zero &&
+                                        IsSubresourceContentInitialized(
+                                            SubresourceRange::SingleMipAndLayer(level, 0,
+                                                                                aspect))) {
+                                        // Skip lazy clears if already initialized.
+                                        continue;
+                                    }
+                                    aspectsToClear |= aspect;
+                                }
+
+                                if (aspectsToClear == Aspect::None) {
                                     continue;
                                 }
+
                                 gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
                                                         GL_DEPTH_STENCIL_ATTACHMENT, GetGLTarget(),
                                                         GetHandle(), static_cast<GLint>(level));
-                                DoClear();
+                                DoClear(aspectsToClear);
                             } else {
                                 for (uint32_t layer = range.baseArrayLayer;
                                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                                    if (clearValue == TextureBase::ClearValue::Zero &&
-                                        IsSubresourceContentInitialized(
-                                            SubresourceRange::SingleSubresource(level, layer))) {
-                                        // Skip lazy clears if already initialized.
+                                    Aspect aspectsToClear = Aspect::None;
+                                    for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                                        if (clearValue == TextureBase::ClearValue::Zero &&
+                                            IsSubresourceContentInitialized(
+                                                SubresourceRange::SingleMipAndLayer(level, layer,
+                                                                                    aspect))) {
+                                            // Skip lazy clears if already initialized.
+                                            continue;
+                                        }
+                                        aspectsToClear |= aspect;
+                                    }
+
+                                    if (aspectsToClear == Aspect::None) {
                                         continue;
                                     }
 
@@ -254,7 +274,7 @@ namespace dawn_native { namespace opengl {
                                         GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                                         GetHandle(), static_cast<GLint>(level),
                                         static_cast<GLint>(layer));
-                                    DoClear();
+                                    DoClear(aspectsToClear);
                                 }
                             }
                             break;
@@ -266,6 +286,8 @@ namespace dawn_native { namespace opengl {
 
                 gl.DeleteFramebuffers(1, &framebuffer);
             } else {
+                ASSERT(range.aspects == Aspect::Color);
+
                 static constexpr uint32_t MAX_TEXEL_SIZE = 16;
                 ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
                 std::array<GLbyte, MAX_TEXEL_SIZE> clearColorData;
@@ -280,7 +302,7 @@ namespace dawn_native { namespace opengl {
                          layer < range.baseArrayLayer + range.layerCount; ++layer) {
                         if (clearValue == TextureBase::ClearValue::Zero &&
                             IsSubresourceContentInitialized(
-                                SubresourceRange::SingleSubresource(level, layer))) {
+                                SubresourceRange::SingleMipAndLayer(level, layer, Aspect::Color))) {
                             // Skip lazy clears if already initialized.
                             continue;
                         }
@@ -292,6 +314,8 @@ namespace dawn_native { namespace opengl {
                 }
             }
         } else {
+            ASSERT(range.aspects == Aspect::Color);
+
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
             ASSERT(kTextureBytesPerRowAlignment % GetFormat().blockByteSize == 0);
@@ -334,7 +358,7 @@ namespace dawn_native { namespace opengl {
                         if (GetArrayLayers() == 1) {
                             if (clearValue == TextureBase::ClearValue::Zero &&
                                 IsSubresourceContentInitialized(
-                                    SubresourceRange::SingleSubresource(level, 0))) {
+                                    SubresourceRange::SingleMipAndLayer(level, 0, Aspect::Color))) {
                                 // Skip lazy clears if already initialized.
                                 continue;
                             }
@@ -346,7 +370,8 @@ namespace dawn_native { namespace opengl {
                                  layer < range.baseArrayLayer + range.layerCount; ++layer) {
                                 if (clearValue == TextureBase::ClearValue::Zero &&
                                     IsSubresourceContentInitialized(
-                                        SubresourceRange::SingleSubresource(level, layer))) {
+                                        SubresourceRange::SingleMipAndLayer(level, layer,
+                                                                            Aspect::Color))) {
                                     // Skip lazy clears if already initialized.
                                     continue;
                                 }

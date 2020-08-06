@@ -53,7 +53,7 @@ namespace dawn_native { namespace metal {
                                              const TextureCopy& dst,
                                              const Extent3D& size);
 
-    MTLBlitOption ComputeMTLBlitOption(const Format& format, wgpu::TextureAspect aspect);
+    MTLBlitOption ComputeMTLBlitOption(const Format& format, Aspect aspect);
 
 }}  // namespace dawn_native::metal
 

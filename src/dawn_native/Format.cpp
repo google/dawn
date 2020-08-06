@@ -120,6 +120,36 @@ namespace dawn_native {
         }
     }
 
+    TexelBlockInfo Format::GetTexelBlockInfo(Aspect aspect) const {
+        ASSERT(HasOneBit(aspect));
+        ASSERT(aspects & aspect);
+        switch (aspect) {
+            case Aspect::Color:
+                ASSERT(aspects == aspect);
+                return *this;
+            case Aspect::Depth:
+                switch (format) {
+                    case wgpu::TextureFormat::Depth32Float:
+                        return *this;
+                    default:
+                        UNREACHABLE();
+                        break;
+                }
+            case Aspect::Stencil:
+                switch (format) {
+                    case wgpu::TextureFormat::Depth24PlusStencil8:
+                        return {1, 1, 1};
+                    default:
+                        UNREACHABLE();
+                        break;
+                }
+                break;
+            default:
+                UNREACHABLE();
+                break;
+        }
+    }
+
     size_t Format::GetIndex() const {
         return ComputeFormatIndex(format);
     }

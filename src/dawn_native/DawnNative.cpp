@@ -179,10 +179,13 @@ namespace dawn_native {
                                          uint32_t baseMipLevel,
                                          uint32_t levelCount,
                                          uint32_t baseArrayLayer,
-                                         uint32_t layerCount) {
+                                         uint32_t layerCount,
+                                         WGPUTextureAspect aspect) {
         dawn_native::TextureBase* textureBase =
             reinterpret_cast<dawn_native::TextureBase*>(texture);
-        SubresourceRange range = {baseMipLevel, levelCount, baseArrayLayer, layerCount};
+        SubresourceRange range = {
+            baseMipLevel, levelCount, baseArrayLayer, layerCount,
+            ConvertAspect(textureBase->GetFormat(), static_cast<wgpu::TextureAspect>(aspect))};
         return textureBase->IsSubresourceContentInitialized(range);
     }
 
