@@ -96,6 +96,9 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* a) {
   if (!a) {
     return false;
   }
+  if (!(ValidateConstant(a))) {
+    return false;
+  }
   if (!(ValidateExpression(a->lhs()) && ValidateExpression(a->rhs()))) {
     return false;
   }
@@ -103,6 +106,25 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* a) {
     return false;
   }
 
+  return true;
+}
+
+bool ValidatorImpl::ValidateConstant(const ast::AssignmentStatement* assign) {
+  if (!assign) {
+    return false;
+  }
+
+  if (assign->lhs()->IsIdentifier()) {
+    ast::Variable* var;
+    auto* ident = assign->lhs()->AsIdentifier();
+    if (variable_stack_.get(ident->name(), &var)) {
+      if (var->is_const()) {
+        set_error(assign->source(), "v-0021: cannot re-assign a constant: '" +
+                                        ident->name() + "'");
+        return false;
+      }
+    }
+  }
   return true;
 }
 

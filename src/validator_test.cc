@@ -413,27 +413,36 @@ TEST_F(ValidatorTest, UnsingUndefinedVariableOuterScope_Pass) {
   EXPECT_TRUE(v.ValidateStatements(outer_body.get())) << v.error();
 }
 
-TEST_F(ValidatorTest, DISABLED_AssignToConstant_Fail) {
-  // v-0021: Cannot re-assign a constant.
-  // const a :i32 = 1;
-  // a = 2;
+TEST_F(ValidatorTest, AssignToConstant_Fail) {
+  // {
+  //  const a :i32 = 2;
+  //  a = 2
+  // }
   ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  var->set_is_const(true);
 
-  ast::Variable var("a", ast::StorageClass::kPrivate, &i32);
-  var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  var.set_is_const(true);
   auto lhs = std::make_unique<ast::IdentifierExpression>("a");
-
+  auto* lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
+  auto* rhs_ptr = rhs.get();
 
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::AssignmentStatement>(
+      Source{12, 34}, std::move(lhs), std::move(rhs)));
+
+  EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
   tint::ValidatorImpl v;
-  // TODO(SarahM0): Invalidate assignments to a constant.
-  ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "2:1: v-0021: cannot re-assign a constant");
+  EXPECT_FALSE(v.ValidateStatements(body.get()));
+  EXPECT_EQ(v.error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
 }
 
 }  // namespace

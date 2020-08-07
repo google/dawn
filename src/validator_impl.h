@@ -66,9 +66,9 @@ class ValidatorImpl {
   /// @returns true if the validation was successful
   bool ValidateStatement(const ast::Statement* stmt);
   /// Validates an assignment
-  /// @param a the assignment to check
+  /// @param assign the assignment to check
   /// @returns true if the validation was successful
-  bool ValidateAssign(const ast::AssignmentStatement* a);
+  bool ValidateAssign(const ast::AssignmentStatement* assign);
   /// Validates v-0001: Only allowed import is "GLSL.std.450"
   /// @param module the modele to check imports
   /// @returns ture if input complies with v-0001 rule
@@ -82,9 +82,13 @@ class ValidatorImpl {
   /// @return true if idnet was defined
   bool ValidateIdentifier(const ast::IdentifierExpression* ident);
   /// Validates if the input follows type checking rules
-  /// @param 'a' the assignment to check
+  /// @param assign the assignment to check
   /// @returns ture if successful
-  bool ValidateResultTypes(const ast::AssignmentStatement* a);
+  bool ValidateResultTypes(const ast::AssignmentStatement* assign);
+  /// Validate v-0021: Cannot re-assign a constant
+  /// @param assign is the assigment to check if its lhs is a const
+  /// @returns false if lhs of assign is a constant identifier
+  bool ValidateConstant(const ast::AssignmentStatement* assign);
 
  private:
   std::string error_;
