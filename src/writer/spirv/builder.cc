@@ -128,6 +128,17 @@ uint32_t IndexFromName(char name) {
   return std::numeric_limits<uint32_t>::max();
 }
 
+/// Returns the matrix type that is |type| or that is wrapped by
+/// one or more levels of an arrays inside of |type|.
+/// @param type the given type, which must not be null
+/// @returns the nested matrix type, or nullptr if none
+ast::type::MatrixType* GetNestedMatrixType(ast::type::Type* type) {
+  while (type->IsArray()) {
+    type = type->AsArray()->type();
+  }
+  return type->IsMatrix() ? type->AsMatrix() : nullptr;
+}
+
 }  // namespace
 
 Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
@@ -2019,15 +2030,37 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
   push_debug(spv::Op::OpMemberName, {Operand::Int(struct_id), Operand::Int(idx),
                                      Operand::String(member->name())});
 
+  bool has_layout = false;
   for (const auto& deco : member->decorations()) {
     if (deco->IsOffset()) {
       push_annot(spv::Op::OpMemberDecorate,
                  {Operand::Int(struct_id), Operand::Int(idx),
                   Operand::Int(SpvDecorationOffset),
                   Operand::Int(deco->AsOffset()->offset())});
+      has_layout = true;
     } else {
       error_ = "unknown struct member decoration";
       return 0;
+    }
+  }
+
+  if (has_layout) {
+    // Infer and emit matrix layout.
+    auto* matrix_type = GetNestedMatrixType(member->type());
+    if (matrix_type) {
+      push_annot(spv::Op::OpMemberDecorate,
+                 {Operand::Int(struct_id), Operand::Int(idx),
+                  Operand::Int(SpvDecorationColMajor)});
+      if (!matrix_type->type()->IsF32()) {
+        error_ = "matrix scalar element type must be f32";
+        return 0;
+      }
+      const auto scalar_elem_size = 4;
+      const auto effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
+      push_annot(spv::Op::OpMemberDecorate,
+                 {Operand::Int(struct_id), Operand::Int(idx),
+                  Operand::Int(SpvDecorationMatrixStride),
+                  Operand::Int(effective_row_count * scalar_elem_size)});
     }
   }
 

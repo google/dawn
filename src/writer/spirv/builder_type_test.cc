@@ -403,6 +403,173 @@ OpMemberDecorate %1 1 Offset 8
 )");
 }
 
+TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
+  // Don't infer layout for matrix when there is no offset.
+  ast::type::F32Type f32;
+  ast::type::MatrixType glsl_mat2x2(&f32, 2, 2);
+  ast::type::MatrixType glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
+  ast::type::MatrixType glsl_mat4x4(&f32, 4, 4);
+
+  ast::StructMemberDecorationList empty_a;
+  ast::StructMemberDecorationList empty_b;
+  ast::StructMemberDecorationList empty_c;
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>("a", &glsl_mat2x2,
+                                                        std::move(empty_a)));
+  members.push_back(std::make_unique<ast::StructMember>("b", &glsl_mat2x3,
+                                                        std::move(empty_b)));
+  members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
+                                                        std::move(empty_c)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  ast::Module mod;
+  Builder b(&mod);
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 2
+%2 = OpTypeMatrix %3 2
+%6 = OpTypeVector %4 3
+%5 = OpTypeMatrix %6 2
+%8 = OpTypeVector %4 4
+%7 = OpTypeMatrix %8 4
+%1 = OpTypeStruct %2 %5 %7
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
+OpMemberName %1 2 "c"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), "");
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
+  // We have to infer layout for matrix when it also has an offset.
+  ast::type::F32Type f32;
+  ast::type::MatrixType glsl_mat2x2(&f32, 2, 2);
+  ast::type::MatrixType glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
+  ast::type::MatrixType glsl_mat4x4(&f32, 4, 4);
+
+  ast::StructMemberDecorationList a_decos;
+  a_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  ast::StructMemberDecorationList b_decos;
+  b_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  ast::StructMemberDecorationList c_decos;
+  c_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(48));
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>("a", &glsl_mat2x2,
+                                                        std::move(a_decos)));
+  members.push_back(std::make_unique<ast::StructMember>("b", &glsl_mat2x3,
+                                                        std::move(b_decos)));
+  members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
+                                                        std::move(c_decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  ast::Module mod;
+  Builder b(&mod);
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 2
+%2 = OpTypeMatrix %3 2
+%6 = OpTypeVector %4 3
+%5 = OpTypeMatrix %6 2
+%8 = OpTypeVector %4 4
+%7 = OpTypeMatrix %8 4
+%1 = OpTypeStruct %2 %5 %7
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
+OpMemberName %1 2 "c"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
+OpMemberDecorate %1 0 ColMajor
+OpMemberDecorate %1 0 MatrixStride 8
+OpMemberDecorate %1 1 Offset 16
+OpMemberDecorate %1 1 ColMajor
+OpMemberDecorate %1 1 MatrixStride 16
+OpMemberDecorate %1 2 Offset 48
+OpMemberDecorate %1 2 ColMajor
+OpMemberDecorate %1 2 MatrixStride 16
+)");
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
+  // We have to infer layout for matrix when it also has an offset.
+  // The decoration goes on the struct member, even if the matrix is buried
+  // in levels of arrays.
+  ast::type::F32Type f32;
+
+  ast::type::MatrixType glsl_mat2x2(&f32, 2, 2);
+  ast::type::ArrayType arr_mat2x2(&glsl_mat2x2, 1);  // Singly nested array
+
+  ast::type::MatrixType glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
+  ast::type::ArrayType arr_mat2x3(&glsl_mat2x3, 1);
+  ast::type::ArrayType arr_arr_mat2x2(&arr_mat2x3, 1);  // Doubly nested array
+
+  ast::type::MatrixType glsl_mat4x4(&f32, 4, 4);
+  ast::type::ArrayType rtarr_mat4x4(&glsl_mat4x4);  // Runtime array
+
+  ast::StructMemberDecorationList a_decos;
+  a_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  ast::StructMemberDecorationList b_decos;
+  b_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  ast::StructMemberDecorationList c_decos;
+  c_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(48));
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>("a", &glsl_mat2x2,
+                                                        std::move(a_decos)));
+  members.push_back(std::make_unique<ast::StructMember>("b", &glsl_mat2x3,
+                                                        std::move(b_decos)));
+  members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
+                                                        std::move(c_decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  ast::Module mod;
+  Builder b(&mod);
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 2
+%2 = OpTypeMatrix %3 2
+%6 = OpTypeVector %4 3
+%5 = OpTypeMatrix %6 2
+%8 = OpTypeVector %4 4
+%7 = OpTypeMatrix %8 4
+%1 = OpTypeStruct %2 %5 %7
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
+OpMemberName %1 2 "c"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
+OpMemberDecorate %1 0 ColMajor
+OpMemberDecorate %1 0 MatrixStride 8
+OpMemberDecorate %1 1 Offset 16
+OpMemberDecorate %1 1 ColMajor
+OpMemberDecorate %1 1 MatrixStride 16
+OpMemberDecorate %1 2 Offset 48
+OpMemberDecorate %1 2 ColMajor
+OpMemberDecorate %1 2 MatrixStride 16
+)");
+}
+
 TEST_F(BuilderTest_Type, GenerateU32) {
   ast::type::U32Type u32;
 
