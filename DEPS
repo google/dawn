@@ -72,7 +72,7 @@ deps = {
 
   # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
   'third_party/SPIRV-Tools': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@8bc27a1cfbc19a9fb0cf244fab693ad8909659e5',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@2990a219264598311fa9f069999f56b774ad34e9',
     'condition': 'dawn_standalone',
   },
   'third_party/spirv-headers': {
@@ -80,7 +80,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/glslang': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@2de6d657dde37a421ff8afb1bd820d522df5821d',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@b60e067b43744ce88adea33ab347ac9997b923d8',
     'condition': 'dawn_standalone',
   },
   'third_party/shaderc': {
@@ -90,7 +90,7 @@ deps = {
 
   # WGSL support
   'third_party/tint': {
-    'url': '{dawn_git}/tint@f18d737b4e9318a1817126852edb6cc596ff1f5e',
+    'url': '{dawn_git}/tint@bc80805c4b04d0e8cd9dad12bef32927363b9787',
     'condition': 'dawn_standalone',
   },
 
