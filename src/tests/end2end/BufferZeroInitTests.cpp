@@ -191,7 +191,8 @@ class BufferZeroInitTest : public DawnTest {
         EXPECT_PIXEL_RGBA8_EQ(kExpectedColor, outputTexture, 0u, 0u);
     }
 
-    wgpu::RenderPipeline CreateRenderPipelineForTest(const char* vertexShader) {
+    wgpu::RenderPipeline CreateRenderPipelineForTest(const char* vertexShader,
+                                                     uint32_t vertexBufferCount = 1u) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
         wgpu::ShaderModule vsModule =
@@ -210,13 +211,30 @@ class BufferZeroInitTest : public DawnTest {
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.vertexBufferCount = vertexBufferCount;
         descriptor.cVertexState.indexFormat = wgpu::IndexFormat::Uint16;
         descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
         descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
         descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
         descriptor.cColorStates[0].format = kColorAttachmentFormat;
         return device.CreateRenderPipeline(&descriptor);
+    }
+
+    void ValidateBufferAndOutputTexture(wgpu::CommandEncoder encoder,
+                                        wgpu::Buffer buffer,
+                                        uint64_t bufferSize,
+                                        wgpu::Texture colorAttachment) {
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+
+        // Although we just bind a part of the buffer, we still expect the whole buffer to be
+        // lazily initialized to 0.
+        const std::vector<float> expectedVertexBufferData(bufferSize / sizeof(float), 0.f);
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedVertexBufferData.data(), buffer,
+                                                           0, expectedVertexBufferData.size()));
+
+        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
+        EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
     }
 
     void TestBufferZeroInitAsVertexBuffer(uint64_t vertexBufferOffset) {
@@ -256,18 +274,7 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.Draw(1);
         renderPass.EndPass();
 
-        wgpu::CommandBuffer commandBuffer = encoder.Finish();
-        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
-
-        // Although we just bind a part of the buffer, we still expect the whole buffer to be
-        // lazily initialized to 0.
-        const std::vector<float> expectedVertexBufferData(vertexBufferSize / sizeof(float), 0);
-        EXPECT_LAZY_CLEAR(
-            0u, EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedVertexBufferData.data(), vertexBuffer, 0,
-                                             expectedVertexBufferData.size()));
-
-        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
-        EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
+        ValidateBufferAndOutputTexture(encoder, vertexBuffer, vertexBufferSize, colorAttachment);
     }
 
     void TestBufferZeroInitAsIndexBuffer(uint64_t indexBufferOffset) {
@@ -316,18 +323,136 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.DrawIndexed(1);
         renderPass.EndPass();
 
-        wgpu::CommandBuffer commandBuffer = encoder.Finish();
-        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+        ValidateBufferAndOutputTexture(encoder, indexBuffer, indexBufferSize, colorAttachment);
+    }
 
-        // Although we just bind a part of the buffer, we still expect the whole buffer to be
-        // lazily initialized to 0.
-        const std::vector<uint32_t> expectedIndexBufferData(indexBufferSize / sizeof(uint32_t), 0);
-        EXPECT_LAZY_CLEAR(0u,
-                          EXPECT_BUFFER_U32_RANGE_EQ(expectedIndexBufferData.data(), indexBuffer, 0,
-                                                     expectedIndexBufferData.size()));
+    void TestBufferZeroInitAsIndirectBufferForDrawIndirect(uint64_t indirectBufferOffset) {
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
-        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
-        EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
+        // As long as the vertex shader is executed once, the output color will be red.
+        const char* vertexShader = R"(
+            #version 450
+            layout(location = 0) out vec4 o_color;
+            void main() {
+                o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+                gl_PointSize = 1.f;
+            }
+        )";
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0);
+
+        // Clear the color attachment to green.
+        wgpu::Texture colorAttachment =
+            CreateAndInitializeTexture({1, 1, 1}, kColorAttachmentFormat, kClearColorGreen);
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorAttachment.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+
+        const uint64_t bufferSize = kDrawIndirectSize + indirectBufferOffset;
+        wgpu::Buffer indirectBuffer =
+            CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Indirect);
+
+        // The indirect buffer should be lazily cleared to 0, so we actually draw nothing and the
+        // color attachment will keep its original color (green) after we end the render pass.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(renderPipeline);
+        renderPass.DrawIndirect(indirectBuffer, indirectBufferOffset);
+        renderPass.EndPass();
+
+        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, colorAttachment);
+    }
+
+    void TestBufferZeroInitAsIndirectBufferForDrawIndexedIndirect(uint64_t indirectBufferOffset) {
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
+
+        // As long as the vertex shader is executed once, the output color will be red.
+        const char* vertexShader = R"(
+            #version 450
+            layout(location = 0) out vec4 o_color;
+            void main() {
+                o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+                gl_PointSize = 1.f;
+            }
+        )";
+
+        // It is not allowed to use an index buffer without a vertex buffer although the vertex
+        // buffer is not used. So here we use an initialized dummy buffer as vertex buffer.
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 1u);
+        wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
+            device, wgpu::BufferUsage::Vertex, {0.f, 0.f, 0.f, 0.f});
+        wgpu::Buffer indexBuffer = utils::CreateBufferFromData<float>(
+            device, wgpu::BufferUsage::Index, {0.f, 0.f, 0.f, 0.f});
+
+        // Clear the color attachment to green.
+        wgpu::Texture colorAttachment =
+            CreateAndInitializeTexture({1, 1, 1}, kColorAttachmentFormat, kClearColorGreen);
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorAttachment.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+
+        const uint64_t bufferSize = kDrawIndexedIndirectSize + indirectBufferOffset;
+        wgpu::Buffer indirectBuffer =
+            CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Indirect);
+
+        // The indirect buffer should be lazily cleared to 0, so we actually draw nothing and the
+        // color attachment will keep its original color (green) after we end the render pass.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(renderPipeline);
+        renderPass.SetVertexBuffer(0, vertexBuffer);
+        renderPass.SetIndexBuffer(indexBuffer);
+        renderPass.DrawIndexedIndirect(indirectBuffer, indirectBufferOffset);
+        renderPass.EndPass();
+
+        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, colorAttachment);
+    }
+
+    void TestBufferZeroInitAsIndirectBufferForDispatchIndirect(uint64_t indirectBufferOffset) {
+        // See https://github.com/google/shaderc/issues/1123 for more details.
+        // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
+        DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+        constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
+
+        // As long as the comptue shader is executed once, the pixel color of outImage will be set
+        // to red.
+        const char* computeShader = R"(
+            #version 450
+            layout(set = 0, binding = 0, rgba8) uniform writeonly image2D outImage;
+            void main() {
+                imageStore(outImage, ivec2(0, 0), vec4(1.f, 0.f, 0.f, 1.f));
+            })";
+
+        wgpu::ComputePipelineDescriptor pipelineDescriptor;
+        pipelineDescriptor.layout = nullptr;
+        pipelineDescriptor.computeStage.module =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
+        pipelineDescriptor.computeStage.entryPoint = "main";
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+        // Clear the color of outputTexture to green.
+        wgpu::Texture outputTexture =
+            CreateAndInitializeTexture({1u, 1u, 1u}, kColorAttachmentFormat, kClearColorGreen);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, outputTexture.CreateView()}});
+
+        const uint64_t bufferSize = kDispatchIndirectSize + indirectBufferOffset;
+        wgpu::Buffer indirectBuffer =
+            CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Indirect);
+
+        // The indirect buffer should be lazily cleared to 0, so we actually don't execute the
+        // compute shader and the output texture should keep its original color (green).
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
+        computePass.SetBindGroup(0, bindGroup);
+        computePass.SetPipeline(pipeline);
+        computePass.DispatchIndirect(indirectBuffer, indirectBufferOffset);
+        computePass.EndPass();
+
+        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, outputTexture);
     }
 };
 
@@ -785,7 +910,7 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     // See https://github.com/google/shaderc/issues/1123 for more details.
     // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     const char* computeShader = R"(
         #version 450
@@ -825,7 +950,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     // See https://github.com/google/shaderc/issues/1123 for more details.
     // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     const char* computeShader = R"(
         #version 450
@@ -865,7 +990,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     // See https://github.com/google/shaderc/issues/1123 for more details.
     // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     const char* computeShader = R"(
         #version 450
@@ -910,7 +1035,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     }
 }
 
-// Test the buffer will be lazy initialized correctly when its first use is in SetVertexBuffer.
+// Test the buffer will be lazily initialized correctly when its first use is in SetVertexBuffer.
 TEST_P(BufferZeroInitTest, SetVertexBuffer) {
     // Bind the whole buffer as a vertex buffer.
     {
@@ -925,7 +1050,7 @@ TEST_P(BufferZeroInitTest, SetVertexBuffer) {
     }
 }
 
-// Test the buffer will be lazy initialized correctly when its first use is in SetIndexBuffer.
+// Test the buffer will be lazily initialized correctly when its first use is in SetIndexBuffer.
 TEST_P(BufferZeroInitTest, SetIndexBuffer) {
     // Bind the whole buffer as an index buffer.
     {
@@ -937,6 +1062,54 @@ TEST_P(BufferZeroInitTest, SetIndexBuffer) {
     {
         constexpr uint64_t kIndexBufferOffset = 16u;
         TestBufferZeroInitAsIndexBuffer(kIndexBufferOffset);
+    }
+}
+
+// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// DrawIndirect.
+TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
+    // Bind the whole buffer as an indirect buffer.
+    {
+        constexpr uint64_t kOffset = 0u;
+        TestBufferZeroInitAsIndirectBufferForDrawIndirect(kOffset);
+    }
+
+    // Bind the buffer as an indirect buffer with a non-zero offset.
+    {
+        constexpr uint64_t kOffset = 8u;
+        TestBufferZeroInitAsIndirectBufferForDrawIndirect(kOffset);
+    }
+}
+
+// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// DrawIndexedIndirect.
+TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
+    // Bind the whole buffer as an indirect buffer.
+    {
+        constexpr uint64_t kOffset = 0u;
+        TestBufferZeroInitAsIndirectBufferForDrawIndexedIndirect(kOffset);
+    }
+
+    // Bind the buffer as an indirect buffer with a non-zero offset.
+    {
+        constexpr uint64_t kOffset = 8u;
+        TestBufferZeroInitAsIndirectBufferForDrawIndexedIndirect(kOffset);
+    }
+}
+
+// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// DispatchIndirect.
+TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
+    // Bind the whole buffer as an indirect buffer.
+    {
+        constexpr uint64_t kOffset = 0u;
+        TestBufferZeroInitAsIndirectBufferForDispatchIndirect(kOffset);
+    }
+
+    // Bind the buffer as an indirect buffer with a non-zero offset.
+    {
+        constexpr uint64_t kOffset = 8u;
+        TestBufferZeroInitAsIndirectBufferForDispatchIndirect(kOffset);
     }
 }
 
