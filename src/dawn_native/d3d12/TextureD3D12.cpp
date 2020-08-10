@@ -722,6 +722,12 @@ namespace dawn_native { namespace d3d12 {
         CommandRecordingContext* commandContext,
         std::vector<D3D12_RESOURCE_BARRIER>* barriers,
         const PassTextureUsage& textureUsages) {
+        if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
+            // Track the underlying heap to ensure residency.
+            Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
+            commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
+        }
+
         HandleTransitionSpecialCases(commandContext);
 
         const Serial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
