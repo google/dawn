@@ -91,7 +91,7 @@ namespace dawn_native { namespace vulkan {
         MaybeError CopyFromStagingToTexture(StagingBufferBase* source,
                                             const TextureDataLayout& src,
                                             TextureCopy* dst,
-                                            const Extent3D copySize);
+                                            const Extent3D& copySizePixels);
 
         ResultOrError<ResourceMemoryAllocation> AllocateMemory(VkMemoryRequirements requirements,
                                                                bool mappable);

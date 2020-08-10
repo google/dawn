@@ -271,7 +271,7 @@ namespace dawn_native { namespace metal {
     MaybeError Device::CopyFromStagingToTexture(StagingBufferBase* source,
                                                 const TextureDataLayout& dataLayout,
                                                 TextureCopy* dst,
-                                                const Extent3D copySize) {
+                                                const Extent3D& copySizePixels) {
         Texture* texture = ToBackend(dst->texture.Get());
 
         // This function assumes data is perfectly aligned. Otherwise, it might be necessary
@@ -280,19 +280,19 @@ namespace dawn_native { namespace metal {
         uint32_t blockSize = blockInfo.blockByteSize;
         uint32_t blockWidth = blockInfo.blockWidth;
         uint32_t blockHeight = blockInfo.blockHeight;
-        ASSERT(dataLayout.rowsPerImage == (copySize.height));
-        ASSERT(dataLayout.bytesPerRow == (copySize.width) / blockWidth * blockSize);
+        ASSERT(dataLayout.rowsPerImage == (copySizePixels.height));
+        ASSERT(dataLayout.bytesPerRow == (copySizePixels.width) / blockWidth * blockSize);
 
-        EnsureDestinationTextureInitialized(texture, *dst, copySize);
+        EnsureDestinationTextureInitialized(texture, *dst, copySizePixels);
 
         // Metal validation layer requires that if the texture's pixel format is a compressed
         // format, the sourceSize must be a multiple of the pixel format's block size or be
         // clamped to the edge of the texture if the block extends outside the bounds of a
         // texture.
         const Extent3D clampedSize =
-            texture->ClampToMipLevelVirtualSize(dst->mipLevel, dst->origin, copySize);
+            texture->ClampToMipLevelVirtualSize(dst->mipLevel, dst->origin, copySizePixels);
         const uint32_t copyBaseLayer = dst->origin.z;
-        const uint32_t copyLayerCount = copySize.depth;
+        const uint32_t copyLayerCount = copySizePixels.depth;
         const uint64_t bytesPerImage =
             dataLayout.rowsPerImage * dataLayout.bytesPerRow / blockHeight;
 

@@ -617,20 +617,21 @@ namespace dawn_native { namespace vulkan {
     MaybeError Device::CopyFromStagingToTexture(StagingBufferBase* source,
                                                 const TextureDataLayout& src,
                                                 TextureCopy* dst,
-                                                const Extent3D copySize) {
+                                                const Extent3D& copySizePixels) {
         // There is no need of a barrier to make host writes available and visible to the copy
         // operation for HOST_COHERENT memory. The Vulkan spec for vkQueueSubmit describes that it
         // does an implicit availability, visibility and domain operation.
 
         CommandRecordingContext* recordingContext = GetPendingRecordingContext();
 
-        VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySize);
+        VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySizePixels);
         VkImageSubresourceLayers subresource = region.imageSubresource;
 
         ASSERT(dst->texture->GetDimension() == wgpu::TextureDimension::e2D);
-        SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySize);
+        SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
 
-        if (IsCompleteSubresourceCopiedTo(dst->texture.Get(), copySize, subresource.mipLevel)) {
+        if (IsCompleteSubresourceCopiedTo(dst->texture.Get(), copySizePixels,
+                                          subresource.mipLevel)) {
             // Since texture has been overwritten, it has been "initialized"
             dst->texture->SetIsSubresourceContentInitialized(true, range);
         } else {

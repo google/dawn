@@ -158,14 +158,13 @@ namespace dawn_native {
             return {};
         }
 
-        return WriteTextureImpl(destination, data, dataSize, dataLayout, writeSize);
+        return WriteTextureImpl(*destination, data, *dataLayout, *writeSize);
     }
 
-    MaybeError QueueBase::WriteTextureImpl(const TextureCopyView* destination,
+    MaybeError QueueBase::WriteTextureImpl(const TextureCopyView& destination,
                                            const void* data,
-                                           size_t dataSize,
-                                           const TextureDataLayout* dataLayout,
-                                           const Extent3D* writeSize) {
+                                           const TextureDataLayout& dataLayout,
+                                           const Extent3D& writeSize) {
         // TODO(tommek@google.com): This should be implemented.
         return {};
     }

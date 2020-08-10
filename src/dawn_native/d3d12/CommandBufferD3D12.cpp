@@ -95,39 +95,6 @@ namespace dawn_native { namespace d3d12 {
                    copySize.depth == srcSize.depth;
         }
 
-        void RecordCopyBufferToTextureFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                           const Texture2DCopySplit& baseCopySplit,
-                                                           Buffer* buffer,
-                                                           uint64_t baseOffset,
-                                                           uint64_t bufferBytesPerRow,
-                                                           Texture* texture,
-                                                           uint32_t textureMiplevel,
-                                                           uint32_t textureSlice,
-                                                           Aspect aspect) {
-            const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice,
-                                                     aspect);
-
-            const uint64_t offset = baseCopySplit.offset + baseOffset;
-
-            for (uint32_t i = 0; i < baseCopySplit.count; ++i) {
-                const Texture2DCopySplit::CopyInfo& info = baseCopySplit.copies[i];
-
-                // TODO(jiawei.shao@intel.com): pre-compute bufferLocation and sourceRegion as
-                // members in Texture2DCopySplit::CopyInfo.
-                const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                    ComputeBufferLocationForCopyTextureRegion(texture, buffer->GetD3D12Resource(),
-                                                              info.bufferSize, offset,
-                                                              bufferBytesPerRow);
-                const D3D12_BOX sourceRegion =
-                    ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
-
-                commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
-                                               info.textureOffset.y, info.textureOffset.z,
-                                               &bufferLocation, &sourceRegion);
-            }
-        }
-
         void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
                                                            const Texture2DCopySplit& baseCopySplit,
                                                            Buffer* buffer,
@@ -713,41 +680,11 @@ namespace dawn_native { namespace d3d12 {
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst,
                                                         subresources);
 
-                    // See comments in ComputeTextureCopySplits() for more details.
-                    const TextureCopySplits copySplits = ComputeTextureCopySplits(
-                        copy->destination.origin, copy->copySize, texture->GetFormat(),
-                        copy->source.offset, copy->source.bytesPerRow, copy->source.rowsPerImage);
-
-                    const uint64_t bytesPerSlice =
-                        copy->source.bytesPerRow *
-                        (copy->source.rowsPerImage / texture->GetFormat().blockHeight);
-
-                    // copySplits.copies2D[1] is always calculated for the second copy slice with
-                    // extra "bytesPerSlice" copy offset compared with the first copy slice. So
-                    // here we use an array bufferOffsetsForNextSlice to record the extra offsets
-                    // for each copy slice: bufferOffsetsForNextSlice[0] is the extra offset for
-                    // the next copy slice that uses copySplits.copies2D[0], and
-                    // bufferOffsetsForNextSlice[1] is the extra offset for the next copy slice
-                    // that uses copySplits.copies2D[1].
-                    std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits>
-                        bufferOffsetsForNextSlice = {{0u, 0u}};
-                    for (uint32_t copySlice = 0; copySlice < copy->copySize.depth; ++copySlice) {
-                        const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
-
-                        const Texture2DCopySplit& copySplitPerLayerBase =
-                            copySplits.copies2D[splitIndex];
-                        const uint64_t bufferOffsetForNextSlice =
-                            bufferOffsetsForNextSlice[splitIndex];
-                        const uint32_t copyTextureLayer = copySlice + copy->destination.origin.z;
-
-                        RecordCopyBufferToTextureFromTextureCopySplit(
-                            commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
-                            copy->source.bytesPerRow, texture, copy->destination.mipLevel,
-                            copyTextureLayer, subresources.aspects);
-
-                        bufferOffsetsForNextSlice[splitIndex] +=
-                            bytesPerSlice * copySplits.copies2D.size();
-                    }
+                    // compute the copySplits and record the CopyTextureRegion commands
+                    CopyBufferToTextureWithCopySplit(
+                        commandContext, copy->destination, copy->copySize, texture,
+                        buffer->GetD3D12Resource(), copy->source.offset, copy->source.bytesPerRow,
+                        copy->source.rowsPerImage, subresources.aspects);
 
                     break;
                 }

@@ -20,6 +20,7 @@
 #include "common/Constants.h"
 #include "common/SerialQueue.h"
 #include "dawn_native/BindingInfo.h"
+#include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Info.h"
@@ -98,6 +99,11 @@ namespace dawn_native { namespace d3d12 {
                                          BufferBase* destination,
                                          uint64_t destinationOffset,
                                          uint64_t size);
+
+        MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+                                            const TextureDataLayout& src,
+                                            TextureCopy* dst,
+                                            const Extent3D& copySizePixels);
 
         ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,

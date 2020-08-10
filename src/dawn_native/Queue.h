@@ -58,11 +58,10 @@ namespace dawn_native {
                                            uint64_t bufferOffset,
                                            const void* data,
                                            size_t size);
-        virtual MaybeError WriteTextureImpl(const TextureCopyView* destination,
+        virtual MaybeError WriteTextureImpl(const TextureCopyView& destination,
                                             const void* data,
-                                            size_t dataSize,
-                                            const TextureDataLayout* dataLayout,
-                                            const Extent3D* writeSize);
+                                            const TextureDataLayout& dataLayout,
+                                            const Extent3D& writeSize);
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
         MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue) const;
