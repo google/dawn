@@ -64,7 +64,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
   EXPECT_EQ(g.result(), "56779u");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
+TEST_F(WgslGeneratorImplTest, DISABLED_EmitConstructor_Float) {
   ast::type::F32Type f32;
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, 1.5e27);
   ast::ScalarConstructorExpression expr(std::move(lit));
