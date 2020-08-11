@@ -334,6 +334,18 @@ namespace {
         }
     }
 
+    // Test that WriteTexture throws an error when requiredBytesInCopy overflows uint64_t
+    TEST_F(QueueWriteTextureValidationTest, RequiredBytesInCopyOverflow) {
+        wgpu::Texture destination = Create2DTexture({1, 1, 16}, 1, wgpu::TextureFormat::RGBA8Unorm,
+                                                    wgpu::TextureUsage::CopyDst);
+
+        // success because depth = 1.
+        TestWriteTexture(10000, 0, (1 << 31), (1 << 31), destination, 0, {0, 0, 0}, {1, 1, 1});
+        // failure because bytesPerImage * (depth - 1) overflows.
+        ASSERT_DEVICE_ERROR(TestWriteTexture(10000, 0, (1 << 31), (1 << 31), destination, 0,
+                                             {0, 0, 0}, {1, 1, 16}));
+    }
+
     // Regression tests for a bug in the computation of texture data size in Dawn.
     TEST_F(QueueWriteTextureValidationTest, TextureWriteDataSizeLastRowComputation) {
         constexpr uint32_t kBytesPerRow = 256;

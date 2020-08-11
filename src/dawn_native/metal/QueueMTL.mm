@@ -34,8 +34,10 @@ namespace dawn_native { namespace metal {
             const TextureDataLayout& dataLayout,
             const TexelBlockInfo& blockInfo,
             const Extent3D& writeSizePixel) {
-            uint32_t newDataSizeBytes = ComputeRequiredBytesInCopy(
-                blockInfo, writeSizePixel, alignedBytesPerRow, alignedRowsPerImage);
+            uint64_t newDataSizeBytes;
+            DAWN_TRY_ASSIGN(newDataSizeBytes,
+                            ComputeRequiredBytesInCopy(blockInfo, writeSizePixel,
+                                                       alignedBytesPerRow, alignedRowsPerImage));
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(

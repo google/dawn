@@ -793,6 +793,20 @@ TEST_F(CopyCommandTest_B2T, CopyToStencilAspect) {
     }
 }
 
+// Test that CopyB2T throws an error when requiredBytesInCopy overflows uint64_t
+TEST_F(CopyCommandTest_B2T, RequiredBytesInCopyOverflow) {
+    wgpu::Buffer source = CreateBuffer(10000, wgpu::BufferUsage::CopySrc);
+    wgpu::Texture destination =
+        Create2DTexture(1, 1, 1, 16, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
+
+    // Success
+    TestB2TCopy(utils::Expectation::Success, source, 0, (1 << 31), (1 << 31), destination, 0,
+                {0, 0, 0}, {1, 1, 1});
+    // Failure because bytesPerImage * (depth - 1) overflows
+    TestB2TCopy(utils::Expectation::Failure, source, 0, (1 << 31), (1 << 31), destination, 0,
+                {0, 0, 0}, {1, 1, 16});
+}
+
 class CopyCommandTest_T2B : public CopyCommandTest {};
 
 // Test a successfull T2B copy
@@ -1225,6 +1239,20 @@ TEST_F(CopyCommandTest_T2B, CopyFromStencilAspect) {
         TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, 256, 0,
                     {16, 16, 1}, wgpu::TextureAspect::StencilOnly);
     }
+}
+
+// Test that CopyT2B throws an error when requiredBytesInCopy overflows uint64_t
+TEST_F(CopyCommandTest_T2B, RequiredBytesInCopyOverflow) {
+    wgpu::Buffer destination = CreateBuffer(10000, wgpu::BufferUsage::CopyDst);
+    wgpu::Texture source =
+        Create2DTexture(1, 1, 1, 16, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
+
+    // Success
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0, (1 << 31),
+                (1 << 31), {1, 1, 1});
+    // Failure because bytesPerImage * (depth - 1) overflows
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, (1 << 31),
+                (1 << 31), {1, 1, 16});
 }
 
 class CopyCommandTest_T2T : public CopyCommandTest {};

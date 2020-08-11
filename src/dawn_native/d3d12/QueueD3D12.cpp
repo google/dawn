@@ -37,8 +37,11 @@ namespace dawn_native { namespace d3d12 {
             const TextureDataLayout& dataLayout,
             const Format& textureFormat,
             const Extent3D& writeSizePixel) {
-            uint32_t newDataSizeBytes = ComputeRequiredBytesInCopy(
-                textureFormat, writeSizePixel, optimallyAlignedBytesPerRow, alignedRowsPerImage);
+            uint64_t newDataSizeBytes;
+            DAWN_TRY_ASSIGN(
+                newDataSizeBytes,
+                ComputeRequiredBytesInCopy(textureFormat, writeSizePixel,
+                                           optimallyAlignedBytesPerRow, alignedRowsPerImage));
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(

@@ -314,7 +314,7 @@ namespace dawn_native {
                 srcPointer += imageAdditionalStride;
             }
         } else {
-            uint64_t layerSize = rowsPerImageInBlock * actualBytesPerRow;
+            uint64_t layerSize = uint64_t(rowsPerImageInBlock) * actualBytesPerRow;
             if (!copyWholeData) {  // copy layer by layer
                 for (uint32_t d = 0; d < depth; ++d) {
                     memcpy(dstPointer, srcPointer, layerSize);
