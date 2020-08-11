@@ -89,6 +89,11 @@ class ValidatorImpl {
   /// @param assign is the assigment to check if its lhs is a const
   /// @returns false if lhs of assign is a constant identifier
   bool ValidateConstant(const ast::AssignmentStatement* assign);
+  /// Validates declaration name uniquness
+  /// @param decl is the new declartion to be added
+  /// @returns true if no previous decleration with the |decl|'s name
+  /// exist in the variable stack
+  bool ValidateDeclStatement(const ast::VariableDeclStatement* decl);
 
  private:
   std::string error_;

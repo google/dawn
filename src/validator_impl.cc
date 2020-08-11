@@ -31,6 +31,11 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
     return false;
   }
   for (const auto& var : module->global_variables()) {
+    if (variable_stack_.has(var->name())) {
+      set_error(var->source(),
+                "v-0011: redeclared global identifier '" + var->name() + "'");
+      return false;
+    }
     variable_stack_.set_global(var->name(), var.get());
   }
   if (!CheckImports(module)) {
@@ -70,11 +75,6 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
     return false;
   }
   for (const auto& stmt : *block) {
-    // TODO(sarahM0): move the folowing to a function
-    if (stmt->IsVariableDecl()) {
-      auto* v = stmt->AsVariableDecl();
-      variable_stack_.set(v->variable()->name(), v->variable());
-    }
     if (!ValidateStatement(stmt.get())) {
       return false;
     }
@@ -82,9 +82,29 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
   return true;
 }
 
+bool ValidatorImpl::ValidateDeclStatement(
+    const ast::VariableDeclStatement* decl) {
+  auto name = decl->variable()->name();
+  bool is_global = false;
+  if (variable_stack_.get(name, nullptr, &is_global)) {
+    std::string error_number = "v-0014: ";
+    if (is_global) {
+      error_number = "v-0013: ";
+    }
+    set_error(decl->source(),
+              error_number + "redeclared identifier '" + name + "'");
+    return false;
+  }
+  variable_stack_.set(name, decl->variable());
+  return true;
+}
+
 bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   if (!stmt) {
     return false;
+  }
+  if (stmt->IsVariableDecl()) {
+    return ValidateDeclStatement(stmt->AsVariableDecl());
   }
   if (stmt->IsAssign()) {
     return ValidateAssign(stmt->AsAssign());

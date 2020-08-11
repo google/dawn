@@ -64,13 +64,26 @@ class ScopeStack {
   /// @param ret where to place the name
   /// @returns true if the name was successfully found, false otherwise
   bool get(const std::string& name, T* ret) const {
+    return get(name, ret, nullptr);
+  }
+
+  /// Retrieves a given name from the stack
+  /// @param name the name to look for
+  /// @param ret where to place the name
+  /// @param is_global set true if the name references a global variable
+  /// otherwise unchanged
+  /// @returns true if the name was successfully found, false otherwise
+  bool get(const std::string& name, T* ret, bool* is_global) const {
     for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
       auto& map = *iter;
-
       auto val = map.find(name);
+
       if (val != map.end()) {
         if (ret) {
           *ret = val->second;
+        }
+        if (is_global && iter == stack_.rend() - 1) {
+          *is_global = true;
         }
         return true;
       }

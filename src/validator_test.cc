@@ -48,6 +48,7 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
@@ -240,7 +241,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
   tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateStatements(body.get()));
+  EXPECT_TRUE(v.ValidateStatements(body.get())) << v.error();
 }
 
 TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
@@ -278,7 +279,11 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
             "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
-TEST_F(ValidatorTest, UnsingUndefinedVariableGlobalVariable_Fail) {
+TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
+  // var global_var: f32 = 2.1;
+  // fn my_func() -> f32 {
+  //   not_global_var = 3.14f;
+  // }
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
       "global_var", ast::StorageClass::kPrivate, &f32);
@@ -307,7 +312,11 @@ TEST_F(ValidatorTest, UnsingUndefinedVariableGlobalVariable_Fail) {
   EXPECT_EQ(v.error(), "12:34: v-0006: 'not_global_var' is not declared");
 }
 
-TEST_F(ValidatorTest, UnsingUndefinedVariableGlobalVariable_Pass) {
+TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
+  // var global_var: f32 = 2.1;
+  // fn my_func() -> f32 {
+  //   global_var = 3.14;
+  // }
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
       "global_var", ast::StorageClass::kPrivate, &f32);
@@ -341,10 +350,10 @@ TEST_F(ValidatorTest, UnsingUndefinedVariableGlobalVariable_Pass) {
   EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
 
-TEST_F(ValidatorTest, UnsingUndefinedVariableInnerScope_Fail) {
+TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   // {
-  // if (true) { var a : f32 = 2.0; }
-  // a = 3.14;
+  //   if (true) { var a : f32 = 2.0; }
+  //   a = 3.14;
   // }
   ast::type::F32Type f32;
   auto var =
@@ -378,10 +387,10 @@ TEST_F(ValidatorTest, UnsingUndefinedVariableInnerScope_Fail) {
   EXPECT_EQ(v.error(), "12:34: v-0006: 'a' is not declared");
 }
 
-TEST_F(ValidatorTest, UnsingUndefinedVariableOuterScope_Pass) {
+TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   // {
-  // var a : f32 = 2.0;
-  // if (true) { a = 3.14; }
+  //   var a : f32 = 2.0;
+  //   if (true) { a = 3.14; }
   // }
   ast::type::F32Type f32;
   auto var =
@@ -411,6 +420,27 @@ TEST_F(ValidatorTest, UnsingUndefinedVariableOuterScope_Pass) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
   EXPECT_TRUE(v.ValidateStatements(outer_body.get())) << v.error();
+}
+
+TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
+  // var global_var0 : f32 = 0.1;
+  // var global_var1 : i32 = 0;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  auto var0 = std::make_unique<ast::Variable>(
+      "global_var0", ast::StorageClass::kPrivate, &f32);
+  var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.1)));
+  mod()->AddGlobalVariable(std::move(var0));
+
+  auto var1 = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var1", ast::StorageClass::kPrivate, &f32);
+  var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 0)));
+  mod()->AddGlobalVariable(std::move(var1));
+
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
 
 TEST_F(ValidatorTest, AssignToConstant_Fail) {
@@ -443,6 +473,214 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.ValidateStatements(body.get()));
   EXPECT_EQ(v.error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
+}
+
+TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
+  // var global_var : f32 = 0.1;
+  // var global_var : i32 = 0;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  auto var0 = std::make_unique<ast::Variable>(
+      "global_var", ast::StorageClass::kPrivate, &f32);
+  var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.1)));
+  mod()->AddGlobalVariable(std::move(var0));
+
+  auto var1 = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kPrivate, &f32);
+  var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 0)));
+  mod()->AddGlobalVariable(std::move(var1));
+
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(),
+            "12:34: v-0011: redeclared global identifier 'global_var'");
+}
+
+TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
+  // var a: f32 = 2.1;
+  // fn my_func -> void {
+  //   var a: f32 = 2.0;
+  //   return 0;
+  // }
+
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+  auto global_var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
+  global_var->set_constructor(
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 2.1)));
+  mod()->AddGlobalVariable(std::move(global_var));
+
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
+                                                            std::move(var)));
+  func->set_body(std::move(body));
+  auto* func_ptr = func.get();
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod())) << v.error();
+  EXPECT_EQ(v.error(), "12:34: v-0013: redeclared identifier 'a'");
+}
+
+TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
+  // fn my_func() -> void {
+  //  var a :i32 = 2;
+  //  var a :f21 = 2.0;
+  // }
+  ast::type::VoidType void_type;
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  auto var_a_float =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var_a_float->set_constructor(
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 0.1)));
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{12, 34}, std::move(var_a_float)));
+  func->set_body(std::move(body));
+  auto* func_ptr = func.get();
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(), "12:34: v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
+  // {
+  // if (true) { var a : f32 = 2.0; }
+  // var a : f32 = 3.14;
+  // }
+  ast::type::F32Type f32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::type::BoolType bool_type;
+  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+
+  auto var_a_float =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var_a_float->set_constructor(
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 3.14)));
+
+  auto outer_body = std::make_unique<ast::BlockStatement>();
+  outer_body->append(
+      std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
+  outer_body->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{12, 34}, std::move(var_a_float)));
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.ValidateStatements(outer_body.get())) << v.error();
+}
+
+TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
+  // TODO(sarahM0): remove DISABLED after implementing ValidateIfStatement
+  // and it should just work
+  // {
+  // var a : f32 = 3.14;
+  // if (true) { var a : f32 = 2.0; }
+  // }
+  ast::type::F32Type f32;
+  auto var_a_float =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var_a_float->set_constructor(
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 3.14)));
+
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::type::BoolType bool_type;
+  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true));
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
+                                                            std::move(var)));
+
+  auto outer_body = std::make_unique<ast::BlockStatement>();
+  outer_body->append(
+      std::make_unique<ast::VariableDeclStatement>(std::move(var_a_float)));
+  outer_body->append(
+      std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.ValidateStatements(outer_body.get()));
+  EXPECT_EQ(v.error(), "12:34: v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
+  // func0 { var a : f32 = 2.0; }
+  // func1 { var a : f32 = 3.0; }
+  ast::type::F32Type f32;
+  auto var0 =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  auto var1 =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
+
+  ast::VariableList params0;
+  auto func0 =
+      std::make_unique<ast::Function>("func0", std::move(params0), &f32);
+  auto body0 = std::make_unique<ast::BlockStatement>();
+  body0->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
+                                                             std::move(var0)));
+  func0->set_body(std::move(body0));
+
+  ast::VariableList params1;
+  auto func1 =
+      std::make_unique<ast::Function>("func1", std::move(params1), &f32);
+  auto body1 = std::make_unique<ast::BlockStatement>();
+  body1->append(std::make_unique<ast::VariableDeclStatement>(Source{13, 34},
+                                                             std::move(var1)));
+  func1->set_body(std::move(body1));
+
+  mod()->AddFunction(std::move(func0));
+  mod()->AddFunction(std::move(func1));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
 
 }  // namespace
