@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include <array>
 #include <cstring>
 
 class BufferMapReadTests : public DawnTest {
@@ -575,6 +576,51 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 12, kDataSize - 5);
 }
 
+// Stress test mapping many buffers.
+TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
+    constexpr uint32_t kDataSize = 1000;
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    constexpr uint32_t kBuffers = 100;
+    std::array<wgpu::Buffer, kBuffers> buffers;
+    uint32_t mapCompletedCount = 0;
+
+    // Create buffers and request mapping them.
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    for (uint32_t i = 0; i < kBuffers; ++i) {
+        buffers[i] = device.CreateBuffer(&descriptor);
+
+        buffers[i].MapAsync(
+            wgpu::MapMode::Write, 0, descriptor.size,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+                (*static_cast<uint32_t*>(userdata))++;
+            },
+            &mapCompletedCount);
+    }
+
+    // Wait for all mappings to complete
+    while (mapCompletedCount != kBuffers) {
+        WaitABit();
+    }
+
+    // All buffers are mapped, write into them and unmap them all.
+    for (uint32_t i = 0; i < kBuffers; ++i) {
+        memcpy(buffers[i].GetMappedRange(0, descriptor.size), myData.data(), descriptor.size);
+        buffers[i].Unmap();
+    }
+
+    // Check the content of the buffers.
+    for (uint32_t i = 0; i < kBuffers; ++i) {
+        EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffers[i], 0, kDataSize);
+    }
+}
+
 // Test that the map offset isn't updated when the call is an error.
 TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     uint32_t data[3] = {0xCA7, 0xB0A7, 0xBA7};
@@ -977,29 +1023,24 @@ DAWN_INSTANTIATE_TEST(CreateBufferMappedTests,
 
 class BufferMappedAtCreationTests : public DawnTest {
   protected:
-    static void MapReadCallback(WGPUBufferMapAsyncStatus status,
-                                const void* data,
-                                uint64_t,
-                                void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-        ASSERT_NE(nullptr, data);
-
-        static_cast<BufferMappedAtCreationTests*>(userdata)->mappedData = data;
+    static void MapCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
+        EXPECT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        *static_cast<bool*>(userdata) = true;
     }
 
-    const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
-        buffer.MapReadAsync(MapReadCallback, this);
+    const void* MapAsyncAndWait(const wgpu::Buffer& buffer, wgpu::MapMode mode, size_t size) {
+        bool done = false;
+        buffer.MapAsync(mode, 0, size, MapCallback, &done);
 
-        while (mappedData == nullptr) {
+        while (!done) {
             WaitABit();
         }
 
-        return mappedData;
+        return buffer.GetConstMappedRange(0, size);
     }
 
     void UnmapBuffer(const wgpu::Buffer& buffer) {
         buffer.Unmap();
-        mappedData = nullptr;
     }
 
     wgpu::Buffer BufferMappedAtCreation(wgpu::BufferUsage usage, uint64_t size) {
@@ -1017,9 +1058,6 @@ class BufferMappedAtCreationTests : public DawnTest {
         memcpy(buffer.GetMappedRange(), data.data(), byteLength);
         return buffer;
     }
-
-  private:
-    const void* mappedData = nullptr;
 };
 
 // Test that the simplest mappedAtCreation works for MapWrite buffers.
@@ -1037,7 +1075,7 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageSmall) {
     wgpu::Buffer buffer = BufferMappedAtCreationWithData(wgpu::BufferUsage::MapRead, {myData});
     UnmapBuffer(buffer);
 
-    const void* mappedData = MapReadAsyncAndWait(buffer);
+    const void* mappedData = MapAsyncAndWait(buffer, wgpu::MapMode::Read, 4);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
     UnmapBuffer(buffer);
 }
@@ -1077,7 +1115,8 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
     wgpu::Buffer buffer = BufferMappedAtCreationWithData(wgpu::BufferUsage::MapRead, myData);
     UnmapBuffer(buffer);
 
-    const void* mappedData = MapReadAsyncAndWait(buffer);
+    const void* mappedData =
+        MapAsyncAndWait(buffer, wgpu::MapMode::Read, kDataSize * sizeof(uint32_t));
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
     UnmapBuffer(buffer);
 }
@@ -1114,7 +1153,6 @@ TEST_P(BufferMappedAtCreationTests, DestroyMappableWhileMappedForCreation) {
 // Test that mapping a buffer is valid after mappedAtCreation and Unmap
 TEST_P(BufferMappedAtCreationTests, CreateThenMapSuccess) {
     static uint32_t myData = 230502;
-    static uint32_t myData2 = 1337;
     wgpu::Buffer buffer = BufferMappedAtCreationWithData(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     UnmapBuffer(buffer);
@@ -1122,12 +1160,10 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapSuccess) {
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 
     bool done = false;
-    buffer.MapWriteAsync(
-        [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+    buffer.MapAsync(
+        wgpu::MapMode::Write, 0, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
             ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            ASSERT_NE(nullptr, data);
-
-            *static_cast<uint32_t*>(data) = myData2;
             *static_cast<bool*>(userdata) = true;
         },
         &done);
@@ -1137,7 +1173,6 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapSuccess) {
     }
 
     UnmapBuffer(buffer);
-    EXPECT_BUFFER_U32_EQ(myData2, buffer, 0);
 }
 
 // Test that is is invalid to map a buffer twice when using mappedAtCreation
@@ -1148,11 +1183,10 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapBeforeUnmapFailure) {
 
     ASSERT_DEVICE_ERROR([&]() {
         bool done = false;
-        buffer.MapWriteAsync(
-            [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+        buffer.MapAsync(
+            wgpu::MapMode::Write, 0, 4,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
                 ASSERT_EQ(WGPUBufferMapAsyncStatus_Error, status);
-                ASSERT_EQ(nullptr, data);
-
                 *static_cast<bool*>(userdata) = true;
             },
             &done);
@@ -1164,7 +1198,6 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapBeforeUnmapFailure) {
 
     // mappedAtCreation is unaffected by the MapWrite error.
     UnmapBuffer(buffer);
-    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
 // Test that creating a zero-sized buffer mapped is allowed.

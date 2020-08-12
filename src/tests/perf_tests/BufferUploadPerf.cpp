@@ -23,7 +23,7 @@ namespace {
 
     enum class UploadMethod {
         WriteBuffer,
-        CreateBufferMapped,
+        MappedAtCreation,
     };
 
     // Perf delta exists between ranges [0, 1MB] vs [1MB, MAX_SIZE).
@@ -55,8 +55,8 @@ namespace {
             case UploadMethod::WriteBuffer:
                 ostream << "_WriteBuffer";
                 break;
-            case UploadMethod::CreateBufferMapped:
-                ostream << "_CreateBufferMapped";
+            case UploadMethod::MappedAtCreation:
+                ostream << "_MappedAtCreation";
                 break;
         }
 
@@ -122,18 +122,19 @@ void BufferUploadPerf::Step() {
             break;
         }
 
-        case UploadMethod::CreateBufferMapped: {
+        case UploadMethod::MappedAtCreation: {
             wgpu::BufferDescriptor desc = {};
             desc.size = data.size();
             desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+            desc.mappedAtCreation = true;
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
             for (unsigned int i = 0; i < kNumIterations; ++i) {
-                auto result = device.CreateBufferMapped(&desc);
-                memcpy(result.data, data.data(), data.size());
-                result.buffer.Unmap();
-                encoder.CopyBufferToBuffer(result.buffer, 0, dst, 0, data.size());
+                wgpu::Buffer buffer = device.CreateBuffer(&desc);
+                memcpy(buffer.GetMappedRange(0, data.size()), data.data(), data.size());
+                buffer.Unmap();
+                encoder.CopyBufferToBuffer(buffer, 0, dst, 0, data.size());
             }
 
             wgpu::CommandBuffer commands = encoder.Finish();
@@ -150,7 +151,7 @@ TEST_P(BufferUploadPerf, Run) {
 DAWN_INSTANTIATE_PERF_TEST_SUITE_P(BufferUploadPerf,
                                    {D3D12Backend(), MetalBackend(), OpenGLBackend(),
                                     VulkanBackend()},
-                                   {UploadMethod::WriteBuffer, UploadMethod::CreateBufferMapped},
+                                   {UploadMethod::WriteBuffer, UploadMethod::MappedAtCreation},
                                    {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
                                     UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,
                                     UploadSize::BufferSize_16MB});

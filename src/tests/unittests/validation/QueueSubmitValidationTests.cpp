@@ -169,26 +169,14 @@ namespace {
             ASSERT_DEVICE_ERROR(queue.WriteBuffer(buffer, 0, &value, sizeof(value)));
         }
 
-        // MapReadAsync
+        // MapAsync
         {
             wgpu::BufferDescriptor descriptor;
             descriptor.size = 4;
             descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
             wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
-            buf.MapReadAsync(nullptr, nullptr);
-            uint32_t value = 0;
-            ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
-        }
-
-        // MapWriteAsync
-        {
-            wgpu::BufferDescriptor descriptor;
-            descriptor.size = 4;
-            descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
-            wgpu::Buffer buf = device.CreateBuffer(&descriptor);
-
-            buf.MapWriteAsync(nullptr, nullptr);
+            buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
             uint32_t value = 0;
             ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
         }

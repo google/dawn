@@ -74,14 +74,9 @@ class DeviceLostTest : public DawnTest {
         device.LoseForTesting();
     }
 
-    template <typename T>
     static void MapFailCallback(WGPUBufferMapAsyncStatus status,
-                                T* data,
-                                uint64_t datalength,
                                 void* userdata) {
         EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
-        EXPECT_EQ(nullptr, data);
-        EXPECT_EQ(0u, datalength);
         EXPECT_EQ(&fakeUserData, userdata);
     }
 };
@@ -251,25 +246,27 @@ TEST_P(DeviceLostTest, CreateBufferFails) {
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&bufferDescriptor));
 }
 
-// Test that buffer.MapWriteAsync fails after device is lost
-TEST_P(DeviceLostTest, BufferMapWriteAsyncFails) {
+// Test that buffer.MapAsync for writing fails after device is lost
+TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = sizeof(float);
+    bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(buffer.MapWriteAsync(MapFailCallback, const_cast<int*>(&fakeUserData)));
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Write, 0, 4, MapFailCallback,
+                                        const_cast<int*>(&fakeUserData)));
 }
 
-// Test that buffer.MapWriteAsync calls back with device loss status
-TEST_P(DeviceLostTest, BufferMapWriteAsyncBeforeLossFails) {
+// Test that BufferMapAsync for writing calls back with device lost status when device lost after
+// mapping
+TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForWriting) {
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = sizeof(float);
+    bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapWriteAsync(MapFailCallback, const_cast<int*>(&fakeUserData));
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
     SetCallbackAndLoseForTesting();
 }
 
@@ -278,21 +275,11 @@ TEST_P(DeviceLostTest, BufferUnmapFails) {
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(float);
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
+    bufferDescriptor.mappedAtCreation = true;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
-    wgpu::CreateBufferMappedResult result = device.CreateBufferMapped(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(result.buffer.Unmap());
-}
-
-// Test that CreateBufferMapped fails after device is lost
-TEST_P(DeviceLostTest, CreateBufferMappedFails) {
-    wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = sizeof(float);
-    bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
-
-    SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&bufferDescriptor));
+    ASSERT_DEVICE_ERROR(buffer.Unmap());
 }
 
 // Test that mappedAtCreation fails after device is lost
@@ -306,27 +293,29 @@ TEST_P(DeviceLostTest, CreateBufferMappedAtCreationFails) {
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&bufferDescriptor));
 }
 
-// Test that BufferMapReadAsync fails after device is lost
-TEST_P(DeviceLostTest, BufferMapReadAsyncFails) {
+// Test that BufferMapAsync for reading fails after device is lost
+TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = sizeof(float);
+    bufferDescriptor.size = 4;
     bufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
 
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(buffer.MapReadAsync(MapFailCallback, const_cast<int*>(&fakeUserData)));
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 0, 4, MapFailCallback,
+                                        const_cast<int*>(&fakeUserData)));
 }
 
-// Test that BufferMapReadAsync calls back with device lost status when device lost after map read
-TEST_P(DeviceLostTest, BufferMapReadAsyncBeforeLossFails) {
+// Test that BufferMapAsync for reading calls back with device lost status when device lost after
+// mapping
+TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForReading) {
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(float);
     bufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
 
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapReadAsync(MapFailCallback, const_cast<int*>(&fakeUserData));
+    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
     SetCallbackAndLoseForTesting();
 }
 
@@ -399,14 +388,14 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationBeforeLoss) {
     ASSERT_EQ(buffer.GetMappedRange(), rangeBeforeLoss);
 }
 
-// Test that device loss doesn't change the result of GetMappedRange, mapReadAsync version.
-TEST_P(DeviceLostTest, GetMappedRange_MapReadAsync) {
+// Test that device loss doesn't change the result of GetMappedRange, mapping for reading version.
+TEST_P(DeviceLostTest, GetMappedRange_MapAsyncReading) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&desc);
 
-    buffer.MapReadAsync(nullptr, nullptr);
+    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
     queue.Submit(0, nullptr);
 
     const void* rangeBeforeLoss = buffer.GetConstMappedRange();
@@ -416,14 +405,14 @@ TEST_P(DeviceLostTest, GetMappedRange_MapReadAsync) {
     ASSERT_EQ(buffer.GetConstMappedRange(), rangeBeforeLoss);
 }
 
-// Test that device loss doesn't change the result of GetMappedRange, mapReadAsync version.
-TEST_P(DeviceLostTest, GetMappedRange_MapWriteAsync) {
+// Test that device loss doesn't change the result of GetMappedRange, mapping for writing version.
+TEST_P(DeviceLostTest, GetMappedRange_MapAsyncWriting) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = device.CreateBuffer(&desc);
 
-    buffer.MapWriteAsync(nullptr, nullptr);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
     queue.Submit(0, nullptr);
 
     const void* rangeBeforeLoss = buffer.GetConstMappedRange();

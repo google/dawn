@@ -151,6 +151,7 @@ namespace dawn_native {
             ASSERT(!IsError());
             CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
             CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
+            CallMapCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown);
         }
     }
 
@@ -468,6 +469,7 @@ namespace dawn_native {
 
             mMapReadCallback = nullptr;
             mMapWriteCallback = nullptr;
+            mMapCallback = nullptr;
             mMapUserdata = 0;
 
         } else if (mState == BufferState::MappedAtCreation) {
