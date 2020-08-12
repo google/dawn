@@ -201,33 +201,136 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
             mod()->to_str());
 }
 
-// We expect the transform to use an existing vertex_idx builtin variable if it
-// finds one
-TEST_F(VertexPullingTransformTest, ExistingVertexIndex) {
+TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   InitBasicModule();
 
   type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
-  type::I32Type i32;
-  auto vertex_index_var =
-      std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-          "custom_vertex_index", StorageClass::kInput, &i32));
-
-  VariableDecorationList decorations;
-  decorations.push_back(
-      std::make_unique<BuiltinDecoration>(Builtin::kVertexIdx));
-
-  vertex_index_var->set_decorations(std::move(decorations));
-  mod()->AddGlobalVariable(std::move(vertex_index_var));
-
-  InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
+  InitTransform(
+      {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
 
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
   Variable{
     var_a
+    private
+    __f32
+  }
+  DecoratedVariable{
+    Decorations{
+      BuiltinDecoration{instance_idx}
+    }
+    tint_pulling_instance_index
+    in
+    __i32
+  }
+  DecoratedVariable{
+    Decorations{
+      BindingDecoration{0}
+      SetDecoration{0}
+    }
+    tint_pulling_vertex_buffer_0
+    storage_buffer
+    __struct_
+  }
+  EntryPoint{vertex as main = vtx_main}
+  Function vtx_main -> __void
+  ()
+  {
+    Block{
+      VariableDeclStatement{
+        Variable{
+          tint_pulling_pos
+          function
+          __i32
+        }
+      }
+      Assignment{
+        Identifier{tint_pulling_pos}
+        Binary{
+          Binary{
+            Identifier{tint_pulling_instance_index}
+            multiply
+            ScalarConstructor{4}
+          }
+          add
+          ScalarConstructor{0}
+        }
+      }
+      Assignment{
+        Identifier{var_a}
+        As<__f32>{
+          ArrayAccessor{
+            MemberAccessor{
+              Identifier{tint_pulling_vertex_buffer_0}
+              Identifier{data}
+            }
+            Binary{
+              Identifier{tint_pulling_pos}
+              divide
+              ScalarConstructor{4}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+)",
+            mod()->to_str());
+}
+
+// We expect the transform to use an existing builtin variables if it finds them
+TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
+  InitBasicModule();
+
+  type::F32Type f32;
+  AddVertexInputVariable(0, "var_a", &f32);
+  AddVertexInputVariable(1, "var_b", &f32);
+
+  type::I32Type i32;
+  {
+    auto vertex_index_var =
+        std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
+            "custom_vertex_index", StorageClass::kInput, &i32));
+
+    VariableDecorationList decorations;
+    decorations.push_back(
+        std::make_unique<BuiltinDecoration>(Builtin::kVertexIdx));
+
+    vertex_index_var->set_decorations(std::move(decorations));
+    mod()->AddGlobalVariable(std::move(vertex_index_var));
+  }
+
+  {
+    auto instance_index_var =
+        std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
+            "custom_instance_index", StorageClass::kInput, &i32));
+
+    VariableDecorationList decorations;
+    decorations.push_back(
+        std::make_unique<BuiltinDecoration>(Builtin::kInstanceIdx));
+
+    instance_index_var->set_decorations(std::move(decorations));
+    mod()->AddGlobalVariable(std::move(instance_index_var));
+  }
+
+  InitTransform(
+      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
+        {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
+
+  EXPECT_TRUE(transform()->Run());
+
+  EXPECT_EQ(R"(Module{
+  Variable{
+    var_a
+    private
+    __f32
+  }
+  Variable{
+    var_b
     private
     __f32
   }
@@ -241,10 +344,27 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndex) {
   }
   DecoratedVariable{
     Decorations{
+      BuiltinDecoration{instance_idx}
+    }
+    custom_instance_index
+    in
+    __i32
+  }
+  DecoratedVariable{
+    Decorations{
       BindingDecoration{0}
       SetDecoration{0}
     }
     tint_pulling_vertex_buffer_0
+    storage_buffer
+    __struct_
+  }
+  DecoratedVariable{
+    Decorations{
+      BindingDecoration{1}
+      SetDecoration{0}
+    }
+    tint_pulling_vertex_buffer_1
     storage_buffer
     __struct_
   }
@@ -278,6 +398,34 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndex) {
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
+              Identifier{data}
+            }
+            Binary{
+              Identifier{tint_pulling_pos}
+              divide
+              ScalarConstructor{4}
+            }
+          }
+        }
+      }
+      Assignment{
+        Identifier{tint_pulling_pos}
+        Binary{
+          Binary{
+            Identifier{custom_instance_index}
+            multiply
+            ScalarConstructor{4}
+          }
+          add
+          ScalarConstructor{0}
+        }
+      }
+      Assignment{
+        Identifier{var_b}
+        As<__f32>{
+          ArrayAccessor{
+            MemberAccessor{
+              Identifier{tint_pulling_vertex_buffer_1}
               Identifier{data}
             }
             Binary{

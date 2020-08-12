@@ -48,6 +48,7 @@ static const char kVertexBufferNamePrefix[] = "tint_pulling_vertex_buffer_";
 static const char kStructBufferName[] = "data";
 static const char kPullingPosVarName[] = "tint_pulling_pos";
 static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
+static const char kDefaultInstanceIndexName[] = "tint_pulling_instance_index";
 }  // namespace
 
 VertexPullingTransform::VertexPullingTransform(Context* ctx, Module* mod)
@@ -100,7 +101,8 @@ bool VertexPullingTransform::Run() {
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
 
-  FindOrInsertVertexIndex();
+  FindOrInsertVertexIndexIfUsed();
+  FindOrInsertInstanceIndexIfUsed();
   ConvertVertexInputVariablesToPrivate();
   AddVertexStorageBuffers();
   AddVertexPullingPreamble(vertex_func);
@@ -116,7 +118,19 @@ std::string VertexPullingTransform::GetVertexBufferName(uint32_t index) {
   return kVertexBufferNamePrefix + std::to_string(index);
 }
 
-void VertexPullingTransform::FindOrInsertVertexIndex() {
+void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
+  bool uses_vertex_step_mode = false;
+  for (const VertexBufferLayoutDescriptor& buffer_layout :
+       vertex_state_->vertex_buffers) {
+    if (buffer_layout.step_mode == InputStepMode::kVertex) {
+      uses_vertex_step_mode = true;
+      break;
+    }
+  }
+  if (!uses_vertex_step_mode) {
+    return;
+  }
+
   // Look for an existing vertex index builtin
   for (auto& v : mod_->global_variables()) {
     if (!v->IsDecorated() || v->storage_class() != StorageClass::kInput) {
@@ -140,6 +154,47 @@ void VertexPullingTransform::FindOrInsertVertexIndex() {
   VariableDecorationList decorations;
   decorations.push_back(
       std::make_unique<BuiltinDecoration>(Builtin::kVertexIdx));
+
+  var->set_decorations(std::move(decorations));
+  mod_->AddGlobalVariable(std::move(var));
+}
+
+void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
+  bool uses_instance_step_mode = false;
+  for (const VertexBufferLayoutDescriptor& buffer_layout :
+       vertex_state_->vertex_buffers) {
+    if (buffer_layout.step_mode == InputStepMode::kInstance) {
+      uses_instance_step_mode = true;
+      break;
+    }
+  }
+  if (!uses_instance_step_mode) {
+    return;
+  }
+
+  // Look for an existing instance index builtin
+  for (auto& v : mod_->global_variables()) {
+    if (!v->IsDecorated() || v->storage_class() != StorageClass::kInput) {
+      continue;
+    }
+
+    for (auto& d : v->AsDecorated()->decorations()) {
+      if (d->IsBuiltin() && d->AsBuiltin()->value() == Builtin::kInstanceIdx) {
+        instance_index_name_ = v->name();
+        return;
+      }
+    }
+  }
+
+  // We didn't find an instance index builtin, so create one
+  instance_index_name_ = kDefaultInstanceIndexName;
+
+  auto var = std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
+      instance_index_name_, StorageClass::kInput, GetI32Type()));
+
+  VariableDecorationList decorations;
+  decorations.push_back(
+      std::make_unique<BuiltinDecoration>(Builtin::kInstanceIdx));
 
   var->set_decorations(std::move(decorations));
   mod_->AddGlobalVariable(std::move(var));
@@ -228,12 +283,17 @@ void VertexPullingTransform::AddVertexPullingPreamble(Function* vertex_func) {
       }
       auto* v = it->second;
 
+      // Identifier to index by
+      auto index_identifier = std::make_unique<IdentifierExpression>(
+          buffer_layout.step_mode == InputStepMode::kVertex
+              ? vertex_index_name_
+              : instance_index_name_);
+
       // An expression for the start of the read in the buffer in bytes
       auto pos_value = std::make_unique<BinaryExpression>(
           BinaryOp::kAdd,
           std::make_unique<BinaryExpression>(
-              BinaryOp::kMultiply,
-              std::make_unique<IdentifierExpression>(vertex_index_name_),
+              BinaryOp::kMultiply, std::move(index_identifier),
               GenUint(static_cast<uint32_t>(buffer_layout.array_stride))),
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 

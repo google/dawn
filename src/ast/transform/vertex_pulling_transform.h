@@ -159,7 +159,10 @@ class VertexPullingTransform {
   std::string GetVertexBufferName(uint32_t index);
 
   /// Inserts vertex_idx binding, or finds the existing one
-  void FindOrInsertVertexIndex();
+  void FindOrInsertVertexIndexIfUsed();
+
+  /// Inserts instance_idx binding, or finds the existing one
+  void FindOrInsertInstanceIndexIfUsed();
 
   /// Converts var<in> with a location decoration to var<private>
   void ConvertVertexInputVariablesToPrivate();
@@ -237,6 +240,7 @@ class VertexPullingTransform {
   std::string error_;
 
   std::string vertex_index_name_;
+  std::string instance_index_name_;
 
   std::unordered_map<uint32_t, Variable*> location_to_var_;
   std::unique_ptr<VertexStateDescriptor> vertex_state_;
