@@ -320,4 +320,4 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(DepthStencilCopyTests, MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DepthStencilCopyTests, D3D12Backend(), MetalBackend(), VulkanBackend());

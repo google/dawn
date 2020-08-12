@@ -548,6 +548,26 @@ namespace dawn_native { namespace d3d12 {
         return mResourceAllocation.GetD3D12Resource();
     }
 
+    DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
+        ASSERT(GetFormat().aspects & aspect);
+
+        switch (GetFormat().format) {
+            case wgpu::TextureFormat::Depth24PlusStencil8:
+                switch (aspect) {
+                    case Aspect::Depth:
+                        return DXGI_FORMAT_R32_FLOAT;
+                    case Aspect::Stencil:
+                        return DXGI_FORMAT_R8_UINT;
+                    default:
+                        UNREACHABLE();
+                        return GetD3D12Format();
+                }
+            default:
+                ASSERT(HasOneBit(GetFormat().aspects));
+                return GetD3D12Format();
+        }
+    }
+
     void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                              wgpu::TextureUsage usage,
                                              const SubresourceRange& range) {
@@ -967,7 +987,7 @@ namespace dawn_native { namespace d3d12 {
                         D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                             ComputeBufferLocationForCopyTextureRegion(
                                 this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                                info.bufferSize, copySplit.offset, bytesPerRow);
+                                info.bufferSize, copySplit.offset, bytesPerRow, Aspect::Color);
                         D3D12_BOX sourceRegion =
                             ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 

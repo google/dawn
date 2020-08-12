@@ -68,7 +68,7 @@ namespace dawn_native { namespace d3d12 {
     D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* texture,
                                                                      uint32_t level,
                                                                      uint32_t slice,
-                                                                     const Aspect& aspect) {
+                                                                     Aspect aspect) {
         D3D12_TEXTURE_COPY_LOCATION copyLocation;
         copyLocation.pResource = texture->GetD3D12Resource();
         copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
@@ -82,12 +82,14 @@ namespace dawn_native { namespace d3d12 {
         ID3D12Resource* bufferResource,
         const Extent3D& bufferSize,
         const uint64_t offset,
-        const uint32_t rowPitch) {
+        const uint32_t rowPitch,
+        Aspect aspect) {
         D3D12_TEXTURE_COPY_LOCATION bufferLocation;
         bufferLocation.pResource = bufferResource;
         bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
         bufferLocation.PlacedFootprint.Offset = offset;
-        bufferLocation.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
+        bufferLocation.PlacedFootprint.Footprint.Format =
+            texture->GetD3D12CopyableSubresourceFormat(aspect);
         bufferLocation.PlacedFootprint.Footprint.Width = bufferSize.width;
         bufferLocation.PlacedFootprint.Footprint.Height = bufferSize.height;
         bufferLocation.PlacedFootprint.Footprint.Depth = bufferSize.depth;
@@ -147,7 +149,8 @@ namespace dawn_native { namespace d3d12 {
                                                        Texture* texture,
                                                        uint32_t textureMiplevel,
                                                        uint32_t textureSlice,
-                                                       const Aspect& aspect) {
+                                                       Aspect aspect) {
+        ASSERT(HasOneBit(aspect));
         const D3D12_TEXTURE_COPY_LOCATION textureLocation =
             ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice, aspect);
 
@@ -160,7 +163,7 @@ namespace dawn_native { namespace d3d12 {
             // members in Texture2DCopySplit::CopyInfo.
             const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                 ComputeBufferLocationForCopyTextureRegion(texture, bufferResource, info.bufferSize,
-                                                          offsetBytes, bufferBytesPerRow);
+                                                          offsetBytes, bufferBytesPerRow, aspect);
             const D3D12_BOX sourceRegion =
                 ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 
@@ -178,14 +181,14 @@ namespace dawn_native { namespace d3d12 {
                                           const uint64_t offsetBytes,
                                           const uint32_t bytesPerRow,
                                           const uint32_t rowsPerImage,
-                                          const Aspect& aspects) {
+                                          Aspect aspect) {
+        ASSERT(HasOneBit(aspect));
         // See comments in ComputeTextureCopySplits() for more details.
-        const TextureCopySplits copySplits =
-            ComputeTextureCopySplits(textureCopy.origin, copySize, texture->GetFormat(),
-                                     offsetBytes, bytesPerRow, rowsPerImage);
+        const TexelBlockInfo& blockInfo = texture->GetFormat().GetTexelBlockInfo(aspect);
+        const TextureCopySplits copySplits = ComputeTextureCopySplits(
+            textureCopy.origin, copySize, blockInfo, offsetBytes, bytesPerRow, rowsPerImage);
 
-        const uint64_t bytesPerSlice =
-            bytesPerRow * (rowsPerImage / texture->GetFormat().blockHeight);
+        const uint64_t bytesPerSlice = bytesPerRow * (rowsPerImage / blockInfo.blockHeight);
 
         // copySplits.copies2D[1] is always calculated for the second copy slice with
         // extra "bytesPerSlice" copy offset compared with the first copy slice. So
@@ -207,7 +210,7 @@ namespace dawn_native { namespace d3d12 {
             RecordCopyBufferToTextureFromTextureCopySplit(
                 commandContext->GetCommandList(), copySplitPerLayerBase, bufferResource,
                 bufferOffsetForNextSlice, bytesPerRow, texture, textureCopy.mipLevel,
-                copyTextureLayer, aspects);
+                copyTextureLayer, aspect);
 
             bufferOffsetsForNextSlice[splitIndex] += bytesPerSlice * copySplits.copies2D.size();
         }

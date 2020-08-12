@@ -651,10 +651,12 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
                             depthStencilTexture.Get(), 0, 1, 0, 1, WGPUTextureAspect_StencilOnly));
 
         // TODO(crbug.com/dawn/439): Implement stencil copies on other platforms
-        if (IsMetal() || IsVulkan()) {
+        if (IsMetal() || IsVulkan() || IsD3D12()) {
             // Check by copy that the stencil data is 2.
-            EXPECT_LAZY_CLEAR(0u, EXPECT_TEXTURE_EQ(uint8_t(2), depthStencilTexture, 0, 0, 0, 0,
-                                                    wgpu::TextureAspect::StencilOnly));
+            std::vector<uint8_t> expected(kSize * kSize, 2);
+            EXPECT_LAZY_CLEAR(
+                0u, EXPECT_TEXTURE_EQ(expected.data(), depthStencilTexture, 0, 0, kSize, kSize, 0,
+                                      0, wgpu::TextureAspect::StencilOnly));
         }
     }
 
@@ -722,10 +724,12 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
                             depthStencilTexture.Get(), 0, 1, 0, 1, WGPUTextureAspect_StencilOnly));
 
         // TODO(crbug.com/dawn/439): Implement stencil copies on other platforms
-        if (IsMetal() || IsVulkan()) {
+        if (IsMetal() || IsVulkan() || IsD3D12()) {
             // Check by copy that the stencil data is 0.
-            EXPECT_LAZY_CLEAR(0u, EXPECT_TEXTURE_EQ(uint8_t(0), depthStencilTexture, 0, 0, 0, 0,
-                                                    wgpu::TextureAspect::StencilOnly));
+            std::vector<uint8_t> expected(kSize * kSize, 0);
+            EXPECT_LAZY_CLEAR(
+                0u, EXPECT_TEXTURE_EQ(expected.data(), depthStencilTexture, 0, 0, kSize, kSize, 0,
+                                      0, wgpu::TextureAspect::StencilOnly));
         }
     }
 }
@@ -734,7 +738,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 // Lazy clear of the stencil aspect via copy should not touch depth.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
     // TODO(crbug.com/dawn/439): Implement stencil copies on other platforms
-    DAWN_SKIP_TEST_IF(!(IsMetal() || IsVulkan()));
+    DAWN_SKIP_TEST_IF(!(IsMetal() || IsVulkan() || IsD3D12()));
 
     // TODO(enga): Figure out why this fails on Metal Intel.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
@@ -767,8 +771,9 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
                          depthStencilTexture.Get(), 0, 1, 0, 1, WGPUTextureAspect_StencilOnly));
 
     // Check by copy that the stencil data is lazily cleared to 0.
-    EXPECT_LAZY_CLEAR(1u, EXPECT_TEXTURE_EQ(uint8_t(0), depthStencilTexture, 0, 0, 0, 0,
-                                            wgpu::TextureAspect::StencilOnly));
+    std::vector<uint8_t> expected(kSize * kSize, 0);
+    EXPECT_LAZY_CLEAR(1u, EXPECT_TEXTURE_EQ(expected.data(), depthStencilTexture, 0, 0, kSize,
+                                            kSize, 0, 0, wgpu::TextureAspect::StencilOnly));
 
     // Everything is initialized now
     EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(depthStencilTexture.Get(), 0, 1, 0,
