@@ -15,6 +15,7 @@
 #ifndef SRC_AST_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
 #define SRC_AST_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -78,35 +79,54 @@ enum class InputStepMode { kVertex, kInstance };
 
 /// Describes a vertex attribute within a buffer
 struct VertexAttributeDescriptor {
+  /// The format of the attribute
   VertexFormat format;
+  /// The byte offset of the attribute in the buffer
   uint64_t offset;
+  /// The shader location used for the attribute
   uint32_t shader_location;
 };
 
 /// Describes a buffer containing multiple vertex attributes
 struct VertexBufferLayoutDescriptor {
+  /// Constructor
   VertexBufferLayoutDescriptor();
-  ~VertexBufferLayoutDescriptor();
+  /// Constructor
+  /// @param in_array_stride the array stride of the in buffer
+  /// @param in_step_mode the step mode of the in buffer
+  /// @param in_attributes the in attributes
   VertexBufferLayoutDescriptor(
       uint64_t in_array_stride,
       InputStepMode in_step_mode,
       std::vector<VertexAttributeDescriptor> in_attributes);
+  /// Copy constructor
+  /// @param other the struct to copy
   VertexBufferLayoutDescriptor(const VertexBufferLayoutDescriptor& other);
+  ~VertexBufferLayoutDescriptor();
 
+  /// The array stride used in the in buffer
   uint64_t array_stride = 0u;
+  /// The input step mode used
   InputStepMode step_mode = InputStepMode::kVertex;
+  /// The vertex attributes
   std::vector<VertexAttributeDescriptor> attributes;
 };
 
 /// Describes vertex state, which consists of many buffers containing vertex
 /// attributes
 struct VertexStateDescriptor {
+  /// Constructor
   VertexStateDescriptor();
-  ~VertexStateDescriptor();
+  /// Constructor
+  /// @param in_vertex_buffers the vertex buffers
   VertexStateDescriptor(
       std::vector<VertexBufferLayoutDescriptor> in_vertex_buffers);
+  /// Copy constructor
+  /// @param other the struct to copy
   VertexStateDescriptor(const VertexStateDescriptor& other);
+  ~VertexStateDescriptor();
 
+  /// The vertex buffers
   std::vector<VertexBufferLayoutDescriptor> vertex_buffers;
 };
 
@@ -121,7 +141,7 @@ struct VertexStateDescriptor {
 ///
 /// |VertexFormat| represents the input type of the attribute. This isn't
 /// related to the type of the variable in the shader. For example,
-/// |VertexFormat::vec2_f16| tells us that the buffer will contain f16 elements,
+/// `VertexFormat::kVec2F16` tells us that the buffer will contain f16 elements,
 /// to be read as vec2. In the shader, a user would make a vec2<f32> to be able
 /// to use them. The conversion between f16 and f32 will need to be handled by
 /// us (using unpack functions).
