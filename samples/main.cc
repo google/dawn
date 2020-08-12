@@ -494,14 +494,12 @@ int main(int argc, const char** argv) {
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
-#if TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER
-  if (options.format == Format::kWgsl || options.format == Format::kMsl) {
+  if (options.format != Format::kSpvAsm && options.format != Format::kSpirv) {
     auto* w = static_cast<tint::writer::Text*>(writer.get());
     if (!WriteFile(options.output_file, "w", w->result())) {
       return 1;
     }
   }
-#endif  // TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER
 
   return 0;
 }
