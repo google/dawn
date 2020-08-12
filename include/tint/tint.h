@@ -25,6 +25,8 @@
 #include "src/validator.h"
 #include "src/writer/writer.h"
 
+#include "src/ast/transform/vertex_pulling_transform.h"
+
 #if TINT_BUILD_SPV_READER
 #include "src/reader/spirv/parser.h"
 #endif  // TINT_BUILD_SPV_READER
