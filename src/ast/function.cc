@@ -156,6 +156,10 @@ void Function::add_ancestor_entry_point(const std::string& ep) {
   ancestor_entry_points_.push_back(ep);
 }
 
+const Statement* Function::get_last_statement() const {
+  return body_->last();
+}
+
 bool Function::IsValid() const {
   for (const auto& param : params_) {
     if (param == nullptr || !param->IsValid())

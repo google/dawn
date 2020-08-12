@@ -121,6 +121,9 @@ class Function : public Node {
   void set_return_type(type::Type* type) { return_type_ = type; }
   /// @returns the function return type.
   type::Type* return_type() const { return return_type_; }
+  /// @returns a pointer to the last statement of the function or nullptr if
+  // function is empty
+  const Statement* get_last_statement() const;
 
   /// Sets the body of the function
   /// @param body the function body

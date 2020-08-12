@@ -349,6 +349,30 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
+TEST_F(FunctionTest, GetLastStatement) {
+  type::VoidType void_type;
+
+  VariableList params;
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto stmt = std::make_unique<DiscardStatement>();
+  auto* stmt_ptr = stmt.get();
+  body->append(std::move(stmt));
+  Function f("func", std::move(params), &void_type);
+  f.set_body(std::move(body));
+
+  EXPECT_EQ(f.get_last_statement(), stmt_ptr);
+}
+
+TEST_F(FunctionTest, GetLastStatement_nullptr) {
+  type::VoidType void_type;
+
+  VariableList params;
+  auto body = std::make_unique<ast::BlockStatement>();
+  Function f("func", std::move(params), &void_type);
+  f.set_body(std::move(body));
+
+  EXPECT_EQ(f.get_last_statement(), nullptr);
+}
 }  // namespace
 }  // namespace ast
 }  // namespace tint
