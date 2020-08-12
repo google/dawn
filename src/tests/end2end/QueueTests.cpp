@@ -522,4 +522,4 @@ TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(QueueWriteTextureTests, MetalBackend(), VulkanBackend(), D3D12Backend());
+DAWN_INSTANTIATE_TEST(QueueWriteTextureTests, D3D12Backend(), MetalBackend(), VulkanBackend());

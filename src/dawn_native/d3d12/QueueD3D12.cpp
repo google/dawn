@@ -15,7 +15,6 @@
 #include "dawn_native/d3d12/QueueD3D12.h"
 
 #include "common/Math.h"
-#include "dawn_native/Buffer.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
