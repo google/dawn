@@ -351,6 +351,7 @@ set(TINT_TEST_SRCS
   type_determiner_test.cc
   type_manager_test.cc
   validator_test.cc
+  validator_function_test.cc
 )
 
 ## Tint library
