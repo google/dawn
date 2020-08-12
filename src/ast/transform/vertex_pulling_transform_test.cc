@@ -121,6 +121,14 @@ TEST_F(VertexPullingTransformTest, BasicModule) {
   EXPECT_TRUE(transform()->Run());
 }
 
+TEST_F(VertexPullingTransformTest, EntryPointUsingFunctionName) {
+  InitBasicModule();
+  mod()->entry_points()[0]->set_name("");
+  InitTransform({});
+  transform()->SetEntryPoint("vtx_main");
+  EXPECT_TRUE(transform()->Run());
+}
+
 TEST_F(VertexPullingTransformTest, OneAttribute) {
   InitBasicModule();
 
@@ -148,7 +156,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{0}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_0
     storage_buffer
@@ -229,7 +237,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{0}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_0
     storage_buffer
@@ -252,6 +260,87 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
         Binary{
           Binary{
             Identifier{tint_pulling_instance_index}
+            multiply
+            ScalarConstructor{4}
+          }
+          add
+          ScalarConstructor{0}
+        }
+      }
+      Assignment{
+        Identifier{var_a}
+        As<__f32>{
+          ArrayAccessor{
+            MemberAccessor{
+              Identifier{tint_pulling_vertex_buffer_0}
+              Identifier{data}
+            }
+            Binary{
+              Identifier{tint_pulling_pos}
+              divide
+              ScalarConstructor{4}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+)",
+            mod()->to_str());
+}
+
+TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
+  InitBasicModule();
+
+  type::F32Type f32;
+  AddVertexInputVariable(0, "var_a", &f32);
+
+  InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
+  transform()->SetPullingBufferBindingSet(5);
+
+  EXPECT_TRUE(transform()->Run());
+
+  EXPECT_EQ(R"(Module{
+  Variable{
+    var_a
+    private
+    __f32
+  }
+  DecoratedVariable{
+    Decorations{
+      BuiltinDecoration{vertex_idx}
+    }
+    tint_pulling_vertex_index
+    in
+    __i32
+  }
+  DecoratedVariable{
+    Decorations{
+      BindingDecoration{0}
+      SetDecoration{5}
+    }
+    tint_pulling_vertex_buffer_0
+    storage_buffer
+    __struct_
+  }
+  EntryPoint{vertex as main = vtx_main}
+  Function vtx_main -> __void
+  ()
+  {
+    Block{
+      VariableDeclStatement{
+        Variable{
+          tint_pulling_pos
+          function
+          __i32
+        }
+      }
+      Assignment{
+        Identifier{tint_pulling_pos}
+        Binary{
+          Binary{
+            Identifier{tint_pulling_vertex_index}
             multiply
             ScalarConstructor{4}
           }
@@ -353,7 +442,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{0}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_0
     storage_buffer
@@ -362,7 +451,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{1}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_1
     storage_buffer
@@ -481,7 +570,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{0}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_0
     storage_buffer
@@ -667,7 +756,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{0}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_0
     storage_buffer
@@ -676,7 +765,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{1}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_1
     storage_buffer
@@ -685,7 +774,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   DecoratedVariable{
     Decorations{
       BindingDecoration{2}
-      SetDecoration{0}
+      SetDecoration{4}
     }
     tint_pulling_vertex_buffer_2
     storage_buffer

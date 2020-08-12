@@ -65,6 +65,10 @@ void VertexPullingTransform::SetEntryPoint(std::string entry_point) {
   entry_point_name_ = std::move(entry_point);
 }
 
+void VertexPullingTransform::SetPullingBufferBindingSet(uint32_t number) {
+  pulling_set_ = number;
+}
+
 bool VertexPullingTransform::Run() {
   // Check SetVertexState was called
   if (vertex_state_ == nullptr) {
@@ -75,7 +79,9 @@ bool VertexPullingTransform::Run() {
   // Find entry point
   EntryPoint* entry_point = nullptr;
   for (const auto& entry : mod_->entry_points()) {
-    if (entry->name() == entry_point_name_) {
+    if (entry->name() == entry_point_name_ ||
+        (entry->name().empty() &&
+         entry->function_name() == entry_point_name_)) {
       entry_point = entry.get();
       break;
     }
@@ -247,7 +253,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
     // Add decorations
     VariableDecorationList decorations;
     decorations.push_back(std::make_unique<BindingDecoration>(i));
-    decorations.push_back(std::make_unique<SetDecoration>(0));
+    decorations.push_back(std::make_unique<SetDecoration>(pulling_set_));
     var->set_decorations(std::move(decorations));
 
     mod_->AddGlobalVariable(std::move(var));

@@ -145,6 +145,11 @@ class VertexPullingTransform {
   /// @param entry_point the vertex stage entry point
   void SetEntryPoint(std::string entry_point);
 
+  /// Sets the "set" we will put all our vertex buffers into (as storage
+  /// buffers)
+  /// @param number the set number we will use
+  void SetPullingBufferBindingSet(uint32_t number);
+
   /// @returns true if the transformation was successful
   bool Run();
 
@@ -241,6 +246,9 @@ class VertexPullingTransform {
 
   std::string vertex_index_name_;
   std::string instance_index_name_;
+
+  // Default to 4 as it is past the limits of user-accessible sets
+  uint32_t pulling_set_ = 4u;
 
   std::unordered_map<uint32_t, Variable*> location_to_var_;
   std::unique_ptr<VertexStateDescriptor> vertex_state_;
