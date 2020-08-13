@@ -52,9 +52,6 @@ class VertexPullingTransformHelper {
     tint::TypeDeterminer td(&ctx_, mod_.get());
     EXPECT_TRUE(td.Determine());
 
-    tint::Validator v;
-    EXPECT_TRUE(v.Validate(mod_.get()));
-
     transform_->SetVertexState(
         std::make_unique<VertexStateDescriptor>(std::move(vertex_state)));
     transform_->SetEntryPoint("main");

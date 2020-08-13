@@ -316,6 +316,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   // var global_var: f32 = 2.1;
   // fn my_func() -> f32 {
   //   global_var = 3.14;
+  //   return 3.14;
   // }
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
@@ -330,6 +331,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
   auto* rhs_ptr = rhs.get();
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
 
   ast::VariableList params;
   auto func =
@@ -338,6 +341,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
       Source{12, 34}, std::move(lhs), std::move(rhs)));
+  body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
   func->set_body(std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
@@ -645,25 +649,27 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
 }
 
 TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
-  // func0 { var a : f32 = 2.0; }
-  // func1 { var a : f32 = 3.0; }
+  // func0 { var a : f32 = 2.0; return; }
+  // func1 { var a : f32 = 3.0; return; }
   ast::type::F32Type f32;
+  ast::type::VoidType void_type;
   auto var0 =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  auto var1 =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto var1 = std::make_unique<ast::Variable>("a", ast::StorageClass::kNone,
+                                              &void_type);
   var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
 
   ast::VariableList params0;
   auto func0 =
-      std::make_unique<ast::Function>("func0", std::move(params0), &f32);
+      std::make_unique<ast::Function>("func0", std::move(params0), &void_type);
   auto body0 = std::make_unique<ast::BlockStatement>();
   body0->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
                                                              std::move(var0)));
+  body0->append(std::make_unique<ast::ReturnStatement>());
   func0->set_body(std::move(body0));
 
   ast::VariableList params1;
@@ -672,6 +678,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto body1 = std::make_unique<ast::BlockStatement>();
   body1->append(std::make_unique<ast::VariableDeclStatement>(Source{13, 34},
                                                              std::move(var1)));
+  body1->append(std::make_unique<ast::ReturnStatement>());
   func1->set_body(std::move(body1));
 
   mod()->AddFunction(std::move(func0));

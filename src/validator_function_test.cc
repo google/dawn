@@ -47,7 +47,7 @@ class TypeDeterminerHelper {
 class ValidateFunctionTest : public TypeDeterminerHelper,
                              public testing::Test {};
 
-TEST_F(ValidateFunctionTest, DISABLED_FunctionEndWithoutReturnStatement_Fail) {
+TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> void { var a:i32 = 2; }
 
   ast::type::I32Type i32;
@@ -69,11 +69,10 @@ TEST_F(ValidateFunctionTest, DISABLED_FunctionEndWithoutReturnStatement_Fail) {
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.Validate(mod()));
   EXPECT_EQ(v.error(),
-            "12:34: v-0002: 'function must end with a return statement 'func'");
+            "12:34: v-0002: function must end with a return statement");
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_FunctionEndWithoutReturnStatementEmptyBody_Fail) {
+TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> void {}
   ast::type::VoidType void_type;
   ast::VariableList params;
@@ -85,7 +84,7 @@ TEST_F(ValidateFunctionTest,
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.Validate(mod()));
   EXPECT_EQ(v.error(),
-            "12:34: v-0002: 'function must end with a return statement 'func'");
+            "12:34: v-0002: function must end with a return statement");
 }
 
 }  // namespace

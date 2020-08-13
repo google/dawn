@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/validator_impl.h"
+#include "src/ast/function.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -65,8 +66,13 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   if (!ValidateStatements(func->body())) {
     return false;
   }
-
   variable_stack_.pop_scope();
+
+  if (!func->get_last_statement() || !func->get_last_statement()->IsReturn()) {
+    set_error(func->source(),
+              "v-0002: function must end with a return statement");
+    return false;
+  }
   return true;
 }
 
