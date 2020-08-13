@@ -16,7 +16,6 @@
 #define DAWNNATIVE_D3D12_COMMANDBUFFERD3D12_H_
 
 #include "common/Constants.h"
-#include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/d3d12/Forward.h"
@@ -43,7 +42,6 @@ namespace dawn_native { namespace d3d12 {
         MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
       private:
-        ~CommandBuffer() override;
         MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                      BindGroupStateTracker* bindingTracker);
         MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
@@ -55,8 +53,6 @@ namespace dawn_native { namespace d3d12 {
                                    RenderPassBuilder* renderPassBuilder);
         void EmulateBeginRenderPass(CommandRecordingContext* commandContext,
                                     const RenderPassBuilder* renderPassBuilder) const;
-
-        CommandIterator mCommands;
     };
 
 }}  // namespace dawn_native::d3d12

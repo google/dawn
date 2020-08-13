@@ -24,16 +24,37 @@
 namespace dawn_native {
 
     CommandBufferBase::CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor*)
-        : ObjectBase(encoder->GetDevice()), mResourceUsages(encoder->AcquireResourceUsages()) {
+        : ObjectBase(encoder->GetDevice()),
+          mCommands(encoder->AcquireCommands()),
+          mResourceUsages(encoder->AcquireResourceUsages()) {
     }
 
     CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ObjectBase(device, tag) {
     }
 
+    CommandBufferBase::~CommandBufferBase() {
+        Destroy();
+    }
+
     // static
     CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device) {
         return new CommandBufferBase(device, ObjectBase::kError);
+    }
+
+    MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
+        ASSERT(!IsError());
+
+        if (mDestroyed) {
+            return DAWN_VALIDATION_ERROR("Command buffer reused in submit");
+        }
+        return {};
+    }
+
+    void CommandBufferBase::Destroy() {
+        FreeCommands(&mCommands);
+        mResourceUsages = {};
+        mDestroyed = true;
     }
 
     const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {

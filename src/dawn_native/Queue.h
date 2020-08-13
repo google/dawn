@@ -73,6 +73,8 @@ namespace dawn_native {
                                         size_t dataSize,
                                         const TextureDataLayout* dataLayout,
                                         const Extent3D* writeSize) const;
+
+        void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
     };
 
     // A helper function used in Queue::WriteTexture. The destination data layout must not

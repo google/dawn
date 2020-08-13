@@ -91,10 +91,13 @@ namespace dawn_native {
             return static_cast<T*>(NextData(sizeof(T) * count, alignof(T)));
         }
 
-        // Needs to be called if iteration was stopped early.
+        // Sets iterator to the beginning of the commands without emptying the list. This method can
+        // be used if iteration was stopped early and the iterator needs to be restarted.
         void Reset();
 
-        void DataWasDestroyed();
+        // This method must to be called after commands have been deleted. This indicates that the
+        // commands have been submitted and they are no longer valid.
+        void MakeEmptyAsDataWasDestroyed();
 
       private:
         bool IsEmpty() const;
@@ -139,7 +142,6 @@ namespace dawn_native {
         size_t mCurrentBlock = 0;
         // Used to avoid a special case for empty iterators.
         uint32_t mEndOfBlock = detail::kEndOfBlock;
-        bool mDataWasDestroyed = false;
     };
 
     class CommandAllocator {

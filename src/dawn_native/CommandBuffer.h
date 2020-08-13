@@ -17,6 +17,8 @@
 
 #include "dawn_native/dawn_platform.h"
 
+#include "dawn_native/CommandAllocator.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
@@ -31,14 +33,24 @@ namespace dawn_native {
     class CommandBufferBase : public ObjectBase {
       public:
         CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+
         static CommandBufferBase* MakeError(DeviceBase* device);
 
+        MaybeError ValidateCanUseInSubmitNow() const;
+        void Destroy();
+
         const CommandBufferResourceUsage& GetResourceUsages() const;
+
+      protected:
+        ~CommandBufferBase();
+
+        CommandIterator mCommands;
 
       private:
         CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         CommandBufferResourceUsage mResourceUsages;
+        bool mDestroyed = false;
     };
 
     bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,

@@ -19,17 +19,17 @@
 
 #include <type_traits>
 
-// Make our own Base - Backend object pair, reusing the CommandBuffer name
+// Make our own Base - Backend object pair, reusing the AdapterBase name
 namespace dawn_native {
-    class CommandBufferBase : public RefCounted {};
+    class AdapterBase : public RefCounted {};
 }  // namespace dawn_native
 
 using namespace dawn_native;
 
-class MyCommandBuffer : public CommandBufferBase {};
+class MyAdapter : public AdapterBase {};
 
 struct MyBackendTraits {
-    using CommandBufferType = MyCommandBuffer;
+    using AdapterType = MyAdapter;
 };
 
 // Instanciate ToBackend for our "backend"
@@ -41,48 +41,47 @@ auto ToBackend(T&& common) -> decltype(ToBackendBase<MyBackendTraits>(common)) {
 // Test that ToBackend correctly converts pointers to base classes.
 TEST(ToBackend, Pointers) {
     {
-        MyCommandBuffer* cmdBuf = new MyCommandBuffer;
-        const CommandBufferBase* base = cmdBuf;
+        MyAdapter* adapter = new MyAdapter;
+        const AdapterBase* base = adapter;
 
-        auto backendCmdBuf = ToBackend(base);
-        static_assert(std::is_same<decltype(backendCmdBuf), const MyCommandBuffer*>::value, "");
-        ASSERT_EQ(cmdBuf, backendCmdBuf);
+        auto backendAdapter = ToBackend(base);
+        static_assert(std::is_same<decltype(backendAdapter), const MyAdapter*>::value, "");
+        ASSERT_EQ(adapter, backendAdapter);
 
-        cmdBuf->Release();
+        adapter->Release();
     }
     {
-        MyCommandBuffer* cmdBuf = new MyCommandBuffer;
-        CommandBufferBase* base = cmdBuf;
+        MyAdapter* adapter = new MyAdapter;
+        AdapterBase* base = adapter;
 
-        auto backendCmdBuf = ToBackend(base);
-        static_assert(std::is_same<decltype(backendCmdBuf), MyCommandBuffer*>::value, "");
-        ASSERT_EQ(cmdBuf, backendCmdBuf);
+        auto backendAdapter = ToBackend(base);
+        static_assert(std::is_same<decltype(backendAdapter), MyAdapter*>::value, "");
+        ASSERT_EQ(adapter, backendAdapter);
 
-        cmdBuf->Release();
+        adapter->Release();
     }
 }
 
 // Test that ToBackend correctly converts Refs to base classes.
 TEST(ToBackend, Ref) {
     {
-        MyCommandBuffer* cmdBuf = new MyCommandBuffer;
-        const Ref<CommandBufferBase> base(cmdBuf);
+        MyAdapter* adapter = new MyAdapter;
+        const Ref<AdapterBase> base(adapter);
 
-        const auto& backendCmdBuf = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyCommandBuffer>&>::value,
-                      "");
-        ASSERT_EQ(cmdBuf, backendCmdBuf.Get());
+        const auto& backendAdapter = ToBackend(base);
+        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyAdapter>&>::value, "");
+        ASSERT_EQ(adapter, backendAdapter.Get());
 
-        cmdBuf->Release();
+        adapter->Release();
     }
     {
-        MyCommandBuffer* cmdBuf = new MyCommandBuffer;
-        Ref<CommandBufferBase> base(cmdBuf);
+        MyAdapter* adapter = new MyAdapter;
+        Ref<AdapterBase> base(adapter);
 
-        auto backendCmdBuf = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyCommandBuffer>&>::value, "");
-        ASSERT_EQ(cmdBuf, backendCmdBuf.Get());
+        auto backendAdapter = ToBackend(base);
+        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyAdapter>&>::value, "");
+        ASSERT_EQ(adapter, backendAdapter.Get());
 
-        cmdBuf->Release();
+        adapter->Release();
     }
 }

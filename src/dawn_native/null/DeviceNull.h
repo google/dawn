@@ -216,10 +216,6 @@ namespace dawn_native { namespace null {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-      private:
-        ~CommandBuffer() override;
-
-        CommandIterator mCommands;
     };
 
     class QuerySet final : public QuerySetBase {

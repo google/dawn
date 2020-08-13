@@ -23,9 +23,10 @@ namespace {
     // Test submitting with a mapped buffer is disallowed
     TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
         // Create a map-write buffer.
+        const uint64_t kBufferSize = 4;
         wgpu::BufferDescriptor descriptor;
         descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-        descriptor.size = 4;
+        descriptor.size = kBufferSize;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
         // Create a fake copy destination buffer
@@ -36,7 +37,7 @@ namespace {
         wgpu::CommandBuffer commands;
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, 4);
+            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, kBufferSize);
             commands = encoder.Finish();
         }
 
@@ -45,16 +46,34 @@ namespace {
         // Submitting when the buffer has never been mapped should succeed
         queue.Submit(1, &commands);
 
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, kBufferSize);
+            commands = encoder.Finish();
+        }
+
         // Map the buffer, submitting when the buffer is mapped should fail
-        buffer.MapWriteAsync(nullptr, nullptr);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, nullptr, nullptr);
 
         // Try submitting before the callback is fired.
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 
         WaitForAllOperations(device);
 
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, kBufferSize);
+            commands = encoder.Finish();
+        }
+
         // Try submitting after the callback is fired.
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, kBufferSize);
+            commands = encoder.Finish();
+        }
 
         // Unmap the buffer, queue submit should succeed
         buffer.Unmap();
@@ -180,6 +199,55 @@ namespace {
             uint32_t value = 0;
             ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
         }
+    }
+
+    // Test it is invalid to submit a command buffer twice
+    TEST_F(QueueSubmitValidationTest, CommandBufferSubmittedTwice) {
+        wgpu::CommandBuffer commandBuffer = device.CreateCommandEncoder().Finish();
+        wgpu::Queue queue = device.GetDefaultQueue();
+
+        // Should succeed
+        queue.Submit(1, &commandBuffer);
+
+        // Should fail because command buffer was already submitted
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commandBuffer));
+    }
+
+    // Test resubmitting failed command buffers
+    TEST_F(QueueSubmitValidationTest, CommandBufferSubmittedFailed) {
+        // Create a map-write buffer
+        const uint64_t kBufferSize = 4;
+        wgpu::BufferDescriptor descriptor;
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        descriptor.size = kBufferSize;
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        // Create a destination buffer for the b2b copy
+        descriptor.usage = wgpu::BufferUsage::CopyDst;
+        descriptor.size = kBufferSize;
+        wgpu::Buffer targetBuffer = device.CreateBuffer(&descriptor);
+
+        // Create a command buffer that reads from the mappable buffer
+        wgpu::CommandBuffer commands;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, kBufferSize);
+            commands = encoder.Finish();
+        }
+
+        wgpu::Queue queue = device.GetDefaultQueue();
+
+        // Map the source buffer to force a failure
+        buffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, nullptr, nullptr);
+
+        // Submitting a command buffer with a mapped buffer should fail
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+
+        // Unmap buffer to fix the failure
+        buffer.Unmap();
+
+        // Resubmitting any command buffer, even if the problem was fixed, should fail
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
 
 }  // anonymous namespace

@@ -51,24 +51,11 @@ namespace dawn_native {
     }
 
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
-        DeviceBase* device = GetDevice();
-        if (device->ConsumedError(device->ValidateIsAlive())) {
-            // If device is lost, don't let any commands be submitted
-            return;
-        }
+        SubmitInternal(commandCount, commands);
 
-        TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
-        if (device->IsValidationEnabled() &&
-            device->ConsumedError(ValidateSubmit(commandCount, commands))) {
-            return;
+        for (uint32_t i = 0; i < commandCount; ++i) {
+            commands[i]->Destroy();
         }
-        ASSERT(!IsError());
-
-        if (device->ConsumedError(SubmitImpl(commandCount, commands))) {
-            return;
-        }
-        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
-            device->GetCurrentErrorScope());
     }
 
     void QueueBase::Signal(Fence* fence, uint64_t signalValue) {
@@ -170,6 +157,7 @@ namespace dawn_native {
 
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
+            DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow());
 
             const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
@@ -284,6 +272,28 @@ namespace dawn_native {
         DAWN_TRY(destination->texture->ValidateCanUseInSubmitNow());
 
         return {};
+    }
+
+    void QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands) {
+        DeviceBase* device = GetDevice();
+        if (device->ConsumedError(device->ValidateIsAlive())) {
+            // If device is lost, don't let any commands be submitted
+            return;
+        }
+
+        TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
+        if (device->IsValidationEnabled() &&
+            device->ConsumedError(ValidateSubmit(commandCount, commands))) {
+            return;
+        }
+        ASSERT(!IsError());
+
+        if (device->ConsumedError(SubmitImpl(commandCount, commands))) {
+            return;
+        }
+
+        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
+            device->GetCurrentErrorScope());
     }
 
     void CopyTextureData(uint8_t* dstPointer,

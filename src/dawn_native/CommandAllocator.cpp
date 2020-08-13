@@ -30,13 +30,7 @@ namespace dawn_native {
     }
 
     CommandIterator::~CommandIterator() {
-        ASSERT(mDataWasDestroyed);
-
-        if (!IsEmpty()) {
-            for (auto& block : mBlocks) {
-                free(block.block);
-            }
-        }
+        ASSERT(IsEmpty());
     }
 
     CommandIterator::CommandIterator(CommandIterator&& other) {
@@ -44,18 +38,13 @@ namespace dawn_native {
             mBlocks = std::move(other.mBlocks);
             other.Reset();
         }
-        other.DataWasDestroyed();
         Reset();
     }
 
     CommandIterator& CommandIterator::operator=(CommandIterator&& other) {
-        if (!other.IsEmpty()) {
-            mBlocks = std::move(other.mBlocks);
-            other.Reset();
-        } else {
-            mBlocks.clear();
-        }
-        other.DataWasDestroyed();
+        ASSERT(IsEmpty());
+        mBlocks = std::move(other.mBlocks);
+        other.Reset();
         Reset();
         return *this;
     }
@@ -66,6 +55,7 @@ namespace dawn_native {
     }
 
     CommandIterator& CommandIterator::operator=(CommandAllocator&& allocator) {
+        ASSERT(IsEmpty());
         mBlocks = allocator.AcquireBlocks();
         Reset();
         return *this;
@@ -97,8 +87,17 @@ namespace dawn_native {
         }
     }
 
-    void CommandIterator::DataWasDestroyed() {
-        mDataWasDestroyed = true;
+    void CommandIterator::MakeEmptyAsDataWasDestroyed() {
+        if (IsEmpty()) {
+            return;
+        }
+
+        for (auto& block : mBlocks) {
+            free(block.block);
+        }
+        mBlocks.clear();
+        Reset();
+        ASSERT(IsEmpty());
     }
 
     bool CommandIterator::IsEmpty() const {

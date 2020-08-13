@@ -329,11 +329,7 @@ namespace dawn_native { namespace null {
     // CommandBuffer
 
     CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
-        : CommandBufferBase(encoder, descriptor), mCommands(encoder->AcquireCommands()) {
-    }
-
-    CommandBuffer::~CommandBuffer() {
-        FreeCommands(&mCommands);
+        : CommandBufferBase(encoder, descriptor) {
     }
 
     // QuerySet
