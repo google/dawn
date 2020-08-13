@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
@@ -85,6 +86,81 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   EXPECT_FALSE(v.Validate(mod()));
   EXPECT_EQ(v.error(),
             "12:34: v-0002: function must end with a return statement");
+}
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_FunctionTypeMustMatchReturnStatementType_pass) {
+  // TODO(sarahM0): remove DISABLED after implementing function type must match
+  // return type
+  // fn func -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("func", std::move(params), &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.Validate(mod())) << v.error();
+}
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_FunctionTypeMustMatchReturnStatementType_fail) {
+  // TODO(sarahM0): remove DISABLED after implementing function type must match
+  // return type
+  // fn func -> void { return 2; }
+  ast::type::VoidType void_type;
+  ast::type::I32Type i32;
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("func", std::move(params), &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  body->append(std::make_unique<ast::ReturnStatement>(Source{12, 34},
+                                                      std::move(return_expr)));
+  func->set_body(std::move(body));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  // TODO(sarahM0): replace 000y with a rule number
+  EXPECT_EQ(
+      v.error(),
+      "12:34: v-000y: function type must match its return statement type");
+}
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_FunctionTypeMustMatchReturnStatementTypeF32_fail) {
+  // TODO(sarahM0): remove DISABLED after implementing function type must match
+  // return type
+  // fn func -> f32 { return 2; }
+  ast::type::VoidType void_type;
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("func", std::move(params), &f32);
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  body->append(std::make_unique<ast::ReturnStatement>(Source{12, 34},
+                                                      std::move(return_expr)));
+  func->set_body(std::move(body));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  // TODO(sarahM0): replace 000y with a rule number
+  EXPECT_EQ(
+      v.error(),
+      "12:34: v-000y: function type must match its return statement type");
 }
 
 }  // namespace
