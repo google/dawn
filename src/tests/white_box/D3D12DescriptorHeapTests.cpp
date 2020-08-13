@@ -66,7 +66,6 @@ class D3D12DescriptorHeapTests : public DawnTest {
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = format;
         descriptor.mipLevelCount = 1;
@@ -732,7 +731,6 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
     descriptor.size.width = kRTSize;
     descriptor.size.height = kRTSize;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;

@@ -325,14 +325,6 @@ namespace dawn_native { namespace metal {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
-        // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
-        // GPUTextureDescriptor.size.depth is done.
-        TextureDescriptor fixedDescriptor;
-        if (ConsumedError(FixTextureDescriptor(this, textureDescriptor), &fixedDescriptor)) {
-            return nullptr;
-        }
-        textureDescriptor = &fixedDescriptor;
-
         if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
             return nullptr;
         }

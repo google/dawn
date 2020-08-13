@@ -668,12 +668,6 @@ namespace dawn_native {
                                              const TextureCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
-            // GPUTextureCopyView.origin.z is done.
-            TextureCopyView fixedDest;
-            DAWN_TRY_ASSIGN(fixedDest, FixTextureCopyView(GetDevice(), destination));
-            destination = &fixedDest;
-
             // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
             BufferCopyView fixedSource;
             DAWN_TRY_ASSIGN(fixedSource, FixBufferCopyView(GetDevice(), source));
@@ -738,12 +732,6 @@ namespace dawn_native {
                                              const BufferCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
-            // GPUTextureCopyView.origin.z is done.
-            TextureCopyView fixedSrc;
-            DAWN_TRY_ASSIGN(fixedSrc, FixTextureCopyView(GetDevice(), source));
-            source = &fixedSrc;
-
             // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
             BufferCopyView fixedDst;
             DAWN_TRY_ASSIGN(fixedDst, FixBufferCopyView(GetDevice(), destination));
@@ -805,15 +793,6 @@ namespace dawn_native {
                                               const TextureCopyView* destination,
                                               const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
-            // GPUTextureCopyView.origin.z is done.
-            TextureCopyView fixedSrc;
-            DAWN_TRY_ASSIGN(fixedSrc, FixTextureCopyView(GetDevice(), source));
-            source = &fixedSrc;
-            TextureCopyView fixedDest;
-            DAWN_TRY_ASSIGN(fixedDest, FixTextureCopyView(GetDevice(), destination));
-            destination = &fixedDest;
-
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));

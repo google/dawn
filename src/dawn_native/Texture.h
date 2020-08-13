@@ -64,11 +64,6 @@ namespace dawn_native {
         const TextureBase* texture,
         const TextureViewDescriptor* descriptor);
 
-    // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
-    // GPUTextureDescriptor.size.depth is done.
-    ResultOrError<TextureDescriptor> FixTextureDescriptor(DeviceBase* device,
-                                                          const TextureDescriptor* desc);
-
     bool IsValidSampleCount(uint32_t sampleCount);
 
     static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
@@ -188,9 +183,6 @@ namespace dawn_native {
         wgpu::TextureViewDimension mDimension;
         SubresourceRange mRange;
     };
-
-    ResultOrError<TextureCopyView> FixTextureCopyView(DeviceBase* device,
-                                                      const TextureCopyView* view);
 
 }  // namespace dawn_native
 

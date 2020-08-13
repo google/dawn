@@ -661,12 +661,6 @@ namespace dawn_native { namespace vulkan {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
-        // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
-        // GPUTextureDescriptor.size.depth is done.
-        TextureDescriptor fixedDescriptor;
-        DAWN_TRY_ASSIGN(fixedDescriptor, FixTextureDescriptor(this, textureDescriptor));
-        textureDescriptor = &fixedDescriptor;
-
         // Check services support this combination of handle type / image info
         if (!mExternalSemaphoreService->Supported()) {
             return DAWN_VALIDATION_ERROR("External semaphore usage not supported");

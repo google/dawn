@@ -333,25 +333,6 @@ namespace dawn_native {
         return desc;
     }
 
-    ResultOrError<TextureDescriptor> FixTextureDescriptor(DeviceBase* device,
-                                                          const TextureDescriptor* desc) {
-        TextureDescriptor fixedDesc = *desc;
-
-        if (desc->arrayLayerCount >= 2) {
-            if (desc->size.depth != 1) {
-                return DAWN_VALIDATION_ERROR("arrayLayerCount and size.depth cannot both be set.");
-            } else {
-                fixedDesc.size.depth = fixedDesc.arrayLayerCount;
-                fixedDesc.arrayLayerCount = 1;
-                device->EmitDeprecationWarning(
-                    "wgpu::TextureDescriptor::arrayLayerCount is deprecated in favor of "
-                    "::size::depth");
-            }
-        }
-
-        return {std::move(fixedDesc)};
-    }
-
     bool IsValidSampleCount(uint32_t sampleCount) {
         switch (sampleCount) {
             case 1:
@@ -694,25 +675,6 @@ namespace dawn_native {
     const SubresourceRange& TextureViewBase::GetSubresourceRange() const {
         ASSERT(!IsError());
         return mRange;
-    }
-
-    ResultOrError<TextureCopyView> FixTextureCopyView(DeviceBase* device,
-                                                      const TextureCopyView* view) {
-        TextureCopyView fixedView = *view;
-
-        if (view->arrayLayer != 0) {
-            if (view->origin.z != 0) {
-                return DAWN_VALIDATION_ERROR("arrayLayer and origin.z cannot both be != 0");
-            } else {
-                fixedView.origin.z = fixedView.arrayLayer;
-                fixedView.arrayLayer = 1;
-                device->EmitDeprecationWarning(
-                    "wgpu::TextureCopyView::arrayLayer is deprecated in favor of "
-                    "::origin::z");
-            }
-        }
-
-        return fixedView;
     }
 
 }  // namespace dawn_native

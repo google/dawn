@@ -373,7 +373,6 @@ namespace dawn_native { namespace vulkan {
             defaultDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             defaultDescriptor.size = {1, 1, 1};
             defaultDescriptor.sampleCount = 1;
-            defaultDescriptor.arrayLayerCount = 1;
             defaultDescriptor.mipLevelCount = 1;
             defaultDescriptor.usage = wgpu::TextureUsage::OutputAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -432,13 +431,11 @@ namespace dawn_native { namespace vulkan {
             wgpu::TextureCopyView copySrc;
             copySrc.texture = source;
             copySrc.mipLevel = 0;
-            copySrc.arrayLayer = 0;
             copySrc.origin = {0, 0, 0};
 
             wgpu::TextureCopyView copyDst;
             copyDst.texture = destination;
             copyDst.mipLevel = 0;
-            copyDst.arrayLayer = 0;
             copyDst.origin = {0, 0, 0};
 
             wgpu::Extent3D copySize = {1, 1, 1};
@@ -918,7 +915,6 @@ namespace dawn_native { namespace vulkan {
         descriptor.size.width = 640;
         descriptor.size.height = 480;
         descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
         descriptor.mipLevelCount = 1;

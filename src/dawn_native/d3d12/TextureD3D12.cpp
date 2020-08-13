@@ -394,12 +394,6 @@ namespace dawn_native { namespace d3d12 {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
-        // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
-        // GPUTextureDescriptor.size.depth is done.
-        TextureDescriptor fixedDescriptor;
-        DAWN_TRY_ASSIGN(fixedDescriptor, FixTextureDescriptor(device, textureDescriptor));
-        textureDescriptor = &fixedDescriptor;
-
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));
         DAWN_TRY(dawnTexture->InitializeAsExternalTexture(textureDescriptor, sharedHandle,

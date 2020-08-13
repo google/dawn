@@ -146,12 +146,6 @@ namespace dawn_native {
                                                size_t dataSize,
                                                const TextureDataLayout* dataLayout,
                                                const Extent3D* writeSize) {
-        // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
-        // GPUTextureCopyView.origin.z is done.
-        TextureCopyView fixedDest;
-        DAWN_TRY_ASSIGN(fixedDest, FixTextureCopyView(GetDevice(), destination));
-        destination = &fixedDest;
-
         DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
 
         if (writeSize->width == 0 || writeSize->height == 0 || writeSize->depth == 0) {

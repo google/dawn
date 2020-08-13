@@ -50,7 +50,6 @@ TEST_P(D3D12SmallTextureTests, AlignSmallCompressedTexture) {
     descriptor.size.width = 8;
     descriptor.size.height = 8;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::BC1RGBAUnorm;
     descriptor.mipLevelCount = 1;
