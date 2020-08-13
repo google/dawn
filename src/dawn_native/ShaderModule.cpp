@@ -1097,6 +1097,7 @@ namespace dawn_native {
     shaderc_spvc::CompileOptions ShaderModuleBase::GetCompileOptions() const {
         shaderc_spvc::CompileOptions options;
         options.SetValidate(GetDevice()->IsValidationEnabled());
+        options.SetRobustBufferAccessPass(GetDevice()->IsRobustnessEnabled());
         return options;
     }
 
