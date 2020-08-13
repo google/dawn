@@ -138,7 +138,11 @@ namespace dawn_native {
                "Clear buffers on their first use. This is a temporary toggle only for the "
                "development of buffer lazy initialization and will be removed after buffer lazy "
                "initialization is completely implemented.",
-               "https://crbug.com/dawn/414"}}}};
+               "https://crbug.com/dawn/414"}},
+             {Toggle::MetalEnableVertexPulling,
+              {"metal_enable_vertex_pulling",
+               "Uses vertex pulling to protect out-of-bounds reads on Metal",
+               "https://crbug.com/dawn/480"}}}};
 
     }  // anonymous namespace
 

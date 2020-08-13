@@ -144,6 +144,14 @@ namespace utils {
         return CreateShaderModuleFromResult(device, result);
     }
 
+    wgpu::ShaderModule CreateShaderModuleFromWGSL(const wgpu::Device& device, const char* source) {
+        wgpu::ShaderModuleWGSLDescriptor wgslDesc;
+        wgslDesc.source = source;
+        wgpu::ShaderModuleDescriptor descriptor;
+        descriptor.nextInChain = &wgslDesc;
+        return device.CreateShaderModule(&descriptor);
+    }
+
     std::vector<uint32_t> CompileGLSLToSpirv(SingleShaderStage stage, const char* source) {
         shaderc_shader_kind kind = ShadercShaderKind(stage);
 

@@ -337,6 +337,10 @@ source_set("dawn_end2end_tests_sources") {
     frameworks = [ "IOSurface.framework" ]
   }
 
+  if (dawn_enable_wgsl) {
+    sources += [ "end2end/VertexBufferRobustnessTests.cpp" ]
+  }
+
   if (dawn_enable_opengl) {
     assert(dawn_supports_glfw_for_windowing)
   }

@@ -44,6 +44,7 @@ namespace dawn_native {
         UseDXC,
         DisableRobustness,
         LazyClearBufferOnFirstUse,
+        MetalEnableVertexPulling,
 
         EnumCount,
         InvalidEnum = EnumCount,

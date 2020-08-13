@@ -61,6 +61,11 @@ namespace dawn_native { namespace metal {
 
     MaybeError Device::Initialize() {
         InitTogglesFromDriver();
+
+        if (!IsRobustnessEnabled() || !IsToggleEnabled(Toggle::UseSpvc)) {
+            ForceSetToggle(Toggle::MetalEnableVertexPulling, false);
+        }
+
         mCommandQueue = [mMtlDevice newCommandQueue];
 
         return DeviceBase::Initialize(new Queue(this));

@@ -91,6 +91,13 @@ namespace dawn_native {
         shaderc_spvc::Context* GetContext();
         const std::vector<uint32_t>& GetSpirv() const;
 
+#ifdef DAWN_ENABLE_WGSL
+        ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
+            const VertexStateDescriptor& vertexState,
+            const std::string& entryPoint,
+            uint32_t pullingBufferBindingSet) const;
+#endif
+
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
         shaderc_spvc::CompileOptions GetCompileOptions() const;
