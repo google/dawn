@@ -389,10 +389,8 @@ int main(int argc, const char** argv) {
     if (!ReadFile<char>(options.input_filename, &text)) {
       return 1;
     }
-    // By default, use SPIR-V 1.3, the original proposal for SPIR-V binary
-    // input for WebGPU.  This lines up with the SPIRV-Tools validation
-    // for the SPV_ENV_WEBGPU0 environment.
-    spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_3);
+    // Use Vulkan 1.1, since this is what Tint, internally, is expecting.
+    spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
     tools.SetMessageConsumer([](spv_message_level_t, const char*,
                                 const spv_position_t& pos, const char* msg) {
       std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg

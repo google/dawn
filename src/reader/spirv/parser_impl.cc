@@ -77,11 +77,11 @@ namespace spirv {
 
 namespace {
 
-// Input SPIR-V needs only to conform to Vulkan 1.0 requirements.
+// Input SPIR-V needs only to conform to Vulkan 1.1 requirements.
 // The combination of the SPIR-V reader and the semantics of WGSL
 // tighten up the code so that the output of the SPIR-V *writer*
 // will satisfy SPV_ENV_WEBGPU_0 validation.
-const spv_target_env kInputEnv = SPV_ENV_VULKAN_1_0;
+const spv_target_env kInputEnv = SPV_ENV_VULKAN_1_1;
 
 // A FunctionTraverser is used to compute an ordering of functions in the
 // module such that callees precede callers.
