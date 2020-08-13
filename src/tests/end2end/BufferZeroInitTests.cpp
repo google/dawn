@@ -207,6 +207,7 @@ class BufferZeroInitTest : public DawnTest {
                     fragColor = i_color;
                 })");
 
+        ASSERT(vertexBufferCount <= 1u);
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
@@ -220,18 +221,18 @@ class BufferZeroInitTest : public DawnTest {
         return device.CreateRenderPipeline(&descriptor);
     }
 
-    void ValidateBufferAndOutputTexture(wgpu::CommandEncoder encoder,
-                                        wgpu::Buffer buffer,
-                                        uint64_t bufferSize,
-                                        wgpu::Texture colorAttachment) {
+    void ExpectLazyClearSubmitAndCheckOutputs(wgpu::CommandEncoder encoder,
+                                              wgpu::Buffer buffer,
+                                              uint64_t bufferSize,
+                                              wgpu::Texture colorAttachment) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
         // Although we just bind a part of the buffer, we still expect the whole buffer to be
         // lazily initialized to 0.
-        const std::vector<float> expectedVertexBufferData(bufferSize / sizeof(float), 0.f);
-        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_FLOAT_RANGE_EQ(expectedVertexBufferData.data(), buffer,
-                                                           0, expectedVertexBufferData.size()));
+        const std::vector<uint32_t> expectedBufferData(bufferSize / sizeof(uint32_t), 0);
+        EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0,
+                                                         expectedBufferData.size()));
 
         const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
         EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
@@ -274,7 +275,8 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.Draw(1);
         renderPass.EndPass();
 
-        ValidateBufferAndOutputTexture(encoder, vertexBuffer, vertexBufferSize, colorAttachment);
+        ExpectLazyClearSubmitAndCheckOutputs(encoder, vertexBuffer, vertexBufferSize,
+                                             colorAttachment);
     }
 
     void TestBufferZeroInitAsIndexBuffer(uint64_t indexBufferOffset) {
@@ -292,15 +294,7 @@ class BufferZeroInitTest : public DawnTest {
                 gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
                 gl_PointSize = 1.0f;
             })";
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader);
-
-        // It is not allowed to use an index buffer without a vertex buffer although the vertex
-        // buffer is not used. So here we use an initialized dummy buffer as vertex buffer.
-        constexpr std::array<float, 4> kVertexBufferData = {0, 0, 0, 0};
-        constexpr uint64_t kVertexBufferSize = sizeof(kVertexBufferData);
-        wgpu::Buffer vertexBuffer =
-            utils::CreateBufferFromData(device, kVertexBufferData.data(), kVertexBufferSize,
-                                        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::CopyDst);
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0u);
 
         // The buffer size cannot be less than 4
         const uint64_t indexBufferSize = sizeof(uint32_t) + indexBufferOffset;
@@ -314,7 +308,6 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
-        renderPass.SetVertexBuffer(0, vertexBuffer, 0, kVertexBufferSize);
         renderPass.SetPipeline(renderPipeline);
 
         // Bind the buffer with offset == indexBufferOffset and size sizeof(uint32_t) as the index
@@ -323,7 +316,8 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.DrawIndexed(1);
         renderPass.EndPass();
 
-        ValidateBufferAndOutputTexture(encoder, indexBuffer, indexBufferSize, colorAttachment);
+        ExpectLazyClearSubmitAndCheckOutputs(encoder, indexBuffer, indexBufferSize,
+                                             colorAttachment);
     }
 
     void TestBufferZeroInitAsIndirectBufferForDrawIndirect(uint64_t indirectBufferOffset) {
@@ -360,7 +354,7 @@ class BufferZeroInitTest : public DawnTest {
         renderPass.DrawIndirect(indirectBuffer, indirectBufferOffset);
         renderPass.EndPass();
 
-        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, colorAttachment);
+        ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, colorAttachment);
     }
 
     void TestBufferZeroInitAsIndirectBufferForDrawIndexedIndirect(uint64_t indirectBufferOffset) {
@@ -378,13 +372,9 @@ class BufferZeroInitTest : public DawnTest {
             }
         )";
 
-        // It is not allowed to use an index buffer without a vertex buffer although the vertex
-        // buffer is not used. So here we use an initialized dummy buffer as vertex buffer.
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 1u);
-        wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
-            device, wgpu::BufferUsage::Vertex, {0.f, 0.f, 0.f, 0.f});
-        wgpu::Buffer indexBuffer = utils::CreateBufferFromData<float>(
-            device, wgpu::BufferUsage::Index, {0.f, 0.f, 0.f, 0.f});
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0u);
+        wgpu::Buffer indexBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0});
 
         // Clear the color attachment to green.
         wgpu::Texture colorAttachment =
@@ -401,12 +391,11 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(renderPipeline);
-        renderPass.SetVertexBuffer(0, vertexBuffer);
         renderPass.SetIndexBuffer(indexBuffer);
         renderPass.DrawIndexedIndirect(indirectBuffer, indirectBufferOffset);
         renderPass.EndPass();
 
-        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, colorAttachment);
+        ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, colorAttachment);
     }
 
     void TestBufferZeroInitAsIndirectBufferForDispatchIndirect(uint64_t indirectBufferOffset) {
@@ -452,7 +441,7 @@ class BufferZeroInitTest : public DawnTest {
         computePass.DispatchIndirect(indirectBuffer, indirectBufferOffset);
         computePass.EndPass();
 
-        ValidateBufferAndOutputTexture(encoder, indirectBuffer, bufferSize, outputTexture);
+        ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, outputTexture);
     }
 };
 
