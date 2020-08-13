@@ -27,12 +27,6 @@
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],
-        "buffer set sub data internal": [
-            {"name": "buffer id", "type": "ObjectId" },
-            {"name": "start", "type": "uint64_t"},
-            {"name": "count", "type": "uint64_t"},
-            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "count"}
-        ],
         "buffer update mapped data": [
             { "name": "buffer id", "type": "ObjectId" },
             { "name": "write flush info length", "type": "uint64_t" },
@@ -105,7 +99,6 @@
             "BufferMapAsync",
             "BufferMapReadAsync",
             "BufferMapWriteAsync",
-            "BufferSetSubData",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
             "DeviceCreateBuffer",

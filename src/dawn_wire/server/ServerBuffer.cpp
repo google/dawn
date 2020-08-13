@@ -168,24 +168,6 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoBufferSetSubDataInternal(ObjectId bufferId,
-                                            uint64_t start,
-                                            uint64_t offset,
-                                            const uint8_t* data) {
-        // The null object isn't valid as `self`
-        if (bufferId == 0) {
-            return false;
-        }
-
-        auto* buffer = BufferObjects().Get(bufferId);
-        if (buffer == nullptr) {
-            return false;
-        }
-
-        mProcs.bufferSetSubData(buffer->handle, start, offset, data);
-        return true;
-    }
-
     bool Server::DoBufferUpdateMappedData(ObjectId bufferId,
                                           uint64_t writeFlushInfoLength,
                                           const uint8_t* writeFlushInfo) {

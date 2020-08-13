@@ -417,16 +417,6 @@ namespace dawn_wire { namespace client {
         device->GetClient()->SerializeCommand(cmd);
     }
 
-    void Buffer::SetSubData(uint64_t start, uint64_t count, const void* data) {
-        BufferSetSubDataInternalCmd cmd;
-        cmd.bufferId = id;
-        cmd.start = start;
-        cmd.count = count;
-        cmd.data = static_cast<const uint8_t*>(data);
-
-        device->GetClient()->SerializeCommand(cmd);
-    }
-
     bool Buffer::IsMappedForReading() const {
         return mReadHandle != nullptr;
     }

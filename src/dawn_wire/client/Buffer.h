@@ -51,8 +51,6 @@ namespace dawn_wire { namespace client {
 
         void Destroy();
 
-        void SetSubData(uint64_t start, uint64_t count, const void* data);
-
       private:
         bool IsMappedForReading() const;
         bool IsMappedForWriting() const;

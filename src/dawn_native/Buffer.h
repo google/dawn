@@ -61,7 +61,6 @@ namespace dawn_native {
         void SetIsDataInitialized();
 
         // Dawn API
-        void SetSubData(uint64_t start, uint64_t count, const void* data);
         void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
         void MapAsync(wgpu::MapMode mode,

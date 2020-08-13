@@ -176,14 +176,6 @@
         "category": "object",
         "methods": [
             {
-                "name": "set sub data",
-                "args": [
-                    {"name": "start", "type": "uint64_t"},
-                    {"name": "count", "type": "uint64_t"},
-                    {"name": "data", "type": "void", "annotation": "const*", "length": "count"}
-                ]
-            },
-            {
                 "name": "map read async",
                 "args": [
                     {"name": "callback", "type": "buffer map read callback"},
