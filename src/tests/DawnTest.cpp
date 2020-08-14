@@ -24,6 +24,7 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
+#include "utils/PlatformDebugLogger.h"
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
 #include "utils/WGPUHelpers.h"
@@ -35,7 +36,7 @@
 #include <sstream>
 #include <unordered_map>
 
-#ifdef DAWN_ENABLE_BACKEND_OPENGL
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #    include "GLFW/glfw3.h"
 #    include "dawn_native/OpenGLBackend.h"
 #endif  // DAWN_ENABLE_BACKEND_OPENGL
@@ -81,7 +82,7 @@ namespace {
 
     DawnTestEnvironment* gTestEnv = nullptr;
 
-}  // namespace
+}  // anonymous namespace
 
 const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
 const RGBA8 RGBA8::kBlack = RGBA8(0, 0, 0, 255);
@@ -186,6 +187,11 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     ParseArgs(argc, argv);
 
+    if (mEnableBackendValidation) {
+        mPlatformDebugLogger =
+            std::unique_ptr<utils::PlatformDebugLogger>(utils::CreatePlatformDebugLogger());
+    }
+
     // Create a temporary instance to select available and preferred adapters. This is done before
     // test instantiation so GetAvailableAdapterTestParamsForBackends can generate test
     // parameterizations all selected adapters. We drop the instance at the end of this function
@@ -198,6 +204,8 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     SelectPreferredAdapterProperties(instance.get());
     PrintTestConfigurationAndAdapterInfo();
 }
+
+DawnTestEnvironment::~DawnTestEnvironment() = default;
 
 void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     size_t argLen = 0;  // Set when parsing --arg=X arguments

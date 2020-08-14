@@ -155,6 +155,7 @@ BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledW
                                 std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
 namespace utils {
+    class PlatformDebugLogger;
     class TerribleCommandBuffer;
 }  // namespace utils
 
@@ -176,7 +177,7 @@ void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
 class DawnTestEnvironment : public testing::Environment {
   public:
     DawnTestEnvironment(int argc, char** argv);
-    ~DawnTestEnvironment() override = default;
+    ~DawnTestEnvironment() override;
 
     static void SetEnvironment(DawnTestEnvironment* env);
 
@@ -219,6 +220,8 @@ class DawnTestEnvironment : public testing::Environment {
     std::string mWireTraceDir;
     std::vector<dawn_native::DeviceType> mDevicePreferences;
     std::vector<TestAdapterProperties> mAdapterProperties;
+
+    std::unique_ptr<utils::PlatformDebugLogger> mPlatformDebugLogger;
 };
 
 class DawnTestBase {

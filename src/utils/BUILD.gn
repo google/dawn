@@ -70,6 +70,7 @@ static_library("dawn_utils") {
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",
     "ComboRenderPipelineDescriptor.h",
+    "PlatformDebugLogger.h",
     "SystemUtils.cpp",
     "SystemUtils.h",
     "TerribleCommandBuffer.cpp",
@@ -88,6 +89,12 @@ static_library("dawn_utils") {
   ]
   libs = []
   frameworks = []
+
+  if (is_win) {
+    sources += [ "WindowsDebugLogger.cpp" ]
+  } else {
+    sources += [ "EmptyDebugLogger.cpp" ]
+  }
 
   if (is_win) {
     sources += [ "WindowsTimer.cpp" ]
