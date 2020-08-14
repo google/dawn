@@ -1119,7 +1119,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {expectedValue});
         wgpu::BufferCopyView bufferCopyView = {};
         bufferCopyView.buffer = textureData;
-        bufferCopyView.bytesPerRow = 256;
+        bufferCopyView.layout.bytesPerRow = 256;
 
         wgpu::TextureCopyView textureCopyView = {};
         textureCopyView.texture = texture;

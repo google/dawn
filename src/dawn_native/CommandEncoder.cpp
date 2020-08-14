@@ -437,35 +437,6 @@ namespace dawn_native {
             return {};
         }
 
-        ResultOrError<BufferCopyView> FixBufferCopyView(DeviceBase* device,
-                                                        const BufferCopyView* view) {
-            BufferCopyView fixedView = *view;
-
-            TextureDataLayout& layout = fixedView.layout;
-            if (layout.offset != 0 || layout.bytesPerRow != 0 || layout.rowsPerImage != 0) {
-                // Using non-deprecated path
-                if (fixedView.offset != 0 || fixedView.bytesPerRow != 0 ||
-                    fixedView.rowsPerImage != 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "WGPUBufferCopyView.offset/bytesPerRow/rowsPerImage is deprecated; use "
-                        "only WGPUBufferCopyView.layout");
-                }
-            } else if (fixedView.offset != 0 || fixedView.bytesPerRow != 0 ||
-                       fixedView.rowsPerImage != 0) {
-                device->EmitDeprecationWarning(
-                    "WGPUBufferCopyView.offset/bytesPerRow/rowsPerImage is deprecated; use "
-                    "WGPUBufferCopyView.layout");
-
-                layout.offset = fixedView.offset;
-                layout.bytesPerRow = fixedView.bytesPerRow;
-                layout.rowsPerImage = fixedView.rowsPerImage;
-                fixedView.offset = 0;
-                fixedView.bytesPerRow = 0;
-                fixedView.rowsPerImage = 0;
-            }
-            return fixedView;
-        }
-
         MaybeError ValidateQuerySetResolve(const QuerySetBase* querySet,
                                            uint32_t firstQuery,
                                            uint32_t queryCount,
@@ -668,11 +639,6 @@ namespace dawn_native {
                                              const TextureCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
-            BufferCopyView fixedSource;
-            DAWN_TRY_ASSIGN(fixedSource, FixBufferCopyView(GetDevice(), source));
-            source = &fixedSource;
-
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *source));
                 DAWN_TRY(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc));
@@ -732,11 +698,6 @@ namespace dawn_native {
                                              const BufferCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
-            BufferCopyView fixedDst;
-            DAWN_TRY_ASSIGN(fixedDst, FixBufferCopyView(GetDevice(), destination));
-            destination = &fixedDst;
-
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source));
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));

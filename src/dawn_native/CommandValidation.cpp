@@ -473,10 +473,6 @@ namespace dawn_native {
 
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView) {
-        // Should have already been fixed up to not use deprecated fields.
-        ASSERT(bufferCopyView.offset == 0 && bufferCopyView.bytesPerRow == 0 &&
-               bufferCopyView.rowsPerImage == 0);
-
         DAWN_TRY(device->ValidateObject(bufferCopyView.buffer));
         if (bufferCopyView.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
             return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
