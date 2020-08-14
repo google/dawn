@@ -83,7 +83,7 @@ namespace utils {
 
         ~WindowsDebugLogger() override {
             if (mShouldExitHandle != nullptr) {
-                ASSERT(SetEvent(mShouldExitHandle));
+                ASSERT(SetEvent(mShouldExitHandle) != 0);
                 CloseHandle(mShouldExitHandle);
             }
 
