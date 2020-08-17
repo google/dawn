@@ -163,5 +163,40 @@ TEST_F(ValidateFunctionTest,
       "12:34: v-000y: function type must match its return statement type");
 }
 
+TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
+  // fn func -> i32 { return 2; }
+  // fn func -> i32 { return 2; }
+  ast::type::VoidType void_type;
+  ast::type::I32Type i32;
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("func", std::move(params), &i32);
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
+  func->set_body(std::move(body));
+
+  ast::VariableList params_copy;
+  auto func_copy = std::make_unique<ast::Function>(
+      Source{12, 34}, "func", std::move(params_copy), &i32);
+  auto body_copy = std::make_unique<ast::BlockStatement>();
+  auto return_expr_copy = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  body_copy->append(
+      std::make_unique<ast::ReturnStatement>(std::move(return_expr_copy)));
+  func_copy->set_body(std::move(body_copy));
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func_copy));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(), "12:34: v-0016: function names must be unique 'func'");
+}
+
 }  // namespace
 }  // namespace tint

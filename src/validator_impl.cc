@@ -31,6 +31,7 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!module) {
     return false;
   }
+  function_stack_.push_scope();
   for (const auto& var : module->global_variables()) {
     if (variable_stack_.has(var->name())) {
       set_error(var->source(),
@@ -45,12 +46,22 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!ValidateFunctions(module->functions())) {
     return false;
   }
+  function_stack_.pop_scope();
   return true;
 }
 
 bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
   for (const auto& func : funcs) {
-    if (!ValidateFunction(func.get())) {
+    auto* func_ptr = func.get();
+    if (function_stack_.has(func_ptr->name())) {
+      set_error(func_ptr->source(), "v-0016: function names must be unique '" +
+                                        func_ptr->name() + "'");
+      return false;
+    }
+
+    function_stack_.set(func_ptr->name(), func_ptr);
+
+    if (!ValidateFunction(func_ptr)) {
       return false;
     }
   }

@@ -16,12 +16,14 @@
 #define SRC_VALIDATOR_IMPL_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
+#include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 #include "src/scope_stack.h"
 
@@ -98,6 +100,7 @@ class ValidatorImpl {
  private:
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
+  ScopeStack<ast::Function*> function_stack_;
 };
 
 }  // namespace tint
