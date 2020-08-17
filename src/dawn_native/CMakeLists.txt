@@ -103,6 +103,8 @@ target_sources(dawn_native PRIVATE
     "Pipeline.h"
     "PipelineLayout.cpp"
     "PipelineLayout.h"
+    "PooledResourceMemoryAllocator.cpp"
+    "PooledResourceMemoryAllocator.h"
     "ProgrammablePassEncoder.cpp"
     "ProgrammablePassEncoder.h"
     "QuerySet.cpp"

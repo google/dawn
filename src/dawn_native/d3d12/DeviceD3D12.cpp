@@ -570,8 +570,11 @@ namespace dawn_native { namespace d3d12 {
             ::CloseHandle(mFenceEvent);
         }
 
+        // Release recycled resource heaps.
+        mResourceAllocatorManager->DestroyPool();
+
         // We need to handle clearing up com object refs that were enqeued after TickImpl
-        mUsedComObjectRefs.ClearUpTo(GetCompletedCommandSerial());
+        mUsedComObjectRefs.ClearUpTo(std::numeric_limits<Serial>::max());
 
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(!mPendingCommands.IsOpen());

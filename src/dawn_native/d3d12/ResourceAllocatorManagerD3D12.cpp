@@ -172,8 +172,10 @@ namespace dawn_native { namespace d3d12 {
             mHeapAllocators[i] = std::make_unique<HeapAllocator>(
                 mDevice, GetD3D12HeapType(resourceHeapKind), GetD3D12HeapFlags(resourceHeapKind),
                 GetMemorySegment(device, GetD3D12HeapType(resourceHeapKind)));
+            mPooledHeapAllocators[i] =
+                std::make_unique<PooledResourceMemoryAllocator>(mHeapAllocators[i].get());
             mSubAllocatedResourceAllocators[i] = std::make_unique<BuddyMemoryAllocator>(
-                kMaxHeapSize, kMinHeapSize, mHeapAllocators[i].get());
+                kMaxHeapSize, kMinHeapSize, mPooledHeapAllocators[i].get());
         }
     }
 
@@ -394,6 +396,12 @@ namespace dawn_native { namespace d3d12 {
 
         return ResourceHeapAllocation{info,
                                       /*offset*/ 0, std::move(committedResource), heap};
+    }
+
+    void ResourceAllocatorManager::DestroyPool() {
+        for (auto& alloc : mPooledHeapAllocators) {
+            alloc->DestroyPool();
+        }
     }
 
 }}  // namespace dawn_native::d3d12

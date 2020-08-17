@@ -46,16 +46,21 @@ namespace dawn_native { namespace vulkan {
             : mDevice(device),
               mMemoryTypeIndex(memoryTypeIndex),
               mMemoryHeapSize(memoryHeapSize),
+              mPooledMemoryAllocator(this),
               mBuddySystem(
                   // Round down to a power of 2 that's <= mMemoryHeapSize. This will always
                   // be a multiple of kBuddyHeapsSize because kBuddyHeapsSize is a power of 2.
                   uint64_t(1) << Log2(mMemoryHeapSize),
                   // Take the min in the very unlikely case the memory heap is tiny.
                   std::min(uint64_t(1) << Log2(mMemoryHeapSize), kBuddyHeapsSize),
-                  this) {
+                  &mPooledMemoryAllocator) {
             ASSERT(IsPowerOfTwo(kBuddyHeapsSize));
         }
         ~SingleTypeAllocator() override = default;
+
+        void DestroyPool() {
+            mPooledMemoryAllocator.DestroyPool();
+        }
 
         ResultOrError<ResourceMemoryAllocation> AllocateMemory(
             const VkMemoryRequirements& requirements) {
@@ -100,6 +105,7 @@ namespace dawn_native { namespace vulkan {
         Device* mDevice;
         size_t mMemoryTypeIndex;
         VkDeviceSize mMemoryHeapSize;
+        PooledResourceMemoryAllocator mPooledMemoryAllocator;
         BuddyMemoryAllocator mBuddySystem;
     };
 
@@ -256,6 +262,12 @@ namespace dawn_native { namespace vulkan {
         }
 
         return bestType;
+    }
+
+    void ResourceMemoryAllocator::DestroyPool() {
+        for (auto& alloc : mAllocatorsPerType) {
+            alloc->DestroyPool();
+        }
     }
 
 }}  // namespace dawn_native::vulkan

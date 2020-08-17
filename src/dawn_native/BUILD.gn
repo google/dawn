@@ -228,6 +228,8 @@ source_set("dawn_native_sources") {
     "Pipeline.h",
     "PipelineLayout.cpp",
     "PipelineLayout.h",
+    "PooledResourceMemoryAllocator.cpp",
+    "PooledResourceMemoryAllocator.h",
     "ProgrammablePassEncoder.cpp",
     "ProgrammablePassEncoder.h",
     "QuerySet.cpp",

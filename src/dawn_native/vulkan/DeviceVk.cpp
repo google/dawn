@@ -888,6 +888,9 @@ namespace dawn_native { namespace vulkan {
         mResourceMemoryAllocator->Tick(GetCompletedCommandSerial());
         mDeleter->Tick(GetCompletedCommandSerial());
 
+        // Allow recycled memory to be deleted.
+        mResourceMemoryAllocator->DestroyPool();
+
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.
         mRenderPassCache = nullptr;

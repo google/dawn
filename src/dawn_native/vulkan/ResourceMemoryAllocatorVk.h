@@ -18,6 +18,7 @@
 #include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/PooledResourceMemoryAllocator.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 
 #include <memory>
@@ -35,6 +36,8 @@ namespace dawn_native { namespace vulkan {
         ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
                                                          bool mappable);
         void Deallocate(ResourceMemoryAllocation* allocation);
+
+        void DestroyPool();
 
         void Tick(Serial completedSerial);
 
