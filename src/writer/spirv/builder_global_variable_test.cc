@@ -157,6 +157,8 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "var"
+)");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1

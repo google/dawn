@@ -556,6 +556,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
+    push_debug(spv::Op::OpName,
+               {Operand::Int(init_id), Operand::String(var->name())});
+
     scope_stack_.set_global(var->name(), init_id);
     spirv_id_to_variable_[init_id] = var;
     return true;
