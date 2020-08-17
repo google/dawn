@@ -23,6 +23,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -685,9 +686,31 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   mod()->AddFunction(std::move(func1));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->Determine()) << td()->error();
   tint::ValidatorImpl v;
   EXPECT_TRUE(v.Validate(mod())) << v.error();
+}
+
+TEST_F(ValidatorTest, DISABLED_RecursionIsNotAllowed_Fail) {
+  // fn func() -> void {func(); return; }
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::ExpressionList call_params;
+  auto call_expr = std::make_unique<ast::CallExpression>(
+      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      std::move(call_params));
+  ast::VariableList params0;
+  auto func0 =
+      std::make_unique<ast::Function>("func", std::move(params0), &f32);
+  auto body0 = std::make_unique<ast::BlockStatement>();
+  body0->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  body0->append(std::make_unique<ast::ReturnStatement>());
+  func0->set_body(std::move(body0));
+  mod()->AddFunction(std::move(func0));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod())) << v.error();
+  EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
 }  // namespace
