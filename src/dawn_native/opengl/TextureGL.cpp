@@ -316,7 +316,6 @@ namespace dawn_native { namespace opengl {
         } else {
             ASSERT(range.aspects == Aspect::Color);
 
-            // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
             ASSERT(kTextureBytesPerRowAlignment % GetFormat().blockByteSize == 0);
             uint32_t bytesPerRow =

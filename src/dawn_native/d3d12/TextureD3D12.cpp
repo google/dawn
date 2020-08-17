@@ -79,13 +79,7 @@ namespace dawn_native { namespace d3d12 {
             // A multisampled resource must have either D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET or
             // D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL set in D3D12_RESOURCE_DESC::Flags.
             // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_resource_desc
-            // Currently all textures are zero-initialized via the render-target path so always add
-            // the render target flag, except for compressed textures for which the render-target
-            // flag is invalid.
-            // TODO(natlee@microsoft.com, jiawei.shao@intel.com): do not require render target for
-            // lazy clearing.
-            if ((usage & wgpu::TextureUsage::OutputAttachment) || isMultisampledTexture ||
-                !format.isCompressed) {
+            if ((usage & wgpu::TextureUsage::OutputAttachment) != 0 || isMultisampledTexture) {
                 if (format.HasDepthOrStencil()) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
                 } else {
@@ -855,7 +849,7 @@ namespace dawn_native { namespace d3d12 {
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
-        if (GetFormat().isRenderable) {
+        if ((GetUsage() & wgpu::TextureUsage::OutputAttachment) != 0) {
             if (GetFormat().HasDepthOrStencil()) {
                 TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE, range);
 
@@ -935,60 +929,63 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
         } else {
-            // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
-            uint32_t bytesPerRow =
-                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
-                      kTextureBytesPerRowAlignment);
-            uint64_t bufferSize64 = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
-            if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
-                return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
-            }
-            uint32_t bufferSize = static_cast<uint32_t>(bufferSize64);
-            DynamicUploader* uploader = device->GetDynamicUploader();
-            UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
-            memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
-
             TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST, range);
 
-            ASSERT(range.aspects == Aspect::Color);
-            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
-                 ++level) {
-                // compute d3d12 texture copy locations for texture and buffer
-                Extent3D copySize = GetMipLevelVirtualSize(level);
+            for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                const TexelBlockInfo& blockInfo = GetFormat().GetTexelBlockInfo(aspect);
 
-                uint32_t rowsPerImage = GetHeight();
-                Texture2DCopySplit copySplit =
-                    ComputeTextureCopySplit({0, 0, 0}, copySize, GetFormat(),
-                                            uploadHandle.startOffset, bytesPerRow, rowsPerImage);
+                uint32_t bytesPerRow =
+                    Align((GetWidth() / blockInfo.blockWidth) * blockInfo.blockByteSize,
+                          kTextureBytesPerRowAlignment);
+                uint64_t bufferSize64 = bytesPerRow * (GetHeight() / blockInfo.blockHeight);
+                if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
+                    return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
+                }
+                uint32_t bufferSize = static_cast<uint32_t>(bufferSize64);
 
-                for (uint32_t layer = range.baseArrayLayer;
-                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                    if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(
-                            SubresourceRange::SingleMipAndLayer(level, layer, Aspect::Color))) {
-                        // Skip lazy clears if already initialized.
-                        continue;
-                    }
+                DynamicUploader* uploader = device->GetDynamicUploader();
+                UploadHandle uploadHandle;
+                DAWN_TRY_ASSIGN(uploadHandle,
+                                uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
+                memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
-                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                        ComputeTextureCopyLocationForTexture(this, level, layer, Aspect::Color);
-                    for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        Texture2DCopySplit::CopyInfo& info = copySplit.copies[i];
+                for (uint32_t level = range.baseMipLevel;
+                     level < range.baseMipLevel + range.levelCount; ++level) {
+                    // compute d3d12 texture copy locations for texture and buffer
+                    Extent3D copySize = GetMipLevelVirtualSize(level);
 
-                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                            ComputeBufferLocationForCopyTextureRegion(
-                                this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                                info.bufferSize, copySplit.offset, bytesPerRow, Aspect::Color);
-                        D3D12_BOX sourceRegion =
-                            ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+                    uint32_t rowsPerImage = GetHeight();
+                    Texture2DCopySplit copySplit = ComputeTextureCopySplit(
+                        {0, 0, 0}, copySize, blockInfo, uploadHandle.startOffset, bytesPerRow,
+                        rowsPerImage);
 
-                        // copy the buffer filled with clear color to the texture
-                        commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
-                                                       info.textureOffset.y, info.textureOffset.z,
-                                                       &bufferLocation, &sourceRegion);
+                    for (uint32_t layer = range.baseArrayLayer;
+                         layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                        if (clearValue == TextureBase::ClearValue::Zero &&
+                            IsSubresourceContentInitialized(
+                                SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
+                            // Skip lazy clears if already initialized.
+                            continue;
+                        }
+
+                        D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                            ComputeTextureCopyLocationForTexture(this, level, layer, aspect);
+                        for (uint32_t i = 0; i < copySplit.count; ++i) {
+                            Texture2DCopySplit::CopyInfo& info = copySplit.copies[i];
+
+                            D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                                ComputeBufferLocationForCopyTextureRegion(
+                                    this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
+                                    info.bufferSize, copySplit.offset, bytesPerRow, aspect);
+                            D3D12_BOX sourceRegion =
+                                ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+
+                            // copy the buffer filled with clear color to the texture
+                            commandList->CopyTextureRegion(
+                                &textureLocation, info.textureOffset.x, info.textureOffset.y,
+                                info.textureOffset.z, &bufferLocation, &sourceRegion);
+                        }
                     }
                 }
             }

@@ -279,12 +279,15 @@ namespace dawn_native { namespace d3d12 {
             resourceHeapKind, requestedResourceDescriptor.SampleDesc.Count,
             requestedResourceDescriptor.Alignment);
 
+        // TODO(bryan.bernhart): Figure out how to compute the alignment without calling this
+        // twice.
         D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
             mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
         // If the requested resource alignment was rejected, let D3D tell us what the
         // required alignment is for this resource.
-        if (resourceDescriptor.Alignment != resourceInfo.Alignment) {
+        if (resourceDescriptor.Alignment != 0 &&
+            resourceDescriptor.Alignment != resourceInfo.Alignment) {
             resourceDescriptor.Alignment = 0;
             resourceInfo =
                 mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);

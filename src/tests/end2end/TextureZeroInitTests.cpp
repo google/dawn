@@ -30,6 +30,7 @@
         }                                                                                     \
     } while (0)
 
+// TODO(natlee@microsoft.com): test compressed textures are cleared
 class TextureZeroInitTest : public DawnTest {
   protected:
     void SetUp() override {

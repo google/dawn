@@ -937,7 +937,6 @@ namespace dawn_native { namespace vulkan {
                 }
             }
         } else {
-            // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
             uint32_t bytesPerRow =
                 Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
