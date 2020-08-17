@@ -22,8 +22,8 @@
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
-#include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 #include "src/scope_stack.h"
 
@@ -96,11 +96,16 @@ class ValidatorImpl {
   /// @returns true if no previous decleration with the |decl|'s name
   /// exist in the variable stack
   bool ValidateDeclStatement(const ast::VariableDeclStatement* decl);
+  /// Validates return statement
+  /// @param ret the return statement to check
+  /// @returns true if function return type matches the return statement type
+  bool ValidateReturnStatement(const ast::ReturnStatement* ret);
 
  private:
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
   ScopeStack<ast::Function*> function_stack_;
+  ast::Function* current_function_ = nullptr;
 };
 
 }  // namespace tint

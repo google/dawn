@@ -88,10 +88,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
             "12:34: v-0002: function must end with a return statement");
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_FunctionTypeMustMatchReturnStatementType_pass) {
-  // TODO(sarahM0): remove DISABLED after implementing function type must match
-  // return type
+TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   // fn func -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
@@ -107,10 +104,7 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_FunctionTypeMustMatchReturnStatementType_fail) {
-  // TODO(sarahM0): remove DISABLED after implementing function type must match
-  // return type
+TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   // fn func -> void { return 2; }
   ast::type::VoidType void_type;
   ast::type::I32Type i32;
@@ -130,17 +124,13 @@ TEST_F(ValidateFunctionTest,
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.Validate(mod()));
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(
-      v.error(),
-      "12:34: v-000y: function type must match its return statement type");
+  EXPECT_EQ(v.error(),
+            "12:34: v-000y: return statement type must match its function "
+            "return type, returned '__i32', expected '__void'");
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_FunctionTypeMustMatchReturnStatementTypeF32_fail) {
-  // TODO(sarahM0): remove DISABLED after implementing function type must match
-  // return type
+TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   // fn func -> f32 { return 2; }
-  ast::type::VoidType void_type;
   ast::type::I32Type i32;
   ast::type::F32Type f32;
   ast::VariableList params;
@@ -158,9 +148,9 @@ TEST_F(ValidateFunctionTest,
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.Validate(mod()));
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(
-      v.error(),
-      "12:34: v-000y: function type must match its return statement type");
+  EXPECT_EQ(v.error(),
+            "12:34: v-000y: return statement type must match its function "
+            "return type, returned '__i32', expected '__f32'");
 }
 
 TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {

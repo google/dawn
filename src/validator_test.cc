@@ -674,7 +674,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
 
   ast::VariableList params1;
   auto func1 =
-      std::make_unique<ast::Function>("func1", std::move(params1), &f32);
+      std::make_unique<ast::Function>("func1", std::move(params1), &void_type);
   auto body1 = std::make_unique<ast::BlockStatement>();
   body1->append(std::make_unique<ast::VariableDeclStatement>(Source{13, 34},
                                                              std::move(var1)));

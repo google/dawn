@@ -14,6 +14,7 @@
 
 #include "src/validator_impl.h"
 #include "src/ast/function.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -60,10 +61,11 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
     }
 
     function_stack_.set(func_ptr->name(), func_ptr);
-
+    current_function_ = func_ptr;
     if (!ValidateFunction(func_ptr)) {
       return false;
     }
+    current_function_ = nullptr;
   }
   return true;
 }
@@ -84,6 +86,28 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
               "v-0002: function must end with a return statement");
     return false;
   }
+  return true;
+}
+
+bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
+  // TODO(sarahM0): update this when this issue resolves:
+  // https://github.com/gpuweb/gpuweb/issues/996
+  ast::type::Type* func_type = current_function_->return_type();
+
+  ast::type::VoidType void_type;
+  auto* ret_type = ret->has_value()
+                       ? ret->value()->result_type()->UnwrapAliasPtrAlias()
+                       : &void_type;
+
+  if (func_type->type_name() != ret_type->type_name()) {
+    set_error(ret->source(),
+              "v-000y: return statement type must match its function return "
+              "type, returned '" +
+                  ret_type->type_name() + "', expected '" +
+                  func_type->type_name() + "'");
+    return false;
+  }
+
   return true;
 }
 
@@ -125,6 +149,9 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   }
   if (stmt->IsAssign()) {
     return ValidateAssign(stmt->AsAssign());
+  }
+  if (stmt->IsReturn()) {
+    return ValidateReturnStatement(stmt->AsReturn());
   }
   return true;
 }
