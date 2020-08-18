@@ -16,7 +16,7 @@ entry_point vertex = vtx_main;
 entry_point fragment = frag_main;
 
 # Vertex shader
-type Uniforms = struct {
+type Uniforms = [[block]] struct {
   [[offset 0]] modelViewProjectionMatrix : mat4x4<f32>;
 };
 
