@@ -387,6 +387,34 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   EXPECT_TRUE(expr_ptr->result_type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
+  // fn main() -> void {func(); return; }
+  // fn func() -> void { return; }
+  ast::type::F32Type f32;
+  ast::ExpressionList call_params;
+  auto call_expr = std::make_unique<ast::CallExpression>(
+      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      std::move(call_params));
+  ast::VariableList params0;
+  auto func_main =
+      std::make_unique<ast::Function>("main", std::move(params0), &f32);
+  auto main_body = std::make_unique<ast::BlockStatement>();
+  main_body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  main_body->append(std::make_unique<ast::ReturnStatement>());
+  func_main->set_body(std::move(main_body));
+  mod()->AddFunction(std::move(func_main));
+
+  auto func = std::make_unique<ast::Function>("func", std::move(params0), &f32);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34: v-0005: function must be declared before use: 'func'");
+}
+
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   ast::type::I32Type i32;
   auto var =

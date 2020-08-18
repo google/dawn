@@ -511,6 +511,15 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       return false;
     }
   }
+
+  if (!expr->func()->result_type()) {
+    auto func_name = expr->func()->AsIdentifier()->name();
+    set_error(
+        expr->source(),
+        "v-0005: function must be declared before use: '" + func_name + "'");
+    return false;
+  }
+
   expr->set_result_type(expr->func()->result_type());
   return true;
 }
