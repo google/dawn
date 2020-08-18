@@ -84,8 +84,9 @@ config("dawn_internal") {
   }
 
   # Only internal Dawn targets can use this config, this means only targets in
-  # this BUILD.gn file.
-  visibility = [ ":*" ]
+  # this BUILD.gn file and related subdirs.
+  visibility = [ "../*" ]
+
   cflags = []
 
   # Enable more warnings that were found when using Dawn in other projects
