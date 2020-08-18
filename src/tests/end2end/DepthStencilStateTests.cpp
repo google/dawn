@@ -85,6 +85,7 @@ class DepthStencilStateTest : public DawnTest {
         RGBA8 color;
         float depth;
         uint32_t stencil;
+        wgpu::FrontFace frontFace = wgpu::FrontFace::CCW;
     };
 
     // Check whether a depth comparison function works as expected
@@ -288,6 +289,7 @@ class DepthStencilStateTest : public DawnTest {
             descriptor.cFragmentStage.module = fsModule;
             descriptor.cDepthStencilState = test.depthStencilState;
             descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            descriptor.cRasterizationState.frontFace = test.frontFace;
             descriptor.depthStencilState = &descriptor.cDepthStencilState;
 
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
@@ -732,6 +734,17 @@ TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
 
         device.CreateRenderPipeline(&descriptor);
     }
+}
+
+// Test that the front and back stencil states are set correctly (and take frontFace into account)
+TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
+    wgpu::DepthStencilStateDescriptor state;
+    state.stencilFront.compare = wgpu::CompareFunction::Always;
+    state.stencilBack.compare = wgpu::CompareFunction::Never;
+
+    // The front facing triangle passes the stencil comparison but the back facing one doesn't.
+    DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CCW}}, RGBA8::kRed, RGBA8::kZero);
+    DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CW}}, RGBA8::kZero, RGBA8::kRed);
 }
 
 DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
