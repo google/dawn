@@ -49,10 +49,6 @@ namespace dawn_native { namespace metal {
                 result |= MTLTextureUsageRenderTarget;
             }
 
-            if (UsageNeedsTextureView(usage)) {
-                result |= MTLTextureUsagePixelFormatView;
-            }
-
             return result;
         }
 
@@ -291,6 +287,8 @@ namespace dawn_native { namespace metal {
         mtlDesc.width = descriptor->size.width;
         mtlDesc.height = descriptor->size.height;
         mtlDesc.sampleCount = descriptor->sampleCount;
+        // TODO: add MTLTextureUsagePixelFormatView when needed when we support format
+        // reinterpretation.
         mtlDesc.usage = MetalTextureUsage(descriptor->usage);
         mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
         mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
