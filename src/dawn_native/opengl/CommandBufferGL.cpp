@@ -445,7 +445,7 @@ namespace dawn_native { namespace opengl {
         : CommandBufferBase(encoder, descriptor) {
     }
 
-    void CommandBuffer::Execute() {
+    MaybeError CommandBuffer::Execute() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         auto TransitionForPass = [](const PassResourceUsage& usages) {
@@ -517,6 +517,12 @@ namespace dawn_native { namespace opengl {
                     Texture* texture = ToBackend(dst.texture.Get());
                     GLenum target = texture->GetGLTarget();
                     const GLFormat& format = texture->GetGLFormat();
+
+                    if (dst.aspect == Aspect::Stencil) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Copies to stencil textures unsupported on OpenGL");
+                    }
+                    ASSERT(dst.aspect == Aspect::Color);
 
                     buffer->EnsureDataInitialized();
 
@@ -601,13 +607,13 @@ namespace dawn_native { namespace opengl {
                     auto& copySize = copy->copySize;
                     Texture* texture = ToBackend(src.texture.Get());
                     Buffer* buffer = ToBackend(dst.buffer.Get());
-                    const Format& format = texture->GetFormat();
-                    const GLFormat& glFormat = texture->GetGLFormat();
+                    const Format& formatInfo = texture->GetFormat();
+                    const GLFormat& format = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
 
                     // TODO(jiawei.shao@intel.com): support texture-to-buffer copy with compressed
                     // texture formats.
-                    if (format.isCompressed) {
+                    if (formatInfo.isCompressed) {
                         UNREACHABLE();
                     }
 
@@ -625,22 +631,35 @@ namespace dawn_native { namespace opengl {
                     gl.GenFramebuffers(1, &readFBO);
                     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
 
-                    GLenum glAttachment = 0;
-                    if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
-                        glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
-                    } else if (format.aspects == Aspect::Depth) {
-                        glAttachment = GL_DEPTH_ATTACHMENT;
-                    } else if (format.aspects == Aspect::Stencil) {
-                        glAttachment = GL_STENCIL_ATTACHMENT;
-                    } else if (format.aspects == Aspect::Color) {
-                        glAttachment = GL_COLOR_ATTACHMENT0;
-                    } else {
-                        UNREACHABLE();
-                    }
+                    const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(src.aspect);
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / format.blockByteSize);
                     gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage);
+                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.blockByteSize);
+
+                    GLenum glAttachment;
+                    GLenum glFormat;
+                    GLenum glType;
+                    switch (src.aspect) {
+                        case Aspect::Color:
+                            glAttachment = GL_COLOR_ATTACHMENT0;
+                            glFormat = format.format;
+                            glType = format.type;
+                            break;
+                        case Aspect::Depth:
+                            glAttachment = GL_DEPTH_ATTACHMENT;
+                            glFormat = GL_DEPTH_COMPONENT;
+                            glType = GL_FLOAT;
+                            break;
+                        case Aspect::Stencil:
+                            glAttachment = GL_STENCIL_ATTACHMENT;
+                            glFormat = GL_STENCIL_INDEX;
+                            glType = GL_UNSIGNED_BYTE;
+                            break;
+                        default:
+                            UNREACHABLE();
+                            break;
+                    }
 
                     uint8_t* offset =
                         reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(dst.offset));
@@ -650,8 +669,7 @@ namespace dawn_native { namespace opengl {
                                 gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
                                                         texture->GetHandle(), src.mipLevel);
                                 gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
-                                              copySize.height, glFormat.format, glFormat.type,
-                                              offset);
+                                              copySize.height, glFormat, glType, offset);
                                 break;
                             }
 
@@ -661,8 +679,7 @@ namespace dawn_native { namespace opengl {
                                                            texture->GetHandle(), src.mipLevel,
                                                            src.origin.z + layer);
                                 gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
-                                              copySize.height, glFormat.format, glFormat.type,
-                                              offset);
+                                              copySize.height, glFormat, glType, offset);
 
                                 offset += bytesPerImage;
                             }
@@ -731,6 +748,8 @@ namespace dawn_native { namespace opengl {
                 }
             }
         }
+
+        return {};
     }
 
     void CommandBuffer::ExecuteComputePass() {

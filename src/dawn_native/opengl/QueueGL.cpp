@@ -30,7 +30,7 @@ namespace dawn_native { namespace opengl {
 
         TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
         for (uint32_t i = 0; i < commandCount; ++i) {
-            ToBackend(commands[i])->Execute();
+            DAWN_TRY(ToBackend(commands[i])->Execute());
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
 

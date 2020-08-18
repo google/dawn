@@ -153,6 +153,9 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
 
 // Test copying to the stencil-aspect of a buffer
 TEST_P(DepthStencilCopyTests, ToStencilAspect) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
     // TODO(enga): Figure out why this fails on Vulkan Intel
     // Results are shifted by 1 byte on Windows, and crash/hang on Linux.
     DAWN_SKIP_TEST_IF(IsVulkan() && IsIntel());
@@ -320,4 +323,8 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(DepthStencilCopyTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DepthStencilCopyTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

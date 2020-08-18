@@ -29,7 +29,7 @@ namespace dawn_native { namespace opengl {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-        void Execute();
+        MaybeError Execute();
 
       private:
         void ExecuteComputePass();
