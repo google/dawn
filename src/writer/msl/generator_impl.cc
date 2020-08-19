@@ -1347,6 +1347,10 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
     // we should instead be using a provided mapping that uses both buffer and
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
     auto* binding = data.second.binding;
+    if (binding == nullptr) {
+      error_ = "unable to find binding information for uniform: " + var->name();
+      return false;
+    }
     // auto* set = data.second.set;
 
     out_ << "constant ";

@@ -29,9 +29,12 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/struct.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
@@ -280,7 +283,7 @@ frag_main_out frag_main(frag_main_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_Emit_Function_EntryPoint_With_Uniform) {
+TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -326,7 +329,91 @@ TEST_F(HlslGeneratorImplTest, DISABLED_Emit_Function_EntryPoint_With_Uniform) {
 
   GeneratorImpl g(&mod);
   ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"( ... )");
+  EXPECT_EQ(g.result(), R"(cbuffer : register(b0) {
+  vector<float, 4> coord;
+};
+
+void frag_main() {
+  float v = coord.x;
+  return;
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_UniformStruct) {
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+  ast::type::VectorType vec4(&f32, 4);
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "coord", &vec4, ast::StructMemberDecorationList{}));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Uniforms");
+  auto alias = std::make_unique<ast::type::AliasType>("Uniforms", &s);
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "uniforms", ast::StorageClass::kUniform, alias.get()));
+
+  mod.AddAliasType(alias.get());
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  coord_var->set_decorations(std::move(decos));
+
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
+                                              &void_type);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("uniforms"),
+          std::make_unique<ast::IdentifierExpression>("coord")),
+      std::make_unique<ast::IdentifierExpression>("x")));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  mod.AddFunction(std::move(func));
+
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
+                                              "frag_main");
+  mod.AddEntryPoint(std::move(ep));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
+  EXPECT_EQ(g.result(), R"(typedef struct {
+  vector<float, 4> coord;
+} Uniforms;
+
+ConstantBuffer<Uniforms> uniforms : register(b0);
+
+void frag_main() {
+  float v = uniforms.coord.x;
+  return;
+}
+
+)");
 }
 
 TEST_F(HlslGeneratorImplTest,

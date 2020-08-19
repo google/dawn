@@ -787,6 +787,50 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
     }
   }
 
+  bool emitted_uniform = false;
+  for (auto data : func->referenced_uniform_variables()) {
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    if (binding == nullptr) {
+      error_ = "unable to find binding information for uniform: " + var->name();
+      return false;
+    }
+    // auto* set = data.second.set;
+
+    auto* type = var->type()->UnwrapAliasesIfNeeded();
+    if (type->IsStruct()) {
+      auto* strct = type->AsStruct();
+
+      out_ << "ConstantBuffer<" << strct->name() << "> " << var->name()
+           << " : register(b" << binding->value() << ");" << std::endl;
+    } else {
+      // TODO(dsinclair): There is outstanding spec work to require all uniform
+      // buffers to be [[block]] decorated, which means structs. This is
+      // currently not the case, so this code handles the cases where the data
+      // is not a block.
+      // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
+      //           https://github.com/gpuweb/gpuweb/issues/1008
+      out_ << "cbuffer : register(b" << binding->value() << ") {" << std::endl;
+
+      increment_indent();
+      make_indent();
+      if (!EmitType(type, "")) {
+        return false;
+      }
+      out_ << " " << var->name() << ";" << std::endl;
+      decrement_indent();
+      out_ << "};" << std::endl;
+    }
+
+    emitted_uniform = true;
+  }
+  if (emitted_uniform) {
+    out_ << std::endl;
+  }
+
   auto ep_name = ep->name();
   if (ep_name.empty()) {
     ep_name = ep->function_name();
