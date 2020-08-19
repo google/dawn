@@ -197,6 +197,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param prefix the prefix of the name to generate
   /// @returns the name
   std::string generate_name(const std::string& prefix);
+  /// Generates an intrinsic name from the given name
+  /// @param name the name to convert to an intrinsic
+  /// @returns the intrinsic name or blank on error
+  std::string generate_intrinsic_name(const std::string& name);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
