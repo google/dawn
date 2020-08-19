@@ -110,6 +110,19 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to generate
   /// @returns true if the function was emitted
   bool EmitFunction(ast::Function* func);
+  /// Internal helper for emitting functions
+  /// @param func the function to emit
+  /// @param emit_duplicate_functions set true if we need to duplicate per entry
+  /// point
+  /// @param ep_name the current entry point or blank if none set
+  /// @returns true if the function was emitted.
+  bool EmitFunctionInternal(ast::Function* func,
+                            bool emit_duplicate_functions,
+                            const std::string& ep_name);
+  /// Handles emitting information for an entry point
+  /// @param ep the entry point
+  /// @returns true if the entry point data was emitted
+  bool EmitEntryPointData(ast::EntryPoint* ep);
   /// Handles emitting the entry point function
   /// @param ep the entry point
   /// @returns true if the entry point function was emitted
@@ -168,6 +181,21 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
   bool global_is_in_struct(ast::Variable* var) const;
+  /// Generates a name for the prefix
+  /// @param prefix the prefix of the name to generate
+  /// @returns the name
+  std::string generate_name(const std::string& prefix);
+  /// Converts a builtin to an attribute name
+  /// @param builtin the builtin to convert
+  /// @returns the string name of the builtin or blank on error
+  std::string builtin_to_attribute(ast::Builtin builtin) const;
+  /// Determines if any used module variable requires an input or output struct.
+  /// @param func the function to check
+  /// @returns true if an input or output struct is required.
+  bool has_referenced_var_needing_struct(ast::Function* func);
+
+  /// @returns the namer for testing
+  Namer* namer_for_testing() { return &namer_; }
 
  private:
   enum class VarType { kIn, kOut };

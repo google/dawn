@@ -20,6 +20,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
@@ -45,6 +46,11 @@ namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
+
+const char kInStructNameSuffix[] = "in";
+const char kOutStructNameSuffix[] = "out";
+const char kTintStructInVarPrefix[] = "tint_in";
+const char kTintStructOutVarPrefix[] = "tint_out";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
@@ -74,6 +80,11 @@ bool GeneratorImpl::Generate() {
     out_ << std::endl;
   }
 
+  for (const auto& ep : module_->entry_points()) {
+    if (!EmitEntryPointData(ep.get())) {
+      return false;
+    }
+  }
   for (const auto& func : module_->functions()) {
     if (!EmitFunction(func.get())) {
       return false;
@@ -87,6 +98,17 @@ bool GeneratorImpl::Generate() {
   }
 
   return true;
+}
+
+std::string GeneratorImpl::generate_name(const std::string& prefix) {
+  std::string name = prefix;
+  uint32_t i = 0;
+  while (namer_.IsMapped(name)) {
+    name = prefix + "_" + std::to_string(i);
+    ++i;
+  }
+  namer_.RegisterRemappedName(name);
+  return name;
 }
 
 std::string GeneratorImpl::current_ep_var_name(VarType type) {
@@ -431,8 +453,12 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   return false;
 }
 
-bool GeneratorImpl::global_is_in_struct(ast::Variable*) const {
-  return false;
+bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
+  return var->IsDecorated() &&
+         (var->AsDecorated()->HasLocationDecoration() ||
+          var->AsDecorated()->HasBuiltinDecoration()) &&
+         (var->storage_class() == ast::StorageClass::kInput ||
+          var->storage_class() == ast::StorageClass::kOutput);
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
@@ -499,6 +525,25 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
   return EmitBlock(stmt->body());
 }
 
+bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput ||
+        var->storage_class() == ast::StorageClass::kInput) {
+      return true;
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput ||
+        var->storage_class() == ast::StorageClass::kInput) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
   make_indent();
 
@@ -507,6 +552,33 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return true;
   }
 
+  // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
+  // entry points are the same we could generate a single struct and then have
+  // this determine it's the same struct and just emit once.
+  bool emit_duplicate_functions = func->ancestor_entry_points().size() > 0 &&
+                                  has_referenced_var_needing_struct(func);
+
+  if (emit_duplicate_functions) {
+    for (const auto& ep_name : func->ancestor_entry_points()) {
+      if (!EmitFunctionInternal(func, emit_duplicate_functions, ep_name)) {
+        return false;
+      }
+      out_ << std::endl;
+    }
+  } else {
+    // Emit as non-duplicated
+    if (!EmitFunctionInternal(func, false, "")) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
+                                         bool emit_duplicate_functions,
+                                         const std::string& ep_name) {
   auto name = func->name();
 
   if (!EmitType(func->return_type(), "")) {
@@ -516,6 +588,30 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   out_ << " " << namer_.NameFor(name) << "(";
 
   bool first = true;
+
+  // If we're emitting duplicate functions that means the function takes
+  // the stage_in or stage_out value from the entry point, emit them.
+  //
+  // We emit both of them if they're there regardless of if they're both used.
+  if (emit_duplicate_functions) {
+    auto in_it = ep_name_to_in_data_.find(ep_name);
+    if (in_it != ep_name_to_in_data_.end()) {
+      out_ << "in " << in_it->second.struct_name << " "
+           << in_it->second.var_name;
+      first = false;
+    }
+
+    auto out_it = ep_name_to_out_data_.find(ep_name);
+    if (out_it != ep_name_to_out_data_.end()) {
+      if (!first) {
+        out_ << ", ";
+      }
+      out_ << "out " << out_it->second.struct_name << " "
+           << out_it->second.var_name;
+      first = false;
+    }
+  }
+
   for (const auto& v : func->params()) {
     if (!first) {
       out_ << ", ";
@@ -533,19 +629,188 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
   out_ << ") ";
 
+  current_ep_name_ = ep_name;
+
   if (!EmitBlockAndNewline(func->body())) {
     return false;
+  }
+
+  current_ep_name_ = "";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
+  auto* func = module_->FindFunctionByName(ep->function_name());
+  if (func == nullptr) {
+    error_ = "Unable to find entry point function: " + ep->function_name();
+    return false;
+  }
+
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>>
+      out_variables;
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_variables.push_back({var, deco});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var, deco});
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_variables.push_back({var, deco});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var, deco});
+    }
+  }
+
+  auto ep_name = ep->name();
+  if (ep_name.empty()) {
+    ep_name = ep->function_name();
+  }
+
+  // TODO(dsinclair): There is a potential bug here. Entry points can have the
+  // same name in WGSL if they have different pipeline stages. This does not
+  // take that into account and will emit duplicate struct names. I'm ignoring
+  // this until https://github.com/gpuweb/gpuweb/issues/662 is resolved as it
+  // may remove this issue and entry point names will need to be unique.
+  if (!in_variables.empty()) {
+    auto in_struct_name = generate_name(ep_name + "_" + kInStructNameSuffix);
+    auto in_var_name = generate_name(kTintStructInVarPrefix);
+    ep_name_to_in_data_[ep_name] = {in_struct_name, in_var_name};
+
+    make_indent();
+    out_ << "struct " << in_struct_name << " {" << std::endl;
+
+    increment_indent();
+
+    for (auto& data : in_variables) {
+      auto* var = data.first;
+      auto* deco = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " : ";
+      if (deco->IsLocation()) {
+        out_ << "TEXCOORD" << deco->AsLocation()->value();
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out_ << attr;
+      } else {
+        error_ = "unsupported variable decoration for entry point output";
+        return false;
+      }
+      out_ << ";" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+
+    out_ << "};" << std::endl << std::endl;
+  }
+
+  if (!out_variables.empty()) {
+    auto out_struct_name = generate_name(ep_name + "_" + kOutStructNameSuffix);
+    auto out_var_name = generate_name(kTintStructOutVarPrefix);
+    ep_name_to_out_data_[ep_name] = {out_struct_name, out_var_name};
+
+    make_indent();
+    out_ << "struct " << out_struct_name << " {" << std::endl;
+
+    increment_indent();
+    for (auto& data : out_variables) {
+      auto* var = data.first;
+      auto* deco = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " : ";
+
+      if (deco->IsLocation()) {
+        auto loc = deco->AsLocation()->value();
+        if (ep->stage() == ast::PipelineStage::kVertex) {
+          out_ << "TEXCOORD" << loc;
+        } else if (ep->stage() == ast::PipelineStage::kFragment) {
+          out_ << "SV_Target" << loc << "";
+        } else {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out_ << attr;
+      } else {
+        error_ = "unsupported variable decoration for entry point output";
+        return false;
+      }
+      out_ << ";" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+    out_ << "};" << std::endl << std::endl;
   }
 
   return true;
 }
 
+std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
+  switch (builtin) {
+    case ast::Builtin::kPosition:
+      return "SV_Position";
+    case ast::Builtin::kVertexIdx:
+      return "SV_VertexID";
+    case ast::Builtin::kInstanceIdx:
+      return "SV_InstanceID";
+    case ast::Builtin::kFrontFacing:
+      return "SV_IsFrontFacing";
+    case ast::Builtin::kFragCoord:
+      return "SV_Position";
+    case ast::Builtin::kFragDepth:
+      return "SV_Depth";
+    // TODO(dsinclair): Ignore for now. This has been removed as a builtin
+    // in the spec. Need to update Tint to match.
+    // https://github.com/gpuweb/gpuweb/pull/824
+    case ast::Builtin::kWorkgroupSize:
+      return "";
+    case ast::Builtin::kLocalInvocationId:
+      return "SV_GroupThreadID";
+    case ast::Builtin::kLocalInvocationIdx:
+      return "SV_GroupIndex";
+    case ast::Builtin::kGlobalInvocationId:
+      return "SV_DispatchThreadID";
+    default:
+      break;
+  }
+  return "";
+}
+
 bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   make_indent();
 
-  auto current_ep_name = ep->name();
-  if (current_ep_name.empty()) {
-    current_ep_name = ep->function_name();
+  current_ep_name_ = ep->name();
+  if (current_ep_name_.empty()) {
+    current_ep_name_ = ep->function_name();
   }
 
   auto* func = module_->FindFunctionByName(ep->function_name());
@@ -554,18 +819,42 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
     return false;
   }
 
-  out_ << "void " << namer_.NameFor(current_ep_name) << "() {" << std::endl;
+  auto out_data = ep_name_to_out_data_.find(current_ep_name_);
+  bool has_out_data = out_data != ep_name_to_out_data_.end();
+  if (has_out_data) {
+    out_ << out_data->second.struct_name;
+  } else {
+    out_ << "void";
+  }
+  out_ << " " << namer_.NameFor(current_ep_name_) << "(";
+
+  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
+  if (in_data != ep_name_to_in_data_.end()) {
+    out_ << in_data->second.struct_name << " " << in_data->second.var_name;
+  }
+  out_ << ") {" << std::endl;
+
   increment_indent();
 
+  if (has_out_data) {
+    make_indent();
+    out_ << out_data->second.struct_name << " " << out_data->second.var_name
+         << ";" << std::endl;
+  }
+
+  generating_entry_point_ = true;
   for (const auto& s : *(func->body())) {
     if (!EmitStatement(s.get())) {
       return false;
     }
   }
+  generating_entry_point_ = false;
 
   decrement_indent();
   make_indent();
   out_ << "}" << std::endl;
+
+  current_ep_name_ = "";
 
   return true;
 }

@@ -67,6 +67,7 @@ TEST_F(HlslGeneratorImplTest, Emit_Function) {
   EXPECT_EQ(g.result(), R"(  void my_func() {
     return;
   }
+
 )");
 }
 
@@ -90,6 +91,7 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_Name_Collision) {
   EXPECT_EQ(g.result(), R"(  void GeometryShader_tint_0() {
     return;
   }
+
 )");
 }
 
@@ -121,6 +123,7 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_WithParams) {
   EXPECT_EQ(g.result(), R"(  void my_func(float a, int b) {
     return;
   }
+
 )");
 }
 
@@ -144,7 +147,7 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_NoName) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_Emit_Function_EntryPoint_WithInOutVars) {
+TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -207,8 +210,7 @@ frag_main_out frag_main(frag_main_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
-       DISABLED_Emit_Function_EntryPoint_WithInOut_Builtins) {
+TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -262,7 +264,7 @@ TEST_F(HlslGeneratorImplTest,
   GeneratorImpl g(&mod);
   ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(struct frag_main_in {
-  float gl_FragCoord : SV_Position;
+  vector<float, 4> coord : SV_Position;
 };
 
 struct frag_main_out {
@@ -271,7 +273,7 @@ struct frag_main_out {
 
 frag_main_out frag_main(frag_main_in tint_in) {
   frag_main_out tint_out;
-  tint_out.depth = tint_in.gl_FragCoord.x;
+  tint_out.depth = tint_in.coord.x;
   return tint_out;
 }
 
@@ -377,6 +379,7 @@ TEST_F(HlslGeneratorImplTest,
   EXPECT_EQ(g.result(), R"( ... )");
 }
 
+// TODO(dsinclair): Requires CallExpression
 TEST_F(
     HlslGeneratorImplTest,
     DISABLED_Emit_Function_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
@@ -480,6 +483,7 @@ ep_1_out ep_1(ep_1_in tint_in) {
 )");
 }
 
+// TODO(dsinclair): Requires CallExpression
 TEST_F(HlslGeneratorImplTest,
        DISABLED_Emit_Function_Called_By_EntryPoints_NoUsedGlobals) {
   ast::type::VoidType void_type;
@@ -558,6 +562,7 @@ fragment ep_1_out ep_1() {
 )");
 }
 
+// TODO(dsinclair): Requires CallExpression
 TEST_F(
     HlslGeneratorImplTest,
     DISABLED_Emit_Function_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
@@ -1098,6 +1103,7 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_WithArrayParams) {
   EXPECT_EQ(g.result(), R"(  void my_func(float a[5]) {
     return;
   }
+
 )");
 }
 
