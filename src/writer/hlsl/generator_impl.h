@@ -180,6 +180,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
   bool EmitVariable(ast::Variable* var);
+  /// Handles generating a program scope constant variable
+  /// @param var the variable to emit
+  /// @returns true if the variable was emitted
+  bool EmitProgramConstVariable(const ast::Variable* var);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
