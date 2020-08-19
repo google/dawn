@@ -402,9 +402,9 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_UniformStruct) {
 
   GeneratorImpl g(&mod);
   ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef struct {
+  EXPECT_EQ(g.result(), R"(struct Uniforms {
   vector<float, 4> coord;
-} Uniforms;
+};
 
 ConstantBuffer<Uniforms> uniforms : register(b0);
 

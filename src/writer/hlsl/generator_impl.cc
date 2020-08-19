@@ -137,11 +137,19 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
 
 bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
   make_indent();
-  out_ << "typedef ";
-  if (!EmitType(alias->type(), "")) {
-    return false;
+
+  if (alias->type()->IsStruct()) {
+    if (!EmitType(alias->type(), namer_.NameFor(alias->name()))) {
+      return false;
+    }
+    out_ << ";" << std::endl;
+  } else {
+    out_ << "typedef ";
+    if (!EmitType(alias->type(), "")) {
+      return false;
+    }
+    out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
   }
-  out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
 
   return true;
 }
@@ -1268,7 +1276,12 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     // TODO(dsinclair): Block decoration?
     // if (str->decoration() != ast::StructDecoration::kNone) {
     // }
-    out_ << "struct {" << std::endl;
+    out_ << "struct";
+    // If a name was provided for the struct emit it.
+    if (!name.empty()) {
+      out_ << " " << name;
+    }
+    out_ << " {" << std::endl;
 
     increment_indent();
     for (const auto& mem : str->members()) {

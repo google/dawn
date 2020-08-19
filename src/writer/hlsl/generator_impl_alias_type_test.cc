@@ -74,10 +74,10 @@ TEST_F(HlslGeneratorImplTest, EmitAliasType_Struct) {
   ast::Module m;
   GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef struct {
+  EXPECT_EQ(g.result(), R"(struct a {
   float a;
   int b;
-} a;
+};
 )");
 }
 
