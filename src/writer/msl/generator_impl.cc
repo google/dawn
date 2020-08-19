@@ -706,7 +706,6 @@ bool GeneratorImpl::EmitImportFunction(ast::CallExpression* expr) {
     case GLSLstd450Radians:
     case GLSLstd450RoundEven:
     case GLSLstd450SSign:
-    default:
       error_ = "Unknown import method: " + ident->name();
       return false;
   }

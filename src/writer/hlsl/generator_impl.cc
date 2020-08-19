@@ -14,6 +14,7 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -525,9 +526,125 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
     out_ << ")";
   } else {
-    error_ = "Imported functions not supported in HLSL backend.";
-    return false;
+    return EmitImportFunction(expr);
   }
+  return true;
+}
+
+bool GeneratorImpl::EmitImportFunction(ast::CallExpression* expr) {
+  auto* ident = expr->func()->AsIdentifier();
+
+  auto* imp = module_->FindImportByName(ident->path());
+  if (imp == nullptr) {
+    error_ = "unable to find import for " + ident->path();
+    return 0;
+  }
+  auto id = imp->GetIdForMethod(ident->name());
+  if (id == 0) {
+    error_ = "unable to lookup: " + ident->name() + " in " + ident->path();
+  }
+
+  switch (id) {
+    case GLSLstd450Acos:
+    case GLSLstd450Asin:
+    case GLSLstd450Atan:
+    case GLSLstd450Atan2:
+    case GLSLstd450Ceil:
+    case GLSLstd450Cos:
+    case GLSLstd450Cosh:
+    case GLSLstd450Cross:
+    case GLSLstd450Degrees:
+    case GLSLstd450Determinant:
+    case GLSLstd450Distance:
+    case GLSLstd450Exp:
+    case GLSLstd450Exp2:
+    case GLSLstd450FaceForward:
+    case GLSLstd450Floor:
+    case GLSLstd450Fma:
+    case GLSLstd450Length:
+    case GLSLstd450Log:
+    case GLSLstd450Log2:
+    case GLSLstd450Normalize:
+    case GLSLstd450Pow:
+    case GLSLstd450Radians:
+    case GLSLstd450Reflect:
+    case GLSLstd450Round:
+    case GLSLstd450Sin:
+    case GLSLstd450Sinh:
+    case GLSLstd450SmoothStep:
+    case GLSLstd450Sqrt:
+    case GLSLstd450Step:
+    case GLSLstd450Tan:
+    case GLSLstd450Tanh:
+    case GLSLstd450Trunc:
+      out_ << ident->name();
+      break;
+    case GLSLstd450Fract:
+      out_ << "frac";
+      break;
+    case GLSLstd450InterpolateAtCentroid:
+      out_ << "EvaluateAttributeAtCentroid";
+      break;
+    case GLSLstd450InverseSqrt:
+      out_ << "rsqrt";
+      break;
+    case GLSLstd450FMix:
+      out_ << "mix";
+      break;
+    case GLSLstd450SSign:
+    case GLSLstd450FSign:
+      out_ << "sign";
+      break;
+    case GLSLstd450FAbs:
+    case GLSLstd450SAbs:
+      out_ << "abs";
+      break;
+    case GLSLstd450FMax:
+    case GLSLstd450NMax:
+    case GLSLstd450SMax:
+    case GLSLstd450UMax:
+      out_ << "max";
+      break;
+    case GLSLstd450FMin:
+    case GLSLstd450NMin:
+    case GLSLstd450SMin:
+    case GLSLstd450UMin:
+      out_ << "min";
+      break;
+    case GLSLstd450FClamp:
+    case GLSLstd450SClamp:
+    case GLSLstd450NClamp:
+    case GLSLstd450UClamp:
+      out_ << "clamp";
+      break;
+    // TODO(dsinclair): Determine mappings for the following
+    case GLSLstd450Atanh:
+    case GLSLstd450Asinh:
+    case GLSLstd450Acosh:
+    case GLSLstd450FindILsb:
+    case GLSLstd450FindUMsb:
+    case GLSLstd450FindSMsb:
+    case GLSLstd450MatrixInverse:
+    case GLSLstd450RoundEven:
+      error_ = "Unknown import method: " + ident->name();
+      return false;
+  }
+
+  out_ << "(";
+  bool first = true;
+  const auto& params = expr->params();
+  for (const auto& param : params) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(param.get())) {
+      return false;
+    }
+  }
+  out_ << ")";
+
   return true;
 }
 

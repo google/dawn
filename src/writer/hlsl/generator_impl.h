@@ -139,6 +139,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
+  /// Handles genreating an import expression
+  /// @param expr the expression
+  /// @returns true if the expression was successfully emitted.
+  bool EmitImportFunction(ast::CallExpression* expr);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
