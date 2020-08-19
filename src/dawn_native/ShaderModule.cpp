@@ -194,7 +194,7 @@ namespace dawn_native {
                 case spv::ImageFormatRgb10A2:
                     return wgpu::TextureFormat::RGB10A2Unorm;
                 case spv::ImageFormatR11fG11fB10f:
-                    return wgpu::TextureFormat::RG11B10Float;
+                    return wgpu::TextureFormat::RG11B10Ufloat;
                 case spv::ImageFormatRg32f:
                     return wgpu::TextureFormat::RG32Float;
                 case spv::ImageFormatRg32ui:
@@ -265,7 +265,7 @@ namespace dawn_native {
                 case shaderc_spvc_storage_texture_format_rgb10a2unorm:
                     return wgpu::TextureFormat::RGB10A2Unorm;
                 case shaderc_spvc_storage_texture_format_rg11b10float:
-                    return wgpu::TextureFormat::RG11B10Float;
+                    return wgpu::TextureFormat::RG11B10Ufloat;
                 case shaderc_spvc_storage_texture_format_rg32float:
                     return wgpu::TextureFormat::RG32Float;
                 case shaderc_spvc_storage_texture_format_rg32uint:

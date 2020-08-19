@@ -20,6 +20,7 @@
 #include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
+#include <cmath>
 #include <type_traits>
 
 // An expectation for float buffer content that can correctly compare different NaN values and
@@ -685,8 +686,8 @@ TEST_P(TextureFormatTest, RGB10A2Unorm) {
         uncompressedData, textureData);
 }
 
-// Test the RG11B10Float format
-TEST_P(TextureFormatTest, RG11B10Float) {
+// Test the RG11B10Ufloat format
+TEST_P(TextureFormatTest, RG11B10Ufloat) {
     constexpr uint32_t kFloat11Zero = 0;
     constexpr uint32_t kFloat11Infinity = 0x7C0;
     constexpr uint32_t kFloat11Nan = 0x7C1;
@@ -714,7 +715,7 @@ TEST_P(TextureFormatTest, RG11B10Float) {
     };
 
     // This is one of the only 3-channel formats, so we don't have specific testing for them. Alpha
-    // should slways be sampled as 1
+    // should always be sampled as 1
     // clang-format off
     std::vector<float> uncompressedData = {
         0.0f,     INFINITY, NAN,      1.0f,
@@ -725,7 +726,54 @@ TEST_P(TextureFormatTest, RG11B10Float) {
     // clang-format on
 
     DoFloatFormatSamplingTest(
-        {wgpu::TextureFormat::RG11B10Float, 4, wgpu::TextureComponentType::Float, 4}, textureData,
+        {wgpu::TextureFormat::RG11B10Ufloat, 4, wgpu::TextureComponentType::Float, 4}, textureData,
+        uncompressedData);
+    // This format is not renderable.
+}
+
+// Test the RGB9E5Ufloat format
+TEST_P(TextureFormatTest, RGB9E5Ufloat) {
+    // RGB9E5 is different from other floating point formats because the mantissa doesn't index in
+    // the window defined by the exponent but is instead treated as a pure multiplier. There is
+    // also no Infinity or NaN. The OpenGL 4.6 spec has the best explanation I've found in section
+    // 8.25 "Shared Exponent Texture Color Conversion":
+    //
+    //   red = reduint * 2^(expuint - B - N) = reduint * 2^(expuint - 24)
+    //
+    // Where reduint and expuint are the integer values when considering the E5 as a 5bit uint, and
+    // the r9 as a 9bit uint. B the number of bits of the mantissa (9), and N the offset for the
+    // exponent (15).
+
+    float smallestExponent = std::pow(2.0f, -24.0f);
+    float largestExponent = std::pow(2.0f, float(31 - 24));
+
+    auto MakeRGB9E5 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t e) {
+        ASSERT((r & 0x1FF) == r);
+        ASSERT((g & 0x1FF) == g);
+        ASSERT((b & 0x1FF) == b);
+        ASSERT((e & 0x1F) == e);
+        return r | g << 9 | b << 18 | e << 27;
+    };
+
+    // Test the smallest largest, and "1" exponents
+    std::vector<uint32_t> textureData = {
+        MakeRGB9E5(0, 1, 2, 0b00000),
+        MakeRGB9E5(2, 1, 0, 0b11111),
+        MakeRGB9E5(0, 1, 2, 0b11000),
+    };
+
+    // This is one of the only 3-channel formats, so we don't have specific testing for them. Alpha
+    // should always be sampled as 1
+    // clang-format off
+    std::vector<float> uncompressedData = {
+        0.0f, smallestExponent, 2.0f * smallestExponent, 1.0f,
+        2.0f * largestExponent, largestExponent, 0.0f, 1.0f,
+        0.0f, 1.0f, 2.0f, 1.0f,
+    };
+    // clang-format on
+
+    DoFloatFormatSamplingTest(
+        {wgpu::TextureFormat::RGB9E5Ufloat, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData);
     // This format is not renderable.
 }

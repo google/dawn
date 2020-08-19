@@ -37,7 +37,7 @@ namespace dawn_native {
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
-    static constexpr size_t kKnownFormatCount = 52;
+    static constexpr size_t kKnownFormatCount = 53;
 
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
     struct Format : TexelBlockInfo {

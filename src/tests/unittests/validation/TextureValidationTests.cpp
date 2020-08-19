@@ -330,7 +330,7 @@ namespace {
         device.CreateTexture(&descriptor);
 
         wgpu::TextureFormat nonRenderableFormats[] = {
-            wgpu::TextureFormat::RG11B10Float,
+            wgpu::TextureFormat::RG11B10Ufloat,
             wgpu::TextureFormat::R8Snorm,
             wgpu::TextureFormat::RG8Snorm,
             wgpu::TextureFormat::RGBA8Snorm,

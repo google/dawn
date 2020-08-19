@@ -344,7 +344,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
         wgpu::TextureFormat::RG8Snorm,     wgpu::TextureFormat::RG8Uint,
         wgpu::TextureFormat::RG8Sint,      wgpu::TextureFormat::RG16Uint,
         wgpu::TextureFormat::RG16Sint,     wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Float};
+        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Ufloat};
 
     for (wgpu::BindingType storageTextureBindingType : kSupportedStorageTextureBindingTypes) {
         for (wgpu::TextureFormat format : kWGPUTextureFormatSupportedAsSPIRVImageFormats) {

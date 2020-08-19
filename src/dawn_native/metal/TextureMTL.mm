@@ -172,8 +172,10 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatBGRA8Unorm_sRGB;
             case wgpu::TextureFormat::RGB10A2Unorm:
                 return MTLPixelFormatRGB10A2Unorm;
-            case wgpu::TextureFormat::RG11B10Float:
+            case wgpu::TextureFormat::RG11B10Ufloat:
                 return MTLPixelFormatRG11B10Float;
+            case wgpu::TextureFormat::RGB9E5Ufloat:
+                return MTLPixelFormatRGB9E5Float;
 
             case wgpu::TextureFormat::RG32Uint:
                 return MTLPixelFormatRG32Uint;

@@ -295,8 +295,10 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_B8G8R8A8_SRGB;
             case wgpu::TextureFormat::RGB10A2Unorm:
                 return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
-            case wgpu::TextureFormat::RG11B10Float:
+            case wgpu::TextureFormat::RG11B10Ufloat:
                 return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
+            case wgpu::TextureFormat::RGB9E5Ufloat:
+                return VK_FORMAT_E5B9G9R9_UFLOAT_PACK32;
 
             case wgpu::TextureFormat::RG32Uint:
                 return VK_FORMAT_R32G32_UINT;

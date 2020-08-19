@@ -152,11 +152,11 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
     }
 
     {
-        // Fails because RG11B10Float is non-renderable
+        // Fails because RG11B10Ufloat is non-renderable
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.cColorStates[0].format = wgpu::TextureFormat::RG11B10Float;
+        descriptor.cColorStates[0].format = wgpu::TextureFormat::RG11B10Ufloat;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
