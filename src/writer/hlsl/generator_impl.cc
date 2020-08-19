@@ -879,6 +879,10 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
 
       out_ << " " << var->name() << " : ";
       if (deco->IsLocation()) {
+        if (ep->stage() == ast::PipelineStage::kCompute) {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
         out_ << "TEXCOORD" << deco->AsLocation()->value();
       } else if (deco->IsBuiltin()) {
         auto attr = builtin_to_attribute(deco->AsBuiltin()->value());

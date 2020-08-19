@@ -579,6 +579,7 @@ if (${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator_impl_constructor_test.cc
     writer/hlsl/generator_impl_continue_test.cc
     writer/hlsl/generator_impl_discard_test.cc
+    writer/hlsl/generator_impl_entry_point_test.cc
     writer/hlsl/generator_impl_function_test.cc
     writer/hlsl/generator_impl_identifier_test.cc
     writer/hlsl/generator_impl_if_test.cc
