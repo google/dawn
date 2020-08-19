@@ -19,12 +19,15 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -318,6 +321,72 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
+bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
+  if (!expr->func()->IsIdentifier()) {
+    error_ = "invalid function name";
+    return 0;
+  }
+
+  auto* ident = expr->func()->AsIdentifier();
+  if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
+    error_ = "Intrinsics not supported in HLSL backend.";
+    return false;
+  }
+
+  if (!ident->has_path()) {
+    auto name = ident->name();
+    auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
+    if (it != ep_func_name_remapped_.end()) {
+      name = it->second;
+    }
+
+    auto* func = module_->FindFunctionByName(ident->name());
+    if (func == nullptr) {
+      error_ = "Unable to find function: " + name;
+      return false;
+    }
+
+    out_ << name << "(";
+
+    bool first = true;
+    if (has_referenced_in_var_needing_struct(func)) {
+      auto var_name = current_ep_var_name(VarType::kIn);
+      if (!var_name.empty()) {
+        out_ << var_name;
+        first = false;
+      }
+    }
+    if (has_referenced_out_var_needing_struct(func)) {
+      auto var_name = current_ep_var_name(VarType::kOut);
+      if (!var_name.empty()) {
+        if (!first) {
+          out_ << ", ";
+        }
+        first = false;
+        out_ << var_name;
+      }
+    }
+
+    const auto& params = expr->params();
+    for (const auto& param : params) {
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(param.get())) {
+        return false;
+      }
+    }
+
+    out_ << ")";
+  } else {
+    error_ = "Imported functions not supported in HLSL backend.";
+    return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   make_indent();
 
@@ -436,6 +505,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
   }
+  if (expr->IsCall()) {
+    return EmitCall(expr->AsCall());
+  }
   if (expr->IsConstructor()) {
     return EmitConstructor(expr->AsConstructor());
   }
@@ -525,6 +597,40 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
   return EmitBlock(stmt->body());
 }
 
+bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      return true;
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput) {
+      return true;
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
   for (auto data : func->referenced_location_variables()) {
     auto* var = data.first;
@@ -585,7 +691,16 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     return false;
   }
 
-  out_ << " " << namer_.NameFor(name) << "(";
+  out_ << " ";
+
+  if (emit_duplicate_functions) {
+    name = generate_name(name + "_" + ep_name);
+    ep_func_name_remapped_[ep_name + "_" + func->name()] = name;
+  } else {
+    name = namer_.NameFor(name);
+  }
+
+  out_ << name << "(";
 
   bool first = true;
 
@@ -993,6 +1108,14 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
+  }
+  if (stmt->IsCall()) {
+    make_indent();
+    if (!EmitCall(stmt->AsCall()->expr())) {
+      return false;
+    }
+    out_ << ";" << std::endl;
+    return true;
   }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());

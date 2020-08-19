@@ -379,10 +379,8 @@ TEST_F(HlslGeneratorImplTest,
   EXPECT_EQ(g.result(), R"( ... )");
 }
 
-// TODO(dsinclair): Requires CallExpression
-TEST_F(
-    HlslGeneratorImplTest,
-    DISABLED_Emit_Function_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
+TEST_F(HlslGeneratorImplTest,
+       Emit_Function_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -483,9 +481,8 @@ ep_1_out ep_1(ep_1_in tint_in) {
 )");
 }
 
-// TODO(dsinclair): Requires CallExpression
 TEST_F(HlslGeneratorImplTest,
-       DISABLED_Emit_Function_Called_By_EntryPoints_NoUsedGlobals) {
+       Emit_Function_Called_By_EntryPoints_NoUsedGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -553,7 +550,7 @@ float sub_func(float param) {
   return param;
 }
 
-fragment ep_1_out ep_1() {
+ep_1_out ep_1() {
   ep_1_out tint_out;
   tint_out.depth = sub_func(1.00000000f);
   return tint_out;
@@ -562,10 +559,8 @@ fragment ep_1_out ep_1() {
 )");
 }
 
-// TODO(dsinclair): Requires CallExpression
-TEST_F(
-    HlslGeneratorImplTest,
-    DISABLED_Emit_Function_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
+TEST_F(HlslGeneratorImplTest,
+       Emit_Function_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -640,7 +635,7 @@ TEST_F(
   GeneratorImpl g(&mod);
   ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(struct ep_1_in {
-  float4 coord : SV_Position;
+  vector<float, 4> coord : SV_Position;
 };
 
 struct ep_1_out {
@@ -972,9 +967,8 @@ ep_1_out ep_1() {
 )");
 }
 
-// TODO(dsinclair): Requires CallExpression support
 TEST_F(HlslGeneratorImplTest,
-       DISABLED_Emit_Function_Called_Two_EntryPoints_WithoutGlobals) {
+       Emit_Function_Called_Two_EntryPoints_WithoutGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -1025,12 +1019,12 @@ TEST_F(HlslGeneratorImplTest,
   return 1.00000000f;
 }
 
-fragment void ep_1() {
+void ep_1() {
   float foo = sub_func();
   return;
 }
 
-fragment void ep_2() {
+void ep_2() {
   float foo = sub_func();
   return;
 }

@@ -74,6 +74,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(ast::BreakStatement* stmt);
+  /// Handles generating a call expression
+  /// @param expr the call expression
+  /// @returns true if the call expression is emitted
+  bool EmitCall(ast::CallExpression* expr);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
@@ -189,6 +193,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
+  /// Determines if the function needs the input struct passed to it.
+  /// @param func the function to check
+  /// @returns true if there are input struct variables used in the function
+  bool has_referenced_in_var_needing_struct(ast::Function* func);
+  /// Determines if the function needs the output struct passed to it.
+  /// @param func the function to check
+  /// @returns true if there are output struct variables used in the function
+  bool has_referenced_out_var_needing_struct(ast::Function* func);
   /// Determines if any used module variable requires an input or output struct.
   /// @param func the function to check
   /// @returns true if an input or output struct is required.
@@ -215,6 +227,11 @@ class GeneratorImpl : public TextGenerator {
   ScopeStack<ast::Variable*> global_variables_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
+
+  // This maps an input of "<entry_point_name>_<function_name>" to a remapped
+  // function name. If there is no entry for a given key then function did
+  // not need to be remapped for the entry point and can be emitted directly.
+  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
 };
 
 }  // namespace hlsl
