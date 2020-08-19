@@ -74,6 +74,18 @@ bool GeneratorImpl::Generate() {
     out_ << std::endl;
   }
 
+  for (const auto& func : module_->functions()) {
+    if (!EmitFunction(func.get())) {
+      return false;
+    }
+  }
+  for (const auto& ep : module_->entry_points()) {
+    if (!EmitEntryPointFunction(ep.get())) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+
   return true;
 }
 
@@ -485,6 +497,77 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
   }
 
   return EmitBlock(stmt->body());
+}
+
+bool GeneratorImpl::EmitFunction(ast::Function* func) {
+  make_indent();
+
+  // Entry points will be emitted later, skip for now.
+  if (module_->IsFunctionEntryPoint(func->name())) {
+    return true;
+  }
+
+  auto name = func->name();
+
+  if (!EmitType(func->return_type(), "")) {
+    return false;
+  }
+
+  out_ << " " << namer_.NameFor(name) << "(";
+
+  bool first = true;
+  for (const auto& v : func->params()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitType(v->type(), v->name())) {
+      return false;
+    }
+    // Array name is output as part of the type
+    if (!v->type()->IsArray()) {
+      out_ << " " << v->name();
+    }
+  }
+
+  out_ << ") ";
+
+  if (!EmitBlockAndNewline(func->body())) {
+    return false;
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
+  make_indent();
+
+  auto current_ep_name = ep->name();
+  if (current_ep_name.empty()) {
+    current_ep_name = ep->function_name();
+  }
+
+  auto* func = module_->FindFunctionByName(ep->function_name());
+  if (func == nullptr) {
+    error_ = "unable to find function for entry point: " + ep->function_name();
+    return false;
+  }
+
+  out_ << "void " << namer_.NameFor(current_ep_name) << "() {" << std::endl;
+  increment_indent();
+
+  for (const auto& s : *(func->body())) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
 }
 
 bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {

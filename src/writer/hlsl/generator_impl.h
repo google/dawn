@@ -106,6 +106,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles generating a function
+  /// @param func the function to generate
+  /// @returns true if the function was emitted
+  bool EmitFunction(ast::Function* func);
+  /// Handles emitting the entry point function
+  /// @param ep the entry point
+  /// @returns true if the entry point function was emitted
+  bool EmitEntryPointFunction(ast::EntryPoint* ep);
   /// Handles an if statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
