@@ -241,7 +241,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
-TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionMissing_Fail) {
+TEST_F(ValidateFunctionTest, EntryPointFunctionMissing_Fail) {
   // entry_point vertex as "main" = vtx_main
   // fn frag_main() -> void { return; }
   ast::type::VoidType void_type;

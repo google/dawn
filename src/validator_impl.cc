@@ -49,7 +49,26 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!ValidateFunctions(module->functions())) {
     return false;
   }
+  // ValidateEntryPoints must be done after populating function_stack_
+  if (!ValidateEntryPoints(module->entry_points())) {
+    return false;
+  }
+
   function_stack_.pop_scope();
+
+  return true;
+}
+
+bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
+  for (const auto& ep : eps) {
+    auto* ep_ptr = ep.get();
+    if (!function_stack_.has(ep_ptr->function_name())) {
+      set_error(ep_ptr->source(),
+                "v-0019: Function used in entry point does not exist: '" +
+                    ep_ptr->function_name() + "'");
+      return false;
+    }
+  }
   return true;
 }
 

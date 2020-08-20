@@ -20,6 +20,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/entry_point.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -105,6 +106,11 @@ class ValidatorImpl {
   /// @param expr the call to validate
   /// @returns true if successful
   bool ValidateCallExpr(const ast::CallExpression* expr);
+  /// Validates entry points
+  /// this funtion must be called after populating function_stack_
+  /// @param eps the vector of entry points to check
+  /// @return true if the validation was successful
+  bool ValidateEntryPoints(const ast::EntryPointList& eps);
 
  private:
   std::string error_;
