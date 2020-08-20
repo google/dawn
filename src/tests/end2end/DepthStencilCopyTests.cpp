@@ -99,9 +99,6 @@ TEST_P(DepthStencilCopyTests, FromDepthAspect) {
 
 // Test copying the stencil-only aspect into a buffer.
 TEST_P(DepthStencilCopyTests, FromStencilAspect) {
-    // TODO(enga): Figure out why this fails on Linux Vulkan Intel
-    DAWN_SKIP_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
-
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -121,6 +118,7 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
     renderPipelineDesc.vertexStage.module = mVertexModule;
     renderPipelineDesc.cFragmentStage.module = mFragmentModule;
     renderPipelineDesc.cDepthStencilState.format = texDescriptor.format;
+    renderPipelineDesc.cDepthStencilState.depthWriteEnabled = true;
     renderPipelineDesc.cDepthStencilState.stencilFront.passOp =
         wgpu::StencilOperation::IncrementClamp;
     renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
