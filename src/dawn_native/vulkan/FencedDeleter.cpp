@@ -30,6 +30,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(mMemoriesToDelete.Empty());
         ASSERT(mPipelinesToDelete.Empty());
         ASSERT(mPipelineLayoutsToDelete.Empty());
+        ASSERT(mQueryPoolsToDelete.Empty());
         ASSERT(mRenderPassesToDelete.Empty());
         ASSERT(mSamplersToDelete.Empty());
         ASSERT(mSemaphoresToDelete.Empty());
@@ -68,6 +69,10 @@ namespace dawn_native { namespace vulkan {
 
     void FencedDeleter::DeleteWhenUnused(VkPipelineLayout layout) {
         mPipelineLayoutsToDelete.Enqueue(layout, mDevice->GetPendingCommandSerial());
+    }
+
+    void FencedDeleter::DeleteWhenUnused(VkQueryPool querypool) {
+        mQueryPoolsToDelete.Enqueue(querypool, mDevice->GetPendingCommandSerial());
     }
 
     void FencedDeleter::DeleteWhenUnused(VkRenderPass renderPass) {
@@ -163,6 +168,11 @@ namespace dawn_native { namespace vulkan {
             mDevice->fn.DestroyDescriptorPool(vkDevice, pool, nullptr);
         }
         mDescriptorPoolsToDelete.ClearUpTo(completedSerial);
+
+        for (VkQueryPool pool : mQueryPoolsToDelete.IterateUpTo(completedSerial)) {
+            mDevice->fn.DestroyQueryPool(vkDevice, pool, nullptr);
+        }
+        mQueryPoolsToDelete.ClearUpTo(completedSerial);
 
         for (VkSampler sampler : mSamplersToDelete.IterateUpTo(completedSerial)) {
             mDevice->fn.DestroySampler(vkDevice, sampler, nullptr);

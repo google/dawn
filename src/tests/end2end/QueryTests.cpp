@@ -57,7 +57,7 @@ TEST_P(OcclusionQueryTests, QuerySetDestroy) {
     querySet.Destroy();
 }
 
-DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend(), VulkanBackend());
 
 class PipelineStatisticsQueryTests : public QueryTests {
   protected:
@@ -91,7 +91,7 @@ TEST_P(PipelineStatisticsQueryTests, QuerySetCreation) {
     device.CreateQuerySet(&descriptor);
 }
 
-DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests, D3D12Backend(), VulkanBackend());
 
 class TimestampExpectation : public detail::Expectation {
   public:

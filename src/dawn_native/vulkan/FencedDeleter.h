@@ -36,6 +36,7 @@ namespace dawn_native { namespace vulkan {
         void DeleteWhenUnused(VkPipelineLayout layout);
         void DeleteWhenUnused(VkRenderPass renderPass);
         void DeleteWhenUnused(VkPipeline pipeline);
+        void DeleteWhenUnused(VkQueryPool querypool);
         void DeleteWhenUnused(VkSampler sampler);
         void DeleteWhenUnused(VkSemaphore semaphore);
         void DeleteWhenUnused(VkShaderModule module);
@@ -54,6 +55,7 @@ namespace dawn_native { namespace vulkan {
         SerialQueue<VkImageView> mImageViewsToDelete;
         SerialQueue<VkPipeline> mPipelinesToDelete;
         SerialQueue<VkPipelineLayout> mPipelineLayoutsToDelete;
+        SerialQueue<VkQueryPool> mQueryPoolsToDelete;
         SerialQueue<VkRenderPass> mRenderPassesToDelete;
         SerialQueue<VkSampler> mSamplersToDelete;
         SerialQueue<VkSemaphore> mSemaphoresToDelete;

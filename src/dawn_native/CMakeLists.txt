@@ -396,6 +396,8 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/NativeSwapChainImplVk.h"
         "vulkan/PipelineLayoutVk.cpp"
         "vulkan/PipelineLayoutVk.h"
+        "vulkan/QuerySetVk.cpp"
+        "vulkan/QuerySetVk.h"
         "vulkan/QueueVk.cpp"
         "vulkan/QueueVk.h"
         "vulkan/RenderPassCache.cpp"
