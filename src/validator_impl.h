@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "src/ast/assignment_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -77,7 +78,7 @@ class ValidatorImpl {
   bool CheckImports(const ast::Module* module);
   /// Validates an expression
   /// @param expr the expression to check
-  /// @return true if the expresssion is valid
+  /// @return true if the expression is valid
   bool ValidateExpression(const ast::Expression* expr);
   /// Validates v-0006:Variables must be defined before use
   /// @param ident the identifer to check if its in the scope
@@ -100,6 +101,10 @@ class ValidatorImpl {
   /// @param ret the return statement to check
   /// @returns true if function return type matches the return statement type
   bool ValidateReturnStatement(const ast::ReturnStatement* ret);
+  /// Validates function calls
+  /// @param expr the call to validate
+  /// @returns true if successful
+  bool ValidateCallExpr(const ast::CallExpression* expr);
 
  private:
   std::string error_;

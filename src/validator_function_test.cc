@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -186,6 +187,57 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.Validate(mod()));
   EXPECT_EQ(v.error(), "12:34: v-0016: function names must be unique 'func'");
+}
+
+TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
+  // fn func() -> void {func(); return; }
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::ExpressionList call_params;
+  auto call_expr = std::make_unique<ast::CallExpression>(
+      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      std::move(call_params));
+  ast::VariableList params0;
+  auto func0 =
+      std::make_unique<ast::Function>("func", std::move(params0), &f32);
+  auto body0 = std::make_unique<ast::BlockStatement>();
+  body0->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  body0->append(std::make_unique<ast::ReturnStatement>());
+  func0->set_body(std::move(body0));
+  mod()->AddFunction(std::move(func0));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod())) << v.error();
+  EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
+}
+
+TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
+  // fn func() -> i32 {var a: i32 = func(); return 2; }
+  ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  ast::ExpressionList call_params;
+  auto call_expr = std::make_unique<ast::CallExpression>(
+      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      std::move(call_params));
+  var->set_constructor(std::move(call_expr));
+  ast::VariableList params0;
+  auto func0 =
+      std::make_unique<ast::Function>("func", std::move(params0), &i32);
+  auto body0 = std::make_unique<ast::BlockStatement>();
+  body0->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  body0->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
+  func0->set_body(std::move(body0));
+  mod()->AddFunction(std::move(func0));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod())) << v.error();
+  EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
 }  // namespace

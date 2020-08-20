@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "src/validator_impl.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/function.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -145,7 +147,13 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
     return false;
   }
   if (stmt->IsVariableDecl()) {
-    return ValidateDeclStatement(stmt->AsVariableDecl());
+    auto* v = stmt->AsVariableDecl();
+    bool constructor_valid =
+        v->variable()->has_constructor()
+            ? ValidateExpression(v->variable()->constructor())
+            : true;
+
+    return constructor_valid && ValidateDeclStatement(stmt->AsVariableDecl());
   }
   if (stmt->IsAssign()) {
     return ValidateAssign(stmt->AsAssign());
@@ -153,6 +161,44 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return ValidateReturnStatement(stmt->AsReturn());
   }
+  if (stmt->IsCall()) {
+    return ValidateCallExpr(stmt->AsCall()->expr());
+  }
+  return true;
+}
+
+bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
+  if (!expr) {
+    // TODO(sarahM0): Here and other Validate.*: figure out whether return false
+    // or true
+    return false;
+  }
+
+  if (expr->func()->IsIdentifier()) {
+    auto* ident = expr->func()->AsIdentifier();
+    auto func_name = ident->name();
+    if (ident->has_path()) {
+      // TODO(sarahM0): validate import statements
+    } else if (ast::intrinsic::IsIntrinsic(ident->name())) {
+      // TODO(sarahM0): validate intrinsics - tied with type-determiner
+    } else {
+      if (!function_stack_.has(func_name)) {
+        set_error(expr->source(),
+                  "v-0005: function must be declared before use: '" +
+                      func_name + "'");
+        return false;
+      }
+      if (func_name == current_function_->name()) {
+        set_error(expr->source(),
+                  "v-0004: recursion is not allowed: '" + func_name + "'");
+        return false;
+      }
+    }
+  } else {
+    set_error(expr->source(), "Invalid function call expression");
+    return false;
+  }
+
   return true;
 }
 
@@ -218,6 +264,9 @@ bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
     return ValidateIdentifier(expr->AsIdentifier());
   }
 
+  if (expr->IsCall()) {
+    return ValidateCallExpr(expr->AsCall());
+  }
   return true;
 }
 
