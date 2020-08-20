@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/entry_point.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -240,5 +241,49 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
+TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionMissing_Fail) {
+  // entry_point vertex as "main" = vtx_main
+  // fn frag_main() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      Source{12, 34}, ast::PipelineStage::kVertex, "main", "frag_main");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(),
+            "12:34: v-0019: Function used in entry point does not exist: "
+            "'frag_main'");
+}
+
+TEST_F(ValidateFunctionTest, EntryPointFunctionExist_Pass) {
+  // entry_point vertex as "main" = vtx_main
+  // fn vtx_main() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "main", "vtx_main");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.Validate(mod())) << v.error();
+}
 }  // namespace
 }  // namespace tint
