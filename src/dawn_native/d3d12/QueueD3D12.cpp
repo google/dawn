@@ -44,7 +44,8 @@ namespace dawn_native { namespace d3d12 {
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                              newDataSizeBytes, device->GetPendingCommandSerial()));
+                                              newDataSizeBytes, device->GetPendingCommandSerial(),
+                                              textureFormat.blockByteSize));
             ASSERT(uploadHandle.mappedBuffer != nullptr);
 
             uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);

@@ -951,7 +951,8 @@ namespace dawn_native { namespace d3d12 {
                 DynamicUploader* uploader = device->GetDynamicUploader();
                 UploadHandle uploadHandle;
                 DAWN_TRY_ASSIGN(uploadHandle,
-                                uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
+                                uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
+                                                   GetFormat().blockByteSize));
                 memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
                 for (uint32_t level = range.baseMipLevel;

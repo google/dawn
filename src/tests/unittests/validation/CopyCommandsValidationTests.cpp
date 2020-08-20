@@ -16,6 +16,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "tests/unittests/validation/ValidationTest.h"
+#include "utils/TestUtils.h"
 #include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 

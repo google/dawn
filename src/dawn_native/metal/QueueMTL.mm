@@ -41,7 +41,8 @@ namespace dawn_native { namespace metal {
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                              newDataSizeBytes, device->GetPendingCommandSerial()));
+                                              newDataSizeBytes, device->GetPendingCommandSerial(),
+                                              blockInfo.blockByteSize));
             ASSERT(uploadHandle.mappedBuffer != nullptr);
 
             uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);

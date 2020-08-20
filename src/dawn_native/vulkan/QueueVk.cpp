@@ -47,11 +47,17 @@ namespace dawn_native { namespace vulkan {
                 ToBackend(device)
                     ->GetDeviceInfo()
                     .properties.limits.optimalBufferCopyOffsetAlignment;
+            ASSERT(IsPowerOfTwo(optimalOffsetAlignment));
+            ASSERT(IsPowerOfTwo(blockInfo.blockByteSize));
+            // We need the offset to be aligned to both optimalOffsetAlignment and blockByteSize,
+            // since both of them are powers of two, we only need to align to the max value.
+            uint64_t offsetAlignment =
+                std::max(optimalOffsetAlignment, uint64_t(blockInfo.blockByteSize));
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                              newDataSizeBytes + optimalOffsetAlignment - 1,
-                                              device->GetPendingCommandSerial()));
+                                              newDataSizeBytes, device->GetPendingCommandSerial(),
+                                              offsetAlignment));
             ASSERT(uploadHandle.mappedBuffer != nullptr);
 
             uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
@@ -63,11 +69,6 @@ namespace dawn_native { namespace vulkan {
             if (dataRowsPerImageInBlock == 0) {
                 dataRowsPerImageInBlock = writeSizePixel.height / blockInfo.blockHeight;
             }
-
-            uint64_t additionalOffset =
-                Align(uploadHandle.startOffset, optimalOffsetAlignment) - uploadHandle.startOffset;
-            uploadHandle.startOffset += additionalOffset;
-            dstPointer += additionalOffset;
 
             ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
             uint64_t imageAdditionalStride =

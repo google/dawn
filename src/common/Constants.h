@@ -64,4 +64,8 @@ static constexpr uint32_t kMaxTexture2DMipLevels = 14u;
 static_assert(1 << (kMaxTexture2DMipLevels - 1) == kMaxTextureSize,
               "kMaxTexture2DMipLevels and kMaxTextureSize size mismatch");
 
+// Offset alignment for CopyB2B. Strictly speaking this alignment is required only
+// on macOS, but we decide to do it on all platforms.
+static constexpr uint64_t kCopyBufferToBufferOffsetAlignment = 4u;
+
 #endif  // COMMON_CONSTANTS_H_

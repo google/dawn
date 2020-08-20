@@ -510,7 +510,8 @@ namespace dawn_native { namespace metal {
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
+                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
+                                               GetFormat().blockByteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             id<MTLBlitCommandEncoder> encoder = commandContext->EnsureBlit();

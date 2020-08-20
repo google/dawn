@@ -27,6 +27,8 @@ target_sources(dawn_utils PRIVATE
     "SystemUtils.h"
     "TerribleCommandBuffer.cpp"
     "TerribleCommandBuffer.h"
+    "TestUtils.cpp"
+    "TestUtils.h"
     "TextureFormatUtils.cpp"
     "TextureFormatUtils.h"
     "Timer.h"

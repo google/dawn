@@ -425,7 +425,8 @@ namespace dawn_native { namespace d3d12 {
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(GetSize(), device->GetPendingCommandSerial()));
+                            uploader->Allocate(GetSize(), device->GetPendingCommandSerial(),
+                                               kCopyBufferToBufferOffsetAlignment));
 
             memset(uploadHandle.mappedBuffer, clearValue, GetSize());
 

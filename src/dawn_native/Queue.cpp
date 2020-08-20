@@ -14,6 +14,7 @@
 
 #include "dawn_native/Queue.h"
 
+#include "common/Constants.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandValidation.h"
@@ -110,7 +111,8 @@ namespace dawn_native {
 
         UploadHandle uploadHandle;
         DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                          size, device->GetPendingCommandSerial()));
+                                          size, device->GetPendingCommandSerial(),
+                                          kCopyBufferToBufferOffsetAlignment));
         ASSERT(uploadHandle.mappedBuffer != nullptr);
 
         memcpy(uploadHandle.mappedBuffer, data, size);

@@ -40,7 +40,9 @@ namespace dawn_native {
         // implemented.
         void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
 
-        ResultOrError<UploadHandle> Allocate(uint64_t allocationSize, Serial serial);
+        ResultOrError<UploadHandle> Allocate(uint64_t allocationSize,
+                                             Serial serial,
+                                             uint64_t offsetAlignment);
         void Deallocate(Serial lastCompletedSerial);
 
       private:
@@ -50,6 +52,8 @@ namespace dawn_native {
             std::unique_ptr<StagingBufferBase> mStagingBuffer;
             RingBufferAllocator mAllocator;
         };
+
+        ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize, Serial serial);
 
         std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
         SerialQueue<std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;

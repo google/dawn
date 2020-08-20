@@ -75,6 +75,8 @@ static_library("dawn_utils") {
     "SystemUtils.h",
     "TerribleCommandBuffer.cpp",
     "TerribleCommandBuffer.h",
+    "TestUtils.cpp",
+    "TestUtils.h",
     "TextureFormatUtils.cpp",
     "TextureFormatUtils.h",
     "Timer.h",

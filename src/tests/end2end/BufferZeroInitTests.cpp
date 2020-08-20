@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TestUtils.h"
 #include "utils/WGPUHelpers.h"
 
 #define EXPECT_LAZY_CLEAR(N, statement)                                                       \

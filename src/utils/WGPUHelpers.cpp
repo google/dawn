@@ -14,11 +14,8 @@
 
 #include "utils/WGPUHelpers.h"
 
-#include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Log.h"
-#include "common/Math.h"
-#include "utils/TextureFormatUtils.h"
 
 #include <shaderc/shaderc.hpp>
 
@@ -391,78 +388,6 @@ namespace utils {
         descriptor.entries = entries.data();
 
         return device.CreateBindGroup(&descriptor);
-    }
-
-    uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
-        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
-        return Align(bytesPerTexel * width, kTextureBytesPerRowAlignment);
-    }
-
-    uint32_t GetBytesInBufferTextureCopy(wgpu::TextureFormat format,
-                                         uint32_t width,
-                                         uint32_t bytesPerRow,
-                                         uint32_t rowsPerImage,
-                                         uint32_t copyArrayLayerCount) {
-        ASSERT(rowsPerImage > 0);
-        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
-        const uint32_t bytesAtLastImage = bytesPerRow * (rowsPerImage - 1) + bytesPerTexel * width;
-        return bytesPerRow * rowsPerImage * (copyArrayLayerCount - 1) + bytesAtLastImage;
-    }
-
-    // TODO(jiawei.shao@intel.com): support compressed texture formats
-    TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(
-        wgpu::TextureFormat format,
-        wgpu::Extent3D textureSizeAtLevel0,
-        uint32_t mipmapLevel,
-        uint32_t rowsPerImage) {
-        TextureDataCopyLayout layout;
-
-        layout.mipSize = {textureSizeAtLevel0.width >> mipmapLevel,
-                          textureSizeAtLevel0.height >> mipmapLevel, textureSizeAtLevel0.depth};
-
-        layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
-
-        uint32_t appliedRowsPerImage = rowsPerImage > 0 ? rowsPerImage : layout.mipSize.height;
-        layout.bytesPerImage = layout.bytesPerRow * appliedRowsPerImage;
-
-        layout.byteLength =
-            GetBytesInBufferTextureCopy(format, layout.mipSize.width, layout.bytesPerRow,
-                                        appliedRowsPerImage, textureSizeAtLevel0.depth);
-
-        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
-        layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;
-        layout.texelBlocksPerImage = layout.bytesPerImage / bytesPerTexel;
-        layout.texelBlockCount = layout.byteLength / bytesPerTexel;
-
-        return layout;
-    }
-
-    const std::array<wgpu::TextureFormat, 14> kBCFormats = {
-        wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
-        wgpu::TextureFormat::BC2RGBAUnorm,  wgpu::TextureFormat::BC2RGBAUnormSrgb,
-        wgpu::TextureFormat::BC3RGBAUnorm,  wgpu::TextureFormat::BC3RGBAUnormSrgb,
-        wgpu::TextureFormat::BC4RUnorm,     wgpu::TextureFormat::BC4RSnorm,
-        wgpu::TextureFormat::BC5RGUnorm,    wgpu::TextureFormat::BC5RGSnorm,
-        wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBSfloat,
-        wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
-
-    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
-                                 uint64_t rowsPerImage,
-                                 wgpu::Extent3D copyExtent,
-                                 wgpu::TextureFormat textureFormat) {
-        if (copyExtent.width == 0 || copyExtent.height == 0 || copyExtent.depth == 0) {
-            return 0;
-        } else {
-            uint32_t blockSize = utils::GetTexelBlockSizeInBytes(textureFormat);
-            uint32_t blockWidth = utils::GetTextureFormatBlockWidth(textureFormat);
-            uint32_t blockHeight = utils::GetTextureFormatBlockHeight(textureFormat);
-
-            uint64_t texelBlockRowsPerImage = rowsPerImage / blockHeight;
-            uint64_t bytesPerImage = bytesPerRow * texelBlockRowsPerImage;
-            uint64_t bytesInLastSlice = bytesPerRow * (copyExtent.height / blockHeight - 1) +
-                                        (copyExtent.width / blockWidth * blockSize);
-            return bytesPerImage * (copyExtent.depth - 1) + bytesInLastSlice;
-        }
     }
 
 }  // namespace utils

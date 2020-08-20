@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/DeviceMTL.h"
 
+#include "common/Platform.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Commands.h"
@@ -75,8 +76,10 @@ namespace dawn_native { namespace metal {
         {
             bool haveStoreAndMSAAResolve = false;
 #if defined(DAWN_PLATFORM_MACOS)
-            haveStoreAndMSAAResolve =
-                [mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+            if (@available(macOS 10.12, *)) {
+                haveStoreAndMSAAResolve =
+                    [mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+            }
 #elif defined(DAWN_PLATFORM_IOS)
             haveStoreAndMSAAResolve =
                 [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];

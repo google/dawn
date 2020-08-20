@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TestUtils.h"
 #include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
@@ -1064,6 +1065,35 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
+}
+
+// Testing a special code path: clearing a non-renderable texture when DynamicUploader
+// is unaligned doesn't throw validation errors.
+TEST_P(CompressedTextureBCFormatTest, UnalignedDynamicUploader) {
+    // CopyT2B for compressed texture formats is unimplemented on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    utils::UnalignDynamicUploader(device);
+
+    wgpu::TextureDescriptor textureDescriptor = {};
+    textureDescriptor.size = {4, 4, 1};
+    textureDescriptor.format = wgpu::TextureFormat::BC1RGBAUnorm;
+    textureDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = 8;
+    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(buffer, 0, 256, 0);
+    wgpu::Extent3D copyExtent = {4, 4, 1};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
 }
 
 // TODO(jiawei.shao@intel.com): support BC formats on OpenGL backend
