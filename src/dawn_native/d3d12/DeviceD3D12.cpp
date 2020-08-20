@@ -571,7 +571,9 @@ namespace dawn_native { namespace d3d12 {
         }
 
         // Release recycled resource heaps.
-        mResourceAllocatorManager->DestroyPool();
+        if (mResourceAllocatorManager != nullptr) {
+            mResourceAllocatorManager->DestroyPool();
+        }
 
         // We need to handle clearing up com object refs that were enqeued after TickImpl
         mUsedComObjectRefs.ClearUpTo(std::numeric_limits<Serial>::max());
