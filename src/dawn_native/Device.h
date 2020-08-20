@@ -16,6 +16,7 @@
 #define DAWNNATIVE_DEVICE_H_
 
 #include "common/Serial.h"
+#include "dawn_native/Commands.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Extensions.h"
 #include "dawn_native/Format.h"
@@ -187,6 +188,10 @@ namespace dawn_native {
                                                    BufferBase* destination,
                                                    uint64_t destinationOffset,
                                                    uint64_t size) = 0;
+        virtual MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+                                                    const TextureDataLayout& src,
+                                                    TextureCopy* dst,
+                                                    const Extent3D& copySizePixels) = 0;
 
         DynamicUploader* GetDynamicUploader() const;
 
@@ -223,6 +228,9 @@ namespace dawn_native {
         void EmitDeprecationWarning(const char* warning);
         void LoseForTesting();
         void AddFutureCallbackSerial(Serial serial);
+
+        virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
+        virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);

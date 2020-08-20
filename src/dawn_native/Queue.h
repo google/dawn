@@ -77,16 +77,6 @@ namespace dawn_native {
         void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
     };
 
-    // A helper function used in Queue::WriteTexture. The destination data layout must not
-    // contain any additional rows per image.
-    void CopyTextureData(uint8_t* dstPointer,
-                         const uint8_t* srcPointer,
-                         uint32_t depth,
-                         uint32_t rowsPerImageInBlock,
-                         uint64_t imageAdditionalStride,
-                         uint32_t actualBytesPerRow,
-                         uint32_t dstBytesPerRow,
-                         uint32_t srcBytesPerRow);
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_QUEUE_H_

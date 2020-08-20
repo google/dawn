@@ -103,7 +103,7 @@ namespace dawn_native { namespace d3d12 {
         MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
                                             const TextureDataLayout& src,
                                             TextureCopy* dst,
-                                            const Extent3D& copySizePixels);
+                                            const Extent3D& copySizePixels) override;
 
         ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
@@ -137,6 +137,9 @@ namespace dawn_native { namespace d3d12 {
         void ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
 
         void InitTogglesFromDriver();
+
+        uint32_t GetOptimalBytesPerRowAlignment() const override;
+        uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
       private:
         using DeviceBase::DeviceBase;

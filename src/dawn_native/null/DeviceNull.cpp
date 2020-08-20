@@ -213,6 +213,13 @@ namespace dawn_native { namespace null {
         return {};
     }
 
+    MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
+                                                const TextureDataLayout& src,
+                                                TextureCopy* dst,
+                                                const Extent3D& copySizePixels) {
+        return {};
+    }
+
     MaybeError Device::IncrementMemoryUsage(uint64_t bytes) {
         static_assert(kMaxMemoryUsage <= std::numeric_limits<size_t>::max(), "");
         if (bytes > kMaxMemoryUsage || mMemoryUsage + bytes > kMaxMemoryUsage) {
@@ -466,6 +473,14 @@ namespace dawn_native { namespace null {
         mBuffer = std::make_unique<uint8_t[]>(GetSize());
         mMappedPointer = mBuffer.get();
         return {};
+    }
+
+    uint32_t Device::GetOptimalBytesPerRowAlignment() const {
+        return 1;
+    }
+
+    uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
+        return 1;
     }
 
 }}  // namespace dawn_native::null

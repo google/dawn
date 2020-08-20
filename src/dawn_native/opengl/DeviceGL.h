@@ -62,6 +62,14 @@ namespace dawn_native { namespace opengl {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
+        MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+                                            const TextureDataLayout& src,
+                                            TextureCopy* dst,
+                                            const Extent3D& copySizePixels) override;
+
+        uint32_t GetOptimalBytesPerRowAlignment() const override;
+        uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
+
       private:
         Device(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,

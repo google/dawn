@@ -276,7 +276,10 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    MaybeError Device::CopyFromStagingToTexture(StagingBufferBase* source,
+    // In Metal we don't write from the CPU to the texture directly which can be done using the
+    // replaceRegion function, because the function requires a non-private storage mode and Dawn
+    // sets the private storage mode by default for all textures except IOSurfaces on macOS.
+    MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
                                                 const TextureDataLayout& dataLayout,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
@@ -372,6 +375,14 @@ namespace dawn_native { namespace metal {
 
         [mMtlDevice release];
         mMtlDevice = nil;
+    }
+
+    uint32_t Device::GetOptimalBytesPerRowAlignment() const {
+        return 1;
+    }
+
+    uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
+        return 1;
     }
 
 }}  // namespace dawn_native::metal

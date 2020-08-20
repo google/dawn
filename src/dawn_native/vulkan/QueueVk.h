@@ -31,10 +31,6 @@ namespace dawn_native { namespace vulkan {
         using QueueBase::QueueBase;
 
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-        MaybeError WriteTextureImpl(const TextureCopyView& destination,
-                                    const void* data,
-                                    const TextureDataLayout& dataLayout,
-                                    const Extent3D& writeSizePixel) override;
     };
 
 }}  // namespace dawn_native::vulkan

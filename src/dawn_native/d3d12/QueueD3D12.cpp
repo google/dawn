@@ -26,50 +26,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    namespace {
-        ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRow(
-            DeviceBase* device,
-            const void* data,
-            uint32_t alignedBytesPerRow,
-            uint32_t optimallyAlignedBytesPerRow,
-            uint32_t alignedRowsPerImage,
-            const TextureDataLayout& dataLayout,
-            const Format& textureFormat,
-            const Extent3D& writeSizePixel) {
-            uint64_t newDataSizeBytes;
-            DAWN_TRY_ASSIGN(
-                newDataSizeBytes,
-                ComputeRequiredBytesInCopy(textureFormat, writeSizePixel,
-                                           optimallyAlignedBytesPerRow, alignedRowsPerImage));
-
-            UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                              newDataSizeBytes, device->GetPendingCommandSerial(),
-                                              textureFormat.blockByteSize));
-            ASSERT(uploadHandle.mappedBuffer != nullptr);
-
-            uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
-            const uint8_t* srcPointer = static_cast<const uint8_t*>(data);
-            srcPointer += dataLayout.offset;
-
-            uint32_t alignedRowsPerImageInBlock = alignedRowsPerImage / textureFormat.blockHeight;
-            uint32_t dataRowsPerImageInBlock = dataLayout.rowsPerImage / textureFormat.blockHeight;
-            if (dataRowsPerImageInBlock == 0) {
-                dataRowsPerImageInBlock = writeSizePixel.height / textureFormat.blockHeight;
-            }
-
-            ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
-            uint64_t imageAdditionalStride =
-                dataLayout.bytesPerRow * (dataRowsPerImageInBlock - alignedRowsPerImageInBlock);
-
-            CopyTextureData(dstPointer, srcPointer, writeSizePixel.depth,
-                            alignedRowsPerImageInBlock, imageAdditionalStride, alignedBytesPerRow,
-                            optimallyAlignedBytesPerRow, dataLayout.bytesPerRow);
-
-            return uploadHandle;
-        }
-    }  // namespace
-
     Queue::Queue(Device* device) : QueueBase(device) {
     }
 
@@ -93,45 +49,6 @@ namespace dawn_native { namespace d3d12 {
 
         DAWN_TRY(device->NextSerial());
         return {};
-    }
-
-    MaybeError Queue::WriteTextureImpl(const TextureCopyView& destination,
-                                       const void* data,
-                                       const TextureDataLayout& dataLayout,
-                                       const Extent3D& writeSizePixel) {
-        const TexelBlockInfo& blockInfo =
-            destination.texture->GetFormat().GetTexelBlockInfo(destination.aspect);
-
-        // We are only copying the part of the data that will appear in the texture.
-        // Note that validating texture copy range ensures that writeSizePixel->width and
-        // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
-        uint32_t alignedBytesPerRow =
-            (writeSizePixel.width) / blockInfo.blockWidth * blockInfo.blockByteSize;
-        uint32_t alignedRowsPerImage = writeSizePixel.height;
-        uint32_t optimallyAlignedBytesPerRow =
-            Align(alignedBytesPerRow, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
-
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(
-            uploadHandle,
-            UploadTextureDataAligningBytesPerRow(
-                GetDevice(), data, alignedBytesPerRow, optimallyAlignedBytesPerRow,
-                alignedRowsPerImage, dataLayout, destination.texture->GetFormat(), writeSizePixel));
-
-        TextureDataLayout passDataLayout = dataLayout;
-        passDataLayout.offset = uploadHandle.startOffset;
-        passDataLayout.bytesPerRow = optimallyAlignedBytesPerRow;
-        passDataLayout.rowsPerImage = alignedRowsPerImage;
-
-        TextureCopy textureCopy;
-        textureCopy.texture = destination.texture;
-        textureCopy.mipLevel = destination.mipLevel;
-        textureCopy.origin = destination.origin;
-        textureCopy.aspect = ConvertAspect(destination.texture->GetFormat(), destination.aspect);
-
-        return ToBackend(GetDevice())
-            ->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, &textureCopy,
-                                       writeSizePixel);
     }
 
 }}  // namespace dawn_native::d3d12

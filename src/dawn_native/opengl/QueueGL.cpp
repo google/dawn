@@ -51,4 +51,11 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
+    MaybeError Queue::WriteTextureImpl(const TextureCopyView& destination,
+                                       const void* data,
+                                       const TextureDataLayout& dataLayout,
+                                       const Extent3D& writeSizePixel) {
+        return DAWN_UNIMPLEMENTED_ERROR("Unable to write to texture\n");
+    }
+
 }}  // namespace dawn_native::opengl
