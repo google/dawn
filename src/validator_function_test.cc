@@ -285,5 +285,31 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionExist_Pass) {
   tint::ValidatorImpl v;
   EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
+
+TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionNotVoid_Fail) {
+  // entry_point vertex as "main" = vtx_main
+  // fn vtx_main() -> i32 { return 0; }
+  ast::type::I32Type i32;
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("vtx_main", std::move(params), &i32);
+  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 0));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "main", "vtx_main");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(),
+            "12:34: v-0024: Entry point function must return void: 'vtx_main'");
+}
 }  // namespace
 }  // namespace tint
