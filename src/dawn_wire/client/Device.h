@@ -38,7 +38,6 @@ namespace dawn_wire { namespace client {
         void PushErrorScope(WGPUErrorFilter filter);
         bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
         WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
-        WGPUCreateBufferMappedResult CreateBufferMapped(const WGPUBufferDescriptor* descriptor);
         WGPUBuffer CreateErrorBuffer();
 
         void HandleError(WGPUErrorType errorType, const char* message);

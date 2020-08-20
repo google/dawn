@@ -27,11 +27,10 @@ namespace dawn_native {
         ASSERT(mInflightRequests.Empty());
     }
 
-    void MapRequestTracker::Track(BufferBase* buffer, uint32_t mapSerial, MapType type) {
+    void MapRequestTracker::Track(BufferBase* buffer, uint32_t mapSerial) {
         Request request;
         request.buffer = buffer;
         request.mapSerial = mapSerial;
-        request.type = type;
 
         mInflightRequests.Enqueue(std::move(request), mDevice->GetPendingCommandSerial());
         mDevice->AddFutureCallbackSerial(mDevice->GetPendingCommandSerial());
@@ -39,7 +38,7 @@ namespace dawn_native {
 
     void MapRequestTracker::Tick(Serial finishedSerial) {
         for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
-            request.buffer->OnMapCommandSerialFinished(request.mapSerial, request.type);
+            request.buffer->OnMapCommandSerialFinished(request.mapSerial);
         }
         mInflightRequests.ClearUpTo(finishedSerial);
     }

@@ -311,14 +311,6 @@ namespace dawn_native { namespace null {
         memcpy(mBackingData.get() + bufferOffset, data, size);
     }
 
-    MaybeError Buffer::MapReadAsyncImpl() {
-        return {};
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl() {
-        return {};
-    }
-
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
         return {};
     }

@@ -103,7 +103,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Count = 1;
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
+        // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
         // and robust resource initialization.
         resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | wgpu::BufferUsage::CopyDst);
 
@@ -291,14 +291,6 @@ namespace dawn_native { namespace d3d12 {
         bool isMapWrite = (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
         DAWN_TRY(MapInternal(isMapWrite, 0, size_t(GetSize()), "D3D12 map at creation"));
         return {};
-    }
-
-    MaybeError Buffer::MapReadAsyncImpl() {
-        return MapInternal(false, 0, size_t(GetSize()), "D3D12 map read async");
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl() {
-        return MapInternal(true, 0, size_t(GetSize()), "D3D12 map write async");
     }
 
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {

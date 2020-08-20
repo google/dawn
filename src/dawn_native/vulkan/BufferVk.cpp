@@ -141,7 +141,7 @@ namespace dawn_native { namespace vulkan {
         // TODO(cwallez@chromium.org): Have a global "zero" buffer that can do everything instead
         // of creating a new 4-byte buffer?
         createInfo.size = std::max(GetSize(), uint64_t(4u));
-        // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
+        // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
         // and robust resource initialization.
         createInfo.usage = VulkanBufferUsage(GetUsage() | wgpu::BufferUsage::CopyDst);
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -247,22 +247,6 @@ namespace dawn_native { namespace vulkan {
         // TODO(jiawei.shao@intel.com): initialize mapped buffer in CPU side.
         EnsureDataInitialized(recordingContext);
 
-        return {};
-    }
-
-    MaybeError Buffer::MapReadAsyncImpl() {
-        Device* device = ToBackend(GetDevice());
-
-        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
-        TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
-        return {};
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl() {
-        Device* device = ToBackend(GetDevice());
-
-        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
-        TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
         return {};
     }
 

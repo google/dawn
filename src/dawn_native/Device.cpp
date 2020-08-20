@@ -612,27 +612,6 @@ namespace dawn_native {
 
         return result.Detach();
     }
-    WGPUCreateBufferMappedResult DeviceBase::CreateBufferMapped(
-        const BufferDescriptor* descriptor) {
-        EmitDeprecationWarning(
-            "CreateBufferMapped is deprecated, use wgpu::BufferDescriptor::mappedAtCreation and "
-            "wgpu::Buffer::GetMappedRange instead");
-
-        BufferDescriptor fixedDesc = *descriptor;
-        fixedDesc.mappedAtCreation = true;
-        BufferBase* buffer = CreateBuffer(&fixedDesc);
-
-        WGPUCreateBufferMappedResult result = {};
-        result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
-        result.data = buffer->GetMappedRange(0, descriptor->size);
-        result.dataLength = descriptor->size;
-
-        if (result.data != nullptr) {
-            memset(result.data, 0, result.dataLength);
-        }
-
-        return result;
-    }
     CommandEncoder* DeviceBase::CreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
         return new CommandEncoder(this, descriptor);
     }

@@ -123,26 +123,6 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    MaybeError Buffer::MapReadAsyncImpl() {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
-
-        // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
-        // version of OpenGL that would let us map the buffer unsynchronized.
-        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        return {};
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl() {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
-
-        // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
-        // version of OpenGL that would let us map the buffer unsynchronized.
-        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        return {};
-    }
-
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 

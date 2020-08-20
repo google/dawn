@@ -90,19 +90,15 @@
     },
     "special items": {
         "client_side_structures": [
-            "CreateBufferMappedResult",
             "SurfaceDescriptorFromMetalLayer",
             "SurfaceDescriptorFromWindowsHWND",
             "SurfaceDescriptorFromXlib"
         ],
         "client_side_commands": [
             "BufferMapAsync",
-            "BufferMapReadAsync",
-            "BufferMapWriteAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
             "DeviceCreateBuffer",
-            "DeviceCreateBufferMapped",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",

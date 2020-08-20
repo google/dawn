@@ -52,7 +52,7 @@ namespace dawn_native {
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation();
-        void OnMapCommandSerialFinished(uint32_t mapSerial, MapType type);
+        void OnMapCommandSerialFinished(uint32_t mapSerial);
 
         MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -61,8 +61,6 @@ namespace dawn_native {
         void SetIsDataInitialized();
 
         // Dawn API
-        void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
-        void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
         void MapAsync(wgpu::MapMode mode,
                       size_t offset,
                       size_t size,
@@ -85,8 +83,6 @@ namespace dawn_native {
 
       private:
         virtual MaybeError MapAtCreationImpl() = 0;
-        virtual MaybeError MapReadAsyncImpl() = 0;
-        virtual MaybeError MapWriteAsyncImpl() = 0;
         virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
         virtual void UnmapImpl() = 0;
         virtual void DestroyImpl() = 0;
@@ -95,14 +91,6 @@ namespace dawn_native {
         virtual bool IsMappableAtCreation() const = 0;
         MaybeError CopyFromStagingBuffer();
         void* GetMappedRangeInternal(bool writable, size_t offset, size_t size);
-        void CallMapReadCallback(uint32_t serial,
-                                 WGPUBufferMapAsyncStatus status,
-                                 const void* pointer,
-                                 uint64_t dataLength);
-        void CallMapWriteCallback(uint32_t serial,
-                                  WGPUBufferMapAsyncStatus status,
-                                  void* pointer,
-                                  uint64_t dataLength);
         void CallMapCallback(uint32_t serial, WGPUBufferMapAsyncStatus status);
 
         MaybeError ValidateMap(wgpu::BufferUsage requiredUsage,
@@ -122,8 +110,6 @@ namespace dawn_native {
 
         std::unique_ptr<StagingBufferBase> mStagingBuffer;
 
-        WGPUBufferMapReadCallback mMapReadCallback = nullptr;
-        WGPUBufferMapWriteCallback mMapWriteCallback = nullptr;
         WGPUBufferMapCallback mMapCallback = nullptr;
         void* mMapUserdata = 0;
         uint32_t mMapSerial = 0;

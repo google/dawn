@@ -65,14 +65,6 @@ namespace dawn_native {
                 return {};
             }
 
-            MaybeError MapReadAsyncImpl() override {
-                UNREACHABLE();
-                return {};
-            }
-            MaybeError MapWriteAsyncImpl() override {
-                UNREACHABLE();
-                return {};
-            }
             MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
                 UNREACHABLE();
                 return {};
@@ -149,8 +141,6 @@ namespace dawn_native {
     BufferBase::~BufferBase() {
         if (mState == BufferState::Mapped) {
             ASSERT(!IsError());
-            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
-            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
             CallMapCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown);
         }
     }
@@ -213,48 +203,6 @@ namespace dawn_native {
         }
     }
 
-    void BufferBase::CallMapReadCallback(uint32_t serial,
-                                         WGPUBufferMapAsyncStatus status,
-                                         const void* pointer,
-                                         uint64_t dataLength) {
-        ASSERT(!IsError());
-        if (mMapReadCallback != nullptr && serial == mMapSerial) {
-            ASSERT(mMapWriteCallback == nullptr);
-
-            // Tag the callback as fired before firing it, otherwise it could fire a second time if
-            // for example buffer.Unmap() is called inside the application-provided callback.
-            WGPUBufferMapReadCallback callback = mMapReadCallback;
-            mMapReadCallback = nullptr;
-
-            if (GetDevice()->IsLost()) {
-                callback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, mMapUserdata);
-            } else {
-                callback(status, pointer, dataLength, mMapUserdata);
-            }
-        }
-    }
-
-    void BufferBase::CallMapWriteCallback(uint32_t serial,
-                                          WGPUBufferMapAsyncStatus status,
-                                          void* pointer,
-                                          uint64_t dataLength) {
-        ASSERT(!IsError());
-        if (mMapWriteCallback != nullptr && serial == mMapSerial) {
-            ASSERT(mMapReadCallback == nullptr);
-
-            // Tag the callback as fired before firing it, otherwise it could fire a second time if
-            // for example buffer.Unmap() is called inside the application-provided callback.
-            WGPUBufferMapWriteCallback callback = mMapWriteCallback;
-            mMapWriteCallback = nullptr;
-
-            if (GetDevice()->IsLost()) {
-                callback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, mMapUserdata);
-            } else {
-                callback(status, pointer, dataLength, mMapUserdata);
-            }
-        }
-    }
-
     void BufferBase::CallMapCallback(uint32_t serial, WGPUBufferMapAsyncStatus status) {
         ASSERT(!IsError());
         if (mMapCallback != nullptr && serial == mMapSerial) {
@@ -269,66 +217,6 @@ namespace dawn_native {
                 callback(status, mMapUserdata);
             }
         }
-    }
-
-    void BufferBase::MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata) {
-        GetDevice()->EmitDeprecationWarning(
-            "Buffer::MapReadAsync is deprecated. Use Buffer::MapAsync instead");
-
-        WGPUBufferMapAsyncStatus status;
-        if (GetDevice()->ConsumedError(ValidateMap(wgpu::BufferUsage::MapRead, &status))) {
-            callback(status, nullptr, 0, userdata);
-            return;
-        }
-        ASSERT(!IsError());
-
-        ASSERT(mMapWriteCallback == nullptr);
-
-        // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
-        mMapSerial++;
-        mMapReadCallback = callback;
-        mMapUserdata = userdata;
-        mMapOffset = 0;
-        mMapSize = mSize;
-        mState = BufferState::Mapped;
-
-        if (GetDevice()->ConsumedError(MapReadAsyncImpl())) {
-            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
-            return;
-        }
-
-        MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
-        tracker->Track(this, mMapSerial, MapType::Read);
-    }
-
-    void BufferBase::MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata) {
-        GetDevice()->EmitDeprecationWarning(
-            "Buffer::MapReadAsync is deprecated. Use Buffer::MapAsync instead");
-
-        WGPUBufferMapAsyncStatus status;
-        if (GetDevice()->ConsumedError(ValidateMap(wgpu::BufferUsage::MapWrite, &status))) {
-            callback(status, nullptr, 0, userdata);
-            return;
-        }
-        ASSERT(!IsError());
-
-        ASSERT(mMapReadCallback == nullptr);
-
-        // TODO(cwallez@chromium.org): what to do on wraparound? Could cause crashes.
-        mMapSerial++;
-        mMapWriteCallback = callback;
-        mMapUserdata = userdata;
-        mMapOffset = 0;
-        mMapSize = mSize;
-        mState = BufferState::Mapped;
-
-        if (GetDevice()->ConsumedError(MapWriteAsyncImpl())) {
-            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
-            return;
-        }
-
-        MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
-        tracker->Track(this, mMapSerial, MapType::Write);
     }
 
     void BufferBase::MapAsync(wgpu::MapMode mode,
@@ -367,7 +255,7 @@ namespace dawn_native {
         }
 
         MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
-        tracker->Track(this, mMapSerial, MapType::Async);
+        tracker->Track(this, mMapSerial);
     }
 
     void* BufferBase::GetMappedRange(size_t offset, size_t size) {
@@ -450,14 +338,10 @@ namespace dawn_native {
             // A map request can only be called once, so this will fire only if the request wasn't
             // completed before the Unmap.
             // Callbacks are not fired if there is no callback registered, so this is correct for
-            // CreateBufferMapped.
-            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
-            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
+            // mappedAtCreation = true.
             CallMapCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown);
             UnmapImpl();
 
-            mMapReadCallback = nullptr;
-            mMapWriteCallback = nullptr;
             mMapCallback = nullptr;
             mMapUserdata = 0;
 
@@ -599,7 +483,7 @@ namespace dawn_native {
         switch (mState) {
             case BufferState::Mapped:
             case BufferState::MappedAtCreation:
-                // A buffer may be in the Mapped state if it was created with CreateBufferMapped
+                // A buffer may be in the Mapped state if it was created with mappedAtCreation
                 // even if it did not have a mappable usage.
                 return {};
             case BufferState::Unmapped:
@@ -626,20 +510,8 @@ namespace dawn_native {
         mState = BufferState::Destroyed;
     }
 
-    void BufferBase::OnMapCommandSerialFinished(uint32_t mapSerial, MapType type) {
-        switch (type) {
-            case MapType::Read:
-                CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success,
-                                    GetMappedRangeInternal(false, 0, mSize), GetSize());
-                break;
-            case MapType::Write:
-                CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success,
-                                     GetMappedRangeInternal(true, 0, mSize), GetSize());
-                break;
-            case MapType::Async:
-                CallMapCallback(mapSerial, WGPUBufferMapAsyncStatus_Success);
-                break;
-        }
+    void BufferBase::OnMapCommandSerialFinished(uint32_t mapSerial) {
+        CallMapCallback(mapSerial, WGPUBufferMapAsyncStatus_Success);
     }
 
     bool BufferBase::IsDataInitialized() const {

@@ -57,13 +57,9 @@ namespace dawn_native { namespace vulkan {
         void InitializeToZero(CommandRecordingContext* recordingContext);
         void ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue);
 
-        // Dawn API
-        MaybeError MapReadAsyncImpl() override;
-        MaybeError MapWriteAsyncImpl() override;
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
-
         bool IsMappableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;

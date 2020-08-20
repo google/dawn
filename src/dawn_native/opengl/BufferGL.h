@@ -35,16 +35,13 @@ namespace dawn_native { namespace opengl {
 
       private:
         ~Buffer() override;
-        // Dawn API
-        MaybeError MapReadAsyncImpl() override;
-        MaybeError MapWriteAsyncImpl() override;
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
-
         bool IsMappableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
+
         uint64_t GetAppliedSize() const;
 
         void InitializeToZero();

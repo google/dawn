@@ -120,14 +120,6 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    MaybeError Buffer::MapReadAsyncImpl() {
-        return {};
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl() {
-        return {};
-    }
-
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
         CommandRecordingContext* commandContext =
             ToBackend(GetDevice())->GetPendingCommandContext();

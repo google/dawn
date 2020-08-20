@@ -679,7 +679,7 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
 
 // Test that the code path of readable buffer mapping clears the buffer correctly when it is the
 // first use of the buffer.
-TEST_P(BufferZeroInitTest, MapReadAsync) {
+TEST_P(BufferZeroInitTest, MapAsync_Read) {
     constexpr uint32_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
         wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -724,7 +724,7 @@ TEST_P(BufferZeroInitTest, MapReadAsync) {
 
 // Test that the code path of writable buffer mapping clears the buffer correctly when it is the
 // first use of the buffer.
-TEST_P(BufferZeroInitTest, MapWriteAsync) {
+TEST_P(BufferZeroInitTest, MapAsync_Write) {
     constexpr uint32_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;

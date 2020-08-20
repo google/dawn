@@ -165,17 +165,6 @@ namespace {
 
     // Test WriteBuffer with mapped buffer
     TEST_F(QueueWriteBufferValidationTest, MappedBuffer) {
-        // CreateBufferMapped
-        {
-            wgpu::BufferDescriptor descriptor;
-            descriptor.size = 4;
-            descriptor.usage = wgpu::BufferUsage::CopyDst;
-            wgpu::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-
-            uint32_t value = 0;
-            ASSERT_DEVICE_ERROR(queue.WriteBuffer(result.buffer, 0, &value, sizeof(value)));
-        }
-
         // mappedAtCreation
         {
             wgpu::BufferDescriptor descriptor;

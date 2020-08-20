@@ -145,7 +145,6 @@ namespace dawn_native {
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
-        WGPUCreateBufferMappedResult CreateBufferMapped(const BufferDescriptor* descriptor);
         CommandEncoder* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);

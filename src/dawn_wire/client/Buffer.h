@@ -34,8 +34,6 @@ namespace dawn_wire { namespace client {
         ~Buffer();
         void ClearMapRequests(WGPUBufferMapAsyncStatus status);
 
-        void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
-        void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
         bool OnMapAsyncCallback(uint32_t requestSerial,
                                 uint32_t status,
                                 uint64_t readInitialDataInfoLength,
