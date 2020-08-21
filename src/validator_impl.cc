@@ -68,6 +68,14 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
                     ep_ptr->function_name() + "'");
       return false;
     }
+    ast::Function* func;
+    function_stack_.get(ep_ptr->function_name(), &func);
+    if (!func->return_type()->IsVoid()) {
+      set_error(ep_ptr->source(),
+                "v-0024: Entry point function must return void: '" +
+                    ep_ptr->function_name() + "'");
+      return false;
+    }
   }
   return true;
 }

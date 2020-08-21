@@ -286,7 +286,7 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionExist_Pass) {
   EXPECT_TRUE(v.Validate(mod())) << v.error();
 }
 
-TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionNotVoid_Fail) {
+TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
   // entry_point vertex as "main" = vtx_main
   // fn vtx_main() -> i32 { return 0; }
   ast::type::I32Type i32;
@@ -301,7 +301,7 @@ TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionNotVoid_Fail) {
   func->set_body(std::move(body));
 
   auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "main", "vtx_main");
+      Source{12, 34}, ast::PipelineStage::kVertex, "main", "vtx_main");
 
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(entry_point));
