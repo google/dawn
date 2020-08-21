@@ -69,15 +69,16 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
   EXPECT_EQ(g.result(), "56779u");
 }
 
-TEST_F(MslGeneratorImplTest, DISABLED_EmitConstructor_Float) {
+TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
   ast::type::F32Type f32;
-  auto lit = std::make_unique<ast::FloatLiteral>(&f32, 1.5e27);
+  // Use a number close to 1<<30 but whose decimal representation ends in 0.
+  auto lit = std::make_unique<ast::FloatLiteral>(&f32, float((1 << 30) - 4));
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   ast::Module m;
   GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "1.49999995e+27f");
+  EXPECT_EQ(g.result(), "1.07374182e+09f");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
