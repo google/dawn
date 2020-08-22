@@ -266,8 +266,6 @@ namespace dawn_native {
         return GetMappedRangeInternal(false, offset, size);
     }
 
-    // TODO(dawn:445): When CreateBufferMapped is removed, make GetMappedRangeInternal also take
-    // care of the validation of GetMappedRange.
     void* BufferBase::GetMappedRangeInternal(bool writable, size_t offset, size_t size) {
         if (!CanGetMappedRange(writable, offset, size)) {
             return nullptr;
@@ -461,11 +459,9 @@ namespace dawn_native {
                 return true;
 
             case BufferState::Mapped:
-                // TODO(dawn:445): When mapRead/WriteAsync is removed, check against mMapMode
-                // instead of mUsage
-                ASSERT(bool(mUsage & wgpu::BufferUsage::MapRead) ^
-                       bool(mUsage & wgpu::BufferUsage::MapWrite));
-                return !writable || (mUsage & wgpu::BufferUsage::MapWrite);
+                ASSERT(bool(mMapMode & wgpu::MapMode::Read) ^
+                       bool(mMapMode & wgpu::MapMode::Write));
+                return !writable || (mMapMode & wgpu::MapMode::Write);
 
             case BufferState::Unmapped:
             case BufferState::Destroyed:
