@@ -1011,13 +1011,15 @@ void DawnTestBase::FlushWire() {
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(uint64_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = readbackSize;
-    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
-
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;
-    slot.buffer = device.CreateBuffer(&descriptor);
+
+    // Create and initialize the slot buffer so that it won't unexpectedly affect the count of
+    // resource lazy clear in the tests.
+    const std::vector<uint8_t> initialBufferData(readbackSize, 0u);
+    slot.buffer =
+        utils::CreateBufferFromData(device, initialBufferData.data(), readbackSize,
+                                    wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
 
     ReadbackReservation reservation;
     reservation.buffer = slot.buffer;

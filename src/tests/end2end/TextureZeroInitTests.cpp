@@ -1365,10 +1365,12 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
     {
         uint32_t bytesPerRow = Align(kUnalignedSize, kTextureBytesPerRowAlignment);
 
-        wgpu::BufferDescriptor bufferDesc;
-        bufferDesc.size = kUnalignedSize * bytesPerRow;
-        bufferDesc.usage = wgpu::BufferUsage::CopyDst;
-        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        // Create and initialize the destination buffer to ensure we only count the times of
+        // texture lazy initialization in this test.
+        const uint64_t bufferSize = kUnalignedSize * bytesPerRow;
+        const std::vector<uint8_t> initialBufferData(bufferSize, 0u);
+        wgpu::Buffer buffer = utils::CreateBufferFromData(device, initialBufferData.data(),
+                                                          bufferSize, wgpu::BufferUsage::CopyDst);
 
         wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
         wgpu::BufferCopyView bufferCopyView =
@@ -1635,10 +1637,20 @@ TEST_P(TextureZeroInitTest, WriteTextureHalfAtMipLevel) {
                             kMipLevel, 0);
 }
 
+// TODO(jiawei.shao@intel.com): remove "lazy_clear_buffer_on_first_use" when we complete the
+// support of buffer lazy initialization.
 DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                    {"use_d3d12_render_pass"}),
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing",
+                                    "lazy_clear_buffer_on_first_use"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing",
+                                     "lazy_clear_buffer_on_first_use"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
+                                    "lazy_clear_buffer_on_first_use"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing",
+                                     "lazy_clear_buffer_on_first_use"}));

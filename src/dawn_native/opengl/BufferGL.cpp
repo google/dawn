@@ -21,6 +21,18 @@ namespace dawn_native { namespace opengl {
 
     // Buffer
 
+    // static
+    ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
+                                                            const BufferDescriptor* descriptor,
+                                                            bool shouldLazyClear) {
+        Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor, shouldLazyClear));
+        if (descriptor->mappedAtCreation) {
+            DAWN_TRY(buffer->MapAtCreation());
+        }
+
+        return std::move(buffer);
+    }
+
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
         // TODO(cwallez@chromium.org): Have a global "zero" buffer instead of creating a new 4-byte
@@ -35,6 +47,13 @@ namespace dawn_native { namespace opengl {
             device->gl.BufferData(GL_ARRAY_BUFFER, size, clearValues.data(), GL_STATIC_DRAW);
         } else {
             device->gl.BufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
+        }
+    }
+
+    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor, bool shouldLazyClear)
+        : Buffer(device, descriptor) {
+        if (!shouldLazyClear) {
+            SetIsDataInitialized();
         }
     }
 

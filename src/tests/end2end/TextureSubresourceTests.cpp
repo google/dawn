@@ -167,6 +167,10 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
 
 // Test different array layers
 TEST_P(TextureSubresourceTest, ArrayLayersTest) {
+    // TODO(crbug.com/dawn/517): The Vulkan backend hits this validation rule.
+    // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/vkspec.html#VUID-vkCmdDraw-None-02687
+    DAWN_SKIP_TEST_IF(IsBackendValidationEnabled() && IsVulkan());
+
     // Create a texture with 1 mipmap level and 2 layers
     wgpu::Texture texture =
         CreateTexture(1, 2,
