@@ -52,6 +52,18 @@ namespace wgsl {
 
 class Lexer;
 
+struct ForHeader {
+  std::unique_ptr<ast::Statement> initializer;
+  std::unique_ptr<ast::Expression> condition;
+  std::unique_ptr<ast::Statement> continuing;
+
+  ForHeader(std::unique_ptr<ast::Statement> _initializer,
+            std::unique_ptr<ast::Expression> _condition,
+            std::unique_ptr<ast::Statement> _continuing);
+
+  ~ForHeader();
+};
+
 /// ParserImpl for WGSL source data
 class ParserImpl {
  public:
@@ -227,6 +239,12 @@ class ParserImpl {
   /// Parses a `loop_stmt` grammar element
   /// @returns the parsed loop or nullptr
   std::unique_ptr<ast::LoopStatement> loop_stmt();
+  /// Parses a `for_header` grammar element
+  /// @returns the parsed for header or nullptr
+  std::unique_ptr<ForHeader> for_header();
+  /// Parses a `for_stmt` grammar element
+  /// @returns the parsed for loop or nullptr
+  std::unique_ptr<ast::Statement> for_stmt();
   /// Parses a `continuing_stmt` grammar element
   /// @returns the parsed statements
   std::unique_ptr<ast::BlockStatement> continuing_stmt();

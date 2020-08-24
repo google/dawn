@@ -513,6 +513,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kFalse, source, "false"};
   if (str == "fn")
     return {Token::Type::kFn, source, "fn"};
+  if (str == "for")
+    return {Token::Type::kFor, source, "for"};
   if (str == "fragment")
     return {Token::Type::kFragment, source, "fragment"};
   if (str == "function")
@@ -610,8 +612,6 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "f16"};
   if (str == "f64")
     return {Token::Type::kReservedKeyword, source, "f64"};
-  if (str == "for")
-    return {Token::Type::kReservedKeyword, source, "for"};
   if (str == "i8")
     return {Token::Type::kReservedKeyword, source, "i8"};
   if (str == "i16")

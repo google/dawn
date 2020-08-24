@@ -160,6 +160,8 @@ class Token {
     kFalse,
     /// A 'fn'
     kFn,
+    // A 'for'
+    kFor,
     /// A 'fragment'
     kFragment,
     /// A 'function'
@@ -415,6 +417,8 @@ class Token {
   bool IsFalse() const { return type_ == Type::kFalse; }
   /// @returns true if token is a 'fn'
   bool IsFn() const { return type_ == Type::kFn; }
+  /// @returns true if token is a 'for'
+  bool IsFor() const { return type_ == Type::kFor; }
   /// @returns true if token is a 'fragment'
   bool IsFragment() const { return type_ == Type::kFragment; }
   /// @returns true if token is a 'function'

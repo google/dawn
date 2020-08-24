@@ -149,6 +149,8 @@ std::string Token::TypeToName(Type type) {
       return "false";
     case Token::Type::kFn:
       return "fn";
+    case Token::Type::kFor:
+      return "for";
     case Token::Type::kFragment:
       return "fragment";
     case Token::Type::kFunction:
