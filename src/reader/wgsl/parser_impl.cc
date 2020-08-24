@@ -1479,6 +1479,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::statements() {
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
 //   | assignment_stmt SEMICOLON
+//   | body_stmt
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
   auto t = peek();
   if (t.IsSemicolon()) {
@@ -1587,6 +1588,12 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     }
     return assign;
   }
+
+  auto body = body_stmt();
+  if (has_error())
+    return nullptr;
+  if (body != nullptr)
+    return body;
 
   return nullptr;
 }

@@ -221,6 +221,23 @@ TEST_F(ParserImplTest, Statement_Discard_MissingSemicolon) {
   EXPECT_EQ(p->error(), "1:8: missing ;");
 }
 
+TEST_F(ParserImplTest, Statement_Body) {
+  auto* p = parser("{ var i: i32; }");
+  auto e = p->statement();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsBlock());
+  EXPECT_TRUE(e->AsBlock()->get(0)->IsVariableDecl());
+}
+
+TEST_F(ParserImplTest, Statement_Body_Invalid) {
+  auto* p = parser("{ fn main() -> {}}");
+  auto e = p->statement();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p->error(), "1:3: missing }");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader
