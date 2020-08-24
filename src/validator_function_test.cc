@@ -311,5 +311,33 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
   EXPECT_EQ(v.error(),
             "12:34: v-0024: Entry point function must return void: 'vtx_main'");
 }
+
+TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionWithParams_Fail) {
+  // entry_point vertex as "func" = vtx_func
+  // fn vtx_func(a : i32) -> void { return; }
+  ast::type::I32Type i32;
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  params.push_back(
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32));
+  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      Source{12, 34}, ast::PipelineStage::kVertex, "func", "vtx_func");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(),
+            "12:34: v-0023: Entry point function must accept no parameters: "
+            "'vtx_func'");
+}
+//
 }  // namespace
 }  // namespace tint
