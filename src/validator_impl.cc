@@ -76,6 +76,12 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
                     ep_ptr->function_name() + "'");
       return false;
     }
+    if (func->params().size() != 0) {
+      set_error(ep_ptr->source(),
+                "v-0023: Entry point function must accept no parameters: '" +
+                    ep_ptr->function_name() + "'");
+      return false;
+    }
   }
   return true;
 }

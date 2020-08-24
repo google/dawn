@@ -312,7 +312,7 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
             "12:34: v-0024: Entry point function must return void: 'vtx_main'");
 }
 
-TEST_F(ValidateFunctionTest, DISABLED_EntryPointFunctionWithParams_Fail) {
+TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
   // entry_point vertex as "func" = vtx_func
   // fn vtx_func(a : i32) -> void { return; }
   ast::type::I32Type i32;
