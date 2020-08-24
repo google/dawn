@@ -30,7 +30,7 @@ entry_point vertex as "main" = vtx_main;
 # Fragment shader
 [[location 0]] var<out> outColor : vec4<f32>;
 fn frag_main() -> void {
-  outColor = vec4<f32>(1, 0, 0, 1);
+  outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   return;
 }
 entry_point fragment = frag_main;
