@@ -65,8 +65,7 @@ TEST_F(ValidatorTest, Import) {
   ast::Module m;
   m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
 
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.CheckImports(&m));
+  EXPECT_TRUE(v()->CheckImports(&m));
 }
 
 TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
@@ -74,10 +73,9 @@ TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
   m.AddImport(
       std::make_unique<ast::Import>(Source{12, 34}, "not.GLSL", "glsl"));
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(&m));
-  ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: not.GLSL");
+  EXPECT_FALSE(v()->CheckImports(&m));
+  ASSERT_TRUE(v()->has_error());
+  EXPECT_EQ(v()->error(), "12:34: v-0001: unknown import: not.GLSL");
 }
 
 TEST_F(ValidatorTest, Import_Fail_Typo) {
@@ -85,10 +83,9 @@ TEST_F(ValidatorTest, Import_Fail_Typo) {
   m.AddImport(
       std::make_unique<ast::Import>(Source{12, 34}, "GLSL.std.4501", "glsl"));
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(&m));
-  ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: GLSL.std.4501");
+  EXPECT_FALSE(v()->CheckImports(&m));
+  ASSERT_TRUE(v()->has_error());
+  EXPECT_EQ(v()->error(), "12:34: v-0001: unknown import: GLSL.std.4501");
 }
 
 TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
@@ -101,11 +98,10 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
                                   std::move(rhs));
 
-  tint::ValidatorImpl v;
   // TODO(sarahM0): Invalidate assignment to scalar.
-  ASSERT_TRUE(v.has_error());
+  ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
-  EXPECT_EQ(v.error(), "12:34: v-000x: invalid assignment");
+  EXPECT_EQ(v()->error(), "12:34: v-000x: invalid assignment");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
@@ -119,9 +115,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
       Source{12, 34}, std::move(lhs), std::move(rhs));
 
   EXPECT_TRUE(td()->DetermineResultType(assign.get())) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateStatement(assign.get()));
-  EXPECT_EQ(v.error(), "12:34: v-0006: 'b' is not declared");
+  EXPECT_FALSE(v()->ValidateStatement(assign.get()));
+  EXPECT_EQ(v()->error(), "12:34: v-0006: 'b' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -139,9 +134,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
       Source{12, 34}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateStatements(body.get()));
-  EXPECT_EQ(v.error(), "12:34: v-0006: 'b' is not declared");
+  EXPECT_FALSE(v()->ValidateStatements(body.get()));
+  EXPECT_EQ(v()->error(), "12:34: v-0006: 'b' is not declared");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
@@ -165,8 +159,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateResultTypes(&assign));
+  EXPECT_TRUE(v()->ValidateResultTypes(&assign));
 }
 
 TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
@@ -194,11 +187,10 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateResultTypes(&assign));
-  ASSERT_TRUE(v.has_error());
+  EXPECT_FALSE(v()->ValidateResultTypes(&assign));
+  ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
-  EXPECT_EQ(v.error(),
+  EXPECT_EQ(v()->error(),
             "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
@@ -228,8 +220,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateStatements(body.get())) << v.error();
+  EXPECT_TRUE(v()->ValidateStatements(body.get())) << v()->error();
 }
 
 TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
@@ -259,11 +250,10 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateStatements(&block));
-  ASSERT_TRUE(v.has_error());
+  EXPECT_FALSE(v()->ValidateStatements(&block));
+  ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
-  EXPECT_EQ(v.error(),
+  EXPECT_EQ(v()->error(),
             "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
@@ -295,9 +285,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(), "12:34: v-0006: 'not_global_var' is not declared");
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(), "12:34: v-0006: 'not_global_var' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -336,10 +325,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
-  tint::ValidatorImpl v;
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
@@ -372,11 +360,10 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
       Source{12, 34}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
-  tint::ValidatorImpl v;
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  EXPECT_FALSE(v.ValidateStatements(outer_body.get()));
-  EXPECT_EQ(v.error(), "12:34: v-0006: 'a' is not declared");
+  EXPECT_FALSE(v()->ValidateStatements(outer_body.get()));
+  EXPECT_EQ(v()->error(), "12:34: v-0006: 'a' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -408,10 +395,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   outer_body->append(
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
-  tint::ValidatorImpl v;
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  EXPECT_TRUE(v.ValidateStatements(outer_body.get())) << v.error();
+  EXPECT_TRUE(v()->ValidateStatements(outer_body.get())) << v()->error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
@@ -431,8 +417,7 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
 
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidatorTest, AssignToConstant_Fail) {
@@ -462,9 +447,8 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateStatements(body.get()));
-  EXPECT_EQ(v.error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
+  EXPECT_FALSE(v()->ValidateStatements(body.get()));
+  EXPECT_EQ(v()->error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
 }
 
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
@@ -484,9 +468,8 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
 
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0011: redeclared global identifier 'global_var'");
 }
 
@@ -522,9 +505,8 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod())) << v.error();
-  EXPECT_EQ(v.error(), "12:34: v-0013: redeclared identifier 'a'");
+  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+  EXPECT_EQ(v()->error(), "12:34: v-0013: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
@@ -559,9 +541,8 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(), "12:34: v-0014: redeclared identifier 'a'");
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(), "12:34: v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
@@ -594,8 +575,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       Source{12, 34}, std::move(var_a_float)));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateStatements(outer_body.get())) << v.error();
+  EXPECT_TRUE(v()->ValidateStatements(outer_body.get())) << v()->error();
 }
 
 TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
@@ -631,9 +611,8 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.ValidateStatements(outer_body.get()));
-  EXPECT_EQ(v.error(), "12:34: v-0014: redeclared identifier 'a'");
+  EXPECT_FALSE(v()->ValidateStatements(outer_body.get()));
+  EXPECT_EQ(v()->error(), "12:34: v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
@@ -673,8 +652,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   mod()->AddFunction(std::move(func1));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
@@ -701,8 +679,7 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.ValidateStatements(body.get())) << v.error();
+  EXPECT_TRUE(v()->ValidateStatements(body.get())) << v()->error();
 }
 
 }  // namespace

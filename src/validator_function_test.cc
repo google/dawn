@@ -54,9 +54,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0002: function must end with a return statement");
 }
 
@@ -69,9 +68,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0002: function must end with a return statement");
 }
 
@@ -87,8 +85,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
@@ -108,10 +105,9 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod()));
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(v.error(),
+  EXPECT_EQ(v()->error(),
             "12:34: v-000y: return statement type must match its function "
             "return type, returned '__i32', expected '__void'");
 }
@@ -132,10 +128,9 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod()));
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(v.error(),
+  EXPECT_EQ(v()->error(),
             "12:34: v-000y: return statement type must match its function "
             "return type, returned '__i32', expected '__f32'");
 }
@@ -170,9 +165,9 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   mod()->AddFunction(std::move(func_copy));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(), "12:34: v-0016: function names must be unique 'func'");
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0016: function names must be unique 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
@@ -193,9 +188,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   mod()->AddFunction(std::move(func0));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod())) << v.error();
-  EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
+  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+  EXPECT_EQ(v()->error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
@@ -221,9 +215,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   mod()->AddFunction(std::move(func0));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod())) << v.error();
-  EXPECT_EQ(v.error(), "12:34: v-0004: recursion is not allowed: 'func'");
+  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+  EXPECT_EQ(v()->error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, EntryPointFunctionMissing_Fail) {
@@ -243,9 +236,8 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionMissing_Fail) {
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0019: Function used in entry point does not exist: "
             "'frag_main'");
 }
@@ -267,8 +259,7 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionExist_Pass) {
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
@@ -291,9 +282,8 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0024: Entry point function must return void: 'vtx_main'");
 }
 
@@ -317,9 +307,8 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0023: Entry point function must accept no parameters: "
             "'vtx_func'");
 }
