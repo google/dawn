@@ -48,7 +48,7 @@ Type* Type::UnwrapPtrIfNeeded() {
 Type* Type::UnwrapAliasesIfNeeded() {
   auto* where = this;
   while (where->IsAlias()) {
-    where = where->AsAlias()->type();
+        where = where->AsAlias()->type();
   }
   return where;
 }

@@ -730,7 +730,6 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
         return false;
       }
     }
-
   }
   out_ << ": ";
 

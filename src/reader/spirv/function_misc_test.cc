@@ -292,8 +292,7 @@ TEST_F(SpvParserTestMiscInstruction, OpNop) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Return{}
-)"))
-      << ToString(fe.ast_body());
+)")) << ToString(fe.ast_body());
 }
 
 // TODO(dneto): OpSizeof : requires Kernel (OpenCL)

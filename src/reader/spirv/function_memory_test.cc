@@ -752,8 +752,7 @@ RTArr -> __array__u32_stride_4
 S -> __struct_S)"));
 }
 
-TEST_F(SpvParserTest,
-       RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
+TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
   const auto assembly = OldStorageBufferPreamble() + R"(
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -825,8 +824,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
       << p->error();
 }
 
-TEST_F(SpvParserTest,
-       RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
+TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
   // Generates a const declaration directly.
   // We have to do a bunch of storage class tracking for locally
   // defined values in order to get the right pointer-to-storage-buffer

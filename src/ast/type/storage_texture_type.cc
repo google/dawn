@@ -31,7 +31,7 @@ bool IsValidStorageDimension(TextureDimension dim) {
 }
 
 #endif  // NDEBUG
-  
+
 }  // namespace
 
 std::ostream& operator<<(std::ostream& out, StorageAccess access) {
