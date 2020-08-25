@@ -362,6 +362,9 @@ class ParserImpl {
   uint32_t array_decoration_list();
   ast::type::Type* type_decl_matrix(Token t);
 
+  std::unique_ptr<ast::ConstructorExpression> const_expr_internal(
+      uint32_t depth);
+
   Context& ctx_;
   std::string error_;
   std::unique_ptr<Lexer> lexer_;

@@ -67,6 +67,11 @@ namespace reader {
 namespace wgsl {
 namespace {
 
+/// Controls the maximum number of times we'll call into the const_expr function
+/// from itself. This is to guard against stack overflow when there is an
+/// excessive number of type constructors inside the const_expr.
+uint32_t kMaxConstExprDepth = 128;
+
 ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
     return ast::Builtin::kPosition;
@@ -2960,7 +2965,18 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
 //   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
 //   | const_literal
 std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
+  return const_expr_internal(0);
+}
+
+std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
+    uint32_t depth) {
   auto t = peek();
+
+  if (depth > kMaxConstExprDepth) {
+    set_error(t, "max const_expr depth reached");
+    return nullptr;
+  }
+
   auto source = t.source();
 
   auto* type = type_decl();
@@ -2972,7 +2988,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
     }
 
     ast::ExpressionList params;
-    auto param = const_expr();
+    auto param = const_expr_internal(depth + 1);
     if (has_error())
       return nullptr;
     if (param == nullptr) {
@@ -2987,7 +3003,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
 
       next();  // Consume the peek
 
-      param = const_expr();
+      param = const_expr_internal(depth + 1);
       if (has_error())
         return nullptr;
       if (param == nullptr) {

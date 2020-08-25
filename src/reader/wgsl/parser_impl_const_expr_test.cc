@@ -122,6 +122,22 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   EXPECT_EQ(p->error(), "1:1: unknown type alias 'invalid'");
 }
 
+TEST_F(ParserImplTest, ConstExpr_Recursion) {
+  std::stringstream out;
+  for (size_t i = 0; i < 200; i++) {
+    out << "f32(";
+  }
+  out << "1.0";
+  for (size_t i = 0; i < 200; i++) {
+    out << ")";
+  }
+  auto* p = parser(out.str());
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p->error(), "1:517: max const_expr depth reached");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader
