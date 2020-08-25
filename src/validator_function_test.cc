@@ -313,8 +313,7 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
             "'vtx_func'");
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_EntryPointFunctionPairMustBeUniqueDuplicate_Fail) {
+TEST_F(ValidateFunctionTest, EntryPointFunctionPairMustBeUniqueDuplicate_Fail) {
   // entry_point vertex  = vtx_main
   // entry_point vertex  = vtx_main
   // fn vtx_main() -> void { return; }
@@ -337,11 +336,11 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0020: Entry point and function pair must be unique");
+            "12:34: v-0020: The pair of <entry point name, pipeline stage> "
+            "must be unique");
 }
 
-TEST_F(ValidateFunctionTest,
-       DISABLED_EntryPointFunctionPairMustBeUniqueTowVertex_Fail) {
+TEST_F(ValidateFunctionTest, EntryPointFunctionPairMustBeUniqueTowVertex_Fail) {
   // entry_point vertex as "main" = vtx_func1
   // entry_point vertex as "main" = vtx_func0
   // fn vtx_func1() -> void { return; }
@@ -373,11 +372,12 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0020: Entry point and function pair must be unique");
+            "12:34: v-0020: The pair of <entry point name, pipeline stage> "
+            "must be unique");
 }
 
 TEST_F(ValidateFunctionTest,
-       DISABLED_EntryPointFunctionPairMustBeUniqueSameFuncDiffStage_Pass) {
+       EntryPointFunctionPairMustBeUniqueSameFuncDiffStage_Pass) {
   // entry_point vertex as "main" = vtx_func
   // entry_point fragment as "main" = vtx_func
   // fn vtx_func() -> void { return; }

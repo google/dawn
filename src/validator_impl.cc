@@ -73,6 +73,8 @@ bool ValidatorImpl::ValidateGlobalVariables(
 }
 
 bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
+  ScopeStack<ast::PipelineStage> entry_point_map;
+  entry_point_map.push_scope();
   for (const auto& ep : eps) {
     auto* ep_ptr = ep.get();
     if (!function_stack_.has(ep_ptr->function_name())) {
@@ -81,6 +83,7 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
                     ep_ptr->function_name() + "'");
       return false;
     }
+
     ast::Function* func;
     function_stack_.get(ep_ptr->function_name(), &func);
     if (!func->return_type()->IsVoid()) {
@@ -89,13 +92,27 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
                     ep_ptr->function_name() + "'");
       return false;
     }
+
     if (func->params().size() != 0) {
       set_error(ep_ptr->source(),
                 "v-0023: Entry point function must accept no parameters: '" +
                     ep_ptr->function_name() + "'");
       return false;
     }
+
+    ast::PipelineStage pipeline_stage;
+    if (entry_point_map.get(ep_ptr->name(), &pipeline_stage)) {
+      if (pipeline_stage == ep_ptr->stage()) {
+        set_error(ep_ptr->source(),
+                  "v-0020: The pair of <entry point name, pipeline stage> must "
+                  "be unique");
+        return false;
+      }
+    }
+    entry_point_map.set(ep_ptr->name(), ep_ptr->stage());
   }
+
+  entry_point_map.pop_scope();
   return true;
 }
 
