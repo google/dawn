@@ -35,13 +35,8 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
     return false;
   }
   function_stack_.push_scope();
-  for (const auto& var : module->global_variables()) {
-    if (variable_stack_.has(var->name())) {
-      set_error(var->source(),
-                "v-0011: redeclared global identifier '" + var->name() + "'");
-      return false;
-    }
-    variable_stack_.set_global(var->name(), var.get());
+  if (!ValidateGlobalVariables(module->global_variables())) {
+    return false;
   }
   if (!CheckImports(module)) {
     return false;
@@ -56,6 +51,24 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
 
   function_stack_.pop_scope();
 
+  return true;
+}
+
+bool ValidatorImpl::ValidateGlobalVariables(
+    const ast::VariableList& global_vars) {
+  for (const auto& var : global_vars) {
+    if (variable_stack_.has(var->name())) {
+      set_error(var->source(),
+                "v-0011: redeclared global identifier '" + var->name() + "'");
+      return false;
+    }
+    if (var->storage_class() == ast::StorageClass::kNone) {
+      set_error(var->source(),
+                "v-0022: global variables must have a storage class");
+      return false;
+    }
+    variable_stack_.set_global(var->name(), var.get());
+  }
   return true;
 }
 

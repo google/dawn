@@ -257,6 +257,30 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
             "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
+TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
+  // var<in> gloabl_var: f32;
+  ast::type::F32Type f32;
+  auto global_var = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
+  mod()->AddGlobalVariable(std::move(global_var));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.Validate(mod())) << v.error();
+}
+
+TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
+  // var gloabl_var: f32;
+  ast::type::F32Type f32;
+  auto global_var = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kNone, &f32);
+  mod()->AddGlobalVariable(std::move(global_var));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_FALSE(v.Validate(mod()));
+  EXPECT_EQ(v.error(),
+            "12:34: v-0022: global variables must have a storage class");
+}
+
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   // var global_var: f32 = 2.1;
   // fn my_func() -> f32 {

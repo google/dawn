@@ -53,6 +53,10 @@ class ValidatorImpl {
   /// @param src the source causing the error
   /// @param msg the error message
   void set_error(const Source& src, const std::string& msg);
+  /// Validate global variables
+  /// @param global_vars list of global variables to check
+  /// @returns true if the validation was successful
+  bool ValidateGlobalVariables(const ast::VariableList& global_vars);
   /// Validates Functions
   /// @param funcs the functions to check
   /// @returns true if the validation was successful
