@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_member.h"
 
+#include "src/ast/struct_member_offset_decoration.h"
+
 namespace tint {
 namespace ast {
 
@@ -36,6 +38,24 @@ StructMember::StructMember(const Source& source,
 StructMember::StructMember(StructMember&&) = default;
 
 StructMember::~StructMember() = default;
+
+bool StructMember::has_offset_decoration() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsOffset()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+uint32_t StructMember::offset() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsOffset()) {
+      return deco->AsOffset()->offset();
+    }
+  }
+  return 0;
+}
 
 bool StructMember::IsValid() const {
   if (name_.empty() || type_ == nullptr) {

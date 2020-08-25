@@ -159,6 +159,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
   bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
+  /// Handles a storage buffer accessor expression
+  /// @param expr the storage buffer accessor expression
+  /// @param rhs the right side of a store expression. Set to nullptr for a load
+  /// @returns true if the storage buffer accessor was emitted
+  bool EmitStorageBufferAccessor(ast::Expression* expr, ast::Expression* rhs);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
@@ -193,6 +198,18 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the variable was emitted
   bool EmitProgramConstVariable(const ast::Variable* var);
 
+  /// Returns true if the accessor is accessing a storage buffer.
+  /// @param expr the expression to check
+  /// @returns true if the accessor is accessing a storage buffer for which
+  /// we need to execute a Load instruction.
+  bool is_storage_buffer_access(ast::MemberAccessorExpression* expr);
+  /// Returns true if the accessor is accessing a storage buffer.
+  /// @param expr the expression to check
+  /// @returns true if the accessor is accessing a storage buffer
+  bool is_storage_buffer_access(ast::ArrayAccessorExpression* expr);
+  /// Registers the given global with the generator
+  /// @param global the global to register
+  void register_global(ast::Variable* global);
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct

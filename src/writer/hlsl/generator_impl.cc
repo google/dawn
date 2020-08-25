@@ -65,6 +65,37 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   return stmts->last()->IsBreak() || stmts->last()->IsFallthrough();
 }
 
+std::string get_buffer_name(ast::Expression* expr) {
+  for (;;) {
+    if (expr->IsIdentifier()) {
+      return expr->AsIdentifier()->name();
+    } else if (expr->IsMemberAccessor()) {
+      expr = expr->AsMemberAccessor()->structure();
+    } else if (expr->IsArrayAccessor()) {
+      expr = expr->AsArrayAccessor()->array();
+    } else {
+      break;
+    }
+  }
+  return "";
+}
+
+uint32_t convert_swizzle_to_index(const std::string& swizzle) {
+  if (swizzle == "r" || swizzle == "x") {
+    return 0;
+  }
+  if (swizzle == "g" || swizzle == "y") {
+    return 1;
+  }
+  if (swizzle == "b" || swizzle == "z") {
+    return 2;
+  }
+  if (swizzle == "a" || swizzle == "w") {
+    return 3;
+  }
+  return 0;
+}
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
@@ -73,7 +104,7 @@ GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
   for (const auto& global : module_->global_variables()) {
-    global_variables_.set(global->name(), global.get());
+    register_global(global.get());
   }
 
   for (auto* const alias : module_->alias_types()) {
@@ -112,6 +143,10 @@ bool GeneratorImpl::Generate() {
   }
 
   return true;
+}
+
+void GeneratorImpl::register_global(ast::Variable* global) {
+  global_variables_.set(global->name(), global);
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
@@ -166,6 +201,11 @@ bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
 }
 
 bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
+  // Handle writing into a storage buffer array
+  if (is_storage_buffer_access(expr)) {
+    return EmitStorageBufferAccessor(expr, nullptr);
+  }
+
   if (!EmitExpression(expr->array())) {
     return false;
   }
@@ -200,6 +240,28 @@ bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
   make_indent();
+
+  // If the LHS is an accessor into a storage buffer then we have to
+  // emit a Store operation instead of an ='s.
+  if (stmt->lhs()->IsMemberAccessor()) {
+    auto* mem = stmt->lhs()->AsMemberAccessor();
+    if (is_storage_buffer_access(mem)) {
+      if (!EmitStorageBufferAccessor(mem, stmt->rhs())) {
+        return false;
+      }
+      out_ << ";" << std::endl;
+      return true;
+    }
+  } else if (stmt->lhs()->IsArrayAccessor()) {
+    auto* ary = stmt->lhs()->AsArrayAccessor();
+    if (is_storage_buffer_access(ary)) {
+      if (!EmitStorageBufferAccessor(ary, stmt->rhs())) {
+        return false;
+      }
+      out_ << ";" << std::endl;
+      return true;
+    }
+  }
 
   if (!EmitExpression(stmt->lhs())) {
     return false;
@@ -1108,6 +1170,19 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
     out_ << std::endl;
   }
 
+  bool emitted_storagebuffer = false;
+  for (auto data : func->referenced_storagebuffer_variables()) {
+    auto* var = data.first;
+    auto* binding = data.second.binding;
+
+    out_ << "RWByteAddressBuffer " << var->name() << " : register(u"
+         << binding->value() << ");" << std::endl;
+    emitted_storagebuffer = true;
+  }
+  if (emitted_storagebuffer) {
+    out_ << std::endl;
+  }
+
   auto ep_name = ep->name();
   if (ep_name.empty()) {
     ep_name = ep->function_name();
@@ -1396,7 +1471,188 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
+// TODO(dsinclair): This currently only handles loading of 4, 8, 12 or 16 byte
+// members. If we need to support larger we'll need to do the loading into
+// chunks.
+//
+// TODO(dsinclair): Need to support loading through a pointer. The pointer is
+// just a memory address in the storage buffer, so need to do the correct
+// calculation.
+bool GeneratorImpl::EmitStorageBufferAccessor(ast::Expression* expr,
+                                              ast::Expression* rhs) {
+  auto* result_type = expr->result_type()->UnwrapAliasPtrAlias();
+  std::string access_method = rhs != nullptr ? "Store" : "Load";
+  if (result_type->IsVector()) {
+    access_method += std::to_string(result_type->AsVector()->size());
+  }
+
+  // If we aren't storing then we need to put in the outer cast.
+  if (rhs == nullptr) {
+    if (result_type->is_float_scalar_or_vector()) {
+      out_ << "asfloat(";
+    } else if (result_type->is_signed_scalar_or_vector()) {
+      out_ << "asint(";
+    } else if (result_type->is_unsigned_scalar_or_vector()) {
+      out_ << "asuint(";
+    }
+  }
+
+  auto buffer_name = get_buffer_name(expr);
+  if (buffer_name.empty()) {
+    error_ = "error emitting storage buffer access";
+    return false;
+  }
+  out_ << buffer_name << "." << access_method << "(";
+
+  auto* ptr = expr;
+  bool first = true;
+  for (;;) {
+    if (ptr->IsIdentifier()) {
+      break;
+    }
+
+    if (!first) {
+      out_ << " + ";
+    }
+    first = false;
+    if (ptr->IsMemberAccessor()) {
+      auto* mem = ptr->AsMemberAccessor();
+      auto* res_type = mem->structure()->result_type()->UnwrapAliasPtrAlias();
+
+      if (res_type->IsStruct()) {
+        auto* str_type = res_type->AsStruct()->impl();
+        auto* str_member = str_type->get_member(mem->member()->name());
+
+        if (!str_member->has_offset_decoration()) {
+          error_ = "missing offset decoration for struct member";
+          return false;
+        }
+        out_ << str_member->offset();
+      } else if (res_type->IsVector()) {
+        // This must be a single element swizzle if we've got a vector at this
+        // point.
+        if (mem->member()->name().size() != 1) {
+          error_ =
+              "Encountered multi-element swizzle when should have only one "
+              "level";
+          return false;
+        }
+
+        // TODO(dsinclair): All our types are currently 4 bytes (f32, i32, u32)
+        // so this is assuming 4. This will need to be fixed when we get f16 or
+        // f64 types.
+        out_ << "(4 * " << convert_swizzle_to_index(mem->member()->name())
+             << ")";
+      } else {
+        error_ =
+            "Invalid result type for member accessor: " + res_type->type_name();
+        return false;
+      }
+
+      ptr = mem->structure();
+    } else if (ptr->IsArrayAccessor()) {
+      auto* ary = ptr->AsArrayAccessor();
+      auto* ary_type = ary->array()->result_type()->UnwrapAliasPtrAlias();
+
+      out_ << "(";
+      // TODO(dsinclair): Handle matrix case and struct case.
+      if (ary_type->IsArray()) {
+        out_ << ary_type->AsArray()->array_stride();
+      } else if (ary_type->IsVector()) {
+        // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
+        // or u32 which are all 4 bytes. When we get f16 or other types we'll
+        // have to ask the type for the byte size.
+        out_ << "4";
+      } else {
+        error_ = "Invalid array type in storage buffer access";
+        return false;
+      }
+      out_ << " * ";
+      if (!EmitExpression(ary->idx_expr())) {
+        return false;
+      }
+      out_ << ")";
+
+      ptr = ary->array();
+    } else {
+      error_ = "error emitting storage buffer access";
+      return false;
+    }
+  }
+
+  if (rhs != nullptr) {
+    out_ << ", asuint(";
+    if (!EmitExpression(rhs)) {
+      return false;
+    }
+    out_ << ")";
+  }
+
+  out_ << ")";
+
+  // Close the outer cast.
+  if (rhs == nullptr) {
+    out_ << ")";
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::is_storage_buffer_access(
+    ast::ArrayAccessorExpression* expr) {
+  // We only care about array so we can get to the next part of the expression.
+  // If it isn't an array or a member accessor we can stop looking as it won't
+  // be a storage buffer.
+  auto* ary = expr->array();
+  if (ary->IsMemberAccessor()) {
+    return is_storage_buffer_access(ary->AsMemberAccessor());
+  } else if (ary->IsArrayAccessor()) {
+    return is_storage_buffer_access(ary->AsArrayAccessor());
+  }
+  return false;
+}
+
+bool GeneratorImpl::is_storage_buffer_access(
+    ast::MemberAccessorExpression* expr) {
+  auto* structure = expr->structure();
+  auto* data_type = structure->result_type()->UnwrapAliasPtrAlias();
+  // If the data is a multi-element swizzle then we will not load the swizzle
+  // portion through the Load command.
+  if (data_type->IsVector() && expr->member()->name().size() > 1) {
+    return false;
+  }
+
+  // Check if this is a storage buffer variable
+  if (structure->IsIdentifier()) {
+    auto* ident = expr->structure()->AsIdentifier();
+    if (ident->has_path()) {
+      return false;
+    }
+
+    ast::Variable* var = nullptr;
+    if (!global_variables_.get(ident->name(), &var)) {
+      return false;
+    }
+    return var->storage_class() == ast::StorageClass::kStorageBuffer;
+  } else if (structure->IsMemberAccessor()) {
+    return is_storage_buffer_access(structure->AsMemberAccessor());
+  } else if (structure->IsArrayAccessor()) {
+    return is_storage_buffer_access(structure->AsArrayAccessor());
+  }
+
+  // Technically I don't think this is possible, but if we don't have a struct
+  // or array accessor then we can't have a storage buffer I believe.
+  return false;
+}
+
 bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
+  // Look for storage buffer accesses as we have to convert them into Load
+  // expressions. Stores will be identified in the assignment emission and a
+  // member accessor store of a storage buffer will not get here.
+  if (is_storage_buffer_access(expr)) {
+    return EmitStorageBufferAccessor(expr, nullptr);
+  }
+
   if (!EmitExpression(expr->structure())) {
     return false;
   }

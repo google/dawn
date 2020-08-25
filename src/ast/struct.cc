@@ -31,6 +31,15 @@ Struct::Struct(Struct&&) = default;
 
 Struct::~Struct() = default;
 
+StructMember* Struct::get_member(const std::string& name) const {
+  for (auto& mem : members_) {
+    if (mem->name() == name) {
+      return mem.get();
+    }
+  }
+  return nullptr;
+}
+
 bool Struct::IsValid() const {
   for (const auto& mem : members_) {
     if (mem == nullptr || !mem->IsValid()) {

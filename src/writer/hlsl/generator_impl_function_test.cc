@@ -30,6 +30,7 @@
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
@@ -417,14 +418,104 @@ void frag_main() {
 }
 
 TEST_F(HlslGeneratorImplTest,
-       DISABLED_Emit_Function_EntryPoint_With_StorageBuffer) {
+       Emit_Function_EntryPoint_With_StorageBuffer_Read) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::I32Type i32;
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "coord", ast::StorageClass::kStorageBuffer, &vec4));
+          "coord", ast::StorageClass::kStorageBuffer, &s));
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  coord_var->set_decorations(std::move(decos));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
+                                              &void_type);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("coord"),
+      std::make_unique<ast::IdentifierExpression>("b")));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  mod.AddFunction(std::move(func));
+
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
+                                              "frag_main");
+  mod.AddEntryPoint(std::move(ep));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
+  EXPECT_EQ(g.result(), R"(RWByteAddressBuffer coord : register(u0);
+
+void frag_main() {
+  float v = asfloat(coord.Load(4));
+  return;
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest,
+       Emit_Function_EntryPoint_With_StorageBuffer_Store) {
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "coord", ast::StorageClass::kStorageBuffer, &s));
 
   ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));
@@ -442,14 +533,15 @@ TEST_F(HlslGeneratorImplTest,
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
-  var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("coord"),
-      std::make_unique<ast::IdentifierExpression>("x")));
+  auto assign = std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("coord"),
+          std::make_unique<ast::IdentifierExpression>("b")),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
 
   auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body->append(std::move(assign));
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
@@ -463,7 +555,14 @@ TEST_F(HlslGeneratorImplTest,
 
   GeneratorImpl g(&mod);
   ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"( ... )");
+  EXPECT_EQ(g.result(), R"(RWByteAddressBuffer coord : register(u0);
+
+void frag_main() {
+  coord.Store(4, asuint(2.00000000f));
+  return;
+}
+
+)");
 }
 
 TEST_F(HlslGeneratorImplTest,

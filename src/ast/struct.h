@@ -59,6 +59,11 @@ class Struct : public Node {
   /// @returns the members
   const StructMemberList& members() const { return members_; }
 
+  /// Returns the struct member with the given name or nullptr if non exists.
+  /// @param name the name of the member
+  /// @returns the struct member or nullptr if not found
+  StructMember* get_member(const std::string& name) const;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

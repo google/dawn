@@ -72,6 +72,11 @@ class StructMember : public Node {
   /// @returns the decorations
   const StructMemberDecorationList& decorations() const { return decorations_; }
 
+  /// @returns true if the struct member has an offset decoration
+  bool has_offset_decoration() const;
+  /// @returns the offset decoration value.
+  uint32_t offset() const;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

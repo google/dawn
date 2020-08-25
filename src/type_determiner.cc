@@ -424,7 +424,9 @@ bool TypeDeterminer::DetermineArrayAccessor(
     ret = ctx_.type_mgr().Get(
         std::make_unique<ast::type::VectorType>(m->type(), m->rows()));
   } else {
-    set_error(expr->source(), "invalid parent type in array accessor");
+    set_error(expr->source(), "invalid parent type (" +
+                                  parent_type->type_name() +
+                                  ") in array accessor");
     return false;
   }
 
