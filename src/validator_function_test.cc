@@ -312,6 +312,94 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
             "12:34: v-0023: Entry point function must accept no parameters: "
             "'vtx_func'");
 }
-//
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_EntryPointFunctionPairMustBeUniqueDuplicate_Fail) {
+  // entry_point vertex  = vtx_main
+  // entry_point vertex  = vtx_main
+  // fn vtx_main() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "", "vtx_main");
+  auto entry_point_copy = std::make_unique<ast::EntryPoint>(
+      Source{12, 34}, ast::PipelineStage::kVertex, "", "vtx_main");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  mod()->AddEntryPoint(std::move(entry_point_copy));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0020: Entry point and function pair must be unique");
+}
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_EntryPointFunctionPairMustBeUniqueTowVertex_Fail) {
+  // entry_point vertex as "main" = vtx_func1
+  // entry_point vertex as "main" = vtx_func0
+  // fn vtx_func1() -> void { return; }
+  // fn vtx_func0() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_func0", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  ast::VariableList params1;
+  auto func1 = std::make_unique<ast::Function>("vtx_func1", std::move(params1),
+                                               &void_type);
+  auto body1 = std::make_unique<ast::BlockStatement>();
+  body1->append(std::make_unique<ast::ReturnStatement>());
+  func1->set_body(std::move(body1));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "main", "vtx_func0");
+  auto entry_point1 = std::make_unique<ast::EntryPoint>(
+      Source{12, 34}, ast::PipelineStage::kVertex, "main", "vtx_func1");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func1));
+  mod()->AddEntryPoint(std::move(entry_point));
+  mod()->AddEntryPoint(std::move(entry_point1));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0020: Entry point and function pair must be unique");
+}
+
+TEST_F(ValidateFunctionTest,
+       DISABLED_EntryPointFunctionPairMustBeUniqueSameFuncDiffStage_Pass) {
+  // entry_point vertex as "main" = vtx_func
+  // entry_point fragment as "main" = vtx_func
+  // fn vtx_func() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "main", "vtx_func");
+  auto entry_point1 = std::make_unique<ast::EntryPoint>(
+      Source{12, 34}, ast::PipelineStage::kFragment, "main", "vtx_func");
+
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+  mod()->AddEntryPoint(std::move(entry_point1));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+}
+
 }  // namespace
 }  // namespace tint
