@@ -27,27 +27,12 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/type_determiner.h"
+#include "src/validator_test_helper.h"
 
 namespace tint {
 namespace {
 
-class TypeDeterminerHelper {
-  // TODO(sarahM0): move this form this test file, type_determiner_test.cc and
-  // validator_test.cc to its own file.
- public:
-  TypeDeterminerHelper()
-      : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
-
-  TypeDeterminer* td() const { return td_.get(); }
-  ast::Module* mod() { return &mod_; }
-
- private:
-  Context ctx_;
-  ast::Module mod_;
-  std::unique_ptr<TypeDeterminer> td_;
-};
-
-class ValidateFunctionTest : public TypeDeterminerHelper,
+class ValidateFunctionTest : public ValidatorTestHelper,
                              public testing::Test {};
 
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {

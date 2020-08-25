@@ -200,6 +200,8 @@ set(TINT_LIB_SRCS
   validator.h
   validator_impl.cc
   validator_impl.h
+  validator_test_helper.cc
+  validator_test_helper.h
   writer/text.cc
   writer/text.h
   writer/text_generator.cc

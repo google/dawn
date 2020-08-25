@@ -54,25 +54,12 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/type_determiner.h"
+#include "src/validator_test_helper.h"
 
 namespace tint {
 namespace {
 
-class TypeDeterminerHelper {
- public:
-  TypeDeterminerHelper()
-      : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
-
-  TypeDeterminer* td() const { return td_.get(); }
-  ast::Module* mod() { return &mod_; }
-
- private:
-  Context ctx_;
-  ast::Module mod_;
-  std::unique_ptr<TypeDeterminer> td_;
-};
-
-class ValidatorTest : public TypeDeterminerHelper, public testing::Test {};
+class ValidatorTest : public ValidatorTestHelper, public testing::Test {};
 
 TEST_F(ValidatorTest, Import) {
   ast::Module m;
