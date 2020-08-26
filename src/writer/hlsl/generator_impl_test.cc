@@ -26,7 +26,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, DISABLED_Generate) {
   ast::type::VoidType void_type;
@@ -71,9 +71,8 @@ inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
   out << data.builtin;
   return out;
 }
-class HlslBuiltinConversionTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslBuiltinData> {};
+using HlslBuiltinConversionTest =
+    TestHelperBase<testing::TestWithParam<HlslBuiltinData>>;
 TEST_P(HlslBuiltinConversionTest, Emit) {
   auto params = GetParam();
   EXPECT_EQ(gen().builtin_to_attribute(params.builtin),

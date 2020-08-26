@@ -29,8 +29,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_ModuleConstant : public TestHelper,
-                                             public testing::Test {};
+using HlslGeneratorImplTest_ModuleConstant = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   ast::type::F32Type f32;

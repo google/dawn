@@ -33,8 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   return out;
 }
 
-class HlslBinaryTest : public TestHelper,
-                       public testing::TestWithParam<BinaryData> {};
+using HlslBinaryTest = TestHelperBase<testing::TestWithParam<BinaryData>>;
 TEST_P(HlslBinaryTest, Emit) {
   auto params = GetParam();
 

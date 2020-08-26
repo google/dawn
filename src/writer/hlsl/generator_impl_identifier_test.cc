@@ -21,8 +21,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Identifier : public TestHelper,
-                                         public testing::Test {};
+using HlslGeneratorImplTest_Identifier = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Identifier, DISABLED_EmitExpression_Identifier) {
   ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});

@@ -25,7 +25,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Return : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Return = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
   ast::ReturnStatement r;

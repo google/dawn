@@ -24,7 +24,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_If : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_If = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");

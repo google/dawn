@@ -25,7 +25,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Assign : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");

@@ -28,7 +28,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Switch : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();

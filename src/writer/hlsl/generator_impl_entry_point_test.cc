@@ -34,8 +34,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_EntryPoint : public TestHelper,
-                                         public testing::Test {};
+using HlslGeneratorImplTest_EntryPoint = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_EntryPoint, EmitEntryPointData_Vertex_Input) {
   // [[location 0]] var<in> foo : f32;

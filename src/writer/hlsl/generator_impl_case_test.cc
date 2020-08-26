@@ -28,7 +28,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Case : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Case = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   ast::type::I32Type i32;

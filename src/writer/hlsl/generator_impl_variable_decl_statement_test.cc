@@ -30,8 +30,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_VariableDecl : public TestHelper,
-                                           public testing::Test {};
+using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;

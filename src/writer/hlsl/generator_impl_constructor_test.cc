@@ -33,8 +33,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Constructor : public TestHelper,
-                                          public testing::Test {};
+using HlslGeneratorImplTest_Constructor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;

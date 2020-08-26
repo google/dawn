@@ -23,7 +23,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Block : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Block = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
   ast::BlockStatement b;

@@ -33,8 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
   out << data.op;
   return out;
 }
-class HlslUnaryOpTest : public TestHelper,
-                        public testing::TestWithParam<UnaryOpData> {};
+using HlslUnaryOpTest = TestHelperBase<testing::TestWithParam<UnaryOpData>>;
 TEST_P(HlslUnaryOpTest, Emit) {
   auto params = GetParam();
 

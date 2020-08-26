@@ -27,7 +27,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Call : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Call = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;

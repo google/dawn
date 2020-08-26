@@ -28,10 +28,11 @@ namespace writer {
 namespace hlsl {
 
 /// Helper class for testing
-class TestHelper {
+template <typename T>
+class TestHelperBase : public T {
  public:
-  TestHelper();
-  ~TestHelper();
+  TestHelperBase() : td_(&ctx_, &mod_), impl_(&mod_) {}
+  ~TestHelperBase() = default;
 
   /// @returns the generator implementation
   GeneratorImpl& gen() { return impl_; }
@@ -55,6 +56,7 @@ class TestHelper {
   GeneratorImpl impl_;
   std::ostringstream out_;
 };
+using TestHelper = TestHelperBase<testing::Test>;
 
 }  // namespace hlsl
 }  // namespace writer

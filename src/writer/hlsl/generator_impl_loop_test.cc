@@ -31,7 +31,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Loop : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Loop = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   auto body = std::make_unique<ast::BlockStatement>();

@@ -43,8 +43,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_MemberAccessor : public TestHelper,
-                                             public testing::Test {};
+using HlslGeneratorImplTest_MemberAccessor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   ast::type::F32Type f32;

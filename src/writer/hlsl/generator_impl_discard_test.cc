@@ -21,8 +21,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Discard : public TestHelper,
-                                      public testing::Test {};
+using HlslGeneratorImplTest_Discard = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
   ast::DiscardStatement stmt;

@@ -27,7 +27,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_As : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_As = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_As, EmitExpression_As_Float) {
   ast::type::F32Type f32;

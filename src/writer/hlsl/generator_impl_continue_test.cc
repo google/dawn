@@ -24,8 +24,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Continue : public TestHelper,
-                                       public testing::Test {};
+using HlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
   ast::ContinueStatement c;

@@ -26,8 +26,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Intrinsic : public TestHelper,
-                                        public testing::Test {};
+using HlslGeneratorImplTest_Intrinsic = TestHelper;
 
 struct IntrinsicData {
   const char* name;
@@ -37,8 +36,7 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.name;
   return out;
 }
-class HlslIntrinsicTest : public TestHelper,
-                          public testing::TestWithParam<IntrinsicData> {};
+using HlslIntrinsicTest = TestHelperBase<testing::TestWithParam<IntrinsicData>>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
   EXPECT_EQ(gen().generate_intrinsic_name(param.name), param.hlsl_name);

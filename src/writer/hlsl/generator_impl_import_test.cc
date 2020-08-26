@@ -36,7 +36,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Import : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Import = TestHelper;
 
 struct HlslImportData {
   const char* name;
@@ -47,9 +47,8 @@ inline std::ostream& operator<<(std::ostream& out, HlslImportData data) {
   return out;
 }
 
-class HlslImportData_SingleParamTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_SingleParamTest =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -113,9 +112,8 @@ TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_ATanh) {
   FAIL();
 }
 
-class HlslImportData_SingleIntParamTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_SingleIntParamTest =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto param = GetParam();
 
@@ -140,9 +138,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"sabs", "abs"},
                                          HlslImportData{"ssign", "sign"}));
 
-class HlslImportData_DualParamTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_DualParamTest =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -177,9 +174,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"reflect", "reflect"},
                                          HlslImportData{"step", "step"}));
 
-class HlslImportData_DualParam_VectorTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_DualParam_VectorTest =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
@@ -224,9 +220,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_VectorTest,
                          testing::Values(HlslImportData{"cross", "cross"}));
 
-class HlslImportData_DualParam_Int_Test
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_DualParam_Int_Test =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -255,9 +250,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"umax", "max"},
                                          HlslImportData{"umin", "min"}));
 
-class HlslImportData_TripleParamTest
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_TripleParamTest =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -295,9 +289,8 @@ TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
   FAIL();
 }
 
-class HlslImportData_TripleParam_Int_Test
-    : public TestHelper,
-      public testing::TestWithParam<HlslImportData> {};
+using HlslImportData_TripleParam_Int_Test =
+    TestHelperBase<testing::TestWithParam<HlslImportData>>;
 TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 

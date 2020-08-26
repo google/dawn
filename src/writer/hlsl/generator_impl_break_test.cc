@@ -24,7 +24,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-class HlslGeneratorImplTest_Break : public TestHelper, public testing::Test {};
+using HlslGeneratorImplTest_Break = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
   ast::BreakStatement b;
