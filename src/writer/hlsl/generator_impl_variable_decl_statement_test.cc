@@ -19,6 +19,7 @@
 #include "src/ast/module.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
@@ -127,6 +128,27 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::VariableDeclStatement stmt(std::move(var));
   ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
   EXPECT_EQ(result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_VariableDecl,
+       Emit_VariableDeclStatement_Initializer_ZeroMat) {
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  ast::ExpressionList values;
+  auto zero_mat =
+      std::make_unique<ast::TypeConstructorExpression>(&mat, std::move(values));
+
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &mat);
+  var->set_constructor(std::move(zero_mat));
+
+  ast::VariableDeclStatement stmt(std::move(var));
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(
+      result(),
+      R"(matrix<float, 3, 2> a = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
 }
 

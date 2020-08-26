@@ -1430,6 +1430,16 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
     out << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(out, type->AsVector()->type());
+  } else if (type->IsMatrix()) {
+    auto* mat = type->AsMatrix();
+    for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      if (!EmitZeroValue(out, mat->type())) {
+        return false;
+      }
+    }
   } else {
     error_ = "Invalid type for zero emission: " + type->type_name();
     return false;
