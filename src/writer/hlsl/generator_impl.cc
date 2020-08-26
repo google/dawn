@@ -1354,6 +1354,13 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     return false;
   }
 
+  if (ep->stage() == ast::PipelineStage::kCompute) {
+    // TODO(dsinclair): When we have a way to set the thread group size this
+    // should be updated.
+    out << "[numthreads(1, 1, 1)]" << std::endl;
+    make_indent(out);
+  }
+
   auto outdata = ep_name_to_out_data_.find(current_ep_name_);
   bool has_outdata = outdata != ep_name_to_out_data_.end();
   if (has_outdata) {

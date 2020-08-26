@@ -1139,10 +1139,10 @@ void ep_2() {
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_WithName) {
   ast::type::VoidType void_type;
 
-  auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
+  auto func = std::make_unique<ast::Function>("frag_main", ast::VariableList{},
                                               &void_type);
-  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
-                                              "my_main", "comp_main");
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
+                                              "my_main", "frag_main");
 
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(ep));
@@ -1158,16 +1158,43 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_EntryPoint_WithNameCollision) {
   ast::type::VoidType void_type;
 
-  auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
+  auto func = std::make_unique<ast::Function>("frag_main", ast::VariableList{},
                                               &void_type);
-  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
-                                              "GeometryShader", "comp_main");
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
+                                              "GeometryShader", "frag_main");
 
   mod()->AddFunction(std::move(func));
   mod()->AddEntryPoint(std::move(ep));
 
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
   EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_Compute) {
+  ast::type::VoidType void_type;
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("comp_main", std::move(params),
+                                              &void_type);
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  mod()->AddFunction(std::move(func));
+
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
+                                              "main", "comp_main");
+  mod()->AddEntryPoint(std::move(ep));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+void main() {
+  return;
 }
 
 )");
