@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/module.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Discard : public TestHelper,
+                                      public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Discard) {
+TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
   ast::DiscardStatement stmt;
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  discard;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  discard;\n");
 }
 
 }  // namespace

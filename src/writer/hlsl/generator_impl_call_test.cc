@@ -14,23 +14,22 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/void_type.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Call : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
+TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;
 
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
@@ -38,16 +37,13 @@ TEST_F(HlslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
+  mod()->AddFunction(std::move(func));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func()");
+  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  EXPECT_EQ(result(), "my_func()");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitExpression_Call_WithParams) {
+TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
   ast::type::VoidType void_type;
 
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
@@ -58,16 +54,13 @@ TEST_F(HlslGeneratorImplTest, EmitExpression_Call_WithParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
+  mod()->AddFunction(std::move(func));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func(param1, param2)");
+  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  EXPECT_EQ(result(), "my_func(param1, param2)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitStatement_Call) {
+TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   ast::type::VoidType void_type;
 
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
@@ -79,14 +72,10 @@ TEST_F(HlslGeneratorImplTest, EmitStatement_Call) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
-
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitStatement(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  my_func(param1, param2);\n");
+  mod()->AddFunction(std::move(func));
+  gen().increment_indent();
+  ASSERT_TRUE(gen().EmitStatement(out(), &call)) << gen().error();
+  EXPECT_EQ(result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace

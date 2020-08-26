@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -20,14 +19,15 @@
 #include "src/ast/type/vector_type.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Intrinsic : public TestHelper,
+                                        public testing::Test {};
 
 struct IntrinsicData {
   const char* name;
@@ -37,16 +37,14 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.name;
   return out;
 }
-using HlslIntrinsicTest = testing::TestWithParam<IntrinsicData>;
+class HlslIntrinsicTest : public TestHelper,
+                          public testing::TestWithParam<IntrinsicData> {};
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  EXPECT_EQ(g.generate_intrinsic_name(param.name), param.hlsl_name);
+  EXPECT_EQ(gen().generate_intrinsic_name(param.name), param.hlsl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
-    HlslGeneratorImplTest,
+    HlslGeneratorImplTest_Intrinsic,
     HlslIntrinsicTest,
     testing::Values(IntrinsicData{"any", "any"},
                     IntrinsicData{"all", "all"},
@@ -64,15 +62,15 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"is_inf", "isinf"},
                     IntrinsicData{"is_nan", "isnan"}));
 
-TEST_F(HlslGeneratorImplTest, DISABLED_Intrinsic_IsNormal) {
+TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_IsNormal) {
   FAIL();
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_Intrinsic_Select) {
+TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
   FAIL();
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
+TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
   ast::type::F32Type f32;
   ast::type::VectorType vec2(&f32, 2);
   ast::type::VectorType vec3(&f32, 3);
@@ -90,32 +88,25 @@ TEST_F(HlslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
       std::make_unique<ast::IdentifierExpression>("outer_product"),
       std::move(params));
 
-  Context ctx;
-  ast::Module m;
-  TypeDeterminer td(&ctx, &m);
-  td.RegisterVariableForTesting(a.get());
-  td.RegisterVariableForTesting(b.get());
+  td().RegisterVariableForTesting(a.get());
+  td().RegisterVariableForTesting(b.get());
 
-  m.AddGlobalVariable(std::move(a));
-  m.AddGlobalVariable(std::move(b));
+  mod()->AddGlobalVariable(std::move(a));
+  mod()->AddGlobalVariable(std::move(b));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&call)) << td().error();
 
-  GeneratorImpl g(&m);
-
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
+  gen().increment_indent();
+  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  EXPECT_EQ(result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
-TEST_F(HlslGeneratorImplTest, Intrinsic_Bad_Name) {
-  ast::Module m;
-  GeneratorImpl g(&m);
-  EXPECT_EQ(g.generate_intrinsic_name("unknown name"), "");
+TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
+  EXPECT_EQ(gen().generate_intrinsic_name("unknown name"), "");
 }
 
-TEST_F(HlslGeneratorImplTest, Intrinsic_Call) {
+TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
   params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
@@ -123,11 +114,9 @@ TEST_F(HlslGeneratorImplTest, Intrinsic_Call) {
   ast::CallExpression call(std::make_unique<ast::IdentifierExpression>("dot"),
                            std::move(params));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  dot(param1, param2)");
+  gen().increment_indent();
+  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  EXPECT_EQ(result(), "  dot(param1, param2)");
 }
 
 }  // namespace

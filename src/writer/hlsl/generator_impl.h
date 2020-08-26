@@ -21,182 +21,247 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/hlsl/namer.h"
-#include "src/writer/text_generator.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 
 /// Implementation class for HLSL generator
-class GeneratorImpl : public TextGenerator {
+class GeneratorImpl {
  public:
   /// Constructor
   /// @param module the module to generate
   explicit GeneratorImpl(ast::Module* module);
   ~GeneratorImpl();
 
+  /// Increment the emitter indent level
+  void increment_indent() { indent_ += 2; }
+  /// Decrement the emiter indent level
+  void decrement_indent() {
+    if (indent_ < 2) {
+      indent_ = 0;
+      return;
+    }
+    indent_ -= 2;
+  }
+
+  /// Writes the current indent to the output stream
+  /// @param out the output stream
+  void make_indent(std::ostream& out);
+
+  /// @returns the error
+  std::string error() const { return error_; }
+
+  /// @param out the output stream
   /// @returns true on successful generation; false otherwise
-  bool Generate();
+  bool Generate(std::ostream& out);
 
   /// Handles generating an alias
+  /// @param out the output stream
   /// @param alias the alias to generate
   /// @returns true if the alias was emitted
-  bool EmitAliasType(const ast::type::AliasType* alias);
+  bool EmitAliasType(std::ostream& out, const ast::type::AliasType* alias);
   /// Handles an array accessor expression
+  /// @param out the output stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
+  bool EmitArrayAccessor(std::ostream& out, ast::ArrayAccessorExpression* expr);
   /// Handles generating an as expression
+  /// @param out the output stream
   /// @param expr the as expression
   /// @returns true if the as was emitted
-  bool EmitAs(ast::AsExpression* expr);
+  bool EmitAs(std::ostream& out, ast::AsExpression* expr);
   /// Handles an assignment statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitAssign(ast::AssignmentStatement* stmt);
+  bool EmitAssign(std::ostream& out, ast::AssignmentStatement* stmt);
   /// Handles generating a binary expression
+  /// @param out the output stream
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
-  bool EmitBinary(ast::BinaryExpression* expr);
+  bool EmitBinary(std::ostream& out, ast::BinaryExpression* expr);
   /// Handles a block statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBlock(const ast::BlockStatement* stmt);
+  bool EmitBlock(std::ostream& out, const ast::BlockStatement* stmt);
   /// Handles a block statement with a newline at the end
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitIndentedBlockAndNewline(ast::BlockStatement* stmt);
+  bool EmitIndentedBlockAndNewline(std::ostream& out,
+                                   ast::BlockStatement* stmt);
   /// Handles a block statement with a newline at the end
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBlockAndNewline(const ast::BlockStatement* stmt);
+  bool EmitBlockAndNewline(std::ostream& out, const ast::BlockStatement* stmt);
   /// Handles a break statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBreak(ast::BreakStatement* stmt);
+  bool EmitBreak(std::ostream& out, ast::BreakStatement* stmt);
   /// Handles generating a call expression
+  /// @param out the output stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
-  bool EmitCall(ast::CallExpression* expr);
+  bool EmitCall(std::ostream& out, ast::CallExpression* expr);
   /// Handles a case statement
+  /// @param out the output stream
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
-  bool EmitCase(ast::CaseStatement* stmt);
+  bool EmitCase(std::ostream& out, ast::CaseStatement* stmt);
   /// Handles generating a cast expression
+  /// @param out the output stream
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
-  bool EmitCast(ast::CastExpression* expr);
+  bool EmitCast(std::ostream& out, ast::CastExpression* expr);
   /// Handles generating constructor expressions
+  /// @param out the output stream
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
-  bool EmitConstructor(ast::ConstructorExpression* expr);
+  bool EmitConstructor(std::ostream& out, ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
+  /// @param out the output stream
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
-  bool EmitDiscard(ast::DiscardStatement* stmt);
+  bool EmitDiscard(std::ostream& out, ast::DiscardStatement* stmt);
   /// Handles generating a scalar constructor
+  /// @param out the output stream
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
+  bool EmitScalarConstructor(std::ostream& out,
+                             ast::ScalarConstructorExpression* expr);
   /// Handles emitting a type constructor
+  /// @param out the output stream
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
+  bool EmitTypeConstructor(std::ostream& out,
+                           ast::TypeConstructorExpression* expr);
   /// Handles a continue statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitContinue(ast::ContinueStatement* stmt);
+  bool EmitContinue(std::ostream& out, ast::ContinueStatement* stmt);
   /// Handles generating an else statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitElse(ast::ElseStatement* stmt);
+  bool EmitElse(std::ostream& out, ast::ElseStatement* stmt);
   /// Handles generate an Expression
+  /// @param out the output stream
   /// @param expr the expression
   /// @returns true if the expression was emitted
-  bool EmitExpression(ast::Expression* expr);
+  bool EmitExpression(std::ostream& out, ast::Expression* expr);
   /// Handles generating a function
+  /// @param out the output stream
   /// @param func the function to generate
   /// @returns true if the function was emitted
-  bool EmitFunction(ast::Function* func);
+  bool EmitFunction(std::ostream& out, ast::Function* func);
   /// Internal helper for emitting functions
+  /// @param out the output stream
   /// @param func the function to emit
   /// @param emit_duplicate_functions set true if we need to duplicate per entry
   /// point
   /// @param ep_name the current entry point or blank if none set
   /// @returns true if the function was emitted.
-  bool EmitFunctionInternal(ast::Function* func,
+  bool EmitFunctionInternal(std::ostream& out,
+                            ast::Function* func,
                             bool emit_duplicate_functions,
                             const std::string& ep_name);
   /// Handles emitting information for an entry point
+  /// @param out the output stream
   /// @param ep the entry point
   /// @returns true if the entry point data was emitted
-  bool EmitEntryPointData(ast::EntryPoint* ep);
+  bool EmitEntryPointData(std::ostream& out, ast::EntryPoint* ep);
   /// Handles emitting the entry point function
+  /// @param out the output stream
   /// @param ep the entry point
   /// @returns true if the entry point function was emitted
-  bool EmitEntryPointFunction(ast::EntryPoint* ep);
+  bool EmitEntryPointFunction(std::ostream& out, ast::EntryPoint* ep);
   /// Handles an if statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
-  bool EmitIf(ast::IfStatement* stmt);
+  bool EmitIf(std::ostream& out, ast::IfStatement* stmt);
   /// Handles genreating an import expression
+  /// @param out the output stream
   /// @param expr the expression
   /// @returns true if the expression was successfully emitted.
-  bool EmitImportFunction(ast::CallExpression* expr);
+  bool EmitImportFunction(std::ostream& out, ast::CallExpression* expr);
   /// Handles a literal
+  /// @param out the output stream
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
-  bool EmitLiteral(ast::Literal* lit);
+  bool EmitLiteral(std::ostream& out, ast::Literal* lit);
   /// Handles a loop statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitLoop(ast::LoopStatement* stmt);
+  bool EmitLoop(std::ostream& out, ast::LoopStatement* stmt);
   /// Handles generating an identifier expression
+  /// @param out the output stream
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
-  bool EmitIdentifier(ast::IdentifierExpression* expr);
+  bool EmitIdentifier(std::ostream& out, ast::IdentifierExpression* expr);
   /// Handles a member accessor expression
+  /// @param out the output stream
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
-  bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
+  bool EmitMemberAccessor(std::ostream& out,
+                          ast::MemberAccessorExpression* expr);
   /// Handles a storage buffer accessor expression
+  /// @param out the output stream
   /// @param expr the storage buffer accessor expression
   /// @param rhs the right side of a store expression. Set to nullptr for a load
   /// @returns true if the storage buffer accessor was emitted
-  bool EmitStorageBufferAccessor(ast::Expression* expr, ast::Expression* rhs);
+  bool EmitStorageBufferAccessor(std::ostream& out,
+                                 ast::Expression* expr,
+                                 ast::Expression* rhs);
   /// Handles return statements
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
-  bool EmitReturn(ast::ReturnStatement* stmt);
+  bool EmitReturn(std::ostream& out, ast::ReturnStatement* stmt);
   /// Handles statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitStatement(ast::Statement* stmt);
+  bool EmitStatement(std::ostream& out, ast::Statement* stmt);
   /// Handles generating a switch statement
+  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitSwitch(ast::SwitchStatement* stmt);
+  bool EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt);
   /// Handles generating type
+  /// @param out the output stream
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(ast::type::Type* type, const std::string& name);
+  bool EmitType(std::ostream& out,
+                ast::type::Type* type,
+                const std::string& name);
   /// Handles a unary op expression
+  /// @param out the output stream
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
-  bool EmitUnaryOp(ast::UnaryOpExpression* expr);
+  bool EmitUnaryOp(std::ostream& out, ast::UnaryOpExpression* expr);
   /// Emits the zero value for the given type
+  /// @param out the output stream
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(ast::type::Type* type);
+  bool EmitZeroValue(std::ostream& out, ast::type::Type* type);
   /// Handles generating a variable
+  /// @param out the output stream
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
-  bool EmitVariable(ast::Variable* var);
+  bool EmitVariable(std::ostream& out, ast::Variable* var);
   /// Handles generating a program scope constant variable
+  /// @param out the output stream
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
-  bool EmitProgramConstVariable(const ast::Variable* var);
+  bool EmitProgramConstVariable(std::ostream& out, const ast::Variable* var);
 
   /// Returns true if the accessor is accessing a storage buffer.
   /// @param expr the expression to check
@@ -251,6 +316,9 @@ class GeneratorImpl : public TextGenerator {
   };
 
   std::string current_ep_var_name(VarType type);
+
+  std::string error_;
+  size_t indent_ = 0;
 
   Namer namer_;
   ast::Module* module_ = nullptr;

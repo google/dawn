@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -21,38 +20,35 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_AliasType : public TestHelper,
+                                        public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, EmitAliasType_F32) {
+TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef float a;
+  ASSERT_TRUE(gen().EmitAliasType(out(), &alias)) << gen().error();
+  EXPECT_EQ(result(), R"(typedef float a;
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitAliasType_NameCollision) {
+TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("float", &f32);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef float float_tint_0;
+  ASSERT_TRUE(gen().EmitAliasType(out(), &alias)) << gen().error();
+  EXPECT_EQ(result(), R"(typedef float float_tint_0;
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitAliasType_Struct) {
+TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -73,8 +69,8 @@ TEST_F(HlslGeneratorImplTest, EmitAliasType_Struct) {
 
   ast::Module m;
   GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct a {
+  ASSERT_TRUE(gen().EmitAliasType(out(), &alias)) << gen().error();
+  EXPECT_EQ(result(), R"(struct a {
   float a;
   int b;
 };

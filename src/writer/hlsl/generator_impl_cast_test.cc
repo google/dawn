@@ -14,43 +14,38 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Cast : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, EmitExpression_Cast_Scalar) {
+TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
   ast::type::F32Type f32;
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::CastExpression cast(&f32, std::move(id));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&cast)) << g.error();
-  EXPECT_EQ(g.result(), "float(id)");
+  ASSERT_TRUE(gen().EmitExpression(out(), &cast)) << gen().error();
+  EXPECT_EQ(result(), "float(id)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitExpression_Cast_Vector) {
+TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::CastExpression cast(&vec3, std::move(id));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&cast)) << g.error();
-  EXPECT_EQ(g.result(), "vector<float, 3>(id)");
+  ASSERT_TRUE(gen().EmitExpression(out(), &cast)) << gen().error();
+  EXPECT_EQ(result(), "vector<float, 3>(id)");
 }
 
 }  // namespace

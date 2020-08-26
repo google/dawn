@@ -15,27 +15,25 @@
 #include <memory>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/module.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Continue : public TestHelper,
+                                       public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Continue) {
+TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
   ast::ContinueStatement c;
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&c)) << g.error();
-  EXPECT_EQ(g.result(), "  continue;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), "  continue;\n");
 }
 
 }  // namespace

@@ -14,11 +14,10 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -33,7 +32,9 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   out << data.op;
   return out;
 }
-using HlslBinaryTest = testing::TestWithParam<BinaryData>;
+
+class HlslBinaryTest : public TestHelper,
+                       public testing::TestWithParam<BinaryData> {};
 TEST_P(HlslBinaryTest, Emit) {
   auto params = GetParam();
 
@@ -42,10 +43,8 @@ TEST_P(HlslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), params.result);
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest,

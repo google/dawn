@@ -15,40 +15,33 @@
 #include <memory>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Return : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Return) {
+TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
   ast::ReturnStatement r;
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &r)) << gen().error();
+  EXPECT_EQ(result(), "  return;\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_ReturnWithValue) {
+TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::ReturnStatement r(std::move(expr));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return expr;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &r)) << gen().error();
+  EXPECT_EQ(result(), "  return expr;\n");
 }
 
 }  // namespace

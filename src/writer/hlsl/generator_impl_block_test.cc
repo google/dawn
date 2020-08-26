@@ -14,43 +14,38 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/discard_statement.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Block : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Block) {
+TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen().EmitStatement(out(), &b)) << gen().error();
+  EXPECT_EQ(result(), R"(  {
     discard;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Block_WithoutNewline) {
+TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitBlock(&b)) << g.error();
-  EXPECT_EQ(g.result(), R"({
+  ASSERT_TRUE(gen().EmitBlock(out(), &b)) << gen().error();
+  EXPECT_EQ(result(), R"({
     discard;
   })");
 }

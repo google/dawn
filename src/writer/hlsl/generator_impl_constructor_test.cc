@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
@@ -27,61 +26,54 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Constructor : public TestHelper,
+                                          public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Bool) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<ast::BoolLiteral>(&bool_type, false);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "false");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "false");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Int) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Int) {
   ast::type::I32Type i32;
   auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "-12345");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "-12345");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_UInt) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_UInt) {
   ast::type::U32Type u32;
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 56779);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "56779u");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "56779u");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Float) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Float) {
   ast::type::F32Type f32;
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, float((1 << 30) - 4));
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "1.07374182e+09f");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "1.07374182e+09f");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Float) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
   ast::type::F32Type f32;
 
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, -1.2e-5);
@@ -91,13 +83,11 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Float) {
 
   ast::TypeConstructorExpression expr(&f32, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "float(-1.20000004e-05f)");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "float(-1.20000004e-05f)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Bool) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
   ast::type::BoolType b;
 
   auto lit = std::make_unique<ast::BoolLiteral>(&b, true);
@@ -107,13 +97,11 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Bool) {
 
   ast::TypeConstructorExpression expr(&b, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "bool(true)");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "bool(true)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Int) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
   auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
@@ -123,13 +111,11 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Int) {
 
   ast::TypeConstructorExpression expr(&i32, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "int(-12345)");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "int(-12345)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Uint) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
   ast::type::U32Type u32;
 
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 12345);
@@ -139,13 +125,11 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Uint) {
 
   ast::TypeConstructorExpression expr(&u32, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "uint(12345u)");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "uint(12345u)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Vec) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
@@ -162,27 +146,23 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Vec) {
 
   ast::TypeConstructorExpression expr(&vec, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
             "vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList values;
   ast::TypeConstructorExpression expr(&vec, std::move(values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "vector<float, 3>(0.0f)");
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "vector<float, 3>(0.0f)");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Mat) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 2);  // 3 ROWS, 2 COLUMNS
   ast::type::VectorType vec(&f32, 3);
@@ -214,19 +194,17 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Mat) {
 
   ast::TypeConstructorExpression expr(&mat, std::move(mat_values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
-  EXPECT_EQ(g.result(),
+  EXPECT_EQ(result(),
             std::string("matrix<float, 3, 2>(vector<float, 3>(1.00000000f, "
                         "2.00000000f, 3.00000000f), ") +
                 "vector<float, 3>(3.00000000f, 4.00000000f, 5.00000000f))");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Array) {
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
   ast::type::ArrayType ary(&vec, 3);
@@ -255,10 +233,8 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Array) {
 
   ast::TypeConstructorExpression expr(&ary, std::move(ary_values));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(gen().EmitConstructor(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
             std::string("{") +
                 "vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f), " +
                 "vector<float, 3>(4.00000000f, 5.00000000f, 6.00000000f), " +
@@ -266,7 +242,8 @@ TEST_F(HlslGeneratorImplTest, EmitConstructor_Type_Array) {
 }
 
 // TODO(dsinclair): Add struct constructor test.
-TEST_F(HlslGeneratorImplTest, DISABLED_EmitConstructor_Type_Struct) {}
+TEST_F(HlslGeneratorImplTest_Constructor,
+       DISABLED_EmitConstructor_Type_Struct) {}
 
 }  // namespace
 }  // namespace hlsl

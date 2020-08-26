@@ -831,6 +831,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
     const ast::ExpressionList& params,
     uint32_t* id) {
   if (path != "GLSL.std.450") {
+    set_error(source, "unknown import path " + path);
     return nullptr;
   }
 

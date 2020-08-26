@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
@@ -36,16 +35,17 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_MemberAccessor : public TestHelper,
+                                             public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, EmitExpression_MemberAccessor) {
+TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   ast::type::F32Type f32;
 
   ast::StructMemberList members;
@@ -68,20 +68,16 @@ TEST_F(HlslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
   ast::MemberAccessorExpression expr(std::move(str), std::move(mem));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(str_var.get());
-  g.register_global(str_var.get());
-  mod.AddGlobalVariable(std::move(str_var));
+  td().RegisterVariableForTesting(str_var.get());
+  gen().register_global(str_var.get());
+  mod()->AddGlobalVariable(std::move(str_var));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "str.mem");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "str.mem");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load) {
   // struct Data {
   //   [[offset 0]] a : i32;
@@ -119,23 +115,18 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("data"),
       std::make_unique<ast::IdentifierExpression>("b"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load(4))");
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load(4))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Int) {
   // struct Data {
   //   [[offset 0]] a : i32;
@@ -173,22 +164,18 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("data"),
       std::make_unique<ast::IdentifierExpression>("a"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asint(data.Load(0))");
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asint(data.Load(0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
   //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
@@ -225,22 +212,18 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
 
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asint(data.Load((4 * 2) + 0))");
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asint(data.Load((4 * 2) + 0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
   //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
@@ -285,22 +268,18 @@ TEST_F(HlslGeneratorImplTest,
           std::make_unique<ast::ScalarConstructorExpression>(
               std::make_unique<ast::SintLiteral>(&i32, 3))));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
 
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store) {
   // struct Data {
   //   [[offset 0]] a : i32;
@@ -335,15 +314,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &s));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lhs = std::make_unique<ast::MemberAccessorExpression>(
       std::make_unique<ast::IdentifierExpression>("data"),
@@ -352,13 +327,13 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::FloatLiteral>(&f32, 2.0f));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), R"(data.Store(4, asuint(2.00000000f));
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(result(), R"(data.Store(4, asuint(2.00000000f));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_ToArray) {
   // struct Data {
   //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
@@ -389,15 +364,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &s));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lhs = std::make_unique<ast::ArrayAccessorExpression>(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -409,13 +380,13 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::SintLiteral>(&i32, 2));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), R"(data.Store((4 * 2) + 0, asuint(2));
+  ASSERT_TRUE(td().DetermineResultType(&assign)) << td().error();
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(result(), R"(data.Store((4 * 2) + 0, asuint(2));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Int) {
   // struct Data {
   //   [[offset 0]] a : i32;
@@ -450,15 +421,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &s));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lhs = std::make_unique<ast::MemberAccessorExpression>(
       std::make_unique<ast::IdentifierExpression>("data"),
@@ -467,13 +434,13 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::SintLiteral>(&i32, 2));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), R"(data.Store(0, asuint(2));
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(result(), R"(data.Store(0, asuint(2));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Vec3) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -510,26 +477,22 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &s));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   ast::MemberAccessorExpression expr(
       std::make_unique<ast::IdentifierExpression>("data"),
       std::make_unique<ast::IdentifierExpression>("b"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load3(16))");
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load3(16))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Vec3) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -566,15 +529,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &s));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f);
   auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f);
@@ -595,15 +554,15 @@ TEST_F(HlslGeneratorImplTest,
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
   EXPECT_EQ(
-      g.result(),
+      result(),
       R"(data.Store3(16, asuint(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -656,15 +615,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   ast::MemberAccessorExpression expr(
       std::make_unique<ast::ArrayAccessorExpression>(
@@ -675,12 +630,12 @@ TEST_F(HlslGeneratorImplTest,
               std::make_unique<ast::SintLiteral>(&i32, 2))),
       std::make_unique<ast::IdentifierExpression>("b"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -733,15 +688,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   ast::MemberAccessorExpression expr(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -754,13 +705,13 @@ TEST_F(HlslGeneratorImplTest,
           std::make_unique<ast::IdentifierExpression>("b")),
       std::make_unique<ast::IdentifierExpression>("xy"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
 }
 
 TEST_F(
-    HlslGeneratorImplTest,
+    HlslGeneratorImplTest_MemberAccessor,
     EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -813,15 +764,11 @@ TEST_F(
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   ast::MemberAccessorExpression expr(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -834,12 +781,12 @@ TEST_F(
           std::make_unique<ast::IdentifierExpression>("b")),
       std::make_unique<ast::IdentifierExpression>("g"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Index) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -892,15 +839,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   ast::ArrayAccessorExpression expr(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -914,12 +857,12 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_MultiLevel) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -972,15 +915,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lhs = std::make_unique<ast::MemberAccessorExpression>(
       std::make_unique<ast::ArrayAccessorExpression>(
@@ -1007,15 +946,15 @@ TEST_F(HlslGeneratorImplTest,
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
   EXPECT_EQ(
-      g.result(),
+      result(),
       R"(data.Store3(16 + (32 * 2) + 0, asuint(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Swizzle_SingleLetter) {
   // struct Data {
   //   [[offset 0]] a : vec3<i32>;
@@ -1068,15 +1007,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "data", ast::StorageClass::kStorageBuffer, &pre));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  GeneratorImpl g(&mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  g.register_global(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
   auto lhs = std::make_unique<ast::MemberAccessorExpression>(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -1094,9 +1029,9 @@ TEST_F(HlslGeneratorImplTest,
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(result(),
             R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.00000000f));
 )");
 }

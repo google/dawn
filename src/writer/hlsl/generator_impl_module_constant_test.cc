@@ -15,7 +15,6 @@
 #include <memory>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -23,16 +22,17 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_ModuleConstant : public TestHelper,
+                                             public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_ModuleConstant) {
+TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   ast::type::F32Type f32;
   ast::type::ArrayType ary(&f32, 3);
 
@@ -50,11 +50,10 @@ TEST_F(HlslGeneratorImplTest, Emit_ModuleConstant) {
   var->set_constructor(
       std::make_unique<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitProgramConstVariable(var.get())) << g.error();
+  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
+      << gen().error();
   EXPECT_EQ(
-      g.result(),
+      result(),
       "static const float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
 }
 

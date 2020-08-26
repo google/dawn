@@ -12,33 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
-
-#include "src/ast/assignment_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
-namespace {
 
-class HlslGeneratorImplTest_Assign : public TestHelper, public testing::Test {};
+TestHelper::TestHelper() : td_(&ctx_, &mod_), impl_(&mod_) {}
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+TestHelper::~TestHelper() = default;
 
-  gen().increment_indent();
-
-  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
-  EXPECT_EQ(result(), "  lhs = rhs;\n");
-}
-
-}  // namespace
 }  // namespace hlsl
 }  // namespace writer
 }  // namespace tint

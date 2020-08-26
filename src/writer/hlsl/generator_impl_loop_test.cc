@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/float_literal.h"
@@ -25,33 +24,30 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Loop : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Loop) {
+TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
-  EXPECT_EQ(g.result(), R"(  for(;;) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &l)) << gen().error();
+  EXPECT_EQ(result(), R"(  for(;;) {
     discard;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_LoopWithContinuing) {
+TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::DiscardStatement>());
 
@@ -59,13 +55,10 @@ TEST_F(HlslGeneratorImplTest, Emit_LoopWithContinuing) {
   continuing->append(std::make_unique<ast::ReturnStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen().EmitStatement(out(), &l)) << gen().error();
+  EXPECT_EQ(result(), R"(  {
     bool tint_hlsl_is_first_1 = true;
     for(;;) {
       if (!tint_hlsl_is_first_1) {
@@ -79,7 +72,7 @@ TEST_F(HlslGeneratorImplTest, Emit_LoopWithContinuing) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
+TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -102,13 +95,10 @@ TEST_F(HlslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen().EmitStatement(out(), &outer)) << gen().error();
+  EXPECT_EQ(result(), R"(  {
     bool tint_hlsl_is_first_1 = true;
     for(;;) {
       if (!tint_hlsl_is_first_1) {
@@ -134,7 +124,7 @@ TEST_F(HlslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
 // TODO(dsinclair): Handle pulling declared variables up and out of the for() if
 // there is a continuing block.
-TEST_F(HlslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
+TEST_F(HlslGeneratorImplTest_Loop, DISABLED_Emit_LoopWithVarUsedInContinuing) {
   ast::type::F32Type f32;
 
   auto var = std::make_unique<ast::Variable>(
@@ -156,13 +146,10 @@ TEST_F(HlslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen().EmitStatement(out(), &outer)) << gen().error();
+  EXPECT_EQ(result(), R"(  {
     float lhs;
     bool tint_hlsl_is_first_1 = true;
     for(;;) {

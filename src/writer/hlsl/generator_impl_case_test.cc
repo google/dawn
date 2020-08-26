@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/fallthrough_statement.h"
@@ -22,16 +21,16 @@
 #include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Case : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Case) {
+TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   ast::type::I32Type i32;
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -41,36 +40,32 @@ TEST_F(HlslGeneratorImplTest, Emit_Case) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
-  EXPECT_EQ(g.result(), R"(  case 5: {
+  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), R"(  case 5: {
     break;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Case_BreaksByDefault) {
+TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
   ast::type::I32Type i32;
 
   ast::CaseSelectorList lit;
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::make_unique<ast::BlockStatement>());
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
-  EXPECT_EQ(g.result(), R"(  case 5: {
+  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), R"(  case 5: {
     break;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Case_WithFallthrough) {
+TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   ast::type::I32Type i32;
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -80,18 +75,16 @@ TEST_F(HlslGeneratorImplTest, Emit_Case_WithFallthrough) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
-  EXPECT_EQ(g.result(), R"(  case 5: {
+  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), R"(  case 5: {
     /* fallthrough */
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Case_MultipleSelectors) {
+TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -102,31 +95,27 @@ TEST_F(HlslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 6));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
-  EXPECT_EQ(g.result(), R"(  case 5:
+  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), R"(  case 5:
   case 6: {
     break;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Case_Default) {
+TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
   ast::CaseStatement c;
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::BreakStatement>());
   c.set_body(std::move(body));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
-  EXPECT_EQ(g.result(), R"(  default: {
+  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  EXPECT_EQ(result(), R"(  default: {
     break;
   }
 )");

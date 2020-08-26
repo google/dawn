@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
@@ -42,16 +41,17 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Function : public TestHelper,
+                                       public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Function) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
   ast::type::VoidType void_type;
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
@@ -61,21 +61,18 @@ TEST_F(HlslGeneratorImplTest, Emit_Function) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
+  gen().increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(  void my_func() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(  void my_func() {
     return;
   }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_Name_Collision) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
   ast::type::VoidType void_type;
 
   auto func = std::make_unique<ast::Function>("GeometryShader",
@@ -85,21 +82,18 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_Name_Collision) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
+  gen().increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(  void GeometryShader_tint_0() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(  void GeometryShader_tint_0() {
     return;
   }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_WithParams) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
@@ -117,21 +111,18 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_WithParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
+  gen().increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(  void my_func(float a, int b) {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(  void my_func(float a, int b) {
     return;
   }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_NoName) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_NoName) {
   ast::type::VoidType void_type;
 
   auto func = std::make_unique<ast::Function>("frag_main", ast::VariableList{},
@@ -139,19 +130,17 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_NoName) {
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-  m.AddEntryPoint(std::move(ep));
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(void frag_main() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(void frag_main() {
 }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_WithInOutVars) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -167,14 +156,11 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td().RegisterVariableForTesting(foo_var.get());
+  td().RegisterVariableForTesting(bar_var.get());
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod()->AddGlobalVariable(std::move(foo_var));
+  mod()->AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -187,17 +173,15 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct frag_main_in {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct frag_main_in {
   float foo : TEXCOORD0;
 };
 
@@ -214,7 +198,8 @@ frag_main_out frag_main(frag_main_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Function_EntryPoint_WithInOut_Builtins) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -235,14 +220,11 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
       std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(depth_var.get());
+  td().RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(depth_var.get());
 
-  mod.AddGlobalVariable(std::move(coord_var));
-  mod.AddGlobalVariable(std::move(depth_var));
+  mod()->AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -257,17 +239,15 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct frag_main_in {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct frag_main_in {
   vector<float, 4> coord : SV_Position;
 };
 
@@ -284,7 +264,7 @@ frag_main_out frag_main(frag_main_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_With_Uniform) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -298,12 +278,8 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
-
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -320,17 +296,15 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(cbuffer : register(b0) {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(cbuffer : register(b0) {
   vector<float, 4> coord;
 };
 
@@ -342,7 +316,8 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_UniformStruct) {
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Function_EntryPoint_With_UniformStruct) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -358,23 +333,19 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_UniformStruct) {
   s.set_name("Uniforms");
   auto alias = std::make_unique<ast::type::AliasType>("Uniforms", &s);
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "uniforms", ast::StorageClass::kUniform, alias.get()));
 
-  mod.AddAliasType(alias.get());
+  mod()->AddAliasType(alias.get());
 
   ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -393,17 +364,15 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_With_UniformStruct) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct Uniforms {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct Uniforms {
   vector<float, 4> coord;
 };
 
@@ -417,7 +386,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_EntryPoint_With_StorageBuffer_Read) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -449,11 +418,8 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  mod.AddGlobalVariable(std::move(coord_var));
+  td().RegisterVariableForTesting(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -470,17 +436,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(RWByteAddressBuffer coord : register(u0);
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
@@ -490,7 +454,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_EntryPoint_With_StorageBuffer_Store) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -522,12 +486,9 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(coord_var.get());
 
-  mod.AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -545,17 +506,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(RWByteAddressBuffer coord : register(u0);
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
   coord.Store(4, asuint(2.00000000f));
@@ -565,7 +524,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -587,16 +546,13 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::LocationDecoration>(0));
   val_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
-  td.RegisterVariableForTesting(val_var.get());
+  td().RegisterVariableForTesting(foo_var.get());
+  td().RegisterVariableForTesting(bar_var.get());
+  td().RegisterVariableForTesting(val_var.get());
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
-  mod.AddGlobalVariable(std::move(val_var));
+  mod()->AddGlobalVariable(std::move(foo_var));
+  mod()->AddGlobalVariable(std::move(bar_var));
+  mod()->AddGlobalVariable(std::move(val_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -615,7 +571,7 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("foo")));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
@@ -633,17 +589,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep1));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct ep_1_in {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct ep_1_in {
   float foo : TEXCOORD0;
 };
 
@@ -667,7 +621,7 @@ ep_1_out ep_1(ep_1_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_Called_By_EntryPoints_NoUsedGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -682,12 +636,9 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(depth_var.get());
+  td().RegisterVariableForTesting(depth_var.get());
 
-  mod.AddGlobalVariable(std::move(depth_var));
+  mod()->AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -700,7 +651,7 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
@@ -718,17 +669,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep1));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct ep_1_out {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct ep_1_out {
   float depth : SV_Depth;
 };
 
@@ -745,7 +694,7 @@ ep_1_out ep_1() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -767,14 +716,11 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(depth_var.get());
+  td().RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(depth_var.get());
 
-  mod.AddGlobalVariable(std::move(coord_var));
-  mod.AddGlobalVariable(std::move(depth_var));
+  mod()->AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -792,7 +738,7 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
@@ -810,17 +756,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep1));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct ep_1_in {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct ep_1_in {
   vector<float, 4> coord : SV_Position;
 };
 
@@ -842,7 +786,7 @@ ep_1_out ep_1(ep_1_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        DISABLED_Emit_Function_Called_By_EntryPoint_With_Uniform) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -857,12 +801,9 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(coord_var.get());
 
-  mod.AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -877,7 +818,7 @@ TEST_F(HlslGeneratorImplTest,
           std::make_unique<ast::IdentifierExpression>("x"))));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
@@ -897,20 +838,18 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"( ... )");
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"( ... )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        DISABLED_Emit_Function_Called_By_EntryPoint_With_StorageBuffer) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -925,12 +864,9 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(coord_var.get());
 
-  mod.AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -945,7 +881,7 @@ TEST_F(HlslGeneratorImplTest,
           std::make_unique<ast::IdentifierExpression>("x"))));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
@@ -965,20 +901,18 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
 
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment, "",
                                               "frag_main");
-  mod.AddEntryPoint(std::move(ep));
+  mod()->AddEntryPoint(std::move(ep));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"( ... )");
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"( ... )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        DISABLED_Emit_Function_Called_Two_EntryPoints_WithGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -995,14 +929,11 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::LocationDecoration>(1));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td().RegisterVariableForTesting(foo_var.get());
+  td().RegisterVariableForTesting(bar_var.get());
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod()->AddGlobalVariable(std::move(foo_var));
+  mod()->AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
   auto sub_func =
@@ -1016,7 +947,7 @@ TEST_F(HlslGeneratorImplTest,
       std::make_unique<ast::IdentifierExpression>("foo")));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
@@ -1030,20 +961,18 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
   auto ep2 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_2", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
-  mod.AddEntryPoint(std::move(ep2));
+  mod()->AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep2));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct ep_1_in {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct ep_1_in {
   float foo : TEXCOORD0;
 };
 
@@ -1084,7 +1013,7 @@ ep_2_out ep_2(ep_2_in tint_in) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        DISABLED_Emit_Function_EntryPoints_WithGlobal_Nested_Return) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
@@ -1096,11 +1025,8 @@ TEST_F(HlslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::LocationDecoration>(1));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(bar_var.get());
-  mod.AddGlobalVariable(std::move(bar_var));
+  td().RegisterVariableForTesting(bar_var.get());
+  mod()->AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
@@ -1127,17 +1053,15 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep1));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(struct ep_1_out {
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct ep_1_out {
   float bar : SV_Target0;
 };
 
@@ -1153,14 +1077,10 @@ ep_1_out ep_1() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest,
+TEST_F(HlslGeneratorImplTest_Function,
        Emit_Function_Called_Two_EntryPoints_WithoutGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
 
   ast::VariableList params;
   auto sub_func =
@@ -1172,7 +1092,7 @@ TEST_F(HlslGeneratorImplTest,
           std::make_unique<ast::FloatLiteral>(&f32, 1.0))));
   sub_func->set_body(std::move(body));
 
-  mod.AddFunction(std::move(sub_func));
+  mod()->AddFunction(std::move(sub_func));
 
   auto func_1 = std::make_unique<ast::Function>("frag_1_main",
                                                 std::move(params), &void_type);
@@ -1188,20 +1108,19 @@ TEST_F(HlslGeneratorImplTest,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod.AddFunction(std::move(func_1));
+  mod()->AddFunction(std::move(func_1));
 
   auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_1", "frag_1_main");
   auto ep2 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
                                                "ep_2", "frag_1_main");
-  mod.AddEntryPoint(std::move(ep1));
-  mod.AddEntryPoint(std::move(ep2));
+  mod()->AddEntryPoint(std::move(ep1));
+  mod()->AddEntryPoint(std::move(ep2));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td().Determine()) << td().error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(float sub_func() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(float sub_func() {
   return 1.00000000f;
 }
 
@@ -1217,7 +1136,7 @@ void ep_2() {
 
 )");
 }
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithName) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_WithName) {
   ast::type::VoidType void_type;
 
   auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
@@ -1225,19 +1144,18 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithName) {
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
                                               "my_main", "comp_main");
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-  m.AddEntryPoint(std::move(ep));
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(void my_main() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(void my_main() {
 }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithNameCollision) {
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Function_EntryPoint_WithNameCollision) {
   ast::type::VoidType void_type;
 
   auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
@@ -1245,19 +1163,17 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_EntryPoint_WithNameCollision) {
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
                                               "GeometryShader", "comp_main");
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-  m.AddEntryPoint(std::move(ep));
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(void GeometryShader_tint_0() {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
 }
 
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_Function_WithArrayParams) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   ast::type::F32Type f32;
   ast::type::ArrayType ary(&f32, 5);
 
@@ -1273,14 +1189,11 @@ TEST_F(HlslGeneratorImplTest, Emit_Function_WithArrayParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod()->AddFunction(std::move(func));
+  gen().increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(  void my_func(float a[5]) {
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(  void my_func(float a[5]) {
     return;
   }
 

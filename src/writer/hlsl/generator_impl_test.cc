@@ -12,35 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/hlsl/generator_impl.h"
-
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/void_type.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest : public TestHelper, public testing::Test {};
 
 TEST_F(HlslGeneratorImplTest, DISABLED_Generate) {
   ast::type::VoidType void_type;
-  ast::Module m;
-  m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                                &void_type));
-  m.AddEntryPoint(std::make_unique<ast::EntryPoint>(
+  mod()->AddFunction(std::make_unique<ast::Function>(
+      "my_func", ast::VariableList{}, &void_type));
+  mod()->AddEntryPoint(std::make_unique<ast::EntryPoint>(
       ast::PipelineStage::kFragment, "my_func", ""));
 
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#import <metal_lib>
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(#import <metal_lib>
 
 void my_func() {
 }
@@ -48,30 +44,23 @@ void my_func() {
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName) {
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_EQ(g.generate_name("func_main_in"), "func_main_in");
+  ASSERT_EQ(gen().generate_name("func_main_in"), "func_main_in");
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
-  ast::Module m;
-  GeneratorImpl g(&m);
-
   // Register the struct name as existing.
-  auto* namer = g.namer_for_testing();
+  auto* namer = gen().namer_for_testing();
   namer->NameFor("func_main_out");
 
-  ASSERT_EQ(g.generate_name("func_main_out"), "func_main_out_0");
+  ASSERT_EQ(gen().generate_name("func_main_out"), "func_main_out_0");
 }
 
 TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_EQ(g.generate_name("func_main_in"), "func_main_in");
+  ASSERT_EQ(gen().generate_name("func_main_in"), "func_main_in");
 
   ast::IdentifierExpression ident("func_main_in");
-  ASSERT_TRUE(g.EmitIdentifier(&ident));
-  EXPECT_EQ(g.result(), "func_main_in_0");
+  ASSERT_TRUE(gen().EmitIdentifier(out(), &ident));
+  EXPECT_EQ(result(), "func_main_in_0");
 }
 
 struct HlslBuiltinData {
@@ -82,13 +71,12 @@ inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
   out << data.builtin;
   return out;
 }
-using HlslBuiltinConversionTest = testing::TestWithParam<HlslBuiltinData>;
+class HlslBuiltinConversionTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslBuiltinData> {};
 TEST_P(HlslBuiltinConversionTest, Emit) {
   auto params = GetParam();
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  EXPECT_EQ(g.builtin_to_attribute(params.builtin),
+  EXPECT_EQ(gen().builtin_to_attribute(params.builtin),
             std::string(params.attribute_name));
 }
 INSTANTIATE_TEST_SUITE_P(

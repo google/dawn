@@ -12,44 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_HLSL_GENERATOR_H_
-#define SRC_WRITER_HLSL_GENERATOR_H_
+#ifndef SRC_WRITER_HLSL_TEST_HELPER_H_
+#define SRC_WRITER_HLSL_TEST_HELPER_H_
 
 #include <sstream>
-#include <string>
 
+#include "gtest/gtest.h"
+#include "src/ast/module.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
-#include "src/writer/text.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 
-/// Class to generate HLSL source
-class Generator : public Text {
+/// Helper class for testing
+class TestHelper {
  public:
-  /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module module);
-  ~Generator() override;
+  TestHelper();
+  ~TestHelper();
 
-  /// Generates the result data
-  /// @returns true on successful generation; false otherwise
-  bool Generate() override;
+  /// @returns the generator implementation
+  GeneratorImpl& gen() { return impl_; }
 
-  /// @returns the result data
-  std::string result() const override;
+  /// @returns the module
+  ast::Module* mod() { return &mod_; }
 
-  /// @returns the error
-  std::string error() const;
+  /// @returns the type determiner
+  TypeDeterminer& td() { return td_; }
+
+  /// @returns the output stream
+  std::ostream& out() { return out_; }
+
+  /// @returns the result string
+  std::string result() const { return out_.str(); }
 
  private:
-  std::ostringstream out_;
+  Context ctx_;
+  ast::Module mod_;
+  TypeDeterminer td_;
   GeneratorImpl impl_;
+  std::ostringstream out_;
 };
 
 }  // namespace hlsl
 }  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_HLSL_GENERATOR_H_
+#endif  // SRC_WRITER_HLSL_TEST_HELPER_H_

@@ -12,53 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Identifier : public TestHelper,
+                                         public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, DISABLED_EmitExpression_Identifier) {
+TEST_F(HlslGeneratorImplTest_Identifier, DISABLED_EmitExpression_Identifier) {
   ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "std::glsl");
+  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), "std::glsl");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitIdentifierExpression_Single) {
+TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression_Single) {
   ast::IdentifierExpression i("foo");
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "foo");
+  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), "foo");
 }
 
-TEST_F(HlslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
+TEST_F(HlslGeneratorImplTest_Identifier,
+       EmitIdentifierExpression_Single_WithCollision) {
   ast::IdentifierExpression i("virtual");
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "virtual_tint_0");
+  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), "virtual_tint_0");
 }
 
 // TODO(dsinclair): Handle import names
-TEST_F(HlslGeneratorImplTest, DISABLED_EmitIdentifierExpression_MultipleNames) {
+TEST_F(HlslGeneratorImplTest_Identifier,
+       DISABLED_EmitIdentifierExpression_MultipleNames) {
   ast::IdentifierExpression i({"std", "glsl", "init"});
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "std::glsl::init");
+  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), "std::glsl::init");
 }
 
 }  // namespace

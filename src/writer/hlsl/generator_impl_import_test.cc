@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
@@ -30,14 +29,14 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Import : public TestHelper, public testing::Test {};
 
 struct HlslImportData {
   const char* name;
@@ -47,7 +46,10 @@ inline std::ostream& operator<<(std::ostream& out, HlslImportData data) {
   out << data.name;
   return out;
 }
-using HlslImportData_SingleParamTest = testing::TestWithParam<HlslImportData>;
+
+class HlslImportData_SingleParamTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -61,19 +63,14 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.hlsl_name) + "(1.00000000f)");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(
-    HlslGeneratorImplTest,
+    HlslGeneratorImplTest_Import,
     HlslImportData_SingleParamTest,
     testing::Values(HlslImportData{"acos", "acos"},
                     HlslImportData{"asin", "asin"},
@@ -104,20 +101,21 @@ INSTANTIATE_TEST_SUITE_P(
                     HlslImportData{"tanh", "tanh"},
                     HlslImportData{"trunc", "trunc"}));
 
-TEST_F(HlslGeneratorImplTest, DISABLED_HlslImportData_Acosh) {
+TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_Acosh) {
   FAIL();
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_HlslImportData_ASinh) {
+TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_ASinh) {
   FAIL();
 }
 
-TEST_F(HlslGeneratorImplTest, DISABLED_HlslImportData_ATanh) {
+TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_ATanh) {
   FAIL();
 }
 
-using HlslImportData_SingleIntParamTest =
-    testing::TestWithParam<HlslImportData>;
+class HlslImportData_SingleIntParamTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto param = GetParam();
 
@@ -131,23 +129,20 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.hlsl_name) + "(1)");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1)");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleIntParamTest,
                          testing::Values(HlslImportData{"sabs", "abs"},
                                          HlslImportData{"ssign", "sign"}));
 
-using HlslImportData_DualParamTest = testing::TestWithParam<HlslImportData>;
+class HlslImportData_DualParamTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -163,19 +158,14 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
             std::string(param.hlsl_name) + "(1.00000000f, 2.00000000f)");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParamTest,
                          testing::Values(HlslImportData{"atan2", "atan2"},
                                          HlslImportData{"distance", "distance"},
@@ -187,8 +177,9 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
                                          HlslImportData{"reflect", "reflect"},
                                          HlslImportData{"step", "step"}));
 
-using HlslImportData_DualParam_VectorTest =
-    testing::TestWithParam<HlslImportData>;
+class HlslImportData_DualParam_VectorTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
@@ -220,26 +211,22 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
             std::string(param.hlsl_name) +
                 "(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f), "
                 "vector<float, 3>(4.00000000f, 5.00000000f, 6.00000000f))");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_VectorTest,
                          testing::Values(HlslImportData{"cross", "cross"}));
 
-using HlslImportData_DualParam_Int_Test =
-    testing::TestWithParam<HlslImportData>;
+class HlslImportData_DualParam_Int_Test
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -255,25 +242,22 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.hlsl_name) + "(1, 2)");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2)");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_Int_Test,
                          testing::Values(HlslImportData{"smax", "max"},
                                          HlslImportData{"smin", "min"},
                                          HlslImportData{"umax", "max"},
                                          HlslImportData{"umin", "min"}));
 
-using HlslImportData_TripleParamTest = testing::TestWithParam<HlslImportData>;
+class HlslImportData_TripleParamTest
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -291,20 +275,15 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.hlsl_name) +
-                            "(1.00000000f, 2.00000000f, 3.00000000f)");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string(param.hlsl_name) +
+                          "(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(
-    HlslGeneratorImplTest,
+    HlslGeneratorImplTest_Import,
     HlslImportData_TripleParamTest,
     testing::Values(HlslImportData{"faceforward", "faceforward"},
                     HlslImportData{"fma", "fma"},
@@ -312,12 +291,13 @@ INSTANTIATE_TEST_SUITE_P(
                     HlslImportData{"nclamp", "clamp"},
                     HlslImportData{"smoothstep", "smoothstep"}));
 
-TEST_F(HlslGeneratorImplTest, DISABLED_HlslImportData_FMix) {
+TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
   FAIL();
 }
 
-using HlslImportData_TripleParam_Int_Test =
-    testing::TestWithParam<HlslImportData>;
+class HlslImportData_TripleParam_Int_Test
+    : public TestHelper,
+      public testing::TestWithParam<HlslImportData> {};
 TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -335,23 +315,18 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
                                std::vector<std::string>{"std", param.name}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.hlsl_name) + "(1, 2, 3)");
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_TripleParam_Int_Test,
                          testing::Values(HlslImportData{"sclamp", "clamp"},
                                          HlslImportData{"uclamp", "clamp"}));
 
-TEST_F(HlslGeneratorImplTest, HlslImportData_Determinant) {
+TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
@@ -365,19 +340,14 @@ TEST_F(HlslGeneratorImplTest, HlslImportData_Determinant) {
                                std::vector<std::string>{"std", "determinant"}),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  mod.AddGlobalVariable(std::move(var));
-  mod.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  mod()->AddGlobalVariable(std::move(var));
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
-  TypeDeterminer td(&ctx, &mod);
   // Register the global
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitImportFunction(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("determinant(var)"));
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
+  ASSERT_TRUE(gen().EmitImportFunction(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), std::string("determinant(var)"));
 }
 
 }  // namespace

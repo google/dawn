@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
@@ -22,16 +21,16 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/i32_type.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_Switch : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_Switch) {
+TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();
   auto def_body = std::make_unique<ast::BlockStatement>();
   def_body->append(std::make_unique<ast::BreakStatement>());
@@ -53,13 +52,10 @@ TEST_F(HlslGeneratorImplTest, Emit_Switch) {
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"(  switch(cond) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &s)) << gen().error();
+  EXPECT_EQ(result(), R"(  switch(cond) {
     case 5: {
       break;
     }

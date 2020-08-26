@@ -15,7 +15,6 @@
 #include <memory>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/array_type.h"
@@ -23,47 +22,42 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_VariableDecl : public TestHelper,
+                                           public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement) {
+TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
+TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
   ast::VariableDeclStatement stmt(std::move(var));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  const float a;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  const float a;\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
+TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
   ast::type::F32Type f32;
   ast::type::ArrayType ary(&f32, 5);
 
@@ -71,46 +65,39 @@ TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
   ast::VariableDeclStatement stmt(std::move(var));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a[5];\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  float a[5];\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
+TEST_F(HlslGeneratorImplTest_VariableDecl,
+       Emit_VariableDeclStatement_Function) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
+TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
+TEST_F(HlslGeneratorImplTest_VariableDecl,
+       Emit_VariableDeclStatement_Initializer_Private) {
   auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
 
   ast::type::F32Type f32;
@@ -119,15 +106,13 @@ TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
   var->set_constructor(std::move(ident));
 
   ast::VariableDeclStatement stmt(std::move(var));
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(float a = initializer;
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), R"(float a = initializer;
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
+TEST_F(HlslGeneratorImplTest_VariableDecl,
+       Emit_VariableDeclStatement_Initializer_ZeroVec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
@@ -140,11 +125,8 @@ TEST_F(HlslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   var->set_constructor(std::move(zero_vec));
 
   ast::VariableDeclStatement stmt(std::move(var));
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
+  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  EXPECT_EQ(result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
 )");
 }
 

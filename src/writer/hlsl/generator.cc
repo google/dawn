@@ -26,7 +26,7 @@ Generator::Generator(ast::Module module)
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  auto ret = impl_.Generate();
+  auto ret = impl_.Generate(out_);
   if (!ret) {
     error_ = impl_.error();
   }
@@ -34,7 +34,7 @@ bool Generator::Generate() {
 }
 
 std::string Generator::result() const {
-  return impl_.result();
+  return out_.str();
 }
 
 std::string Generator::error() const {

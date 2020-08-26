@@ -12,40 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
-#include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest = testing::Test;
+class HlslGeneratorImplTest_If : public TestHelper, public testing::Test {};
 
-TEST_F(HlslGeneratorImplTest, Emit_If) {
+TEST_F(HlslGeneratorImplTest_If, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
+  gen().increment_indent();
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), R"(  if (cond) {
     return;
   }
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_IfWithElseIf) {
+TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
   auto else_body = std::make_unique<ast::BlockStatement>();
   else_body->append(std::make_unique<ast::ReturnStatement>());
@@ -61,12 +57,10 @@ TEST_F(HlslGeneratorImplTest, Emit_IfWithElseIf) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else if (else_cond) {
     return;
@@ -74,7 +68,7 @@ TEST_F(HlslGeneratorImplTest, Emit_IfWithElseIf) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_IfWithElse) {
+TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
   auto else_body = std::make_unique<ast::BlockStatement>();
   else_body->append(std::make_unique<ast::ReturnStatement>());
 
@@ -88,12 +82,10 @@ TEST_F(HlslGeneratorImplTest, Emit_IfWithElse) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -101,7 +93,7 @@ TEST_F(HlslGeneratorImplTest, Emit_IfWithElse) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, Emit_IfWithMultiple) {
+TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
   auto else_body = std::make_unique<ast::BlockStatement>();
@@ -122,12 +114,10 @@ TEST_F(HlslGeneratorImplTest, Emit_IfWithMultiple) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen().increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else if (else_cond) {
     return;
