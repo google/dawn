@@ -43,8 +43,6 @@ namespace dawn_native {
 
     class ShaderModuleBase : public CachedObject {
       public:
-        enum class Type { Undefined, Spirv, Wgsl };
-
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
@@ -98,6 +96,15 @@ namespace dawn_native {
             uint32_t pullingBufferBindingSet) const;
 #endif
 
+        struct EntryPointMetadata {
+            EntryPointMetadata();
+
+            ModuleBindingInfo bindings;
+            std::bitset<kMaxVertexAttributes> usedVertexAttributes;
+            SingleShaderStage stage;
+            FragmentOutputBaseTypes fragmentOutputFormatBaseTypes;
+        };
+
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
         shaderc_spvc::CompileOptions GetCompileOptions() const;
@@ -108,27 +115,18 @@ namespace dawn_native {
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        MaybeError ValidateCompatibilityWithBindGroupLayout(
-            BindGroupIndex group,
-            const BindGroupLayoutBase* layout) const;
-
-        std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingInfoMap& shaderMap,
-                                                         const BindGroupLayoutBase* layout) const;
-
         // Different implementations reflection into the shader depending on
         // whether using spvc, or directly accessing spirv-cross.
-        MaybeError ExtractSpirvInfoWithSpvc();
-        MaybeError ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler);
+        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoWithSpvc();
+        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoWithSpirvCross(
+            const spirv_cross::Compiler& compiler);
 
+        enum class Type { Undefined, Spirv, Wgsl };
         Type mType;
         std::vector<uint32_t> mSpirv;
         std::string mWgsl;
 
-        ModuleBindingInfo mBindingInfo;
-        std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
-        SingleShaderStage mExecutionModel;
-
-        FragmentOutputBaseTypes mFragmentOutputFormatBaseTypes;
+        std::unique_ptr<EntryPointMetadata> mMainEntryPoint;
     };
 
 }  // namespace dawn_native
