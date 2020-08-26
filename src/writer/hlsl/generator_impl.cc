@@ -58,6 +58,7 @@ const char kInStructNameSuffix[] = "in";
 const char kOutStructNameSuffix[] = "out";
 const char kTintStructInVarPrefix[] = "tint_in";
 const char kTintStructOutVarPrefix[] = "tint_out";
+const char kTempNamePrefix[] = "_tint_tmp";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
@@ -1524,7 +1525,6 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     if (expr->IsMemberAccessor()) {
       auto* mem = expr->AsMemberAccessor();
       auto* res_type = mem->structure()->result_type()->UnwrapAliasPtrAlias();
-
       if (res_type->IsStruct()) {
         auto* str_type = res_type->AsStruct()->impl();
         auto* str_member = str_type->get_member(mem->member()->name());
@@ -1534,6 +1534,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
           return "";
         }
         out << str_member->offset();
+
       } else if (res_type->IsVector()) {
         // This must be a single element swizzle if we've got a vector at this
         // point.
@@ -1561,7 +1562,6 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       auto* ary_type = ary->array()->result_type()->UnwrapAliasPtrAlias();
 
       out << "(";
-      // TODO(dsinclair): Handle matrix case
       if (ary_type->IsArray()) {
         out << ary_type->AsArray()->array_stride();
       } else if (ary_type->IsVector()) {
@@ -1569,6 +1569,13 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
         // have to ask the type for the byte size.
         out << "4";
+      } else if (ary_type->IsMatrix()) {
+        auto* mat = ary_type->AsMatrix();
+        if (mat->columns() == 2) {
+          out << "8";
+        } else {
+          out << "16";
+        }
       } else {
         error_ = "Invalid array type in storage buffer access";
         return "";
@@ -1600,14 +1607,18 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& out,
                                               ast::Expression* expr,
                                               ast::Expression* rhs) {
   auto* result_type = expr->result_type()->UnwrapAliasPtrAlias();
-  std::string access_method = rhs != nullptr ? "Store" : "Load";
+  bool is_store = rhs != nullptr;
+
+  std::string access_method = is_store ? "Store" : "Load";
   if (result_type->IsVector()) {
     access_method += std::to_string(result_type->AsVector()->size());
+  } else if (result_type->IsMatrix()) {
+    access_method += std::to_string(result_type->AsMatrix()->rows());
   }
 
   // If we aren't storing then we need to put in the outer cast.
-  if (rhs == nullptr) {
-    if (result_type->is_float_scalar_or_vector()) {
+  if (!is_store) {
+    if (result_type->is_float_scalar_or_vector() || result_type->IsMatrix()) {
       out << "asfloat(";
     } else if (result_type->is_signed_scalar_or_vector()) {
       out << "asint(";
@@ -1621,15 +1632,63 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& out,
     error_ = "error emitting storage buffer access";
     return false;
   }
-  out << buffer_name << "." << access_method << "(";
 
   auto idx = generate_storage_buffer_index_expression(expr);
   if (idx.empty()) {
     return false;
   }
-  out << idx;
 
-  if (rhs != nullptr) {
+  if (result_type->IsMatrix()) {
+    auto* mat = result_type->AsMatrix();
+
+    // TODO(dsinclair): This is assuming 4 byte elements. Will need to be fixed
+    // if we get matrixes of f16 or f64.
+    uint32_t stride = mat->rows() == 2 ? 8 : 16;
+
+    if (is_store) {
+      if (!EmitType(out, mat, "")) {
+        return false;
+      }
+
+      auto name = generate_name(kTempNamePrefix);
+      out << " " << name << " = ";
+      if (!EmitExpression(out, rhs)) {
+        return false;
+      }
+      out << ";" << std::endl;
+
+      for (uint32_t i = 0; i < mat->columns(); i++) {
+        if (i > 0) {
+          out << ";" << std::endl;
+        }
+
+        make_indent(out);
+        out << buffer_name << "." << access_method << "(" << idx << " + "
+            << (i * stride) << ", asuint(" << name << "[" << i << "]))";
+      }
+
+      return true;
+    }
+
+    out << "matrix<uint, " << mat->rows() << ", " << mat->columns() << ">(";
+
+    for (uint32_t i = 0; i < mat->columns(); i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+
+      out << buffer_name << "." << access_method << "(" << idx << " + "
+          << (i * stride) << ")";
+    }
+
+    // Close the matrix type and outer cast
+    out << "))";
+
+    return true;
+  }
+
+  out << buffer_name << "." << access_method << "(" << idx;
+  if (is_store) {
     out << ", asuint(";
     if (!EmitExpression(out, rhs)) {
       return false;
@@ -1640,7 +1699,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& out,
   out << ")";
 
   // Close the outer cast.
-  if (rhs == nullptr) {
+  if (!is_store) {
     out << ")";
   }
 

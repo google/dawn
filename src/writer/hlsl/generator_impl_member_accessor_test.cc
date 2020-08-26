@@ -30,6 +30,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -173,6 +174,344 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asint(data.Load(0))");
+}
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix) {
+  // struct Data {
+  //   [[offset 0]] z : f32;
+  //   [[offset 4]] a : mat2x3<f32>;
+  // };
+  // var<storage_buffer> data : Data;
+  // mat2x3<f32> b;
+  // data.a = b;
+  //
+  // -> matrix<float, 3, 2> _tint_tmp = b;
+  //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
+  //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto b_var =
+      std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate, &mat);
+
+  auto coord_var = std::make_unique<ast::Variable>(
+      "data", ast::StorageClass::kStorageBuffer, &s);
+
+  auto lhs = std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("data"),
+      std::make_unique<ast::IdentifierExpression>("a"));
+  auto rhs = std::make_unique<ast::IdentifierExpression>("b");
+
+  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  td().RegisterVariableForTesting(b_var.get());
+  gen().register_global(coord_var.get());
+  gen().register_global(b_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+  mod()->AddGlobalVariable(std::move(b_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(result(), R"(matrix<float, 3, 2> _tint_tmp = b;
+data.Store3(4 + 0, asuint(_tint_tmp[0]));
+data.Store3(4 + 16, asuint(_tint_tmp[1]));
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix_Empty) {
+  // struct Data {
+  //   [[offset 0]] z : f32;
+  //   [[offset 4]] a : mat2x3<f32>;
+  // };
+  // var<storage_buffer> data : Data;
+  // data.a = mat2x3<f32>();
+  //
+  // -> matrix<float, 3, 2> _tint_tmp = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f,
+  // 0.0f, 0.0f, 0.0f);
+  //    data.Store3(4 + 0, asuint(_tint_tmp[0]);
+  //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &s));
+
+  auto lhs = std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("data"),
+      std::make_unique<ast::IdentifierExpression>("a"));
+  auto rhs = std::make_unique<ast::TypeConstructorExpression>(
+      &mat, ast::ExpressionList{});
+
+  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&assign));
+
+  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  EXPECT_EQ(
+      result(),
+      R"(matrix<float, 3, 2> _tint_tmp = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+data.Store3(4 + 0, asuint(_tint_tmp[0]));
+data.Store3(4 + 16, asuint(_tint_tmp[1]));
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix) {
+  // struct Data {
+  //   [[offset 0]] z : f32;
+  //   [[offset 4]] a : mat3x2<f32>;
+  // };
+  // var<storage_buffer> data : Data;
+  // data.a;
+  //
+  // -> asfloat(matrix<uint, 2, 3>(data.Load2(4 + 0), data.Load2(4 + 8),
+  // data.Load2(4 + 16)));
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 2, 3);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &s));
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("data"),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
+            "asfloat(matrix<uint, 2, 3>(data.Load2(4 + 0), data.Load2(4 + 8), "
+            "data.Load2(4 + 16)))");
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Nested) {
+  // struct Data {
+  //   [[offset 0]] z : f32;
+  //   [[offset 4]] a : mat2x3<f32;
+  // };
+  // struct Outer {
+  //   [[offset 0]] c : f32;
+  //   [[offset 4]] b : Data;
+  // };
+  // var<storage_buffer> data : Outer;
+  // data.b.a;
+  //
+  // -> asfloat(matrix<uint, 3, 2>(data.Load3(4 + 0), data.Load3(4 + 16)));
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &s));
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("data"),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(
+      result(),
+      "asfloat(matrix<uint, 3, 2>(data.Load3(4 + 0), data.Load3(4 + 16)))");
+}
+
+TEST_F(
+    HlslGeneratorImplTest_MemberAccessor,
+    EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_By3_Is_16_Bytes) {
+  // struct Data {
+  //   [[offset 4]] a : mat3x3<f32;
+  // };
+  // var<storage_buffer> data : Data;
+  // data.a;
+  //
+  // -> asfloat(matrix<uint, 3, 3>(data.Load3(0), data.Load3(16),
+  // data.Load3(32)));
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList deco;
+  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &s));
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("data"),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(),
+            "asfloat(matrix<uint, 3, 3>(data.Load3(0 + 0), data.Load3(0 + 16), "
+            "data.Load3(0 + 32)))");
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Single_Element) {
+  // struct Data {
+  //   [[offset 0]] z : f32;
+  //   [[offset 16]] a : mat4x3<f32>;
+  // };
+  // var<storage_buffer> data : Data;
+  // data.a[2][1];
+  //
+  // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::MatrixType mat(&f32, 3, 4);
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+  s.set_name("Data");
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &s));
+
+  ast::ArrayAccessorExpression expr(
+      std::make_unique<ast::ArrayAccessorExpression>(
+          std::make_unique<ast::MemberAccessorExpression>(
+              std::make_unique<ast::IdentifierExpression>("data"),
+              std::make_unique<ast::IdentifierExpression>("a")),
+          std::make_unique<ast::ScalarConstructorExpression>(
+              std::make_unique<ast::SintLiteral>(&i32, 2))),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  td().RegisterVariableForTesting(coord_var.get());
+  gen().register_global(coord_var.get());
+  mod()->AddGlobalVariable(std::move(coord_var));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(td().DetermineResultType(&expr));
+
+  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + (16 * 2) + 16))");
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
