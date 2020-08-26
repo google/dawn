@@ -52,16 +52,24 @@ namespace wgsl {
 
 class Lexer;
 
+/// Struct holding information for a for loop
 struct ForHeader {
-  std::unique_ptr<ast::Statement> initializer;
-  std::unique_ptr<ast::Expression> condition;
-  std::unique_ptr<ast::Statement> continuing;
-
-  ForHeader(std::unique_ptr<ast::Statement> _initializer,
-            std::unique_ptr<ast::Expression> _condition,
-            std::unique_ptr<ast::Statement> _continuing);
+  /// Constructor
+  /// @param init the initializer statement
+  /// @param cond the condition statement
+  /// @param cont the continuing statement
+  ForHeader(std::unique_ptr<ast::Statement> init,
+            std::unique_ptr<ast::Expression> cond,
+            std::unique_ptr<ast::Statement> cont);
 
   ~ForHeader();
+
+  /// The for loop initializer
+  std::unique_ptr<ast::Statement> initializer;
+  /// The for loop condition
+  std::unique_ptr<ast::Expression> condition;
+  /// The for loop continuing statement
+  std::unique_ptr<ast::Statement> continuing;
 };
 
 /// ParserImpl for WGSL source data

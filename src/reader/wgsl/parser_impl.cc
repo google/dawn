@@ -1991,12 +1991,12 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
                                               std::move(continuing));
 }
 
-ForHeader::ForHeader(std::unique_ptr<ast::Statement> _initializer,
-                     std::unique_ptr<ast::Expression> _condition,
-                     std::unique_ptr<ast::Statement> _continuing)
-    : initializer(std::move(_initializer)),
-      condition(std::move(_condition)),
-      continuing(std::move(_continuing)) {}
+ForHeader::ForHeader(std::unique_ptr<ast::Statement> init,
+                     std::unique_ptr<ast::Expression> cond,
+                     std::unique_ptr<ast::Statement> cont)
+    : initializer(std::move(init)),
+      condition(std::move(cond)),
+      continuing(std::move(cont)) {}
 
 ForHeader::~ForHeader() = default;
 
