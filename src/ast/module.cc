@@ -16,6 +16,8 @@
 
 #include <sstream>
 
+#include "src/ast/type/struct_type.h"
+
 namespace tint {
 namespace ast {
 
@@ -95,7 +97,13 @@ std::string Module::to_str() const {
     ep->to_str(out, indent);
   }
   for (auto* const alias : alias_types_) {
+    for (size_t i = 0; i < indent; ++i) {
+      out << " ";
+    }
     out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
+    if (alias->type()->IsStruct()) {
+      alias->type()->AsStruct()->impl()->to_str(out, indent);
+    }
   }
   for (const auto& func : functions_) {
     func->to_str(out, indent);

@@ -60,8 +60,16 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     %s2 = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(p->module().to_str(),
-              HasSubstr("S -> __struct_S\nS_1 -> __struct_S_1"));
+  EXPECT_THAT(p->module().to_str(), HasSubstr(R"(S -> __struct_S
+  Struct{
+    StructMember{field0: __u32}
+    StructMember{field1: __u32}
+  }
+  S_1 -> __struct_S_1
+  Struct{
+    StructMember{field0: __u32}
+    StructMember{field1: __u32}
+  })"));
 }
 
 // TODO(dneto): Should we make an alias for an un-decoratrd array with
@@ -89,7 +97,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->module().to_str(),
-              HasSubstr("RTArr -> __array__u32_stride_8\nRTArr_1 -> "
+              HasSubstr("RTArr -> __array__u32_stride_8\n  RTArr_1 -> "
                         "__array__u32_stride_8\n"));
 }
 
@@ -129,10 +137,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(
-      p->module().to_str(),
-      HasSubstr(
-          "Arr -> __array__u32_5_stride_8\nArr_1 -> __array__u32_5_stride_"));
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("Arr -> __array__u32_5_stride_8\n  Arr_1 -> "
+                        "__array__u32_5_stride_8"));
 }
 
 // TODO(dneto): Handle arrays sized by a spec constant.

@@ -748,8 +748,12 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
     storage_buffer
     __alias_S__struct_S
   }
-RTArr -> __array__u32_stride_4
-S -> __struct_S)"));
+  RTArr -> __array__u32_stride_4
+  S -> __struct_S
+  [[block]] Struct{
+    StructMember{[[ offset 0 ]] field0: __u32}
+    StructMember{[[ offset 4 ]] field1: __alias_RTArr__array__u32_stride_4}
+  })"));
 }
 
 TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {

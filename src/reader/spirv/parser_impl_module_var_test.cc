@@ -1310,7 +1310,12 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
     storage_buffer
     __alias_S__struct_S
   }
-S -> __struct_S
+  S -> __struct_S
+  [[block]] Struct{
+    StructMember{field0: __u32}
+    StructMember{field1: __f32}
+    StructMember{field2: __array__u32_2}
+  }
 })")) << module_str;
 }
 
@@ -1332,7 +1337,12 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
     storage_buffer
     __alias_S__struct_S
   }
-S -> __struct_S
+  S -> __struct_S
+  [[block]] Struct{
+    StructMember{field0: __u32}
+    StructMember{field1: __f32}
+    StructMember{field2: __array__u32_2}
+  }
 })")) << module_str;
 }
 
@@ -1358,7 +1368,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
     storage_buffer
     __alias_S__struct_S
   }
-S -> __struct_S
+  S -> __struct_S
+  [[block]] Struct{
+    StructMember{field0: __mat_2_3__f32}
+  }
 })")) << module_str;
 }
 
@@ -1384,7 +1397,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
     storage_buffer
     __alias_S__struct_S
   }
-S -> __struct_S
+  S -> __struct_S
+  [[block]] Struct{
+    StructMember{field0: __mat_2_3__f32}
+  }
 })")) << module_str;
 }
 
