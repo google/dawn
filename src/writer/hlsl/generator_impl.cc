@@ -14,6 +14,8 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include <sstream>
+
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
@@ -1489,6 +1491,87 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
   return true;
 }
 
+std::string GeneratorImpl::generate_storage_buffer_index_expression(
+    ast::Expression* expr) {
+  std::ostringstream out;
+  bool first = true;
+  for (;;) {
+    if (expr->IsIdentifier()) {
+      break;
+    }
+
+    if (!first) {
+      out << " + ";
+    }
+    first = false;
+    if (expr->IsMemberAccessor()) {
+      auto* mem = expr->AsMemberAccessor();
+      auto* res_type = mem->structure()->result_type()->UnwrapAliasPtrAlias();
+
+      if (res_type->IsStruct()) {
+        auto* str_type = res_type->AsStruct()->impl();
+        auto* str_member = str_type->get_member(mem->member()->name());
+
+        if (!str_member->has_offset_decoration()) {
+          error_ = "missing offset decoration for struct member";
+          return "";
+        }
+        out << str_member->offset();
+      } else if (res_type->IsVector()) {
+        // This must be a single element swizzle if we've got a vector at this
+        // point.
+        if (mem->member()->name().size() != 1) {
+          error_ =
+              "Encountered multi-element swizzle when should have only one "
+              "level";
+          return "";
+        }
+
+        // TODO(dsinclair): All our types are currently 4 bytes (f32, i32, u32)
+        // so this is assuming 4. This will need to be fixed when we get f16 or
+        // f64 types.
+        out << "(4 * " << convert_swizzle_to_index(mem->member()->name())
+            << ")";
+      } else {
+        error_ =
+            "Invalid result type for member accessor: " + res_type->type_name();
+        return "";
+      }
+
+      expr = mem->structure();
+    } else if (expr->IsArrayAccessor()) {
+      auto* ary = expr->AsArrayAccessor();
+      auto* ary_type = ary->array()->result_type()->UnwrapAliasPtrAlias();
+
+      out << "(";
+      // TODO(dsinclair): Handle matrix case
+      if (ary_type->IsArray()) {
+        out << ary_type->AsArray()->array_stride();
+      } else if (ary_type->IsVector()) {
+        // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
+        // or u32 which are all 4 bytes. When we get f16 or other types we'll
+        // have to ask the type for the byte size.
+        out << "4";
+      } else {
+        error_ = "Invalid array type in storage buffer access";
+        return "";
+      }
+      out << " * ";
+      if (!EmitExpression(out, ary->idx_expr())) {
+        return "";
+      }
+      out << ")";
+
+      expr = ary->array();
+    } else {
+      error_ = "error emitting storage buffer access";
+      return "";
+    }
+  }
+
+  return out.str();
+}
+
 // TODO(dsinclair): This currently only handles loading of 4, 8, 12 or 16 byte
 // members. If we need to support larger we'll need to do the loading into
 // chunks.
@@ -1523,81 +1606,11 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& out,
   }
   out << buffer_name << "." << access_method << "(";
 
-  auto* ptr = expr;
-  bool first = true;
-  for (;;) {
-    if (ptr->IsIdentifier()) {
-      break;
-    }
-
-    if (!first) {
-      out << " + ";
-    }
-    first = false;
-    if (ptr->IsMemberAccessor()) {
-      auto* mem = ptr->AsMemberAccessor();
-      auto* res_type = mem->structure()->result_type()->UnwrapAliasPtrAlias();
-
-      if (res_type->IsStruct()) {
-        auto* str_type = res_type->AsStruct()->impl();
-        auto* str_member = str_type->get_member(mem->member()->name());
-
-        if (!str_member->has_offset_decoration()) {
-          error_ = "missing offset decoration for struct member";
-          return false;
-        }
-        out << str_member->offset();
-      } else if (res_type->IsVector()) {
-        // This must be a single element swizzle if we've got a vector at this
-        // point.
-        if (mem->member()->name().size() != 1) {
-          error_ =
-              "Encountered multi-element swizzle when should have only one "
-              "level";
-          return false;
-        }
-
-        // TODO(dsinclair): All our types are currently 4 bytes (f32, i32, u32)
-        // so this is assuming 4. This will need to be fixed when we get f16 or
-        // f64 types.
-        out << "(4 * " << convert_swizzle_to_index(mem->member()->name())
-            << ")";
-      } else {
-        error_ =
-            "Invalid result type for member accessor: " + res_type->type_name();
-        return false;
-      }
-
-      ptr = mem->structure();
-    } else if (ptr->IsArrayAccessor()) {
-      auto* ary = ptr->AsArrayAccessor();
-      auto* ary_type = ary->array()->result_type()->UnwrapAliasPtrAlias();
-
-      out << "(";
-      // TODO(dsinclair): Handle matrix case and struct case.
-      if (ary_type->IsArray()) {
-        out << ary_type->AsArray()->array_stride();
-      } else if (ary_type->IsVector()) {
-        // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
-        // or u32 which are all 4 bytes. When we get f16 or other types we'll
-        // have to ask the type for the byte size.
-        out << "4";
-      } else {
-        error_ = "Invalid array type in storage buffer access";
-        return false;
-      }
-      out << " * ";
-      if (!EmitExpression(out, ary->idx_expr())) {
-        return false;
-      }
-      out << ")";
-
-      ptr = ary->array();
-    } else {
-      error_ = "error emitting storage buffer access";
-      return false;
-    }
+  auto idx = generate_storage_buffer_index_expression(expr);
+  if (idx.empty()) {
+    return false;
   }
+  out << idx;
 
   if (rhs != nullptr) {
     out << ", asuint(";

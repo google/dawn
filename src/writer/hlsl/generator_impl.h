@@ -279,6 +279,10 @@ class GeneratorImpl {
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
   bool global_is_in_struct(ast::Variable* var) const;
+  /// Creates a text string representing the index into a storage buffer
+  /// @param expr the expression to use as the index
+  /// @returns the index string, or blank if unable to generate
+  std::string generate_storage_buffer_index_expression(ast::Expression* expr);
   /// Generates a name for the prefix
   /// @param prefix the prefix of the name to generate
   /// @returns the name
