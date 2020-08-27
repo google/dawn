@@ -98,7 +98,7 @@ namespace dawn_native { namespace d3d12 {
         D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
         if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
                 D3D12_FEATURE_D3D12_OPTIONS4, &featureData4, sizeof(featureData4)))) {
-            info.supportsShaderFloat16 = info.shaderModel >= D3D_SHADER_MODEL_6_2 &&
+            info.supportsShaderFloat16 = driverShaderModel >= D3D_SHADER_MODEL_6_2 &&
                                          featureData4.Native16BitShaderOpsSupported;
         }
 
