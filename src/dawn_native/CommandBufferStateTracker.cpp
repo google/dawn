@@ -61,7 +61,8 @@ namespace dawn_native {
         1 << VALIDATION_ASPECT_VERTEX_BUFFERS | 1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
     static constexpr CommandBufferStateTracker::ValidationAspects kLazyAspects =
-        1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS;
+        1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
+        1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
     MaybeError CommandBufferStateTracker::ValidateCanDispatch() {
         return ValidateOperation(kDispatchAspects);
@@ -124,6 +125,23 @@ namespace dawn_native {
                 mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             }
         }
+
+        if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
+            if (mIndexBufferSet) {
+                wgpu::IndexFormat pipelineIndexFormat =
+                    mLastRenderPipeline->GetVertexStateDescriptor()->indexFormat;
+                if (mIndexFormat != wgpu::IndexFormat::Undefined) {
+                    if (!mLastRenderPipeline->IsStripPrimitiveTopology() ||
+                        mIndexFormat == pipelineIndexFormat) {
+                        mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
+                    }
+                } else if (pipelineIndexFormat != wgpu::IndexFormat::Undefined) {
+                    // TODO(crbug.com/dawn/502): Deprecated path. Remove once setIndexFormat always
+                    // requires an index format.
+                    mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
+                }
+            }
+        }
     }
 
     MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspects) {
@@ -132,7 +150,29 @@ namespace dawn_native {
         }
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            return DAWN_VALIDATION_ERROR("Missing index buffer");
+            wgpu::IndexFormat pipelineIndexFormat =
+                mLastRenderPipeline->GetVertexStateDescriptor()->indexFormat;
+            if (!mIndexBufferSet) {
+                return DAWN_VALIDATION_ERROR("Missing index buffer");
+            } else if (mIndexFormat != wgpu::IndexFormat::Undefined &&
+                mLastRenderPipeline->IsStripPrimitiveTopology() &&
+                mIndexFormat != pipelineIndexFormat) {
+                return DAWN_VALIDATION_ERROR(
+                    "Pipeline strip index format does not match index buffer format");
+            } else if (mIndexFormat == wgpu::IndexFormat::Undefined &&
+                       pipelineIndexFormat == wgpu::IndexFormat::Undefined) {
+                // TODO(crbug.com/dawn/502): Deprecated path. Remove once setIndexFormat always
+                // requires an index format.
+                return DAWN_VALIDATION_ERROR(
+                    "Index format must be specified on the pipeline or in setIndexBuffer");
+            }
+
+            // The chunk of code above should be similar to the one in |RecomputeLazyAspects|.
+            // It returns the first invalid state found. We shouldn't be able to reach this line
+            // because to have invalid aspects one of the above conditions must have failed earlier.
+            // If this is reached, make sure lazy aspects and the error checks above are consistent.
+            UNREACHABLE();
+            return DAWN_VALIDATION_ERROR("Index buffer invalid");
         }
 
         if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
@@ -185,8 +225,9 @@ namespace dawn_native {
         mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
     }
 
-    void CommandBufferStateTracker::SetIndexBuffer() {
-        mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
+    void CommandBufferStateTracker::SetIndexBuffer(wgpu::IndexFormat format) {
+        mIndexBufferSet = true;
+        mIndexFormat = format;
     }
 
     void CommandBufferStateTracker::SetVertexBuffer(uint32_t slot) {

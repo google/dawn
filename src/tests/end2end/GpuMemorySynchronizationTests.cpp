@@ -552,7 +552,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass1.SetPipeline(rp);
     pass1.SetVertexBuffer(0, vertexBuffer);
-    pass1.SetIndexBuffer(indexBuffer, 0);
+    pass1.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32, 0);
     pass1.SetBindGroup(0, bindGroup1);
     pass1.DrawIndexed(6);
     pass1.EndPass();
@@ -676,7 +676,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass1.SetPipeline(rp);
     pass1.SetVertexBuffer(0, buffer);
-    pass1.SetIndexBuffer(buffer, offsetof(Data, indices));
+    pass1.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, offsetof(Data, indices));
     pass1.SetBindGroup(0, bindGroup1);
     pass1.DrawIndexed(6);
     pass1.EndPass();

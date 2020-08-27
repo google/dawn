@@ -136,6 +136,20 @@ namespace dawn_native {
     }
 
     void RenderEncoderBase::SetIndexBuffer(BufferBase* buffer, uint64_t offset, uint64_t size) {
+        GetDevice()->EmitDeprecationWarning(
+            "RenderEncoderBase::SetIndexBuffer is deprecated. Use RenderEncoderBase::SetIndexBufferWithFormat instead");
+
+        SetIndexBufferCommon(buffer, wgpu::IndexFormat::Undefined, offset, size, false);
+    }
+
+    void RenderEncoderBase::SetIndexBufferWithFormat(BufferBase* buffer, wgpu::IndexFormat format,
+                                                     uint64_t offset, uint64_t size) {
+        SetIndexBufferCommon(buffer, format, offset, size, true);
+    }
+
+    void RenderEncoderBase::SetIndexBufferCommon(BufferBase* buffer, wgpu::IndexFormat format,
+                                                 uint64_t offset, uint64_t size,
+                                                 bool requireFormat) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
 
@@ -153,9 +167,16 @@ namespace dawn_native {
                 }
             }
 
+            if (requireFormat && format == wgpu::IndexFormat::Undefined) {
+                return DAWN_VALIDATION_ERROR("Index format must be specified");
+            } else if (!requireFormat) {
+                ASSERT(format == wgpu::IndexFormat::Undefined);
+            }
+
             SetIndexBufferCmd* cmd =
                 allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
             cmd->buffer = buffer;
+            cmd->format = format;
             cmd->offset = offset;
             cmd->size = size;
 

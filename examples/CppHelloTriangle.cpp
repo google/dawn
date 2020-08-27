@@ -164,7 +164,7 @@ void frame() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(3);
         pass.EndPass();
     }

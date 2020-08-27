@@ -30,7 +30,8 @@ class IndexFormatTest : public DawnTest {
 
     utils::BasicRenderPass renderPass;
 
-    wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format) {
+    wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format,
+        wgpu::PrimitiveTopology primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip) {
         wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
@@ -50,7 +51,7 @@ class IndexFormatTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = primitiveTopology;
         descriptor.cVertexState.indexFormat = format;
         descriptor.cVertexState.vertexBufferCount = 1;
         descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
@@ -79,7 +80,7 @@ TEST_P(IndexFormatTest, Uint32) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(3);
         pass.EndPass();
     }
@@ -106,7 +107,7 @@ TEST_P(IndexFormatTest, Uint16) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint16);
         pass.DrawIndexed(3);
         pass.EndPass();
     }
@@ -156,7 +157,7 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(7);
         pass.EndPass();
     }
@@ -198,7 +199,7 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint16);
         pass.DrawIndexed(7);
         pass.EndPass();
     }
@@ -215,8 +216,6 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
 // prevent a case in D3D12 where the index format would be captured from the last
 // pipeline on SetIndexBuffer.
 TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsVulkan());
-
     wgpu::RenderPipeline pipeline32 = MakeTestPipeline(wgpu::IndexFormat::Uint32);
     wgpu::RenderPipeline pipeline16 = MakeTestPipeline(wgpu::IndexFormat::Uint16);
 
@@ -233,7 +232,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline16);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.SetPipeline(pipeline32);
         pass.DrawIndexed(3);
         pass.EndPass();
@@ -250,7 +249,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
 // because it needs to be done lazily (to query the format from the last pipeline).
 // TODO(cwallez@chromium.org): This is currently disallowed by the validation but
 // we want to support eventually.
-TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
+TEST_P(IndexFormatTest, SetIndexBufferBeforeSetPipeline) {
     wgpu::RenderPipeline pipeline = MakeTestPipeline(wgpu::IndexFormat::Uint32);
 
     wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
@@ -262,7 +261,7 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.DrawIndexed(3);
@@ -270,6 +269,51 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+}
+
+// Test that index buffers of multiple formats can be used with a pipeline that
+// doesn't use strip primitive topology.
+TEST_P(IndexFormatTest, SetIndexBufferDifferentFormats) {
+    wgpu::RenderPipeline pipeline = MakeTestPipeline(wgpu::IndexFormat::Undefined,
+                                                     wgpu::PrimitiveTopology::TriangleList);
+
+    wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Vertex,
+        {-1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f});
+    wgpu::Buffer indexBuffer32 =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
+    wgpu::Buffer indexBuffer16 =
+        utils::CreateBufferFromData<uint16_t>(device, wgpu::BufferUsage::Index, {0, 1, 2, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetIndexBufferWithFormat(indexBuffer32, wgpu::IndexFormat::Uint32);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.DrawIndexed(3);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+
+    encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetIndexBufferWithFormat(indexBuffer16, wgpu::IndexFormat::Uint16);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.DrawIndexed(3);
+        pass.EndPass();
+    }
+
+    commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);

@@ -86,11 +86,21 @@ namespace dawn_native {
 
         MaybeError ValidateVertexStateDescriptor(
             const VertexStateDescriptor* descriptor,
+            wgpu::PrimitiveTopology primitiveTopology,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
             DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
+
+            // Pipeline descriptors using strip topologies must not have an undefined index format.
+            if (descriptor->indexFormat == wgpu::IndexFormat::Undefined) {
+                if (primitiveTopology == wgpu::PrimitiveTopology::LineStrip ||
+                    primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip) {
+                    return DAWN_VALIDATION_ERROR(
+                        "indexFormat must not be undefined when using strip primitive topologies");
+                }
+            }
 
             if (descriptor->vertexBufferCount > kMaxVertexBuffers) {
                 return DAWN_VALIDATION_ERROR("Vertex buffer count exceeds maximum");
@@ -321,12 +331,14 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Null fragment stage is not supported (yet)");
         }
 
+        DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
+
         std::bitset<kMaxVertexAttributes> attributesSetMask;
         if (descriptor->vertexState) {
-            DAWN_TRY(ValidateVertexStateDescriptor(descriptor->vertexState, &attributesSetMask));
+            DAWN_TRY(ValidateVertexStateDescriptor(
+                descriptor->vertexState, descriptor->primitiveTopology, &attributesSetMask));
         }
 
-        DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
         DAWN_TRY(ValidateProgrammableStageDescriptor(
             device, &descriptor->vertexStage, descriptor->layout, SingleShaderStage::Vertex));
         DAWN_TRY(ValidateProgrammableStageDescriptor(
@@ -529,6 +541,12 @@ namespace dawn_native {
     wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
         ASSERT(!IsError());
         return mPrimitiveTopology;
+    }
+
+    bool RenderPipelineBase::IsStripPrimitiveTopology() const {
+        ASSERT(!IsError());
+        return mPrimitiveTopology == wgpu::PrimitiveTopology::LineStrip ||
+               mPrimitiveTopology == wgpu::PrimitiveTopology::TriangleStrip;
     }
 
     wgpu::CullMode RenderPipelineBase::GetCullMode() const {

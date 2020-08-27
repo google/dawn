@@ -68,6 +68,7 @@ namespace dawn_native {
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
         wgpu::PrimitiveTopology GetPrimitiveTopology() const;
+        bool IsStripPrimitiveTopology() const;
         wgpu::CullMode GetCullMode() const;
         wgpu::FrontFace GetFrontFace() const;
 

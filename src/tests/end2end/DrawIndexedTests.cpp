@@ -88,7 +88,7 @@ class DrawIndexedTest : public DawnTest {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
-            pass.SetIndexBuffer(indexBuffer, bufferOffset);
+            pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32, bufferOffset);
             pass.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
             pass.EndPass();
         }

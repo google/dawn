@@ -228,6 +228,7 @@ namespace dawn_native {
 
     struct SetIndexBufferCmd {
         Ref<BufferBase> buffer;
+        wgpu::IndexFormat format;
         uint64_t offset;
         uint64_t size;
     };

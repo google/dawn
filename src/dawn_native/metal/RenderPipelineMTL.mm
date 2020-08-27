@@ -126,15 +126,6 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MTLIndexType MTLIndexFormat(wgpu::IndexFormat format) {
-            switch (format) {
-                case wgpu::IndexFormat::Uint16:
-                    return MTLIndexTypeUInt16;
-                case wgpu::IndexFormat::Uint32:
-                    return MTLIndexTypeUInt32;
-            }
-        }
-
         MTLBlendFactor MetalBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             switch (factor) {
                 case wgpu::BlendFactor::Zero:
@@ -321,7 +312,6 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
-        mMtlIndexType = MTLIndexFormat(GetVertexStateDescriptor()->indexFormat);
         mMtlPrimitiveTopology = MTLPrimitiveTopology(GetPrimitiveTopology());
         mMtlFrontFace = MTLFrontFace(GetFrontFace());
         mMtlCullMode = ToMTLCullMode(GetCullMode());
@@ -418,10 +408,6 @@ namespace dawn_native { namespace metal {
     RenderPipeline::~RenderPipeline() {
         [mMtlRenderPipelineState release];
         [mMtlDepthStencilState release];
-    }
-
-    MTLIndexType RenderPipeline::GetMTLIndexType() const {
-        return mMtlIndexType;
     }
 
     MTLPrimitiveType RenderPipeline::GetMTLPrimitiveTopology() const {

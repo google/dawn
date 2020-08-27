@@ -251,7 +251,7 @@ void frame() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer);
+        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(36);
 
         pass.SetStencilReference(0x1);

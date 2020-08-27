@@ -82,3 +82,108 @@ class BufferCopyViewDeprecationTests : public DeprecationTests {
 
     wgpu::Extent3D copySize = {1, 1, 1};
 };
+
+constexpr uint32_t kRTSize = 400;
+
+class SetIndexBufferDeprecationTests : public DeprecationTests {
+  protected:
+    void SetUp() override {
+        DeprecationTests::SetUp();
+
+        renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    }
+
+    utils::BasicRenderPass renderPass;
+
+    wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format) {
+        wgpu::ShaderModule vsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                layout(location = 0) in vec4 pos;
+                void main() {
+                    gl_Position = pos;
+                })");
+
+        wgpu::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                layout(location = 0) out vec4 fragColor;
+                void main() {
+                    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                })");
+
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.cVertexState.indexFormat = format;
+        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        descriptor.cColorStates[0].format = renderPass.colorFormat;
+
+        return device.CreateRenderPipeline(&descriptor);
+    }
+};
+
+// Test that the Uint32 index format is correctly interpreted
+TEST_P(SetIndexBufferDeprecationTests, Uint32) {
+    wgpu::RenderPipeline pipeline = MakeTestPipeline(wgpu::IndexFormat::Uint32);
+
+    wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Vertex,
+        {-1.0f, -1.0f, 0.0f, 1.0f,  // Note Vertices[0] = Vertices[1]
+         -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f});
+    // If this is interpreted as Uint16, then it would be 0, 1, 0, ... and would draw nothing.
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {1, 2, 3});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        EXPECT_DEPRECATION_WARNING(pass.SetIndexBuffer(indexBuffer));
+        pass.DrawIndexed(3);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 100, 300);
+}
+
+// Test that the Uint16 index format is correctly interpreted
+TEST_P(SetIndexBufferDeprecationTests, Uint16) {
+    wgpu::RenderPipeline pipeline = MakeTestPipeline(wgpu::IndexFormat::Uint16);
+
+    wgpu::Buffer vertexBuffer = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Vertex,
+        {-1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f});
+    // If this is interpreted as uint32, it will have index 1 and 2 be both 0 and render nothing
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint16_t>(device, wgpu::BufferUsage::Index, {1, 2, 0, 0, 0, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        EXPECT_DEPRECATION_WARNING(pass.SetIndexBuffer(indexBuffer));
+        pass.DrawIndexed(3);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 100, 300);
+}
+
+DAWN_INSTANTIATE_TEST(SetIndexBufferDeprecationTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

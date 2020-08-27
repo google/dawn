@@ -48,6 +48,8 @@ namespace dawn_native { namespace d3d12 {
 
         DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
             switch (format) {
+                case wgpu::IndexFormat::Undefined:
+                    return DXGI_FORMAT_UNKNOWN;
                 case wgpu::IndexFormat::Uint16:
                     return DXGI_FORMAT_R16_UINT;
                 case wgpu::IndexFormat::Uint32:
@@ -467,9 +469,11 @@ namespace dawn_native { namespace d3d12 {
 
         class IndexBufferTracker {
           public:
-            void OnSetIndexBuffer(Buffer* buffer, uint64_t offset, uint64_t size) {
+            void OnSetIndexBuffer(Buffer* buffer, wgpu::IndexFormat format, uint64_t offset,
+                                  uint64_t size) {
                 mD3D12BufferView.BufferLocation = buffer->GetVA() + offset;
                 mD3D12BufferView.SizeInBytes = size;
+                mBufferIndexFormat = DXGIIndexFormat(format);
 
                 // We don't need to dirty the state unless BufferLocation or SizeInBytes
                 // change, but most of the time this will always be the case.
@@ -477,20 +481,26 @@ namespace dawn_native { namespace d3d12 {
             }
 
             void OnSetPipeline(const RenderPipelineBase* pipeline) {
-                mD3D12BufferView.Format =
+                mPipelineIndexFormat =
                     DXGIIndexFormat(pipeline->GetVertexStateDescriptor()->indexFormat);
             }
 
             void Apply(ID3D12GraphicsCommandList* commandList) {
-                if (mD3D12BufferView.Format == mLastAppliedIndexFormat) {
-                    return;
+                DXGI_FORMAT newIndexFormat = mBufferIndexFormat;
+                if (newIndexFormat == DXGI_FORMAT_UNKNOWN) {
+                    newIndexFormat = mPipelineIndexFormat;
                 }
 
-                commandList->IASetIndexBuffer(&mD3D12BufferView);
-                mLastAppliedIndexFormat = mD3D12BufferView.Format;
+                if (newIndexFormat != mLastAppliedIndexFormat) {
+                    mD3D12BufferView.Format = newIndexFormat;
+                    commandList->IASetIndexBuffer(&mD3D12BufferView);
+                    mLastAppliedIndexFormat = newIndexFormat;
+                }
             }
 
           private:
+            DXGI_FORMAT mBufferIndexFormat = DXGI_FORMAT_UNKNOWN;
+            DXGI_FORMAT mPipelineIndexFormat = DXGI_FORMAT_UNKNOWN;
             DXGI_FORMAT mLastAppliedIndexFormat = DXGI_FORMAT_UNKNOWN;
             D3D12_INDEX_BUFFER_VIEW mD3D12BufferView = {};
         };
@@ -1285,8 +1295,8 @@ namespace dawn_native { namespace d3d12 {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
 
-                    indexBufferTracker.OnSetIndexBuffer(ToBackend(cmd->buffer.Get()), cmd->offset,
-                                                        cmd->size);
+                    indexBufferTracker.OnSetIndexBuffer(ToBackend(cmd->buffer.Get()), cmd->format,
+                                                        cmd->offset, cmd->size);
                     break;
                 }
 

@@ -28,7 +28,6 @@ namespace dawn_native { namespace metal {
         static ResultOrError<RenderPipeline*> Create(Device* device,
                                                      const RenderPipelineDescriptor* descriptor);
 
-        MTLIndexType GetMTLIndexType() const;
         MTLPrimitiveType GetMTLPrimitiveTopology() const;
         MTLWinding GetMTLFrontFace() const;
         MTLCullMode GetMTLCullMode() const;
@@ -50,7 +49,6 @@ namespace dawn_native { namespace metal {
 
         MTLVertexDescriptor* MakeVertexDesc();
 
-        MTLIndexType mMtlIndexType;
         MTLPrimitiveType mMtlPrimitiveTopology;
         MTLWinding mMtlFrontFace;
         MTLCullMode mMtlCullMode;

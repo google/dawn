@@ -41,12 +41,17 @@ namespace dawn_native {
 
         void SetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
         void SetIndexBuffer(BufferBase* buffer, uint64_t offset, uint64_t size);
+        void SetIndexBufferWithFormat(BufferBase* buffer, wgpu::IndexFormat format, uint64_t offset,
+                                      uint64_t size);
 
       protected:
         // Construct an "error" render encoder base.
         RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
 
       private:
+        void SetIndexBufferCommon(BufferBase* buffer, wgpu::IndexFormat format, uint64_t offset,
+                                  uint64_t size, bool requireFormat);
+
         const bool mDisableBaseVertex;
         const bool mDisableBaseInstance;
     };

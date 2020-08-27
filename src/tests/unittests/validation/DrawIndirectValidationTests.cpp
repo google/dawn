@@ -84,7 +84,7 @@ class DrawIndirectValidationTest : public ValidationTest {
             uint32_t zeros[100] = {};
             wgpu::Buffer indexBuffer =
                 utils::CreateBufferFromData(device, zeros, sizeof(zeros), wgpu::BufferUsage::Index);
-            pass.SetIndexBuffer(indexBuffer);
+            pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
             pass.DrawIndexedIndirect(indirectBuffer, indirectOffset);
         } else {
             pass.DrawIndirect(indirectBuffer, indirectOffset);

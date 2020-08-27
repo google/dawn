@@ -779,8 +779,9 @@
     "index format": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "uint16"},
-            {"value": 1, "name": "uint32"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "uint16"},
+            {"value": 2, "name": "uint32"}
         ]
     },
     "instance": {
@@ -823,7 +824,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "index format", "type": "index format", "default": "uint32"},
+            {"name": "index format", "type": "index format", "default": "undefined"},
             {"name": "vertex buffer count", "type": "uint32_t", "default": 0},
             {"name": "vertex buffers", "type": "vertex buffer layout descriptor", "annotation": "const*", "length": "vertex buffer count"}
         ]
@@ -1087,6 +1088,15 @@
                 ]
             },
             {
+                "name": "set index buffer with format",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "format", "type": "index format"},
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
+                ]
+            },
+            {
                 "name": "finish",
                 "returns": "render bundle",
                 "args": [
@@ -1272,6 +1282,15 @@
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
+                ]
+            },
+            {
+                "name": "set index buffer with format",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "format", "type": "index format"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
                     {"name": "size", "type": "uint64_t", "default": "0"}
                 ]

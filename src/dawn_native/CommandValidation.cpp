@@ -102,8 +102,8 @@ namespace dawn_native {
                 }
 
                 case Command::SetIndexBuffer: {
-                    commands->NextCommand<SetIndexBufferCmd>();
-                    commandBufferState->SetIndexBuffer();
+                    SetIndexBufferCmd* cmd = commands->NextCommand<SetIndexBufferCmd>();
+                    commandBufferState->SetIndexBuffer(cmd->format);
                     break;
                 }
 
