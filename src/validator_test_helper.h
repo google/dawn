@@ -15,6 +15,7 @@
 #ifndef SRC_VALIDATOR_TEST_HELPER_H_
 #define SRC_VALIDATOR_TEST_HELPER_H_
 
+#include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator_impl.h"
 
@@ -36,6 +37,8 @@ class ValidatorTestHelper {
   /// A handle to the created module
   /// @return a pointer to the test module
   ast::Module* mod() { return &mod_; }
+  /// Create a function and add an entry point to it
+  void AddFakeEntryPoint();
 
  private:
   std::unique_ptr<ValidatorImpl> v_;

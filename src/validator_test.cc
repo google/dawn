@@ -263,9 +263,10 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   auto global_var = std::make_unique<ast::Variable>(
       Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
   mod()->AddGlobalVariable(std::move(global_var));
+  AddFakeEntryPoint();
+
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_TRUE(v.Validate(mod())) << v.error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
@@ -275,9 +276,8 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
       Source{12, 34}, "global_var", ast::StorageClass::kNone, &f32);
   mod()->AddGlobalVariable(std::move(global_var));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  tint::ValidatorImpl v;
-  EXPECT_FALSE(v.Validate(mod()));
-  EXPECT_EQ(v.error(),
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
             "12:34: v-0022: global variables must have a storage class");
 }
 
@@ -346,6 +346,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   func->set_body(std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
+  AddFakeEntryPoint();
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
@@ -440,6 +441,7 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
+  AddFakeEntryPoint();
 
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
@@ -674,6 +676,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
 
   mod()->AddFunction(std::move(func0));
   mod()->AddFunction(std::move(func1));
+  AddFakeEntryPoint();
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();

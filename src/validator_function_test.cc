@@ -83,6 +83,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
+  AddFakeEntryPoint();
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
