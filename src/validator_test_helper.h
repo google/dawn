@@ -37,7 +37,7 @@ class ValidatorTestHelper {
   /// A handle to the created module
   /// @return a pointer to the test module
   ast::Module* mod() { return &mod_; }
-  /// Create a function and add an entry point to it
+  /// Creates a function and add an entry point to it
   void AddFakeEntryPoint();
 
  private:
@@ -45,6 +45,7 @@ class ValidatorTestHelper {
   Context ctx_;
   ast::Module mod_;
   std::unique_ptr<TypeDeterminer> td_;
+  ast::type::VoidType void_type_;
 };
 
 }  // namespace tint

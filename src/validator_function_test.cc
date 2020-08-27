@@ -402,5 +402,45 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
+TEST_F(ValidateFunctionTest,
+       AtLeastOneOfVertexFragmentComputeShaderMustBePeresent_Pass) {
+  // entry_point vertex as "main" = vtx_func
+  // fn vtx_func() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "main", "vtx_func");
+  mod()->AddFunction(std::move(func));
+  mod()->AddEntryPoint(std::move(entry_point));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+}
+
+TEST_F(ValidateFunctionTest,
+       AtLeastOneOfVertexFragmentComputeShaderMustBePeresent_Fail) {
+  // fn vtx_func() -> void { return; }
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
+                                              &void_type);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
+            "0:0: v-0003: At least one of vertex, fragment or compute shader "
+            "must be present");
+}
+
 }  // namespace
 }  // namespace tint

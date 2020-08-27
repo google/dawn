@@ -112,6 +112,12 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
     entry_point_map.set(ep_ptr->name(), ep_ptr->stage());
   }
 
+  if (eps.empty()) {
+    set_error(Source{0, 0},
+              "v-0003: At least one of vertex, fragment or compute shader must "
+              "be present");
+    return false;
+  }
   entry_point_map.pop_scope();
   return true;
 }
