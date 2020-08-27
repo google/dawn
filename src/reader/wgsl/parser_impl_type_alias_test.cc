@@ -109,6 +109,24 @@ TEST_F(ParserImplTest, TypeDecl_Struct_WithStride) {
   EXPECT_EQ(arr->array_stride(), 4u);
 }
 
+// This was failing due to not finding the missing ;. https://crbug.com/tint/218
+TEST_F(ParserImplTest, TypeDecl_Struct_Empty) {
+  auto* p = parser("type str = struct {};");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto module = p->module();
+  ASSERT_EQ(module.alias_types().size(), 1u);
+
+  auto* t = module.alias_types()[0];
+  ASSERT_NE(t, nullptr);
+  EXPECT_EQ(t->name(), "str");
+
+  ASSERT_TRUE(t->type()->IsStruct());
+  auto* s = t->type()->AsStruct();
+  EXPECT_EQ(s->impl()->members().size(), 0u);
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

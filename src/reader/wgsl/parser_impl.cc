@@ -1021,12 +1021,6 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
     return nullptr;
   }
 
-  t = peek();
-  if (!t.IsBraceLeft()) {
-    set_error(t, "missing { for struct declaration");
-    return nullptr;
-  }
-
   auto body = struct_body_decl();
   if (has_error()) {
     return nullptr;
@@ -1075,14 +1069,17 @@ ast::StructDecoration ParserImpl::struct_decoration(Token t) {
 //   : BRACKET_LEFT struct_member* BRACKET_RIGHT
 ast::StructMemberList ParserImpl::struct_body_decl() {
   auto t = peek();
-  if (!t.IsBraceLeft())
+  if (!t.IsBraceLeft()) {
+    set_error(t, "missing { for struct declaration");
     return {};
-
+  }
   next();  // Consume the peek
 
   t = peek();
-  if (t.IsBraceRight())
+  if (t.IsBraceRight()) {
+    next();  // Consume the peek
     return {};
+  }
 
   ast::StructMemberList members;
   for (;;) {
