@@ -347,7 +347,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorSwizzle) {
     Identifier{z}
   }
   ScalarConstructor{42}
-})"));
+})")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorConstOutOfBounds) {
@@ -535,6 +535,61 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct) {
 })"));
 }
 
+TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct_DifferOnlyMemberName) {
+  // The spirv-opt internal representation will map both structs to the
+  // same canonicalized type, because it doesn't care about member names.
+  // But we care about member names when producing a member-access expression.
+  // crbug.com/tint/213
+  const std::string assembly = R"(
+     OpName %1 "myvar"
+     OpName %10 "myvar2"
+     OpMemberName %strct 1 "age"
+     OpMemberName %strct2 1 "ancientness"
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %float = OpTypeFloat 32
+     %float_42 = OpConstant %float 42
+     %float_420 = OpConstant %float 420
+     %strct = OpTypeStruct %float %float
+     %strct2 = OpTypeStruct %float %float
+     %elem_ty = OpTypePointer Workgroup %float
+     %var_ty = OpTypePointer Workgroup %strct
+     %var2_ty = OpTypePointer Workgroup %strct2
+     %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+
+     %1 = OpVariable %var_ty Workgroup
+     %10 = OpVariable %var2_ty Workgroup
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %2 = OpAccessChain %elem_ty %1 %uint_1
+     OpStore %2 %float_42
+     %20 = OpAccessChain %elem_ty %10 %uint_1
+     OpStore %20 %float_420
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody());
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
+  MemberAccessor{
+    Identifier{myvar}
+    Identifier{age}
+  }
+  ScalarConstructor{42.000000}
+}
+Assignment{
+  MemberAccessor{
+    Identifier{myvar2}
+    Identifier{ancientness}
+  }
+  ScalarConstructor{420.000000}
+})")) << ToString(fe.ast_body());
+}
+
 TEST_F(SpvParserTest, EmitStatement_AccessChain_StructNonConstIndex) {
   const std::string assembly = R"(
      OpName %1 "myvar"
@@ -597,7 +652,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_StructConstOutOfBounds) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("Access chain %2 index value 99 is out of bounds "
-                             "for structure %55 having 2 elements"));
+                             "for structure %55 having 2 members"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
@@ -705,7 +760,8 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_InvalidPointeeType) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
-              HasSubstr("Access chain with unknown pointee type %60 void"));
+              HasSubstr("Access chain with unknown or invalid pointee type "
+                        "%60: %60 = OpTypePointer Workgroup %55"));
 }
 
 std::string OldStorageBufferPreamble() {
