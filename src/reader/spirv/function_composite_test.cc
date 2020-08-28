@@ -451,6 +451,61 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
+  const auto assembly =
+      R"(
+      OpMemberName %s0 0 "algo"
+      OpMemberName %s1 0 "rithm"
+)" + Preamble() +
+      R"(
+     %s0 = OpTypeStruct %uint
+     %s1 = OpTypeStruct %uint
+     %ptr0 = OpTypePointer Function %s0
+     %ptr1 = OpTypePointer Function %s1
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var0 = OpVariable %ptr0 Function
+     %var1 = OpVariable %ptr1 Function
+     %1 = OpLoad %s0 %var0
+     %2 = OpCompositeExtract %uint %1 0
+     %3 = OpLoad %s1 %var1
+     %4 = OpCompositeExtract %uint %3 0
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      MemberAccessor{
+        Identifier{x_1}
+        Identifier{algo}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_4
+    none
+    __u32
+    {
+      MemberAccessor{
+        Identifier{x_3}
+        Identifier{rithm}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %s_v2f_u_i
@@ -468,7 +523,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 40 is out of "
-                             "bounds for structure %25 having 3 elements"));
+                             "bounds for structure %25 having 3 members"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
