@@ -33,29 +33,6 @@ namespace dawn_wire { namespace client {
         return ToAPI(fence);
     }
 
-    void Queue::Signal(WGPUFence cFence, uint64_t signalValue) {
-        Fence* fence = FromAPI(cFence);
-        if (fence->GetQueue() != this) {
-            device->InjectError(WGPUErrorType_Validation,
-                                "Fence must be signaled on the queue on which it was created.");
-            return;
-        }
-        if (signalValue <= fence->GetSignaledValue()) {
-            device->InjectError(WGPUErrorType_Validation,
-                                "Fence value less than or equal to signaled value");
-            return;
-        }
-
-        fence->SetSignaledValue(signalValue);
-
-        QueueSignalCmd cmd;
-        cmd.self = ToAPI(this);
-        cmd.fence = cFence;
-        cmd.signalValue = signalValue;
-
-        device->GetClient()->SerializeCommand(cmd);
-    }
-
     void Queue::WriteBuffer(WGPUBuffer cBuffer,
                             uint64_t bufferOffset,
                             const void* data,

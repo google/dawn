@@ -47,6 +47,11 @@
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }
         ],
+        "fence on completion": [
+            { "name": "fence id", "type": "ObjectId" },
+            { "name": "value", "type": "uint64_t" },
+            { "name": "request serial", "type": "uint64_t" }
+        ],
         "queue write buffer internal": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "buffer id", "type": "ObjectId" },
@@ -83,6 +88,11 @@
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
+        "fence on completion callback": [
+            { "name": "fence", "type": "ObjectHandle", "handle_type": "fence" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "fence completion status" }
+        ],
         "fence update completed value": [
             { "name": "fence", "type": "ObjectHandle", "handle_type": "fence" },
             { "name": "value", "type": "uint64_t" }
@@ -114,8 +124,7 @@
             "DeviceGetDefaultQueue",
             "DeviceInjectError",
             "DevicePushErrorScope",
-            "QueueCreateFence",
-            "QueueSignal"
+            "QueueCreateFence"
         ],
         "client_special_objects": [
             "Buffer",

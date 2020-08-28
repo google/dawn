@@ -29,7 +29,6 @@ namespace dawn_wire { namespace client {
         using ObjectBase::ObjectBase;
 
         WGPUFence CreateFence(const WGPUFenceDescriptor* descriptor);
-        void Signal(WGPUFence fence, uint64_t signalValue);
         void WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
         void WriteTexture(const WGPUTextureCopyView* destination,
                           const void* data,

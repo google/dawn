@@ -48,6 +48,12 @@ namespace dawn_wire { namespace server {
         uint64_t value;
     };
 
+    struct FenceOnCompletionUserdata {
+        Server* server;
+        ObjectHandle fence;
+        uint64_t requestSerial;
+    };
+
     class Server : public ServerBase {
       public:
         Server(WGPUDevice device,
@@ -77,6 +83,7 @@ namespace dawn_wire { namespace server {
         static void ForwardPopErrorScope(WGPUErrorType type, const char* message, void* userdata);
         static void ForwardBufferMapAsync(WGPUBufferMapAsyncStatus status, void* userdata);
         static void ForwardFenceCompletedValue(WGPUFenceCompletionStatus status, void* userdata);
+        static void ForwardFenceOnCompletion(WGPUFenceCompletionStatus status, void* userdata);
 
         // Error callbacks
         void OnUncapturedError(WGPUErrorType type, const char* message);
@@ -87,6 +94,8 @@ namespace dawn_wire { namespace server {
         void OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus status, MapUserdata* userdata);
         void OnFenceCompletedValueUpdated(WGPUFenceCompletionStatus status,
                                           FenceCompletionUserdata* userdata);
+        void OnFenceOnCompletion(WGPUFenceCompletionStatus status,
+                                 FenceOnCompletionUserdata* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"
 

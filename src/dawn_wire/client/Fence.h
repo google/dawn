@@ -33,22 +33,20 @@ namespace dawn_wire { namespace client {
         void CheckPassedFences();
         void OnCompletion(uint64_t value, WGPUFenceOnCompletionCallback callback, void* userdata);
         void OnUpdateCompletedValueCallback(uint64_t value);
+        bool OnCompletionCallback(uint64_t requestSerial, WGPUFenceCompletionStatus status);
 
         uint64_t GetCompletedValue() const;
-        uint64_t GetSignaledValue() const;
         Queue* GetQueue() const;
-
-        void SetSignaledValue(uint64_t value);
 
       private:
         struct OnCompletionData {
-            WGPUFenceOnCompletionCallback completionCallback = nullptr;
+            WGPUFenceOnCompletionCallback callback = nullptr;
             void* userdata = nullptr;
         };
         Queue* mQueue = nullptr;
-        uint64_t mSignaledValue = 0;
         uint64_t mCompletedValue = 0;
-        SerialMap<OnCompletionData> mRequests;
+        uint64_t mOnCompletionRequestSerial = 0;
+        std::map<uint64_t, OnCompletionData> mOnCompletionRequests;
     };
 
 }}  // namespace dawn_wire::client

@@ -70,4 +70,16 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
+    bool Client::DoFenceOnCompletionCallback(Fence* fence,
+                                             uint64_t requestSerial,
+                                             WGPUFenceCompletionStatus status) {
+        // The fence might have been deleted or recreated so this isn't an error.
+        if (fence == nullptr) {
+            return true;
+        }
+
+        fence->OnCompletionCallback(requestSerial, status);
+        return true;
+    }
+
 }}  // namespace dawn_wire::client

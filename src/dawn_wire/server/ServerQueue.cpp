@@ -21,7 +21,6 @@ namespace dawn_wire { namespace server {
         if (cFence == nullptr) {
             return false;
         }
-
         mProcs.queueSignal(cSelf, cFence, signalValue);
 
         ObjectId fenceId = FenceObjectIdTable().Get(cFence);
