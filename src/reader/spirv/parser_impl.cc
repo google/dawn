@@ -460,6 +460,7 @@ bool ParserImpl::ParseInternalModule() {
   if (!success_) {
     return false;
   }
+  RegisterLineNumbers();
   if (!ParseInternalModuleExceptFunctions()) {
     return false;
   }
@@ -467,6 +468,47 @@ bool ParserImpl::ParseInternalModule() {
     return false;
   }
   return success_;
+}
+
+void ParserImpl::RegisterLineNumbers() {
+  Source instruction_number{0, 0};
+
+  // Has there been an OpLine since the last OpNoLine or start of the module?
+  bool in_op_line_scope = false;
+  // The source location provided by the most recent OpLine instruction.
+  Source op_line_source{0, 0};
+  const bool run_on_debug_insts = true;
+  module_->ForEachInst(
+      [this, &in_op_line_scope, &op_line_source,
+       &instruction_number](const spvtools::opt::Instruction* inst) {
+        ++instruction_number.line;
+        switch (inst->opcode()) {
+          case SpvOpLine:
+            in_op_line_scope = true;
+            // TODO(dneto): This ignores the File ID (operand 0), since the Tint
+            // Source concept doesn't represent that.
+            op_line_source.line = inst->GetSingleWordInOperand(1);
+            op_line_source.column = inst->GetSingleWordInOperand(2);
+            break;
+          case SpvOpNoLine:
+            in_op_line_scope = false;
+            break;
+          default:
+            break;
+        }
+        this->inst_source_[inst] =
+            in_op_line_scope ? op_line_source : instruction_number;
+      },
+      run_on_debug_insts);
+}
+
+Source ParserImpl::GetSourceForResultIdForTest(uint32_t id) {
+  const auto* inst = def_use_mgr_->GetDef(id);
+  auto where = inst_source_.find(inst);
+  if (where == inst_source_.end()) {
+    return {};
+  }
+  return where->second;
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {

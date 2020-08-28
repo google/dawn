@@ -119,6 +119,92 @@ TEST_F(SpvParserTest, Impl_OpenCLKernel_Fails) {
   EXPECT_THAT(p->error(), HasSubstr("Capability Kernel is not allowed"));
 }
 
+TEST_F(SpvParserTest, Impl_Source_NoOpLine) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %5 = OpTypeInt 32 0
+  %60 = OpConstantNull %5
+  %main = OpFunction %void None %voidfn
+  %1 = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+  // Use instruction counting.
+  auto s5 = p->GetSourceForResultIdForTest(5);
+  EXPECT_EQ(7u, s5.line);
+  EXPECT_EQ(0u, s5.column);
+  auto s60 = p->GetSourceForResultIdForTest(60);
+  EXPECT_EQ(8u, s60.line);
+  EXPECT_EQ(0u, s60.column);
+  auto s1 = p->GetSourceForResultIdForTest(1);
+  EXPECT_EQ(10u, s1.line);
+  EXPECT_EQ(0u, s1.column);
+}
+
+TEST_F(SpvParserTest, Impl_Source_WithOpLine_WithOpNoLine) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %15 = OpString "myfile"
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  OpLine %15 42 53
+  %5 = OpTypeInt 32 0
+  %60 = OpConstantNull %5
+  OpNoLine
+  %main = OpFunction %void None %voidfn
+  %1 = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+  // Use the information from the OpLine that is still in scope.
+  auto s5 = p->GetSourceForResultIdForTest(5);
+  EXPECT_EQ(42u, s5.line);
+  EXPECT_EQ(53u, s5.column);
+  auto s60 = p->GetSourceForResultIdForTest(60);
+  EXPECT_EQ(42u, s60.line);
+  EXPECT_EQ(53u, s60.column);
+  // After OpNoLine, revert back to instruction counting.
+  auto s1 = p->GetSourceForResultIdForTest(1);
+  EXPECT_EQ(13u, s1.line);
+  EXPECT_EQ(0u, s1.column);
+}
+
+TEST_F(SpvParserTest, Impl_Source_InvalidId) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %15 = OpString "myfile"
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+  %1 = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+  auto s99 = p->GetSourceForResultIdForTest(99);
+  EXPECT_EQ(0u, s99.line);
+  EXPECT_EQ(0u, s99.column);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

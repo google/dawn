@@ -41,6 +41,7 @@
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
+#include "src/source.h"
 
 namespace tint {
 namespace reader {
@@ -214,6 +215,9 @@ class ParserImpl : Reader {
   /// @returns true if the parser is still successful.
   bool ParseInternalModule();
 
+  /// Records line numbers for each instruction.
+  void RegisterLineNumbers();
+
   /// Walks the internal representation of the module, except for function
   /// definitions, to populate the AST form of the module.
   /// This is a no-op if the parser has already failed.
@@ -358,6 +362,12 @@ class ParserImpl : Reader {
     return builtin_position_;
   }
 
+  /// Look up the source record for the SPIR-V instruction with the given
+  /// result ID.
+  /// @param id the SPIR-V result id.
+  /// @return the Source record, or a default one
+  Source GetSourceForResultIdForTest(uint32_t id);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -434,6 +444,12 @@ class ParserImpl : Reader {
   spvtools::opt::analysis::ConstantManager* constant_mgr_ = nullptr;
   spvtools::opt::analysis::TypeManager* type_mgr_ = nullptr;
   spvtools::opt::analysis::DecorationManager* deco_mgr_ = nullptr;
+
+  // Maps an instruction to its source location. If no OpLine information
+  // is in effect for the instruction, map the instruction to its position
+  // in the SPIR-V module, counting by instructions, where the first
+  // instruction is line 1.
+  std::unordered_map<const spvtools::opt::Instruction*, Source> inst_source_;
 
   /// Maps a SPIR-V ID for an external instruction import to an AST import
   std::unordered_map<uint32_t, ast::Import*> import_map_;
