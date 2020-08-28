@@ -3317,10 +3317,19 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     const auto first_pos = def_info->block_pos;
     const auto last_use_pos = def_info->last_use_pos;
 
-    const auto* const def_in_construct =
-        GetBlockInfo(block_order_[first_pos])->construct;
     const auto* const construct_with_last_use =
         GetBlockInfo(block_order_[last_use_pos])->construct;
+    const auto* def_in_construct =
+        GetBlockInfo(block_order_[first_pos])->construct;
+    // A definition in the first block of an kIfSelection or kSwitchSelection
+    // occurs before the branch, and so that definition should count as
+    // having been defined at the scope of the parent construct.
+    if (first_pos == def_in_construct->begin_pos) {
+      if ((def_in_construct->kind == Construct::kIfSelection) ||
+          (def_in_construct->kind == Construct::kSwitchSelection)) {
+        def_in_construct = def_in_construct->parent;
+      }
+    }
 
     if (def_in_construct != construct_with_last_use) {
       const auto* enclosing_construct =

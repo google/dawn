@@ -929,6 +929,259 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
+TEST_F(
+    SpvParserTest,
+    EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InFunction) {
+  // This is a hoisting case, where the definition is in the first block
+  // of an if selection construct. In this case the definition should count
+  // as being in the parent (enclosing) construct.
+  //
+  // The definition of %1 is in an IfSelection construct and also the enclosing
+  // Function construct, both of which start at block %10. For the purpose of
+  // determining the construct containing %10, go to the parent construct of
+  // the IfSelection.
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %200 = OpVariable %pty Private
+     %cond = OpConstantTrue %bool
+
+     %100 = OpFunction %void None %voidfn
+
+     ; in IfSelection construct, nested in Function construct
+     %10 = OpLabel
+     %1 = OpCopyObject %uint %uint_1
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel  ; in IfSelection construct
+     OpBranch %99
+
+     %99 = OpLabel
+     %3 = OpCopyObject %uint %1; in Function construct
+     OpStore %200 %3
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  // We don't hoist x_1 into its own mutable variable. It is emitted as
+  // a const definition.
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      ScalarConstructor{1}
+    }
+  }
+}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_3
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+}
+Assignment{
+  Identifier{x_200}
+  Identifier{x_3}
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest,
+       EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InIf) {
+  // This is like the previous case, but the IfSelection is nested inside
+  // another IfSelection.
+  // This tests that the hoisting algorithm goes to only one parent of
+  // the definining if-selection block, and doesn't jump all the way out
+  // to the Function construct that encloses everything.
+  //
+  // We should not hoist %1 because its definition should count as being
+  // in the outer IfSelection, not the inner IfSelection.
+  auto assembly = Preamble() + R"(
+
+     %pty = OpTypePointer Private %uint
+     %200 = OpVariable %pty Private
+     %cond = OpConstantTrue %bool
+
+     %100 = OpFunction %void None %voidfn
+
+     ; outer IfSelection
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     ; inner IfSelection
+     %20 = OpLabel
+     %1 = OpCopyObject %uint %uint_1
+     OpSelectionMerge %89 None
+     OpBranchConditional %cond %30 %89
+
+     %30 = OpLabel ; last block of inner IfSelection
+     OpBranch %89
+
+     ; in outer IfSelection
+     %89 = OpLabel
+     %3 = OpCopyObject %uint %1; Last use of %1, in outer IfSelection
+     OpStore %200 %3
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    VariableDeclStatement{
+      Variable{
+        x_1
+        none
+        __u32
+        {
+          ScalarConstructor{1}
+        }
+      }
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+      }
+    }
+    VariableDeclStatement{
+      Variable{
+        x_3
+        none
+        __u32
+        {
+          Identifier{x_1}
+        }
+      }
+    }
+    Assignment{
+      Identifier{x_200}
+      Identifier{x_3}
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(
+    SpvParserTest,
+    EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockSwitch_InIf) {
+  // This is like the previous case, but the definition is in a SwitchSelection
+  // inside another IfSelection.
+  // Tests that definitions in the first block of a switch count as being
+  // in the parent of the switch construct.
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %200 = OpVariable %pty Private
+     %cond = OpConstantTrue %bool
+
+     %100 = OpFunction %void None %voidfn
+
+     ; outer IfSelection
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     ; inner SwitchSelection
+     %20 = OpLabel
+     %1 = OpCopyObject %uint %uint_1
+     OpSelectionMerge %89 None
+     OpSwitch %uint_1 %89 0 %30
+
+     %30 = OpLabel ; last block of inner SwitchSelection
+     OpBranch %89
+
+     ; in outer IfSelection
+     %89 = OpLabel
+     %3 = OpCopyObject %uint %1; Last use of %1, in outer IfSelection
+     OpStore %200 %3
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    VariableDeclStatement{
+      Variable{
+        x_1
+        none
+        __u32
+        {
+          ScalarConstructor{1}
+        }
+      }
+    }
+    Switch{
+      ScalarConstructor{1}
+      {
+        Case 0{
+        }
+        Default{
+        }
+      }
+    }
+    VariableDeclStatement{
+      Variable{
+        x_3
+        none
+        __u32
+        {
+          Identifier{x_1}
+        }
+      }
+    }
+    Assignment{
+      Identifier{x_200}
+      Identifier{x_3}
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
 TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
