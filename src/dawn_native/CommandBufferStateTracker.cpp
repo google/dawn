@@ -26,11 +26,11 @@ namespace dawn_native {
 
     namespace {
         bool BufferSizesAtLeastAsBig(const ityp::span<uint32_t, uint64_t> unverifiedBufferSizes,
-                                     const std::vector<uint64_t>& pipelineMinimumBufferSizes) {
-            ASSERT(unverifiedBufferSizes.size() == pipelineMinimumBufferSizes.size());
+                                     const std::vector<uint64_t>& pipelineMinBufferSizes) {
+            ASSERT(unverifiedBufferSizes.size() == pipelineMinBufferSizes.size());
 
             for (uint32_t i = 0; i < unverifiedBufferSizes.size(); ++i) {
-                if (unverifiedBufferSizes[i] < pipelineMinimumBufferSizes[i]) {
+                if (unverifiedBufferSizes[i] < pipelineMinBufferSizes[i]) {
                     return false;
                 }
             }
@@ -105,7 +105,7 @@ namespace dawn_native {
                 if (mBindgroups[i] == nullptr ||
                     mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout() ||
                     !BufferSizesAtLeastAsBig(mBindgroups[i]->GetUnverifiedBufferSizes(),
-                                             (*mMinimumBufferSizes)[i])) {
+                                             (*mMinBufferSizes)[i])) {
                     matches = false;
                     break;
                 }
@@ -190,7 +190,7 @@ namespace dawn_native {
                         "Pipeline and bind group layout doesn't match for bind group " +
                         std::to_string(static_cast<uint32_t>(i)));
                 } else if (!BufferSizesAtLeastAsBig(mBindgroups[i]->GetUnverifiedBufferSizes(),
-                                                    (*mMinimumBufferSizes)[i])) {
+                                                    (*mMinBufferSizes)[i])) {
                     return DAWN_VALIDATION_ERROR("Binding sizes too small for bind group " +
                                                  std::to_string(static_cast<uint32_t>(i)));
                 }
@@ -236,7 +236,7 @@ namespace dawn_native {
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         mLastPipelineLayout = pipeline->GetLayout();
-        mMinimumBufferSizes = &pipeline->GetMinimumBufferSizes();
+        mMinBufferSizes = &pipeline->GetMinBufferSizes();
 
         mAspects.set(VALIDATION_ASPECT_PIPELINE);
 

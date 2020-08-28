@@ -33,27 +33,40 @@ namespace dawn_native {
                                                    const PipelineLayoutBase* layout,
                                                    SingleShaderStage stage);
 
+    struct ProgrammableStage {
+        Ref<ShaderModuleBase> module;
+        std::string entryPoint;
+    };
+
     class PipelineBase : public CachedObject {
       public:
-        wgpu::ShaderStage GetStageMask() const;
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
+        const RequiredBufferSizes& GetMinBufferSizes() const;
+        const ProgrammableStage& GetStage(SingleShaderStage stage) const;
+
         BindGroupLayoutBase* GetBindGroupLayout(uint32_t groupIndex);
-        const RequiredBufferSizes& GetMinimumBufferSizes() const;
+
+        // Helper function for the functors for std::unordered_map-based pipeline caches.
+        static size_t HashForCache(const PipelineBase* pipeline);
+        static bool EqualForCache(const PipelineBase* a, const PipelineBase* b);
 
       protected:
+        using StageAndDescriptor = std::pair<SingleShaderStage, const ProgrammableStageDescriptor*>;
+
         PipelineBase(DeviceBase* device,
                      PipelineLayoutBase* layout,
-                     wgpu::ShaderStage stages,
-                     RequiredBufferSizes bufferSizes);
+                     std::vector<StageAndDescriptor> stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
         MaybeError ValidateGetBindGroupLayout(uint32_t group);
 
-        wgpu::ShaderStage mStageMask;
+        wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
+        PerStage<ProgrammableStage> mStages;
+
         Ref<PipelineLayoutBase> mLayout;
-        RequiredBufferSizes mMinimumBufferSizes;
+        RequiredBufferSizes mMinBufferSizes;
     };
 
 }  // namespace dawn_native

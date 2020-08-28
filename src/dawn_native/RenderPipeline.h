@@ -114,13 +114,6 @@ namespace dawn_native {
         RasterizationStateDescriptor mRasterizationState;
         uint32_t mSampleMask;
         bool mAlphaToCoverageEnabled;
-
-        // Stage information
-        // TODO(cwallez@chromium.org): Store a crypto hash of the modules instead.
-        Ref<ShaderModuleBase> mVertexModule;
-        std::string mVertexEntryPoint;
-        Ref<ShaderModuleBase> mFragmentModule;
-        std::string mFragmentEntryPoint;
     };
 
 }  // namespace dawn_native

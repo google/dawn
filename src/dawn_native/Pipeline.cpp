@@ -14,6 +14,7 @@
 
 #include "dawn_native/Pipeline.h"
 
+#include "common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/PipelineLayout.h"
@@ -43,21 +44,36 @@ namespace dawn_native {
 
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
-                               wgpu::ShaderStage stages,
-                               RequiredBufferSizes minimumBufferSizes)
-        : CachedObject(device),
-          mStageMask(stages),
-          mLayout(layout),
-          mMinimumBufferSizes(std::move(minimumBufferSizes)) {
+                               std::vector<StageAndDescriptor> stages)
+        : CachedObject(device), mLayout(layout) {
+        ASSERT(!stages.empty());
+
+        for (const StageAndDescriptor& stage : stages) {
+            bool isFirstStage = mStageMask == wgpu::ShaderStage::None;
+            mStageMask |= StageBit(stage.first);
+            mStages[stage.first] = {stage.second->module, stage.second->entryPoint};
+
+            // Compute the max() of all minBufferSizes across all stages.
+            RequiredBufferSizes stageMinBufferSizes =
+                stage.second->module->ComputeRequiredBufferSizesForLayout(layout);
+
+            if (isFirstStage) {
+                mMinBufferSizes = std::move(stageMinBufferSizes);
+            } else {
+                for (BindGroupIndex group(0); group < mMinBufferSizes.size(); ++group) {
+                    ASSERT(stageMinBufferSizes[group].size() == mMinBufferSizes[group].size());
+
+                    for (size_t i = 0; i < stageMinBufferSizes[group].size(); ++i) {
+                        mMinBufferSizes[group][i] =
+                            std::max(mMinBufferSizes[group][i], stageMinBufferSizes[group][i]);
+                    }
+                }
+            }
+        }
     }
 
     PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : CachedObject(device, tag) {
-    }
-
-    wgpu::ShaderStage PipelineBase::GetStageMask() const {
-        ASSERT(!IsError());
-        return mStageMask;
     }
 
     PipelineLayoutBase* PipelineBase::GetLayout() {
@@ -70,9 +86,14 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
-    const RequiredBufferSizes& PipelineBase::GetMinimumBufferSizes() const {
+    const RequiredBufferSizes& PipelineBase::GetMinBufferSizes() const {
         ASSERT(!IsError());
-        return mMinimumBufferSizes;
+        return mMinBufferSizes;
+    }
+
+    const ProgrammableStage& PipelineBase::GetStage(SingleShaderStage stage) const {
+        ASSERT(!IsError());
+        return mStages[stage];
     }
 
     MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t groupIndex) {
@@ -100,6 +121,41 @@ namespace dawn_native {
         }
         bgl->Reference();
         return bgl;
+    }
+
+    // static
+    size_t PipelineBase::HashForCache(const PipelineBase* pipeline) {
+        size_t hash = 0;
+
+        // The layout is deduplicated so it can be hashed by pointer.
+        HashCombine(&hash, pipeline->mLayout.Get());
+
+        HashCombine(&hash, pipeline->mStageMask);
+        for (SingleShaderStage stage : IterateStages(pipeline->mStageMask)) {
+            // The module is deduplicated so it can be hashed by pointer.
+            HashCombine(&hash, pipeline->mStages[stage].module.Get());
+            HashCombine(&hash, pipeline->mStages[stage].entryPoint);
+        }
+
+        return hash;
+    }
+
+    // static
+    bool PipelineBase::EqualForCache(const PipelineBase* a, const PipelineBase* b) {
+        // The layout is deduplicated so it can be compared by pointer.
+        if (a->mLayout.Get() != b->mLayout.Get() || a->mStageMask != b->mStageMask) {
+            return false;
+        }
+
+        for (SingleShaderStage stage : IterateStages(a->mStageMask)) {
+            // The module is deduplicated so it can be compared by pointer.
+            if (a->mStages[stage].module.Get() != b->mStages[stage].module.Get() ||
+                a->mStages[stage].entryPoint != b->mStages[stage].entryPoint) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }  // namespace dawn_native

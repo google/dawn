@@ -193,29 +193,6 @@ namespace dawn_native {
             return {};
         }
 
-        RequiredBufferSizes ComputeMinBufferSizes(const RenderPipelineDescriptor* descriptor) {
-            RequiredBufferSizes bufferSizes =
-                descriptor->vertexStage.module->ComputeRequiredBufferSizesForLayout(
-                    descriptor->layout);
-
-            // Merge the two buffer size requirements by taking the larger element from each
-            if (descriptor->fragmentStage != nullptr) {
-                RequiredBufferSizes fragmentSizes =
-                    descriptor->fragmentStage->module->ComputeRequiredBufferSizesForLayout(
-                        descriptor->layout);
-
-                for (BindGroupIndex group(0); group < bufferSizes.size(); ++group) {
-                    ASSERT(bufferSizes[group].size() == fragmentSizes[group].size());
-                    for (size_t i = 0; i < bufferSizes[group].size(); ++i) {
-                        bufferSizes[group][i] =
-                            std::max(bufferSizes[group][i], fragmentSizes[group][i]);
-                    }
-                }
-            }
-
-            return bufferSizes;
-        }
-
     }  // anonymous namespace
 
     // Helper functions
@@ -411,16 +388,12 @@ namespace dawn_native {
                                            const RenderPipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
-                       wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
-                       ComputeMinBufferSizes(descriptor)),
+                       {{SingleShaderStage::Vertex, &descriptor->vertexStage},
+                        {SingleShaderStage::Fragment, descriptor->fragmentStage}}),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
           mPrimitiveTopology(descriptor->primitiveTopology),
           mSampleMask(descriptor->sampleMask),
-          mAlphaToCoverageEnabled(descriptor->alphaToCoverageEnabled),
-          mVertexModule(descriptor->vertexStage.module),
-          mVertexEntryPoint(descriptor->vertexStage.entryPoint),
-          mFragmentModule(descriptor->fragmentStage->module),
-          mFragmentEntryPoint(descriptor->fragmentStage->entryPoint) {
+          mAlphaToCoverageEnabled(descriptor->alphaToCoverageEnabled) {
         if (descriptor->vertexState != nullptr) {
             mVertexState = *descriptor->vertexState;
         } else {
@@ -608,12 +581,8 @@ namespace dawn_native {
     }
 
     size_t RenderPipelineBase::HashFunc::operator()(const RenderPipelineBase* pipeline) const {
-        size_t hash = 0;
-
         // Hash modules and layout
-        HashCombine(&hash, pipeline->GetLayout());
-        HashCombine(&hash, pipeline->mVertexModule.Get(), pipeline->mFragmentEntryPoint);
-        HashCombine(&hash, pipeline->mFragmentModule.Get(), pipeline->mFragmentEntryPoint);
+        size_t hash = PipelineBase::HashForCache(pipeline);
 
         // Hierarchically hash the attachment state.
         // It contains the attachments set, texture formats, and sample count.
@@ -671,11 +640,8 @@ namespace dawn_native {
 
     bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
                                                       const RenderPipelineBase* b) const {
-        // Check modules and layout
-        if (a->GetLayout() != b->GetLayout() || a->mVertexModule.Get() != b->mVertexModule.Get() ||
-            a->mVertexEntryPoint != b->mVertexEntryPoint ||
-            a->mFragmentModule.Get() != b->mFragmentModule.Get() ||
-            a->mFragmentEntryPoint != b->mFragmentEntryPoint) {
+        // Check the layout and shader stages.
+        if (!PipelineBase::EqualForCache(a, b)) {
             return false;
         }
 

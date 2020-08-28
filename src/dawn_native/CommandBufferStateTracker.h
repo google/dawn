@@ -61,7 +61,7 @@ namespace dawn_native {
         PipelineLayoutBase* mLastPipelineLayout = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;
 
-        const RequiredBufferSizes* mMinimumBufferSizes = nullptr;
+        const RequiredBufferSizes* mMinBufferSizes = nullptr;
     };
 
 }  // namespace dawn_native
