@@ -728,7 +728,7 @@ TEST_F(SpvParserTest,
        EmitStatement_CombinatorialValue_Immediate_UsedOnceDifferentConstruct) {
   // Translation should not sink expensive operations into or out of control
   // flow. As a simple heuristic, don't move *any* combinatorial operation
-  // across any constrol flow.
+  // across any control flow.
   auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -1176,6 +1176,74 @@ TEST_F(
       Identifier{x_200}
       Identifier{x_3}
     }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest,
+       EmitStatement_CombinatorialNonPointer_Hoisting_DefAndUseFirstBlockIf) {
+  // In this test, both the defintion and the use are in the first block
+  // of an IfSelection.  No hoisting occurs because hoisting is triggered
+  // on whether the defining construct contains the last use, rather than
+  // whether the two constructs are the same.
+  //
+  // This example has two SSA IDs which are tempting to hoist but should not:
+  //   %1 is defined and used in the first block of an IfSelection.
+  //       Do not hoist it.
+  auto assembly = Preamble() + R"(
+     %cond = OpConstantTrue %bool
+
+     %100 = OpFunction %void None %voidfn
+
+     ; in IfSelection construct, nested in Function construct
+     %10 = OpLabel
+     %1 = OpCopyObject %uint %uint_1
+     %2 = OpCopyObject %uint %1
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel  ; in IfSelection construct
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  // We don't hoist x_1 into its own mutable variable. It is emitted as
+  // a const definition.
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      ScalarConstructor{1}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
   }
 }
 Return{}

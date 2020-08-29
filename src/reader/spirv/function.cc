@@ -3247,12 +3247,21 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
       // Update the usage span for IDs used by this instruction.
       // But skip uses in OpPhi because they are handled differently.
       if (inst.opcode() != SpvOpPhi) {
-        inst.ForEachInId([this, block_pos](const uint32_t* id_ptr) {
+        inst.ForEachInId([this, block_pos, block_info](const uint32_t* id_ptr) {
           auto* def_info = GetDefInfo(*id_ptr);
           if (def_info) {
             def_info->num_uses++;
             def_info->last_use_pos =
                 std::max(def_info->last_use_pos, block_pos);
+
+            // Determine whether this ID is defined in a different construct
+            // from this use.
+            const auto defining_block = block_order_[def_info->block_pos];
+            const auto* def_in_construct =
+                GetBlockInfo(defining_block)->construct;
+            if (def_in_construct != block_info->construct) {
+              def_info->used_in_another_construct = true;
+            }
           }
         });
       }
@@ -3317,8 +3326,6 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     const auto first_pos = def_info->block_pos;
     const auto last_use_pos = def_info->last_use_pos;
 
-    const auto* const construct_with_last_use =
-        GetBlockInfo(block_order_[last_use_pos])->construct;
     const auto* def_in_construct =
         GetBlockInfo(block_order_[first_pos])->construct;
     // A definition in the first block of an kIfSelection or kSwitchSelection
@@ -3331,7 +3338,22 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
       }
     }
 
-    if (def_in_construct != construct_with_last_use) {
+    bool should_hoist = false;
+    if (!def_in_construct->ContainsPos(last_use_pos)) {
+      // To satisfy scoping, we have to hoist the definition out to an enclosing
+      // construct.
+      should_hoist = true;
+    } else {
+      // Avoid moving combinatorial values across constructs.  This is a
+      // simple heuristic to avoid changing the cost of an operation
+      // by moving it into or out of a loop, for example.
+      if ((def_info->storage_class == ast::StorageClass::kNone) &&
+          def_info->used_in_another_construct) {
+        should_hoist = true;
+      }
+    }
+
+    if (should_hoist) {
       const auto* enclosing_construct =
           GetEnclosingScope(first_pos, last_use_pos);
       if (enclosing_construct == def_in_construct) {

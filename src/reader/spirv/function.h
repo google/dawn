@@ -223,6 +223,10 @@ struct DefInfo {
   /// at all.  The "last" ordering is determined by the function block order.
   uint32_t last_use_pos = 0;
 
+  /// Is this value used in a construct other than the one in which it was
+  /// defined?
+  bool used_in_another_construct = false;
+
   /// True if this ID requires a WGSL 'const' definition, due to context. It
   /// might get one anyway (so this is *not* an if-and-only-if condition).
   bool requires_named_const_def = false;
@@ -248,7 +252,7 @@ struct DefInfo {
   std::string phi_var;
 
   /// The storage class to use for this value, if it is of pointer type.
-  /// This is required to carry a stroage class override from a storage
+  /// This is required to carry a storage class override from a storage
   /// buffer expressed in the old style (with Uniform storage class)
   /// that needs to be remapped to StorageBuffer storage class.
   /// This is kNone for non-pointers.
