@@ -1363,23 +1363,13 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
         }
       }
     }
-    VariableDeclStatement{
-      Variable{
-        x_4
-        none
-        __u32
-        {
-          Binary{
-            Identifier{x_2}
-            add
-            ScalarConstructor{1}
-          }
-        }
-      }
-    }
     Assignment{
       Identifier{x_2_phi}
-      Identifier{x_4}
+      Binary{
+        Identifier{x_2}
+        add
+        ScalarConstructor{1}
+      }
     }
     Assignment{
       Identifier{x_3_phi}
@@ -1497,6 +1487,13 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   Loop{
     VariableDeclStatement{
       Variable{
+        x_4
+        function
+        __u32
+      }
+    }
+    VariableDeclStatement{
+      Variable{
         x_2
         none
         __u32
@@ -1524,18 +1521,12 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
       }
     }
     continuing {
-      VariableDeclStatement{
-        Variable{
-          x_4
-          none
-          __u32
-          {
-            Binary{
-              Identifier{x_2}
-              add
-              ScalarConstructor{1}
-            }
-          }
+      Assignment{
+        Identifier{x_4}
+        Binary{
+          Identifier{x_2}
+          add
+          ScalarConstructor{1}
         }
       }
       Assignment{
@@ -1634,6 +1625,13 @@ Loop{
   Loop{
     VariableDeclStatement{
       Variable{
+        x_7
+        function
+        __u32
+      }
+    }
+    VariableDeclStatement{
+      Variable{
         x_2
         none
         __u32
@@ -1689,18 +1687,12 @@ Loop{
       }
     }
     continuing {
-      VariableDeclStatement{
-        Variable{
-          x_7
-          none
-          __u32
-          {
-            Binary{
-              Identifier{x_4}
-              add
-              Identifier{x_6}
-            }
-          }
+      Assignment{
+        Identifier{x_7}
+        Binary{
+          Identifier{x_4}
+          add
+          Identifier{x_6}
         }
       }
       Assignment{
@@ -1950,6 +1942,103 @@ Loop{
     Assignment{
       Identifier{x_1}
       Identifier{x_2}
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
+  // From crbug.com/215
+  // If the only use of a combinatorially computed ID is as the value
+  // in an OpPhi, then we still have to emit it.  The algorithm fix
+  // is to always count uses in Phis.
+  // This is the reduced case from the bug report.
+  //
+  // The only use of %12 is in the phi.
+  // The only use of %11 is in %12.
+  // Both definintions need to be emitted to the output.
+  auto assembly = Preamble() + R"(
+        %100 = OpFunction %void None %voidfn
+
+         %10 = OpLabel
+         %11 = OpLogicalAnd %bool %true %true
+         %12 = OpLogicalNot %bool %11  ;
+               OpSelectionMerge %99 None
+               OpBranchConditional %true %20 %99
+
+         %20 = OpLabel
+               OpBranch %99
+
+         %99 = OpLabel
+        %101 = OpPhi %bool %11 %10 %12 %20
+               OpReturn
+
+               OpFunctionEnd
+
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_101_phi
+    function
+    __bool
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_11
+    none
+    __bool
+    {
+      Binary{
+        ScalarConstructor{true}
+        logical_and
+        ScalarConstructor{true}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_12
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Identifier{x_11}
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{x_101_phi}
+  Identifier{x_11}
+}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    Assignment{
+      Identifier{x_101_phi}
+      Identifier{x_12}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_101
+    none
+    __bool
+    {
+      Identifier{x_101_phi}
     }
   }
 }

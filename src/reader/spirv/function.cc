@@ -3244,27 +3244,25 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     const auto* block_info = GetBlockInfo(block_id);
     const auto block_pos = block_info->pos;
     for (const auto& inst : *(block_info->basic_block)) {
-      // Update the usage span for IDs used by this instruction.
-      // But skip uses in OpPhi because they are handled differently.
-      if (inst.opcode() != SpvOpPhi) {
-        inst.ForEachInId([this, block_pos, block_info](const uint32_t* id_ptr) {
-          auto* def_info = GetDefInfo(*id_ptr);
-          if (def_info) {
-            def_info->num_uses++;
-            def_info->last_use_pos =
-                std::max(def_info->last_use_pos, block_pos);
+      // Update bookkeeping for locally-defined IDs used by this instruction.
+      inst.ForEachInId([this, block_pos, block_info](const uint32_t* id_ptr) {
+        auto* def_info = GetDefInfo(*id_ptr);
+        if (def_info) {
+          // Update usage count.
+          def_info->num_uses++;
+          // Update usage span.
+          def_info->last_use_pos = std::max(def_info->last_use_pos, block_pos);
 
-            // Determine whether this ID is defined in a different construct
-            // from this use.
-            const auto defining_block = block_order_[def_info->block_pos];
-            const auto* def_in_construct =
-                GetBlockInfo(defining_block)->construct;
-            if (def_in_construct != block_info->construct) {
-              def_info->used_in_another_construct = true;
-            }
+          // Determine whether this ID is defined in a different construct
+          // from this use.
+          const auto defining_block = block_order_[def_info->block_pos];
+          const auto* def_in_construct =
+              GetBlockInfo(defining_block)->construct;
+          if (def_in_construct != block_info->construct) {
+            def_info->used_in_another_construct = true;
           }
-        });
-      }
+        }
+      });
 
       if (inst.opcode() == SpvOpPhi) {
         // Declare a name for the variable used to carry values to a phi.
