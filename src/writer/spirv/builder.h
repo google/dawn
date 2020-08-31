@@ -26,6 +26,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
@@ -366,6 +367,12 @@ class Builder {
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
   bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
+
+  // Converts ast image format to spv and pushes an appropriate capability.
+  // @returns SPIR-V image format type
+  // @param format AST image format type
+  SpvImageFormat convert_image_format_to_spv(
+      const ast::type::ImageFormat format);
 
  private:
   /// @returns an Operand with a new result ID in it. Increments the next_id_

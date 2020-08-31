@@ -2136,6 +2136,101 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
   return SpvBuiltInMax;
 }
 
+SpvImageFormat Builder::convert_image_format_to_spv(
+    const ast::type::ImageFormat format) {
+  switch (format) {
+    case ast::type::ImageFormat::kR8Unorm:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR8;
+    case ast::type::ImageFormat::kR8Snorm:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR8Snorm;
+    case ast::type::ImageFormat::kR8Uint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR8ui;
+    case ast::type::ImageFormat::kR8Sint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR8i;
+    case ast::type::ImageFormat::kR16Uint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR16ui;
+    case ast::type::ImageFormat::kR16Sint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR16i;
+    case ast::type::ImageFormat::kR16Float:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR16f;
+    case ast::type::ImageFormat::kRg8Unorm:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg8;
+    case ast::type::ImageFormat::kRg8Snorm:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg8Snorm;
+    case ast::type::ImageFormat::kRg8Uint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg8ui;
+    case ast::type::ImageFormat::kRg8Sint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg8i;
+    case ast::type::ImageFormat::kR32Uint:
+      return SpvImageFormatR32ui;
+    case ast::type::ImageFormat::kR32Sint:
+      return SpvImageFormatR32i;
+    case ast::type::ImageFormat::kR32Float:
+      return SpvImageFormatR32f;
+    case ast::type::ImageFormat::kRg16Uint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg16ui;
+    case ast::type::ImageFormat::kRg16Sint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg16i;
+    case ast::type::ImageFormat::kRg16Float:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg16f;
+    case ast::type::ImageFormat::kRgba8Unorm:
+      return SpvImageFormatRgba8;
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+      return SpvImageFormatUnknown;
+    case ast::type::ImageFormat::kRgba8Snorm:
+      return SpvImageFormatRgba8Snorm;
+    case ast::type::ImageFormat::kRgba8Uint:
+      return SpvImageFormatRgba8ui;
+    case ast::type::ImageFormat::kRgba8Sint:
+      return SpvImageFormatRgba8i;
+    case ast::type::ImageFormat::kBgra8Unorm:
+      return SpvImageFormatUnknown;
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+      return SpvImageFormatUnknown;
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRgb10A2;
+    case ast::type::ImageFormat::kRg11B10Float:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatR11fG11fB10f;
+    case ast::type::ImageFormat::kRg32Uint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg32ui;
+    case ast::type::ImageFormat::kRg32Sint:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg32i;
+    case ast::type::ImageFormat::kRg32Float:
+      push_capability(SpvCapabilityStorageImageExtendedFormats);
+      return SpvImageFormatRg32f;
+    case ast::type::ImageFormat::kRgba16Uint:
+      return SpvImageFormatRgba16ui;
+    case ast::type::ImageFormat::kRgba16Sint:
+      return SpvImageFormatRgba16i;
+    case ast::type::ImageFormat::kRgba16Float:
+      return SpvImageFormatRgba16f;
+    case ast::type::ImageFormat::kRgba32Uint:
+      return SpvImageFormatRgba32ui;
+    case ast::type::ImageFormat::kRgba32Sint:
+      return SpvImageFormatRgba32i;
+    case ast::type::ImageFormat::kRgba32Float:
+      return SpvImageFormatRgba32f;
+  }
+}
+
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

@@ -481,6 +481,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_constructor_expression_test.cc
     writer/spirv/builder_discard_test.cc
     writer/spirv/builder_entry_point_test.cc
+    writer/spirv/builder_format_conversion_test.cc
     writer/spirv/builder_function_test.cc
     writer/spirv/builder_function_variable_test.cc
     writer/spirv/builder_global_variable_test.cc
