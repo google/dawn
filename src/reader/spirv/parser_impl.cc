@@ -502,8 +502,12 @@ void ParserImpl::RegisterLineNumbers() {
       run_on_debug_insts);
 }
 
-Source ParserImpl::GetSourceForResultIdForTest(uint32_t id) {
-  const auto* inst = def_use_mgr_->GetDef(id);
+Source ParserImpl::GetSourceForResultIdForTest(uint32_t id) const {
+  return GetSourceForInst(def_use_mgr_->GetDef(id));
+}
+
+Source ParserImpl::GetSourceForInst(
+    const spvtools::opt::Instruction* inst) const {
   auto where = inst_source_.find(inst);
   if (where == inst_source_.end()) {
     return {};

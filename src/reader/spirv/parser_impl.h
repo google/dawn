@@ -362,11 +362,15 @@ class ParserImpl : Reader {
     return builtin_position_;
   }
 
-  /// Look up the source record for the SPIR-V instruction with the given
+  /// Returns the source record for the SPIR-V instruction with the given
   /// result ID.
   /// @param id the SPIR-V result id.
   /// @return the Source record, or a default one
-  Source GetSourceForResultIdForTest(uint32_t id);
+  Source GetSourceForResultIdForTest(uint32_t id) const;
+  /// Returns the soruce record for the given instruction.
+  /// @param inst the SPIR-V instruction
+  /// @return the Source record, or a default one
+  Source GetSourceForInst(const spvtools::opt::Instruction* inst) const;
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case

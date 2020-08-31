@@ -426,6 +426,12 @@ class StructuredTraverser {
   std::unordered_set<uint32_t> visited_;
 };
 
+/// @param src a source record
+/// @returns true if |src| is a non-default Source
+bool HasSource(const Source& src) {
+  return src.line != 0 || src.column != 0;
+}
+
 }  // namespace
 
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
@@ -523,6 +529,14 @@ ast::Statement* FunctionEmitter::AddStatement(
     statements_stack_.back().statements_->append(std::move(statement));
   }
   return result;
+}
+
+ast::Statement* FunctionEmitter::AddStatementForInstruction(
+    std::unique_ptr<ast::Statement> statement,
+    const spvtools::opt::Instruction& inst) {
+  auto* node = AddStatement(std::move(statement));
+  ApplySourceForInstruction(node, inst);
+  return node;
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {
@@ -1655,7 +1669,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     // TODO(dneto): Add the initializer via Variable::set_constructor.
     auto var_decl_stmt =
         std::make_unique<ast::VariableDeclStatement>(std::move(var));
-    AddStatement(std::move(var_decl_stmt));
+    AddStatementForInstruction(std::move(var_decl_stmt), inst);
     // Save this as an already-named value.
     identifier_values_.insert(inst.result_id());
   }
@@ -2430,7 +2444,6 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Only emit this part of the basic block once.
     return true;
   }
-
   // Returns the given list of local definition IDs, sorted by their index.
   auto sorted_by_index = [this](const std::vector<uint32_t>& ids) {
     auto sorted = ids;
@@ -2514,8 +2527,8 @@ bool FunctionEmitter::EmitConstDefinition(
   }
   ast_const->set_constructor(std::move(ast_expr.expr));
   ast_const->set_is_const(true);
-  AddStatement(
-      std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
+  AddStatementForInstruction(
+      std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)), inst);
   // Save this as an already-named value.
   identifier_values_.insert(inst.result_id());
   return success();
@@ -2528,9 +2541,11 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
   const auto* def_info = GetDefInfo(result_id);
   if (def_info && def_info->requires_hoisted_def) {
     // Emit an assignment of the expression to the hoisted variable.
-    AddStatement(std::make_unique<ast::AssignmentStatement>(
-        std::make_unique<ast::IdentifierExpression>(namer_.Name(result_id)),
-        std::move(ast_expr.expr)));
+    AddStatementForInstruction(
+        std::make_unique<ast::AssignmentStatement>(
+            std::make_unique<ast::IdentifierExpression>(namer_.Name(result_id)),
+            std::move(ast_expr.expr)),
+        inst);
     return true;
   }
   return EmitConstDefinition(inst, std::move(ast_expr));
@@ -2593,8 +2608,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
       auto rhs = MakeExpression(value_id);
-      AddStatement(std::make_unique<ast::AssignmentStatement>(
-          std::move(lhs.expr), std::move(rhs.expr)));
+      AddStatementForInstruction(std::make_unique<ast::AssignmentStatement>(
+                                     std::move(lhs.expr), std::move(rhs.expr)),
+                                 inst);
       return success();
     }
     case SpvOpLoad: {
@@ -3456,8 +3472,10 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
 
   if (result_type->IsVoid()) {
-    return nullptr != AddStatement(std::make_unique<ast::CallStatement>(
-                          std::move(call_expr)));
+    return nullptr !=
+           AddStatementForInstruction(
+               std::make_unique<ast::CallStatement>(std::move(call_expr)),
+               inst);
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst,
@@ -3489,6 +3507,18 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
                 std::move(params))};
   }
   return {};
+}
+
+void FunctionEmitter::ApplySourceForInstruction(
+    ast::Node* node,
+    const spvtools::opt::Instruction& inst) {
+  if (!node) {
+    return;
+  }
+  const Source& existing = node->source();
+  if (!HasSource(existing)) {
+    node->set_source(parser_impl_.GetSourceForInst(&inst));
+  }
 }
 
 }  // namespace spirv

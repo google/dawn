@@ -705,6 +705,23 @@ class FunctionEmitter {
   /// @returns a pointer to the statement.
   ast::Statement* AddStatement(std::unique_ptr<ast::Statement> statement);
 
+  /// Appends a new statement to the top of the statement stack, and attaches
+  /// source location information from the given instruction. Does nothing if
+  /// the statement is null.
+  /// @param statement the new statement
+  /// @returns a pointer to the statement.
+  ast::Statement* AddStatementForInstruction(
+      std::unique_ptr<ast::Statement> statement,
+      const spvtools::opt::Instruction& inst);
+
+  /// Sets the source information for the given instruction to the given
+  /// node, if the node doesn't already have a source record.  Does nothing
+  /// if |nodes| is null.
+  /// @param node the AST node
+  /// @param inst the SPIR-V instruction
+  void ApplySourceForInstruction(ast::Node* node,
+                                 const spvtools::opt::Instruction& inst);
+
   /// @returns the last statetment in the top of the statement stack.
   ast::Statement* LastStatement();
 
