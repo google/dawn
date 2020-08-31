@@ -44,7 +44,10 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -540,6 +543,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   return true;
 }
 
+// TODO(tommek): Update names to camel case
 bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
                                         ast::CallExpression* expr) {
   if (ast::intrinsic::IsDerivative(name)) {
@@ -582,6 +586,46 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
     } else {
       expr->func()->set_result_type(bool_type);
     }
+    return true;
+  }
+  if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
+    uint32_t num_of_params =
+        (name == "texture_load" || name == "texture_sample") ? 3 : 4;
+    if (expr->params().size() != num_of_params) {
+      set_error(expr->source(),
+                "incorrect number of parameters for " + name + ", got " +
+                    std::to_string(expr->params().size()) + " and expected " +
+                    std::to_string(num_of_params));
+      return false;
+    }
+
+    if (name == "texture_sample_compare") {
+      expr->func()->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+      return true;
+    }
+
+    auto& texture_param = expr->params()[0];
+    if (!DetermineResultType(texture_param.get())) {
+      return false;
+    }
+    if (!texture_param->result_type()->UnwrapPtrIfNeeded()->IsTexture()) {
+      set_error(expr->source(), "invalid first argument for " + name);
+      return false;
+    }
+    ast::type::TextureType* texture =
+        texture_param->result_type()->UnwrapPtrIfNeeded()->AsTexture();
+
+    if (!texture->IsStorage() && !texture->IsSampled()) {
+      set_error(expr->source(), "invalid texture for " + name);
+      return false;
+    }
+
+    expr->func()->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+            texture->IsStorage() ? texture->AsStorage()->type()
+                                 : texture->AsSampled()->type(),
+            4)));
     return true;
   }
   if (name == "dot") {

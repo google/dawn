@@ -41,6 +41,11 @@ bool IsDerivative(const std::string& name);
 /// @returns true if the given |name| is a float intrinsic
 bool IsFloatClassificationIntrinsic(const std::string& name);
 
+/// Determines if the given |name| is a texture operation intrinsic
+/// @param name the name to check
+/// @returns true if the given |name| is a texture operation intrinsic
+bool IsTextureOperationIntrinsic(const std::string& name);
+
 /// Determines if the given |name| is an intrinsic
 /// @param name the name to check
 /// @returns true if the given |name| is an intrinsic

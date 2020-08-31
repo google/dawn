@@ -46,11 +46,16 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -80,6 +85,7 @@ class TypeDeterminerHelper {
 
   TypeDeterminer* td() const { return td_.get(); }
   ast::Module* mod() { return &mod_; }
+  Context* ctx() { return &ctx_; }
 
  private:
   Context ctx_;
@@ -1800,6 +1806,382 @@ INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_FloatMethod,
     testing::Values("is_inf", "is_nan", "is_finite", "is_normal"));
+
+enum class TextureType { kF32, kI32, kU32 };
+inline std::ostream& operator<<(std::ostream& out, TextureType data) {
+  if (data == TextureType::kF32) {
+    out << "f32";
+  } else if (data == TextureType::kI32) {
+    out << "i32";
+  } else {
+    out << "u32";
+  }
+  return out;
+}
+
+struct TextureTestParams {
+  ast::type::TextureDimension dim;
+  TextureType type = TextureType::kF32;
+  ast::type::ImageFormat format = ast::type::ImageFormat::kR16Float;
+};
+inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
+  out << data.dim << "_" << data.type;
+  return out;
+}
+
+class Intrinsic_TextureOperation
+    : public TypeDeterminerTestWithParam<TextureTestParams> {
+ public:
+  std::unique_ptr<ast::type::Type> get_coords_type(
+      ast::type::TextureDimension dim,
+      ast::type::Type* type) {
+    if (dim == ast::type::TextureDimension::k1d) {
+      if (type->IsI32()) {
+        return std::make_unique<ast::type::I32Type>();
+      } else if (type->IsU32()) {
+        return std::make_unique<ast::type::U32Type>();
+      } else {
+        return std::make_unique<ast::type::F32Type>();
+      }
+    } else if (dim == ast::type::TextureDimension::k1dArray ||
+               dim == ast::type::TextureDimension::k2d ||
+               dim == ast::type::TextureDimension::k2dMs) {
+      return std::make_unique<ast::type::VectorType>(type, 2);
+    } else if (dim == ast::type::TextureDimension::kCubeArray) {
+      return std::make_unique<ast::type::VectorType>(type, 4);
+    } else {
+      return std::make_unique<ast::type::VectorType>(type, 3);
+    }
+  }
+
+  void add_call_param(std::string name,
+                      ast::type::Type* type,
+                      ast::ExpressionList* call_params) {
+    auto var =
+        std::make_unique<ast::Variable>(name, ast::StorageClass::kNone, type);
+    mod()->AddGlobalVariable(std::move(var));
+    call_params->push_back(std::make_unique<ast::IdentifierExpression>(name));
+  }
+
+  std::unique_ptr<ast::type::Type> subtype(TextureType type) {
+    if (type == TextureType::kF32) {
+      return std::make_unique<ast::type::F32Type>();
+    }
+    if (type == TextureType::kI32) {
+      return std::make_unique<ast::type::I32Type>();
+    }
+    return std::make_unique<ast::type::U32Type>();
+  }
+};
+
+using Intrinsic_StorageTextureOperation = Intrinsic_TextureOperation;
+TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
+  auto dim = GetParam().dim;
+  auto type = GetParam().type;
+  auto format = GetParam().format;
+
+  ast::type::I32Type i32;
+  auto coords_type = get_coords_type(dim, &i32);
+
+  ast::type::Type* texture_type =
+      ctx()->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          dim, ast::type::StorageAccess::kRead, format));
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type, &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("lod", &i32, &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  if (type == TextureType::kF32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  } else if (type == TextureType::kI32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
+  } else {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+  }
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    Intrinsic_StorageTextureOperation,
+    testing::Values(
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kF32,
+                          ast::type::ImageFormat::kR16Float},
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kI32,
+                          ast::type::ImageFormat::kR16Sint},
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kU32,
+                          ast::type::ImageFormat::kR8Unorm},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kF32, ast::type::ImageFormat::kR16Float},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kI32, ast::type::ImageFormat::kR16Sint},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kU32, ast::type::ImageFormat::kR8Unorm},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kF32,
+                          ast::type::ImageFormat::kR16Float},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kI32,
+                          ast::type::ImageFormat::kR16Sint},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kU32,
+                          ast::type::ImageFormat::kR8Unorm},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kF32, ast::type::ImageFormat::kR16Float},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kI32, ast::type::ImageFormat::kR16Sint},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kU32, ast::type::ImageFormat::kR8Unorm},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kF32,
+                          ast::type::ImageFormat::kR16Float},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kI32,
+                          ast::type::ImageFormat::kR16Sint},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kU32,
+                          ast::type::ImageFormat::kR8Unorm}));
+
+using Intrinsic_SampledTextureOperation = Intrinsic_TextureOperation;
+TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
+  auto dim = GetParam().dim;
+  auto type = GetParam().type;
+
+  ast::type::I32Type i32;
+  std::unique_ptr<ast::type::Type> s = subtype(type);
+  auto coords_type = get_coords_type(dim, &i32);
+  auto texture_type =
+      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type.get(), &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("lod", &i32, &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  if (type == TextureType::kF32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  } else if (type == TextureType::kI32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
+  } else {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+  }
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+TEST_P(Intrinsic_SampledTextureOperation, TextureSample) {
+  auto dim = GetParam().dim;
+  auto type = GetParam().type;
+
+  auto s = subtype(type);
+  ast::type::F32Type f32;
+  auto sampler_type = std::make_unique<ast::type::SamplerType>(
+      ast::type::SamplerKind::kSampler);
+  auto coords_type = get_coords_type(dim, &f32);
+  auto texture_type =
+      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type.get(), &call_params);
+  add_call_param("sampler", sampler_type.get(), &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_sample"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  if (type == TextureType::kF32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  } else if (type == TextureType::kI32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
+  } else {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+  }
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+TEST_P(Intrinsic_SampledTextureOperation, TextureSampleLevel) {
+  auto dim = GetParam().dim;
+  auto type = GetParam().type;
+
+  ast::type::F32Type f32;
+  auto s = subtype(type);
+  auto sampler_type = std::make_unique<ast::type::SamplerType>(
+      ast::type::SamplerKind::kSampler);
+  auto coords_type = get_coords_type(dim, &f32);
+  auto texture_type =
+      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type.get(), &call_params);
+  add_call_param("sampler", sampler_type.get(), &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("lod", &f32, &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_sample_level"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  if (type == TextureType::kF32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  } else if (type == TextureType::kI32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
+  } else {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+  }
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+TEST_P(Intrinsic_SampledTextureOperation, TextureSampleBias) {
+  auto dim = GetParam().dim;
+  auto type = GetParam().type;
+
+  ast::type::F32Type f32;
+  auto s = subtype(type);
+  auto sampler_type = std::make_unique<ast::type::SamplerType>(
+      ast::type::SamplerKind::kSampler);
+  auto coords_type = get_coords_type(dim, &f32);
+  auto texture_type =
+      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type.get(), &call_params);
+  add_call_param("sampler", sampler_type.get(), &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("bias", &f32, &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_sample_bias"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  if (type == TextureType::kF32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  } else if (type == TextureType::kI32) {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
+  } else {
+    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+  }
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    Intrinsic_SampledTextureOperation,
+    testing::Values(
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k1dArray,
+                          TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k2dArray,
+                          TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k2dMs,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k2dMs,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k2dMs,
+                          TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
+                          TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::kCube,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::kCube,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::kCube,
+                          TextureType::kU32},
+        TextureTestParams{ast::type::TextureDimension::kCubeArray,
+                          TextureType::kF32},
+        TextureTestParams{ast::type::TextureDimension::kCubeArray,
+                          TextureType::kI32},
+        TextureTestParams{ast::type::TextureDimension::kCubeArray,
+                          TextureType::kU32}));
+
+using Intrinsic_DepthTextureOperation = Intrinsic_TextureOperation;
+TEST_P(Intrinsic_DepthTextureOperation, TextureSampleCompare) {
+  auto dim = GetParam().dim;
+
+  ast::type::F32Type f32;
+  auto sampler_type = std::make_unique<ast::type::SamplerType>(
+      ast::type::SamplerKind::kComparisonSampler);
+  auto coords_type = get_coords_type(dim, &f32);
+  auto texture_type = std::make_unique<ast::type::DepthTextureType>(dim);
+
+  ast::ExpressionList call_params;
+
+  add_call_param("texture", texture_type.get(), &call_params);
+  add_call_param("sampler_comparison", sampler_type.get(), &call_params);
+  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("depth_reference", &f32, &call_params);
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("texture_sample_compare"),
+      std::move(call_params));
+
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  EXPECT_TRUE(expr.result_type()->IsF32());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    Intrinsic_DepthTextureOperation,
+    testing::Values(TextureTestParams{ast::type::TextureDimension::k2d},
+                    TextureTestParams{ast::type::TextureDimension::k2dArray},
+                    TextureTestParams{ast::type::TextureDimension::kCube},
+                    TextureTestParams{
+                        ast::type::TextureDimension::kCubeArray}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   ast::type::F32Type f32;

@@ -37,9 +37,16 @@ bool IsFloatClassificationIntrinsic(const std::string& name) {
          name == "is_normal";
 }
 
+bool IsTextureOperationIntrinsic(const std::string& name) {
+  return name == "texture_load" || name == "texture_sample" ||
+         name == "texture_sample_level" || name == "texture_sample_bias" ||
+         name == "texture_sample_compare";
+}
+
 bool IsIntrinsic(const std::string& name) {
   return IsDerivative(name) || name == "all" || name == "any" ||
-         IsFloatClassificationIntrinsic(name) || name == "dot" ||
+         IsFloatClassificationIntrinsic(name) ||
+         IsTextureOperationIntrinsic(name) || name == "dot" ||
          name == "outer_product" || name == "select";
 }
 
