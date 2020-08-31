@@ -57,9 +57,9 @@ TEST_F(TypeManagerTest, ResetClearsPreviousData) {
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
 
-  EXPECT_FALSE(tm.TypesForTesting().empty());
+  EXPECT_FALSE(tm.types().empty());
   tm.Reset();
-  EXPECT_TRUE(tm.TypesForTesting().empty());
+  EXPECT_TRUE(tm.types().empty());
 
   auto* t2 = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t2, nullptr);

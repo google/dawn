@@ -37,10 +37,10 @@ class TypeManager {
   /// @return the pointer to the registered type
   ast::type::Type* Get(std::unique_ptr<ast::type::Type> type);
 
-  /// Returns the type map, for testing purposes.
+  /// Returns the type map
   /// @returns the mapping from name string to type.
   const std::unordered_map<std::string, std::unique_ptr<ast::type::Type>>&
-  TypesForTesting() {
+  types() {
     return types_;
   }
 

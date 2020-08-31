@@ -41,9 +41,11 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -177,6 +179,18 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
 }
 
 bool TypeDeterminer::Determine() {
+  for (auto& iter : ctx_.type_mgr().types()) {
+    auto& type = iter.second;
+    if (!type->IsTexture() || !type->AsTexture()->IsStorage()) {
+      continue;
+    }
+    if (!DetermineStorageTextureSubtype(type->AsTexture()->AsStorage())) {
+      set_error(Source{}, "unable to determine storage texture subtype for: " +
+                              type->type_name());
+      return false;
+    }
+  }
+
   for (const auto& var : mod_->global_variables()) {
     variable_stack_.set_global(var->name(), var.get());
 
@@ -822,6 +836,67 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   }
   expr->set_result_type(expr->expr()->result_type()->UnwrapPtrIfNeeded());
   return true;
+}
+
+bool TypeDeterminer::DetermineStorageTextureSubtype(
+    ast::type::StorageTextureType* tex) {
+  if (tex->type() != nullptr) {
+    return true;
+  }
+
+  switch (tex->image_format()) {
+    case ast::type::ImageFormat::kR8Unorm:
+    case ast::type::ImageFormat::kRg8Unorm:
+    case ast::type::ImageFormat::kRgba8Unorm:
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+    case ast::type::ImageFormat::kBgra8Unorm:
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+    case ast::type::ImageFormat::kR8Uint:
+    case ast::type::ImageFormat::kR16Uint:
+    case ast::type::ImageFormat::kRg8Uint:
+    case ast::type::ImageFormat::kR32Uint:
+    case ast::type::ImageFormat::kRg16Uint:
+    case ast::type::ImageFormat::kRgba8Uint:
+    case ast::type::ImageFormat::kRg32Uint:
+    case ast::type::ImageFormat::kRgba16Uint:
+    case ast::type::ImageFormat::kRgba32Uint: {
+      tex->set_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>()));
+      return true;
+    }
+
+    case ast::type::ImageFormat::kR8Snorm:
+    case ast::type::ImageFormat::kRg8Snorm:
+    case ast::type::ImageFormat::kRgba8Snorm:
+    case ast::type::ImageFormat::kR8Sint:
+    case ast::type::ImageFormat::kR16Sint:
+    case ast::type::ImageFormat::kRg8Sint:
+    case ast::type::ImageFormat::kR32Sint:
+    case ast::type::ImageFormat::kRg16Sint:
+    case ast::type::ImageFormat::kRgba8Sint:
+    case ast::type::ImageFormat::kRg32Sint:
+    case ast::type::ImageFormat::kRgba16Sint:
+    case ast::type::ImageFormat::kRgba32Sint: {
+      tex->set_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>()));
+      return true;
+    }
+
+    case ast::type::ImageFormat::kR16Float:
+    case ast::type::ImageFormat::kR32Float:
+    case ast::type::ImageFormat::kRg16Float:
+    case ast::type::ImageFormat::kRg11B10Float:
+    case ast::type::ImageFormat::kRg32Float:
+    case ast::type::ImageFormat::kRgba16Float:
+    case ast::type::ImageFormat::kRgba32Float: {
+      tex->set_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+      return true;
+    }
+  }
+
+  return false;
 }
 
 ast::type::Type* TypeDeterminer::GetImportData(

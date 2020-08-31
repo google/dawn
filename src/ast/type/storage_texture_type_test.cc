@@ -14,6 +14,9 @@
 
 #include "src/ast/type/storage_texture_type.h"
 
+#include "src/ast/identifier_expression.h"
+#include "src/type_determiner.h"
+
 #include "gtest/gtest.h"
 
 namespace tint {
@@ -70,6 +73,48 @@ TEST_F(StorageTextureTypeTest, TypeName) {
   StorageTextureType s(TextureDimension::k2dArray, StorageAccess::kRead,
                        ImageFormat::kRgba32Float);
   EXPECT_EQ(s.type_name(), "__storage_texture_read_2d_array_rgba32float");
+}
+
+TEST_F(StorageTextureTypeTest, F32Type) {
+  Context ctx;
+  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+      TextureDimension::k2dArray, StorageAccess::kRead,
+      ImageFormat::kRgba32Float));
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(s->IsTexture());
+  ASSERT_TRUE(s->AsTexture()->IsStorage());
+  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsF32());
+}
+
+TEST_F(StorageTextureTypeTest, U32Type) {
+  Context ctx;
+  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+      TextureDimension::k2dArray, StorageAccess::kRead,
+      ImageFormat::kRgba8Unorm));
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(s->IsTexture());
+  ASSERT_TRUE(s->AsTexture()->IsStorage());
+  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsU32());
+}
+
+TEST_F(StorageTextureTypeTest, I32Type) {
+  Context ctx;
+  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+      TextureDimension::k2dArray, StorageAccess::kRead,
+      ImageFormat::kRgba32Sint));
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(s->IsTexture());
+  ASSERT_TRUE(s->AsTexture()->IsStorage());
+  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsI32());
 }
 
 }  // namespace

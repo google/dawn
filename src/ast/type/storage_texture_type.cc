@@ -164,6 +164,14 @@ StorageTextureType::StorageTextureType(TextureDimension dim,
   assert(IsValidStorageDimension(dim));
 }
 
+void StorageTextureType::set_type(Type* const type) {
+  type_ = type;
+}
+
+Type* StorageTextureType::type() const {
+  return type_;
+}
+
 StorageTextureType::StorageTextureType(StorageTextureType&&) = default;
 
 StorageTextureType::~StorageTextureType() = default;

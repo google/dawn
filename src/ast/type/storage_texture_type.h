@@ -74,9 +74,10 @@ class StorageTextureType : public TextureType {
   /// @param dim the dimensionality of the texture
   /// @param access the access type for the texture
   /// @param format the image format of the texture
-  explicit StorageTextureType(TextureDimension dim,
-                              StorageAccess access,
-                              ImageFormat format);
+  StorageTextureType(TextureDimension dim,
+                     StorageAccess access,
+                     ImageFormat format);
+
   /// Move constructor
   StorageTextureType(StorageTextureType&&);
   ~StorageTextureType() override;
@@ -84,8 +85,11 @@ class StorageTextureType : public TextureType {
   /// @returns true if the type is a storage texture type
   bool IsStorage() const override;
 
-  /// @returns the subtype of the sampled texture
-  Type* type() const { return type_; }
+  /// @param type the subtype of the storage texture
+  void set_type(Type* const type);
+
+  /// @returns the subtype of the storage texture set with set_type
+  Type* type() const;
 
   /// @returns the storage access
   StorageAccess access() const { return storage_access_; }

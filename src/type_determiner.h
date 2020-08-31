@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "src/ast/module.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/context.h"
 #include "src/scope_stack.h"
 
@@ -117,6 +118,8 @@ class TypeDeterminer {
   bool DetermineIntrinsic(const std::string& name, ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
+
+  bool DetermineStorageTextureSubtype(ast::type::StorageTextureType* tex);
 
   Context& ctx_;
   ast::Module* mod_;
