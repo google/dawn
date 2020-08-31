@@ -122,9 +122,28 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
 )");
 }
 
-// TODO(dsinclair): Handle pulling declared variables up and out of the for() if
-// there is a continuing block.
-TEST_F(HlslGeneratorImplTest_Loop, DISABLED_Emit_LoopWithVarUsedInContinuing) {
+TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
+  // loop {
+  //   var lhs : f32 = 2.4;
+  //   var other : f32;
+  //   continuing {
+  //     lhs = rhs
+  //   }
+  // }
+  //
+  // ->
+  // {
+  //   float lhs;
+  //   float other;
+  //   for (;;) {
+  //     if (continuing) {
+  //       lhs = rhs;
+  //     }
+  //     lhs = 2.4f;
+  //     other = 0.0f;
+  //   }
+  // }
+
   ast::type::F32Type f32;
 
   auto var = std::make_unique<ast::Variable>(
@@ -150,8 +169,9 @@ TEST_F(HlslGeneratorImplTest_Loop, DISABLED_Emit_LoopWithVarUsedInContinuing) {
 
   ASSERT_TRUE(gen().EmitStatement(out(), &outer)) << gen().error();
   EXPECT_EQ(result(), R"(  {
-    float lhs;
     bool tint_hlsl_is_first_1 = true;
+    float lhs;
+    float other;
     for(;;) {
       if (!tint_hlsl_is_first_1) {
         lhs = rhs;
@@ -159,7 +179,7 @@ TEST_F(HlslGeneratorImplTest_Loop, DISABLED_Emit_LoopWithVarUsedInContinuing) {
       tint_hlsl_is_first_1 = false;
 
       lhs = 2.40000010f;
-      float other;
+      other = 0.0f;
     }
   }
 )");

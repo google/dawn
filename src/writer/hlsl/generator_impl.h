@@ -255,8 +255,11 @@ class GeneratorImpl {
   /// Handles generating a variable
   /// @param out the output stream
   /// @param var the variable to generate
+  /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(std::ostream& out, ast::Variable* var);
+  bool EmitVariable(std::ostream& out,
+                    ast::Variable* var,
+                    bool skip_constructor);
   /// Handles generating a program scope constant variable
   /// @param out the output stream
   /// @param var the variable to emit

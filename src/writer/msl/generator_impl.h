@@ -200,8 +200,9 @@ class GeneratorImpl : public TextGenerator {
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
   /// Handles generating a variable
   /// @param var the variable to generate
+  /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(ast::Variable* var);
+  bool EmitVariable(ast::Variable* var, bool skip_constructor);
   /// Handles generating a program scope constant variable
   /// @param var the variable to emit
   /// @returns true if the variable was emitted

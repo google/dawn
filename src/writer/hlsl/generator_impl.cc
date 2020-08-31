@@ -1470,6 +1470,19 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
 
     make_indent(out);
     out << "bool " << guard << " = true;" << std::endl;
+
+    // A continuing block may use variables declared in the method body. As a
+    // first pass, if we have a continuing, we pull all declarations outside
+    // the for loop into the continuing scope. Then, the variable declarations
+    // will be turned into assignments.
+    for (const auto& s : *(stmt->body())) {
+      if (!s->IsVariableDecl()) {
+        continue;
+      }
+      if (!EmitVariable(out, s->AsVariableDecl()->variable(), true)) {
+        return false;
+      }
+    }
   }
 
   make_indent(out);
@@ -1490,6 +1503,26 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
   }
 
   for (const auto& s : *(stmt->body())) {
+    // If we have a continuing block we've already emitted the variable
+    // declaration before the loop, so treat it as an assignment.
+    if (s->IsVariableDecl() && stmt->has_continuing()) {
+      make_indent(out);
+
+      auto* var = s->AsVariableDecl()->variable();
+      out << var->name() << " = ";
+      if (var->constructor() != nullptr) {
+        if (!EmitExpression(out, var->constructor())) {
+          return false;
+        }
+      } else {
+        if (!EmitZeroValue(out, var->type())) {
+          return false;
+        }
+      }
+      out << ";" << std::endl;
+      continue;
+    }
+
     if (!EmitStatement(out, s.get())) {
       return false;
     }
@@ -1831,7 +1864,7 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitSwitch(out, stmt->AsSwitch());
   }
   if (stmt->IsVariableDecl()) {
-    return EmitVariable(out, stmt->AsVariableDecl()->variable());
+    return EmitVariable(out, stmt->AsVariableDecl()->variable(), false);
   }
 
   error_ = "unknown statement type: " + stmt->str();
@@ -1982,7 +2015,9 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
+bool GeneratorImpl::EmitVariable(std::ostream& out,
+                                 ast::Variable* var,
+                                 bool skip_constructor) {
   make_indent(out);
 
   // TODO(dsinclair): Handle variable decorations
@@ -2001,7 +2036,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
     out << " " << var->name();
   }
 
-  if (var->constructor() != nullptr) {
+  if (!skip_constructor && var->constructor() != nullptr) {
     out << " = ";
     if (!EmitExpression(out, var->constructor())) {
       return false;
