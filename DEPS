@@ -14,15 +14,15 @@ vars = {
   'chromium_git':  'https://chromium.googlesource.com',
   'github': '/external/github.com',
 
-  'build_revision': 'aae8259e754b6cee311089563623a4f3a39145ba',
+  'build_revision': 'b1d8cdddd35b2ccf16a4945748b1661b19201785',
   'buildtools_revision': 'ff93f3ea1a7f033d3caf8f60ec1937cc71351419',
-  'clang_revision': '9784c4f72a4e4d43a1ebf97ae8f6265d4bdeaf3e',
+  'clang_revision': 'fcef86e30a0ab061b982b5c9d91bb060df8f5269',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
-  'googletest_revision': '1e315c5b1a62707fac9b8f1d4e03180ee7507f98',
+  'googletest_revision': 'df6b75949b1efab7606ba60c0f0a0125ac95c5af',
   'gpuweb_cts_revision': '40e337a38784ad72fa5c7b9afd1b9c358a9e0f1a',
   'spirv_headers_revision': '3fdabd0da2932c276b25b9b4a988ba134eba1aa6',
-  'spirv_tools_revision': '4dd122392f3ad757e70951a1198479bf233d4cd8',
-  'testing_revision': '3a36cd6d9221a1ff397b8b911ff2905f05c840a7',
+  'spirv_tools_revision': '8a0ebd40f86d1f18ad42ea96c6ac53915076c3c7',
+  'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
 }
 
 deps = {
