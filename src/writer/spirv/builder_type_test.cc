@@ -15,20 +15,26 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -688,6 +694,473 @@ INSTANTIATE_TEST_SUITE_P(
         PtrData{ast::StorageClass::kImage, SpvStorageClassImage},
         PtrData{ast::StorageClass::kPrivate, SpvStorageClassPrivate},
         PtrData{ast::StorageClass::kFunction, SpvStorageClassFunction}));
+
+using DepthTextureTypeTest = BuilderTest_Type;
+TEST_F(DepthTextureTypeTest, Generate_2d) {
+  ast::type::DepthTextureType two_d(ast::type::TextureDimension::k2d);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_two_d = b.GenerateTypeIfNeeded(&two_d);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_two_d);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeImage %2 2D 1 0 0 1 Unknown
+)");
+}
+
+TEST_F(DepthTextureTypeTest, Generate_2dArray) {
+  ast::type::DepthTextureType two_d_array(
+      ast::type::TextureDimension::k2dArray);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_two_d_array = b.GenerateTypeIfNeeded(&two_d_array);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_two_d_array);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeImage %2 2D 1 1 0 1 Unknown
+)");
+}
+
+TEST_F(DepthTextureTypeTest, Generate_Cube) {
+  ast::type::DepthTextureType cube(ast::type::TextureDimension::kCube);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_cube = b.GenerateTypeIfNeeded(&cube);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_cube);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeImage %2 Cube 1 0 0 1 Unknown
+)");
+}
+
+TEST_F(DepthTextureTypeTest, Generate_CubeArray) {
+  ast::type::DepthTextureType cube_array(
+      ast::type::TextureDimension::kCubeArray);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_cube_array = b.GenerateTypeIfNeeded(&cube_array);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_cube_array);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeImage %2 Cube 1 1 0 1 Unknown
+)");
+}
+
+enum class TextureType { kF32, kI32, kU32 };
+inline std::ostream& operator<<(std::ostream& out, TextureType data) {
+  if (data == TextureType::kF32) {
+    out << "f32";
+  } else if (data == TextureType::kI32) {
+    out << "i32";
+  } else {
+    out << "u32";
+  }
+  return out;
+}
+
+class SampledTextureTypeTest : public testing::TestWithParam<TextureType> {
+ public:
+  std::unique_ptr<ast::type::Type> get_type(TextureType param) {
+    if (param == TextureType::kF32) {
+      return std::make_unique<ast::type::F32Type>();
+    }
+    if (param == TextureType::kI32) {
+      return std::make_unique<ast::type::I32Type>();
+    }
+    return std::make_unique<ast::type::U32Type>();
+  }
+
+  std::string get_type_line(TextureType param) {
+    if (param == TextureType::kI32) {
+      return "%2 = OpTypeInt 32 1\n";
+    }
+    if (param == TextureType::kU32) {
+      return "%2 = OpTypeInt 32 0\n";
+    }
+    return "%2 = OpTypeFloat 32\n";
+  }
+};
+
+TEST_P(SampledTextureTypeTest, Generate_1d) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType one_d(ast::type::TextureDimension::k1d,
+                                      type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_one_d = b.GenerateTypeIfNeeded(&one_d);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_one_d);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 1D 0 0 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_1dArray) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType one_d_array(
+      ast::type::TextureDimension::k1dArray, type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_one_d_array = b.GenerateTypeIfNeeded(&one_d_array);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_one_d_array);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 1D 0 1 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_2d) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType two_d(ast::type::TextureDimension::k2d,
+                                      type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_two_d = b.GenerateTypeIfNeeded(&two_d);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_two_d);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 2D 0 0 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_2d_array) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType two_d_array(
+      ast::type::TextureDimension::k2dArray, type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_two_d_array = b.GenerateTypeIfNeeded(&two_d_array);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_two_d_array);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 2D 0 1 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_3d) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType three_d(ast::type::TextureDimension::k3d,
+                                        type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_three_d = b.GenerateTypeIfNeeded(&three_d);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_three_d);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 3D 0 0 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_Cube) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType cube(ast::type::TextureDimension::kCube,
+                                     type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_cube = b.GenerateTypeIfNeeded(&cube);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_cube);
+
+  EXPECT_EQ(
+      DumpInstructions(b.types()),
+      get_type_line(param) + "%1 = OpTypeImage %2 Cube 0 0 0 1 Unknown\n");
+}
+
+TEST_P(SampledTextureTypeTest, Generate_CubeArray) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::SampledTextureType cube_array(
+      ast::type::TextureDimension::kCubeArray, type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_cube_array = b.GenerateTypeIfNeeded(&cube_array);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_cube_array);
+
+  EXPECT_EQ(
+      DumpInstructions(b.types()),
+      get_type_line(param) + "%1 = OpTypeImage %2 Cube 0 1 0 1 Unknown\n");
+}
+
+INSTANTIATE_TEST_SUITE_P(BuilderTest_Type,
+                         SampledTextureTypeTest,
+                         testing::Values(TextureType::kU32,
+                                         TextureType::kI32,
+                                         TextureType::kF32));
+
+class StorageTextureTypeTest
+    : public testing::TestWithParam<ast::type::ImageFormat> {
+ public:
+  std::string format_literal(ast::type::ImageFormat format) {
+    if (format == ast::type::ImageFormat::kR16Float) {
+      return "R16f\n";
+    }
+    if (format == ast::type::ImageFormat::kR8Snorm) {
+      return "R8Snorm\n";
+    }
+    return "R8\n";
+  }
+
+  std::string type_line(ast::type::ImageFormat format) {
+    if (format == ast::type::ImageFormat::kR8Snorm) {
+      return "%2 = OpTypeInt 32 1\n";
+    }
+    if (format == ast::type::ImageFormat::kR8Unorm) {
+      return "%2 = OpTypeInt 32 0\n";
+    }
+    return "%2 = OpTypeFloat 32\n";
+  }
+};
+
+TEST_P(StorageTextureTypeTest, GenerateReadonly_1d) {
+  auto format = GetParam();
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  ast::type::Type* type =
+      ctx.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          ast::type::TextureDimension::k1d, ast::type::StorageAccess::kRead,
+          format));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  auto id = b.GenerateTypeIfNeeded(type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), type_line(format) +
+                                             "%1 = OpTypeImage %2 1D 0 0 0 2 " +
+                                             format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateReadonly_1d_array) {
+  auto format = GetParam();
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  ast::type::Type* type =
+      ctx.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          ast::type::TextureDimension::k1dArray,
+          ast::type::StorageAccess::kRead, format));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  auto id = b.GenerateTypeIfNeeded(type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), type_line(format) +
+                                             "%1 = OpTypeImage %2 1D 0 1 0 2 " +
+                                             format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateReadonly_2d) {
+  auto format = GetParam();
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  ast::type::Type* type =
+      ctx.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          ast::type::TextureDimension::k2d, ast::type::StorageAccess::kRead,
+          format));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  auto id = b.GenerateTypeIfNeeded(type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), type_line(format) +
+                                             "%1 = OpTypeImage %2 2D 0 0 0 2 " +
+                                             format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateReadonly_2dArray) {
+  auto format = GetParam();
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  ast::type::Type* type =
+      ctx.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          ast::type::TextureDimension::k2dArray,
+          ast::type::StorageAccess::kRead, format));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  auto id = b.GenerateTypeIfNeeded(type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), type_line(format) +
+                                             "%1 = OpTypeImage %2 2D 0 1 0 2 " +
+                                             format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateReadonly_3d) {
+  auto format = GetParam();
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  ast::type::Type* type =
+      ctx.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+          ast::type::TextureDimension::k3d, ast::type::StorageAccess::kRead,
+          format));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  auto id = b.GenerateTypeIfNeeded(type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), type_line(format) +
+                                             "%1 = OpTypeImage %2 3D 0 0 0 2 " +
+                                             format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateWriteonly_1d) {
+  auto format = GetParam();
+
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k1d,
+                                     ast::type::StorageAccess::kWrite, format);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id = b.GenerateTypeIfNeeded(&type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeImage %2 1D 0 0 0 2 )" + format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateWriteonly_1dArray) {
+  auto format = GetParam();
+
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k1dArray,
+                                     ast::type::StorageAccess::kWrite, format);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id = b.GenerateTypeIfNeeded(&type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeImage %2 1D 0 1 0 2 )" + format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateWriteonly_2d) {
+  auto format = GetParam();
+
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k2d,
+                                     ast::type::StorageAccess::kWrite, format);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id = b.GenerateTypeIfNeeded(&type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeImage %2 2D 0 0 0 2 )" + format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateWriteonly_2dArray) {
+  auto format = GetParam();
+
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k2dArray,
+                                     ast::type::StorageAccess::kWrite, format);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id = b.GenerateTypeIfNeeded(&type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeImage %2 2D 0 1 0 2 )" + format_literal(format));
+}
+
+TEST_P(StorageTextureTypeTest, GenerateWriteonly_3d) {
+  auto format = GetParam();
+
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k3d,
+                                     ast::type::StorageAccess::kWrite, format);
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id = b.GenerateTypeIfNeeded(&type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeImage %2 3D 0 0 0 2 )" + format_literal(format));
+}
+
+INSTANTIATE_TEST_SUITE_P(BuilderTest_Type,
+                         StorageTextureTypeTest,
+                         testing::Values(ast::type::ImageFormat::kR16Float,
+                                         ast::type::ImageFormat::kR8Snorm,
+                                         ast::type::ImageFormat::kR8Unorm));
 
 }  // namespace
 }  // namespace spirv

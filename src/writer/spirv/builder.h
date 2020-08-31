@@ -329,6 +329,12 @@ class Builder {
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
   uint32_t GenerateTypeIfNeeded(ast::type::Type* type);
+  /// Generates a texture type declaration
+  /// @param texture the texture to generate
+  /// @param result the result operand
+  /// @returns true if the texture was successfully generated
+  bool GenerateTextureType(ast::type::TextureType* texture,
+                           const Operand& result);
   /// Generates an array type declaration
   /// @param ary the array to generate
   /// @param result the result operand

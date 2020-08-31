@@ -50,11 +50,18 @@
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/depth_texture_type.h"
+#include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
@@ -1916,6 +1923,10 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     }
   } else if (type->IsVoid()) {
     push_type(spv::Op::OpTypeVoid, {result});
+  } else if (type->IsTexture()) {
+    if (!GenerateTextureType(type->AsTexture(), result)) {
+      return 0;
+    }
   } else {
     error_ = "unable to convert type: " + type->type_name();
     return 0;
@@ -1923,6 +1934,80 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
 
   type_name_to_id_[type->type_name()] = id;
   return id;
+}
+
+// TODO(tommek): Cover multisampled textures here when they're included in AST
+bool Builder::GenerateTextureType(ast::type::TextureType* texture,
+                                  const Operand& result) {
+  uint32_t array_literal = 0u;
+  auto dim = texture->dim();
+  if (dim == ast::type::TextureDimension::k1dArray ||
+      dim == ast::type::TextureDimension::k2dArray ||
+      dim == ast::type::TextureDimension::k2dMsArray ||
+      dim == ast::type::TextureDimension::kCubeArray) {
+    array_literal = 1u;
+  }
+
+  uint32_t dim_literal = SpvDim2D;
+  if (dim == ast::type::TextureDimension::k1dArray ||
+      dim == ast::type::TextureDimension::k1d) {
+    dim_literal = SpvDim1D;
+  }
+  if (dim == ast::type::TextureDimension::k3d) {
+    dim_literal = SpvDim3D;
+  }
+  if (dim == ast::type::TextureDimension::kCube ||
+      dim == ast::type::TextureDimension::kCubeArray) {
+    dim_literal = SpvDimCube;
+  }
+
+  uint32_t ms_literal = 0u;
+  if (dim == ast::type::TextureDimension::k2dMs ||
+      dim == ast::type::TextureDimension::k2dMsArray) {
+    ms_literal = 1u;
+  }
+
+  uint32_t depth_literal = 0u;
+  if (texture->IsDepth()) {
+    depth_literal = 1u;
+  }
+
+  uint32_t sampled_literal = 2u;
+  if (texture->IsSampled() || texture->IsDepth()) {
+    sampled_literal = 1u;
+  }
+
+  uint32_t type_id = 0u;
+  if (texture->IsDepth()) {
+    ast::type::F32Type f32;
+    type_id = GenerateTypeIfNeeded(&f32);
+  } else if (texture->IsSampled()) {
+    type_id = GenerateTypeIfNeeded(texture->AsSampled()->type());
+  } else if (texture->IsStorage()) {
+    if (texture->AsStorage()->access() == ast::type::StorageAccess::kWrite) {
+      ast::type::VoidType void_type;
+      type_id = GenerateTypeIfNeeded(&void_type);
+    } else {
+      type_id = GenerateTypeIfNeeded(texture->AsStorage()->type());
+    }
+  }
+  if (type_id == 0u) {
+    return false;
+  }
+
+  uint32_t format_literal = SpvImageFormat_::SpvImageFormatUnknown;
+  if (texture->IsStorage()) {
+    format_literal =
+        convert_image_format_to_spv(texture->AsStorage()->image_format());
+  }
+
+  push_type(spv::Op::OpTypeImage,
+            {result, Operand::Int(type_id), Operand::Int(dim_literal),
+             Operand::Int(depth_literal), Operand::Int(array_literal),
+             Operand::Int(ms_literal), Operand::Int(sampled_literal),
+             Operand::Int(format_literal)});
+
+  return true;
 }
 
 bool Builder::GenerateArrayType(ast::type::ArrayType* ary,
