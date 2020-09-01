@@ -55,7 +55,7 @@ namespace dawn_native {
             }
 
           private:
-            bool IsMappableAtCreation() const override {
+            bool IsCPUWritableAtCreation() const override {
                 UNREACHABLE();
                 return false;
             }
@@ -161,6 +161,23 @@ namespace dawn_native {
     }
 
     MaybeError BufferBase::MapAtCreation() {
+        DAWN_TRY(MapAtCreationInternal());
+
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse instead when
+        // buffer lazy initialization is completely supported.
+        DeviceBase* device = GetDevice();
+        if (device->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            memset(GetMappedRange(0, mSize), uint8_t(0u), mSize);
+            SetIsDataInitialized();
+            device->IncrementLazyClearCountForTesting();
+        } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+            memset(GetMappedRange(0, mSize), uint8_t(1u), mSize);
+        }
+
+        return {};
+    }
+
+    MaybeError BufferBase::MapAtCreationInternal() {
         ASSERT(!IsError());
         mState = BufferState::MappedAtCreation;
         mMapOffset = 0;
@@ -173,16 +190,15 @@ namespace dawn_native {
         }
 
         // Mappable buffers don't use a staging buffer and are just as if mapped through MapAsync.
-        if (IsMappableAtCreation()) {
+        if (IsCPUWritableAtCreation()) {
             DAWN_TRY(MapAtCreationImpl());
-            return {};
+        } else {
+            // If any of these fail, the buffer will be deleted and replaced with an
+            // error buffer.
+            // TODO(enga): Suballocate and reuse memory from a larger staging buffer so we don't
+            // create many small buffers.
+            DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateStagingBuffer(GetSize()));
         }
-
-        // If any of these fail, the buffer will be deleted and replaced with an
-        // error buffer.
-        // TODO(enga): Suballocate and reuse memory from a larger staging buffer so we don't create
-        // many small buffers.
-        DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateStagingBuffer(GetSize()));
 
         return {};
     }
@@ -298,7 +314,7 @@ namespace dawn_native {
             if (mStagingBuffer != nullptr) {
                 mStagingBuffer.reset();
             } else if (mSize != 0) {
-                ASSERT(IsMappableAtCreation());
+                ASSERT(IsCPUWritableAtCreation());
                 Unmap();
             }
         }
@@ -347,7 +363,7 @@ namespace dawn_native {
             if (mStagingBuffer != nullptr) {
                 GetDevice()->ConsumedError(CopyFromStagingBuffer());
             } else if (mSize != 0) {
-                ASSERT(IsMappableAtCreation());
+                ASSERT(IsCPUWritableAtCreation());
                 UnmapImpl();
             }
         }

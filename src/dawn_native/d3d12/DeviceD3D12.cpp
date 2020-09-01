@@ -276,7 +276,7 @@ namespace dawn_native { namespace d3d12 {
     }
     ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(this, descriptor));
-        DAWN_TRY(buffer->Initialize());
+        DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
         return std::move(buffer);
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandEncoder* encoder,

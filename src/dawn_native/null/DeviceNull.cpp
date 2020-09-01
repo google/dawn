@@ -287,7 +287,7 @@ namespace dawn_native { namespace null {
         ToBackend(GetDevice())->DecrementMemoryUsage(GetSize());
     }
 
-    bool Buffer::IsMappableAtCreation() const {
+    bool Buffer::IsCPUWritableAtCreation() const {
         // Only return true for mappable buffers so we can test cases that need / don't need a
         // staging buffer.
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;

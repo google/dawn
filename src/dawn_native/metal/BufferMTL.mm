@@ -33,11 +33,11 @@ namespace dawn_native { namespace metal {
     // static
     ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
-        DAWN_TRY(buffer->Initialize());
+        DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
         return std::move(buffer);
     }
 
-    MaybeError Buffer::Initialize() {
+    MaybeError Buffer::Initialize(bool mappedAtCreation) {
         MTLResourceOptions storageMode;
         if (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
@@ -90,7 +90,10 @@ namespace dawn_native { namespace metal {
             return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation failed");
         }
 
-        if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+        // The buffers with mappedAtCreation == true will be initialized in
+        // BufferBase::MapAtCreation().
+        if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
+            !mappedAtCreation) {
             CommandRecordingContext* commandContext =
                 ToBackend(GetDevice())->GetPendingCommandContext();
             ClearBuffer(commandContext, uint8_t(1u));
@@ -107,16 +110,12 @@ namespace dawn_native { namespace metal {
         return mMtlBuffer;
     }
 
-    bool Buffer::IsMappableAtCreation() const {
+    bool Buffer::IsCPUWritableAtCreation() const {
         // TODO(enga): Handle CPU-visible memory on UMA
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
-        CommandRecordingContext* commandContext =
-            ToBackend(GetDevice())->GetPendingCommandContext();
-        EnsureDataInitialized(commandContext);
-
         return {};
     }
 

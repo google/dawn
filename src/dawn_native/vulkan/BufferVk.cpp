@@ -119,11 +119,11 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
-        DAWN_TRY(buffer->Initialize());
+        DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
         return std::move(buffer);
     }
 
-    MaybeError Buffer::Initialize() {
+    MaybeError Buffer::Initialize(bool mappedAtCreation) {
         // Avoid passing ludicrously large sizes to drivers because it causes issues: drivers add
         // some constants to the size passed and align it, but for values close to the maximum
         // VkDeviceSize this can cause overflows and makes drivers crash or return bad sizes in the
@@ -166,7 +166,10 @@ namespace dawn_native { namespace vulkan {
                                         mMemoryAllocation.GetOffset()),
             "vkBindBufferMemory"));
 
-        if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+        // The buffers with mappedAtCreation == true will be initialized in
+        // BufferBase::MapAtCreation().
+        if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
+            !mappedAtCreation) {
             ClearBuffer(device->GetPendingRecordingContext(), 0x01010101);
         }
 
@@ -235,18 +238,12 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
-    bool Buffer::IsMappableAtCreation() const {
+    bool Buffer::IsCPUWritableAtCreation() const {
         // TODO(enga): Handle CPU-visible memory on UMA
         return mMemoryAllocation.GetMappedPointer() != nullptr;
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
-        CommandRecordingContext* recordingContext =
-            ToBackend(GetDevice())->GetPendingRecordingContext();
-
-        // TODO(jiawei.shao@intel.com): initialize mapped buffer in CPU side.
-        EnsureDataInitialized(recordingContext);
-
         return {};
     }
 

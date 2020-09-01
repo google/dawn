@@ -207,7 +207,7 @@ namespace dawn_native { namespace null {
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
-        bool IsMappableAtCreation() const override;
+        bool IsCPUWritableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
 

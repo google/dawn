@@ -53,14 +53,14 @@ namespace dawn_native { namespace vulkan {
       private:
         ~Buffer() override;
         using BufferBase::BufferBase;
-        MaybeError Initialize();
+        MaybeError Initialize(bool mappedAtCreation);
         void InitializeToZero(CommandRecordingContext* recordingContext);
         void ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue);
 
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
-        bool IsMappableAtCreation() const override;
+        bool IsCPUWritableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
 

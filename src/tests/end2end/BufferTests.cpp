@@ -683,12 +683,20 @@ TEST_P(BufferMappedAtCreationTests, GetMappedRangeZeroSized) {
     buffer.Unmap();
 }
 
+// TODO(jiawei.shao@intel.com): remove "lazy_clear_buffer_on_first_use" when we complete the
+// support of buffer lazy initialization.
 DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
+                      D3D12Backend({"lazy_clear_buffer_on_first_use"}),
+                      D3D12Backend({"lazy_clear_buffer_on_first_use"},
+                                   {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
+                      MetalBackend({"lazy_clear_buffer_on_first_use"}),
                       OpenGLBackend(),
-                      VulkanBackend());
+                      OpenGLBackend({"lazy_clear_buffer_on_first_use"}),
+                      VulkanBackend(),
+                      VulkanBackend({"lazy_clear_buffer_on_first_use"}));
 
 class BufferTests : public DawnTest {};
 

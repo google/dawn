@@ -30,7 +30,7 @@ namespace dawn_native { namespace d3d12 {
       public:
         Buffer(Device* device, const BufferDescriptor* descriptor);
 
-        MaybeError Initialize();
+        MaybeError Initialize(bool mappedAtCreation);
 
         ID3D12Resource* GetD3D12Resource() const;
         D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
@@ -56,7 +56,7 @@ namespace dawn_native { namespace d3d12 {
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
-        bool IsMappableAtCreation() const override;
+        bool IsCPUWritableAtCreation() const override;
         virtual MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
 

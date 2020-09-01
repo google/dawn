@@ -762,19 +762,91 @@ TEST_P(BufferZeroInitTest, MapAsync_Write) {
 
 // Test that the code path of creating a buffer with BufferDescriptor.mappedAtCreation == true
 // clears the buffer correctly at the creation of the buffer.
-TEST_P(BufferZeroInitTest, MapAtCreation) {
+TEST_P(BufferZeroInitTest, MappedAtCreation) {
     constexpr uint32_t kBufferSize = 16u;
-    constexpr wgpu::BufferUsage kBufferUsage =
-        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-
-    wgpu::Buffer buffer;
-    EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
-    buffer.Unmap();
 
     constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedData = {{0, 0, 0, 0}};
-    EXPECT_LAZY_CLEAR(
-        0u, EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()),
-                                       buffer, 0, kExpectedData.size()));
+
+    // Buffer with MapRead usage
+    {
+        constexpr wgpu::BufferUsage kBufferUsage = wgpu::BufferUsage::MapRead;
+
+        wgpu::Buffer buffer;
+        EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
+        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+        EXPECT_EQ(0, memcmp(mappedData, kExpectedData.data(), kBufferSize));
+        buffer.Unmap();
+
+        MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, kBufferSize);
+        mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+        EXPECT_EQ(0, memcmp(mappedData, kExpectedData.data(), kBufferSize));
+        buffer.Unmap();
+    }
+
+    // Buffer with MapRead usage and upload the buffer (from CPU and GPU)
+    {
+        constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedFinalData = {
+            {10, 20, 30, 40}};
+
+        constexpr wgpu::BufferUsage kBufferUsage =
+            wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+
+        wgpu::Buffer buffer;
+        EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
+
+        // Update data from the CPU side.
+        uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange());
+        mappedData[2] = kExpectedFinalData[2];
+        mappedData[3] = kExpectedFinalData[3];
+        buffer.Unmap();
+
+        // Update data from the GPU side.
+        wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
+            device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
+            {kExpectedFinalData[0], kExpectedFinalData[1]});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(uploadBuffer, 0, buffer, 0, 2 * sizeof(uint32_t));
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
+
+        // Check the content of the buffer on the CPU side
+        MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, kBufferSize);
+        const uint32_t* constMappedData =
+            static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        EXPECT_EQ(0, memcmp(kExpectedFinalData.data(), constMappedData, kBufferSize));
+    }
+
+    // Buffer with MapWrite usage
+    {
+        constexpr wgpu::BufferUsage kBufferUsage =
+            wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+
+        wgpu::Buffer buffer;
+        EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
+
+        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+        EXPECT_EQ(0, memcmp(mappedData, kExpectedData.data(), kBufferSize));
+        buffer.Unmap();
+
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), buffer, 0, kExpectedData.size()));
+    }
+
+    // Buffer with neither MapRead nor MapWrite usage
+    {
+        constexpr wgpu::BufferUsage kBufferUsage = wgpu::BufferUsage::CopySrc;
+
+        wgpu::Buffer buffer;
+        EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
+
+        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+        EXPECT_EQ(0, memcmp(mappedData, kExpectedData.data(), kBufferSize));
+        buffer.Unmap();
+
+        EXPECT_LAZY_CLEAR(
+            0u, EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), buffer, 0, kExpectedData.size()));
+    }
 }
 
 // Test that the code path of CopyBufferToTexture clears the source buffer correctly when it is the
