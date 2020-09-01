@@ -85,6 +85,7 @@ namespace dawn_native {
         }
 
         MaybeError ValidateVertexStateDescriptor(
+            DeviceBase* device,
             const VertexStateDescriptor* descriptor,
             wgpu::PrimitiveTopology primitiveTopology,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
@@ -94,12 +95,14 @@ namespace dawn_native {
             DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
 
             // Pipeline descriptors using strip topologies must not have an undefined index format.
-            if (descriptor->indexFormat == wgpu::IndexFormat::Undefined) {
-                if (primitiveTopology == wgpu::PrimitiveTopology::LineStrip ||
-                    primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip) {
+            if (IsStripPrimitiveTopology(primitiveTopology)) {
+                if (descriptor->indexFormat == wgpu::IndexFormat::Undefined) {
                     return DAWN_VALIDATION_ERROR(
                         "indexFormat must not be undefined when using strip primitive topologies");
                 }
+            } else if (descriptor->indexFormat != wgpu::IndexFormat::Undefined) {
+                device->EmitDeprecationWarning(
+                    "Specifying an indexFormat when using list primitive topologies is deprecated");
             }
 
             if (descriptor->vertexBufferCount > kMaxVertexBuffers) {
@@ -293,7 +296,12 @@ namespace dawn_native {
         return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
-    MaybeError ValidateRenderPipelineDescriptor(const DeviceBase* device,
+    bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
+        return primitiveTopology == wgpu::PrimitiveTopology::LineStrip ||
+               primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip;
+    }
+
+    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -312,7 +320,7 @@ namespace dawn_native {
 
         std::bitset<kMaxVertexAttributes> attributesSetMask;
         if (descriptor->vertexState) {
-            DAWN_TRY(ValidateVertexStateDescriptor(
+            DAWN_TRY(ValidateVertexStateDescriptor(device,
                 descriptor->vertexState, descriptor->primitiveTopology, &attributesSetMask));
         }
 
@@ -514,12 +522,6 @@ namespace dawn_native {
     wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
         ASSERT(!IsError());
         return mPrimitiveTopology;
-    }
-
-    bool RenderPipelineBase::IsStripPrimitiveTopology() const {
-        ASSERT(!IsError());
-        return mPrimitiveTopology == wgpu::PrimitiveTopology::LineStrip ||
-               mPrimitiveTopology == wgpu::PrimitiveTopology::TriangleStrip;
     }
 
     wgpu::CullMode RenderPipelineBase::GetCullMode() const {

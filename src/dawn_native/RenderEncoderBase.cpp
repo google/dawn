@@ -20,6 +20,7 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/RenderPipeline.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 #include <math.h>
 #include <cstring>
@@ -152,6 +153,7 @@ namespace dawn_native {
                                                  bool requireFormat) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
+            DAWN_TRY(ValidateIndexFormat(format));
 
             uint64_t bufferSize = buffer->GetSize();
             if (offset > bufferSize) {

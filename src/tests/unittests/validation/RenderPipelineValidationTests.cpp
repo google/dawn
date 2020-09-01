@@ -577,9 +577,16 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
             descriptor.primitiveTopology = primitiveTopology;
             descriptor.cVertexState.indexFormat = indexFormat;
 
-            // Succeeds even when the index format is undefined because the
-            // primitive topology isn't a strip type.
-            device.CreateRenderPipeline(&descriptor);
+            if (indexFormat == wgpu::IndexFormat::Undefined) {
+                // Succeeds even when the index format is undefined because the
+                // primitive topology isn't a strip type.
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                // TODO(crbug.com/dawn/502): Once setIndexBuffer requires an
+                // indexFormat. this should fail. For now it succeeds to allow
+                // backwards compatibility during the deprecation period.
+                device.CreateRenderPipeline(&descriptor);
+            }
         }
     }
 }

@@ -30,12 +30,13 @@ namespace dawn_native {
     class DeviceBase;
     class RenderBundleEncoder;
 
-    MaybeError ValidateRenderPipelineDescriptor(const DeviceBase* device,
+    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
     size_t IndexFormatSize(wgpu::IndexFormat format);
     uint32_t VertexFormatNumComponents(wgpu::VertexFormat format);
     size_t VertexFormatComponentSize(wgpu::VertexFormat format);
     size_t VertexFormatSize(wgpu::VertexFormat format);
+    bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
     bool BlendEnabled(const ColorStateDescriptor* mColorState);
@@ -68,7 +69,6 @@ namespace dawn_native {
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
         wgpu::PrimitiveTopology GetPrimitiveTopology() const;
-        bool IsStripPrimitiveTopology() const;
         wgpu::CullMode GetCullMode() const;
         wgpu::FrontFace GetFrontFace() const;
 

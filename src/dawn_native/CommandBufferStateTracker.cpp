@@ -131,7 +131,7 @@ namespace dawn_native {
                 wgpu::IndexFormat pipelineIndexFormat =
                     mLastRenderPipeline->GetVertexStateDescriptor()->indexFormat;
                 if (mIndexFormat != wgpu::IndexFormat::Undefined) {
-                    if (!mLastRenderPipeline->IsStripPrimitiveTopology() ||
+                    if (!IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) ||
                         mIndexFormat == pipelineIndexFormat) {
                         mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
                     }
@@ -155,7 +155,7 @@ namespace dawn_native {
             if (!mIndexBufferSet) {
                 return DAWN_VALIDATION_ERROR("Missing index buffer");
             } else if (mIndexFormat != wgpu::IndexFormat::Undefined &&
-                mLastRenderPipeline->IsStripPrimitiveTopology() &&
+                IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) &&
                 mIndexFormat != pipelineIndexFormat) {
                 return DAWN_VALIDATION_ERROR(
                     "Pipeline strip index format does not match index buffer format");
