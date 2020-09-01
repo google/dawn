@@ -71,6 +71,7 @@ config("tint_public_config") {
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
+    "${tint_spirv_headers_dir}/include",
   ]
 }
 
