@@ -28,6 +28,7 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
@@ -1161,6 +1162,30 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest_Type,
                          testing::Values(ast::type::ImageFormat::kR16Float,
                                          ast::type::ImageFormat::kR8Snorm,
                                          ast::type::ImageFormat::kR8Unorm));
+
+TEST_F(BuilderTest_Type, Sampler) {
+  ast::type::SamplerType sampler(ast::type::SamplerKind::kSampler);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
+}
+
+TEST_F(BuilderTest_Type, ComparisonSampler) {
+  ast::type::SamplerType sampler(ast::type::SamplerKind::kComparisonSampler);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
+}
 
 }  // namespace
 }  // namespace spirv

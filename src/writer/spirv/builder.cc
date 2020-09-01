@@ -1927,6 +1927,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateTextureType(type->AsTexture(), result)) {
       return 0;
     }
+  } else if (type->IsSampler()) {
+    push_type(spv::Op::OpTypeSampler, {result});
   } else {
     error_ = "unable to convert type: " + type->type_name();
     return 0;
