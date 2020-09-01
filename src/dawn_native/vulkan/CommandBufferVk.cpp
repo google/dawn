@@ -18,6 +18,7 @@
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/BufferVk.h"
@@ -59,7 +60,8 @@ namespace dawn_native { namespace vulkan {
 
         VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
                                            const TextureCopy& dstCopy,
-                                           const Extent3D& copySize) {
+                                           const Extent3D& copySize,
+                                           Aspect aspect) {
             const Texture* srcTexture = ToBackend(srcCopy.texture.Get());
             const Texture* dstTexture = ToBackend(dstCopy.texture.Get());
 
@@ -68,7 +70,7 @@ namespace dawn_native { namespace vulkan {
             // TODO(jiawei.shao@intel.com): support 1D and 3D textures
             ASSERT(srcTexture->GetDimension() == wgpu::TextureDimension::e2D &&
                    dstTexture->GetDimension() == wgpu::TextureDimension::e2D);
-            region.srcSubresource.aspectMask = VulkanAspectMask(srcCopy.aspect);
+            region.srcSubresource.aspectMask = VulkanAspectMask(aspect);
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
             region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
             region.srcSubresource.layerCount = copySize.depth;
@@ -77,7 +79,7 @@ namespace dawn_native { namespace vulkan {
             region.srcOffset.y = srcCopy.origin.y;
             region.srcOffset.z = 0;
 
-            region.dstSubresource.aspectMask = VulkanAspectMask(dstCopy.aspect);
+            region.dstSubresource.aspectMask = VulkanAspectMask(aspect);
             region.dstSubresource.mipLevel = dstCopy.mipLevel;
             region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
             region.dstSubresource.layerCount = copySize.depth;
@@ -616,13 +618,18 @@ namespace dawn_native { namespace vulkan {
                     if (!copyUsingTemporaryBuffer) {
                         VkImage srcImage = ToBackend(src.texture)->GetHandle();
                         VkImage dstImage = ToBackend(dst.texture)->GetHandle();
-                        VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
 
-                        // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
-                        // copy command.
-                        device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
-                                                dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                                                &region);
+                        for (Aspect aspect : IterateEnumMask(src.texture->GetFormat().aspects)) {
+                            ASSERT(dst.texture->GetFormat().aspects & aspect);
+                            VkImageCopy region =
+                                ComputeImageCopyRegion(src, dst, copy->copySize, aspect);
+
+                            // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after
+                            // the copy command.
+                            device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
+                                                    dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                    1, &region);
+                        }
                     } else {
                         RecordCopyImageWithTemporaryBuffer(recordingContext, src, dst,
                                                            copy->copySize);

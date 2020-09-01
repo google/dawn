@@ -364,7 +364,7 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-        DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination));
+        DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *writeSize));
 
         if (dataLayout->offset > dataSize) {
             return DAWN_VALIDATION_ERROR("Queue::WriteTexture out of range");

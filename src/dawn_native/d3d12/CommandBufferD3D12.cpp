@@ -72,28 +72,32 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        bool CanUseCopyResource(const Texture* src, const Texture* dst, const Extent3D& copySize) {
+        bool CanUseCopyResource(const TextureCopy& src,
+                                const TextureCopy& dst,
+                                const Extent3D& copySize) {
             // Checked by validation
-            ASSERT(src->GetSampleCount() == dst->GetSampleCount());
-            ASSERT(src->GetFormat().format == dst->GetFormat().format);
+            ASSERT(src.texture->GetSampleCount() == dst.texture->GetSampleCount());
+            ASSERT(src.texture->GetFormat().format == dst.texture->GetFormat().format);
+            ASSERT(src.aspect == dst.aspect);
 
-            const Extent3D& srcSize = src->GetSize();
-            const Extent3D& dstSize = dst->GetSize();
+            const Extent3D& srcSize = src.texture->GetSize();
+            const Extent3D& dstSize = dst.texture->GetSize();
 
             // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
             // In order to use D3D12's copy resource, the textures must be the same dimensions, and
             // the copy must be of the entire resource.
             // TODO(dawn:129): Support 1D textures.
-            return src->GetDimension() == dst->GetDimension() &&  //
-                   dst->GetNumMipLevels() == 1 &&                 //
-                   src->GetNumMipLevels() == 1 &&      // A copy command is of a single mip, so if a
-                                                       // resource has more than one, we definitely
-                                                       // cannot use CopyResource.
-                   copySize.width == dstSize.width &&  //
-                   copySize.width == srcSize.width &&  //
-                   copySize.height == dstSize.height &&  //
-                   copySize.height == srcSize.height &&  //
-                   copySize.depth == dstSize.depth &&    //
+            return src.aspect == src.texture->GetFormat().aspects &&
+                   src.texture->GetDimension() == dst.texture->GetDimension() &&  //
+                   dst.texture->GetNumMipLevels() == 1 &&                         //
+                   src.texture->GetNumMipLevels() == 1 &&  // A copy command is of a single mip, so
+                                                           // if a resource has more than one, we
+                                                           // definitely cannot use CopyResource.
+                   copySize.width == dstSize.width &&      //
+                   copySize.width == srcSize.width &&      //
+                   copySize.height == dstSize.height &&    //
+                   copySize.height == srcSize.height &&    //
+                   copySize.depth == dstSize.depth &&      //
                    copySize.depth == srcSize.depth;
         }
 
@@ -789,7 +793,7 @@ namespace dawn_native { namespace d3d12 {
                                                             wgpu::TextureUsage::CopyDst, dstRange);
 
                     ASSERT(srcRange.aspects == dstRange.aspects);
-                    if (CanUseCopyResource(source, destination, copy->copySize)) {
+                    if (CanUseCopyResource(copy->source, copy->destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
                     } else {

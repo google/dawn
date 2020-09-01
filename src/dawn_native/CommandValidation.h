@@ -57,7 +57,8 @@ namespace dawn_native {
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView);
     MaybeError ValidateTextureCopyView(DeviceBase const* device,
-                                       const TextureCopyView& textureCopyView);
+                                       const TextureCopyView& textureCopyView,
+                                       const Extent3D& copySize);
 
     MaybeError ValidateRowsPerImage(const Format& format,
                                     uint32_t rowsPerImage,

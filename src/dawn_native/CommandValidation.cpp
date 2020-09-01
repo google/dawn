@@ -482,18 +482,20 @@ namespace dawn_native {
     }
 
     MaybeError ValidateTextureCopyView(DeviceBase const* device,
-                                       const TextureCopyView& textureCopy) {
-        DAWN_TRY(device->ValidateObject(textureCopy.texture));
-        if (textureCopy.mipLevel >= textureCopy.texture->GetNumMipLevels()) {
+                                       const TextureCopyView& textureCopy,
+                                       const Extent3D& copySize) {
+        const TextureBase* texture = textureCopy.texture;
+        DAWN_TRY(device->ValidateObject(texture));
+        if (textureCopy.mipLevel >= texture->GetNumMipLevels()) {
             return DAWN_VALIDATION_ERROR("mipLevel out of range");
         }
 
-        if (textureCopy.origin.x % textureCopy.texture->GetFormat().blockWidth != 0) {
+        if (textureCopy.origin.x % texture->GetFormat().blockWidth != 0) {
             return DAWN_VALIDATION_ERROR(
                 "Offset.x must be a multiple of compressed texture format block width");
         }
 
-        if (textureCopy.origin.y % textureCopy.texture->GetFormat().blockHeight != 0) {
+        if (textureCopy.origin.y % texture->GetFormat().blockHeight != 0) {
             return DAWN_VALIDATION_ERROR(
                 "Offset.y must be a multiple of compressed texture format block height");
         }
@@ -502,13 +504,13 @@ namespace dawn_native {
             case wgpu::TextureAspect::All:
                 break;
             case wgpu::TextureAspect::DepthOnly:
-                if ((textureCopy.texture->GetFormat().aspects & Aspect::Depth) == 0) {
+                if ((texture->GetFormat().aspects & Aspect::Depth) == 0) {
                     return DAWN_VALIDATION_ERROR(
                         "Texture does not have depth aspect for texture copy");
                 }
                 break;
             case wgpu::TextureAspect::StencilOnly:
-                if ((textureCopy.texture->GetFormat().aspects & Aspect::Stencil) == 0) {
+                if ((texture->GetFormat().aspects & Aspect::Stencil) == 0) {
                     return DAWN_VALIDATION_ERROR(
                         "Texture does not have stencil aspect for texture copy");
                 }
@@ -516,6 +518,18 @@ namespace dawn_native {
             default:
                 UNREACHABLE();
                 break;
+        }
+
+        if (texture->GetSampleCount() > 1 || texture->GetFormat().HasDepthOrStencil()) {
+            Extent3D subresourceSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
+            ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+            if (textureCopy.origin.x != 0 || textureCopy.origin.y != 0 ||
+                subresourceSize.width != copySize.width ||
+                subresourceSize.height != copySize.height) {
+                return DAWN_VALIDATION_ERROR(
+                    "The entire subresource must be copied when using a depth/stencil texture, or "
+                    "when sample count is greater than 1.");
+            }
         }
 
         return {};

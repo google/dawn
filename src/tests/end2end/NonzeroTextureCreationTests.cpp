@@ -49,9 +49,6 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // Copies from depth textures not supported on the OpenGL backend right now.
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
-    // Closing the pending command list crashes flakily on D3D12 NVIDIA only.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia());
-
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kSize;
@@ -66,7 +63,8 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // format.
     // TODO(crbug.com/dawn/145): Test other formats via sampling.
     wgpu::Texture texture = device.CreateTexture(&descriptor);
-    EXPECT_PIXEL_FLOAT_EQ(1.f, texture, 0, 0);
+    std::vector<float> expected(kSize * kSize, 1.f);
+    EXPECT_TEXTURE_EQ(expected.data(), texture, 0, 0, kSize, kSize, 0, 0);
 }
 
 // Test that non-zero mip level clears 0xFF because toggle is enabled.

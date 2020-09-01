@@ -499,6 +499,11 @@ namespace {
             ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize - 1, 0, bytesPerRow, 0, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1},
                                                  wgpu::TextureAspect::StencilOnly));
+
+            // It is invalid to write just part of the subresource size
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+                                                 {0, 0, 0}, {3, 3, 1},
+                                                 wgpu::TextureAspect::StencilOnly));
         }
 
         // It is invalid to write into the stencil aspect of depth24plus (no stencil)
