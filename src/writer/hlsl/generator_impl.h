@@ -164,11 +164,6 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitContinue(std::ostream& out, ast::ContinueStatement* stmt);
-  /// Handles generating an else statement
-  /// @param out the output stream
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted
-  bool EmitElse(std::ostream& out, ast::ElseStatement* stmt);
   /// Handles generate an Expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream

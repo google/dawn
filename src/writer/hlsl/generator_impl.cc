@@ -949,38 +949,51 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
   if (!EmitExpression(pre, cond, stmt->condition())) {
     return false;
   }
-  out << pre.str();
-  out << "if (" << cond.str() << ") ";
-  if (!EmitBlock(out, stmt->body())) {
+
+  std::ostringstream if_out;
+  if_out << "if (" << cond.str() << ") ";
+  if (!EmitBlock(if_out, stmt->body())) {
     return false;
   }
 
-  // TODO(dsinclair): The else pre strings need to mix with the if pre
-  // strings correctly.
   for (const auto& e : stmt->else_statements()) {
-    if (!EmitElse(out, e.get())) {
+    if (e->HasCondition()) {
+      if_out << " else {" << std::endl;
+
+      increment_indent();
+
+      std::ostringstream else_pre;
+      std::ostringstream else_cond_out;
+      if (!EmitExpression(else_pre, else_cond_out, e->condition())) {
+        return false;
+      }
+      if_out << else_pre.str();
+
+      make_indent(if_out);
+      if_out << "if (" << else_cond_out.str() << ") ";
+    } else {
+      if_out << " else ";
+    }
+
+    if (!EmitBlock(if_out, e->body())) {
       return false;
     }
   }
-  out << std::endl;
+  if_out << std::endl;
 
+  for (const auto& e : stmt->else_statements()) {
+    if (!e->HasCondition()) {
+      continue;
+    }
+
+    decrement_indent();
+    make_indent(if_out);
+    if_out << "}" << std::endl;
+  }
+
+  out << pre.str();
+  out << if_out.str();
   return true;
-}
-
-bool GeneratorImpl::EmitElse(std::ostream& out, ast::ElseStatement* stmt) {
-  // TODO(dsinclair): This has to work with the if pre string ....
-  std::ostringstream pre;
-  if (stmt->HasCondition()) {
-    out << " else if (";
-    if (!EmitExpression(pre, out, stmt->condition())) {
-      return false;
-    }
-    out << ") ";
-  } else {
-    out << " else ";
-  }
-
-  return EmitBlock(out, stmt->body());
 }
 
 bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
