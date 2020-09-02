@@ -141,10 +141,8 @@ namespace dawn_native { namespace metal {
     }
 
     void Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -154,10 +152,8 @@ namespace dawn_native { namespace metal {
     void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                     uint64_t offset,
                                                     uint64_t size) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -170,10 +166,8 @@ namespace dawn_native { namespace metal {
 
     void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                     const CopyTextureToBufferCmd* copy) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -185,7 +179,7 @@ namespace dawn_native { namespace metal {
     }
 
     void Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
-        ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse));
+        ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse));
         ASSERT(!IsDataInitialized());
 
         ClearBuffer(commandContext, uint8_t(0u));
@@ -196,6 +190,12 @@ namespace dawn_native { namespace metal {
 
     void Buffer::ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue) {
         ASSERT(commandContext != nullptr);
+
+        // Metal validation layer doesn't allow the length of the range in fillBuffer() to be 0.
+        if (GetSize() == 0u) {
+            return;
+        }
+
         [commandContext->EnsureBlit() fillBuffer:mMtlBuffer
                                            range:NSMakeRange(0, GetSize())
                                            value:clearValue];

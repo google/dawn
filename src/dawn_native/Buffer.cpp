@@ -163,10 +163,8 @@ namespace dawn_native {
     MaybeError BufferBase::MapAtCreation() {
         DAWN_TRY(MapAtCreationInternal());
 
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse instead when
-        // buffer lazy initialization is completely supported.
         DeviceBase* device = GetDevice();
-        if (device->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+        if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             memset(GetMappedRange(0, mSize), uint8_t(0u), mSize);
             SetIsDataInitialized();
             device->IncrementLazyClearCountForTesting();

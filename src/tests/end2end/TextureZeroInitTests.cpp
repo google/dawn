@@ -1637,20 +1637,10 @@ TEST_P(TextureZeroInitTest, WriteTextureHalfAtMipLevel) {
                             kMipLevel, 0);
 }
 
-// TODO(jiawei.shao@intel.com): remove "lazy_clear_buffer_on_first_use" when we complete the
-// support of buffer lazy initialization.
 DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                    {"use_d3d12_render_pass"}),
-                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing",
-                                    "lazy_clear_buffer_on_first_use"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing",
-                                     "lazy_clear_buffer_on_first_use"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing",
-                                    "lazy_clear_buffer_on_first_use"}),
-                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing",
-                                     "lazy_clear_buffer_on_first_use"}));
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));

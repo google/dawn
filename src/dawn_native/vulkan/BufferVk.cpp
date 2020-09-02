@@ -284,10 +284,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::EnsureDataInitialized(CommandRecordingContext* recordingContext) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -297,10 +295,8 @@ namespace dawn_native { namespace vulkan {
     void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                     uint64_t offset,
                                                     uint64_t size) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -313,10 +309,8 @@ namespace dawn_native { namespace vulkan {
 
     void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                     const CopyTextureToBufferCmd* copy) {
-        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
-        // instead when buffer lazy initialization is completely supported.
         if (IsDataInitialized() ||
-            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
 
@@ -328,7 +322,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {
-        ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse));
+        ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse));
         ASSERT(!IsDataInitialized());
 
         ClearBuffer(recordingContext, 0u);
@@ -338,6 +332,11 @@ namespace dawn_native { namespace vulkan {
 
     void Buffer::ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue) {
         ASSERT(recordingContext != nullptr);
+
+        // Vulkan validation layer doesn't allow the `size` in vkCmdFillBuffer() to be 0.
+        if (GetSize() == 0u) {
+            return;
+        }
 
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 

@@ -133,12 +133,6 @@ namespace dawn_native {
                "https://crbug.com/dawn/402"}},
              {Toggle::DisableRobustness,
               {"disable_robustness", "Disable robust buffer access", "https://crbug.com/dawn/480"}},
-             {Toggle::LazyClearBufferOnFirstUse,
-              {"lazy_clear_buffer_on_first_use",
-               "Clear buffers on their first use. This is a temporary toggle only for the "
-               "development of buffer lazy initialization and will be removed after buffer lazy "
-               "initialization is completely implemented.",
-               "https://crbug.com/dawn/414"}},
              {Toggle::MetalEnableVertexPulling,
               {"metal_enable_vertex_pulling",
                "Uses vertex pulling to protect out-of-bounds reads on Metal",

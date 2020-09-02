@@ -129,7 +129,11 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
 }
 
 DAWN_INSTANTIATE_TEST(NonzeroBufferCreationTests,
-                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"lazy_clear_resource_on_first_use"}),
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"lazy_clear_resource_on_first_use"}),
+                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                                    {"lazy_clear_resource_on_first_use"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                                    {"lazy_clear_resource_on_first_use"}));

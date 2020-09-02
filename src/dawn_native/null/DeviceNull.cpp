@@ -197,7 +197,7 @@ namespace dawn_native { namespace null {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+        if (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             destination->SetIsDataInitialized();
         }
 
