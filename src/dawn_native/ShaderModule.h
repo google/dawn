@@ -38,18 +38,25 @@ namespace spirv_cross {
 
 namespace dawn_native {
 
+    struct EntryPointMetadata;
+
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor);
+    MaybeError ValidateCompatibilityWithPipelineLayout(const EntryPointMetadata& entryPoint,
+                                                       const PipelineLayoutBase* layout);
 
-    class ShaderModuleBase : public CachedObject {
-      public:
-        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
-        ~ShaderModuleBase() override;
+    RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
+                                                            const PipelineLayoutBase* layout);
 
-        static ShaderModuleBase* MakeError(DeviceBase* device);
+    // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
+    // stored in the ShaderModuleBase and destroyed only when the shader module is destroyed so
+    // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
+    // ShaderModuleBase.
+    struct EntryPointMetadata {
+        EntryPointMetadata();
 
-        MaybeError ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
-
+        // Per-binding shader metadata contains some SPIRV specific information in addition to
+        // most of the frontend per-binding information.
         struct ShaderBindingInfo : BindingInfo {
             // The SPIRV ID of the resource.
             uint32_t id;
@@ -61,22 +68,42 @@ namespace dawn_native {
             using BindingInfo::visibility;
         };
 
-        using BindingInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
-        using ModuleBindingInfo = ityp::array<BindGroupIndex, BindingInfoMap, kMaxBindGroups>;
+        // bindings[G][B] is the reflection data for the binding defined with
+        // [[group=G, binding=B]] in WGSL / SPIRV.
+        using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
+        using BindingInfo = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+        BindingInfo bindings;
 
-        const ModuleBindingInfo& GetBindingInfo() const;
-        const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
-        SingleShaderStage GetExecutionModel() const;
+        // The set of vertex attributes this entryPoint uses.
+        std::bitset<kMaxVertexAttributes> usedVertexAttributes;
 
         // An array to record the basic types (float, int and uint) of the fragment shader outputs
         // or Format::Type::Other means the fragment shader output is unused.
         using FragmentOutputBaseTypes = std::array<Format::Type, kMaxColorAttachments>;
-        const FragmentOutputBaseTypes& GetFragmentOutputBaseTypes() const;
+        FragmentOutputBaseTypes fragmentOutputFormatBaseTypes;
 
-        MaybeError ValidateCompatibilityWithPipelineLayout(const PipelineLayoutBase* layout) const;
+        // The shader stage for this binding, TODO(dawn:216): can likely be removed once we
+        // properly support multiple entrypoints per ShaderModule.
+        SingleShaderStage stage;
+    };
 
-        RequiredBufferSizes ComputeRequiredBufferSizesForLayout(
-            const PipelineLayoutBase* layout) const;
+    class ShaderModuleBase : public CachedObject {
+      public:
+        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
+        ~ShaderModuleBase() override;
+
+        static ShaderModuleBase* MakeError(DeviceBase* device);
+
+        // Return true iff the module has an entrypoint called `entryPoint` for stage `stage`.
+        bool HasEntryPoint(const std::string& entryPoint, SingleShaderStage stage) const;
+
+        // Returns the metadata for the given `entryPoint` and `stage`. HasEntryPoint with the same
+        // arguments must be true.
+        const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint,
+                                                SingleShaderStage stage) const;
+
+        // TODO make this member protected, it is only used outside of child classes in DeviceNull.
+        MaybeError ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
@@ -96,21 +123,17 @@ namespace dawn_native {
             uint32_t pullingBufferBindingSet) const;
 #endif
 
-        struct EntryPointMetadata {
-            EntryPointMetadata();
-
-            ModuleBindingInfo bindings;
-            std::bitset<kMaxVertexAttributes> usedVertexAttributes;
-            SingleShaderStage stage;
-            FragmentOutputBaseTypes fragmentOutputFormatBaseTypes;
-        };
-
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
         shaderc_spvc::CompileOptions GetCompileOptions() const;
         MaybeError InitializeBase();
 
         shaderc_spvc::Context mSpvcContext;
+
+        // Allows backends to get the stage for the "main" entrypoint while they are transitioned to
+        // support multiple entrypoints.
+        // TODO(dawn:216): Remove this once the transition is complete.
+        SingleShaderStage GetMainEntryPointStageForTransition() const;
 
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);

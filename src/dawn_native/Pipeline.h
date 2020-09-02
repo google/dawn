@@ -36,6 +36,9 @@ namespace dawn_native {
     struct ProgrammableStage {
         Ref<ShaderModuleBase> module;
         std::string entryPoint;
+
+        // The metadata lives as long as module, that's ref-ed in the same structure.
+        const EntryPointMetadata* metadata = nullptr;
     };
 
     class PipelineBase : public CachedObject {
@@ -52,8 +55,6 @@ namespace dawn_native {
         static bool EqualForCache(const PipelineBase* a, const PipelineBase* b);
 
       protected:
-        using StageAndDescriptor = std::pair<SingleShaderStage, const ProgrammableStageDescriptor*>;
-
         PipelineBase(DeviceBase* device,
                      PipelineLayoutBase* layout,
                      std::vector<StageAndDescriptor> stages);

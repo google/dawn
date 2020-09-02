@@ -368,8 +368,8 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
-            descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
+        const EntryPointMetadata::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
+            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputFormatBaseTypes;
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[i].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));

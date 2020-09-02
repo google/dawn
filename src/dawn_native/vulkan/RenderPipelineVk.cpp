@@ -425,8 +425,8 @@ namespace dawn_native { namespace vulkan {
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the ColorState
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
-        const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
-            descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
+        const EntryPointMetadata::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
+            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputFormatBaseTypes;
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorStateDescriptor* colorStateDescriptor = GetColorStateDescriptor(i);
             bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Type::Other;

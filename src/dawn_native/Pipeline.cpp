@@ -26,16 +26,17 @@ namespace dawn_native {
                                                    const ProgrammableStageDescriptor* descriptor,
                                                    const PipelineLayoutBase* layout,
                                                    SingleShaderStage stage) {
-        DAWN_TRY(device->ValidateObject(descriptor->module));
+        const ShaderModuleBase* module = descriptor->module;
+        DAWN_TRY(device->ValidateObject(module));
 
-        if (descriptor->entryPoint != std::string("main")) {
-            return DAWN_VALIDATION_ERROR("Entry point must be \"main\"");
+        if (!module->HasEntryPoint(descriptor->entryPoint, stage)) {
+            return DAWN_VALIDATION_ERROR("Entry point doesn't exist in the module");
         }
-        if (descriptor->module->GetExecutionModel() != stage) {
-            return DAWN_VALIDATION_ERROR("Setting module with wrong stages");
-        }
+
         if (layout != nullptr) {
-            DAWN_TRY(descriptor->module->ValidateCompatibilityWithPipelineLayout(layout));
+            const EntryPointMetadata& metadata =
+                module->GetEntryPoint(descriptor->entryPoint, stage);
+            DAWN_TRY(ValidateCompatibilityWithPipelineLayout(metadata, layout));
         }
         return {};
     }
@@ -49,13 +50,20 @@ namespace dawn_native {
         ASSERT(!stages.empty());
 
         for (const StageAndDescriptor& stage : stages) {
+            // Extract argument for this stage.
+            SingleShaderStage shaderStage = stage.first;
+            ShaderModuleBase* module = stage.second->module;
+            const char* entryPointName = stage.second->entryPoint;
+            const EntryPointMetadata& metadata = module->GetEntryPoint(entryPointName, shaderStage);
+
+            // Record them internally.
             bool isFirstStage = mStageMask == wgpu::ShaderStage::None;
-            mStageMask |= StageBit(stage.first);
-            mStages[stage.first] = {stage.second->module, stage.second->entryPoint};
+            mStageMask |= StageBit(shaderStage);
+            mStages[shaderStage] = {module, entryPointName, &metadata};
 
             // Compute the max() of all minBufferSizes across all stages.
             RequiredBufferSizes stageMinBufferSizes =
-                stage.second->module->ComputeRequiredBufferSizesForLayout(layout);
+                ComputeRequiredBufferSizesForLayout(metadata, layout);
 
             if (isFirstStage) {
                 mMinBufferSizes = std::move(stageMinBufferSizes);

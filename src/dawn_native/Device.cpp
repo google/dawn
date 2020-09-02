@@ -877,9 +877,9 @@ namespace dawn_native {
         if (descriptor->layout == nullptr) {
             ComputePipelineDescriptor descriptorWithDefaultLayout = *descriptor;
 
-            DAWN_TRY_ASSIGN(
-                descriptorWithDefaultLayout.layout,
-                PipelineLayoutBase::CreateDefault(this, &descriptor->computeStage.module, 1));
+            DAWN_TRY_ASSIGN(descriptorWithDefaultLayout.layout,
+                            PipelineLayoutBase::CreateDefault(
+                                this, {{SingleShaderStage::Compute, &descriptor->computeStage}}));
             // Ref will keep the pipeline layout alive until the end of the function where
             // the pipeline will take another reference.
             Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);
@@ -934,18 +934,14 @@ namespace dawn_native {
         if (descriptor->layout == nullptr) {
             RenderPipelineDescriptor descriptorWithDefaultLayout = *descriptor;
 
-            const ShaderModuleBase* modules[2];
-            modules[0] = descriptor->vertexStage.module;
-            uint32_t count;
-            if (descriptor->fragmentStage == nullptr) {
-                count = 1;
-            } else {
-                modules[1] = descriptor->fragmentStage->module;
-                count = 2;
+            std::vector<StageAndDescriptor> stages;
+            stages.emplace_back(SingleShaderStage::Vertex, &descriptor->vertexStage);
+            if (descriptor->fragmentStage != nullptr) {
+                stages.emplace_back(SingleShaderStage::Fragment, descriptor->fragmentStage);
             }
 
             DAWN_TRY_ASSIGN(descriptorWithDefaultLayout.layout,
-                            PipelineLayoutBase::CreateDefault(this, modules, count));
+                            PipelineLayoutBase::CreateDefault(this, std::move(stages)));
             // Ref will keep the pipeline layout alive until the end of the function where
             // the pipeline will take another reference.
             Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);

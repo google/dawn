@@ -125,8 +125,6 @@ namespace dawn_native { namespace opengl {
 
         DAWN_TRY(ExtractSpirvInfo(*compiler));
 
-        const ShaderModuleBase::ModuleBindingInfo& bindingInfo = GetBindingInfo();
-
         // Extract bindings names so that it can be used to get its location in program.
         // Now translate the separate sampler / textures into combined ones and store their info.
         // We need to do this before removing the set and binding decorations.
@@ -181,6 +179,9 @@ namespace dawn_native { namespace opengl {
                 compiler->set_name(combined.combined_id, info.GetName());
             }
         }
+
+        const EntryPointMetadata::BindingInfo& bindingInfo =
+            GetEntryPoint("main", GetMainEntryPointStageForTransition()).bindings;
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which

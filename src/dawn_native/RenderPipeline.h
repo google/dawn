@@ -28,6 +28,7 @@ namespace dawn_native {
     struct BeginRenderPassCmd;
 
     class DeviceBase;
+    struct EntryPointMetadata;
     class RenderBundleEncoder;
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,

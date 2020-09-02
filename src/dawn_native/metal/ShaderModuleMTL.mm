@@ -259,11 +259,15 @@ namespace dawn_native { namespace metal {
             // TODO(kainino@chromium.org): make this somehow more robust; it needs to behave like
             // clean_func_name:
             // https://github.com/KhronosGroup/SPIRV-Cross/blob/4e915e8c483e319d0dd7a1fa22318bef28f8cca3/spirv_msl.cpp#L1213
-            if (strcmp(functionName, "main") == 0) {
-                functionName = "main0";
+            const char* metalFunctionName = functionName;
+            if (strcmp(metalFunctionName, "main") == 0) {
+                metalFunctionName = "main0";
+            }
+            if (strcmp(metalFunctionName, "saturate") == 0) {
+                metalFunctionName = "saturate0";
             }
 
-            NSString* name = [[NSString alloc] initWithUTF8String:functionName];
+            NSString* name = [[NSString alloc] initWithUTF8String:metalFunctionName];
             out->function = [library newFunctionWithName:name];
             [library release];
         }
@@ -277,7 +281,7 @@ namespace dawn_native { namespace metal {
         }
 
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            functionStage == SingleShaderStage::Vertex && GetUsedVertexAttributes().any()) {
+            GetEntryPoint(functionName, functionStage).usedVertexAttributes.any()) {
             out->needsStorageBufferLength = true;
         }
 

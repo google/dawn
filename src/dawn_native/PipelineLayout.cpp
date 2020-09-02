@@ -114,9 +114,8 @@ namespace dawn_native {
     // static
     ResultOrError<PipelineLayoutBase*> PipelineLayoutBase::CreateDefault(
         DeviceBase* device,
-        const ShaderModuleBase* const* modules,
-        uint32_t count) {
-        ASSERT(count > 0);
+        std::vector<StageAndDescriptor> stages) {
+        ASSERT(!stages.empty());
 
         // Data which BindGroupLayoutDescriptor will point to for creation
         ityp::array<
@@ -134,20 +133,22 @@ namespace dawn_native {
 
         BindingCounts bindingCounts = {};
         BindGroupIndex bindGroupLayoutCount(0);
-        for (uint32_t moduleIndex = 0; moduleIndex < count; ++moduleIndex) {
-            const ShaderModuleBase* module = modules[moduleIndex];
-            const ShaderModuleBase::ModuleBindingInfo& info = module->GetBindingInfo();
+        for (const StageAndDescriptor& stage : stages) {
+            // Extract argument for this stage.
+            SingleShaderStage shaderStage = stage.first;
+            const EntryPointMetadata::BindingInfo& info =
+                stage.second->module->GetEntryPoint(stage.second->entryPoint, shaderStage).bindings;
 
             for (BindGroupIndex group(0); group < info.size(); ++group) {
                 for (const auto& it : info[group]) {
                     BindingNumber bindingNumber = it.first;
-                    const ShaderModuleBase::ShaderBindingInfo& bindingInfo = it.second;
+                    const EntryPointMetadata::ShaderBindingInfo& bindingInfo = it.second;
 
                     BindGroupLayoutEntry bindingSlot;
                     bindingSlot.binding = static_cast<uint32_t>(bindingNumber);
 
-                    DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
-                        bindingInfo.type, StageBit(module->GetExecutionModel())));
+                    DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(bindingInfo.type,
+                                                                          StageBit(shaderStage)));
                     DAWN_TRY(ValidateStorageTextureFormat(device, bindingInfo.type,
                                                           bindingInfo.storageTextureFormat));
                     DAWN_TRY(ValidateStorageTextureViewDimension(bindingInfo.type,
@@ -239,10 +240,10 @@ namespace dawn_native {
             }
         }
 
-        for (uint32_t moduleIndex = 0; moduleIndex < count; ++moduleIndex) {
-            ASSERT(modules[moduleIndex]
-                       ->ValidateCompatibilityWithPipelineLayout(pipelineLayout)
-                       .IsSuccess());
+        for (const StageAndDescriptor& stage : stages) {
+            const EntryPointMetadata& metadata =
+                stage.second->module->GetEntryPoint(stage.second->entryPoint, stage.first);
+            ASSERT(ValidateCompatibilityWithPipelineLayout(metadata, pipelineLayout).IsSuccess());
         }
 
         return pipelineLayout;
