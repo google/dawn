@@ -51,6 +51,8 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
+        // TODO(cwallez@chromium.org): We shouldn't need any access usages for srcAccessMask when
+        // the previous usage is readonly because an execution dependency is sufficient.
         VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) {
             VkAccessFlags flags = 0;
 
@@ -151,6 +153,9 @@ namespace dawn_native { namespace vulkan {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
             if (usage & (wgpu::TextureUsage::Sampled | kReadonlyStorageTexture)) {
+                // TODO(cwallez@chromium.org): Only transition to the usage we care about to avoid
+                // introducing FS -> VS dependencies that would prevent parallelization on tiler
+                // GPUs
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
