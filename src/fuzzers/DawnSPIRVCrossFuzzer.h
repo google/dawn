@@ -16,13 +16,9 @@
 #include <functional>
 #include <vector>
 
-#include "spvc/spvc.hpp"
-
 namespace DawnSPIRVCrossFuzzer {
 
     using Task = std::function<int(const std::vector<uint32_t>&)>;
-    using TaskWithOptions =
-        std::function<int(const std::vector<uint32_t>&, shaderc_spvc::CompileOptions)>;
 
     // Used to wrap code that may fire a SIGABRT. Do not allocate anything local within |exec|, as
     // it is not guaranteed to return.

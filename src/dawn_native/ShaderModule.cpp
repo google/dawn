@@ -74,79 +74,6 @@ namespace dawn_native {
             }
         }
 
-        wgpu::TextureViewDimension ToWGPUTextureViewDimension(
-            shaderc_spvc_texture_view_dimension dim) {
-            switch (dim) {
-                case shaderc_spvc_texture_view_dimension_undefined:
-                    return wgpu::TextureViewDimension::Undefined;
-                case shaderc_spvc_texture_view_dimension_e1D:
-                    return wgpu::TextureViewDimension::e1D;
-                case shaderc_spvc_texture_view_dimension_e2D:
-                    return wgpu::TextureViewDimension::e2D;
-                case shaderc_spvc_texture_view_dimension_e2D_array:
-                    return wgpu::TextureViewDimension::e2DArray;
-                case shaderc_spvc_texture_view_dimension_cube:
-                    return wgpu::TextureViewDimension::Cube;
-                case shaderc_spvc_texture_view_dimension_cube_array:
-                    return wgpu::TextureViewDimension::CubeArray;
-                case shaderc_spvc_texture_view_dimension_e3D:
-                    return wgpu::TextureViewDimension::e3D;
-            }
-            UNREACHABLE();
-        }
-
-        Format::Type ToDawnFormatType(shaderc_spvc_texture_format_type type) {
-            switch (type) {
-                case shaderc_spvc_texture_format_type_float:
-                    return Format::Type::Float;
-                case shaderc_spvc_texture_format_type_sint:
-                    return Format::Type::Sint;
-                case shaderc_spvc_texture_format_type_uint:
-                    return Format::Type::Uint;
-                case shaderc_spvc_texture_format_type_other:
-                    return Format::Type::Other;
-            }
-            UNREACHABLE();
-        }
-
-        wgpu::BindingType ToWGPUBindingType(shaderc_spvc_binding_type type) {
-            switch (type) {
-                case shaderc_spvc_binding_type_uniform_buffer:
-                    return wgpu::BindingType::UniformBuffer;
-                case shaderc_spvc_binding_type_storage_buffer:
-                    return wgpu::BindingType::StorageBuffer;
-                case shaderc_spvc_binding_type_readonly_storage_buffer:
-                    return wgpu::BindingType::ReadonlyStorageBuffer;
-                case shaderc_spvc_binding_type_sampler:
-                    return wgpu::BindingType::Sampler;
-                case shaderc_spvc_binding_type_comparison_sampler:
-                    return wgpu::BindingType::ComparisonSampler;
-                case shaderc_spvc_binding_type_sampled_texture:
-                    return wgpu::BindingType::SampledTexture;
-                case shaderc_spvc_binding_type_readonly_storage_texture:
-                    return wgpu::BindingType::ReadonlyStorageTexture;
-                case shaderc_spvc_binding_type_writeonly_storage_texture:
-                    return wgpu::BindingType::WriteonlyStorageTexture;
-                case shaderc_spvc_binding_type_storage_texture:
-                    return wgpu::BindingType::StorageTexture;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
-        SingleShaderStage ToSingleShaderStage(shaderc_spvc_execution_model execution_model) {
-            switch (execution_model) {
-                case shaderc_spvc_execution_model_vertex:
-                    return SingleShaderStage::Vertex;
-                case shaderc_spvc_execution_model_fragment:
-                    return SingleShaderStage::Fragment;
-                case shaderc_spvc_execution_model_glcompute:
-                    return SingleShaderStage::Compute;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         wgpu::TextureFormat ToWGPUTextureFormat(spv::ImageFormat format) {
             switch (format) {
                 case spv::ImageFormatR8:
@@ -212,77 +139,6 @@ namespace dawn_native {
                 case spv::ImageFormatRgba32ui:
                     return wgpu::TextureFormat::RGBA32Uint;
                 case spv::ImageFormatRgba32i:
-                    return wgpu::TextureFormat::RGBA32Sint;
-                default:
-                    return wgpu::TextureFormat::Undefined;
-            }
-        }
-
-        wgpu::TextureFormat ToWGPUTextureFormat(shaderc_spvc_storage_texture_format format) {
-            switch (format) {
-                case shaderc_spvc_storage_texture_format_r8unorm:
-                    return wgpu::TextureFormat::R8Unorm;
-                case shaderc_spvc_storage_texture_format_r8snorm:
-                    return wgpu::TextureFormat::R8Snorm;
-                case shaderc_spvc_storage_texture_format_r8uint:
-                    return wgpu::TextureFormat::R8Uint;
-                case shaderc_spvc_storage_texture_format_r8sint:
-                    return wgpu::TextureFormat::R8Sint;
-                case shaderc_spvc_storage_texture_format_r16uint:
-                    return wgpu::TextureFormat::R16Uint;
-                case shaderc_spvc_storage_texture_format_r16sint:
-                    return wgpu::TextureFormat::R16Sint;
-                case shaderc_spvc_storage_texture_format_r16float:
-                    return wgpu::TextureFormat::R16Float;
-                case shaderc_spvc_storage_texture_format_rg8unorm:
-                    return wgpu::TextureFormat::RG8Unorm;
-                case shaderc_spvc_storage_texture_format_rg8snorm:
-                    return wgpu::TextureFormat::RG8Snorm;
-                case shaderc_spvc_storage_texture_format_rg8uint:
-                    return wgpu::TextureFormat::RG8Uint;
-                case shaderc_spvc_storage_texture_format_rg8sint:
-                    return wgpu::TextureFormat::RG8Sint;
-                case shaderc_spvc_storage_texture_format_r32float:
-                    return wgpu::TextureFormat::R32Float;
-                case shaderc_spvc_storage_texture_format_r32uint:
-                    return wgpu::TextureFormat::R32Uint;
-                case shaderc_spvc_storage_texture_format_r32sint:
-                    return wgpu::TextureFormat::R32Sint;
-                case shaderc_spvc_storage_texture_format_rg16uint:
-                    return wgpu::TextureFormat::RG16Uint;
-                case shaderc_spvc_storage_texture_format_rg16sint:
-                    return wgpu::TextureFormat::RG16Sint;
-                case shaderc_spvc_storage_texture_format_rg16float:
-                    return wgpu::TextureFormat::RG16Float;
-                case shaderc_spvc_storage_texture_format_rgba8unorm:
-                    return wgpu::TextureFormat::RGBA8Unorm;
-                case shaderc_spvc_storage_texture_format_rgba8snorm:
-                    return wgpu::TextureFormat::RGBA8Snorm;
-                case shaderc_spvc_storage_texture_format_rgba8uint:
-                    return wgpu::TextureFormat::RGBA8Uint;
-                case shaderc_spvc_storage_texture_format_rgba8sint:
-                    return wgpu::TextureFormat::RGBA8Sint;
-                case shaderc_spvc_storage_texture_format_rgb10a2unorm:
-                    return wgpu::TextureFormat::RGB10A2Unorm;
-                case shaderc_spvc_storage_texture_format_rg11b10float:
-                    return wgpu::TextureFormat::RG11B10Ufloat;
-                case shaderc_spvc_storage_texture_format_rg32float:
-                    return wgpu::TextureFormat::RG32Float;
-                case shaderc_spvc_storage_texture_format_rg32uint:
-                    return wgpu::TextureFormat::RG32Uint;
-                case shaderc_spvc_storage_texture_format_rg32sint:
-                    return wgpu::TextureFormat::RG32Sint;
-                case shaderc_spvc_storage_texture_format_rgba16uint:
-                    return wgpu::TextureFormat::RGBA16Uint;
-                case shaderc_spvc_storage_texture_format_rgba16sint:
-                    return wgpu::TextureFormat::RGBA16Sint;
-                case shaderc_spvc_storage_texture_format_rgba16float:
-                    return wgpu::TextureFormat::RGBA16Float;
-                case shaderc_spvc_storage_texture_format_rgba32float:
-                    return wgpu::TextureFormat::RGBA32Float;
-                case shaderc_spvc_storage_texture_format_rgba32uint:
-                    return wgpu::TextureFormat::RGBA32Uint;
-                case shaderc_spvc_storage_texture_format_rgba32sint:
                     return wgpu::TextureFormat::RGBA32Sint;
                 default:
                     return wgpu::TextureFormat::Undefined;
@@ -790,10 +646,6 @@ namespace dawn_native {
             default:
                 UNREACHABLE();
         }
-
-        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
-            mSpvcContext.SetUseSpvcParser(true);
-        }
     }
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -827,186 +679,12 @@ namespace dawn_native {
 
     MaybeError ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
         ASSERT(!IsError());
-        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            DAWN_TRY_ASSIGN(mMainEntryPoint, ExtractSpirvInfoWithSpvc());
-        } else {
-            DAWN_TRY_ASSIGN(mMainEntryPoint, ExtractSpirvInfoWithSpirvCross(compiler));
-        }
+        DAWN_TRY_ASSIGN(mMainEntryPoint, ExtractSpirvInfoImpl(compiler));
         return {};
     }
 
-    ResultOrError<std::unique_ptr<EntryPointMetadata>>
-    ShaderModuleBase::ExtractSpirvInfoWithSpvc() {
-        DeviceBase* device = GetDevice();
-        std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
-
-        shaderc_spvc_execution_model execution_model;
-        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetExecutionModel(&execution_model),
-                                  "Unable to get execution model for shader."));
-        metadata->stage = ToSingleShaderStage(execution_model);
-
-        size_t push_constant_buffers_count;
-        DAWN_TRY(
-            CheckSpvcSuccess(mSpvcContext.GetPushConstantBufferCount(&push_constant_buffers_count),
-                             "Unable to get push constant buffer count for shader."));
-
-        // TODO(rharrison): This should be handled by spirv-val pass in spvc,
-        // but need to confirm.
-        if (push_constant_buffers_count > 0) {
-            return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
-        }
-
-        // Fill in bindingInfo with the SPIRV bindings
-        auto ExtractResourcesBinding =
-            [](const DeviceBase* device, const std::vector<shaderc_spvc_binding_info>& spvcBindings,
-               EntryPointMetadata::BindingInfo* metadataBindings) -> MaybeError {
-            for (const shaderc_spvc_binding_info& binding : spvcBindings) {
-                BindGroupIndex bindGroupIndex(binding.set);
-
-                if (bindGroupIndex >= kMaxBindGroupsTyped) {
-                    return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
-                }
-
-                const auto& it = (*metadataBindings)[bindGroupIndex].emplace(
-                    BindingNumber(binding.binding), EntryPointMetadata::ShaderBindingInfo{});
-                if (!it.second) {
-                    return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
-                }
-
-                EntryPointMetadata::ShaderBindingInfo* info = &it.first->second;
-                info->id = binding.id;
-                info->base_type_id = binding.base_type_id;
-                info->type = ToWGPUBindingType(binding.binding_type);
-
-                switch (info->type) {
-                    case wgpu::BindingType::SampledTexture: {
-                        info->multisampled = binding.multisampled;
-                        info->viewDimension = ToWGPUTextureViewDimension(binding.texture_dimension);
-                        info->textureComponentType =
-                            ToDawnFormatType(binding.texture_component_type);
-                        break;
-                    }
-                    case wgpu::BindingType::StorageTexture:
-                    case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture: {
-                        wgpu::TextureFormat storageTextureFormat =
-                            ToWGPUTextureFormat(binding.storage_texture_format);
-                        if (storageTextureFormat == wgpu::TextureFormat::Undefined) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Invalid image format declaration on storage image");
-                        }
-                        const Format& format = device->GetValidInternalFormat(storageTextureFormat);
-                        if (!format.supportsStorageUsage) {
-                            return DAWN_VALIDATION_ERROR(
-                                "The storage texture format is not supported");
-                        }
-                        info->multisampled = binding.multisampled;
-                        info->storageTextureFormat = storageTextureFormat;
-                        info->viewDimension = ToWGPUTextureViewDimension(binding.texture_dimension);
-                        break;
-                    }
-                    case wgpu::BindingType::UniformBuffer:
-                    case wgpu::BindingType::StorageBuffer:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                        info->minBufferBindingSize = binding.minimum_buffer_size;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return {};
-        };
-
-        std::vector<shaderc_spvc_binding_info> resource_bindings;
-        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
-                                      shaderc_spvc_shader_resource_uniform_buffers,
-                                      shaderc_spvc_binding_type_uniform_buffer, &resource_bindings),
-                                  "Unable to get binding info for uniform buffers from shader"));
-        DAWN_TRY(ExtractResourcesBinding(device, resource_bindings, &metadata->bindings));
-
-        DAWN_TRY(CheckSpvcSuccess(
-            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_separate_images,
-                                        shaderc_spvc_binding_type_sampled_texture,
-                                        &resource_bindings),
-            "Unable to get binding info for sampled textures from shader"));
-        DAWN_TRY(ExtractResourcesBinding(device, resource_bindings, &metadata->bindings));
-
-        DAWN_TRY(CheckSpvcSuccess(
-            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_separate_samplers,
-                                        shaderc_spvc_binding_type_sampler, &resource_bindings),
-            "Unable to get binding info for samples from shader"));
-        DAWN_TRY(ExtractResourcesBinding(device, resource_bindings, &metadata->bindings));
-
-        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
-                                      shaderc_spvc_shader_resource_storage_buffers,
-                                      shaderc_spvc_binding_type_storage_buffer, &resource_bindings),
-                                  "Unable to get binding info for storage buffers from shader"));
-        DAWN_TRY(ExtractResourcesBinding(device, resource_bindings, &metadata->bindings));
-
-        DAWN_TRY(CheckSpvcSuccess(
-            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_storage_images,
-                                        shaderc_spvc_binding_type_storage_texture,
-                                        &resource_bindings),
-            "Unable to get binding info for storage textures from shader"));
-        DAWN_TRY(ExtractResourcesBinding(device, resource_bindings, &metadata->bindings));
-
-        std::vector<shaderc_spvc_resource_location_info> input_stage_locations;
-        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetInputStageLocationInfo(&input_stage_locations),
-                                  "Unable to get input stage location information from shader"));
-
-        for (const auto& input : input_stage_locations) {
-            if (metadata->stage == SingleShaderStage::Vertex) {
-                if (input.location >= kMaxVertexAttributes) {
-                    return DAWN_VALIDATION_ERROR("Attribute location over limits in the SPIRV");
-                }
-                metadata->usedVertexAttributes.set(input.location);
-            } else if (metadata->stage == SingleShaderStage::Fragment) {
-                // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives
-                // them all the location 0, causing a compile error.
-                if (!input.has_location) {
-                    return DAWN_VALIDATION_ERROR("Need location qualifier on fragment input");
-                }
-            }
-        }
-
-        std::vector<shaderc_spvc_resource_location_info> output_stage_locations;
-        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetOutputStageLocationInfo(&output_stage_locations),
-                                  "Unable to get output stage location information from shader"));
-
-        for (const auto& output : output_stage_locations) {
-            if (metadata->stage == SingleShaderStage::Vertex) {
-                // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL
-                // gives them all the location 0, causing a compile error.
-                if (!output.has_location) {
-                    return DAWN_VALIDATION_ERROR("Need location qualifier on vertex output");
-                }
-            } else if (metadata->stage == SingleShaderStage::Fragment) {
-                if (output.location >= kMaxColorAttachments) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Fragment output location over limits in the SPIRV");
-                }
-            }
-        }
-
-        if (metadata->stage == SingleShaderStage::Fragment) {
-            std::vector<shaderc_spvc_resource_type_info> output_types;
-            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetOutputStageTypeInfo(&output_types),
-                                      "Unable to get output stage type information from shader"));
-
-            for (const auto& output : output_types) {
-                if (output.type == shaderc_spvc_texture_format_type_other) {
-                    return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
-                }
-                metadata->fragmentOutputFormatBaseTypes[output.location] =
-                    ToDawnFormatType(output.type);
-            }
-        }
-
-        return {std::move(metadata)};
-    }
-
-    ResultOrError<std::unique_ptr<EntryPointMetadata>>
-    ShaderModuleBase::ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler) {
+    ResultOrError<std::unique_ptr<EntryPointMetadata>> ShaderModuleBase::ExtractSpirvInfoImpl(
+        const spirv_cross::Compiler& compiler) {
         DeviceBase* device = GetDevice();
         std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
 
@@ -1230,18 +908,6 @@ namespace dawn_native {
         return a->mSpirv == b->mSpirv;
     }
 
-    MaybeError ShaderModuleBase::CheckSpvcSuccess(shaderc_spvc_status status,
-                                                  const char* error_msg) {
-        if (status != shaderc_spvc_status_success) {
-            return DAWN_VALIDATION_ERROR(error_msg);
-        }
-        return {};
-    }
-
-    shaderc_spvc::Context* ShaderModuleBase::GetContext() {
-        return &mSpvcContext;
-    }
-
     const std::vector<uint32_t>& ShaderModuleBase::GetSpirv() const {
         return mSpirv;
     }
@@ -1255,15 +921,6 @@ namespace dawn_native {
                                              pullingBufferBindingSet);
     }
 #endif
-
-    shaderc_spvc::CompileOptions ShaderModuleBase::GetCompileOptions() const {
-        shaderc_spvc::CompileOptions options;
-        options.SetValidate(GetDevice()->IsValidationEnabled());
-        options.SetRobustBufferAccessPass(GetDevice()->IsRobustnessEnabled());
-        options.SetSourceEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-        return options;
-    }
 
     MaybeError ShaderModuleBase::InitializeBase() {
         if (mType == Type::Wgsl) {

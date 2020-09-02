@@ -16,29 +16,25 @@
 #include <string>
 #include <vector>
 
+#include <spirv_glsl.hpp>
+
 #include "DawnSPIRVCrossFuzzer.h"
 
 namespace {
     int GLSLFastFuzzTask(const std::vector<uint32_t>& input) {
-        shaderc_spvc::Context context;
-        if (!context.IsValid()) {
-            return 0;
-        }
+        // Values come from ShaderModuleGL.cpp
+        spirv_cross::CompilerGLSL::Options options;
+        options.vertex.flip_vert_y = true;
+        options.vertex.fixup_clipspace = true;
+#if defined(DAWN_PLATFORM_APPLE)
+        options.version = 410;
+#else
+        options.version = 440;
+#endif
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
-            shaderc_spvc::CompilationResult result;
-            shaderc_spvc::CompileOptions options;
-            options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-            options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-            // Using the options that are used by Dawn, they appear in ShaderModuleGL.cpp
-            options.SetGLSLLanguageVersion(440);
-            options.SetFixupClipspace(true);
-            if (context.InitializeForGlsl(input.data(), input.size(), options) ==
-                shaderc_spvc_status_success) {
-                context.CompileShader(&result);
-            }
-        });
+        spirv_cross::CompilerGLSL compiler(input);
+        compiler.set_common_options(options);
+        compiler.compile();
 
         return 0;
     }

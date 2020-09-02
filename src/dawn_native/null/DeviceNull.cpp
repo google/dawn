@@ -129,27 +129,8 @@ namespace dawn_native { namespace null {
     ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(this, descriptor));
-
-        if (IsToggleEnabled(Toggle::UseSpvc)) {
-            shaderc_spvc::CompileOptions options;
-            options.SetValidate(IsValidationEnabled());
-            shaderc_spvc::Context* context = module->GetContext();
-            shaderc_spvc_status status = context->InitializeForGlsl(
-                module->GetSpirv().data(), module->GetSpirv().size(), options);
-            if (status != shaderc_spvc_status_success) {
-                return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
-            }
-
-            spirv_cross::Compiler* compiler;
-            status = context->GetCompiler(reinterpret_cast<void**>(&compiler));
-            if (status != shaderc_spvc_status_success) {
-                return DAWN_VALIDATION_ERROR("Unable to get cross compiler");
-            }
-            DAWN_TRY(module->ExtractSpirvInfo(*compiler));
-        } else {
-            spirv_cross::Compiler compiler(module->GetSpirv());
-            DAWN_TRY(module->ExtractSpirvInfo(compiler));
-        }
+        spirv_cross::Compiler compiler(module->GetSpirv());
+        DAWN_TRY(module->ExtractSpirvInfo(compiler));
         return module.Detach();
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(

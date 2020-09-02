@@ -16,28 +16,21 @@
 #include <string>
 #include <vector>
 
+#include <spirv_msl.hpp>
+
 #include "DawnSPIRVCrossFuzzer.h"
 
 namespace {
 
     int FuzzTask(const std::vector<uint32_t>& input) {
-        shaderc_spvc::Context context;
-        if (!context.IsValid()) {
-            return 0;
-        }
+        // Values come from ShaderModuleMTL.mm
+        spirv_cross::CompilerMSL::Options options_msl;
+        options_msl.enable_point_size_builtin = false;
+        options_msl.buffer_size_buffer_index = 30;
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
-            shaderc_spvc::CompilationResult result;
-            shaderc_spvc::CompileOptions options;
-            options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-            options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
-
-            // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
-            if (context.InitializeForMsl(input.data(), input.size(), options) ==
-                shaderc_spvc_status_success) {
-                context.CompileShader(&result);
-            }
-        });
+        spirv_cross::CompilerMSL compiler(input);
+        compiler.set_msl_options(options_msl);
+        compiler.compile();
 
         return 0;
     }

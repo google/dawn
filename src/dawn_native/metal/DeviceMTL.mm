@@ -63,7 +63,7 @@ namespace dawn_native { namespace metal {
     MaybeError Device::Initialize() {
         InitTogglesFromDriver();
 
-        if (!IsRobustnessEnabled() || !IsToggleEnabled(Toggle::UseSpvc)) {
+        if (!IsRobustnessEnabled()) {
             ForceSetToggle(Toggle::MetalEnableVertexPulling, false);
         }
 

@@ -26,8 +26,6 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "spvc/spvc.hpp"
-
 #include <bitset>
 #include <map>
 #include <vector>
@@ -113,7 +111,6 @@ namespace dawn_native {
             bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
         };
 
-        shaderc_spvc::Context* GetContext();
         const std::vector<uint32_t>& GetSpirv() const;
 
 #ifdef DAWN_ENABLE_WGSL
@@ -124,11 +121,7 @@ namespace dawn_native {
 #endif
 
       protected:
-        static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
-        shaderc_spvc::CompileOptions GetCompileOptions() const;
         MaybeError InitializeBase();
-
-        shaderc_spvc::Context mSpvcContext;
 
         // Allows backends to get the stage for the "main" entrypoint while they are transitioned to
         // support multiple entrypoints.
@@ -138,10 +131,7 @@ namespace dawn_native {
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        // Different implementations reflection into the shader depending on
-        // whether using spvc, or directly accessing spirv-cross.
-        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoWithSpvc();
-        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoWithSpirvCross(
+        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoImpl(
             const spirv_cross::Compiler& compiler);
 
         enum class Type { Undefined, Spirv, Wgsl };

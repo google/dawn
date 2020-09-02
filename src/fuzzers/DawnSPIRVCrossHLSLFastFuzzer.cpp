@@ -16,40 +16,32 @@
 #include <string>
 #include <vector>
 
+#include <spirv_hlsl.hpp>
+
 #include "DawnSPIRVCrossFuzzer.h"
 
 namespace {
 
     int FuzzTask(const std::vector<uint32_t>& input) {
-        shaderc_spvc::Context context;
-        if (!context.IsValid()) {
-            return 0;
-        }
+        // Values come from ShaderModuleD3D12.cpp
+        spirv_cross::CompilerGLSL::Options options_glsl;
+        // Force all uninitialized variables to be 0, otherwise they will fail to compile
+        // by FXC.
+        options_glsl.force_zero_initialized_variables = true;
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
-            shaderc_spvc::CompilationResult result;
-            shaderc_spvc::CompileOptions options;
-            options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
-            options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
+        spirv_cross::CompilerHLSL::Options options_hlsl;
+        options_hlsl.shader_model = 51;
+        options_hlsl.point_coord_compat = true;
+        options_hlsl.point_size_compat = true;
+        options_hlsl.nonwritable_uav_texture_as_srv = true;
 
-            // Using the options that are used by Dawn, they appear in ShaderModuleD3D12.cpp
-            options.SetForceZeroInitializedVariables(true);
-            options.SetHLSLShaderModel(51);
-            // TODO (hao.x.li@intel.com): The HLSLPointCoordCompat and HLSLPointSizeCompat are
-            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
-            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
-            // See https://github.com/gpuweb/gpuweb/issues/332
-            options.SetHLSLPointCoordCompat(true);
-            options.SetHLSLPointSizeCompat(true);
-            if (context.InitializeForHlsl(input.data(), input.size(), options) ==
-                shaderc_spvc_status_success) {
-                context.CompileShader(&result);
-            }
-        });
+        spirv_cross::CompilerHLSL compiler(input);
+        compiler.set_common_options(options_glsl);
+        compiler.set_hlsl_options(options_hlsl);
+        compiler.compile();
 
         return 0;
     }
-
 }  // namespace
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {

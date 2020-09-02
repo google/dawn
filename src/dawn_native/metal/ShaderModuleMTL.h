@@ -55,8 +55,6 @@ namespace dawn_native { namespace metal {
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize();
-
-        shaderc_spvc::CompileOptions GetMSLCompileOptions(uint32_t sampleMask = 0xFFFFFFFF);
     };
 
 }}  // namespace dawn_native::metal

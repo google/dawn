@@ -149,7 +149,6 @@ target_link_libraries(dawn_native
     PRIVATE dawn_common
             dawn_platform
             dawn_internal_config
-            shaderc_spvc
             spirv-cross-core
 )
 

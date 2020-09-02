@@ -100,37 +100,9 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(InitializeBase());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
-        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            shaderc_spvc::CompileOptions options = GetCompileOptions();
+        spirv_cross::CompilerHLSL compiler(spirv);
+        DAWN_TRY(ExtractSpirvInfo(compiler));
 
-            options.SetForceZeroInitializedVariables(true);
-            if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
-                options.SetHLSLShaderModel(ToBackend(GetDevice())->GetDeviceInfo().shaderModel);
-                options.SetHLSLEnable16BitTypes(true);
-            } else {
-                options.SetHLSLShaderModel(51);
-            }
-            // PointCoord and PointSize are not supported in HLSL
-            // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
-            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
-            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
-            // See https://github.com/gpuweb/gpuweb/issues/332
-            options.SetHLSLPointCoordCompat(true);
-            options.SetHLSLPointSizeCompat(true);
-            options.SetHLSLNonWritableUAVTextureAsSRV(true);
-
-            DAWN_TRY(CheckSpvcSuccess(
-                mSpvcContext.InitializeForHlsl(spirv.data(), spirv.size(), options),
-                "Unable to initialize instance of spvc"));
-
-            spirv_cross::Compiler* compiler;
-            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
-                                      "Unable to get cross compiler"));
-            DAWN_TRY(ExtractSpirvInfo(*compiler));
-        } else {
-            spirv_cross::CompilerHLSL compiler(spirv);
-            DAWN_TRY(ExtractSpirvInfo(compiler));
-        }
         return {};
     }
 
@@ -138,37 +110,32 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(!IsError());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
-        std::unique_ptr<spirv_cross::CompilerHLSL> compilerImpl;
-        spirv_cross::CompilerHLSL* compiler = nullptr;
-        if (!GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
-            // be updated.
-            spirv_cross::CompilerGLSL::Options options_glsl;
-            // Force all uninitialized variables to be 0, otherwise they will fail to compile
-            // by FXC.
-            options_glsl.force_zero_initialized_variables = true;
+        // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
+        // be updated.
+        spirv_cross::CompilerGLSL::Options options_glsl;
+        // Force all uninitialized variables to be 0, otherwise they will fail to compile
+        // by FXC.
+        options_glsl.force_zero_initialized_variables = true;
 
-            spirv_cross::CompilerHLSL::Options options_hlsl;
-            if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
-                options_hlsl.shader_model = ToBackend(GetDevice())->GetDeviceInfo().shaderModel;
-                options_hlsl.enable_16bit_types = true;
-            } else {
-                options_hlsl.shader_model = 51;
-            }
-            // PointCoord and PointSize are not supported in HLSL
-            // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
-            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
-            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
-            // See https://github.com/gpuweb/gpuweb/issues/332
-            options_hlsl.point_coord_compat = true;
-            options_hlsl.point_size_compat = true;
-            options_hlsl.nonwritable_uav_texture_as_srv = true;
-
-            compilerImpl = std::make_unique<spirv_cross::CompilerHLSL>(spirv);
-            compiler = compilerImpl.get();
-            compiler->set_common_options(options_glsl);
-            compiler->set_hlsl_options(options_hlsl);
+        spirv_cross::CompilerHLSL::Options options_hlsl;
+        if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
+            options_hlsl.shader_model = ToBackend(GetDevice())->GetDeviceInfo().shaderModel;
+            options_hlsl.enable_16bit_types = true;
+        } else {
+            options_hlsl.shader_model = 51;
         }
+        // PointCoord and PointSize are not supported in HLSL
+        // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
+        // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
+        // but should be removed once WebGPU requires there is no gl_PointSize builtin.
+        // See https://github.com/gpuweb/gpuweb/issues/332
+        options_hlsl.point_coord_compat = true;
+        options_hlsl.point_size_compat = true;
+        options_hlsl.nonwritable_uav_texture_as_srv = true;
+
+        spirv_cross::CompilerHLSL compiler(spirv);
+        compiler.set_common_options(options_glsl);
+        compiler.set_hlsl_options(options_hlsl);
 
         const EntryPointMetadata::BindingInfo& moduleBindingInfo =
             GetEntryPoint("main", GetMainEntryPointStageForTransition()).bindings;
@@ -190,38 +157,14 @@ namespace dawn_native { namespace d3d12 {
                      bgl->GetBindingInfo(bindingIndex).type == wgpu::BindingType::StorageBuffer);
 
                 uint32_t bindingOffset = bindingOffsets[bindingIndex];
-                if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-                    DAWN_TRY(CheckSpvcSuccess(
-                        mSpvcContext.SetDecoration(bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING,
-                                                   bindingOffset),
-                        "Unable to set decorating binding before generating HLSL shader w/ "
-                        "spvc"));
-                    if (forceStorageBufferAsUAV) {
-                        DAWN_TRY(CheckSpvcSuccess(
-                            mSpvcContext.SetHLSLForceStorageBufferAsUAV(
-                                static_cast<uint32_t>(group), static_cast<uint32_t>(bindingNumber)),
-                            "Unable to force read-only storage buffer as UAV w/ spvc"));
-                    }
-                } else {
-                    compiler->set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
-                    if (forceStorageBufferAsUAV) {
-                        compiler->set_hlsl_force_storage_buffer_as_uav(
-                            static_cast<uint32_t>(group), static_cast<uint32_t>(bindingNumber));
-                    }
+                compiler.set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
+                if (forceStorageBufferAsUAV) {
+                    compiler.set_hlsl_force_storage_buffer_as_uav(
+                        static_cast<uint32_t>(group), static_cast<uint32_t>(bindingNumber));
                 }
             }
         }
-        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            shaderc_spvc::CompilationResult result;
-            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
-                                      "Unable to generate HLSL shader w/ spvc"));
-            std::string result_string;
-            DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&result_string),
-                                      "Unable to get HLSL shader text"));
-            return std::move(result_string);
-        } else {
-            return compiler->compile();
-        }
+        return compiler.compile();
     }
 
     ResultOrError<ComPtr<IDxcBlob>> ShaderModule::CompileShaderDXC(SingleShaderStage stage,

@@ -129,7 +129,7 @@ source_set("dawn_native_sources") {
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
     "${dawn_root}/src/common",
-    "${dawn_shaderc_dir}:spirv_cross",
+    "${dawn_root}/third_party/gn/spirv_cross:spirv_cross",
     "${dawn_spirv_tools_dir}:spvtools_val",
   ]
   defines = []
@@ -141,10 +141,7 @@ source_set("dawn_native_sources") {
   # Dependencies that are needed to compile dawn_native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
   # dawn_native target
-  public_deps = [
-    "${dawn_root}/src/dawn_platform",
-    "${dawn_shaderc_dir}:libshaderc_spvc",
-  ]
+  public_deps = [ "${dawn_root}/src/dawn_platform" ]
 
   sources = get_target_outputs(":dawn_native_utils_gen")
   sources += [

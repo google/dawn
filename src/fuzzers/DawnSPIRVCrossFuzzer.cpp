@@ -15,8 +15,11 @@
 #include <csetjmp>
 #include <csignal>
 #include <cstdint>
+#include <sstream>
 #include <string>
 #include <vector>
+
+#include <spirv-tools/libspirv.hpp>
 
 #include "DawnSPIRVCrossFuzzer.h"
 
@@ -26,12 +29,8 @@ namespace {
     void (*old_signal_handler)(int);
 
     // Handler to trap signals, so that it doesn't crash the fuzzer when running
-    // the code under test. Currently the
-    // code being fuzzed uses abort() to report errors like bad input instead of
-    // returning an error code. This will be changing in the future.
-    //
-    // TODO(rharrison): Remove all of this signal trapping once SPIRV-Cross has
-    // been changed to not use abort() for reporting errors.
+    // the code under test. The code being fuzzed uses abort() to report errors
+    // like bad input instead of returning an error code.
     [[noreturn]] static void sigabrt_trap(int sig) {
         std::longjmp(jump_buffer, 1);
     }
@@ -68,6 +67,16 @@ namespace DawnSPIRVCrossFuzzer {
         size_t sizeInU32 = size / sizeof(uint32_t);
         const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
         std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
+
+        spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
+        spirvTools.SetMessageConsumer(
+            [](spv_message_level_t, const char*, const spv_position_t&, const char*) {});
+
+        // Dawn is responsible to validating input before it goes into
+        // SPIRV-Cross.
+        if (!spirvTools.Validate(input.data(), input.size())) {
+            return 0;
+        }
 
         if (input.size() != 0) {
             task(input);
