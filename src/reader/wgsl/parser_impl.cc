@@ -577,6 +577,26 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   return std::make_unique<ast::Variable>(source, name, sc, type);
 }
 
+// texture_sampler_types
+//  : sampler_type
+//  | depth_texture_type
+//  | TODO: sampled_texture_type LESS_THAN type_decl GREATER_THAN
+//  | TODO: multisampled_texture_type LESS_THAN type_decl GREATER_THAN
+//  | TODO: storage_texture_type LESS_THAN image_storage_type GREATER_THAN
+ast::type::Type* ParserImpl::texture_sampler_types() {
+  auto* type = sampler_type();
+  if (type != nullptr) {
+    return type;
+  }
+
+  type = depth_texture_type();
+  if (type != nullptr) {
+    return type;
+  }
+
+  return nullptr;
+}
+
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON

@@ -180,6 +180,9 @@ class ParserImpl {
   /// Parses a `function_decl` grammar element
   /// @returns the parsed function, nullptr otherwise
   std::unique_ptr<ast::Function> function_decl();
+  /// Parses a `texture_sampler_types` grammar element
+  /// @returns the parsed Type or nullptr if none matched.
+  ast::type::Type* texture_sampler_types();
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* sampler_type();

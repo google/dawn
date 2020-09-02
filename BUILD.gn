@@ -926,6 +926,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     "src/reader/wgsl/parser_impl_test.cc",
     "src/reader/wgsl/parser_impl_test_helper.cc",
     "src/reader/wgsl/parser_impl_test_helper.h",
+    "src/reader/wgsl/parser_impl_texture_sampler_types_test.cc",
     "src/reader/wgsl/parser_impl_type_alias_test.cc",
     "src/reader/wgsl/parser_impl_type_decl_test.cc",
     "src/reader/wgsl/parser_impl_unary_expression_test.cc",
