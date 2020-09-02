@@ -290,13 +290,13 @@ class CopySplitTest : public testing::Test {
     Texture2DCopySplit DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
         ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
                textureSpec.height % textureSpec.blockHeight == 0);
-        dawn_native::Format fakeFormat = {};
-        fakeFormat.blockWidth = textureSpec.blockWidth;
-        fakeFormat.blockHeight = textureSpec.blockHeight;
-        fakeFormat.blockByteSize = textureSpec.texelBlockSizeInBytes;
+        dawn_native::TexelBlockInfo blockInfo = {};
+        blockInfo.blockWidth = textureSpec.blockWidth;
+        blockInfo.blockHeight = textureSpec.blockHeight;
+        blockInfo.blockByteSize = textureSpec.texelBlockSizeInBytes;
         Texture2DCopySplit copySplit = ComputeTextureCopySplit(
             {textureSpec.x, textureSpec.y, textureSpec.z},
-            {textureSpec.width, textureSpec.height, textureSpec.depth}, fakeFormat,
+            {textureSpec.width, textureSpec.height, textureSpec.depth}, blockInfo,
             bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
         ValidateCopySplit(textureSpec, bufferSpec, copySplit);
         return copySplit;

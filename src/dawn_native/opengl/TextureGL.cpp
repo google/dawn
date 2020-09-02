@@ -289,7 +289,9 @@ namespace dawn_native { namespace opengl {
                 ASSERT(range.aspects == Aspect::Color);
 
                 static constexpr uint32_t MAX_TEXEL_SIZE = 16;
-                ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
+                const TexelBlockInfo& blockInfo = GetFormat().GetTexelBlockInfo(Aspect::Color);
+                ASSERT(blockInfo.blockByteSize <= MAX_TEXEL_SIZE);
+
                 std::array<GLbyte, MAX_TEXEL_SIZE> clearColorData;
                 clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 255;
                 clearColorData.fill(clearColor);
@@ -317,19 +319,20 @@ namespace dawn_native { namespace opengl {
             ASSERT(range.aspects == Aspect::Color);
 
             // create temp buffer with clear color to copy to the texture image
-            ASSERT(kTextureBytesPerRowAlignment % GetFormat().blockByteSize == 0);
+            const TexelBlockInfo& blockInfo = GetFormat().GetTexelBlockInfo(Aspect::Color);
+            ASSERT(kTextureBytesPerRowAlignment % blockInfo.blockByteSize == 0);
             uint32_t bytesPerRow =
-                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                Align((GetWidth() / blockInfo.blockWidth) * blockInfo.blockByteSize,
                       kTextureBytesPerRowAlignment);
 
             // Make sure that we are not rounding
-            ASSERT(bytesPerRow % GetFormat().blockByteSize == 0);
-            ASSERT(GetHeight() % GetFormat().blockHeight == 0);
+            ASSERT(bytesPerRow % blockInfo.blockByteSize == 0);
+            ASSERT(GetHeight() % blockInfo.blockHeight == 0);
 
             dawn_native::BufferDescriptor descriptor = {};
             descriptor.mappedAtCreation = true;
             descriptor.usage = wgpu::BufferUsage::CopySrc;
-            descriptor.size = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
+            descriptor.size = bytesPerRow * (GetHeight() / blockInfo.blockHeight);
             if (descriptor.size > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -345,7 +348,7 @@ namespace dawn_native { namespace opengl {
 
             // Bind buffer and texture, and make the buffer to texture copy
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
-                           (bytesPerRow / GetFormat().blockByteSize) * GetFormat().blockWidth);
+                           (bytesPerRow / blockInfo.blockByteSize) * blockInfo.blockWidth);
             gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {

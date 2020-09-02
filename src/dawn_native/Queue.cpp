@@ -378,12 +378,12 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("The sample count of textures must be 1");
         }
 
+        DAWN_TRY(ValidateBufferToTextureCopyRestrictions(*destination));
         // We validate texture copy range before validating linear texture data,
         // because in the latter we divide copyExtent.width by blockWidth and
         // copyExtent.height by blockHeight while the divisibility conditions are
         // checked in validating texture copy range.
         DAWN_TRY(ValidateTextureCopyRange(*destination, *writeSize));
-        DAWN_TRY(ValidateBufferToTextureCopyRestrictions(*destination));
         DAWN_TRY(ValidateLinearTextureData(
             *dataLayout, dataSize,
             destination->texture->GetFormat().GetTexelBlockInfo(destination->aspect), *writeSize));

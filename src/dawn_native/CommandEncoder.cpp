@@ -622,12 +622,12 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
 
+                DAWN_TRY(ValidateBufferToTextureCopyRestrictions(*destination));
                 // We validate texture copy range before validating linear texture data,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
                 DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
-                DAWN_TRY(ValidateBufferToTextureCopyRestrictions(*destination));
                 DAWN_TRY(ValidateLinearTextureData(
                     source->layout, source->buffer->GetSize(),
                     destination->texture->GetFormat().GetTexelBlockInfo(destination->aspect),
@@ -644,11 +644,12 @@ namespace dawn_native {
             }
 
             // In the case of one row copy bytesPerRow might not contain enough bytes
+            const TexelBlockInfo& blockInfo =
+                destination->texture->GetFormat().GetTexelBlockInfo(destination->aspect);
             uint32_t bytesPerRow = source->layout.bytesPerRow;
             if (copySize->height <= 1 && copySize->depth <= 1) {
                 bytesPerRow =
-                    Align(copySize->width * destination->texture->GetFormat().blockByteSize,
-                          kTextureBytesPerRowAlignment);
+                    Align(copySize->width * blockInfo.blockByteSize, kTextureBytesPerRowAlignment);
             }
 
             // Record the copy command.
@@ -681,12 +682,12 @@ namespace dawn_native {
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
                 DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
 
+                DAWN_TRY(ValidateTextureToBufferCopyRestrictions(*source));
                 // We validate texture copy range before validating linear texture data,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
                 DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
-                DAWN_TRY(ValidateTextureToBufferCopyRestrictions(*source));
                 DAWN_TRY(ValidateLinearTextureData(
                     destination->layout, destination->buffer->GetSize(),
                     source->texture->GetFormat().GetTexelBlockInfo(source->aspect), *copySize));
@@ -702,10 +703,12 @@ namespace dawn_native {
             }
 
             // In the case of one row copy bytesPerRow might not contain enough bytes
+            const TexelBlockInfo& blockInfo =
+                source->texture->GetFormat().GetTexelBlockInfo(source->aspect);
             uint32_t bytesPerRow = destination->layout.bytesPerRow;
             if (copySize->height <= 1 && copySize->depth <= 1) {
-                bytesPerRow = Align(copySize->width * source->texture->GetFormat().blockByteSize,
-                                    kTextureBytesPerRowAlignment);
+                bytesPerRow =
+                    Align(copySize->width * blockInfo.blockByteSize, kTextureBytesPerRowAlignment);
             }
 
             // Record the copy command.
@@ -733,14 +736,14 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *copySize));
+
                 DAWN_TRY(
                     ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
 
                 DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
                 DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
-
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source, *copySize));
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *copySize));
 
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));

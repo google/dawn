@@ -47,7 +47,8 @@ namespace dawn_native { namespace metal {
                                                          uint64_t bufferSize,
                                                          uint64_t bufferOffset,
                                                          uint32_t bytesPerRow,
-                                                         uint32_t rowsPerImage);
+                                                         uint32_t rowsPerImage,
+                                                         Aspect aspect);
 
     void EnsureDestinationTextureInitialized(Texture* texture,
                                              const TextureCopy& dst,

@@ -39,8 +39,11 @@ namespace dawn_native {
     // exact number of known format.
     static constexpr size_t kKnownFormatCount = 53;
 
+    struct Format;
+    using FormatTable = std::array<Format, kKnownFormatCount>;
+
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
-    struct Format : TexelBlockInfo {
+    struct Format {
         enum class Type {
             Float,
             Sint,
@@ -72,11 +75,14 @@ namespace dawn_native {
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)
         size_t GetIndex() const;
+
+      private:
+        TexelBlockInfo blockInfo;
+
+        friend FormatTable BuildFormatTable(const DeviceBase* device);
     };
 
     // Implementation details of the format table in the device.
-
-    using FormatTable = std::array<Format, kKnownFormatCount>;
 
     // Returns the index of a format in the FormatTable.
     size_t ComputeFormatIndex(wgpu::TextureFormat format);

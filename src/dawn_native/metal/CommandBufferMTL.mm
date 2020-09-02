@@ -643,7 +643,7 @@ namespace dawn_native { namespace metal {
 
                     TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
                         texture, dst.mipLevel, dst.origin, copySize, buffer->GetSize(), src.offset,
-                        src.bytesPerRow, src.rowsPerImage);
+                        src.bytesPerRow, src.rowsPerImage, dst.aspect);
 
                     for (uint32_t i = 0; i < splitCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];
@@ -693,7 +693,7 @@ namespace dawn_native { namespace metal {
 
                     TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
                         texture, src.mipLevel, src.origin, copySize, buffer->GetSize(), dst.offset,
-                        dst.bytesPerRow, dst.rowsPerImage);
+                        dst.bytesPerRow, dst.rowsPerImage, src.aspect);
 
                     for (uint32_t i = 0; i < splitCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];

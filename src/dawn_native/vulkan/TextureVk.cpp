@@ -945,10 +945,12 @@ namespace dawn_native { namespace vulkan {
             }
         } else {
             // create temp buffer with clear color to copy to the texture image
+            const TexelBlockInfo& blockInfo =
+                GetFormat().GetTexelBlockInfo(wgpu::TextureAspect::All);
             uint32_t bytesPerRow =
-                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                Align((GetWidth() / blockInfo.blockWidth) * blockInfo.blockByteSize,
                       kTextureBytesPerRowAlignment);
-            uint64_t bufferSize64 = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
+            uint64_t bufferSize64 = bytesPerRow * (GetHeight() / blockInfo.blockHeight);
             if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -957,7 +959,7 @@ namespace dawn_native { namespace vulkan {
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
                             uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
-                                               GetFormat().blockByteSize));
+                                               blockInfo.blockByteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             // compute the buffer image copy to set the clear region of entire texture

@@ -540,21 +540,21 @@ namespace dawn_native { namespace opengl {
                     gl.BindTexture(target, texture->GetHandle());
 
                     const Format& formatInfo = texture->GetFormat();
-                    gl.PixelStorei(
-                        GL_UNPACK_ROW_LENGTH,
-                        src.bytesPerRow / formatInfo.blockByteSize * formatInfo.blockWidth);
+                    const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(dst.aspect);
+                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH, src.bytesPerRow / blockInfo.blockByteSize *
+                                                             blockInfo.blockWidth);
                     gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.rowsPerImage);
 
                     if (formatInfo.isCompressed) {
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, formatInfo.blockByteSize);
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, formatInfo.blockWidth);
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, formatInfo.blockHeight);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.blockByteSize);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, blockInfo.blockWidth);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, blockInfo.blockHeight);
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
 
                         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                        uint64_t copyDataSize = (copySize.width / formatInfo.blockWidth) *
-                                                (copySize.height / formatInfo.blockHeight) *
-                                                formatInfo.blockByteSize * copySize.depth;
+                        uint64_t copyDataSize = (copySize.width / blockInfo.blockWidth) *
+                                                (copySize.height / blockInfo.blockHeight) *
+                                                blockInfo.blockByteSize * copySize.depth;
                         Extent3D copyExtent = ComputeTextureCopyExtent(dst, copySize);
 
                         if (texture->GetArrayLayers() > 1) {
