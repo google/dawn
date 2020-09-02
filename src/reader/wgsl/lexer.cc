@@ -575,6 +575,18 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kStruct, source, "struct"};
   if (str == "switch")
     return {Token::Type::kSwitch, source, "switch"};
+  if (str == "texture_depth_2d")
+    return {Token::Type::kTextureDepth2d, source, "texture_depth_2d"};
+  if (str == "texture_depth_2d_array") {
+    return {Token::Type::kTextureDepth2dArray, source,
+            "texture_depth_2d_array"};
+  }
+  if (str == "texture_depth_cube")
+    return {Token::Type::kTextureDepthCube, source, "texture_depth_cube"};
+  if (str == "texture_depth_cube_array") {
+    return {Token::Type::kTextureDepthCubeArray, source,
+            "texture_depth_cube_array"};
+  }
   if (str == "true")
     return {Token::Type::kTrue, source, "true"};
   if (str == "type")

@@ -211,6 +211,14 @@ std::string Token::TypeToName(Type type) {
       return "struct";
     case Token::Type::kSwitch:
       return "switch";
+    case Token::Type::kTextureDepth2d:
+      return "texture_depth_2d";
+    case Token::Type::kTextureDepth2dArray:
+      return "texture_depth_2d_array";
+    case Token::Type::kTextureDepthCube:
+      return "texture_depth_cube";
+    case Token::Type::kTextureDepthCubeArray:
+      return "texture_depth_cube_array";
     case Token::Type::kTrue:
       return "true";
     case Token::Type::kType:

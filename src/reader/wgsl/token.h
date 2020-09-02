@@ -222,6 +222,14 @@ class Token {
     kStruct,
     /// A 'switch'
     kSwitch,
+    /// A 'texture_depth_2d'
+    kTextureDepth2d,
+    /// A 'texture_depth_2d_array'
+    kTextureDepth2dArray,
+    /// A 'texture_depth_cube'
+    kTextureDepthCube,
+    /// A 'texture_depth_cube_array'
+    kTextureDepthCubeArray,
     /// A 'true'
     kTrue,
     /// A 'type'
@@ -483,6 +491,18 @@ class Token {
   bool IsStruct() const { return type_ == Type::kStruct; }
   /// @returns true if token is a 'switch'
   bool IsSwitch() const { return type_ == Type::kSwitch; }
+  /// @returns true if token is a 'texture_depth_2d'
+  bool IsTextureDepth2d() const { return type_ == Type::kTextureDepth2d; }
+  /// @returns true if token is a 'texture_depth_2d_array'
+  bool IsTextureDepth2dArray() const {
+    return type_ == Type::kTextureDepth2dArray;
+  }
+  /// @returns true if token is a 'texture_depth_cube'
+  bool IsTextureDepthCube() const { return type_ == Type::kTextureDepthCube; }
+  /// @returns true if token is a 'texture_depth_cube_array'
+  bool IsTextureDepthCubeArray() const {
+    return type_ == Type::kTextureDepthCubeArray;
+  }
   /// @returns true if token is a 'true'
   bool IsTrue() const { return type_ == Type::kTrue; }
   /// @returns true if token is a 'type'

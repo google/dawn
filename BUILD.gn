@@ -883,6 +883,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     "src/reader/wgsl/parser_impl_const_literal_test.cc",
     "src/reader/wgsl/parser_impl_continue_stmt_test.cc",
     "src/reader/wgsl/parser_impl_continuing_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_depth_texture_type_test.cc",
     "src/reader/wgsl/parser_impl_else_stmt_test.cc",
     "src/reader/wgsl/parser_impl_elseif_stmt_test.cc",
     "src/reader/wgsl/parser_impl_entry_point_decl_test.cc",

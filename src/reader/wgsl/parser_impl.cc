@@ -46,6 +46,7 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -590,6 +591,36 @@ ast::type::Type* ParserImpl::sampler_type() {
     next();  // Consume the peek
     return ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
         ast::type::SamplerKind::kComparisonSampler));
+  }
+  return nullptr;
+}
+
+// depth_texture_type
+//  : TEXTURE_DEPTH_2D
+//  | TEXTURE_DEPTH_2D_ARRAY
+//  | TEXTURE_DEPTH_CUBE
+//  | TEXTURE_DEPTH_CUBE_ARRAY
+ast::type::Type* ParserImpl::depth_texture_type() {
+  auto t = peek();
+  if (t.IsTextureDepth2d()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
+        ast::type::TextureDimension::k2d));
+  }
+  if (t.IsTextureDepth2dArray()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
+        ast::type::TextureDimension::k2dArray));
+  }
+  if (t.IsTextureDepthCube()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
+        ast::type::TextureDimension::kCube));
+  }
+  if (t.IsTextureDepthCubeArray()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
+        ast::type::TextureDimension::kCubeArray));
   }
   return nullptr;
 }
