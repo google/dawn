@@ -374,9 +374,9 @@ class Builder {
   /// @returns true if the vector was successfully generated
   bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
 
-  // Converts ast image format to spv and pushes an appropriate capability.
-  // @returns SPIR-V image format type
-  // @param format AST image format type
+  /// Converts AST image format to SPIR-V and pushes an appropriate capability.
+  /// @param format AST image format type
+  /// @returns SPIR-V image format type
   SpvImageFormat convert_image_format_to_spv(
       const ast::type::ImageFormat format);
 
