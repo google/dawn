@@ -440,6 +440,7 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_postfix_expression_test.cc
     reader/wgsl/parser_impl_primary_expression_test.cc
     reader/wgsl/parser_impl_relational_expression_test.cc
+    reader/wgsl/parser_impl_sampled_texture_type_test.cc
     reader/wgsl/parser_impl_sampler_type_test.cc
     reader/wgsl/parser_impl_shift_expression_test.cc
     reader/wgsl/parser_impl_statement_test.cc

@@ -26,6 +26,9 @@ namespace type {
 
 std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
   switch (dim) {
+    case TextureDimension::kNone:
+      out << "None";
+      break;
     case TextureDimension::k1d:
       out << "1d";
       break;

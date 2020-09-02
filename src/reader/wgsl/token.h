@@ -230,6 +230,24 @@ class Token {
     kTextureDepthCube,
     /// A 'texture_depth_cube_array'
     kTextureDepthCubeArray,
+    /// A 'texture_sampled_1d'
+    kTextureSampled1d,
+    /// A 'texture_sampled_1d_array'
+    kTextureSampled1dArray,
+    /// A 'texture_sampled_2d'
+    kTextureSampled2d,
+    /// A 'texture_sampled_2d_array'
+    kTextureSampled2dArray,
+    /// A 'texture_sampled_2d_ms'
+    kTextureSampled2dMs,
+    /// A 'texture_sampled_2d_ms_array'
+    kTextureSampled2dMsArray,
+    /// A 'texture_sampled_3d'
+    kTextureSampled3d,
+    /// A 'texture_sampled_cube'
+    kTextureSampledCube,
+    /// A 'texture_sampled_cube_array'
+    kTextureSampledCubeArray,
     /// A 'true'
     kTrue,
     /// A 'type'
@@ -502,6 +520,36 @@ class Token {
   /// @returns true if token is a 'texture_depth_cube_array'
   bool IsTextureDepthCubeArray() const {
     return type_ == Type::kTextureDepthCubeArray;
+  }
+  /// @returns true if token is a 'texture_sampled_1d'
+  bool IsTextureSampled1d() const { return type_ == Type::kTextureSampled1d; }
+  /// @returns true if token is a 'texture_sampled_1d_array'
+  bool IsTextureSampled1dArray() const {
+    return type_ == Type::kTextureSampled1dArray;
+  }
+  /// @returns true if token is a 'texture_sampled_2d'
+  bool IsTextureSampled2d() const { return type_ == Type::kTextureSampled2d; }
+  /// @returns true if token is a 'texture_sampled_2d_array'
+  bool IsTextureSampled2dArray() const {
+    return type_ == Type::kTextureSampled2dArray;
+  }
+  /// @returns true if token is a 'texture_sampled_2d_ms'
+  bool IsTextureSampled2dMs() const {
+    return type_ == Type::kTextureSampled2dMs;
+  }
+  /// @returns true if token is a 'texture_sampled_2d_ms_array'
+  bool IsTextureSampled2dMsArray() const {
+    return type_ == Type::kTextureSampled2dMsArray;
+  }
+  /// @returns true if token is a 'texture_sampled_3d'
+  bool IsTextureSampled3d() const { return type_ == Type::kTextureSampled3d; }
+  /// @returns true if token is a 'texture_sampled_cube'
+  bool IsTextureSampledCube() const {
+    return type_ == Type::kTextureSampledCube;
+  }
+  /// @returns true if token is a 'texture_sampled_cube_array'
+  bool IsTextureSampledCubeArray() const {
+    return type_ == Type::kTextureSampledCubeArray;
   }
   /// @returns true if token is a 'true'
   bool IsTrue() const { return type_ == Type::kTrue; }

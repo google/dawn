@@ -587,6 +587,32 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kTextureDepthCubeArray, source,
             "texture_depth_cube_array"};
   }
+  if (str == "texture_sampled_1d")
+    return {Token::Type::kTextureSampled1d, source, "texture_sampled_1d"};
+  if (str == "texture_sampled_1d_array") {
+    return {Token::Type::kTextureSampled1dArray, source,
+            "texture_sampled_1d_array"};
+  }
+  if (str == "texture_sampled_2d")
+    return {Token::Type::kTextureSampled2d, source, "texture_sampled_2d"};
+  if (str == "texture_sampled_2d_array") {
+    return {Token::Type::kTextureSampled2dArray, source,
+            "texture_sampled_2d_array"};
+  }
+  if (str == "texture_sampled_2d_ms")
+    return {Token::Type::kTextureSampled2dMs, source, "texture_sampled_2d_ms"};
+  if (str == "texture_sampled_2d_ms_array") {
+    return {Token::Type::kTextureSampled2dMsArray, source,
+            "texture_sampled_2d_ms_array"};
+  }
+  if (str == "texture_sampled_3d")
+    return {Token::Type::kTextureSampled3d, source, "texture_sampled_3d"};
+  if (str == "texture_sampled_cube")
+    return {Token::Type::kTextureSampledCube, source, "texture_sampled_cube"};
+  if (str == "texture_sampled_cube_array") {
+    return {Token::Type::kTextureSampledCubeArray, source,
+            "texture_sampled_cube_array"};
+  }
   if (str == "true")
     return {Token::Type::kTrue, source, "true"};
   if (str == "type")

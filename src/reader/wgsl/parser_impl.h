@@ -40,6 +40,7 @@
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
@@ -186,6 +187,9 @@ class ParserImpl {
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* sampler_type();
+  /// Parses a `sampled_texture_type` grammar element
+  /// @returns returns the sample texture dimension or kNone if none matched.
+  ast::type::TextureDimension sampled_texture_type();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* depth_texture_type();

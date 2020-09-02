@@ -30,6 +30,8 @@ class StorageTextureType;
 
 /// The dimensionality of the texture
 enum class TextureDimension {
+  /// Invalid texture
+  kNone = -1,
   /// 1 dimensional texture
   k1d,
   /// 1 dimenstional array texture
