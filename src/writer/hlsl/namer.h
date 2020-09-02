@@ -39,10 +39,15 @@ class Namer {
   /// @param name the name to register
   void RegisterRemappedName(const std::string& name);
 
-  /// Returns if the given name has been mapped alread
+  /// Returns if the given name has been mapped already
   /// @param name the name to check
   /// @returns true if the name has been mapped
   bool IsMapped(const std::string& name);
+
+  /// Returns if the given name has been remapped already
+  /// @param name the name to check
+  /// @returns true if the name has been remapped
+  bool IsRemapped(const std::string& name);
 
  private:
   /// Map of original name to new name. The two names may be the same.

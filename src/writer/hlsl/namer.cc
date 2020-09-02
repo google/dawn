@@ -664,8 +664,7 @@ std::string Namer::NameFor(const std::string& name) {
     uint32_t i = 0;
     // Make sure the ident name wasn't assigned by a remapping.
     while (true) {
-      auto remap_it = remapped_names_.find(ret_name);
-      if (remap_it == remapped_names_.end()) {
+      if (!IsRemapped(ret_name)) {
         break;
       }
       ret_name = name + "_" + std::to_string(i);
@@ -681,6 +680,11 @@ std::string Namer::NameFor(const std::string& name) {
 bool Namer::IsMapped(const std::string& name) {
   auto it = name_map_.find(name);
   return it != name_map_.end();
+}
+
+bool Namer::IsRemapped(const std::string& name) {
+  auto it = remapped_names_.find(name);
+  return it != remapped_names_.end();
 }
 
 void Namer::RegisterRemappedName(const std::string& name) {

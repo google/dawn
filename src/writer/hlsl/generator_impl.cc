@@ -161,7 +161,7 @@ void GeneratorImpl::register_global(ast::Variable* global) {
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
   std::string name = prefix;
   uint32_t i = 0;
-  while (namer_.IsMapped(name)) {
+  while (namer_.IsMapped(name) || namer_.IsRemapped(name)) {
     name = prefix + "_" + std::to_string(i);
     ++i;
   }
@@ -302,8 +302,97 @@ bool GeneratorImpl::EmitAssign(std::ostream& out,
 bool GeneratorImpl::EmitBinary(std::ostream& pre,
                                std::ostream& out,
                                ast::BinaryExpression* expr) {
-  out << "(";
+  if (expr->op() == ast::BinaryOp::kLogicalAnd) {
+    std::ostringstream lhs_out;
+    if (!EmitExpression(pre, lhs_out, expr->lhs())) {
+      return false;
+    }
 
+    auto name = generate_name(kTempNamePrefix);
+    make_indent(pre);
+    pre << "bool " << name << " = false;" << std::endl;
+    make_indent(pre);
+    pre << "if (" << lhs_out.str() << ") {" << std::endl;
+    {
+      increment_indent();
+
+      std::ostringstream rhs_out;
+      if (!EmitExpression(pre, rhs_out, expr->rhs())) {
+        return false;
+      }
+      make_indent(pre);
+      pre << "if (" << rhs_out.str() << ") {" << std::endl;
+      {
+        increment_indent();
+
+        make_indent(pre);
+        pre << name << " = true;" << std::endl;
+
+        decrement_indent();
+      }
+      make_indent(pre);
+      pre << "}" << std::endl;
+
+      decrement_indent();
+    }
+    make_indent(pre);
+    pre << "}" << std::endl;
+
+    out << "(" << name << ")";
+    return true;
+  }
+  if (expr->op() == ast::BinaryOp::kLogicalOr) {
+    std::ostringstream lhs_out;
+    if (!EmitExpression(pre, lhs_out, expr->lhs())) {
+      return false;
+    }
+
+    auto name = generate_name(kTempNamePrefix);
+    make_indent(pre);
+    pre << "bool " << name << " = false;" << std::endl;
+    make_indent(pre);
+    pre << "if (" << lhs_out.str() << ") {" << std::endl;
+    {
+      increment_indent();
+
+      make_indent(pre);
+      pre << name << " = true;" << std::endl;
+
+      decrement_indent();
+    }
+
+    make_indent(pre);
+    pre << "} else {" << std::endl;
+    {
+      increment_indent();
+
+      std::ostringstream rhs_out;
+      if (!EmitExpression(pre, rhs_out, expr->rhs())) {
+        return false;
+      }
+      make_indent(pre);
+      pre << "if (" << rhs_out.str() << ") {" << std::endl;
+      {
+        increment_indent();
+
+        make_indent(pre);
+        pre << name << " = true;" << std::endl;
+
+        decrement_indent();
+      }
+      make_indent(pre);
+      pre << "}" << std::endl;
+
+      decrement_indent();
+    }
+    make_indent(pre);
+    pre << "}" << std::endl;
+
+    out << "(" << name << ")";
+    return true;
+  }
+
+  out << "(";
   if (!EmitExpression(pre, out, expr->lhs())) {
     return false;
   }
@@ -320,13 +409,11 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
       out << "^";
       break;
     case ast::BinaryOp::kLogicalAnd:
-      // TODO(dsinclair): Implement support ...
-      error_ = "&& not supported yet";
+    case ast::BinaryOp::kLogicalOr: {
+      // These are both handled above.
+      assert(false);
       return false;
-    case ast::BinaryOp::kLogicalOr:
-      // TODO(dsinclair): Implement support ...
-      error_ = "|| not supported yet";
-      return false;
+    }
     case ast::BinaryOp::kEqual:
       out << "==";
       break;

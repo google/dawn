@@ -24,6 +24,8 @@ namespace writer {
 namespace hlsl {
 namespace {
 
+using HlslGeneratorImplTest_Binary = TestHelper;
+
 struct BinaryData {
   const char* result;
   ast::BinaryOp op;
@@ -52,8 +54,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left & right)", ast::BinaryOp::kAnd},
         BinaryData{"(left | right)", ast::BinaryOp::kOr},
         BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-        // BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
-        // BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
         BinaryData{"(left == right)", ast::BinaryOp::kEqual},
         BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
         BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
@@ -67,6 +67,85 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
         BinaryData{"(left / right)", ast::BinaryOp::kDivide},
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+
+TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
+  auto left = std::make_unique<ast::IdentifierExpression>("left");
+  auto right = std::make_unique<ast::IdentifierExpression>("right");
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(left),
+                             std::move(right));
+
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "(_tint_tmp)");
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
+if (left) {
+  if (right) {
+    _tint_tmp = true;
+  }
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
+  // (a && b) || (c || d)
+  auto a = std::make_unique<ast::IdentifierExpression>("a");
+  auto b = std::make_unique<ast::IdentifierExpression>("b");
+  auto c = std::make_unique<ast::IdentifierExpression>("c");
+  auto d = std::make_unique<ast::IdentifierExpression>("d");
+
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kLogicalOr,
+      std::make_unique<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                              std::move(a), std::move(b)),
+      std::make_unique<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                              std::move(c), std::move(d)));
+
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "(_tint_tmp_0)");
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
+if (a) {
+  if (b) {
+    _tint_tmp = true;
+  }
+}
+bool _tint_tmp_0 = false;
+if ((_tint_tmp)) {
+  _tint_tmp_0 = true;
+} else {
+  bool _tint_tmp_1 = false;
+  if (c) {
+    _tint_tmp_1 = true;
+  } else {
+    if (d) {
+      _tint_tmp_1 = true;
+    }
+  }
+  if ((_tint_tmp_1)) {
+    _tint_tmp_0 = true;
+  }
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
+  auto left = std::make_unique<ast::IdentifierExpression>("left");
+  auto right = std::make_unique<ast::IdentifierExpression>("right");
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(left),
+                             std::move(right));
+
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  EXPECT_EQ(result(), "(_tint_tmp)");
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
+if (left) {
+  _tint_tmp = true;
+} else {
+  if (right) {
+    _tint_tmp = true;
+  }
+}
+)");
+}
 
 }  // namespace
 }  // namespace hlsl
