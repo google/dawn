@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
                                               &void_type);
   mod()->AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
   EXPECT_EQ(result(), "my_func()");
 }
 
@@ -56,7 +56,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
                                               &void_type);
   mod()->AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
   EXPECT_EQ(result(), "my_func(param1, param2)");
 }
 

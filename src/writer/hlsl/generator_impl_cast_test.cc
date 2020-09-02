@@ -33,7 +33,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::CastExpression cast(&f32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &cast)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &cast)) << gen().error();
   EXPECT_EQ(result(), "float(id)");
 }
 
@@ -44,7 +44,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::CastExpression cast(&vec3, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &cast)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &cast)) << gen().error();
   EXPECT_EQ(result(), "vector<float, 3>(id)");
 }
 

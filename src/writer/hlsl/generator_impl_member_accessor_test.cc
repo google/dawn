@@ -73,7 +73,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   mod()->AddGlobalVariable(std::move(str_var));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "str.mem");
 }
 
@@ -122,7 +122,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load(4))");
 }
 
@@ -171,7 +171,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asint(data.Load(0))");
 }
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -347,7 +347,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(),
             "asfloat(matrix<uint, 2, 3>(data.Load2(4 + 0), data.Load2(4 + 8), "
             "data.Load2(4 + 16)))");
@@ -403,7 +403,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(
       result(),
       "asfloat(matrix<uint, 3, 2>(data.Load3(4 + 0), data.Load3(4 + 16)))");
@@ -451,7 +451,7 @@ TEST_F(
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(),
             "asfloat(matrix<uint, 3, 3>(data.Load3(0 + 0), data.Load3(0 + 16), "
             "data.Load3(0 + 32)))");
@@ -509,7 +509,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + (16 * 2) + 16))");
 }
 
@@ -557,7 +557,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asint(data.Load((4 * 2) + 0))");
 }
 
@@ -613,7 +613,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
 }
 
@@ -826,7 +826,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       std::make_unique<ast::IdentifierExpression>("b"));
 
   ASSERT_TRUE(td().DetermineResultType(&expr));
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16))");
 }
 
@@ -946,12 +946,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());
@@ -969,7 +969,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       std::make_unique<ast::IdentifierExpression>("b"));
 
   ASSERT_TRUE(td().DetermineResultType(&expr));
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
 }
 
@@ -1019,12 +1019,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());
@@ -1044,7 +1044,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       std::make_unique<ast::IdentifierExpression>("xy"));
 
   ASSERT_TRUE(td().DetermineResultType(&expr));
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
 }
 
@@ -1095,12 +1095,12 @@ TEST_F(
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());
@@ -1120,7 +1120,7 @@ TEST_F(
       std::make_unique<ast::IdentifierExpression>("g"));
 
   ASSERT_TRUE(td().DetermineResultType(&expr));
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
@@ -1170,12 +1170,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());
@@ -1196,7 +1196,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
           std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   ASSERT_TRUE(td().DetermineResultType(&expr));
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
@@ -1246,12 +1246,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());
@@ -1338,12 +1338,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre(std::move(pre_str));
-  pre.set_name("Pre");
+  ast::type::StructType pre_struct(std::move(pre_str));
+  pre_struct.set_name("Pre");
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &pre));
+          "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
   td().RegisterVariableForTesting(coord_var.get());
   gen().register_global(coord_var.get());

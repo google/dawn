@@ -42,7 +42,7 @@ TEST_P(HlslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

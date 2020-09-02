@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_As, EmitExpression_As_Float) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::AsExpression as(&f32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &as)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &as)) << gen().error();
   EXPECT_EQ(result(), "asfloat(id)");
 }
 
@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_As, EmitExpression_As_Int) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::AsExpression as(&i32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &as)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &as)) << gen().error();
   EXPECT_EQ(result(), "asint(id)");
 }
 
@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_As, EmitExpression_As_Uint) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::AsExpression as(&u32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(out(), &as)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &as)) << gen().error();
   EXPECT_EQ(result(), "asuint(id)");
 }
 

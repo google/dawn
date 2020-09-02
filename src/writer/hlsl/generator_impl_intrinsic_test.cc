@@ -96,7 +96,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
   ASSERT_TRUE(td().DetermineResultType(&call)) << td().error();
 
   gen().increment_indent();
-  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
   EXPECT_EQ(result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
@@ -113,7 +113,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
                            std::move(params));
 
   gen().increment_indent();
-  ASSERT_TRUE(gen().EmitExpression(out(), &call)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
   EXPECT_EQ(result(), "  dot(param1, param2)");
 }
 

@@ -25,20 +25,20 @@ using HlslGeneratorImplTest_Identifier = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Identifier, DISABLED_EmitExpression_Identifier) {
   ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
-  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &i)) << gen().error();
   EXPECT_EQ(result(), "std::glsl");
 }
 
 TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression_Single) {
   ast::IdentifierExpression i("foo");
-  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &i)) << gen().error();
   EXPECT_EQ(result(), "foo");
 }
 
 TEST_F(HlslGeneratorImplTest_Identifier,
        EmitIdentifierExpression_Single_WithCollision) {
   ast::IdentifierExpression i("virtual");
-  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &i)) << gen().error();
   EXPECT_EQ(result(), "virtual_tint_0");
 }
 
@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_Identifier,
 TEST_F(HlslGeneratorImplTest_Identifier,
        DISABLED_EmitIdentifierExpression_MultipleNames) {
   ast::IdentifierExpression i({"std", "glsl", "init"});
-  ASSERT_TRUE(gen().EmitExpression(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &i)) << gen().error();
   EXPECT_EQ(result(), "std::glsl::init");
 }
 

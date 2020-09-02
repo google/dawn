@@ -62,25 +62,32 @@ class GeneratorImpl {
   /// @returns true if the alias was emitted
   bool EmitAliasType(std::ostream& out, const ast::type::AliasType* alias);
   /// Handles an array accessor expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(std::ostream& out, ast::ArrayAccessorExpression* expr);
+  bool EmitArrayAccessor(std::ostream& pre,
+                         std::ostream& out,
+                         ast::ArrayAccessorExpression* expr);
   /// Handles generating an as expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the as expression
   /// @returns true if the as was emitted
-  bool EmitAs(std::ostream& out, ast::AsExpression* expr);
+  bool EmitAs(std::ostream& pre, std::ostream& out, ast::AsExpression* expr);
   /// Handles an assignment statement
   /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(std::ostream& out, ast::AssignmentStatement* stmt);
   /// Handles generating a binary expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
-  bool EmitBinary(std::ostream& out, ast::BinaryExpression* expr);
+  bool EmitBinary(std::ostream& pre,
+                  std::ostream& out,
+                  ast::BinaryExpression* expr);
   /// Handles a block statement
   /// @param out the output stream
   /// @param stmt the statement to emit
@@ -103,41 +110,54 @@ class GeneratorImpl {
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(std::ostream& out, ast::BreakStatement* stmt);
   /// Handles generating a call expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
-  bool EmitCall(std::ostream& out, ast::CallExpression* expr);
+  bool EmitCall(std::ostream& pre,
+                std::ostream& out,
+                ast::CallExpression* expr);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(std::ostream& out, ast::CaseStatement* stmt);
   /// Handles generating a cast expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
-  bool EmitCast(std::ostream& out, ast::CastExpression* expr);
+  bool EmitCast(std::ostream& pre,
+                std::ostream& out,
+                ast::CastExpression* expr);
   /// Handles generating constructor expressions
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
-  bool EmitConstructor(std::ostream& out, ast::ConstructorExpression* expr);
+  bool EmitConstructor(std::ostream& pre,
+                       std::ostream& out,
+                       ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
   /// @param out the output stream
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
   bool EmitDiscard(std::ostream& out, ast::DiscardStatement* stmt);
   /// Handles generating a scalar constructor
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(std::ostream& out,
+  bool EmitScalarConstructor(std::ostream& pre,
+                             std::ostream& out,
                              ast::ScalarConstructorExpression* expr);
   /// Handles emitting a type constructor
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(std::ostream& out,
+  bool EmitTypeConstructor(std::ostream& pre,
+                           std::ostream& out,
                            ast::TypeConstructorExpression* expr);
   /// Handles a continue statement
   /// @param out the output stream
@@ -150,10 +170,13 @@ class GeneratorImpl {
   /// @returns true if the statement was emitted
   bool EmitElse(std::ostream& out, ast::ElseStatement* stmt);
   /// Handles generate an Expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the expression
   /// @returns true if the expression was emitted
-  bool EmitExpression(std::ostream& out, ast::Expression* expr);
+  bool EmitExpression(std::ostream& pre,
+                      std::ostream& out,
+                      ast::Expression* expr);
   /// Handles generating a function
   /// @param out the output stream
   /// @param func the function to generate
@@ -186,10 +209,13 @@ class GeneratorImpl {
   /// @returns true if the statement was successfully emitted
   bool EmitIf(std::ostream& out, ast::IfStatement* stmt);
   /// Handles genreating an import expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the expression
   /// @returns true if the expression was successfully emitted.
-  bool EmitImportFunction(std::ostream& out, ast::CallExpression* expr);
+  bool EmitImportFunction(std::ostream& pre,
+                          std::ostream& out,
+                          ast::CallExpression* expr);
   /// Handles a literal
   /// @param out the output stream
   /// @param lit the literal to emit
@@ -201,22 +227,29 @@ class GeneratorImpl {
   /// @returns true if the statement was emitted
   bool EmitLoop(std::ostream& out, ast::LoopStatement* stmt);
   /// Handles generating an identifier expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
-  bool EmitIdentifier(std::ostream& out, ast::IdentifierExpression* expr);
+  bool EmitIdentifier(std::ostream& pre,
+                      std::ostream& out,
+                      ast::IdentifierExpression* expr);
   /// Handles a member accessor expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
-  bool EmitMemberAccessor(std::ostream& out,
+  bool EmitMemberAccessor(std::ostream& pre,
+                          std::ostream& out,
                           ast::MemberAccessorExpression* expr);
   /// Handles a storage buffer accessor expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the storage buffer accessor expression
   /// @param rhs the right side of a store expression. Set to nullptr for a load
   /// @returns true if the storage buffer accessor was emitted
-  bool EmitStorageBufferAccessor(std::ostream& out,
+  bool EmitStorageBufferAccessor(std::ostream& pre,
+                                 std::ostream& out,
                                  ast::Expression* expr,
                                  ast::Expression* rhs);
   /// Handles return statements
@@ -243,10 +276,13 @@ class GeneratorImpl {
                 ast::type::Type* type,
                 const std::string& name);
   /// Handles a unary op expression
-  /// @param out the output stream
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
-  bool EmitUnaryOp(std::ostream& out, ast::UnaryOpExpression* expr);
+  bool EmitUnaryOp(std::ostream& pre,
+                   std::ostream& out,
+                   ast::UnaryOpExpression* expr);
   /// Emits the zero value for the given type
   /// @param out the output stream
   /// @param type the type to emit the value for

@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
   ASSERT_EQ(gen().generate_name("func_main_in"), "func_main_in");
 
   ast::IdentifierExpression ident("func_main_in");
-  ASSERT_TRUE(gen().EmitIdentifier(out(), &ident));
+  ASSERT_TRUE(gen().EmitIdentifier(pre(), out(), &ident));
   EXPECT_EQ(result(), "func_main_in_0");
 }
 
