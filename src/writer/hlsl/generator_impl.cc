@@ -263,34 +263,38 @@ bool GeneratorImpl::EmitAssign(std::ostream& out,
   if (stmt->lhs()->IsMemberAccessor()) {
     auto* mem = stmt->lhs()->AsMemberAccessor();
     if (is_storage_buffer_access(mem)) {
-      if (!EmitStorageBufferAccessor(pre, out, mem, stmt->rhs())) {
+      std::ostringstream accessor_out;
+      if (!EmitStorageBufferAccessor(pre, accessor_out, mem, stmt->rhs())) {
         return false;
       }
-      out << ";" << std::endl;
+      out << pre.str();
+      out << accessor_out.str() << ";" << std::endl;
       return true;
     }
   } else if (stmt->lhs()->IsArrayAccessor()) {
     auto* ary = stmt->lhs()->AsArrayAccessor();
     if (is_storage_buffer_access(ary)) {
-      if (!EmitStorageBufferAccessor(pre, out, ary, stmt->rhs())) {
+      std::ostringstream accessor_out;
+      if (!EmitStorageBufferAccessor(pre, accessor_out, ary, stmt->rhs())) {
         return false;
       }
-      out << ";" << std::endl;
+      out << pre.str();
+      out << accessor_out.str() << ";" << std::endl;
       return true;
     }
   }
 
-  if (!EmitExpression(pre, out, stmt->lhs())) {
+  std::ostringstream lhs_out;
+  if (!EmitExpression(pre, lhs_out, stmt->lhs())) {
+    return false;
+  }
+  std::ostringstream rhs_out;
+  if (!EmitExpression(pre, rhs_out, stmt->rhs())) {
     return false;
   }
 
-  out << " = ";
-
-  if (!EmitExpression(pre, out, stmt->rhs())) {
-    return false;
-  }
-
-  out << ";" << std::endl;
+  out << pre.str();
+  out << lhs_out.str() << " = " << rhs_out.str() << ";" << std::endl;
 
   return true;
 }
@@ -941,16 +945,18 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
   make_indent(out);
 
   std::ostringstream pre;
-  out << "if (";
-  if (!EmitExpression(pre, out, stmt->condition())) {
+  std::ostringstream cond;
+  if (!EmitExpression(pre, cond, stmt->condition())) {
     return false;
   }
-  out << ") ";
-
+  out << pre.str();
+  out << "if (" << cond.str() << ") ";
   if (!EmitBlock(out, stmt->body())) {
     return false;
   }
 
+  // TODO(dsinclair): The else pre strings need to mix with the if pre
+  // strings correctly.
   for (const auto& e : stmt->else_statements()) {
     if (!EmitElse(out, e.get())) {
       return false;
@@ -962,6 +968,7 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitElse(std::ostream& out, ast::ElseStatement* stmt) {
+  // TODO(dsinclair): This has to work with the if pre string ....
   std::ostringstream pre;
   if (stmt->HasCondition()) {
     out << " else if (";
@@ -1529,12 +1536,19 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
       make_indent(out);
 
       auto* var = s->AsVariableDecl()->variable();
-      out << var->name() << " = ";
+
+      std::ostringstream pre;
+      std::ostringstream constructor_out;
       if (var->constructor() != nullptr) {
-        std::ostringstream pre;
-        if (!EmitExpression(pre, out, var->constructor())) {
+        if (!EmitExpression(pre, constructor_out, var->constructor())) {
           return false;
         }
+      }
+      out << pre.str();
+
+      out << var->name() << " = ";
+      if (var->constructor() != nullptr) {
+        out << constructor_out.str();
       } else {
         if (!EmitZeroValue(out, var->type())) {
           return false;
@@ -1564,6 +1578,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
 }
 
 std::string GeneratorImpl::generate_storage_buffer_index_expression(
+    std::ostream& pre,
     ast::Expression* expr) {
   std::ostringstream out;
   bool first = true;
@@ -1635,7 +1650,6 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         return "";
       }
       out << " * ";
-      std::ostringstream pre;
       if (!EmitExpression(pre, out, ary->idx_expr())) {
         return "";
       }
@@ -1689,7 +1703,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
     return false;
   }
 
-  auto idx = generate_storage_buffer_index_expression(expr);
+  auto idx = generate_storage_buffer_index_expression(pre, expr);
   if (idx.empty()) {
     return false;
   }
@@ -1829,19 +1843,22 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
 bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
   make_indent(out);
 
-  out << "return";
-
   if (generating_entry_point_) {
+    out << "return";
     auto outdata = ep_name_to_out_data_.find(current_ep_name_);
     if (outdata != ep_name_to_out_data_.end()) {
       out << " " << outdata->second.var_name;
     }
   } else if (stmt->has_value()) {
-    out << " ";
     std::ostringstream pre;
-    if (!EmitExpression(pre, out, stmt->value())) {
+    std::ostringstream ret_out;
+    if (!EmitExpression(pre, ret_out, stmt->value())) {
       return false;
     }
+    out << pre.str();
+    out << "return " << ret_out.str();
+  } else {
+    out << "return";
   }
   out << ";" << std::endl;
   return true;
@@ -1860,10 +1877,12 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
   if (stmt->IsCall()) {
     make_indent(out);
     std::ostringstream pre;
-    if (!EmitCall(pre, out, stmt->AsCall()->expr())) {
+    std::ostringstream call_out;
+    if (!EmitCall(pre, call_out, stmt->AsCall()->expr())) {
       return false;
     }
-    out << ";" << std::endl;
+    out << pre.str();
+    out << call_out.str() << ";" << std::endl;
     return true;
   }
   if (stmt->IsContinue()) {
@@ -1901,11 +1920,13 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
   make_indent(out);
 
   std::ostringstream pre;
-  out << "switch(";
-  if (!EmitExpression(pre, out, stmt->condition())) {
+  std::ostringstream cond;
+  if (!EmitExpression(pre, cond, stmt->condition())) {
     return false;
   }
-  out << ") {" << std::endl;
+
+  out << pre.str();
+  out << "switch(" << cond.str() << ") {" << std::endl;
 
   increment_indent();
 
@@ -2054,6 +2075,17 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
     return false;
   }
 
+  std::ostringstream constructor_out;
+  if (!skip_constructor && var->constructor() != nullptr) {
+    constructor_out << " = ";
+
+    std::ostringstream pre;
+    if (!EmitExpression(pre, constructor_out, var->constructor())) {
+      return false;
+    }
+    out << pre.str();
+  }
+
   if (var->is_const()) {
     out << "const ";
   }
@@ -2063,16 +2095,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (!var->type()->IsArray()) {
     out << " " << var->name();
   }
-
-  if (!skip_constructor && var->constructor() != nullptr) {
-    out << " = ";
-
-    std::ostringstream pre;
-    if (!EmitExpression(pre, out, var->constructor())) {
-      return false;
-    }
-  }
-  out << ";" << std::endl;
+  out << constructor_out.str() << ";" << std::endl;
 
   return true;
 }
@@ -2090,6 +2113,17 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     return false;
   }
 
+  std::ostringstream constructor_out;
+  if (var->constructor() != nullptr) {
+    constructor_out << " = ";
+
+    std::ostringstream pre;
+    if (!EmitExpression(pre, constructor_out, var->constructor())) {
+      return false;
+    }
+    out << pre.str();
+  }
+
   out << "static const ";
   if (!EmitType(out, var->type(), var->name())) {
     return false;
@@ -2097,16 +2131,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   if (!var->type()->IsArray()) {
     out << " " << var->name();
   }
-
-  if (var->constructor() != nullptr) {
-    out << " = ";
-
-    std::ostringstream pre;
-    if (!EmitExpression(pre, out, var->constructor())) {
-      return false;
-    }
-  }
-  out << ";" << std::endl;
+  out << constructor_out.str() << ";" << std::endl;
 
   return true;
 }
