@@ -311,39 +311,25 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
 
     auto name = generate_name(kTempNamePrefix);
     make_indent(pre);
-    pre << "bool " << name << " = false;" << std::endl;
+    pre << "bool " << name << " = " << lhs_out.str() << ";" << std::endl;
+
     make_indent(pre);
-    pre << "if (" << lhs_out.str() << ") {" << std::endl;
-    {
-      increment_indent();
-
-      if (expr->op() == ast::BinaryOp::kLogicalOr) {
-        make_indent(pre);
-        pre << name << " = true;" << std::endl;
-
-        decrement_indent();
-        make_indent(pre);
-        pre << "} else {" << std::endl;
-        increment_indent();
-      }
-
-      std::ostringstream rhs_out;
-      if (!EmitExpression(pre, rhs_out, expr->rhs())) {
-        return false;
-      }
-      make_indent(pre);
-      pre << "if (" << rhs_out.str() << ") {" << std::endl;
-      {
-        increment_indent();
-        make_indent(pre);
-        pre << name << " = true;" << std::endl;
-        decrement_indent();
-      }
-
-      make_indent(pre);
-      pre << "}" << std::endl;
-      decrement_indent();
+    pre << "if (";
+    if (expr->op() == ast::BinaryOp::kLogicalOr) {
+      pre << "!";
     }
+    pre << name << ") {" << std::endl;
+    increment_indent();
+
+    std::ostringstream rhs_out;
+    if (!EmitExpression(pre, rhs_out, expr->rhs())) {
+      return false;
+    }
+
+    make_indent(pre);
+    pre << name << " = " << rhs_out.str() << ";" << std::endl;
+
+    decrement_indent();
     make_indent(pre);
     pre << "}" << std::endl;
 

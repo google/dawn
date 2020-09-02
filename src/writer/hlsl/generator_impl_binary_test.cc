@@ -92,11 +92,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
 
   ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
-if (left) {
-  if (right) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
+if (_tint_tmp) {
+  _tint_tmp = right;
 }
 )");
 }
@@ -117,27 +115,17 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
 
   ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
-if (a) {
-  if (b) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
+if (_tint_tmp) {
+  _tint_tmp = b;
 }
-bool _tint_tmp_0 = false;
-if ((_tint_tmp)) {
-  _tint_tmp_0 = true;
-} else {
-  bool _tint_tmp_1 = false;
-  if (c) {
-    _tint_tmp_1 = true;
-  } else {
-    if (d) {
-      _tint_tmp_1 = true;
-    }
+bool _tint_tmp_0 = (_tint_tmp);
+if (!_tint_tmp_0) {
+  bool _tint_tmp_1 = c;
+  if (!_tint_tmp_1) {
+    _tint_tmp_1 = d;
   }
-  if ((_tint_tmp_1)) {
-    _tint_tmp_0 = true;
-  }
+  _tint_tmp_0 = (_tint_tmp_1);
 }
 )");
 }
@@ -151,13 +139,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
 
   ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
-if (left) {
-  _tint_tmp = true;
-} else {
-  if (right) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
+if (!_tint_tmp) {
+  _tint_tmp = right;
 }
 )");
 }
@@ -207,22 +191,16 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   expr.set_else_statements(std::move(else_stmts));
 
   ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = false;
-if (a) {
-  if (b) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
+if (_tint_tmp) {
+  _tint_tmp = b;
 }
 if ((_tint_tmp)) {
   return 1;
 } else {
-  bool _tint_tmp_0 = false;
-  if (b) {
-    _tint_tmp_0 = true;
-  } else {
-    if (c) {
-      _tint_tmp_0 = true;
-    }
+  bool _tint_tmp_0 = b;
+  if (!_tint_tmp_0) {
+    _tint_tmp_0 = c;
   }
   if ((_tint_tmp_0)) {
     return 2;
@@ -246,19 +224,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
       std::move(c)));
 
   ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = false;
-if (a) {
-  if (b) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
+if (_tint_tmp) {
+  _tint_tmp = b;
 }
-bool _tint_tmp_0 = false;
-if ((_tint_tmp)) {
-  _tint_tmp_0 = true;
-} else {
-  if (c) {
-    _tint_tmp_0 = true;
-  }
+bool _tint_tmp_0 = (_tint_tmp);
+if (!_tint_tmp_0) {
+  _tint_tmp_0 = c;
 }
 return (_tint_tmp_0);
 )");
@@ -280,19 +252,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
           std::move(d)));
 
   ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = false;
-if (b) {
-  _tint_tmp = true;
-} else {
-  if (c) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
+if (!_tint_tmp) {
+  _tint_tmp = c;
 }
-bool _tint_tmp_0 = false;
-if ((_tint_tmp)) {
-  if (d) {
-    _tint_tmp_0 = true;
-  }
+bool _tint_tmp_0 = (_tint_tmp);
+if (_tint_tmp_0) {
+  _tint_tmp_0 = d;
 }
 a = (_tint_tmp_0);
 )");
@@ -317,19 +283,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   ast::VariableDeclStatement expr(std::move(var));
 
   ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = false;
-if (b) {
-  if (c) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
+if (_tint_tmp) {
+  _tint_tmp = c;
 }
-bool _tint_tmp_0 = false;
-if ((_tint_tmp)) {
-  _tint_tmp_0 = true;
-} else {
-  if (d) {
-    _tint_tmp_0 = true;
-  }
+bool _tint_tmp_0 = (_tint_tmp);
+if (!_tint_tmp_0) {
+  _tint_tmp_0 = d;
 }
 bool a = (_tint_tmp_0);
 )");
@@ -350,19 +310,13 @@ TEST_F(HlslGeneratorImplTest_Binary, As_WithLogical) {
                     ast::BinaryOp::kLogicalOr, std::move(b), std::move(c))));
 
   ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = false;
-if (a) {
-  bool _tint_tmp_0 = false;
-  if (b) {
-    _tint_tmp_0 = true;
-  } else {
-    if (c) {
-      _tint_tmp_0 = true;
-    }
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
+if (_tint_tmp) {
+  bool _tint_tmp_0 = b;
+  if (!_tint_tmp_0) {
+    _tint_tmp_0 = c;
   }
-  if ((_tint_tmp_0)) {
-    _tint_tmp = true;
-  }
+  _tint_tmp = (_tint_tmp_0);
 }
 )");
   EXPECT_EQ(result(), R"(asint((_tint_tmp)))");
@@ -401,41 +355,25 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
       std::make_unique<ast::IdentifierExpression>("foo"), std::move(params)));
 
   ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = false;
-if (a) {
-  if (b) {
-    _tint_tmp = true;
-  }
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
+if (_tint_tmp) {
+  _tint_tmp = b;
 }
-bool _tint_tmp_0 = false;
-if (c) {
-  _tint_tmp_0 = true;
-} else {
-  if (d) {
-    _tint_tmp_0 = true;
-  }
+bool _tint_tmp_0 = c;
+if (!_tint_tmp_0) {
+  _tint_tmp_0 = d;
 }
-bool _tint_tmp_1 = false;
-if (a) {
-  _tint_tmp_1 = true;
-} else {
-  if (c) {
-    _tint_tmp_1 = true;
-  }
+bool _tint_tmp_1 = a;
+if (!_tint_tmp_1) {
+  _tint_tmp_1 = c;
 }
-bool _tint_tmp_2 = false;
-if ((_tint_tmp_1)) {
-  bool _tint_tmp_3 = false;
-  if (b) {
-    _tint_tmp_3 = true;
-  } else {
-    if (d) {
-      _tint_tmp_3 = true;
-    }
+bool _tint_tmp_2 = (_tint_tmp_1);
+if (_tint_tmp_2) {
+  bool _tint_tmp_3 = b;
+  if (!_tint_tmp_3) {
+    _tint_tmp_3 = d;
   }
-  if ((_tint_tmp_3)) {
-    _tint_tmp_2 = true;
-  }
+  _tint_tmp_2 = (_tint_tmp_3);
 }
 foo((_tint_tmp), (_tint_tmp_0), (_tint_tmp_2));
 )");
