@@ -302,7 +302,8 @@ bool GeneratorImpl::EmitAssign(std::ostream& out,
 bool GeneratorImpl::EmitBinary(std::ostream& pre,
                                std::ostream& out,
                                ast::BinaryExpression* expr) {
-  if (expr->op() == ast::BinaryOp::kLogicalAnd) {
+  if (expr->op() == ast::BinaryOp::kLogicalAnd ||
+      expr->op() == ast::BinaryOp::kLogicalOr) {
     std::ostringstream lhs_out;
     if (!EmitExpression(pre, lhs_out, expr->lhs())) {
       return false;
@@ -316,55 +317,15 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     {
       increment_indent();
 
-      std::ostringstream rhs_out;
-      if (!EmitExpression(pre, rhs_out, expr->rhs())) {
-        return false;
-      }
-      make_indent(pre);
-      pre << "if (" << rhs_out.str() << ") {" << std::endl;
-      {
-        increment_indent();
-
+      if (expr->op() == ast::BinaryOp::kLogicalOr) {
         make_indent(pre);
         pre << name << " = true;" << std::endl;
 
         decrement_indent();
+        make_indent(pre);
+        pre << "} else {" << std::endl;
+        increment_indent();
       }
-      make_indent(pre);
-      pre << "}" << std::endl;
-
-      decrement_indent();
-    }
-    make_indent(pre);
-    pre << "}" << std::endl;
-
-    out << "(" << name << ")";
-    return true;
-  }
-  if (expr->op() == ast::BinaryOp::kLogicalOr) {
-    std::ostringstream lhs_out;
-    if (!EmitExpression(pre, lhs_out, expr->lhs())) {
-      return false;
-    }
-
-    auto name = generate_name(kTempNamePrefix);
-    make_indent(pre);
-    pre << "bool " << name << " = false;" << std::endl;
-    make_indent(pre);
-    pre << "if (" << lhs_out.str() << ") {" << std::endl;
-    {
-      increment_indent();
-
-      make_indent(pre);
-      pre << name << " = true;" << std::endl;
-
-      decrement_indent();
-    }
-
-    make_indent(pre);
-    pre << "} else {" << std::endl;
-    {
-      increment_indent();
 
       std::ostringstream rhs_out;
       if (!EmitExpression(pre, rhs_out, expr->rhs())) {
@@ -374,15 +335,13 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
       pre << "if (" << rhs_out.str() << ") {" << std::endl;
       {
         increment_indent();
-
         make_indent(pre);
         pre << name << " = true;" << std::endl;
-
         decrement_indent();
       }
+
       make_indent(pre);
       pre << "}" << std::endl;
-
       decrement_indent();
     }
     make_indent(pre);
