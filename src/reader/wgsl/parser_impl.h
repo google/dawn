@@ -150,8 +150,7 @@ class ParserImpl {
   /// @returns the type alias or nullptr on error
   ast::type::AliasType* type_alias();
   /// Parses a `type_decl` grammar element
-  /// @returns the parsed Type or nullptr if none matched. The returned type
-  //           is owned by the TypeManager.
+  /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* type_decl();
   /// Parses a `storage_class` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
@@ -181,6 +180,9 @@ class ParserImpl {
   /// Parses a `function_decl` grammar element
   /// @returns the parsed function, nullptr otherwise
   std::unique_ptr<ast::Function> function_decl();
+  /// Parses a `sampler_type` grammar element
+  /// @returns the parsed Type or nullptr if none matched.
+  ast::type::Type* sampler_type();
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
   ast::type::Type* function_type_decl();

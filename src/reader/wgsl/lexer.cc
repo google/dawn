@@ -561,6 +561,10 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kPtr, source, "ptr"};
   if (str == "return")
     return {Token::Type::kReturn, source, "return"};
+  if (str == "sampler")
+    return {Token::Type::kSampler, source, "sampler"};
+  if (str == "sampler_comparison")
+    return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
   if (str == "set")
     return {Token::Type::kSet, source, "set"};
   if (str == "storage_buffer")

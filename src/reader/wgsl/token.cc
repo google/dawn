@@ -197,6 +197,10 @@ std::string Token::TypeToName(Type type) {
       return "ptr";
     case Token::Type::kReturn:
       return "return";
+    case Token::Type::kSampler:
+      return "sampler";
+    case Token::Type::kComparisonSampler:
+      return "sampler_comparison";
     case Token::Type::kSet:
       return "set";
     case Token::Type::kStorageBuffer:

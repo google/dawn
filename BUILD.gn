@@ -908,6 +908,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     "src/reader/wgsl/parser_impl_postfix_expression_test.cc",
     "src/reader/wgsl/parser_impl_primary_expression_test.cc",
     "src/reader/wgsl/parser_impl_relational_expression_test.cc",
+    "src/reader/wgsl/parser_impl_sampler_type_test.cc",
     "src/reader/wgsl/parser_impl_shift_expression_test.cc",
     "src/reader/wgsl/parser_impl_statement_test.cc",
     "src/reader/wgsl/parser_impl_statements_test.cc",

@@ -50,6 +50,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -573,6 +574,24 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   }
 
   return std::make_unique<ast::Variable>(source, name, sc, type);
+}
+
+// sampler_type
+//  : SAMPLER
+//  | SAMPLER_COMPARISON
+ast::type::Type* ParserImpl::sampler_type() {
+  auto t = peek();
+  if (t.IsSampler()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
+        ast::type::SamplerKind::kSampler));
+  }
+  if (t.IsComparisonSampler()) {
+    next();  // Consume the peek
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
+        ast::type::SamplerKind::kComparisonSampler));
+  }
+  return nullptr;
 }
 
 // variable_ident_decl

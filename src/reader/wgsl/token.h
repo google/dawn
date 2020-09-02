@@ -208,6 +208,10 @@ class Token {
     kPtr,
     /// A 'return'
     kReturn,
+    /// A 'sampler'
+    kSampler,
+    /// A 'sampler_comparison'
+    kComparisonSampler,
     /// A 'set'
     kSet,
     /// A 'storage_buffer'
@@ -465,6 +469,10 @@ class Token {
   bool IsPtr() const { return type_ == Type::kPtr; }
   /// @returns true if token is a 'return'
   bool IsReturn() const { return type_ == Type::kReturn; }
+  /// @returns true if token is a 'sampler'
+  bool IsSampler() const { return type_ == Type::kSampler; }
+  /// @returns true if token is a 'sampler_comparison'
+  bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
   /// @returns true if token is a 'set'
   bool IsSet() const { return type_ == Type::kSet; }
   /// @returns true if token is a 'storage_buffer'
