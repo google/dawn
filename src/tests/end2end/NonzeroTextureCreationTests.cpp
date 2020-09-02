@@ -143,7 +143,8 @@ TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expected(bufferSize, 0x01010101);
+    uint32_t expectedBytes = IsVulkan() ? 0x7F7F7F7F : 0x01010101;
+    std::vector<uint32_t> expected(bufferSize, expectedBytes);
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), bufferDst, 0, 8);
 }
 
@@ -176,7 +177,8 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayer
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    std::vector<uint32_t> expected(bufferSize, 0x01010101);
+    uint32_t expectedBytes = IsVulkan() ? 0x7F7F7F7F : 0x01010101;
+    std::vector<uint32_t> expected(bufferSize, expectedBytes);
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), bufferDst, 0, 8);
 }
 
@@ -244,7 +246,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
     baseDescriptor.mipLevelCount = 1;
     baseDescriptor.usage = wgpu::TextureUsage::CopySrc;
 
-    RGBA8 filled(1, 1, 1, 1);
+    RGBA8 filled = IsVulkan() ? RGBA8(127, 127, 127, 127) : RGBA8(1, 1, 1, 1);
 
     {
         wgpu::TextureDescriptor descriptor = baseDescriptor;
