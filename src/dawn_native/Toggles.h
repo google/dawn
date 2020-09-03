@@ -34,8 +34,6 @@ namespace dawn_native {
         UseD3D12RenderPass,
         UseD3D12ResidencyManagement,
         SkipValidation,
-        UseSpvc,
-        UseSpvcParser,
         VulkanUseD32S8,
         MetalDisableSamplerCompare,
         DisableBaseVertex,

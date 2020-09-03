@@ -116,7 +116,6 @@ TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
 }
 
 // Test that it is not allowed to use combined texture and sampler.
-// TODO(jiawei.shao@intel.com): support extracting  combined texture and sampler in spvc.
 TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
     const char* shader = R"(
         #version 450

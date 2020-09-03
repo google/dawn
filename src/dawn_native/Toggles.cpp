@@ -93,16 +93,6 @@ namespace dawn_native {
              {Toggle::SkipValidation,
               {"skip_validation", "Skip expensive validation of Dawn commands.",
                "https://crbug.com/dawn/271"}},
-             {Toggle::UseSpvc,
-              {"use_spvc",
-               "Enable use of spvc for shader compilation, instead of accessing spirv_cross "
-               "directly.",
-               "https://crbug.com/dawn/288"}},
-             {Toggle::UseSpvcParser,
-              {"use_spvc_parser",
-               "Enable usage of spvc's internal parsing and IR generation code, instead of "
-               "spirv_cross's.",
-               "https://crbug.com/dawn/288"}},
              {Toggle::VulkanUseD32S8,
               {"vulkan_use_d32s8",
                "Vulkan mandates support of either D32_FLOAT_S8 or D24_UNORM_S8. When available the "

@@ -401,10 +401,6 @@ class BufferZeroInitTest : public DawnTest {
     }
 
     void TestBufferZeroInitAsIndirectBufferForDispatchIndirect(uint64_t indirectBufferOffset) {
-        // See https://github.com/google/shaderc/issues/1123 for more details.
-        // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-        DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
         constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
@@ -971,10 +967,6 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // uniform buffer.
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
-    // See https://github.com/google/shaderc/issues/1123 for more details.
-    // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) uniform UBO {
@@ -1011,10 +1003,6 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // read-only storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
-    // See https://github.com/google/shaderc/issues/1123 for more details.
-    // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) readonly buffer SSBO {
@@ -1051,10 +1039,6 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
-    // See https://github.com/google/shaderc/issues/1123 for more details.
-    // TODO(jiawei.shao@intel.com): enable this test when the related SPVC issue is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) buffer SSBO {

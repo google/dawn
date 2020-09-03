@@ -191,8 +191,6 @@ class DawnTestEnvironment : public testing::Environment {
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
     bool IsDawnValidationSkipped() const;
-    bool IsSpvcBeingUsed() const;
-    bool IsSpvcParserBeingUsed() const;
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
@@ -210,10 +208,6 @@ class DawnTestEnvironment : public testing::Environment {
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
     bool mSkipDawnValidation = false;
-    bool mUseSpvc = false;
-    bool mSpvcFlagSeen = false;
-    bool mUseSpvcParser = false;
-    bool mSpvcParserFlagSeen = false;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
@@ -256,8 +250,6 @@ class DawnTestBase {
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
     bool IsDawnValidationSkipped() const;
-    bool IsSpvcBeingUsed() const;
-    bool IsSpvcParserBeingUsed() const;
 
     bool IsAsan() const;
 

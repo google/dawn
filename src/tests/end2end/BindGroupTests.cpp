@@ -1095,12 +1095,6 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(BindGroupTests, ReallyLargeBindGroup) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     std::string interface = "#version 450\n";
     std::string body;
     uint32_t binding = 0;

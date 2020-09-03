@@ -42,16 +42,12 @@ endif()
 if (NOT TARGET shaderc)
     set(SHADERC_SKIP_TESTS ON CACHE BOOL "" FORCE)
     set(SHADERC_SKIP_INSTALL ON CACHE BOOL "" FORCE)
-    set(SHADERC_ENABLE_SPVC ON CACHE BOOL "" FORCE)
 
     # Change the default value of SHADERC_ENABLE_SHARED_CRT to ON as that's what matches the
     # CMake defaults better.
     if(MSVC)
         option(SHADERC_ENABLE_SHARED_CRT "Use the shared CRT instead of the static CRT" ON CACHE BOOL "" FORCE)
     endif()
-
-    # Let SPVC's CMakeLists.txt deal with configuring SPIRV-Cross
-    set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 
     message(STATUS "Dawn: using shaderc at ${DAWN_SHADERC_DIR}")
     add_subdirectory(${DAWN_SHADERC_DIR})

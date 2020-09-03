@@ -703,12 +703,6 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
 
 // Test that read-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -743,12 +737,6 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 
 // Test that read-only storage textures are supported in vertex shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -789,12 +777,6 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
 
 // Test that read-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -827,12 +809,6 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
 
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -860,12 +836,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 // Test that reading from one read-only storage texture then writing into another write-only storage
 // texture in one dispatch are supported in compute shader.
 TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInComputeShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -898,12 +868,6 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -931,12 +895,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
 // Verify 2D array read-only storage texture works correctly.
 TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
-
     constexpr uint32_t kArrayLayerCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -969,12 +927,6 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 
 // Verify 2D array write-only storage texture works correctly.
 TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     constexpr uint32_t kArrayLayerCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -1037,12 +989,6 @@ class StorageTextureZeroInitTests : public StorageTextureTests {
 // Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
 // texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPass) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
-
     wgpu::Texture readonlyStorageTexture =
         CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
 
@@ -1069,12 +1015,6 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
 // Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputePass) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
-
     wgpu::Texture readonlyStorageTexture =
         CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
 
@@ -1102,12 +1042,6 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // storage texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
@@ -1121,12 +1055,6 @@ TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderP
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInComputePass) {
-    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
-    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
-    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
-    // bug in spvc parser is fixed.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
