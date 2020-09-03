@@ -43,6 +43,10 @@ bool Generator::Generate() {
   return true;
 }
 
+bool Generator::GenerateEntryPoint(ast::PipelineStage, const std::string&) {
+  return false;
+}
+
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

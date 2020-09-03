@@ -40,6 +40,10 @@ bool Generator::Generate() {
   return ret;
 }
 
+bool Generator::GenerateEntryPoint(ast::PipelineStage, const std::string&) {
+  return false;
+}
+
 std::string Generator::result() const {
   return out_.str();
 }
