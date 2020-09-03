@@ -33,6 +33,9 @@ class Generator : public Text {
   explicit Generator(ast::Module module);
   ~Generator() override;
 
+  /// Resets the generator
+  void Reset() override;
+
   /// Generates the result data
   /// @returns true on successful generation; false otherwise
   bool Generate() override;

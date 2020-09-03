@@ -30,6 +30,9 @@ class Writer {
   /// @returns the writer error string
   const std::string& error() const { return error_; }
 
+  /// Resets the generator
+  virtual void Reset() = 0;
+
   /// Converts the module into the desired format
   /// @returns true on success; false on failure
   virtual bool Generate() = 0;

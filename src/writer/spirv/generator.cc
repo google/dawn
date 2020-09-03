@@ -27,6 +27,11 @@ Generator::Generator(ast::Module module)
 
 Generator::~Generator() = default;
 
+void Generator::Reset() {
+  builder_ = std::make_unique<Builder>(&module_);
+  writer_ = std::make_unique<BinaryWriter>();
+}
+
 bool Generator::Generate() {
   if (!builder_->Build()) {
     set_error(builder_->error());

@@ -25,6 +25,11 @@ Generator::Generator(ast::Module module)
 
 Generator::~Generator() = default;
 
+void Generator::Reset() {
+  set_error("");
+  impl_ = std::make_unique<GeneratorImpl>();
+}
+
 bool Generator::Generate() {
   auto ret = impl_->Generate(module_);
   if (!ret) {

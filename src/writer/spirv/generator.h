@@ -35,6 +35,9 @@ class Generator : public writer::Writer {
   explicit Generator(ast::Module module);
   ~Generator() override;
 
+  /// Resets the generator
+  void Reset() override;
+
   /// Generates the result data
   /// @returns true on successful generation; false otherwise
   bool Generate() override;
