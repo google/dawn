@@ -2316,6 +2316,7 @@ SpvImageFormat Builder::convert_image_format_to_spv(
     case ast::type::ImageFormat::kRgba32Float:
       return SpvImageFormatRgba32f;
   }
+  return SpvImageFormatUnknown;
 }
 
 }  // namespace spirv
