@@ -280,6 +280,32 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   EXPECT_EQ(v()->error(),
             "12:34: v-0022: global variables must have a storage class");
 }
+TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
+  // const<in> gloabl_var: f32;
+  ast::type::F32Type f32;
+  auto global_var = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
+  global_var->set_is_const(true);
+
+  mod()->AddGlobalVariable(std::move(global_var));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(
+      v()->error(),
+      "12:34: v-global01: global constants shouldn't have a storage class");
+}
+
+TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
+  // const gloabl_var: f32;
+  ast::type::F32Type f32;
+  auto global_var = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kNone, &f32);
+  global_var->set_is_const(true);
+
+  mod()->AddGlobalVariable(std::move(global_var));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+}
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   // var global_var: f32 = 2.1;

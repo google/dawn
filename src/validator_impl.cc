@@ -62,9 +62,15 @@ bool ValidatorImpl::ValidateGlobalVariables(
                 "v-0011: redeclared global identifier '" + var->name() + "'");
       return false;
     }
-    if (var->storage_class() == ast::StorageClass::kNone) {
+    if (!var->is_const() && var->storage_class() == ast::StorageClass::kNone) {
       set_error(var->source(),
                 "v-0022: global variables must have a storage class");
+      return false;
+    }
+    if (var->is_const() &&
+        !(var->storage_class() == ast::StorageClass::kNone)) {
+      set_error(var->source(),
+                "v-global01: global constants shouldn't have a storage class");
       return false;
     }
     variable_stack_.set_global(var->name(), var.get());
