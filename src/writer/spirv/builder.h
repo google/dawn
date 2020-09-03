@@ -286,6 +286,26 @@ class Builder {
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateIntrinsic(const std::string& name,
                              ast::CallExpression* call);
+  /// Generates a texture intrinsic call
+  /// @param name the texture intrinsic name
+  /// @param call the call expression
+  /// @returns the expression ID on success or 0 otherwise
+  uint32_t GenerateTextureIntrinsic(const std::string& name,
+                                    ast::CallExpression* call,
+                                    uint32_t result_id,
+                                    OperandList params);
+  /// Generates a sampled image
+  /// @param texture_type the texture type
+  /// @param texture_operand the texture operand
+  /// @param sampler_operand the sampler operand
+  /// @returns the expression ID
+  uint32_t GenerateSampledImage(ast::type::Type* texture_type,
+                                Operand texture_operand,
+                                Operand sampler_operand);
+  /// Generates a constant float zero.
+  /// @param float_operand the f32 type operand
+  /// @returns the expression ID
+  uint32_t GenerateConstantFloatZeroIfNeeded(Operand float_operand);
   /// Generates a cast expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
@@ -424,10 +444,13 @@ class Builder {
   std::unordered_map<std::string, ast::Function*> func_name_to_func_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
+  std::unordered_map<std::string, uint32_t>
+      texture_type_name_to_sampled_image_type_id_;
   ScopeStack<uint32_t> scope_stack_;
   std::unordered_map<uint32_t, ast::Variable*> spirv_id_to_variable_;
   std::vector<uint32_t> merge_stack_;
   std::vector<uint32_t> continue_stack_;
+  uint32_t constant_float_zero_id_ = 0;
 };
 
 }  // namespace spirv

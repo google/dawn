@@ -1467,6 +1467,10 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     params.push_back(Operand::Int(val_id));
   }
 
+  if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
+    return GenerateTextureIntrinsic(name, call, result_id, params);
+  }
+
   if (ast::intrinsic::IsFineDerivative(name) ||
       ast::intrinsic::IsCoarseDerivative(name)) {
     push_capability(SpvCapabilityDerivativeControl);
@@ -1513,6 +1517,103 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
   push_function_inst(op, params);
 
   return result_id;
+}
+
+uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
+                                           ast::CallExpression* call,
+                                           uint32_t result_id,
+                                           OperandList wgsl_params) {
+  auto* texture_type = call->params()[0]
+                           .get()
+                           ->result_type()
+                           ->UnwrapAliasPtrAlias()
+                           ->AsTexture();
+
+  if (name == "texture_load") {
+    auto spirv_params = {std::move(wgsl_params[0]),
+                         std::move(wgsl_params[1]),
+                         std::move(wgsl_params[2]),
+                         std::move(wgsl_params[3]),
+                         Operand::Int(SpvImageOperandsLodMask),
+                         std::move(wgsl_params[4])};
+    auto op = spv::Op::OpImageFetch;
+    if (texture_type->IsStorage()) {
+      op = spv::Op::OpImageRead;
+    }
+    push_function_inst(op, spirv_params);
+    return result_id;
+  }
+
+  spv::Op op = spv::Op::OpNop;
+  OperandList spirv_params = {
+      wgsl_params[0], std::move(wgsl_params[1]),
+      Operand::Int(GenerateSampledImage(texture_type, std::move(wgsl_params[2]),
+                                        std::move(wgsl_params[3]))),
+      std::move(wgsl_params[4])};
+
+  if (name == "texture_sample") {
+    op = spv::Op::OpImageSampleImplicitLod;
+  } else if (name == "texture_sample_level") {
+    op = spv::Op::OpImageSampleExplicitLod;
+    spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
+    spirv_params.push_back(std::move(wgsl_params[5]));
+  } else if (name == "texture_sample_bias") {
+    op = spv::Op::OpImageSampleImplicitLod;
+    spirv_params.push_back(Operand::Int(SpvImageOperandsBiasMask));
+    spirv_params.push_back(std::move(wgsl_params[5]));
+  } else if (name == "texture_sample_compare") {
+    op = spv::Op::OpImageSampleDrefExplicitLod;
+    spirv_params.push_back(std::move(wgsl_params[5]));
+
+    spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
+    spirv_params.push_back(Operand::Int(
+        GenerateConstantFloatZeroIfNeeded(std::move(wgsl_params[0]))));
+  }
+  if (op == spv::Op::OpNop) {
+    error_ = "unable to determine operator for: " + name;
+    return 0;
+  }
+  push_function_inst(op, spirv_params);
+
+  return result_id;
+}
+
+uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
+                                       Operand texture_operand,
+                                       Operand sampler_operand) {
+  uint32_t sampled_image_type_id = 0;
+  auto val = texture_type_name_to_sampled_image_type_id_.find(
+      texture_type->type_name());
+  if (val != texture_type_name_to_sampled_image_type_id_.end()) {
+    // The sampled image type is already created.
+    sampled_image_type_id = val->second;
+  } else {
+    // We need to create the sampled image type and cache the result.
+    auto sampled_image_type = result_op();
+    sampled_image_type_id = sampled_image_type.to_i();
+    auto texture_type_id = GenerateTypeIfNeeded(texture_type);
+    push_type(spv::Op::OpTypeSampledImage,
+              {sampled_image_type, Operand::Int(texture_type_id)});
+    texture_type_name_to_sampled_image_type_id_[texture_type->type_name()] =
+        sampled_image_type_id;
+  }
+
+  auto sampled_image = result_op();
+  push_function_inst(spv::Op::OpSampledImage,
+                     {Operand::Int(sampled_image_type_id), sampled_image,
+                      texture_operand, sampler_operand});
+
+  return sampled_image.to_i();
+}
+
+uint32_t Builder::GenerateConstantFloatZeroIfNeeded(Operand float_operand) {
+  if (constant_float_zero_id_ == 0) {
+    auto float_0 = result_op();
+    push_type(spv::Op::OpConstant,
+              {std::move(float_operand), float_0, Operand::Int(0)});
+    constant_float_zero_id_ = float_0.to_i();
+  }
+  return constant_float_zero_id_;
 }
 
 uint32_t Builder::GenerateAsExpression(ast::AsExpression* as) {
