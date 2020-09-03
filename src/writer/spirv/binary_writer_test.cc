@@ -47,7 +47,7 @@ TEST_F(BinaryWriterTest, Float) {
   Builder b(&mod);
   b.push_preamble(spv::Op::OpKill, {Operand::Float(2.4f)});
   BinaryWriter bw;
-  bw.WriteBuilder(b);
+  bw.WriteBuilder(&b);
 
   auto res = bw.result();
   ASSERT_EQ(res.size(), 2u);
@@ -61,7 +61,7 @@ TEST_F(BinaryWriterTest, Int) {
   Builder b(&mod);
   b.push_preamble(spv::Op::OpKill, {Operand::Int(2)});
   BinaryWriter bw;
-  bw.WriteBuilder(b);
+  bw.WriteBuilder(&b);
 
   auto res = bw.result();
   ASSERT_EQ(res.size(), 2u);
@@ -73,7 +73,7 @@ TEST_F(BinaryWriterTest, String) {
   Builder b(&mod);
   b.push_preamble(spv::Op::OpKill, {Operand::String("my_string")});
   BinaryWriter bw;
-  bw.WriteBuilder(b);
+  bw.WriteBuilder(&b);
 
   auto res = bw.result();
   ASSERT_EQ(res.size(), 4u);
@@ -98,7 +98,7 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
   Builder b(&mod);
   b.push_preamble(spv::Op::OpKill, {Operand::String("mystring")});
   BinaryWriter bw;
-  bw.WriteBuilder(b);
+  bw.WriteBuilder(&b);
 
   auto res = bw.result();
   ASSERT_EQ(res.size(), 4u);

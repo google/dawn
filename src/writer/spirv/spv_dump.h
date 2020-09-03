@@ -28,7 +28,7 @@ namespace spirv {
 /// Dumps the given builder to a SPIR-V disassembly string
 /// @param builder the builder to convert
 /// @returns the builder as a SPIR-V disassembly string
-std::string DumpBuilder(const Builder& builder);
+std::string DumpBuilder(Builder& builder);
 
 /// Dumps the given instruction to a SPIR-V disassembly string
 /// @param inst the instruction to dump

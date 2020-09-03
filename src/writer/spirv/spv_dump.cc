@@ -61,10 +61,10 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 
 }  // namespace
 
-std::string DumpBuilder(const Builder& builder) {
+std::string DumpBuilder(Builder& builder) {
   BinaryWriter writer;
   writer.WriteHeader(builder.id_bound());
-  writer.WriteBuilder(builder);
+  writer.WriteBuilder(&builder);
   return Disassemble(writer.result());
 }
 

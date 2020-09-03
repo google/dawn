@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_HLSL_GENERATOR_H_
 #define SRC_WRITER_HLSL_GENERATOR_H_
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -45,7 +46,7 @@ class Generator : public Text {
 
  private:
   std::ostringstream out_;
-  GeneratorImpl impl_;
+  std::unique_ptr<GeneratorImpl> impl_;
 };
 
 }  // namespace hlsl

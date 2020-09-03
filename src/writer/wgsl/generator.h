@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_WGSL_GENERATOR_H_
 #define SRC_WRITER_WGSL_GENERATOR_H_
 
+#include <memory>
 #include <string>
 
 #include "src/writer/text.h"
@@ -43,7 +44,7 @@ class Generator : public Text {
   std::string error() const;
 
  private:
-  GeneratorImpl impl_;
+  std::unique_ptr<GeneratorImpl> impl_;
 };
 
 }  // namespace wgsl

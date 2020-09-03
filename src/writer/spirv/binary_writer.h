@@ -38,7 +38,7 @@ class BinaryWriter {
   /// the SPIR-V header. You |must| call |WriteHeader| before |WriteBuilder|
   /// if you want the SPIR-V to be emitted.
   /// @param builder the builder to assemble from
-  void WriteBuilder(const Builder& builder);
+  void WriteBuilder(Builder* builder);
 
   /// Writes the given instruction into the binary.
   /// @param inst the instruction to assemble

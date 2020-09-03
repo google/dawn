@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_SPIRV_GENERATOR_H_
 #define SRC_WRITER_SPIRV_GENERATOR_H_
 
+#include <memory>
 #include <vector>
 
 #include "src/ast/module.h"
@@ -39,11 +40,11 @@ class Generator : public writer::Writer {
   bool Generate() override;
 
   /// @returns the result data
-  const std::vector<uint32_t>& result() const { return writer_.result(); }
+  const std::vector<uint32_t>& result() const { return writer_->result(); }
 
  private:
-  Builder builder_;
-  BinaryWriter writer_;
+  std::unique_ptr<Builder> builder_;
+  std::unique_ptr<BinaryWriter> writer_;
 };
 
 }  // namespace spirv
