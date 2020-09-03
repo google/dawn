@@ -47,7 +47,8 @@ TEST_F(SpvParserTest, EntryPoint_Vertex) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{vertex = foobar})"));
+  EXPECT_THAT(module_str,
+              HasSubstr(R"(EntryPoint{vertex as foobar = foobar})"));
 }
 
 TEST_F(SpvParserTest, EntryPoint_Fragment) {
@@ -55,7 +56,8 @@ TEST_F(SpvParserTest, EntryPoint_Fragment) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{fragment = blitz})"));
+  EXPECT_THAT(module_str,
+              HasSubstr(R"(EntryPoint{fragment as blitz = blitz})"));
 }
 
 TEST_F(SpvParserTest, EntryPoint_Compute) {
@@ -63,7 +65,7 @@ TEST_F(SpvParserTest, EntryPoint_Compute) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute = sort})"));
+  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute as sort = sort})"));
 }
 
 TEST_F(SpvParserTest, EntryPoint_MultiNameConflict) {
@@ -73,9 +75,10 @@ TEST_F(SpvParserTest, EntryPoint_MultiNameConflict) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute = work})"));
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{vertex = work_1})"));
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{fragment = work_2})"));
+  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute as work = work})"));
+  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{vertex as work = work_1})"));
+  EXPECT_THAT(module_str,
+              HasSubstr(R"(EntryPoint{fragment as work = work_2})"));
 }
 
 TEST_F(SpvParserTest, EntryPoint_NameIsSanitized) {
@@ -83,7 +86,8 @@ TEST_F(SpvParserTest, EntryPoint_NameIsSanitized) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute = x_1234})"));
+  EXPECT_THAT(module_str,
+              HasSubstr(R"(EntryPoint{compute as .1234 = x_1234})"));
 }
 
 }  // namespace

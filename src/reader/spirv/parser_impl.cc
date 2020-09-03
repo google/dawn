@@ -613,10 +613,11 @@ bool ParserImpl::EmitEntryPoints() {
        module_->entry_points()) {
     const auto stage = SpvExecutionModel(entry_point.GetSingleWordInOperand(0));
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
+    const std::string ep_name = entry_point.GetOperand(2).AsString();
     const std::string name = namer_.GetName(function_id);
 
     ast_module_.AddEntryPoint(std::make_unique<ast::EntryPoint>(
-        enum_converter_.ToPipelineStage(stage), "", name));
+        enum_converter_.ToPipelineStage(stage), ep_name, name));
   }
   // The enum conversion could have failed, so return the existing status value.
   return success_;
