@@ -18,6 +18,7 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
+#include "src/ast/pipeline_stage.h"
 #include "src/context.h"
 #include "src/reader/reader.h"
 #include "src/type_determiner.h"

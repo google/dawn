@@ -115,6 +115,10 @@ class Function : public Node {
   const std::vector<std::string>& ancestor_entry_points() const {
     return ancestor_entry_points_;
   }
+  /// Checks if the given entry point is an ancestor
+  /// @param name the entry point name
+  /// @returns true if |name| is an ancestor entry point of this function
+  bool HasAncestorEntryPoint(const std::string& name) const;
 
   /// Sets the return type of the function
   /// @param type the return type

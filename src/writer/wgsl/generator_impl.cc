@@ -112,6 +112,101 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   return true;
 }
 
+bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
+                                       ast::PipelineStage stage,
+                                       const std::string& name) {
+  // TODO(dsinclair): We're always emitting imports even if they aren't needed.
+  for (const auto& import : module.imports()) {
+    if (!EmitImport(import.get())) {
+      return false;
+    }
+  }
+  if (!module.imports().empty()) {
+    out_ << std::endl;
+  }
+
+  bool found_entry_point = false;
+  std::string ep_function_name = "";
+  for (const auto& ep : module.entry_points()) {
+    std::string ep_name = ep->name();
+    if (ep_name.empty()) {
+      ep_name = ep->function_name();
+    }
+    ep_function_name = ep->function_name();
+
+    if (ep->stage() != stage || ep_name != name) {
+      continue;
+    }
+    if (!EmitEntryPoint(ep.get())) {
+      return false;
+    }
+    found_entry_point = true;
+    break;
+  }
+  out_ << std::endl;
+
+  if (!found_entry_point) {
+    error_ = "Unable to find requested entry point: " + name;
+    return false;
+  }
+
+  // TODO(dsinclair): We always emit aliases even if they aren't strictly needed
+  for (auto* const alias : module.alias_types()) {
+    if (!EmitAliasType(alias)) {
+      return false;
+    }
+  }
+  if (!module.alias_types().empty()) {
+    out_ << std::endl;
+  }
+
+  // TODO(dsinclair): This should be smarter and only emit needed const
+  // variables
+  for (const auto& var : module.global_variables()) {
+    if (!var->is_const()) {
+      continue;
+    }
+    if (!EmitVariable(var.get())) {
+      return false;
+    }
+  }
+
+  auto* func = module.FindFunctionByName(ep_function_name);
+  if (!func) {
+    error_ = "Unable to find entry point function: " + ep_function_name;
+    return false;
+  }
+
+  bool found_func_variable = false;
+  for (auto* var : func->referenced_module_variables()) {
+    if (!EmitVariable(var)) {
+      return false;
+    }
+    found_func_variable = true;
+  }
+  if (found_func_variable) {
+    out_ << std::endl;
+  }
+
+  for (const auto& f : module.functions()) {
+    if (!f->HasAncestorEntryPoint(name)) {
+      continue;
+    }
+
+    if (!EmitFunction(f.get())) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+
+  if (!EmitFunction(func)) {
+    return false;
+  }
+  out_ << std::endl;
+
+  return true;
+}
+
 bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
   make_indent();
   out_ << "type " << alias->name() << " = ";

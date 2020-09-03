@@ -47,6 +47,14 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
 
+  /// Generates a single entry point
+  /// @param module the module to generate from
+  /// @param stage the pipeline stage
+  /// @param name the entry point name
+  bool GenerateEntryPoint(const ast::Module& module,
+                          ast::PipelineStage stage,
+                          const std::string& name);
+
   /// Handles generating an alias
   /// @param alias the alias to generate
   /// @returns true if the alias was emitted

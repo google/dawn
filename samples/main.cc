@@ -46,6 +46,10 @@ struct Options {
   bool dump_ast = false;
 
   Format format = Format::kNone;
+
+  bool emit_single_entry_point = false;
+  tint::ast::PipelineStage stage;
+  std::string ep_name;
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -60,6 +64,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                    .metal  -> msl
                                    .hlsl   -> hlsl
                                If none matches, then default to SPIR-V assembly.
+  -ep <compute|fragment|vertex> <name>  -- Output single entry point
   --output-file <name>      -- Output file name.  Use "-" for standard output
   -o <name>                 -- Output file name.  Use "-" for standard output
   --parse-only              -- Stop after parsing the input
@@ -138,6 +143,19 @@ Format infer_format(const std::string& filename) {
   return Format::kNone;
 }
 
+tint::ast::PipelineStage convert_to_pipeline_stage(const std::string& name) {
+  if (name == "compute") {
+    return tint::ast::PipelineStage::kCompute;
+  }
+  if (name == "fragment") {
+    return tint::ast::PipelineStage::kFragment;
+  }
+  if (name == "vertex") {
+    return tint::ast::PipelineStage::kVertex;
+  }
+  return tint::ast::PipelineStage::kNone;
+}
+
 bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   for (size_t i = 1; i < args.size(); ++i) {
     const std::string& arg = args[i];
@@ -153,6 +171,22 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         std::cerr << "Unknown output format: " << args[i] << std::endl;
         return false;
       }
+    } else if (arg == "-ep") {
+      if (i + 2 >= args.size()) {
+        std::cerr << "Missing values for -ep" << std::endl;
+        return false;
+      }
+      i++;
+      opts->stage = convert_to_pipeline_stage(args[i]);
+      if (opts->stage == tint::ast::PipelineStage::kNone) {
+        std::cerr << "Invalid pipeline stage: " << args[i] << std::endl;
+        return false;
+      }
+
+      i++;
+      opts->ep_name = args[i];
+      opts->emit_single_entry_point = true;
+
     } else if (arg == "-o" || arg == "--output-name") {
       ++i;
       if (i >= args.size()) {
@@ -471,9 +505,16 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  if (!writer->Generate()) {
-    std::cerr << "Failed to generate: " << writer->error() << std::endl;
-    return 1;
+  if (options.emit_single_entry_point) {
+    if (!writer->GenerateEntryPoint(options.stage, options.ep_name)) {
+      std::cerr << "Failed to generate: " << writer->error() << std::endl;
+      return 1;
+    }
+  } else {
+    if (!writer->Generate()) {
+      std::cerr << "Failed to generate: " << writer->error() << std::endl;
+      return 1;
+    }
   }
 
 #if TINT_BUILD_SPV_WRITER

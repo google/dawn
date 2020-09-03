@@ -156,6 +156,15 @@ void Function::add_ancestor_entry_point(const std::string& ep) {
   ancestor_entry_points_.push_back(ep);
 }
 
+bool Function::HasAncestorEntryPoint(const std::string& name) const {
+  for (const auto& point : ancestor_entry_points_) {
+    if (point == name) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const Statement* Function::get_last_statement() const {
   return body_->last();
 }
