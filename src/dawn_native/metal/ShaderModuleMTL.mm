@@ -136,6 +136,7 @@ namespace dawn_native { namespace metal {
             }
         }
 
+#ifdef DAWN_ENABLE_WGSL
         // Add vertex buffers bound as storage buffers
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             functionStage == SingleShaderStage::Vertex) {
@@ -151,6 +152,7 @@ namespace dawn_native { namespace metal {
                 compiler.add_msl_resource_binding(mslBinding);
             }
         }
+#endif
 
         {
             spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
