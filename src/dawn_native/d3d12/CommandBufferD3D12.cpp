@@ -223,32 +223,37 @@ namespace dawn_native { namespace d3d12 {
             }
 
             if (mInCompute) {
+                std::vector<D3D12_RESOURCE_BARRIER> barriers;
                 for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     for (BindingIndex binding : IterateBitSet(mBindingsNeedingBarrier[index])) {
                         wgpu::BindingType bindingType = mBindingTypes[index][binding];
                         switch (bindingType) {
-                            case wgpu::BindingType::StorageBuffer:
-                                static_cast<Buffer*>(mBindings[index][binding])
-                                    ->TrackUsageAndTransitionNow(commandContext,
-                                                                 wgpu::BufferUsage::Storage);
+                            case wgpu::BindingType::StorageBuffer: {
+                                D3D12_RESOURCE_BARRIER barrier;
+                                if (static_cast<Buffer*>(mBindings[index][binding])
+                                        ->TrackUsageAndGetResourceBarrier(
+                                            commandContext, &barrier, wgpu::BufferUsage::Storage)) {
+                                    barriers.push_back(barrier);
+                                }
                                 break;
+                            }
 
                             case wgpu::BindingType::ReadonlyStorageTexture: {
                                 TextureViewBase* view =
                                     static_cast<TextureViewBase*>(mBindings[index][binding]);
                                 ToBackend(view->GetTexture())
-                                    ->TrackUsageAndTransitionNow(commandContext,
-                                                                 kReadonlyStorageTexture,
-                                                                 view->GetSubresourceRange());
+                                    ->TransitionUsageAndGetResourceBarrier(
+                                        commandContext, &barriers, kReadonlyStorageTexture,
+                                        view->GetSubresourceRange());
                                 break;
                             }
                             case wgpu::BindingType::WriteonlyStorageTexture: {
                                 TextureViewBase* view =
                                     static_cast<TextureViewBase*>(mBindings[index][binding]);
                                 ToBackend(view->GetTexture())
-                                    ->TrackUsageAndTransitionNow(commandContext,
-                                                                 wgpu::TextureUsage::Storage,
-                                                                 view->GetSubresourceRange());
+                                    ->TransitionUsageAndGetResourceBarrier(
+                                        commandContext, &barriers, wgpu::TextureUsage::Storage,
+                                        view->GetSubresourceRange());
                                 break;
                             }
                             case wgpu::BindingType::StorageTexture:
@@ -266,6 +271,10 @@ namespace dawn_native { namespace d3d12 {
                                 break;
                         }
                     }
+                }
+
+                if (!barriers.empty()) {
+                    commandList->ResourceBarrier(barriers.size(), barriers.data());
                 }
             }
             DidApply();

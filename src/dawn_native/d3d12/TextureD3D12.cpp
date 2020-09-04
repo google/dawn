@@ -686,6 +686,14 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
+    void Texture::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                       std::vector<D3D12_RESOURCE_BARRIER>* barrier,
+                                                       wgpu::TextureUsage usage,
+                                                       const SubresourceRange& range) {
+        TransitionUsageAndGetResourceBarrier(commandContext, barrier,
+                                             D3D12TextureUsage(usage, GetFormat()), range);
+    }
+
     void Texture::TransitionUsageAndGetResourceBarrier(
         CommandRecordingContext* commandContext,
         std::vector<D3D12_RESOURCE_BARRIER>* barriers,
