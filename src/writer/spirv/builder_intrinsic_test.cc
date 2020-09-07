@@ -471,12 +471,13 @@ class Builder_TextureOperation
   void add_call_param(std::string name,
                       ast::type::Type* type,
                       ast::ExpressionList* call_params) {
-    auto var =
-        std::make_unique<ast::Variable>(name, ast::StorageClass::kNone, type);
-    td()->RegisterVariableForTesting(var.get());
+    variables_.push_back(
+        std::make_unique<ast::Variable>(name, ast::StorageClass::kNone, type));
+    td()->RegisterVariableForTesting(variables_.back().get());
 
     call_params->push_back(std::make_unique<ast::IdentifierExpression>(name));
-    ASSERT_TRUE(b()->GenerateGlobalVariable(var.release())) << b()->error();
+    ASSERT_TRUE(b()->GenerateGlobalVariable(variables_.back().get()))
+        << b()->error();
   }
 
   std::unique_ptr<ast::type::Type> subtype(TextureType type) {
@@ -556,6 +557,7 @@ class Builder_TextureOperation
   ast::Module mod_;
   std::unique_ptr<TypeDeterminer> td_;
   std::unique_ptr<Builder> b_;
+  std::vector<std::unique_ptr<ast::Variable>> variables_;
 };
 
 class Builder_TextureLoad : public Builder_TextureOperation {
