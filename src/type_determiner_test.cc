@@ -1676,14 +1676,14 @@ TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          IntrinsicDerivativeTest,
                          testing::Values("dpdx",
-                                         "dpdx_coarse",
-                                         "dpdx_fine",
+                                         "dpdxCoarse",
+                                         "dpdxFine",
                                          "dpdy",
-                                         "dpdy_coarse",
-                                         "dpdy_fine",
+                                         "dpdyCoarse",
+                                         "dpdyFine",
                                          "fwidth",
-                                         "fwidth_coarse",
-                                         "fwidth_fine"));
+                                         "fwidthCoarse",
+                                         "fwidthFine"));
 
 using Intrinsic = TypeDeterminerTestWithParam<std::string>;
 TEST_P(Intrinsic, Test) {
@@ -1805,7 +1805,7 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_FloatMethod,
-    testing::Values("is_inf", "is_nan", "is_finite", "is_normal"));
+    testing::Values("isInf", "isNan", "isFinite", "isNormal"));
 
 enum class TextureType { kF32, kI32, kU32 };
 inline std::ostream& operator<<(std::ostream& out, TextureType data) {
@@ -1894,7 +1894,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   add_call_param("lod", &i32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::make_unique<ast::IdentifierExpression>("textureLoad"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -1965,7 +1965,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   add_call_param("lod", &i32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::make_unique<ast::IdentifierExpression>("textureLoad"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -2002,7 +2002,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureSample) {
   add_call_param("coords", coords_type.get(), &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample"),
+      std::make_unique<ast::IdentifierExpression>("textureSample"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -2040,7 +2040,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureSampleLevel) {
   add_call_param("lod", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_level"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleLevel"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -2078,7 +2078,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureSampleBias) {
   add_call_param("bias", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_bias"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleBias"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -2164,7 +2164,7 @@ TEST_P(Intrinsic_DepthTextureOperation, TextureSampleCompare) {
   add_call_param("depth_reference", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_compare"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->Determine());
@@ -2301,7 +2301,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::make_unique<ast::IdentifierExpression>("outerProduct"),
       std::move(call_params));
 
   // Register the variable
@@ -2330,7 +2330,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
   call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::make_unique<ast::IdentifierExpression>("outerProduct"),
       std::move(call_params));
 
   // Register the variable
@@ -2354,7 +2354,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
   call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::make_unique<ast::IdentifierExpression>("outerProduct"),
       std::move(call_params));
 
   // Register the variable

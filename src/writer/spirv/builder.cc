@@ -1485,27 +1485,27 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     op = spv::Op::OpDot;
   } else if (name == "dpdx") {
     op = spv::Op::OpDPdx;
-  } else if (name == "dpdx_coarse") {
+  } else if (name == "dpdxCoarse") {
     op = spv::Op::OpDPdxCoarse;
-  } else if (name == "dpdx_fine") {
+  } else if (name == "dpdxFine") {
     op = spv::Op::OpDPdxFine;
   } else if (name == "dpdy") {
     op = spv::Op::OpDPdy;
-  } else if (name == "dpdy_coarse") {
+  } else if (name == "dpdyCoarse") {
     op = spv::Op::OpDPdyCoarse;
-  } else if (name == "dpdy_fine") {
+  } else if (name == "dpdyFine") {
     op = spv::Op::OpDPdyFine;
   } else if (name == "fwidth") {
     op = spv::Op::OpFwidth;
-  } else if (name == "fwidth_coarse") {
+  } else if (name == "fwidthCoarse") {
     op = spv::Op::OpFwidthCoarse;
-  } else if (name == "fwidth_fine") {
+  } else if (name == "fwidthFine") {
     op = spv::Op::OpFwidthFine;
-  } else if (name == "is_inf") {
+  } else if (name == "isInf") {
     op = spv::Op::OpIsInf;
-  } else if (name == "is_nan") {
+  } else if (name == "isNan") {
     op = spv::Op::OpIsNan;
-  } else if (name == "outer_product") {
+  } else if (name == "outerProduct") {
     op = spv::Op::OpOuterProduct;
   } else if (name == "select") {
     op = spv::Op::OpSelect;
@@ -1529,7 +1529,7 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
                            ->UnwrapAliasPtrAlias()
                            ->AsTexture();
 
-  if (name == "texture_load") {
+  if (name == "textureLoad") {
     auto spirv_params = {std::move(wgsl_params[0]),
                          std::move(wgsl_params[1]),
                          std::move(wgsl_params[2]),
@@ -1551,17 +1551,17 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
                                         std::move(wgsl_params[3]))),
       std::move(wgsl_params[4])};
 
-  if (name == "texture_sample") {
+  if (name == "textureSample") {
     op = spv::Op::OpImageSampleImplicitLod;
-  } else if (name == "texture_sample_level") {
+  } else if (name == "textureSampleLevel") {
     op = spv::Op::OpImageSampleExplicitLod;
     spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
     spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (name == "texture_sample_bias") {
+  } else if (name == "textureSampleBias") {
     op = spv::Op::OpImageSampleImplicitLod;
     spirv_params.push_back(Operand::Int(SpvImageOperandsBiasMask));
     spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (name == "texture_sample_compare") {
+  } else if (name == "textureSampleCompare") {
     op = spv::Op::OpImageSampleDrefExplicitLod;
     spirv_params.push_back(std::move(wgsl_params[5]));
 

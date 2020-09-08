@@ -173,8 +173,8 @@ TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(BuilderTest,
                          IntrinsicFloatTest,
-                         testing::Values(IntrinsicData{"is_nan", "OpIsNan"},
-                                         IntrinsicData{"is_inf", "OpIsInf"}));
+                         testing::Values(IntrinsicData{"isNan", "OpIsNan"},
+                                         IntrinsicData{"isInf", "OpIsInf"}));
 
 TEST_F(BuilderTest, Call_Dot) {
   ast::type::F32Type f32;
@@ -301,14 +301,14 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     IntrinsicDeriveTest,
     testing::Values(IntrinsicData{"dpdx", "OpDPdx"},
-                    IntrinsicData{"dpdx_fine", "OpDPdxFine"},
-                    IntrinsicData{"dpdx_coarse", "OpDPdxCoarse"},
+                    IntrinsicData{"dpdxFine", "OpDPdxFine"},
+                    IntrinsicData{"dpdxCoarse", "OpDPdxCoarse"},
                     IntrinsicData{"dpdy", "OpDPdy"},
-                    IntrinsicData{"dpdy_fine", "OpDPdyFine"},
-                    IntrinsicData{"dpdy_coarse", "OpDPdyCoarse"},
+                    IntrinsicData{"dpdyFine", "OpDPdyFine"},
+                    IntrinsicData{"dpdyCoarse", "OpDPdyCoarse"},
                     IntrinsicData{"fwidth", "OpFwidth"},
-                    IntrinsicData{"fwidth_fine", "OpFwidthFine"},
-                    IntrinsicData{"fwidth_coarse", "OpFwidthCoarse"}));
+                    IntrinsicData{"fwidthFine", "OpFwidthFine"},
+                    IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(BuilderTest, Call_OuterProduct) {
   ast::type::F32Type f32;
@@ -325,7 +325,7 @@ TEST_F(BuilderTest, Call_OuterProduct) {
   params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
   params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::make_unique<ast::IdentifierExpression>("outerProduct"),
       std::move(params));
 
   Context ctx;
@@ -665,7 +665,7 @@ TEST_P(Builder_TextureLoad, StorageReadonly) {
   add_call_param("lod", &i32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::make_unique<ast::IdentifierExpression>("textureLoad"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -724,7 +724,7 @@ TEST_P(Builder_TextureLoad, Sampled) {
   add_call_param("lod", &i32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_load"),
+      std::make_unique<ast::IdentifierExpression>("textureLoad"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -933,7 +933,7 @@ TEST_P(Builder_SampledTextureOperation, TextureSample) {
   add_call_param("coords", coords_type.get(), &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample"),
+      std::make_unique<ast::IdentifierExpression>("textureSample"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -994,7 +994,7 @@ TEST_P(Builder_SampledTextureOperation, TextureSampleLevel) {
   add_call_param("lod", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_level"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleLevel"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -1055,7 +1055,7 @@ TEST_P(Builder_SampledTextureOperation, TextureSampleBias) {
   add_call_param("bias", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_bias"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleBias"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -1176,7 +1176,7 @@ TEST_P(Builder_DepthTextureOperation, TextureSampleCompare) {
   add_call_param("depth_reference", &f32, &call_params);
 
   ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_compare"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
       std::move(call_params));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -1226,10 +1226,10 @@ TEST_F(Builder_TextureOperation, TextureSampleCompareTwice) {
   add_call_param("depth_reference", &f32, &call_params_second);
 
   ast::CallExpression expr_first(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_compare"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
       std::move(call_params_first));
   ast::CallExpression expr_second(
-      std::make_unique<ast::IdentifierExpression>("texture_sample_compare"),
+      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
       std::move(call_params_second));
 
   EXPECT_TRUE(td()->DetermineResultType(&expr_first));

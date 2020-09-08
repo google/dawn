@@ -19,12 +19,11 @@ namespace ast {
 namespace intrinsic {
 
 bool IsCoarseDerivative(const std::string& name) {
-  return name == "dpdx_coarse" || name == "dpdy_coarse" ||
-         name == "fwidth_coarse";
+  return name == "dpdxCoarse" || name == "dpdyCoarse" || name == "fwidthCoarse";
 }
 
 bool IsFineDerivative(const std::string& name) {
-  return name == "dpdx_fine" || name == "dpdy_fine" || name == "fwidth_fine";
+  return name == "dpdxFine" || name == "dpdyFine" || name == "fwidthFine";
 }
 
 bool IsDerivative(const std::string& name) {
@@ -33,21 +32,21 @@ bool IsDerivative(const std::string& name) {
 }
 
 bool IsFloatClassificationIntrinsic(const std::string& name) {
-  return name == "is_finite" || name == "is_inf" || name == "is_nan" ||
-         name == "is_normal";
+  return name == "isFinite" || name == "isInf" || name == "isNan" ||
+         name == "isNormal";
 }
 
 bool IsTextureOperationIntrinsic(const std::string& name) {
-  return name == "texture_load" || name == "texture_sample" ||
-         name == "texture_sample_level" || name == "texture_sample_bias" ||
-         name == "texture_sample_compare";
+  return name == "textureLoad" || name == "textureSample" ||
+         name == "textureSampleLevel" || name == "textureSampleBias" ||
+         name == "textureSampleCompare";
 }
 
 bool IsIntrinsic(const std::string& name) {
   return IsDerivative(name) || name == "all" || name == "any" ||
          IsFloatClassificationIntrinsic(name) ||
          IsTextureOperationIntrinsic(name) || name == "dot" ||
-         name == "outer_product" || name == "select";
+         name == "outerProduct" || name == "select";
 }
 
 }  // namespace intrinsic

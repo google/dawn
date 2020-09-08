@@ -543,7 +543,6 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   return true;
 }
 
-// TODO(tommek): Update names to camel case
 bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
                                         ast::CallExpression* expr) {
   if (ast::intrinsic::IsDerivative(name)) {
@@ -590,7 +589,7 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
   }
   if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
     uint32_t num_of_params =
-        (name == "texture_load" || name == "texture_sample") ? 3 : 4;
+        (name == "textureLoad" || name == "textureSample") ? 3 : 4;
     if (expr->params().size() != num_of_params) {
       set_error(expr->source(),
                 "incorrect number of parameters for " + name + ", got " +
@@ -599,7 +598,7 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
       return false;
     }
 
-    if (name == "texture_sample_compare") {
+    if (name == "textureSampleCompare") {
       expr->func()->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
       return true;
@@ -633,7 +632,7 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
         ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
     return true;
   }
-  if (name == "outer_product") {
+  if (name == "outerProduct") {
     if (expr->params().size() != 2) {
       set_error(expr->source(),
                 "incorrect number of parameters for outer_product");
