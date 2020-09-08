@@ -289,11 +289,14 @@ class Builder {
   /// Generates a texture intrinsic call
   /// @param name the texture intrinsic name
   /// @param call the call expression
+  /// @param result_id result ID of the texture instruction
+  /// @param wgsl_params SPIR-V arguments for WGSL-specific intrinsic's call
+  /// parameters
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateTextureIntrinsic(const std::string& name,
                                     ast::CallExpression* call,
                                     uint32_t result_id,
-                                    OperandList params);
+                                    OperandList wgsl_params);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

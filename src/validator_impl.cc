@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cassert>
 #include "src/validator_impl.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/function.h"
@@ -90,8 +91,9 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
       return false;
     }
 
-    ast::Function* func;
+    ast::Function* func = nullptr;
     function_stack_.get(ep_ptr->function_name(), &func);
+
     if (!func->return_type()->IsVoid()) {
       set_error(ep_ptr->source(),
                 "v-0024: Entry point function must return void: '" +
