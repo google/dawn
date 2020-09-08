@@ -119,6 +119,62 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
   EXPECT_EQ(p->error(), "1:23: missing '>' for sampled texture type");
 }
 
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
+  auto* p = parser("texture_ro_1d<r8unorm>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsStorage());
+  EXPECT_EQ(t->AsTexture()->AsStorage()->image_format(),
+            ast::type::ImageFormat::kR8Unorm);
+  EXPECT_EQ(t->AsTexture()->AsStorage()->access(),
+            ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
+  auto* p = parser("texture_wo_2d<r16float>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsStorage());
+  EXPECT_EQ(t->AsTexture()->AsStorage()->image_format(),
+            ast::type::ImageFormat::kR16Float);
+  EXPECT_EQ(t->AsTexture()->AsStorage()->access(),
+            ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
+  auto* p = parser("texture_ro_1d<abc>");
+  auto* t = p->texture_sampler_types();
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:15: invalid format for storage texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
+  auto* p = parser("texture_wo_1d<>");
+  auto* t = p->texture_sampler_types();
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:15: invalid format for storage texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
+  auto* p = parser("texture_ro_1d");
+  auto* t = p->texture_sampler_types();
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:14: missing '<' for storage texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
+  auto* p = parser("texture_wo_1d<r8unorm");
+  auto* t = p->texture_sampler_types();
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:22: missing '>' for storage texture type");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

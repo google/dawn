@@ -191,6 +191,11 @@ class ParserImpl {
   /// Parses a `sampled_texture_type` grammar element
   /// @returns returns the sample texture dimension or kNone if none matched.
   ast::type::TextureDimension sampled_texture_type();
+  /// Parses a `storage_texture_type` grammar element
+  /// @returns returns the storage texture dimension and the storage access.
+  ///          Returns kNone and kRead if none matched.
+  std::pair<ast::type::TextureDimension, ast::type::StorageAccess>
+  storage_texture_type();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* depth_texture_type();

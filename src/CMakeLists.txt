@@ -448,6 +448,7 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_statement_test.cc
     reader/wgsl/parser_impl_statements_test.cc
     reader/wgsl/parser_impl_storage_class_test.cc
+    reader/wgsl/parser_impl_storage_texture_type_test.cc
     reader/wgsl/parser_impl_struct_body_decl_test.cc
     reader/wgsl/parser_impl_struct_decl_test.cc
     reader/wgsl/parser_impl_struct_decoration_decl_test.cc
