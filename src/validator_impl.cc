@@ -84,15 +84,13 @@ bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
   entry_point_map.push_scope();
   for (const auto& ep : eps) {
     auto* ep_ptr = ep.get();
-    if (!function_stack_.has(ep_ptr->function_name())) {
+    ast::Function* func = nullptr;
+    if (!function_stack_.get(ep_ptr->function_name(), &func)) {
       set_error(ep_ptr->source(),
                 "v-0019: Function used in entry point does not exist: '" +
                     ep_ptr->function_name() + "'");
       return false;
     }
-
-    ast::Function* func = nullptr;
-    function_stack_.get(ep_ptr->function_name(), &func);
 
     if (!func->return_type()->IsVoid()) {
       set_error(ep_ptr->source(),
