@@ -302,10 +302,6 @@ class Builder {
   uint32_t GenerateSampledImage(ast::type::Type* texture_type,
                                 Operand texture_operand,
                                 Operand sampler_operand);
-  /// Generates a constant float zero.
-  /// @param float_operand the f32 type operand
-  /// @returns the expression ID
-  uint32_t GenerateConstantFloatZeroIfNeeded(Operand float_operand);
   /// Generates a cast expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
@@ -450,7 +446,6 @@ class Builder {
   std::unordered_map<uint32_t, ast::Variable*> spirv_id_to_variable_;
   std::vector<uint32_t> merge_stack_;
   std::vector<uint32_t> continue_stack_;
-  uint32_t constant_float_zero_id_ = 0;
 };
 
 }  // namespace spirv

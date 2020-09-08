@@ -1566,8 +1566,9 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
     spirv_params.push_back(std::move(wgsl_params[5]));
 
     spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
-    spirv_params.push_back(Operand::Int(
-        GenerateConstantFloatZeroIfNeeded(std::move(wgsl_params[0]))));
+    ast::type::F32Type f32;
+    ast::FloatLiteral float_0(&f32, 0.0);
+    spirv_params.push_back(Operand::Int(GenerateLiteralIfNeeded(&float_0)));
   }
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + name;
@@ -1604,16 +1605,6 @@ uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
                       texture_operand, sampler_operand});
 
   return sampled_image.to_i();
-}
-
-uint32_t Builder::GenerateConstantFloatZeroIfNeeded(Operand float_operand) {
-  if (constant_float_zero_id_ == 0) {
-    auto float_0 = result_op();
-    push_type(spv::Op::OpConstant,
-              {std::move(float_operand), float_0, Operand::Int(0)});
-    constant_float_zero_id_ = float_0.to_i();
-  }
-  return constant_float_zero_id_;
 }
 
 uint32_t Builder::GenerateAsExpression(ast::AsExpression* as) {
