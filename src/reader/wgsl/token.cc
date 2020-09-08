@@ -151,6 +151,76 @@ std::string Token::TypeToName(Type type) {
       return "fn";
     case Token::Type::kFor:
       return "for";
+    case Token::Type::kFormatBgra8Unorm:
+      return "bgra8unorm";
+    case Token::Type::kFormatBgra8UnormSrgb:
+      return "bgra8unorm_srgb";
+    case Token::Type::kFormatR16Float:
+      return "r16float";
+    case Token::Type::kFormatR16Sint:
+      return "r16sint";
+    case Token::Type::kFormatR16Uint:
+      return "r16uint";
+    case Token::Type::kFormatR32Float:
+      return "r32float";
+    case Token::Type::kFormatR32Sint:
+      return "r32sint";
+    case Token::Type::kFormatR32Uint:
+      return "r32uint";
+    case Token::Type::kFormatR8Sint:
+      return "r8sint";
+    case Token::Type::kFormatR8Snorm:
+      return "r8snorm";
+    case Token::Type::kFormatR8Uint:
+      return "r8uint";
+    case Token::Type::kFormatR8Unorm:
+      return "r8unorm";
+    case Token::Type::kFormatRg11B10Float:
+      return "rg11b10float";
+    case Token::Type::kFormatRg16Float:
+      return "rg16float";
+    case Token::Type::kFormatRg16Sint:
+      return "rg16sint";
+    case Token::Type::kFormatRg16Uint:
+      return "rg16uint";
+    case Token::Type::kFormatRg32Float:
+      return "rg32float";
+    case Token::Type::kFormatRg32Sint:
+      return "rg32sint";
+    case Token::Type::kFormatRg32Uint:
+      return "rg32uint";
+    case Token::Type::kFormatRg8Sint:
+      return "rg8sint";
+    case Token::Type::kFormatRg8Snorm:
+      return "rg8snorm";
+    case Token::Type::kFormatRg8Uint:
+      return "rg8uint";
+    case Token::Type::kFormatRg8Unorm:
+      return "rg8unorm";
+    case Token::Type::kFormatRgb10A2Unorm:
+      return "rgb10a2unorm";
+    case Token::Type::kFormatRgba16Float:
+      return "rgba16float";
+    case Token::Type::kFormatRgba16Sint:
+      return "rgba16sint";
+    case Token::Type::kFormatRgba16Uint:
+      return "rgba16uint";
+    case Token::Type::kFormatRgba32Float:
+      return "rgba32float";
+    case Token::Type::kFormatRgba32Sint:
+      return "rgba32sint";
+    case Token::Type::kFormatRgba32Uint:
+      return "rgba32uint";
+    case Token::Type::kFormatRgba8Sint:
+      return "rgba8sint";
+    case Token::Type::kFormatRgba8Snorm:
+      return "rgba8snorm";
+    case Token::Type::kFormatRgba8Uint:
+      return "rgba8uint";
+    case Token::Type::kFormatRgba8Unorm:
+      return "rgba8unorm";
+    case Token::Type::kFormatRgba8UnormSrgb:
+      return "rgba8unorm_srgb";
     case Token::Type::kFragment:
       return "fragment";
     case Token::Type::kFunction:

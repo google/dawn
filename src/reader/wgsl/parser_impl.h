@@ -40,6 +40,7 @@
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable.h"
@@ -193,6 +194,9 @@ class ParserImpl {
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* depth_texture_type();
+  /// Parses a `image_storage_type` grammar element
+  /// @returns returns the image format or kNone if none matched.
+  ast::type::ImageFormat image_storage_type();
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
   ast::type::Type* function_type_decl();

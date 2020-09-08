@@ -29,6 +29,7 @@ std::ostream& operator<<(std::ostream& out, StorageAccess dim);
 
 /// The image format in the storage texture
 enum class ImageFormat {
+  kNone = -1,
   kR8Unorm,
   kR8Snorm,
   kR8Uint,

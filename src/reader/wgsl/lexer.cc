@@ -515,6 +515,76 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kFn, source, "fn"};
   if (str == "for")
     return {Token::Type::kFor, source, "for"};
+  if (str == "bgra8unorm")
+    return {Token::Type::kFormatBgra8Unorm, source, "bgra8unorm"};
+  if (str == "bgra8unorm_srgb")
+    return {Token::Type::kFormatBgra8UnormSrgb, source, "bgra8unorm_srgb"};
+  if (str == "r16float")
+    return {Token::Type::kFormatR16Float, source, "r16float"};
+  if (str == "r16sint")
+    return {Token::Type::kFormatR16Sint, source, "r16sint"};
+  if (str == "r16uint")
+    return {Token::Type::kFormatR16Uint, source, "r16uint"};
+  if (str == "r32float")
+    return {Token::Type::kFormatR32Float, source, "r32float"};
+  if (str == "r32sint")
+    return {Token::Type::kFormatR32Sint, source, "r32sint"};
+  if (str == "r32uint")
+    return {Token::Type::kFormatR32Uint, source, "r32uint"};
+  if (str == "r8sint")
+    return {Token::Type::kFormatR8Sint, source, "r8sint"};
+  if (str == "r8snorm")
+    return {Token::Type::kFormatR8Snorm, source, "r8snorm"};
+  if (str == "r8uint")
+    return {Token::Type::kFormatR8Uint, source, "r8uint"};
+  if (str == "r8unorm")
+    return {Token::Type::kFormatR8Unorm, source, "r8unorm"};
+  if (str == "rg11b10float")
+    return {Token::Type::kFormatRg11B10Float, source, "rg11b10float"};
+  if (str == "rg16float")
+    return {Token::Type::kFormatRg16Float, source, "rg16float"};
+  if (str == "rg16sint")
+    return {Token::Type::kFormatRg16Sint, source, "rg16sint"};
+  if (str == "rg16uint")
+    return {Token::Type::kFormatRg16Uint, source, "rg16uint"};
+  if (str == "rg32float")
+    return {Token::Type::kFormatRg32Float, source, "rg32float"};
+  if (str == "rg32sint")
+    return {Token::Type::kFormatRg32Sint, source, "rg32sint"};
+  if (str == "rg32uint")
+    return {Token::Type::kFormatRg32Uint, source, "rg32uint"};
+  if (str == "rg8sint")
+    return {Token::Type::kFormatRg8Sint, source, "rg8sint"};
+  if (str == "rg8snorm")
+    return {Token::Type::kFormatRg8Snorm, source, "rg8snorm"};
+  if (str == "rg8uint")
+    return {Token::Type::kFormatRg8Uint, source, "rg8uint"};
+  if (str == "rg8unorm")
+    return {Token::Type::kFormatRg8Unorm, source, "rg8unorm"};
+  if (str == "rgb10a2unorm")
+    return {Token::Type::kFormatRgb10A2Unorm, source, "rgb10a2unorm"};
+  if (str == "rgba16float")
+    return {Token::Type::kFormatRgba16Float, source, "rgba16float"};
+  if (str == "rgba16sint")
+    return {Token::Type::kFormatRgba16Sint, source, "rgba16sint"};
+  if (str == "rgba16uint")
+    return {Token::Type::kFormatRgba16Uint, source, "rgba16uint"};
+  if (str == "rgba32float")
+    return {Token::Type::kFormatRgba32Float, source, "rgba32float"};
+  if (str == "rgba32sint")
+    return {Token::Type::kFormatRgba32Sint, source, "rgba32sint"};
+  if (str == "rgba32uint")
+    return {Token::Type::kFormatRgba32Uint, source, "rgba32uint"};
+  if (str == "rgba8sint")
+    return {Token::Type::kFormatRgba8Sint, source, "rgba8sint"};
+  if (str == "rgba8snorm")
+    return {Token::Type::kFormatRgba8Snorm, source, "rgba8snorm"};
+  if (str == "rgba8uint")
+    return {Token::Type::kFormatRgba8Uint, source, "rgba8uint"};
+  if (str == "rgba8unorm")
+    return {Token::Type::kFormatRgba8Unorm, source, "rgba8unorm"};
+  if (str == "rgba8unorm_srgb")
+    return {Token::Type::kFormatRgba8UnormSrgb, source, "rgba8unorm_srgb"};
   if (str == "fragment")
     return {Token::Type::kFragment, source, "fragment"};
   if (str == "function")

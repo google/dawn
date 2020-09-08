@@ -937,6 +937,9 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
           ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
       return true;
     }
+
+    case ast::type::ImageFormat::kNone:
+      break;
   }
 
   return false;

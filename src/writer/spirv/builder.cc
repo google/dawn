@@ -2407,6 +2407,8 @@ SpvImageFormat Builder::convert_image_format_to_spv(
       return SpvImageFormatRgba32i;
     case ast::type::ImageFormat::kRgba32Float:
       return SpvImageFormatRgba32f;
+    case ast::type::ImageFormat::kNone:
+      return SpvImageFormatUnknown;
   }
   return SpvImageFormatUnknown;
 }

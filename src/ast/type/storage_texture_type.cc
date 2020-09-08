@@ -48,6 +48,9 @@ std::ostream& operator<<(std::ostream& out, StorageAccess access) {
 
 std::ostream& operator<<(std::ostream& out, ImageFormat format) {
   switch (format) {
+    case ImageFormat::kNone:
+      out << "none";
+      break;
     case ImageFormat::kR8Unorm:
       out << "r8unorm";
       break;

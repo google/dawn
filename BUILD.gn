@@ -898,6 +898,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     "src/reader/wgsl/parser_impl_global_decl_test.cc",
     "src/reader/wgsl/parser_impl_global_variable_decl_test.cc",
     "src/reader/wgsl/parser_impl_if_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_image_storage_type_test.cc",
     "src/reader/wgsl/parser_impl_import_decl_test.cc",
     "src/reader/wgsl/parser_impl_inclusive_or_expression_test.cc",
     "src/reader/wgsl/parser_impl_logical_and_expression_test.cc",

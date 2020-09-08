@@ -162,6 +162,76 @@ class Token {
     kFn,
     // A 'for'
     kFor,
+    // A 'Bgra8Unorm' format
+    kFormatBgra8Unorm,
+    // A 'Bgra8UnormSrgb' format
+    kFormatBgra8UnormSrgb,
+    // A 'R16Float' format
+    kFormatR16Float,
+    // A 'R16Sint' format
+    kFormatR16Sint,
+    // A 'R16Uint' format
+    kFormatR16Uint,
+    // A 'R32Float' format
+    kFormatR32Float,
+    // A 'R32Sint' format
+    kFormatR32Sint,
+    // A 'R32Uint' format
+    kFormatR32Uint,
+    // A 'R8Sint' format
+    kFormatR8Sint,
+    // A 'R8Snorm' format
+    kFormatR8Snorm,
+    // A 'R8Uint' format
+    kFormatR8Uint,
+    // A 'R8Unorm' format
+    kFormatR8Unorm,
+    // A 'Rg11B10Float' format
+    kFormatRg11B10Float,
+    // A 'Rg16Float' format
+    kFormatRg16Float,
+    // A 'Rg16Sint' format
+    kFormatRg16Sint,
+    // A 'Rg16Uint' format
+    kFormatRg16Uint,
+    // A 'Rg32Float' format
+    kFormatRg32Float,
+    // A 'Rg32Sint' format
+    kFormatRg32Sint,
+    // A 'Rg32Uint' format
+    kFormatRg32Uint,
+    // A 'Rg8Sint' format
+    kFormatRg8Sint,
+    // A 'Rg8Snorm' format
+    kFormatRg8Snorm,
+    // A 'Rg8Uint' format
+    kFormatRg8Uint,
+    // A 'Rg8Unorm' format
+    kFormatRg8Unorm,
+    // A 'Rgb10A2Unorm' format
+    kFormatRgb10A2Unorm,
+    // A 'Rgba16Float' format
+    kFormatRgba16Float,
+    // A 'Rgba16Sint' format
+    kFormatRgba16Sint,
+    // A 'Rgba16Uint' format
+    kFormatRgba16Uint,
+    // A 'Rgba32Float' format
+    kFormatRgba32Float,
+    // A 'Rgba32Sint' format
+    kFormatRgba32Sint,
+    // A 'Rgba32Uint' format
+    kFormatRgba32Uint,
+    // A 'Rgba8Sint' format
+    kFormatRgba8Sint,
+    // A 'Rgba8Snorm' format
+    kFormatRgba8Snorm,
+    // A 'Rgba8Uint' format
+    kFormatRgba8Uint,
+    // A 'Rgba8Unorm' format
+    kFormatRgba8Unorm,
+    // A 'Rgba8UnormSrgb' format
+    kFormatRgba8UnormSrgb,
     /// A 'fragment'
     kFragment,
     /// A 'function'
@@ -449,6 +519,84 @@ class Token {
   bool IsFn() const { return type_ == Type::kFn; }
   /// @returns true if token is a 'for'
   bool IsFor() const { return type_ == Type::kFor; }
+  /// @returns true if token is a 'Bgra8Unorm' format
+  bool IsFormatBgra8Unorm() const { return type_ == Type::kFormatBgra8Unorm; }
+  /// @returns true if token is a 'Bgra8UnormSrgb' format
+  bool IsFormatBgra8UnormSrgb() const {
+    return type_ == Type::kFormatBgra8UnormSrgb;
+  }
+  /// @returns true if token is a 'R16Float' format
+  bool IsFormatR16Float() const { return type_ == Type::kFormatR16Float; }
+  /// @returns true if token is a 'R16Sint' format
+  bool IsFormatR16Sint() const { return type_ == Type::kFormatR16Sint; }
+  /// @returns true if token is a 'R16Uint' format
+  bool IsFormatR16Uint() const { return type_ == Type::kFormatR16Uint; }
+  /// @returns true if token is a 'R32Float' format
+  bool IsFormatR32Float() const { return type_ == Type::kFormatR32Float; }
+  /// @returns true if token is a 'R32Sint' format
+  bool IsFormatR32Sint() const { return type_ == Type::kFormatR32Sint; }
+  /// @returns true if token is a 'R32Uint' format
+  bool IsFormatR32Uint() const { return type_ == Type::kFormatR32Uint; }
+  /// @returns true if token is a 'R8Sint' format
+  bool IsFormatR8Sint() const { return type_ == Type::kFormatR8Sint; }
+  /// @returns true if token is a 'R8Snorm' format
+  bool IsFormatR8Snorm() const { return type_ == Type::kFormatR8Snorm; }
+  /// @returns true if token is a 'R8Uint' format
+  bool IsFormatR8Uint() const { return type_ == Type::kFormatR8Uint; }
+  /// @returns true if token is a 'R8Unorm' format
+  bool IsFormatR8Unorm() const { return type_ == Type::kFormatR8Unorm; }
+  /// @returns true if token is a 'Rg11B10Float' format
+  bool IsFormatRg11B10Float() const {
+    return type_ == Type::kFormatRg11B10Float;
+  }
+  /// @returns true if token is a 'Rg16Float' format
+  bool IsFormatRg16Float() const { return type_ == Type::kFormatRg16Float; }
+  /// @returns true if token is a 'Rg16Sint' format
+  bool IsFormatRg16Sint() const { return type_ == Type::kFormatRg16Sint; }
+  /// @returns true if token is a 'Rg16Uint' format
+  bool IsFormatRg16Uint() const { return type_ == Type::kFormatRg16Uint; }
+  /// @returns true if token is a 'Rg32Float' format
+  bool IsFormatRg32Float() const { return type_ == Type::kFormatRg32Float; }
+  /// @returns true if token is a 'Rg32Sint' format
+  bool IsFormatRg32Sint() const { return type_ == Type::kFormatRg32Sint; }
+  /// @returns true if token is a 'Rg32Uint' format
+  bool IsFormatRg32Uint() const { return type_ == Type::kFormatRg32Uint; }
+  /// @returns true if token is a 'Rg8Sint' format
+  bool IsFormatRg8Sint() const { return type_ == Type::kFormatRg8Sint; }
+  /// @returns true if token is a 'Rg8Snorm' format
+  bool IsFormatRg8Snorm() const { return type_ == Type::kFormatRg8Snorm; }
+  /// @returns true if token is a 'Rg8Uint' format
+  bool IsFormatRg8Uint() const { return type_ == Type::kFormatRg8Uint; }
+  /// @returns true if token is a 'Rg8Unorm' format
+  bool IsFormatRg8Unorm() const { return type_ == Type::kFormatRg8Unorm; }
+  /// @returns true if token is a 'Rgb10A2Unorm' format
+  bool IsFormatRgb10A2Unorm() const {
+    return type_ == Type::kFormatRgb10A2Unorm;
+  }
+  /// @returns true if token is a 'Rgba16Float' format
+  bool IsFormatRgba16Float() const { return type_ == Type::kFormatRgba16Float; }
+  /// @returns true if token is a 'Rgba16Sint' format
+  bool IsFormatRgba16Sint() const { return type_ == Type::kFormatRgba16Sint; }
+  /// @returns true if token is a 'Rgba16Uint' format
+  bool IsFormatRgba16Uint() const { return type_ == Type::kFormatRgba16Uint; }
+  /// @returns true if token is a 'Rgba32Float' format
+  bool IsFormatRgba32Float() const { return type_ == Type::kFormatRgba32Float; }
+  /// @returns true if token is a 'Rgba32Sint' format
+  bool IsFormatRgba32Sint() const { return type_ == Type::kFormatRgba32Sint; }
+  /// @returns true if token is a 'Rgba32Uint' format
+  bool IsFormatRgba32Uint() const { return type_ == Type::kFormatRgba32Uint; }
+  /// @returns true if token is a 'Rgba8Sint' format
+  bool IsFormatRgba8Sint() const { return type_ == Type::kFormatRgba8Sint; }
+  /// @returns true if token is a 'Rgba8Snorm' format
+  bool IsFormatRgba8Snorm() const { return type_ == Type::kFormatRgba8Snorm; }
+  /// @returns true if token is a 'Rgba8Uint' format
+  bool IsFormatRgba8Uint() const { return type_ == Type::kFormatRgba8Uint; }
+  /// @returns true if token is a 'Rgba8Unorm' format
+  bool IsFormatRgba8Unorm() const { return type_ == Type::kFormatRgba8Unorm; }
+  /// @returns true if token is a 'Rgba8UnormSrgb' format
+  bool IsFormatRgba8UnormSrgb() const {
+    return type_ == Type::kFormatRgba8UnormSrgb;
+  }
   /// @returns true if token is a 'fragment'
   bool IsFragment() const { return type_ == Type::kFragment; }
   /// @returns true if token is a 'function'

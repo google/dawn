@@ -723,6 +723,187 @@ ast::type::Type* ParserImpl::depth_texture_type() {
   return nullptr;
 }
 
+// image_storage_type
+//  : R8UNORM
+//  | R8SNORM
+//  | R8UINT
+//  | R8SINT
+//  | R16UINT
+//  | R16SINT
+//  | R16FLOAT
+//  | RG8UNORM
+//  | RG8SNORM
+//  | RG8UINT
+//  | RG8SINT
+//  | R32UINT
+//  | R32SINT
+//  | R32FLOAT
+//  | RG16UINT
+//  | RG16SINT
+//  | RG16FLOAT
+//  | RGBA8UNORM
+/// | RGBA8UNORM-SRGB
+//  | RGBA8SNORM
+//  | RGBA8UINT
+//  | RGBA8SINT
+//  | BGRA8UNORM
+//  | BGRA8UNORM-SRGB
+//  | RGB10A2UNORM
+//  | RG11B10FLOAT
+//  | RG32UINT
+//  | RG32SINT
+//  | RG32FLOAT
+//  | RGBA16UINT
+//  | RGBA16SINT
+//  | RGBA16FLOAT
+//  | RGBA32UINT
+//  | RGBA32SINT
+//  | RGBA32FLOAT
+ast::type::ImageFormat ParserImpl::image_storage_type() {
+  auto t = peek();
+  if (t.IsFormatR8Unorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR8Unorm;
+  }
+  if (t.IsFormatR8Snorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR8Snorm;
+  }
+  if (t.IsFormatR8Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR8Uint;
+  }
+  if (t.IsFormatR8Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR8Sint;
+  }
+  if (t.IsFormatR16Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR16Uint;
+  }
+  if (t.IsFormatR16Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR16Sint;
+  }
+  if (t.IsFormatR16Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR16Float;
+  }
+  if (t.IsFormatRg8Unorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg8Unorm;
+  }
+  if (t.IsFormatRg8Snorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg8Snorm;
+  }
+  if (t.IsFormatRg8Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg8Uint;
+  }
+  if (t.IsFormatRg8Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg8Sint;
+  }
+  if (t.IsFormatR32Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR32Uint;
+  }
+  if (t.IsFormatR32Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR32Sint;
+  }
+  if (t.IsFormatR32Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kR32Float;
+  }
+  if (t.IsFormatRg16Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg16Uint;
+  }
+  if (t.IsFormatRg16Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg16Sint;
+  }
+  if (t.IsFormatRg16Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg16Float;
+  }
+  if (t.IsFormatRgba8Unorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba8Unorm;
+  }
+  if (t.IsFormatRgba8UnormSrgb()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba8UnormSrgb;
+  }
+  if (t.IsFormatRgba8Snorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba8Snorm;
+  }
+  if (t.IsFormatRgba8Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba8Uint;
+  }
+  if (t.IsFormatRgba8Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba8Sint;
+  }
+  if (t.IsFormatBgra8Unorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kBgra8Unorm;
+  }
+  if (t.IsFormatBgra8UnormSrgb()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kBgra8UnormSrgb;
+  }
+  if (t.IsFormatRgb10A2Unorm()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgb10A2Unorm;
+  }
+  if (t.IsFormatRg11B10Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg11B10Float;
+  }
+  if (t.IsFormatRg32Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg32Uint;
+  }
+  if (t.IsFormatRg32Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg32Sint;
+  }
+  if (t.IsFormatRg32Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRg32Float;
+  }
+  if (t.IsFormatRgba16Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba16Uint;
+  }
+  if (t.IsFormatRgba16Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba16Sint;
+  }
+  if (t.IsFormatRgba16Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba16Float;
+  }
+  if (t.IsFormatRgba32Uint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba32Uint;
+  }
+  if (t.IsFormatRgba32Sint()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba32Sint;
+  }
+  if (t.IsFormatRgba32Float()) {
+    next();  // Consume the peek
+    return ast::type::ImageFormat::kRgba32Float;
+  }
+  return ast::type::ImageFormat::kNone;
+}
+
 // variable_ident_decl
 //   : IDENT COLON type_decl
 std::pair<std::string, ast::type::Type*> ParserImpl::variable_ident_decl() {
