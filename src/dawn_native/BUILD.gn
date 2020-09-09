@@ -153,7 +153,6 @@ source_set("dawn_native_sources") {
     "BackendConnection.h",
     "BindGroup.cpp",
     "BindGroup.h",
-    "BindGroupAndStorageBarrierTracker.h",
     "BindGroupLayout.cpp",
     "BindGroupLayout.h",
     "BindGroupTracker.h",

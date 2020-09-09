@@ -944,6 +944,163 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
     CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kArrayLayerCount);
 }
 
+// Test that multiple dispatches to increment values by ping-ponging between a read-only storage
+// texture and a write-only storage texture are synchronized in one pass.
+TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
+    wgpu::Texture storageTexture1 = CreateTexture(
+        kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
+    wgpu::Texture storageTexture2 = CreateTexture(
+        kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
+
+    wgpu::ShaderModule module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        layout(set = 0, binding = 0, r32ui) uniform readonly uimage2D Src;
+        layout(set = 0, binding = 1, r32ui) uniform writeonly uimage2D Dst;
+        void main() {
+            uvec4 srcValue = imageLoad(Src, ivec2(0, 0));
+            ++srcValue.x;
+            imageStore(Dst, ivec2(0, 0), srcValue);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is
+    // bound as write-only storage texture.
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, storageTexture1.CreateView()},
+                                                          {1, storageTexture2.CreateView()},
+                                                      });
+
+    // In bindGroupA storageTexture2 is bound as read-only storage texture and storageTexture1 is
+    // bound as write-only storage texture.
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, storageTexture2.CreateView()},
+                                                          {1, storageTexture1.CreateView()},
+                                                      });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    // After the first dispatch the value in storageTexture2 should be 1u.
+    pass.SetBindGroup(0, bindGroupA);
+    pass.Dispatch(1);
+
+    // After the second dispatch the value in storageTexture1 should be 2u;
+    pass.SetBindGroup(0, bindGroupB);
+    pass.Dispatch(1);
+
+    pass.EndPass();
+
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = sizeof(uint32_t);
+    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
+
+    wgpu::TextureCopyView textureCopyView;
+    textureCopyView.texture = storageTexture1;
+
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(resultBuffer, 0, 256, 1);
+    wgpu::Extent3D extent3D = {1, 1, 1};
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    constexpr uint32_t kFinalPixelValueInTexture1 = 2u;
+    EXPECT_BUFFER_U32_EQ(kFinalPixelValueInTexture1, resultBuffer, 0);
+}
+
+// Test that multiple dispatches to increment values by ping-ponging between a sampled texture and
+// a write-only storage texture are synchronized in one pass.
+TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
+    wgpu::Texture storageTexture1 = CreateTexture(
+        kTextureFormat,
+        wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u,
+        1u);
+    wgpu::Texture storageTexture2 = CreateTexture(
+        kTextureFormat, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage, 1u, 1u);
+    wgpu::SamplerDescriptor samplerDesc;
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::ShaderModule module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform sampler mySampler;
+        layout(set = 0, binding = 1) uniform utexture2D Src;
+        layout(set = 0, binding = 2, r32ui) uniform writeonly uimage2D Dst;
+        void main() {
+            uvec4 srcValue = texelFetch(usampler2D(Src, mySampler), ivec2(0, 0), 0);
+            ++srcValue.x;
+            imageStore(Dst, ivec2(0, 0), srcValue);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is
+    // bound as write-only storage texture.
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, sampler},
+                                                          {1, storageTexture1.CreateView()},
+                                                          {2, storageTexture2.CreateView()},
+                                                      });
+
+    // In bindGroupA storageTexture2 is bound as read-only storage texture and storageTexture1 is
+    // bound as write-only storage texture.
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, sampler},
+                                                          {1, storageTexture2.CreateView()},
+                                                          {2, storageTexture1.CreateView()},
+                                                      });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    // After the first dispatch the value in storageTexture2 should be 1u.
+    pass.SetBindGroup(0, bindGroupA);
+    pass.Dispatch(1);
+
+    // After the second dispatch the value in storageTexture1 should be 2u;
+    pass.SetBindGroup(0, bindGroupB);
+    pass.Dispatch(1);
+
+    pass.EndPass();
+
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = sizeof(uint32_t);
+    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
+
+    wgpu::TextureCopyView textureCopyView;
+    textureCopyView.texture = storageTexture1;
+
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(resultBuffer, 0, 256, 1);
+    wgpu::Extent3D extent3D = {1, 1, 1};
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    constexpr uint32_t kFinalPixelValueInTexture1 = 2u;
+    EXPECT_BUFFER_U32_EQ(kFinalPixelValueInTexture1, resultBuffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
                       D3D12Backend(),
                       MetalBackend(),

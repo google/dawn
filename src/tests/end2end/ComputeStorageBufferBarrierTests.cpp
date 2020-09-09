@@ -127,6 +127,70 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedB.data(), bufferB, 0, kNumValues);
 }
 
+// Test that multiple dispatches to increment values by ping-ponging between storage buffers and
+// read-only storage buffers are synchronized in one compute pass.
+TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOnePass) {
+    std::vector<uint32_t> data(kNumValues, 0);
+    std::vector<uint32_t> expectedA(kNumValues, 0x1234 * kIterations);
+    std::vector<uint32_t> expectedB(kNumValues, 0x1234 * (kIterations - 1));
+
+    uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
+
+    wgpu::Buffer bufferA = utils::CreateBufferFromData(
+        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+
+    wgpu::Buffer bufferB = utils::CreateBufferFromData(
+        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+
+    wgpu::ShaderModule module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        #define kNumValues 100
+        layout(std430, set = 0, binding = 0) readonly buffer Src { uint src[kNumValues]; };
+        layout(std430, set = 0, binding = 1) buffer Dst { uint dst[kNumValues]; };
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            dst[index] = src[index] + 0x1234;
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, bufferA, 0, bufferSize},
+                                                          {1, bufferB, 0, bufferSize},
+                                                      });
+
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, bufferB, 0, bufferSize},
+                                                          {1, bufferA, 0, bufferSize},
+                                                      });
+
+    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    for (uint32_t i = 0; i < kIterations / 2; ++i) {
+        pass.SetBindGroup(0, bindGroups[0]);
+        pass.Dispatch(kNumValues);
+        pass.SetBindGroup(0, bindGroups[1]);
+        pass.Dispatch(kNumValues);
+    }
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedA.data(), bufferA, 0, kNumValues);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedB.data(), bufferB, 0, kNumValues);
+}
+
 // Test that Storage to Uniform buffer transitions work and synchronize correctly
 // by ping-ponging between Storage/Uniform usage in sequential compute passes.
 TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
@@ -184,6 +248,70 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         pass.Dispatch(kNumValues / 4);
         pass.EndPass();
     }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedA.data(), bufferA, 0, kNumValues);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedB.data(), bufferB, 0, kNumValues);
+}
+
+// Test that Storage to Uniform buffer transitions work and synchronize correctly
+// by ping-ponging between Storage/Uniform usage in one compute pass.
+TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
+    std::vector<uint32_t> data(kNumValues, 0);
+    std::vector<uint32_t> expectedA(kNumValues, 0x1234 * kIterations);
+    std::vector<uint32_t> expectedB(kNumValues, 0x1234 * (kIterations - 1));
+
+    uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
+
+    wgpu::Buffer bufferA = utils::CreateBufferFromData(
+        device, data.data(), bufferSize,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
+
+    wgpu::Buffer bufferB = utils::CreateBufferFromData(
+        device, data.data(), bufferSize,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
+
+    wgpu::ShaderModule module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        #define kNumValues 100
+        layout(std140, set = 0, binding = 0) uniform Src { uvec4 src[kNumValues / 4]; };
+        layout(std430, set = 0, binding = 1) buffer Dst { uvec4 dst[kNumValues / 4]; };
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            dst[index] = src[index] + 0x1234;
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, bufferA, 0, bufferSize},
+                                                          {1, bufferB, 0, bufferSize},
+                                                      });
+
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, bufferB, 0, bufferSize},
+                                                          {1, bufferA, 0, bufferSize},
+                                                      });
+
+    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    for (uint32_t i = 0, b = 0; i < kIterations; ++i, b = 1 - b) {
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroups[b]);
+        pass.Dispatch(kNumValues / 4);
+    }
+    pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
