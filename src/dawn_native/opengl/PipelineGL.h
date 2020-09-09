@@ -17,16 +17,20 @@
 
 #include "dawn_native/Pipeline.h"
 
+#include "dawn_native/PerStage.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
 #include <vector>
+
+namespace dawn_native {
+    struct ProgrammableStage;
+}  // namespace dawn_native
 
 namespace dawn_native { namespace opengl {
 
     struct OpenGLFunctions;
     class PersistentPipelineState;
     class PipelineLayout;
-    class ShaderModule;
 
     class PipelineGL {
       public:
@@ -34,7 +38,7 @@ namespace dawn_native { namespace opengl {
 
         void Initialize(const OpenGLFunctions& gl,
                         const PipelineLayout* layout,
-                        const PerStage<const ShaderModule*>& modules);
+                        const PerStage<ProgrammableStage>& stages);
 
         // For each unit a sampler is bound to we need to know if we should use filtering or not
         // because int and uint texture are only complete without filtering.

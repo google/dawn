@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/Platform.h"
+#include "dawn_native/SpirvUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
 #include <spirv_glsl.hpp>
@@ -54,26 +55,17 @@ namespace dawn_native { namespace opengl {
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
                                                       const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        DAWN_TRY(module->Initialize());
+        DAWN_TRY(module->InitializeBase());
         return module.Detach();
-    }
-
-    const char* ShaderModule::GetSource() const {
-        return mGlslSource.c_str();
-    }
-
-    const ShaderModule::CombinedSamplerInfo& ShaderModule::GetCombinedSamplerInfo() const {
-        return mCombinedInfo;
     }
 
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
     }
 
-    MaybeError ShaderModule::Initialize() {
-        DAWN_TRY(InitializeBase());
-        const std::vector<uint32_t>& spirv = GetSpirv();
-
+    std::string ShaderModule::TranslateToGLSL(const char* entryPointName,
+                                              SingleShaderStage stage,
+                                              CombinedSamplerInfo* combinedSamplers) const {
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
         // be updated.
         spirv_cross::CompilerGLSL::Options options;
@@ -92,31 +84,32 @@ namespace dawn_native { namespace opengl {
         options.version = 440;
 #endif
 
-        spirv_cross::CompilerGLSL compiler(spirv);
+        spirv_cross::CompilerGLSL compiler(GetSpirv());
         compiler.set_common_options(options);
+        compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 
         // Extract bindings names so that it can be used to get its location in program.
-        // Now translate the separate sampler / textures into combined ones and store their info.
-        // We need to do this before removing the set and binding decorations.
+        // Now translate the separate sampler / textures into combined ones and store their info. We
+        // need to do this before removing the set and binding decorations.
         compiler.build_combined_image_samplers();
 
         for (const auto& combined : compiler.get_combined_image_samplers()) {
-            mCombinedInfo.emplace_back();
+            combinedSamplers->emplace_back();
 
-            auto& info = mCombinedInfo.back();
-            info.samplerLocation.group = BindGroupIndex(
+            CombinedSampler* info = &combinedSamplers->back();
+            info->samplerLocation.group = BindGroupIndex(
                 compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet));
-            info.samplerLocation.binding =
+            info->samplerLocation.binding =
                 BindingNumber(compiler.get_decoration(combined.sampler_id, spv::DecorationBinding));
-            info.textureLocation.group = BindGroupIndex(
+            info->textureLocation.group = BindGroupIndex(
                 compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet));
-            info.textureLocation.binding =
+            info->textureLocation.binding =
                 BindingNumber(compiler.get_decoration(combined.image_id, spv::DecorationBinding));
-            compiler.set_name(combined.combined_id, info.GetName());
+            compiler.set_name(combined.combined_id, info->GetName());
         }
 
         const EntryPointMetadata::BindingInfo& bindingInfo =
-            GetEntryPoint("main", GetMainEntryPointStageForTransition()).bindings;
+            GetEntryPoint(entryPointName, stage).bindings;
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
@@ -146,9 +139,7 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        mGlslSource = compiler.compile();
-
-        return {};
+        return compiler.compile();
     }
 
 }}  // namespace dawn_native::opengl

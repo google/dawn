@@ -38,23 +38,20 @@ namespace dawn_native { namespace opengl {
     };
     bool operator<(const CombinedSampler& a, const CombinedSampler& b);
 
+    using CombinedSamplerInfo = std::vector<CombinedSampler>;
+
     class ShaderModule final : public ShaderModuleBase {
       public:
         static ResultOrError<ShaderModule*> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor);
 
-        using CombinedSamplerInfo = std::vector<CombinedSampler>;
-
-        const char* GetSource() const;
-        const CombinedSamplerInfo& GetCombinedSamplerInfo() const;
+        std::string TranslateToGLSL(const char* entryPointName,
+                                    SingleShaderStage stage,
+                                    CombinedSamplerInfo* combinedSamplers) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
-        MaybeError Initialize();
-
-        CombinedSamplerInfo mCombinedInfo;
-        std::string mGlslSource;
     };
 
 }}  // namespace dawn_native::opengl

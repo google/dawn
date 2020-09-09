@@ -17,6 +17,7 @@
 #include "common/BitSetIterator.h"
 #include "common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/Pipeline.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/OpenGLFunctions.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
@@ -48,7 +49,7 @@ namespace dawn_native { namespace opengl {
 
     void PipelineGL::Initialize(const OpenGLFunctions& gl,
                                 const PipelineLayout* layout,
-                                const PerStage<const ShaderModule*>& modules) {
+                                const PerStage<ProgrammableStage>& stages) {
         auto CreateShader = [](const OpenGLFunctions& gl, GLenum type,
                                const char* source) -> GLuint {
             GLuint shader = gl.CreateShader(type);
@@ -73,18 +74,25 @@ namespace dawn_native { namespace opengl {
 
         mProgram = gl.CreateProgram();
 
+        // Compute the set of active stages.
         wgpu::ShaderStage activeStages = wgpu::ShaderStage::None;
         for (SingleShaderStage stage : IterateStages(kAllStages)) {
-            if (modules[stage] != nullptr) {
+            if (stages[stage].module != nullptr) {
                 activeStages |= StageBit(stage);
             }
         }
 
+        // Create an OpenGL shader for each stage and gather the list of combined samplers.
+        PerStage<CombinedSamplerInfo> combinedSamplers;
         for (SingleShaderStage stage : IterateStages(activeStages)) {
-            GLuint shader = CreateShader(gl, GLShaderType(stage), modules[stage]->GetSource());
+            const ShaderModule* module = ToBackend(stages[stage].module.Get());
+            std::string glsl = module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
+                                                       &combinedSamplers[stage]);
+            GLuint shader = CreateShader(gl, GLShaderType(stage), glsl.c_str());
             gl.AttachShader(mProgram, shader);
         }
 
+        // Link all the shaders together.
         gl.LinkProgram(mProgram);
 
         GLint linkStatus = GL_FALSE;
@@ -100,10 +108,9 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        gl.UseProgram(mProgram);
-
         // The uniforms are part of the program state so we can pre-bind buffer units, texture units
         // etc.
+        gl.UseProgram(mProgram);
         const auto& indices = layout->GetBindingIndexInfo();
 
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
@@ -154,8 +161,6 @@ namespace dawn_native { namespace opengl {
                     case wgpu::BindingType::StorageTexture:
                         UNREACHABLE();
                         break;
-
-                        // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
                 }
             }
         }
@@ -164,7 +169,7 @@ namespace dawn_native { namespace opengl {
         {
             std::set<CombinedSampler> combinedSamplersSet;
             for (SingleShaderStage stage : IterateStages(activeStages)) {
-                for (const auto& combined : modules[stage]->GetCombinedSamplerInfo()) {
+                for (const CombinedSampler& combined : combinedSamplers[stage]) {
                     combinedSamplersSet.insert(combined);
                 }
             }

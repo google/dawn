@@ -104,6 +104,10 @@ namespace dawn_native {
         return mStages[stage];
     }
 
+    const PerStage<ProgrammableStage>& PipelineBase::GetAllStages() const {
+        return mStages;
+    }
+
     MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t groupIndex) {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));

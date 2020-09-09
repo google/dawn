@@ -204,7 +204,7 @@ namespace dawn_native { namespace opengl {
         modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertexStage.module);
         modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
 
-        PipelineGL::Initialize(device->gl, ToBackend(GetLayout()), modules);
+        PipelineGL::Initialize(device->gl, ToBackend(GetLayout()), GetAllStages());
         CreateVAOForVertexState(descriptor->vertexState);
     }
 

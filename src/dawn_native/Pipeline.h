@@ -47,6 +47,7 @@ namespace dawn_native {
         const PipelineLayoutBase* GetLayout() const;
         const RequiredBufferSizes& GetMinBufferSizes() const;
         const ProgrammableStage& GetStage(SingleShaderStage stage) const;
+        const PerStage<ProgrammableStage>& GetAllStages() const;
 
         BindGroupLayoutBase* GetBindGroupLayout(uint32_t groupIndex);
 

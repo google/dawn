@@ -23,7 +23,7 @@ namespace dawn_native { namespace opengl {
         PerStage<const ShaderModule*> modules(nullptr);
         modules[SingleShaderStage::Compute] = ToBackend(descriptor->computeStage.module);
 
-        PipelineGL::Initialize(device->gl, ToBackend(descriptor->layout), modules);
+        PipelineGL::Initialize(device->gl, ToBackend(descriptor->layout), GetAllStages());
     }
 
     void ComputePipeline::ApplyNow() {
