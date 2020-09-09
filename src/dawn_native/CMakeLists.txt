@@ -150,6 +150,9 @@ target_link_libraries(dawn_native
             dawn_platform
             dawn_internal_config
             spirv-cross-core
+            spirv-cross-glsl
+            spirv-cross-hlsl
+            SPIRV-Tools
 )
 
 if (DAWN_USE_X11)
