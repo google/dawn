@@ -29,7 +29,7 @@ static constexpr uint32_t kMaxVertexAttributeEnd = 2048u;
 static constexpr uint32_t kMaxVertexBuffers = 16u;
 static constexpr uint32_t kMaxVertexBufferStride = 2048u;
 static constexpr uint32_t kNumStages = 3;
-static constexpr uint32_t kMaxColorAttachments = 4u;
+static constexpr uint8_t kMaxColorAttachments = 4u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 // Dynamic buffer offsets require offset to be divisible by 256
 static constexpr uint64_t kMinDynamicBufferOffsetAlignment = 256u;

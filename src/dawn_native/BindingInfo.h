@@ -16,10 +16,10 @@
 #define DAWNNATIVE_BINDINGINFO_H_
 
 #include "common/Constants.h"
-#include "common/TypedInteger.h"
 #include "common/ityp_array.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -27,16 +27,6 @@
 #include <cstdint>
 
 namespace dawn_native {
-
-    // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
-    using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
-
-    // Binding numbers get mapped to a packed range of indices
-    using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
-
-    using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
-
-    static constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
     // Not a real WebGPU limit, but the sum of the two limits is useful for internal optimizations.
     static constexpr uint32_t kMaxDynamicBuffersPerPipelineLayout =

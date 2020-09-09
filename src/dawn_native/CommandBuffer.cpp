@@ -85,7 +85,8 @@ namespace dawn_native {
     }
 
     void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
-        for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+        for (ColorAttachmentIndex i :
+             IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             auto& attachmentInfo = renderPass->colorAttachments[i];
             TextureViewBase* view = attachmentInfo.view.Get();
             bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;

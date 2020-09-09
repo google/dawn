@@ -67,15 +67,16 @@ namespace dawn_native {
         const std::bitset<kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
         const VertexBufferInfo& GetVertexBuffer(uint32_t slot) const;
 
-        const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
+        const ColorStateDescriptor* GetColorStateDescriptor(
+            ColorAttachmentIndex attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
         wgpu::PrimitiveTopology GetPrimitiveTopology() const;
         wgpu::CullMode GetCullMode() const;
         wgpu::FrontFace GetFrontFace() const;
 
-        std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
+        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
         bool HasDepthStencilAttachment() const;
-        wgpu::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
+        wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
         wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
         uint32_t GetSampleMask() const;
@@ -108,7 +109,7 @@ namespace dawn_native {
         // Attachments
         Ref<AttachmentState> mAttachmentState;
         DepthStencilStateDescriptor mDepthStencilState;
-        std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
+        ityp::array<ColorAttachmentIndex, ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
         // Other state
         wgpu::PrimitiveTopology mPrimitiveTopology;

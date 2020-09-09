@@ -872,12 +872,14 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Unable to find Location decoration for Fragment output");
                 }
-                uint32_t location =
+                uint32_t unsanitizedAttachment =
                     compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
-                if (location >= kMaxColorAttachments) {
+                if (unsanitizedAttachment >= kMaxColorAttachments) {
                     return DAWN_VALIDATION_ERROR(
-                        "Fragment output location over limits in the SPIRV");
+                        "Fragment output attachment index must be less than max number of color "
+                        "attachments");
                 }
+                ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
 
                 spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
                     compiler.get_type(fragmentOutput.base_type_id).basetype;
@@ -886,7 +888,7 @@ namespace dawn_native {
                 if (formatType == Format::Type::Other) {
                     return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
                 }
-                metadata->fragmentOutputFormatBaseTypes[location] = formatType;
+                metadata->fragmentOutputFormatBaseTypes[attachment] = formatType;
             }
         }
 

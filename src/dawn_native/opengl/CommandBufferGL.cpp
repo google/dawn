@@ -370,7 +370,7 @@ namespace dawn_native { namespace opengl {
             GLuint readFbo = 0;
             GLuint writeFbo = 0;
 
-            for (uint32_t i :
+            for (ColorAttachmentIndex i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
                     if (readFbo == 0) {
@@ -854,30 +854,33 @@ namespace dawn_native { namespace opengl {
 
             // Mapping from attachmentSlot to GL framebuffer attachment points. Defaults to zero
             // (GL_NONE).
-            std::array<GLenum, kMaxColorAttachments> drawBuffers = {};
+            ityp::array<ColorAttachmentIndex, GLenum, kMaxColorAttachments> drawBuffers = {};
 
             // Construct GL framebuffer
 
-            unsigned int attachmentCount = 0;
-            for (uint32_t i :
+            ColorAttachmentIndex attachmentCount(uint8_t(0));
+            for (ColorAttachmentIndex i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 TextureViewBase* textureView = renderPass->colorAttachments[i].view.Get();
                 GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
 
+                GLenum glAttachment = GL_COLOR_ATTACHMENT0 + static_cast<uint8_t>(i);
+
                 // Attach color buffers.
                 if (textureView->GetTexture()->GetArrayLayers() == 1) {
                     GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
-                    gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target,
-                                            texture, textureView->GetBaseMipLevel());
+                    gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture,
+                                            textureView->GetBaseMipLevel());
                 } else {
-                    gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                               texture, textureView->GetBaseMipLevel(),
+                    gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, glAttachment, texture,
+                                               textureView->GetBaseMipLevel(),
                                                textureView->GetBaseArrayLayer());
                 }
-                drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-                attachmentCount = i + 1;
+                drawBuffers[i] = glAttachment;
+                attachmentCount = i;
+                attachmentCount++;
             }
-            gl.DrawBuffers(attachmentCount, drawBuffers.data());
+            gl.DrawBuffers(static_cast<uint8_t>(attachmentCount), drawBuffers.data());
 
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 TextureViewBase* textureView = renderPass->depthStencilAttachment.view.Get();
@@ -922,9 +925,10 @@ namespace dawn_native { namespace opengl {
 
         // Clear framebuffer attachments as needed
         {
-            for (uint32_t i :
+            for (ColorAttachmentIndex index :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                auto* attachmentInfo = &renderPass->colorAttachments[i];
+                uint8_t i = static_cast<uint8_t>(index);
+                auto* attachmentInfo = &renderPass->colorAttachments[index];
 
                 // Load op - color
                 if (attachmentInfo->loadOp == wgpu::LoadOp::Clear) {

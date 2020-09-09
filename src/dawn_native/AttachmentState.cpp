@@ -24,18 +24,22 @@ namespace dawn_native {
     AttachmentStateBlueprint::AttachmentStateBlueprint(
         const RenderBundleEncoderDescriptor* descriptor)
         : mSampleCount(descriptor->sampleCount) {
-        for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
+        ASSERT(descriptor->colorFormatsCount <= kMaxColorAttachments);
+        for (ColorAttachmentIndex i(uint8_t(0));
+             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatsCount)); ++i) {
             mColorAttachmentsSet.set(i);
-            mColorFormats[i] = descriptor->colorFormats[i];
+            mColorFormats[i] = descriptor->colorFormats[static_cast<uint8_t>(i)];
         }
         mDepthStencilFormat = descriptor->depthStencilFormat;
     }
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
         : mSampleCount(descriptor->sampleCount) {
-        for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
+        ASSERT(descriptor->colorStateCount <= kMaxColorAttachments);
+        for (ColorAttachmentIndex i(uint8_t(0));
+             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorStateCount)); ++i) {
             mColorAttachmentsSet.set(i);
-            mColorFormats[i] = descriptor->colorStates[i].format;
+            mColorFormats[i] = descriptor->colorStates[static_cast<uint8_t>(i)].format;
         }
         if (descriptor->depthStencilState != nullptr) {
             mDepthStencilFormat = descriptor->depthStencilState->format;
@@ -43,8 +47,11 @@ namespace dawn_native {
     }
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
-        for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-            TextureViewBase* attachment = descriptor->colorAttachments[i].attachment;
+        for (ColorAttachmentIndex i(uint8_t(0));
+             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount));
+             ++i) {
+            TextureViewBase* attachment =
+                descriptor->colorAttachments[static_cast<uint8_t>(i)].attachment;
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = attachment->GetFormat().format;
             if (mSampleCount == 0) {
@@ -74,7 +81,7 @@ namespace dawn_native {
 
         // Hash color formats
         HashCombine(&hash, attachmentState->mColorAttachmentsSet);
-        for (uint32_t i : IterateBitSet(attachmentState->mColorAttachmentsSet)) {
+        for (ColorAttachmentIndex i : IterateBitSet(attachmentState->mColorAttachmentsSet)) {
             HashCombine(&hash, attachmentState->mColorFormats[i]);
         }
 
@@ -96,7 +103,7 @@ namespace dawn_native {
         }
 
         // Check color formats
-        for (uint32_t i : IterateBitSet(a->mColorAttachmentsSet)) {
+        for (ColorAttachmentIndex i : IterateBitSet(a->mColorAttachmentsSet)) {
             if (a->mColorFormats[i] != b->mColorFormats[i]) {
                 return false;
             }
@@ -123,11 +130,13 @@ namespace dawn_native {
         GetDevice()->UncacheAttachmentState(this);
     }
 
-    std::bitset<kMaxColorAttachments> AttachmentState::GetColorAttachmentsMask() const {
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
+    AttachmentState::GetColorAttachmentsMask() const {
         return mColorAttachmentsSet;
     }
 
-    wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(uint32_t index) const {
+    wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(
+        ColorAttachmentIndex index) const {
         ASSERT(mColorAttachmentsSet[index]);
         return mColorFormats[index];
     }

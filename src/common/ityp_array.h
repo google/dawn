@@ -88,6 +88,7 @@ namespace ityp {
         using Base::back;
         using Base::data;
         using Base::empty;
+        using Base::fill;
         using Base::front;
     };
 

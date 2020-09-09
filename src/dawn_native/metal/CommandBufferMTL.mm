@@ -56,9 +56,10 @@ namespace dawn_native { namespace metal {
         MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(BeginRenderPassCmd* renderPass) {
             MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
-            for (uint32_t i :
+            for (ColorAttachmentIndex attachment :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                auto& attachmentInfo = renderPass->colorAttachments[i];
+                uint8_t i = static_cast<uint8_t>(attachment);
+                auto& attachmentInfo = renderPass->colorAttachments[attachment];
 
                 switch (attachmentInfo.loadOp) {
                     case wgpu::LoadOp::Clear:

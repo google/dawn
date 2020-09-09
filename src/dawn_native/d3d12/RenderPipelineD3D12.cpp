@@ -376,9 +376,10 @@ namespace dawn_native { namespace d3d12 {
             descriptorD3D12.DSVFormat = D3D12TextureFormat(GetDepthStencilFormat());
         }
 
-        for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-            descriptorD3D12.RTVFormats[i] = D3D12TextureFormat(GetColorAttachmentFormat(i));
-            descriptorD3D12.BlendState.RenderTarget[i] =
+        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+            descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
+                D3D12TextureFormat(GetColorAttachmentFormat(i));
+            descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
                 ComputeColorDesc(GetColorStateDescriptor(i));
         }
         descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());

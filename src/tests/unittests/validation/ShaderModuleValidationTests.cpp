@@ -99,11 +99,10 @@ TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachme
     std::ostringstream stream;
     stream << R"(#version 450
               layout(location = )"
-           << kMaxColorAttachments << R"() out vec4 fragColor;
+           << static_cast<unsigned>(kMaxColorAttachments) << R"() out vec4 fragColor;
               void main() {
                   fragColor = vec4(0.0, 1.0, 0.0, 1.0);
               })";
-
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
                                                   stream.str().c_str()));
 }

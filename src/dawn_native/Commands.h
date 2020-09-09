@@ -86,7 +86,8 @@ namespace dawn_native {
 
     struct BeginRenderPassCmd {
         Ref<AttachmentState> attachmentState;
-        RenderPassColorAttachmentInfo colorAttachments[kMaxColorAttachments];
+        ityp::array<ColorAttachmentIndex, RenderPassColorAttachmentInfo, kMaxColorAttachments>
+            colorAttachments;
         RenderPassDepthStencilAttachmentInfo depthStencilAttachment;
 
         // Cache the width and height of all attachments for convenience

@@ -424,10 +424,11 @@ namespace dawn_native { namespace vulkan {
 
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the ColorState
-        std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
+        ityp::array<ColorAttachmentIndex, VkPipelineColorBlendAttachmentState, kMaxColorAttachments>
+            colorBlendAttachments;
         const EntryPointMetadata::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
             GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputFormatBaseTypes;
-        for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
+        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             const ColorStateDescriptor* colorStateDescriptor = GetColorStateDescriptor(i);
             bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Type::Other;
             colorBlendAttachments[i] =
@@ -469,7 +470,7 @@ namespace dawn_native { namespace vulkan {
         {
             RenderPassCacheQuery query;
 
-            for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
+            for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
                 query.SetColor(i, GetColorAttachmentFormat(i), wgpu::LoadOp::Load, false);
             }
 

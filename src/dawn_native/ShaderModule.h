@@ -22,6 +22,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -77,7 +78,8 @@ namespace dawn_native {
 
         // An array to record the basic types (float, int and uint) of the fragment shader outputs
         // or Format::Type::Other means the fragment shader output is unused.
-        using FragmentOutputBaseTypes = std::array<Format::Type, kMaxColorAttachments>;
+        using FragmentOutputBaseTypes =
+            ityp::array<ColorAttachmentIndex, Format::Type, kMaxColorAttachments>;
         FragmentOutputBaseTypes fragmentOutputFormatBaseTypes;
 
         // The shader stage for this binding, TODO(dawn:216): can likely be removed once we

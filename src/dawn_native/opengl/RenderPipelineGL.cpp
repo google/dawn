@@ -109,21 +109,23 @@ namespace dawn_native { namespace opengl {
         }
 
         void ApplyColorState(const OpenGLFunctions& gl,
-                             uint32_t attachment,
+                             ColorAttachmentIndex attachment,
                              const ColorStateDescriptor* descriptor) {
+            GLuint colorBuffer = static_cast<GLuint>(static_cast<uint8_t>(attachment));
             if (BlendEnabled(descriptor)) {
-                gl.Enablei(GL_BLEND, attachment);
-                gl.BlendEquationSeparatei(attachment, GLBlendMode(descriptor->colorBlend.operation),
+                gl.Enablei(GL_BLEND, colorBuffer);
+                gl.BlendEquationSeparatei(colorBuffer,
+                                          GLBlendMode(descriptor->colorBlend.operation),
                                           GLBlendMode(descriptor->alphaBlend.operation));
-                gl.BlendFuncSeparatei(attachment,
+                gl.BlendFuncSeparatei(colorBuffer,
                                       GLBlendFactor(descriptor->colorBlend.srcFactor, false),
                                       GLBlendFactor(descriptor->colorBlend.dstFactor, false),
                                       GLBlendFactor(descriptor->alphaBlend.srcFactor, true),
                                       GLBlendFactor(descriptor->alphaBlend.dstFactor, true));
             } else {
-                gl.Disablei(GL_BLEND, attachment);
+                gl.Disablei(GL_BLEND, colorBuffer);
             }
-            gl.ColorMaski(attachment, descriptor->writeMask & wgpu::ColorWriteMask::Red,
+            gl.ColorMaski(colorBuffer, descriptor->writeMask & wgpu::ColorWriteMask::Red,
                           descriptor->writeMask & wgpu::ColorWriteMask::Green,
                           descriptor->writeMask & wgpu::ColorWriteMask::Blue,
                           descriptor->writeMask & wgpu::ColorWriteMask::Alpha);
@@ -265,7 +267,7 @@ namespace dawn_native { namespace opengl {
             gl.Disable(GL_SAMPLE_ALPHA_TO_COVERAGE);
         }
 
-        for (uint32_t attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
+        for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ApplyColorState(gl, attachmentSlot, GetColorStateDescriptor(attachmentSlot));
         }
     }

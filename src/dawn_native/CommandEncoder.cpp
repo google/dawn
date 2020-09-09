@@ -514,15 +514,17 @@ namespace dawn_native {
 
                 cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
 
-                for (uint32_t i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+                for (ColorAttachmentIndex index :
+                     IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+                    uint8_t i = static_cast<uint8_t>(index);
                     TextureViewBase* view = descriptor->colorAttachments[i].attachment;
                     TextureViewBase* resolveTarget = descriptor->colorAttachments[i].resolveTarget;
 
-                    cmd->colorAttachments[i].view = view;
-                    cmd->colorAttachments[i].resolveTarget = resolveTarget;
-                    cmd->colorAttachments[i].loadOp = descriptor->colorAttachments[i].loadOp;
-                    cmd->colorAttachments[i].storeOp = descriptor->colorAttachments[i].storeOp;
-                    cmd->colorAttachments[i].clearColor =
+                    cmd->colorAttachments[index].view = view;
+                    cmd->colorAttachments[index].resolveTarget = resolveTarget;
+                    cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
+                    cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
+                    cmd->colorAttachments[index].clearColor =
                         descriptor->colorAttachments[i].clearColor;
 
                     usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::OutputAttachment);

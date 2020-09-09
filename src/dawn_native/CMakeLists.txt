@@ -90,6 +90,7 @@ target_sources(dawn_native PRIVATE
     "Forward.h"
     "Instance.cpp"
     "Instance.h"
+    "IntegerTypes.h"
     "MapRequestTracker.cpp"
     "MapRequestTracker.h"
     "ObjectBase.cpp"
