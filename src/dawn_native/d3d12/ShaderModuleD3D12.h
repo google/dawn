@@ -24,26 +24,29 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class PipelineLayout;
 
+    ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(Device* device,
+                                                     SingleShaderStage stage,
+                                                     const std::string& hlslSource,
+                                                     const char* entryPoint,
+                                                     uint32_t compileFlags);
+    ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(Device* device,
+                                                     SingleShaderStage stage,
+                                                     const std::string& hlslSource,
+                                                     const char* entryPoint,
+                                                     uint32_t compileFlags);
+
     class ShaderModule final : public ShaderModuleBase {
       public:
         static ResultOrError<ShaderModule*> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor);
 
-        ResultOrError<std::string> GetHLSLSource(PipelineLayout* layout);
-
-        ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(SingleShaderStage stage,
-                                                         const std::string& hlslSource,
-                                                         const char* entryPoint,
-                                                         uint32_t compileFlags);
-        ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(SingleShaderStage stage,
-                                                         const std::string& hlslSource,
-                                                         const char* entryPoint,
-                                                         uint32_t compileFlags);
+        ResultOrError<std::string> TranslateToHLSL(const char* entryPointName,
+                                                   SingleShaderStage stage,
+                                                   PipelineLayout* layout) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
-        MaybeError Initialize();
     };
 
 }}  // namespace dawn_native::d3d12
