@@ -40,11 +40,6 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY(InitializeBase());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
-        // Use SPIRV-Cross to extract info from the SPIRV even if Vulkan consumes SPIRV. We want to
-        // have a translation step eventually anyway.
-        spirv_cross::Compiler compiler(spirv);
-        DAWN_TRY(ExtractSpirvInfo(compiler));
-
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.pNext = nullptr;

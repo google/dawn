@@ -129,8 +129,7 @@ namespace dawn_native { namespace null {
     ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(this, descriptor));
-        spirv_cross::Compiler compiler(module->GetSpirv());
-        DAWN_TRY(module->ExtractSpirvInfo(compiler));
+        DAWN_TRY(module->Initialize());
         return module.Detach();
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
@@ -384,6 +383,12 @@ namespace dawn_native { namespace null {
             mTexture->Destroy();
             mTexture = nullptr;
         }
+    }
+
+    // ShaderModule
+
+    MaybeError ShaderModule::Initialize() {
+        return InitializeBase();
     }
 
     // OldSwapChain

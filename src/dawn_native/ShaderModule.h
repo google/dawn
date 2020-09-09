@@ -102,9 +102,6 @@ namespace dawn_native {
         const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint,
                                                 SingleShaderStage stage) const;
 
-        // TODO make this member protected, it is only used outside of child classes in DeviceNull.
-        MaybeError ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
-
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
             size_t operator()(const ShaderModuleBase* module) const;
@@ -132,9 +129,6 @@ namespace dawn_native {
 
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
-        ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfoImpl(
-            const spirv_cross::Compiler& compiler);
 
         enum class Type { Undefined, Spirv, Wgsl };
         Type mType;

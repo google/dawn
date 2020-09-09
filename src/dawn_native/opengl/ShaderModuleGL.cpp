@@ -95,8 +95,6 @@ namespace dawn_native { namespace opengl {
         spirv_cross::CompilerGLSL compiler(spirv);
         compiler.set_common_options(options);
 
-        DAWN_TRY(ExtractSpirvInfo(compiler));
-
         // Extract bindings names so that it can be used to get its location in program.
         // Now translate the separate sampler / textures into combined ones and store their info.
         // We need to do this before removing the set and binding decorations.

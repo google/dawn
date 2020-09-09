@@ -50,7 +50,7 @@ namespace dawn_native { namespace null {
     class Queue;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
-    using ShaderModule = ShaderModuleBase;
+    class ShaderModule;
     class SwapChain;
     using Texture = TextureBase;
     using TextureView = TextureViewBase;
@@ -217,7 +217,6 @@ namespace dawn_native { namespace null {
     class CommandBuffer final : public CommandBufferBase {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-
     };
 
     class QuerySet final : public QuerySetBase {
@@ -241,6 +240,13 @@ namespace dawn_native { namespace null {
                                    uint64_t bufferOffset,
                                    const void* data,
                                    size_t size) override;
+    };
+
+    class ShaderModule final : public ShaderModuleBase {
+      public:
+        using ShaderModuleBase::ShaderModuleBase;
+
+        MaybeError Initialize();
     };
 
     class SwapChain final : public NewSwapChainBase {

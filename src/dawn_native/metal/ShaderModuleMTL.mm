@@ -54,13 +54,7 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError ShaderModule::Initialize() {
-        DAWN_TRY(InitializeBase());
-        const std::vector<uint32_t>& spirv = GetSpirv();
-
-        spirv_cross::CompilerMSL compiler(spirv);
-        DAWN_TRY(ExtractSpirvInfo(compiler));
-
-        return {};
+        return InitializeBase();
     }
 
     MaybeError ShaderModule::GetFunction(const char* functionName,

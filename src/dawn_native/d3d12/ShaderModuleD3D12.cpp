@@ -97,13 +97,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError ShaderModule::Initialize() {
-        DAWN_TRY(InitializeBase());
-        const std::vector<uint32_t>& spirv = GetSpirv();
-
-        spirv_cross::CompilerHLSL compiler(spirv);
-        DAWN_TRY(ExtractSpirvInfo(compiler));
-
-        return {};
+        return InitializeBase();
     }
 
     ResultOrError<std::string> ShaderModule::GetHLSLSource(PipelineLayout* layout) {
