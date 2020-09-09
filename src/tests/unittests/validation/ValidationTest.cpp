@@ -102,6 +102,14 @@ void ValidationTest::WaitForAllOperations(const wgpu::Device& device) const {
     device.Tick();
 }
 
+bool ValidationTest::HasWGSL() const {
+#ifdef DAWN_ENABLE_WGSL
+    return true;
+#else
+    return false;
+#endif
+}
+
 // static
 void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
     ASSERT(type != WGPUErrorType_NoError);

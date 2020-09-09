@@ -590,3 +590,209 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
         }
     }
 }
+
+// Test that the entryPoint names must be present for the correct stage in the shader module.
+TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
+    DAWN_SKIP_TEST_IF(!HasWGSL());
+
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin position]] var<out> position : vec4<f32>;
+        fn vertex_main() -> void {
+            position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            return;
+        }
+        entry_point vertex = vertex_main;
+
+        [[location 0]] var<out> color : vec4<f32>;
+        fn fragment_main() -> void {
+            color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            return;
+        }
+        entry_point fragment = fragment_main;
+    )");
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.vertexStage.module = module;
+    descriptor.vertexStage.entryPoint = "vertex_main";
+    descriptor.cFragmentStage.module = module;
+    descriptor.cFragmentStage.entryPoint = "fragment_main";
+
+    // Success case.
+    device.CreateRenderPipeline(&descriptor);
+
+    // Test for the vertex stage entryPoint name.
+    {
+        // The entryPoint name doesn't exist in the module.
+        descriptor.vertexStage.entryPoint = "main";
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+        // The entryPoint name exists, but not for the correct stage.
+        descriptor.vertexStage.entryPoint = "fragment_main";
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    descriptor.vertexStage.entryPoint = "vertex_main";
+
+    // Test for the fragment stage entryPoint name.
+    {
+        // The entryPoint name doesn't exist in the module.
+        descriptor.cFragmentStage.entryPoint = "main";
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+        // The entryPoint name exists, but not for the correct stage.
+        descriptor.cFragmentStage.entryPoint = "vertex_main";
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
+// Test that vertex attrib validation is for the correct entryPoint
+TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
+    DAWN_SKIP_TEST_IF(!HasWGSL());
+
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin position]] var<out> position : vec4<f32>;
+        [[location 0]] var<in> attrib0 : vec4<f32>;
+        [[location 1]] var<in> attrib1 : vec4<f32>;
+
+        fn vertex0() -> void {
+            position = attrib0;
+            return;
+        }
+        fn vertex1() -> void {
+            position = attrib1;
+            return;
+        }
+
+        entry_point vertex = vertex0;
+        entry_point vertex = vertex1;
+    )");
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.vertexStage.module = module;
+    descriptor.cFragmentStage.module = fsModule;
+
+    descriptor.cVertexState.vertexBufferCount = 1;
+    descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+    descriptor.cVertexState.cVertexBuffers[0].arrayStride = 16;
+    descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    descriptor.cVertexState.cAttributes[0].offset = 0;
+
+    // Success cases, the attribute used by the entryPoint is declared in the pipeline.
+    descriptor.vertexStage.entryPoint = "vertex0";
+    descriptor.cVertexState.cAttributes[0].shaderLocation = 0;
+    device.CreateRenderPipeline(&descriptor);
+
+    descriptor.vertexStage.entryPoint = "vertex1";
+    descriptor.cVertexState.cAttributes[0].shaderLocation = 1;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Error cases, the attribute used by the entryPoint isn't declared in the pipeline.
+    descriptor.vertexStage.entryPoint = "vertex1";
+    descriptor.cVertexState.cAttributes[0].shaderLocation = 0;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    descriptor.vertexStage.entryPoint = "vertex0";
+    descriptor.cVertexState.cAttributes[0].shaderLocation = 1;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}
+
+// Test that fragment output validation is for the correct entryPoint
+TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
+    DAWN_SKIP_TEST_IF(!HasWGSL());
+
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location 0]] var<out> colorFloat : vec4<f32>;
+        [[location 0]] var<out> colorUint : vec4<u32>;
+
+        fn fragmentFloat() -> void {
+            colorFloat = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+            return;
+        }
+        fn fragmentUint() -> void {
+            colorUint = vec4<u32>(0, 0, 0, 0);
+            return;
+        }
+
+        entry_point fragment = fragmentFloat;
+        entry_point fragment = fragmentUint;
+    )");
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.vertexStage.module = vsModule;
+    descriptor.cFragmentStage.module = module;
+
+    // Success case, the component type matches between the pipeline and the entryPoint
+    descriptor.cFragmentStage.entryPoint = "fragmentFloat";
+    descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA32Float;
+    device.CreateRenderPipeline(&descriptor);
+
+    descriptor.cFragmentStage.entryPoint = "fragmentUint";
+    descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA32Uint;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Error case, the component type doesn't match between the pipeline and the entryPoint
+    descriptor.cFragmentStage.entryPoint = "fragmentUint";
+    descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA32Float;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    descriptor.cFragmentStage.entryPoint = "fragmentFloat";
+    descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA32Uint;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}
+
+// Test that fragment output validation is for the correct entryPoint
+// TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
+TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
+    DAWN_SKIP_TEST_IF(!HasWGSL());
+
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        type Uniforms = [[block]] struct {
+            [[offset 0]] data : vec4<f32>;
+        };
+        [[binding 0, set 0]] var<uniform> var0 : Uniforms;
+        [[binding 1, set 0]] var<uniform> var1 : Uniforms;
+        [[builtin position]] var<out> position : vec4<f32>;
+
+        fn vertex0() -> void {
+            position = var0.data;
+            return;
+        }
+        fn vertex1() -> void {
+            position = var1.data;
+            return;
+        }
+
+        entry_point vertex = vertex0;
+        entry_point vertex = vertex1;
+    )");
+
+    wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+    wgpu::PipelineLayout layout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
+
+    wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+    wgpu::PipelineLayout layout1 = utils::MakeBasicPipelineLayout(device, &bgl1);
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.vertexStage.module = module;
+    descriptor.cFragmentStage.module = fsModule;
+
+    // Success case, the BGL matches the bindings used by the entryPoint
+    descriptor.vertexStage.entryPoint = "vertex0";
+    descriptor.layout = layout0;
+    device.CreateRenderPipeline(&descriptor);
+
+    descriptor.vertexStage.entryPoint = "vertex1";
+    descriptor.layout = layout1;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Error case, the BGL doesn't match the bindings used by the entryPoint
+    descriptor.vertexStage.entryPoint = "vertex1";
+    descriptor.layout = layout0;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    descriptor.vertexStage.entryPoint = "vertex0";
+    descriptor.layout = layout1;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}

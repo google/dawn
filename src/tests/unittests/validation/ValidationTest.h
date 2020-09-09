@@ -15,6 +15,7 @@
 #ifndef TESTS_UNITTESTS_VALIDATIONTEST_H_
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
+#include "common/Log.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "gtest/gtest.h"
@@ -26,6 +27,16 @@
         FAIL() << "Expected device error in:\n " << #statement; \
     }                                                           \
     do {                                                        \
+    } while (0)
+
+// Skip a test when the given condition is satisfied.
+#define DAWN_SKIP_TEST_IF(condition)                            \
+    do {                                                        \
+        if (condition) {                                        \
+            dawn::InfoLog() << "Test skipped: " #condition "."; \
+            GTEST_SKIP();                                       \
+            return;                                             \
+        }                                                       \
     } while (0)
 
 class ValidationTest : public testing::Test {
@@ -57,6 +68,8 @@ class ValidationTest : public testing::Test {
       private:
         wgpu::RenderPassColorAttachmentDescriptor mColorAttachment;
     };
+
+    bool HasWGSL() const;
 
   protected:
     wgpu::Device device;

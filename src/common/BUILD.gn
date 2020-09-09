@@ -75,6 +75,10 @@ config("dawn_internal") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
+  if (dawn_enable_wgsl) {
+    defines += [ "DAWN_ENABLE_WGSL" ]
+  }
+
   if (dawn_use_x11) {
     defines += [ "DAWN_USE_X11" ]
   }

@@ -675,3 +675,52 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
         EXPECT_EQ(pipeline.GetBindGroupLayout(3).Get(), emptyBindGroupLayout.Get());
     }
 }
+
+// Test that fragment output validation is for the correct entryPoint
+// TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
+TEST_F(GetBindGroupLayoutTests, DISABLED_FromCorrectEntryPoint) {
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        type Data = [[block]] struct {
+            [[offset 0]] data : f32;
+        };
+        [[binding 0, set 0]] var<storage_buffer> data0 : Data;
+        [[binding 1, set 0]] var<storage_buffer> data1 : Data;
+
+        fn compute0() -> void {
+            data0.data = 0.0;
+            return;
+        }
+        fn compute1() -> void {
+            data1.data = 0.0;
+            return;
+        }
+        entry_point compute = compute0;
+        entry_point compute = compute1;
+    )");
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.computeStage.module = module;
+
+    // Get each entryPoint's BGL.
+    pipelineDesc.computeStage.entryPoint = "compute0";
+    wgpu::ComputePipeline pipeline0 = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::BindGroupLayout bgl0 = pipeline0.GetBindGroupLayout(0);
+
+    pipelineDesc.computeStage.entryPoint = "compute1";
+    wgpu::ComputePipeline pipeline1 = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::BindGroupLayout bgl1 = pipeline1.GetBindGroupLayout(0);
+
+    // Create the buffer used in the bindgroups.
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 4;
+    bufferDesc.usage = wgpu::BufferUsage::Storage;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    // Success case, the BGL matches the descriptor for the bindgroup.
+    utils::MakeBindGroup(device, bgl0, {{0, buffer}});
+    utils::MakeBindGroup(device, bgl1, {{1, buffer}});
+
+    // Error case, the BGL doesn't match the descriptor for the bindgroup.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl0, {{1, buffer}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl1, {{0, buffer}}));
+}
