@@ -19,6 +19,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/PipelineLayout.h"
+#include "dawn_native/SpirvUtils.h"
 
 #include <spirv-tools/libspirv.hpp>
 #include <spirv_cross.hpp>
@@ -36,114 +37,6 @@
 namespace dawn_native {
 
     namespace {
-        Format::Type SpirvCrossBaseTypeToFormatType(spirv_cross::SPIRType::BaseType spirvBaseType) {
-            switch (spirvBaseType) {
-                case spirv_cross::SPIRType::Float:
-                    return Format::Type::Float;
-                case spirv_cross::SPIRType::Int:
-                    return Format::Type::Sint;
-                case spirv_cross::SPIRType::UInt:
-                    return Format::Type::Uint;
-                default:
-                    UNREACHABLE();
-                    return Format::Type::Other;
-            }
-        }
-
-        wgpu::TextureViewDimension SpirvDimToTextureViewDimension(spv::Dim dim, bool arrayed) {
-            switch (dim) {
-                case spv::Dim::Dim1D:
-                    return wgpu::TextureViewDimension::e1D;
-                case spv::Dim::Dim2D:
-                    if (arrayed) {
-                        return wgpu::TextureViewDimension::e2DArray;
-                    } else {
-                        return wgpu::TextureViewDimension::e2D;
-                    }
-                case spv::Dim::Dim3D:
-                    return wgpu::TextureViewDimension::e3D;
-                case spv::Dim::DimCube:
-                    if (arrayed) {
-                        return wgpu::TextureViewDimension::CubeArray;
-                    } else {
-                        return wgpu::TextureViewDimension::Cube;
-                    }
-                default:
-                    UNREACHABLE();
-                    return wgpu::TextureViewDimension::Undefined;
-            }
-        }
-
-        wgpu::TextureFormat ToWGPUTextureFormat(spv::ImageFormat format) {
-            switch (format) {
-                case spv::ImageFormatR8:
-                    return wgpu::TextureFormat::R8Unorm;
-                case spv::ImageFormatR8Snorm:
-                    return wgpu::TextureFormat::R8Snorm;
-                case spv::ImageFormatR8ui:
-                    return wgpu::TextureFormat::R8Uint;
-                case spv::ImageFormatR8i:
-                    return wgpu::TextureFormat::R8Sint;
-                case spv::ImageFormatR16ui:
-                    return wgpu::TextureFormat::R16Uint;
-                case spv::ImageFormatR16i:
-                    return wgpu::TextureFormat::R16Sint;
-                case spv::ImageFormatR16f:
-                    return wgpu::TextureFormat::R16Float;
-                case spv::ImageFormatRg8:
-                    return wgpu::TextureFormat::RG8Unorm;
-                case spv::ImageFormatRg8Snorm:
-                    return wgpu::TextureFormat::RG8Snorm;
-                case spv::ImageFormatRg8ui:
-                    return wgpu::TextureFormat::RG8Uint;
-                case spv::ImageFormatRg8i:
-                    return wgpu::TextureFormat::RG8Sint;
-                case spv::ImageFormatR32f:
-                    return wgpu::TextureFormat::R32Float;
-                case spv::ImageFormatR32ui:
-                    return wgpu::TextureFormat::R32Uint;
-                case spv::ImageFormatR32i:
-                    return wgpu::TextureFormat::R32Sint;
-                case spv::ImageFormatRg16ui:
-                    return wgpu::TextureFormat::RG16Uint;
-                case spv::ImageFormatRg16i:
-                    return wgpu::TextureFormat::RG16Sint;
-                case spv::ImageFormatRg16f:
-                    return wgpu::TextureFormat::RG16Float;
-                case spv::ImageFormatRgba8:
-                    return wgpu::TextureFormat::RGBA8Unorm;
-                case spv::ImageFormatRgba8Snorm:
-                    return wgpu::TextureFormat::RGBA8Snorm;
-                case spv::ImageFormatRgba8ui:
-                    return wgpu::TextureFormat::RGBA8Uint;
-                case spv::ImageFormatRgba8i:
-                    return wgpu::TextureFormat::RGBA8Sint;
-                case spv::ImageFormatRgb10A2:
-                    return wgpu::TextureFormat::RGB10A2Unorm;
-                case spv::ImageFormatR11fG11fB10f:
-                    return wgpu::TextureFormat::RG11B10Ufloat;
-                case spv::ImageFormatRg32f:
-                    return wgpu::TextureFormat::RG32Float;
-                case spv::ImageFormatRg32ui:
-                    return wgpu::TextureFormat::RG32Uint;
-                case spv::ImageFormatRg32i:
-                    return wgpu::TextureFormat::RG32Sint;
-                case spv::ImageFormatRgba16ui:
-                    return wgpu::TextureFormat::RGBA16Uint;
-                case spv::ImageFormatRgba16i:
-                    return wgpu::TextureFormat::RGBA16Sint;
-                case spv::ImageFormatRgba16f:
-                    return wgpu::TextureFormat::RGBA16Float;
-                case spv::ImageFormatRgba32f:
-                    return wgpu::TextureFormat::RGBA32Float;
-                case spv::ImageFormatRgba32ui:
-                    return wgpu::TextureFormat::RGBA32Uint;
-                case spv::ImageFormatRgba32i:
-                    return wgpu::TextureFormat::RGBA32Sint;
-                default:
-                    return wgpu::TextureFormat::Undefined;
-            }
-        }
 
         std::string GetShaderDeclarationString(BindGroupIndex group, BindingNumber binding) {
             std::ostringstream ostream;
@@ -550,27 +443,15 @@ namespace dawn_native {
 
         ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfo(
             const DeviceBase* device,
-            const spirv_cross::Compiler& compiler) {
+            const spirv_cross::Compiler& compiler,
+            const char* entryPointName) {
             std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
 
             // TODO(cwallez@chromium.org): make errors here creation errors
             // currently errors here do not prevent the shadermodule from being used
             const auto& resources = compiler.get_shader_resources();
 
-            switch (compiler.get_execution_model()) {
-                case spv::ExecutionModelVertex:
-                    metadata->stage = SingleShaderStage::Vertex;
-                    break;
-                case spv::ExecutionModelFragment:
-                    metadata->stage = SingleShaderStage::Fragment;
-                    break;
-                case spv::ExecutionModelGLCompute:
-                    metadata->stage = SingleShaderStage::Compute;
-                    break;
-                default:
-                    UNREACHABLE();
-                    return DAWN_VALIDATION_ERROR("Unexpected shader execution model");
-            }
+            metadata->stage = ExecutionModelToShaderStage(compiler.get_execution_model());
 
             if (resources.push_constant_buffers.size() > 0) {
                 return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
@@ -635,7 +516,7 @@ namespace dawn_native {
                             info->viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                             info->textureComponentType =
-                                SpirvCrossBaseTypeToFormatType(textureComponentType);
+                                SpirvBaseTypeToFormatType(textureComponentType);
                             info->type = bindingType;
                             break;
                         }
@@ -664,7 +545,7 @@ namespace dawn_native {
                             spirv_cross::SPIRType::ImageType imageType =
                                 compiler.get_type(info->base_type_id).image;
                             wgpu::TextureFormat storageTextureFormat =
-                                ToWGPUTextureFormat(imageType.format);
+                                SpirvImageFormatToTextureFormat(imageType.format);
                             if (storageTextureFormat == wgpu::TextureFormat::Undefined) {
                                 return DAWN_VALIDATION_ERROR(
                                     "Invalid image format declaration on storage image");
@@ -756,12 +637,20 @@ namespace dawn_native {
                     spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
                         compiler.get_type(fragmentOutput.base_type_id).basetype;
                     Format::Type formatType =
-                        SpirvCrossBaseTypeToFormatType(shaderFragmentOutputBaseType);
+                        SpirvBaseTypeToFormatType(shaderFragmentOutputBaseType);
                     if (formatType == Format::Type::Other) {
                         return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
                     }
                     metadata->fragmentOutputFormatBaseTypes[attachment] = formatType;
                 }
+            }
+
+            if (metadata->stage == SingleShaderStage::Compute) {
+                const spirv_cross::SPIREntryPoint& spirEntryPoint =
+                    compiler.get_entry_point(entryPointName, spv::ExecutionModelGLCompute);
+                metadata->localWorkgroupSize.x = spirEntryPoint.workgroup_size.x;
+                metadata->localWorkgroupSize.y = spirEntryPoint.workgroup_size.y;
+                metadata->localWorkgroupSize.z = spirEntryPoint.workgroup_size.z;
             }
 
             return {std::move(metadata)};
@@ -935,7 +824,7 @@ namespace dawn_native {
         }
 
         spirv_cross::Compiler compiler(mSpirv);
-        DAWN_TRY_ASSIGN(mMainEntryPoint, ExtractSpirvInfo(GetDevice(), compiler));
+        DAWN_TRY_ASSIGN(mMainEntryPoint, ExtractSpirvInfo(GetDevice(), compiler, "main"));
 
         return {};
     }

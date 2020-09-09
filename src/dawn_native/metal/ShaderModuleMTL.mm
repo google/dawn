@@ -15,6 +15,7 @@
 #include "dawn_native/metal/ShaderModuleMTL.h"
 
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/SpirvUtils.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
@@ -24,22 +25,6 @@
 #include <sstream>
 
 namespace dawn_native { namespace metal {
-
-    namespace {
-
-        spv::ExecutionModel SpirvExecutionModelForStage(SingleShaderStage stage) {
-            switch (stage) {
-                case SingleShaderStage::Vertex:
-                    return spv::ExecutionModelVertex;
-                case SingleShaderStage::Fragment:
-                    return spv::ExecutionModelFragment;
-                case SingleShaderStage::Compute:
-                    return spv::ExecutionModelGLCompute;
-                default:
-                    UNREACHABLE();
-            }
-        }
-    }  // namespace
 
     // static
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
@@ -57,25 +42,26 @@ namespace dawn_native { namespace metal {
         return InitializeBase();
     }
 
-    MaybeError ShaderModule::GetFunction(const char* functionName,
-                                         SingleShaderStage functionStage,
-                                         const PipelineLayout* layout,
-                                         ShaderModule::MetalFunctionData* out,
-                                         uint32_t sampleMask,
-                                         const RenderPipeline* renderPipeline) {
+    MaybeError ShaderModule::CreateFunction(const char* entryPointName,
+                                            SingleShaderStage stage,
+                                            const PipelineLayout* layout,
+                                            ShaderModule::MetalFunctionData* out,
+                                            uint32_t sampleMask,
+                                            const RenderPipeline* renderPipeline) {
         ASSERT(!IsError());
         ASSERT(out);
         const std::vector<uint32_t>* spirv = &GetSpirv();
+        spv::ExecutionModel executionModel = ShaderStageToExecutionModel(stage);
 
 #ifdef DAWN_ENABLE_WGSL
         // Use set 4 since it is bigger than what users can access currently
         static const uint32_t kPullingBufferBindingSet = 4;
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            functionStage == SingleShaderStage::Vertex) {
+            stage == SingleShaderStage::Vertex) {
             DAWN_TRY_ASSIGN(pullingSpirv,
                             GeneratePullingSpirv(*renderPipeline->GetVertexStateDescriptor(),
-                                                 functionName, kPullingBufferBindingSet));
+                                                 entryPointName, kPullingBufferBindingSet));
             spirv = &pullingSpirv;
         }
 #endif
@@ -99,6 +85,7 @@ namespace dawn_native { namespace metal {
 
         spirv_cross::CompilerMSL compiler(*spirv);
         compiler.set_msl_options(options_msl);
+        compiler.set_entry_point(entryPointName, executionModel);
 
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
@@ -116,30 +103,33 @@ namespace dawn_native { namespace metal {
                 const BindingInfo& bindingInfo =
                     layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
 
-                for (auto stage : IterateStages(bindingInfo.visibility)) {
-                    uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
-                    spirv_cross::MSLResourceBinding mslBinding;
-                    mslBinding.stage = SpirvExecutionModelForStage(stage);
-                    mslBinding.desc_set = static_cast<uint32_t>(group);
-                    mslBinding.binding = static_cast<uint32_t>(bindingNumber);
-                    mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
-                        shaderIndex;
-
-                    compiler.add_msl_resource_binding(mslBinding);
+                if (!(bindingInfo.visibility & StageBit(stage))) {
+                    continue;
                 }
+
+                uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
+
+                spirv_cross::MSLResourceBinding mslBinding;
+                mslBinding.stage = executionModel;
+                mslBinding.desc_set = static_cast<uint32_t>(group);
+                mslBinding.binding = static_cast<uint32_t>(bindingNumber);
+                mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
+                    shaderIndex;
+
+                compiler.add_msl_resource_binding(mslBinding);
             }
         }
 
 #ifdef DAWN_ENABLE_WGSL
         // Add vertex buffers bound as storage buffers
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            functionStage == SingleShaderStage::Vertex) {
+            stage == SingleShaderStage::Vertex) {
             for (uint32_t dawnIndex : IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
                 uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(dawnIndex);
 
                 spirv_cross::MSLResourceBinding mslBinding;
 
-                mslBinding.stage = SpirvExecutionModelForStage(SingleShaderStage::Vertex);
+                mslBinding.stage = spv::ExecutionModelVertex;
                 mslBinding.desc_set = kPullingBufferBindingSet;
                 mslBinding.binding = dawnIndex;
                 mslBinding.msl_buffer = metalIndex;
@@ -149,16 +139,16 @@ namespace dawn_native { namespace metal {
 #endif
 
         {
-            spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
-            auto size = compiler.get_entry_point(functionName, executionModel).workgroup_size;
-            out->localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
-        }
-
-        {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
             NSString* mslSource;
             std::string msl = compiler.compile();
+
+            // Some entry point names are forbidden in MSL so SPIRV-Cross modifies them. Query the
+            // modified entryPointName from it.
+            const std::string& modifiedEntryPointName =
+                compiler.get_entry_point(entryPointName, executionModel).name;
+
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and some
             // (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError instead
@@ -183,18 +173,7 @@ namespace dawn_native { namespace metal {
                 }
             }
 
-            // TODO(kainino@chromium.org): make this somehow more robust; it needs to behave like
-            // clean_func_name:
-            // https://github.com/KhronosGroup/SPIRV-Cross/blob/4e915e8c483e319d0dd7a1fa22318bef28f8cca3/spirv_msl.cpp#L1213
-            const char* metalFunctionName = functionName;
-            if (strcmp(metalFunctionName, "main") == 0) {
-                metalFunctionName = "main0";
-            }
-            if (strcmp(metalFunctionName, "saturate") == 0) {
-                metalFunctionName = "saturate0";
-            }
-
-            NSString* name = [[NSString alloc] initWithUTF8String:metalFunctionName];
+            NSString* name = [[NSString alloc] initWithUTF8String:modifiedEntryPointName.c_str()];
             out->function = [library newFunctionWithName:name];
             [library release];
         }
@@ -202,7 +181,7 @@ namespace dawn_native { namespace metal {
         out->needsStorageBufferLength = compiler.needs_buffer_size_buffer();
 
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            GetEntryPoint(functionName, functionStage).usedVertexAttributes.any()) {
+            GetEntryPoint(entryPointName, stage).usedVertexAttributes.any()) {
             out->needsStorageBufferLength = true;
         }
 

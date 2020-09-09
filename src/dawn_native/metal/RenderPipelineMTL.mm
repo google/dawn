@@ -335,8 +335,9 @@ namespace dawn_native { namespace metal {
         ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
         const char* vertexEntryPoint = descriptor->vertexStage.entryPoint;
         ShaderModule::MetalFunctionData vertexData;
-        DAWN_TRY(vertexModule->GetFunction(vertexEntryPoint, SingleShaderStage::Vertex,
-                                           ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF, this));
+        DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
+                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF,
+                                              this));
 
         descriptorMTL.vertexFunction = vertexData.function;
         if (vertexData.needsStorageBufferLength) {
@@ -346,9 +347,9 @@ namespace dawn_native { namespace metal {
         ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData;
-        DAWN_TRY(fragmentModule->GetFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
-                                             ToBackend(GetLayout()), &fragmentData,
-                                             descriptor->sampleMask));
+        DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
+                                                ToBackend(GetLayout()), &fragmentData,
+                                                descriptor->sampleMask));
 
         descriptorMTL.fragmentFunction = fragmentData.function;
         if (fragmentData.needsStorageBufferLength) {

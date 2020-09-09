@@ -131,6 +131,8 @@ target_sources(dawn_native PRIVATE
     "Sampler.h"
     "ShaderModule.cpp"
     "ShaderModule.h"
+    "SpirvUtils.cpp"
+    "SpirvUtils.h"
     "StagingBuffer.cpp"
     "StagingBuffer.h"
     "Surface.cpp"
