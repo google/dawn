@@ -32,7 +32,6 @@ class Writer {
   const std::string& error() const { return error_; }
 
   /// Resets the generator
-  /// @returns nothing
   virtual void Reset() = 0;
 
   /// Converts the module into the desired format
