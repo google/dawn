@@ -205,6 +205,27 @@ TEST_F(SpvParserTest, Impl_Source_InvalidId) {
   EXPECT_EQ(0u, s99.column);
 }
 
+TEST_F(SpvParserTest, Impl_IsValidIdentifier) {
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier(""));     // empty
+  EXPECT_FALSE(
+      ParserImpl::IsValidIdentifier("_"));  // leading underscore, but ok later
+  EXPECT_FALSE(
+      ParserImpl::IsValidIdentifier("9"));  // leading digit, but ok later
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier(" "));    // leading space
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier("a "));   // trailing space
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier("a 1"));  // space in the middle
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier("."));    // weird character
+
+  // a simple identifier
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("A"));
+  // each upper case letter
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+  // each lower case letter
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("abcdefghijklmnopqrstuvwxyz"));
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("a0123456789"));  // each digit
+  EXPECT_TRUE(ParserImpl::IsValidIdentifier("x_"));           // has underscore
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

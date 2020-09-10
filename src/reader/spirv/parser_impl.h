@@ -372,6 +372,10 @@ class ParserImpl : Reader {
   /// @return the Source record, or a default one
   Source GetSourceForInst(const spvtools::opt::Instruction* inst) const;
 
+  /// @param str a candidate identifier
+  /// @returns true if the given string is a valid WGSL identifier.
+  static bool IsValidIdentifier(const std::string& str);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);

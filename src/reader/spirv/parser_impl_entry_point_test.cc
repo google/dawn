@@ -24,6 +24,7 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string MakeEntryPoint(const std::string& stage,
@@ -81,13 +82,11 @@ TEST_F(SpvParserTest, EntryPoint_MultiNameConflict) {
               HasSubstr(R"(EntryPoint{fragment as work = work_2})"));
 }
 
-TEST_F(SpvParserTest, EntryPoint_NameIsSanitized) {
+TEST_F(SpvParserTest, EntryPoint_MustBeWgslIdentifier) {
   auto* p = parser(test::Assemble(MakeEntryPoint("GLCompute", ".1234")));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str,
-              HasSubstr(R"(EntryPoint{compute as .1234 = x_1234})"));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              Eq("entry point name is not a valid WGSL identifier: .1234"));
 }
 
 }  // namespace

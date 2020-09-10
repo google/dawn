@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
+#include <locale>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -608,6 +609,22 @@ bool ParserImpl::RegisterUserAndStructMemberNames() {
   return true;
 }
 
+bool ParserImpl::IsValidIdentifier(const std::string& str) {
+  if (str.empty()) {
+    return false;
+  }
+  std::locale c_locale("C");
+  if (!std::isalpha(str[0], c_locale)) {
+    return false;
+  }
+  for (const char& ch : str) {
+    if ((ch != '_') && !std::isalnum(ch, c_locale)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool ParserImpl::EmitEntryPoints() {
   for (const spvtools::opt::Instruction& entry_point :
        module_->entry_points()) {
@@ -615,6 +632,11 @@ bool ParserImpl::EmitEntryPoints() {
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
     const std::string ep_name = entry_point.GetOperand(2).AsString();
     const std::string name = namer_.GetName(function_id);
+
+    if (!IsValidIdentifier(ep_name)) {
+      return Fail() << "entry point name is not a valid WGSL identifier: "
+                    << ep_name;
+    }
 
     ast_module_.AddEntryPoint(std::make_unique<ast::EntryPoint>(
         enum_converter_.ToPipelineStage(stage), ep_name, name));
