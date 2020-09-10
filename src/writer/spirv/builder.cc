@@ -1529,6 +1529,8 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
                            ->UnwrapAliasPtrAlias()
                            ->AsTexture();
 
+  // TODO: Remove the LOD param from textureLoad on storage textures when
+  // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
   if (name == "textureLoad") {
     auto spirv_params = {std::move(wgsl_params[0]),
                          std::move(wgsl_params[1]),

@@ -588,6 +588,8 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
     return true;
   }
   if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
+    // TODO: Remove the LOD param from textureLoad on storage textures when
+    // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
     uint32_t num_of_params =
         (name == "textureLoad" || name == "textureSample") ? 3 : 4;
     if (expr->params().size() != num_of_params) {
