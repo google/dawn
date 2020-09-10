@@ -146,43 +146,59 @@ namespace dawn_native { namespace vulkan {
                                     mDirtyBindGroupsObjectChangedOrIsDynamic, mBindGroups,
                                     mDynamicOffsetCounts, mDynamicOffsets);
 
-                // TODO(jiawei.shao@intel.com): combine the following barriers in one
-                // vkCmdPipelineBarrier() call.
+                std::vector<VkBufferMemoryBarrier> bufferBarriers;
+                std::vector<VkImageMemoryBarrier> imageBarriers;
+                VkPipelineStageFlags srcStages = 0;
+                VkPipelineStageFlags dstStages = 0;
+
                 for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     BindGroupLayoutBase* layout = mBindGroups[index]->GetLayout();
                     for (BindingIndex binding{0}; binding < layout->GetBindingCount(); ++binding) {
                         switch (layout->GetBindingInfo(binding).type) {
                             case wgpu::BindingType::StorageBuffer:
-                            case wgpu::BindingType::ReadonlyStorageBuffer:
-                                ToBackend(
-                                    mBindGroups[index]->GetBindingAsBufferBinding(binding).buffer)
-                                    ->TransitionUsageNow(recordingContext,
-                                                         wgpu::BufferUsage::Storage);
+                            case wgpu::BindingType::ReadonlyStorageBuffer: {
+                                VkBufferMemoryBarrier bufferBarrier;
+                                if (ToBackend(mBindGroups[index]
+                                                  ->GetBindingAsBufferBinding(binding)
+                                                  .buffer)
+                                        ->TransitionUsageAndGetResourceBarrier(
+                                            wgpu::BufferUsage::Storage, &bufferBarrier, &srcStages,
+                                            &dstStages)) {
+                                    bufferBarriers.push_back(bufferBarrier);
+                                }
                                 break;
+                            }
 
                             case wgpu::BindingType::ReadonlyStorageTexture:
                             case wgpu::BindingType::WriteonlyStorageTexture: {
                                 TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
                                 ToBackend(view->GetTexture())
-                                    ->TransitionUsageNow(recordingContext,
-                                                         wgpu::TextureUsage::Storage,
-                                                         view->GetSubresourceRange());
+                                    ->TransitionUsageAndGetResourceBarrier(
+                                        wgpu::TextureUsage::Storage, view->GetSubresourceRange(),
+                                        &imageBarriers, &srcStages, &dstStages);
                                 break;
                             }
-                            case wgpu::BindingType::UniformBuffer:
-                                ToBackend(
-                                    mBindGroups[index]->GetBindingAsBufferBinding(binding).buffer)
-                                    ->TransitionUsageNow(recordingContext,
-                                                         wgpu::BufferUsage::Uniform);
+                            case wgpu::BindingType::UniformBuffer: {
+                                VkBufferMemoryBarrier bufferBarrier;
+                                if (ToBackend(mBindGroups[index]
+                                                  ->GetBindingAsBufferBinding(binding)
+                                                  .buffer)
+                                        ->TransitionUsageAndGetResourceBarrier(
+                                            wgpu::BufferUsage::Uniform, &bufferBarrier, &srcStages,
+                                            &dstStages)) {
+                                    bufferBarriers.push_back(bufferBarrier);
+                                }
                                 break;
+                            }
+
                             case wgpu::BindingType::SampledTexture: {
                                 TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
                                 ToBackend(view->GetTexture())
-                                    ->TransitionUsageNow(recordingContext,
-                                                         wgpu::TextureUsage::Sampled,
-                                                         view->GetSubresourceRange());
+                                    ->TransitionUsageAndGetResourceBarrier(
+                                        wgpu::TextureUsage::Sampled, view->GetSubresourceRange(),
+                                        &imageBarriers, &srcStages, &dstStages);
                                 break;
                             }
 
@@ -200,6 +216,15 @@ namespace dawn_native { namespace vulkan {
                         }
                     }
                 }
+
+                if (!bufferBarriers.empty() || !imageBarriers.empty()) {
+                    ASSERT(srcStages != 0 && dstStages != 0);
+                    device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages,
+                                                  dstStages, 0, 0, nullptr, bufferBarriers.size(),
+                                                  bufferBarriers.data(), imageBarriers.size(),
+                                                  imageBarriers.data());
+                }
+
                 DidApply();
             }
         };
@@ -459,8 +484,12 @@ namespace dawn_native { namespace vulkan {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
                 buffer->EnsureDataInitialized(recordingContext);
-                buffer->TransitionUsageNow(recordingContext, usages.bufferUsages[i],
-                                           &bufferBarriers, &srcStages, &dstStages);
+
+                VkBufferMemoryBarrier bufferBarrier;
+                if (buffer->TransitionUsageAndGetResourceBarrier(
+                        usages.bufferUsages[i], &bufferBarrier, &srcStages, &dstStages)) {
+                    bufferBarriers.push_back(bufferBarrier);
+                }
             }
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {

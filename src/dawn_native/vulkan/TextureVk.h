@@ -70,6 +70,11 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(CommandRecordingContext* recordingContext,
                                 wgpu::TextureUsage usage,
                                 const SubresourceRange& range);
+        void TransitionUsageAndGetResourceBarrier(wgpu::TextureUsage usage,
+                                                  const SubresourceRange& range,
+                                                  std::vector<VkImageMemoryBarrier>* imageBarriers,
+                                                  VkPipelineStageFlags* srcStages,
+                                                  VkPipelineStageFlags* dstStages);
         void TransitionUsageForPass(CommandRecordingContext* recordingContext,
                                     const PassTextureUsage& textureUsages,
                                     std::vector<VkImageMemoryBarrier>* imageBarriers,

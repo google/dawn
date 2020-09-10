@@ -186,56 +186,52 @@ namespace dawn_native { namespace vulkan {
 
     void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
                                     wgpu::BufferUsage usage) {
-        std::vector<VkBufferMemoryBarrier> barriers;
+        VkBufferMemoryBarrier barrier;
         VkPipelineStageFlags srcStages = 0;
         VkPipelineStageFlags dstStages = 0;
 
-        TransitionUsageNow(recordingContext, usage, &barriers, &srcStages, &dstStages);
-
-        if (barriers.size() > 0) {
-            ASSERT(barriers.size() == 1);
+        if (TransitionUsageAndGetResourceBarrier(usage, &barrier, &srcStages, &dstStages)) {
+            ASSERT(srcStages != 0 && dstStages != 0);
             ToBackend(GetDevice())
                 ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
-                                        nullptr, barriers.size(), barriers.data(), 0, nullptr);
+                                        nullptr, 1u, &barrier, 0, nullptr);
         }
     }
 
-    void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                    wgpu::BufferUsage usage,
-                                    std::vector<VkBufferMemoryBarrier>* bufferBarriers,
-                                    VkPipelineStageFlags* srcStages,
-                                    VkPipelineStageFlags* dstStages) {
+    bool Buffer::TransitionUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
+                                                      VkBufferMemoryBarrier* barrier,
+                                                      VkPipelineStageFlags* srcStages,
+                                                      VkPipelineStageFlags* dstStages) {
         bool lastIncludesTarget = (mLastUsage & usage) == usage;
         bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
 
         // We can skip transitions to already current read-only usages.
         if (lastIncludesTarget && lastReadOnly) {
-            return;
+            return false;
         }
 
         // Special-case for the initial transition: Vulkan doesn't allow access flags to be 0.
         if (mLastUsage == wgpu::BufferUsage::None) {
             mLastUsage = usage;
-            return;
+            return false;
         }
 
         *srcStages |= VulkanPipelineStage(mLastUsage);
         *dstStages |= VulkanPipelineStage(usage);
 
-        VkBufferMemoryBarrier barrier;
-        barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-        barrier.pNext = nullptr;
-        barrier.srcAccessMask = VulkanAccessFlags(mLastUsage);
-        barrier.dstAccessMask = VulkanAccessFlags(usage);
-        barrier.srcQueueFamilyIndex = 0;
-        barrier.dstQueueFamilyIndex = 0;
-        barrier.buffer = mHandle;
-        barrier.offset = 0;
-        barrier.size = GetSize();
-
-        bufferBarriers->push_back(barrier);
+        barrier->sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+        barrier->pNext = nullptr;
+        barrier->srcAccessMask = VulkanAccessFlags(mLastUsage);
+        barrier->dstAccessMask = VulkanAccessFlags(usage);
+        barrier->srcQueueFamilyIndex = 0;
+        barrier->dstQueueFamilyIndex = 0;
+        barrier->buffer = mHandle;
+        barrier->offset = 0;
+        barrier->size = GetSize();
 
         mLastUsage = usage;
+
+        return true;
     }
 
     bool Buffer::IsCPUWritableAtCreation() const {

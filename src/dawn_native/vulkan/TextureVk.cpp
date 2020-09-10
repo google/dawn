@@ -818,6 +818,32 @@ namespace dawn_native { namespace vulkan {
                                      wgpu::TextureUsage usage,
                                      const SubresourceRange& range) {
         std::vector<VkImageMemoryBarrier> barriers;
+
+        VkPipelineStageFlags srcStages = 0;
+        VkPipelineStageFlags dstStages = 0;
+
+        TransitionUsageAndGetResourceBarrier(usage, range, &barriers, &srcStages, &dstStages);
+
+        if (mExternalState != ExternalState::InternalOnly) {
+            TweakTransitionForExternalUsage(recordingContext, &barriers, 0);
+        }
+
+        if (!barriers.empty()) {
+            ASSERT(srcStages != 0 && dstStages != 0);
+            ToBackend(GetDevice())
+                ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
+                                        nullptr, 0, nullptr, barriers.size(), barriers.data());
+        }
+    }
+
+    void Texture::TransitionUsageAndGetResourceBarrier(
+        wgpu::TextureUsage usage,
+        const SubresourceRange& range,
+        std::vector<VkImageMemoryBarrier>* imageBarriers,
+        VkPipelineStageFlags* srcStages,
+        VkPipelineStageFlags* dstStages) {
+        ASSERT(imageBarriers != nullptr);
+
         const Format& format = GetFormat();
 
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
@@ -837,7 +863,7 @@ namespace dawn_native { namespace vulkan {
             if (CanReuseWithoutBarrier(mSubresourceLastUsages[0], usage)) {
                 return;
             }
-            barriers.push_back(
+            imageBarriers->push_back(
                 BuildMemoryBarrier(format, mHandle, mSubresourceLastUsages[0], usage, range));
             allLastUsages = mSubresourceLastUsages[0];
             for (uint32_t i = 0; i < GetSubresourceCount(); ++i) {
@@ -868,22 +894,15 @@ namespace dawn_native { namespace vulkan {
                         mSubresourceLastUsages[index] = usage;
                     }
 
-                    barriers.push_back(BuildMemoryBarrier(
+                    imageBarriers->push_back(BuildMemoryBarrier(
                         format, mHandle, lastUsage, usage,
                         SubresourceRange::SingleMipAndLayer(level, layer, format.aspects)));
                 }
             }
         }
 
-        if (mExternalState != ExternalState::InternalOnly) {
-            TweakTransitionForExternalUsage(recordingContext, &barriers, 0);
-        }
-
-        VkPipelineStageFlags srcStages = VulkanPipelineStage(allLastUsages, format);
-        VkPipelineStageFlags dstStages = VulkanPipelineStage(usage, format);
-        ToBackend(GetDevice())
-            ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
-                                    nullptr, 0, nullptr, barriers.size(), barriers.data());
+        *srcStages |= VulkanPipelineStage(allLastUsages, format);
+        *dstStages |= VulkanPipelineStage(usage, format);
 
         mSameLastUsagesAcrossSubresources = areAllSubresourcesCovered;
     }
