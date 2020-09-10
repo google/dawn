@@ -82,6 +82,12 @@ namespace utils {
         }
 
         ~WindowsDebugLogger() override {
+            if (IsDebuggerPresent()) {
+                // This condition is true when running inside Visual Studio or some other debugger.
+                // Messages are already printed there so we don't need to do anything.
+                return;
+            }
+
             if (mShouldExitHandle != nullptr) {
                 ASSERT(SetEvent(mShouldExitHandle) != 0);
                 CloseHandle(mShouldExitHandle);
