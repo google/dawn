@@ -95,6 +95,7 @@ typedef uint32_t WGPUFlags;
 {% endfor %}
 //* TODO(dawn:22) remove this once the PSA is sent and the deadline passed.
 #define WGPUTextureFormat_RG11B10Float WGPUTextureFormat_RG11B10Ufloat
+#define WGPUTextureFormat_BC6HRGBSfloat WGPUTextureFormat_BC6HRGBFloat
 
 typedef struct WGPUChainedStruct {
     struct WGPUChainedStruct const * next;

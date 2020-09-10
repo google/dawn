@@ -29,6 +29,7 @@ namespace wgpu {
             //* TODO(dawn:22) remove this once the PSA is sent and the deadline passed.
             {% if type.name.canonical_case() == "texture format" %}
                 RG11B10Float = RG11B10Ufloat,
+                BC6HRGBSfloat = BC6HRGBFloat,
             {% endif %}
         };
 

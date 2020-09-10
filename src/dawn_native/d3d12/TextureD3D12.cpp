@@ -191,7 +191,7 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::BC5RGUnorm:
                     return DXGI_FORMAT_BC5_TYPELESS;
 
-                case wgpu::TextureFormat::BC6HRGBSfloat:
+                case wgpu::TextureFormat::BC6HRGBFloat:
                 case wgpu::TextureFormat::BC6HRGBUfloat:
                     return DXGI_FORMAT_BC6H_TYPELESS;
 
@@ -312,7 +312,7 @@ namespace dawn_native { namespace d3d12 {
                 return DXGI_FORMAT_BC5_SNORM;
             case wgpu::TextureFormat::BC5RGUnorm:
                 return DXGI_FORMAT_BC5_UNORM;
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
                 return DXGI_FORMAT_BC6H_SF16;
             case wgpu::TextureFormat::BC6HRGBUfloat:
                 return DXGI_FORMAT_BC6H_UF16;

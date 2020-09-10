@@ -322,7 +322,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
             case wgpu::TextureFormat::BC5RGUnorm:
                 return {0xff, 0x0, 0x40, 0x2,  0x24, 0x40, 0x2,  0x24,
                         0xff, 0x0, 0x9,  0x90, 0x0,  0x9,  0x90, 0x0};
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
                 return {0xe3, 0x1f, 0x0, 0x0,  0x0, 0xe0, 0x1f, 0x0,
                         0x0,  0xff, 0x0, 0xff, 0x0, 0xff, 0x0,  0xff};
             case wgpu::TextureFormat::BC6HRGBUfloat:
@@ -376,7 +376,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC5RGUnorm:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
             case wgpu::TextureFormat::BC6HRGBUfloat:
                 return FillExpectedData(testRegion, RGBA8::kRed, RGBA8::kGreen);
 
@@ -417,13 +417,13 @@ class CompressedTextureBCFormatTest : public DawnTest {
     }
 
     const std::array<wgpu::TextureFormat, 14> kBCFormats = {
-        wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
-        wgpu::TextureFormat::BC2RGBAUnorm,  wgpu::TextureFormat::BC2RGBAUnormSrgb,
-        wgpu::TextureFormat::BC3RGBAUnorm,  wgpu::TextureFormat::BC3RGBAUnormSrgb,
-        wgpu::TextureFormat::BC4RSnorm,     wgpu::TextureFormat::BC4RUnorm,
-        wgpu::TextureFormat::BC5RGSnorm,    wgpu::TextureFormat::BC5RGUnorm,
-        wgpu::TextureFormat::BC6HRGBSfloat, wgpu::TextureFormat::BC6HRGBUfloat,
-        wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
+        wgpu::TextureFormat::BC1RGBAUnorm, wgpu::TextureFormat::BC1RGBAUnormSrgb,
+        wgpu::TextureFormat::BC2RGBAUnorm, wgpu::TextureFormat::BC2RGBAUnormSrgb,
+        wgpu::TextureFormat::BC3RGBAUnorm, wgpu::TextureFormat::BC3RGBAUnormSrgb,
+        wgpu::TextureFormat::BC4RSnorm,    wgpu::TextureFormat::BC4RUnorm,
+        wgpu::TextureFormat::BC5RGSnorm,   wgpu::TextureFormat::BC5RGUnorm,
+        wgpu::TextureFormat::BC6HRGBFloat, wgpu::TextureFormat::BC6HRGBUfloat,
+        wgpu::TextureFormat::BC7RGBAUnorm, wgpu::TextureFormat::BC7RGBAUnormSrgb};
 
     // Tthe block width and height in texels are 4 for all BC formats.
     static constexpr uint32_t kBCBlockWidthInTexels = 4;

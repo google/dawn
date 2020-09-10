@@ -360,7 +360,7 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_BC5_SNORM_BLOCK;
             case wgpu::TextureFormat::BC5RGUnorm:
                 return VK_FORMAT_BC5_UNORM_BLOCK;
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
                 return VK_FORMAT_BC6H_SFLOAT_BLOCK;
             case wgpu::TextureFormat::BC6HRGBUfloat:
                 return VK_FORMAT_BC6H_UFLOAT_BLOCK;

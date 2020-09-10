@@ -225,7 +225,7 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatBC5_RGSnorm;
             case wgpu::TextureFormat::BC5RGUnorm:
                 return MTLPixelFormatBC5_RGUnorm;
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
                 return MTLPixelFormatBC6H_RGBFloat;
             case wgpu::TextureFormat::BC6HRGBUfloat:
                 return MTLPixelFormatBC6H_RGBUfloat;

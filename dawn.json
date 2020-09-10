@@ -1646,7 +1646,7 @@
             {"value": 48, "name": "BC5 RG unorm"},
             {"value": 49, "name": "BC5 RG snorm"},
             {"value": 50, "name": "BC6H RGB ufloat"},
-            {"value": 51, "name": "BC6H RGB sfloat"},
+            {"value": 51, "name": "BC6H RGB float"},
             {"value": 52, "name": "BC7 RGBA unorm"},
             {"value": 53, "name": "BC7 RGBA unorm srgb"}
         ]

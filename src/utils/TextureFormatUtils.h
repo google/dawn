@@ -73,7 +73,7 @@ namespace utils {
         wgpu::TextureFormat::BC5RGUnorm,
         wgpu::TextureFormat::BC5RGSnorm,
         wgpu::TextureFormat::BC6HRGBUfloat,
-        wgpu::TextureFormat::BC6HRGBSfloat,
+        wgpu::TextureFormat::BC6HRGBFloat,
         wgpu::TextureFormat::BC7RGBAUnorm,
         wgpu::TextureFormat::BC7RGBAUnormSrgb,
     };
@@ -84,7 +84,7 @@ namespace utils {
         wgpu::TextureFormat::BC3RGBAUnorm,  wgpu::TextureFormat::BC3RGBAUnormSrgb,
         wgpu::TextureFormat::BC4RUnorm,     wgpu::TextureFormat::BC4RSnorm,
         wgpu::TextureFormat::BC5RGUnorm,    wgpu::TextureFormat::BC5RGSnorm,
-        wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBSfloat,
+        wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBFloat,
         wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
 
     const char* GetColorTextureComponentTypePrefix(wgpu::TextureFormat textureFormat);

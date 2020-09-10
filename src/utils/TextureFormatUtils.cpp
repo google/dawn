@@ -150,7 +150,7 @@ namespace utils {
             case wgpu::TextureFormat::BC5RGUnorm:
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
             case wgpu::TextureFormat::BC7RGBAUnorm:
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return 16u;
@@ -218,7 +218,7 @@ namespace utils {
             case wgpu::TextureFormat::BC5RGUnorm:
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
             case wgpu::TextureFormat::BC7RGBAUnorm:
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return 4u;
@@ -284,7 +284,7 @@ namespace utils {
             case wgpu::TextureFormat::BC5RGUnorm:
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
             case wgpu::TextureFormat::BC7RGBAUnorm:
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return 4u;
@@ -378,7 +378,7 @@ namespace utils {
             case wgpu::TextureFormat::BC5RGUnorm:
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBFloat:
             case wgpu::TextureFormat::BC7RGBAUnorm:
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
             case wgpu::TextureFormat::Depth32Float:

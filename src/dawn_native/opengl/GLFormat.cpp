@@ -106,7 +106,7 @@ namespace dawn_native { namespace opengl {
         AddFormat(wgpu::TextureFormat::BC4RUnorm, GL_COMPRESSED_RED_RGTC1, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
         AddFormat(wgpu::TextureFormat::BC5RGSnorm, GL_COMPRESSED_SIGNED_RG_RGTC2, GL_RG, GL_BYTE, Type::Float);
         AddFormat(wgpu::TextureFormat::BC5RGUnorm, GL_COMPRESSED_RG_RGTC2, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(wgpu::TextureFormat::BC6HRGBSfloat, GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC6HRGBFloat, GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
         AddFormat(wgpu::TextureFormat::BC6HRGBUfloat, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
         AddFormat(wgpu::TextureFormat::BC7RGBAUnorm, GL_COMPRESSED_RGBA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
         AddFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
