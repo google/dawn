@@ -14,10 +14,17 @@
 
 #include <cassert>
 #include "src/validator_impl.h"
+#include <unordered_set>
 #include "src/ast/call_statement.h"
 #include "src/ast/function.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/intrinsic.h"
+#include "src/ast/sint_literal.h"
+#include "src/ast/switch_statement.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -239,13 +246,94 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   if (stmt->IsCall()) {
     return ValidateCallExpr(stmt->AsCall()->expr());
   }
+  if (stmt->IsSwitch()) {
+    return ValidateSwitch(stmt->AsSwitch());
+  }
+  if (stmt->IsCase()) {
+    return ValidateCase(stmt->AsCase());
+  }
+  return true;
+}
+
+bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
+  if (!ValidateExpression(s->condition())) {
+    return false;
+  }
+
+  auto* cond_type = s->condition()->result_type()->UnwrapAliasPtrAlias();
+  if (!(cond_type->IsI32() || cond_type->IsU32())) {
+    set_error(s->condition()->source(),
+              "v-switch01: switch statement selector expression must be of a "
+              "scalar integer type");
+    return false;
+  }
+
+  int default_counter = 0;
+  std::unordered_set<int32_t> selector_set;
+  for (const auto& case_stmt : s->body()) {
+    if (!ValidateStatement(case_stmt.get())) {
+      return false;
+    }
+
+    if (case_stmt.get()->IsDefault()) {
+      default_counter++;
+    }
+
+    for (const auto& selector : case_stmt.get()->selectors()) {
+      auto* selector_ptr = selector.get();
+      if (cond_type != selector_ptr->type()) {
+        set_error(case_stmt.get()->source(),
+                  "v-switch03: the case selector values must have the same "
+                  "type as the selector expression.");
+        return false;
+      }
+
+      auto v = static_cast<int32_t>(selector_ptr->type()->IsU32()
+                                        ? selector_ptr->AsUint()->value()
+                                        : selector_ptr->AsSint()->value());
+      if (selector_set.count(v)) {
+        auto v_str = selector_ptr->type()->IsU32()
+                         ? selector_ptr->AsUint()->to_str()
+                         : selector_ptr->AsSint()->to_str();
+        set_error(
+            case_stmt.get()->source(),
+            "v-switch04: a literal value must not appear more than once in "
+            "the case selectors for a switch statement: '" +
+                v_str + "'");
+        return false;
+      }
+      selector_set.emplace(v);
+    }
+  }
+
+  if (default_counter != 1) {
+    set_error(s->source(),
+              "v-0008: switch statement must have exactly one default clause");
+    return false;
+  }
+
+  auto* last_clause = s->body().back().get();
+  auto* last_stmt_of_last_clause = last_clause->AsCase()->body()->last();
+  if (last_stmt_of_last_clause && last_stmt_of_last_clause->IsFallthrough()) {
+    set_error(last_stmt_of_last_clause->source(),
+              "v-switch05: a fallthrough statement must not appear as "
+              "the last statement in last clause of a switch");
+    return false;
+  }
+  return true;
+}
+
+bool ValidatorImpl::ValidateCase(const ast::CaseStatement* c) {
+  if (!ValidateStatement(c->body())) {
+    return false;
+  }
   return true;
 }
 
 bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
   if (!expr) {
-    // TODO(sarahM0): Here and other Validate.*: figure out whether return false
-    // or true
+    // TODO(sarahM0): Here and other Validate.*: figure out whether return
+    // false or true
     return false;
   }
 

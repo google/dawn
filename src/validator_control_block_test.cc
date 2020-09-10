@@ -22,6 +22,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
@@ -37,8 +38,7 @@ namespace {
 class ValidateControlBlockTest : public ValidatorTestHelper,
                                  public testing::Test {};
 
-TEST_F(ValidateControlBlockTest,
-       DISABLED_SwitchSelectorExpressionNoneIntegerType_Fail) {
+TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   // var a : f32 = 3.14;
   // switch (a) {
   //   default: {}
@@ -49,7 +49,7 @@ TEST_F(ValidateControlBlockTest,
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&f32, 3.14f)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "a");
   ast::CaseSelectorList default_csl;
   auto block_default = std::make_unique<ast::BlockStatement>();
   ast::CaseStatementList body;
@@ -58,8 +58,8 @@ TEST_F(ValidateControlBlockTest,
 
   auto block = std::make_unique<ast::BlockStatement>();
   block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(
-      Source{12, 34}, std::move(cond), std::move(body)));
+  block->append(
+      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -68,7 +68,7 @@ TEST_F(ValidateControlBlockTest,
             "of a scalar integer type");
 }
 
-TEST_F(ValidateControlBlockTest, DISABLED_SwitchWithoutDefault_Fail) {
+TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   case 1: {}
@@ -94,11 +94,11 @@ TEST_F(ValidateControlBlockTest, DISABLED_SwitchWithoutDefault_Fail) {
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-switch02: switch statement must have exactly one default "
+            "12:34: v-0008: switch statement must have exactly one default "
             "clause");
 }
 
-TEST_F(ValidateControlBlockTest, DISABLED_SwitchWithTwoDefault_Fail) {
+TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   default: {}
@@ -128,7 +128,46 @@ TEST_F(ValidateControlBlockTest, DISABLED_SwitchWithTwoDefault_Fail) {
   ast::CaseSelectorList default_csl_2;
   auto block_default_2 = std::make_unique<ast::BlockStatement>();
   switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      Source{12, 34}, std::move(default_csl_2), std::move(block_default_2)));
+      std::move(default_csl_2), std::move(block_default_2)));
+
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  block->append(std::make_unique<ast::SwitchStatement>(
+      Source{12, 34}, std::move(cond), std::move(switch_body)));
+
+  EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
+  EXPECT_FALSE(v()->ValidateStatements(block.get()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0008: switch statement must have exactly one default "
+            "clause");
+}
+
+TEST_F(ValidateControlBlockTest,
+       SwitchConditionTypeMustMatchSelectorType2_Fail) {
+  // var a : i32 = 2;
+  // switch (a) {
+  //   case 1: {}
+  //   default: {}
+  // }
+  ast::type::U32Type u32;
+  ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  ast::CaseStatementList switch_body;
+  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+
+  ast::CaseSelectorList csl;
+  csl.push_back(std::make_unique<ast::UintLiteral>(&u32, 1));
+  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+      Source{12, 34}, std::move(csl), std::make_unique<ast::BlockStatement>()));
+
+  ast::CaseSelectorList default_csl;
+  auto block_default = std::make_unique<ast::BlockStatement>();
+  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+      std::move(default_csl), std::move(block_default)));
 
   auto block = std::make_unique<ast::BlockStatement>();
   block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
@@ -138,12 +177,12 @@ TEST_F(ValidateControlBlockTest, DISABLED_SwitchWithTwoDefault_Fail) {
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-switch02: switch statement must have exactly one default "
-            "clause");
+            "12:34: v-switch03: the case selector values must have the same "
+            "type as the selector expression.");
 }
 
 TEST_F(ValidateControlBlockTest,
-       DISABLED_SwitchConditionTypeMustMatchSelectorType_Fail) {
+       SwitchConditionTypeMustMatchSelectorType_Fail) {
   // var a : u32 = 2;
   // switch (a) {
   //   case -1: {}
@@ -176,14 +215,57 @@ TEST_F(ValidateControlBlockTest,
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
-  EXPECT_EQ(
-      v()->error(),
-      "12:34: v-switch03: the case selector values must have the same type "
-      "as the selector expression.");
+  EXPECT_EQ(v()->error(),
+            "12:34: v-switch03: the case selector values must have the same "
+            "type as the selector expression.");
 }
 
-TEST_F(ValidateControlBlockTest,
-       DISABLED_NonUniqueCaseSelectorLiteralValue_Fail) {
+TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
+  // var a : u32 = 3;
+  // switch (a) {
+  //   case 0: {}
+  //   case 2, 2: {}
+  //   default: {}
+  // }
+  ast::type::U32Type u32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &u32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 3)));
+
+  ast::CaseStatementList switch_body;
+  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+
+  ast::CaseSelectorList csl_1;
+  csl_1.push_back(std::make_unique<ast::UintLiteral>(&u32, 0));
+  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+      std::move(csl_1), std::make_unique<ast::BlockStatement>()));
+
+  ast::CaseSelectorList csl_2;
+  csl_2.push_back(std::make_unique<ast::UintLiteral>(&u32, 2));
+  csl_2.push_back(std::make_unique<ast::UintLiteral>(&u32, 2));
+  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+      Source{12, 34}, std::move(csl_2),
+      std::make_unique<ast::BlockStatement>()));
+
+  ast::CaseSelectorList default_csl;
+  auto block_default = std::make_unique<ast::BlockStatement>();
+  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+      std::move(default_csl), std::move(block_default)));
+
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  block->append(std::make_unique<ast::SwitchStatement>(std::move(cond),
+                                                       std::move(switch_body)));
+
+  EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
+  EXPECT_FALSE(v()->ValidateStatements(block.get()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-switch04: a literal value must not appear more than once "
+            "in the case selectors for a switch statement: '2'");
+}
+
+TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   case 10: {}
@@ -210,7 +292,7 @@ TEST_F(ValidateControlBlockTest,
   csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
   csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 10));
   switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      Source{12, 34}, std::move(csl_1),
+      Source{12, 34}, std::move(csl_2),
       std::make_unique<ast::BlockStatement>()));
 
   ast::CaseSelectorList default_csl;
@@ -228,11 +310,10 @@ TEST_F(ValidateControlBlockTest,
   EXPECT_EQ(
       v()->error(),
       "12:34: v-switch04: a literal value must not appear more than once in "
-      "the case selectors for a switch statement");
+      "the case selectors for a switch statement: '10'");
 }
 
-TEST_F(ValidateControlBlockTest,
-       DISABLED_LastClauseLastStatementIsFallthrough_Fail) {
+TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   default: { fallthrough; }
@@ -246,10 +327,11 @@ TEST_F(ValidateControlBlockTest,
   auto cond = std::make_unique<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
   auto block_default = std::make_unique<ast::BlockStatement>();
-  block_default->append(std::make_unique<ast::FallthroughStatement>());
+  block_default->append(
+      std::make_unique<ast::FallthroughStatement>(Source{12, 34}));
   ast::CaseStatementList body;
   body.push_back(std::make_unique<ast::CaseStatement>(
-      Source{12, 34}, std::move(default_csl), std::move(block_default)));
+      std::move(default_csl), std::move(block_default)));
 
   auto block = std::make_unique<ast::BlockStatement>();
   block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
@@ -294,6 +376,51 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block.get())) << v()->error();
+}
+
+TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
+  // entry_point vertex = main
+  // type MyInt = u32;
+  // fn main()->void {
+  //   var v: MyInt;
+  //   switch(v){
+  //     default: {}
+  //   }
+  // }
+  ast::type::U32Type u32;
+  ast::type::AliasType my_int{"MyInt", &u32};
+
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &my_int);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&u32, 2)));
+
+  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  ast::CaseSelectorList default_csl;
+  auto block_default = std::make_unique<ast::BlockStatement>();
+  ast::CaseStatementList body;
+  body.push_back(std::make_unique<ast::CaseStatement>(
+      Source{12, 34}, std::move(default_csl), std::move(block_default)));
+
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  block->append(
+      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
+  block->append(std::make_unique<ast::ReturnStatement>());
+
+  ast::type::VoidType void_type;
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("main", std::move(params), &void_type);
+  func->set_body(std::move(block));
+  auto entry_point = std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kVertex, "", "main");
+  mod()->AddFunction(std::move(func));
+  mod()->AddAliasType(&my_int);
+  mod()->AddEntryPoint(std::move(entry_point));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
 }  // namespace

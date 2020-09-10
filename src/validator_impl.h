@@ -115,6 +115,14 @@ class ValidatorImpl {
   /// @param eps the vector of entry points to check
   /// @return true if the validation was successful
   bool ValidateEntryPoints(const ast::EntryPointList& eps);
+  /// Validates switch statements
+  /// @param s the switch statement to check
+  /// @returns true if the valdiation was successful
+  bool ValidateSwitch(const ast::SwitchStatement* s);
+  /// Validates case statements
+  /// @param c the case statement to check
+  /// @returns true if the valdiation was successful
+  bool ValidateCase(const ast::CaseStatement* c);
 
  private:
   std::string error_;
