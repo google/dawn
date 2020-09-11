@@ -52,8 +52,8 @@ declare_args() {
   dawn_enable_opengl = is_linux && !is_chromeos
 
   # Enables the compilation of Dawn's Vulkan backend
-  dawn_enable_vulkan =
-      is_linux || is_win || is_fuchsia || is_android || dawn_use_swiftshader
+  dawn_enable_vulkan = is_linux || is_chromeos || is_win || is_fuchsia ||
+                       is_android || dawn_use_swiftshader
 
   # Enable use of reflection compiler in spirv-cross. This is needed
   # if performing reflection on systems that the platform language
