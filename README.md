@@ -20,7 +20,7 @@ Helpful links:
  - [Dawn's bug tracker](https://bugs.chromium.org/p/dawn/issues/entry) if you find issues with Dawn.
  - [Dawn's mailing list](https://groups.google.com/forum/#!members/dawn-graphics) for other discussions related to Dawn.
  - [Dawn's source code](https://dawn.googlesource.com/dawn)
- - [Dawm's Matrix chatroom](https://matrix.to/#/#webgpu-dawn:matrix.org) for live discussion around contributing or using Dawn.
+ - [Dawn's Matrix chatroom](https://matrix.to/#/#webgpu-dawn:matrix.org) for live discussion around contributing or using Dawn.
  - [WebGPU's Matrix chatroom](https://matrix.to/#/#WebGPU:matrix.org)
 
 ## Documentation table of content
