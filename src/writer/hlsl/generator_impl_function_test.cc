@@ -786,7 +786,7 @@ ep_1_out ep_1(ep_1_in tint_in) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       DISABLED_Emit_Function_Called_By_EntryPoint_With_Uniform) {
+       Emit_Function_Called_By_EntryPoint_With_Uniform) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -845,11 +845,24 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
-  EXPECT_EQ(result(), R"( ... )");
+  EXPECT_EQ(result(), R"(cbuffer : register(b0) {
+  vector<float, 4> coord;
+};
+
+float sub_func(float param) {
+  return coord.x;
+}
+
+void frag_main() {
+  float v = sub_func(1.00000000f);
+  return;
+}
+
+)");
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       DISABLED_Emit_Function_Called_By_EntryPoint_With_StorageBuffer) {
+       Emit_Function_Called_By_EntryPoint_With_StorageBuffer) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
@@ -908,11 +921,22 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
-  EXPECT_EQ(result(), R"( ... )");
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+
+float sub_func(float param) {
+  return asfloat(coord.Load((4 * 0)));
+}
+
+void frag_main() {
+  float v = sub_func(1.00000000f);
+  return;
+}
+
+)");
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       DISABLED_Emit_Function_Called_Two_EntryPoints_WithGlobals) {
+       Emit_Function_Called_Two_EntryPoints_WithGlobals) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -992,9 +1016,9 @@ float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out) {
   return tint_in.foo;
 }
 
-float sub_func_ep_2(in ep_2_in tint_in, out ep_2_out tint_out) {
-  tint_out.bar = tint_in.foo;
-  return tint_in.foo;
+float sub_func_ep_2(in ep_2_in tint_in_0, out ep_2_out tint_out_0) {
+  tint_out_0.bar = tint_in_0.foo;
+  return tint_in_0.foo;
 }
 
 ep_1_out ep_1(ep_1_in tint_in) {
@@ -1003,17 +1027,17 @@ ep_1_out ep_1(ep_1_in tint_in) {
   return tint_out;
 }
 
-ep_2_out ep_2(ep_2_in tint_in) {
-  ep_2_out tint_out;
-  tint_out.bar = sub_func_ep_2(tint_in, tint_out);
-  return tint_out;
+ep_2_out ep_2(ep_2_in tint_in_0) {
+  ep_2_out tint_out_0;
+  tint_out_0.bar = sub_func_ep_2(tint_in_0, tint_out_0);
+  return tint_out_0;
 }
 
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       DISABLED_Emit_Function_EntryPoints_WithGlobal_Nested_Return) {
+       Emit_Function_EntryPoints_WithGlobal_Nested_Return) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -1061,7 +1085,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
   EXPECT_EQ(result(), R"(struct ep_1_out {
-  float bar : SV_Target0;
+  float bar : SV_Target1;
 };
 
 ep_1_out ep_1() {
