@@ -1119,6 +1119,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
 //   | MAT4x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
+//   | texture_sampler_types
 ast::type::Type* ParserImpl::type_decl() {
   auto t = peek();
   if (t.IsIdentifier()) {
@@ -1172,6 +1173,15 @@ ast::type::Type* ParserImpl::type_decl() {
       t.IsMat4x4()) {
     return type_decl_matrix(t);
   }
+
+  auto* texture_or_sampler = texture_sampler_types();
+  if (has_error()) {
+    return nullptr;
+  }
+  if (texture_or_sampler != nullptr) {
+    return texture_or_sampler;
+  }
+
   return nullptr;
 }
 

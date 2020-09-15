@@ -20,6 +20,8 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -740,6 +742,34 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x2<>", 4, 2},
                                          MatrixData{"mat4x3<>", 4, 3},
                                          MatrixData{"mat4x4<>", 4, 4}));
+
+TEST_F(ParserImplTest, TypeDecl_Sampler) {
+  auto* p = parser("sampler");
+
+  auto* type = tm()->Get(std::make_unique<ast::type::SamplerType>(
+      ast::type::SamplerKind::kSampler));
+
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr);
+  EXPECT_EQ(t, type);
+  ASSERT_TRUE(t->IsSampler());
+  ASSERT_FALSE(t->AsSampler()->IsComparison());
+}
+
+TEST_F(ParserImplTest, TypeDecl_Texture) {
+  auto* p = parser("texture_sampled_cube<f32>");
+
+  ast::type::F32Type f32;
+  auto* type = tm()->Get(std::make_unique<ast::type::SampledTextureType>(
+      ast::type::TextureDimension::kCube, &f32));
+
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr);
+  EXPECT_EQ(t, type);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+}
 
 }  // namespace
 }  // namespace wgsl
