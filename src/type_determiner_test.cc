@@ -808,6 +808,32 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(my_var_ptr->result_type()->AsPointer()->type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
+  ast::type::F32Type f32;
+  ast::type::PointerType ptr(&f32, ast::StorageClass::kFunction);
+
+  auto my_var = std::make_unique<ast::IdentifierExpression>("my_var");
+  auto* my_var_ptr = my_var.get();
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                      &ptr)));
+
+  body->append(std::make_unique<ast::AssignmentStatement>(
+      std::move(my_var),
+      std::make_unique<ast::IdentifierExpression>("my_var")));
+
+  ast::Function f("my_func", {}, &f32);
+  f.set_body(std::move(body));
+
+  EXPECT_TRUE(td()->DetermineFunction(&f));
+
+  ASSERT_NE(my_var_ptr->result_type(), nullptr);
+  EXPECT_TRUE(my_var_ptr->result_type()->IsPointer());
+  EXPECT_TRUE(my_var_ptr->result_type()->AsPointer()->type()->IsF32());
+}
+
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::type::F32Type f32;
 

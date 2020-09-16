@@ -719,6 +719,8 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     // the pointer around the variable type.
     if (var->is_const()) {
       expr->set_result_type(var->type());
+    } else if (var->type()->IsPointer()) {
+      expr->set_result_type(var->type());
     } else {
       expr->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
