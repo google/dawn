@@ -80,6 +80,10 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWNPROC_GEN_SOURCES"
 )
 
-add_library(dawn_proc STATIC ${DAWN_DUMMY_FILE})
+add_library(dawn_proc ${DAWN_DUMMY_FILE})
+target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
+endif()
 target_sources(dawn_proc PRIVATE ${DAWNPROC_GEN_SOURCES})
 target_link_libraries(dawn_proc PUBLIC dawn_headers)

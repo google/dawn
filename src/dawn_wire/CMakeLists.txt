@@ -18,7 +18,13 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_WIRE_GEN_SOURCES"
 )
 
-add_library(dawn_wire STATIC ${DAWN_DUMMY_FILE})
+add_library(dawn_wire ${DAWN_DUMMY_FILE})
+
+target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_IMPLEMENTATION")
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_SHARED_LIBRARY")
+endif()
+
 target_sources(dawn_wire PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn_wire/Wire.h"
     "${DAWN_INCLUDE_DIR}/dawn_wire/WireClient.h"

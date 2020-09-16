@@ -18,7 +18,13 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_NATIVE_UTILS_GEN_SOURCES"
 )
 
-add_library(dawn_native STATIC ${DAWN_DUMMY_FILE})
+add_library(dawn_native ${DAWN_DUMMY_FILE})
+
+target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_IMPLEMENTATION")
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_SHARED_LIBRARY")
+endif()
+
 target_sources(dawn_native PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn_native/DawnNative.h"
     "${DAWN_INCLUDE_DIR}/dawn_native/dawn_native_export.h"
