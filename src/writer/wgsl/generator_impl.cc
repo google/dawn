@@ -50,8 +50,12 @@
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -445,6 +449,120 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   return EmitBlockAndNewline(func->body());
 }
 
+bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
+  switch (fmt) {
+    case ast::type::ImageFormat::kBgra8Unorm:
+      out_ << "bgra8unorm";
+      break;
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+      out_ << "bgra8unorm_srgb";
+      break;
+    case ast::type::ImageFormat::kR16Float:
+      out_ << "r16float";
+      break;
+    case ast::type::ImageFormat::kR16Sint:
+      out_ << "r16sint";
+      break;
+    case ast::type::ImageFormat::kR16Uint:
+      out_ << "r16uint";
+      break;
+    case ast::type::ImageFormat::kR32Float:
+      out_ << "r32float";
+      break;
+    case ast::type::ImageFormat::kR32Sint:
+      out_ << "r32sint";
+      break;
+    case ast::type::ImageFormat::kR32Uint:
+      out_ << "r32uint";
+      break;
+    case ast::type::ImageFormat::kR8Sint:
+      out_ << "r8sint";
+      break;
+    case ast::type::ImageFormat::kR8Snorm:
+      out_ << "r8snorm";
+      break;
+    case ast::type::ImageFormat::kR8Uint:
+      out_ << "r8uint";
+      break;
+    case ast::type::ImageFormat::kR8Unorm:
+      out_ << "r8unorm";
+      break;
+    case ast::type::ImageFormat::kRg11B10Float:
+      out_ << "rg11b10float";
+      break;
+    case ast::type::ImageFormat::kRg16Float:
+      out_ << "rg16float";
+      break;
+    case ast::type::ImageFormat::kRg16Sint:
+      out_ << "rg16sint";
+      break;
+    case ast::type::ImageFormat::kRg16Uint:
+      out_ << "rg16uint";
+      break;
+    case ast::type::ImageFormat::kRg32Float:
+      out_ << "rg32float";
+      break;
+    case ast::type::ImageFormat::kRg32Sint:
+      out_ << "rg32sint";
+      break;
+    case ast::type::ImageFormat::kRg32Uint:
+      out_ << "rg32uint";
+      break;
+    case ast::type::ImageFormat::kRg8Sint:
+      out_ << "rg8sint";
+      break;
+    case ast::type::ImageFormat::kRg8Snorm:
+      out_ << "rg8snorm";
+      break;
+    case ast::type::ImageFormat::kRg8Uint:
+      out_ << "rg8uint";
+      break;
+    case ast::type::ImageFormat::kRg8Unorm:
+      out_ << "rg8unorm";
+      break;
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+      out_ << "rgb10a2unorm";
+      break;
+    case ast::type::ImageFormat::kRgba16Float:
+      out_ << "rgba16float";
+      break;
+    case ast::type::ImageFormat::kRgba16Sint:
+      out_ << "rgba16sint";
+      break;
+    case ast::type::ImageFormat::kRgba16Uint:
+      out_ << "rgba16uint";
+      break;
+    case ast::type::ImageFormat::kRgba32Float:
+      out_ << "rgba32float";
+      break;
+    case ast::type::ImageFormat::kRgba32Sint:
+      out_ << "rgba32sint";
+      break;
+    case ast::type::ImageFormat::kRgba32Uint:
+      out_ << "rgba32uint";
+      break;
+    case ast::type::ImageFormat::kRgba8Sint:
+      out_ << "rgba8sint";
+      break;
+    case ast::type::ImageFormat::kRgba8Snorm:
+      out_ << "rgba8snorm";
+      break;
+    case ast::type::ImageFormat::kRgba8Uint:
+      out_ << "rgba8uint";
+      break;
+    case ast::type::ImageFormat::kRgba8Unorm:
+      out_ << "rgba8unorm";
+      break;
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+      out_ << "rgba8unorm_srgb";
+      break;
+    default:
+      error_ = "unknown image format";
+      return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
   if (type->IsAlias()) {
     auto* alias = type->AsAlias();
@@ -485,6 +603,13 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       return false;
     }
     out_ << ">";
+  } else if (type->IsSampler()) {
+    auto* sampler = type->AsSampler();
+    out_ << "sampler";
+
+    if (sampler->IsComparison()) {
+      out_ << "_comparison";
+    }
   } else if (type->IsStruct()) {
     auto* str = type->AsStruct()->impl();
     if (str->decoration() != ast::StructDecoration::kNone) {
@@ -522,6 +647,81 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     make_indent();
 
     out_ << "}";
+  } else if (type->IsTexture()) {
+    auto* texture = type->AsTexture();
+
+    out_ << "texture_";
+    if (texture->IsDepth()) {
+      out_ << "depth_";
+    } else if (texture->IsSampled()) {
+      out_ << "sampled_";
+    } else if (texture->IsStorage()) {
+      auto* storage = texture->AsStorage();
+
+      if (storage->access() == ast::type::StorageAccess::kRead) {
+        out_ << "ro_";
+      } else if (storage->access() == ast::type::StorageAccess::kWrite) {
+        out_ << "wo_";
+      } else {
+        error_ = "unknown storage texture access";
+        return false;
+      }
+    } else {
+      error_ = "unknown texture type";
+      return false;
+    }
+
+    switch (texture->dim()) {
+      case ast::type::TextureDimension::k1d:
+        out_ << "1d";
+        break;
+      case ast::type::TextureDimension::k1dArray:
+        out_ << "1d_array";
+        break;
+      case ast::type::TextureDimension::k2d:
+        out_ << "2d";
+        break;
+      case ast::type::TextureDimension::k2dArray:
+        out_ << "2d_array";
+        break;
+      case ast::type::TextureDimension::k2dMs:
+        out_ << "2d_ms";
+        break;
+      case ast::type::TextureDimension::k2dMsArray:
+        out_ << "2d_ms_array";
+        break;
+      case ast::type::TextureDimension::k3d:
+        out_ << "3d";
+        break;
+      case ast::type::TextureDimension::kCube:
+        out_ << "cube";
+        break;
+      case ast::type::TextureDimension::kCubeArray:
+        out_ << "cube_array";
+        break;
+      default:
+        error_ = "unknown texture dimension";
+        return false;
+    }
+
+    if (texture->IsSampled()) {
+      auto* sampled = texture->AsSampled();
+
+      out_ << "<";
+      if (!EmitType(sampled->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (texture->IsStorage()) {
+      auto* storage = texture->AsStorage();
+
+      out_ << "<";
+      if (!EmitImageFormat(storage->image_format())) {
+        return false;
+      }
+      out_ << ">";
+    }
+
   } else if (type->IsU32()) {
     out_ << "u32";
   } else if (type->IsVector()) {

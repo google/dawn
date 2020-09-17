@@ -26,6 +26,7 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/alias_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
@@ -179,6 +180,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type);
+  /// Handles emitting an image format
+  /// @param fmt the format to generate
+  /// @returns true if the format is emitted
+  bool EmitImageFormat(const ast::type::ImageFormat fmt);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
