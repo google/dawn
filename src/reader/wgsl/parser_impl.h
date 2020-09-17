@@ -188,6 +188,10 @@ class ParserImpl {
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* sampler_type();
+  /// Parses a `multisampled_texture_type` grammar element
+  /// @returns returns the multisample texture dimension or kNone if none
+  /// matched.
+  ast::type::TextureDimension multisampled_texture_type();
   /// Parses a `sampled_texture_type` grammar element
   /// @returns returns the sample texture dimension or kNone if none matched.
   ast::type::TextureDimension sampled_texture_type();

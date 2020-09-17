@@ -24,6 +24,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -275,6 +276,46 @@ INSTANTIATE_TEST_SUITE_P(
         TextureData{ast::type::TextureDimension::kCube, "texture_sampled_cube"},
         TextureData{ast::type::TextureDimension::kCubeArray,
                     "texture_sampled_cube_array"}));
+
+using WgslGenerator_MultiampledTextureTest =
+    testing::TestWithParam<TextureData>;
+TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::MultisampledTextureType t(param.dim, &f32);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&t)) << g.error();
+  EXPECT_EQ(g.result(), std::string(param.name) + "<f32>");
+}
+
+TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::MultisampledTextureType t(param.dim, &i32);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&t)) << g.error();
+  EXPECT_EQ(g.result(), std::string(param.name) + "<i32>");
+}
+
+TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::MultisampledTextureType t(param.dim, &u32);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&t)) << g.error();
+  EXPECT_EQ(g.result(), std::string(param.name) + "<u32>");
+}
+INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
+                         WgslGenerator_MultiampledTextureTest,
+                         testing::Values(TextureData{
+                             ast::type::TextureDimension::k2d,
+                             "texture_multisampled_2d"}));
 
 struct StorageTextureData {
   ast::type::ImageFormat fmt;

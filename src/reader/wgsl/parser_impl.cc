@@ -50,6 +50,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -582,7 +583,7 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
 //  : sampler_type
 //  | depth_texture_type
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | TODO: multisampled_texture_type LESS_THAN type_decl GREATER_THAN
+//  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
 ast::type::Type* ParserImpl::texture_sampler_types() {
   auto* type = sampler_type();
@@ -595,8 +596,8 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     return type;
   }
 
-  auto sampled_dim = sampled_texture_type();
-  if (sampled_dim != ast::type::TextureDimension::kNone) {
+  auto dim = sampled_texture_type();
+  if (dim != ast::type::TextureDimension::kNone) {
     auto t = next();
     if (!t.IsLessThan()) {
       set_error(peek(), "missing '<' for sampled texture type");
@@ -618,7 +619,33 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     }
 
     return ctx_.type_mgr().Get(
-        std::make_unique<ast::type::SampledTextureType>(sampled_dim, subtype));
+        std::make_unique<ast::type::SampledTextureType>(dim, subtype));
+  }
+
+  dim = multisampled_texture_type();
+  if (dim != ast::type::TextureDimension::kNone) {
+    auto t = next();
+    if (!t.IsLessThan()) {
+      set_error(peek(), "missing '<' for multisampled texture type");
+      return nullptr;
+    }
+
+    auto* subtype = type_decl();
+    if (has_error())
+      return nullptr;
+    if (subtype == nullptr) {
+      set_error(peek(), "invalid subtype for multisampled texture type");
+      return nullptr;
+    }
+
+    t = next();
+    if (!t.IsGreaterThan()) {
+      set_error(peek(), "missing '>' for multisampled texture type");
+      return nullptr;
+    }
+
+    return ctx_.type_mgr().Get(
+        std::make_unique<ast::type::MultisampledTextureType>(dim, subtype));
   }
 
   ast::type::TextureDimension storage_dim;
@@ -675,8 +702,6 @@ ast::type::Type* ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_1D_ARRAY
 //  | TEXTURE_SAMPLED_2D
 //  | TEXTURE_SAMPLED_2D_ARRAY
-//  | TEXTURE_SAMPLED_2D_MS
-//  | TEXTURE_SAMPLED_2D_MS_ARRAY
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
@@ -698,14 +723,6 @@ ast::type::TextureDimension ParserImpl::sampled_texture_type() {
     next();  // Consume the peek
     return ast::type::TextureDimension::k2dArray;
   }
-  if (t.IsTextureSampled2dMs()) {
-    next();  // Consume the peek
-    return ast::type::TextureDimension::k2dMs;
-  }
-  if (t.IsTextureSampled2dMsArray()) {
-    next();  // Consume the peek
-    return ast::type::TextureDimension::k2dMsArray;
-  }
   if (t.IsTextureSampled3d()) {
     next();  // Consume the peek
     return ast::type::TextureDimension::k3d;
@@ -717,6 +734,17 @@ ast::type::TextureDimension ParserImpl::sampled_texture_type() {
   if (t.IsTextureSampledCubeArray()) {
     next();  // Consume the peek
     return ast::type::TextureDimension::kCubeArray;
+  }
+  return ast::type::TextureDimension::kNone;
+}
+
+// multisampled_texture_type
+//  : TEXTURE_MULTISAMPLED_2D
+ast::type::TextureDimension ParserImpl::multisampled_texture_type() {
+  auto t = peek();
+  if (t.IsTextureMultisampled2d()) {
+    next();  // Consume the peek
+    return ast::type::TextureDimension::k2d;
   }
   return ast::type::TextureDimension::kNone;
 }

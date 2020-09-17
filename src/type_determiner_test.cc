@@ -1870,8 +1870,7 @@ class Intrinsic_TextureOperation
         return std::make_unique<ast::type::F32Type>();
       }
     } else if (dim == ast::type::TextureDimension::k1dArray ||
-               dim == ast::type::TextureDimension::k2d ||
-               dim == ast::type::TextureDimension::k2dMs) {
+               dim == ast::type::TextureDimension::k2d) {
       return std::make_unique<ast::type::VectorType>(type, 2);
     } else if (dim == ast::type::TextureDimension::kCubeArray) {
       return std::make_unique<ast::type::VectorType>(type, 4);
@@ -2143,18 +2142,6 @@ INSTANTIATE_TEST_SUITE_P(
         TextureTestParams{ast::type::TextureDimension::k2dArray,
                           TextureType::kI32},
         TextureTestParams{ast::type::TextureDimension::k2dArray,
-                          TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k2dMs,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k2dMs,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k2dMs,
-                          TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k2dMsArray,
                           TextureType::kU32},
         TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kF32},
         TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kI32},

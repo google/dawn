@@ -289,6 +289,8 @@ std::string Token::TypeToName(Type type) {
       return "texture_depth_cube";
     case Token::Type::kTextureDepthCubeArray:
       return "texture_depth_cube_array";
+    case Token::Type::kTextureMultisampled2d:
+      return "texture_multisampled_2d";
     case Token::Type::kTextureStorageReadonly1d:
       return "texture_ro_1d";
     case Token::Type::kTextureStorageReadonly1dArray:
@@ -307,10 +309,6 @@ std::string Token::TypeToName(Type type) {
       return "texture_sampled_2d";
     case Token::Type::kTextureSampled2dArray:
       return "texture_sampled_2d_array";
-    case Token::Type::kTextureSampled2dMs:
-      return "texture_sampled_2d_ms";
-    case Token::Type::kTextureSampled2dMsArray:
-      return "texture_sampled_2d_ms_array";
     case Token::Type::kTextureSampled3d:
       return "texture_sampled_3d";
     case Token::Type::kTextureSampledCube:

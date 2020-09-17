@@ -57,20 +57,6 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray) {
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_2dMs) {
-  auto* p = parser("texture_sampled_2d_ms");
-  auto t = p->sampled_texture_type();
-  EXPECT_EQ(t, ast::type::TextureDimension::k2dMs);
-  EXPECT_FALSE(p->has_error());
-}
-
-TEST_F(ParserImplTest, SampledTextureType_2dMsArray) {
-  auto* p = parser("texture_sampled_2d_ms_array");
-  auto t = p->sampled_texture_type();
-  EXPECT_EQ(t, ast::type::TextureDimension::k2dMsArray);
-  EXPECT_FALSE(p->has_error());
-}
-
 TEST_F(ParserImplTest, SampledTextureType_3d) {
   auto* p = parser("texture_sampled_3d");
   auto t = p->sampled_texture_type();

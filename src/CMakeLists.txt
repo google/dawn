@@ -154,6 +154,8 @@ set(TINT_LIB_SRCS
   ast/type/i32_type.h
   ast/type/matrix_type.cc
   ast/type/matrix_type.h
+  ast/type/multisampled_texture_type.cc
+  ast/type/multisampled_texture_type.h
   ast/type/pointer_type.cc
   ast/type/pointer_type.h
   ast/type/sampled_texture_type.cc
@@ -337,6 +339,7 @@ set(TINT_TEST_SRCS
   ast/type/f32_type_test.cc
   ast/type/i32_type_test.cc
   ast/type/matrix_type_test.cc
+  ast/type/multisampled_texture_type_test.cc
   ast/type/pointer_type_test.cc
   ast/type/sampled_texture_type_test.cc
   ast/type/sampler_type_test.cc

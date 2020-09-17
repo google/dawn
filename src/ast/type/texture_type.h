@@ -25,6 +25,7 @@ namespace ast {
 namespace type {
 
 class DepthTextureType;
+class MultisampledTextureType;
 class SampledTextureType;
 class StorageTextureType;
 
@@ -40,10 +41,6 @@ enum class TextureDimension {
   k2d,
   /// 2 dimensional array texture
   k2dArray,
-  /// 2 dimensional multi-sampled texture
-  k2dMs,
-  /// 2 dimensional multi-sampled array texture
-  k2dMsArray,
   /// 3 dimensional texture
   k3d,
   /// cube texture
@@ -71,6 +68,8 @@ class TextureType : public Type {
 
   /// @returns true if this is a depth texture
   virtual bool IsDepth() const;
+  /// @returns ture if this is a multisampled texture
+  virtual bool IsMultisampled() const;
   /// @returns true if this is a storage texture
   virtual bool IsStorage() const;
   /// @returns true if this is a sampled texture
@@ -78,6 +77,8 @@ class TextureType : public Type {
 
   /// @returns the texture as a depth texture
   const DepthTextureType* AsDepth() const;
+  /// @returns the texture as a multisampled texture
+  const MultisampledTextureType* AsMultisampled() const;
   /// @returns the texture as a sampled texture
   const SampledTextureType* AsSampled() const;
   /// @returns the texture as a storage texture
@@ -85,6 +86,8 @@ class TextureType : public Type {
 
   /// @returns the texture as a depth texture
   DepthTextureType* AsDepth();
+  /// @returns the texture as a multisampled texture
+  MultisampledTextureType* AsMultisampled();
   /// @returns the texture as a sampled texture
   SampledTextureType* AsSampled();
   /// @returns the texture as a storage texture

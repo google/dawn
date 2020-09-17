@@ -401,7 +401,7 @@ TEST_P(KeywordTest, Parses) {
   Lexer l(params.input);
 
   auto t = l.next();
-  EXPECT_TRUE(t.Is(params.type));
+  EXPECT_TRUE(t.Is(params.type)) << params.input;
   EXPECT_EQ(1u, t.line());
   EXPECT_EQ(1u, t.column());
 
@@ -505,6 +505,8 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"texture_depth_cube", Token::Type::kTextureDepthCube},
         TokenData{"texture_depth_cube_array",
                   Token::Type::kTextureDepthCubeArray},
+        TokenData{"texture_multisampled_2d",
+                  Token::Type::kTextureMultisampled2d},
         TokenData{"texture_ro_1d", Token::Type::kTextureStorageReadonly1d},
         TokenData{"texture_ro_1d_array",
                   Token::Type::kTextureStorageReadonly1dArray},
@@ -518,9 +520,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"texture_sampled_2d", Token::Type::kTextureSampled2d},
         TokenData{"texture_sampled_2d_array",
                   Token::Type::kTextureSampled2dArray},
-        TokenData{"texture_sampled_2d_ms", Token::Type::kTextureSampled2dMs},
-        TokenData{"texture_sampled_2d_ms_array",
-                  Token::Type::kTextureSampled2dMsArray},
         TokenData{"texture_sampled_3d", Token::Type::kTextureSampled3d},
         TokenData{"texture_sampled_cube", Token::Type::kTextureSampledCube},
         TokenData{"texture_sampled_cube_array",

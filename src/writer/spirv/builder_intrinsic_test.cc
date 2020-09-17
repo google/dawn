@@ -458,8 +458,7 @@ class Builder_TextureOperation
         return std::make_unique<ast::type::F32Type>();
       }
     } else if (dim == ast::type::TextureDimension::k1dArray ||
-               dim == ast::type::TextureDimension::k2d ||
-               dim == ast::type::TextureDimension::k2dMs) {
+               dim == ast::type::TextureDimension::k2d) {
       return std::make_unique<ast::type::VectorType>(type, 2);
     } else if (dim == ast::type::TextureDimension::kCubeArray) {
       return std::make_unique<ast::type::VectorType>(type, 4);
@@ -523,20 +522,13 @@ class Builder_TextureOperation
 
     if (dim == ast::type::TextureDimension::k1dArray ||
         dim == ast::type::TextureDimension::k2dArray ||
-        dim == ast::type::TextureDimension::k2dMsArray ||
         dim == ast::type::TextureDimension::kCubeArray) {
       res += "1 ";
     } else {
       res += "0 ";
     }
 
-    if (dim == ast::type::TextureDimension::k2dMs ||
-        dim == ast::type::TextureDimension::k2dMsArray) {
-      res += "1 ";
-    } else {
-      res += "0 ";
-    }
-
+    res += "0 ";
     res += std::to_string(sampled_literal) + " ";
 
     if (unknown_format) {

@@ -52,6 +52,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -655,6 +656,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << "depth_";
     } else if (texture->IsSampled()) {
       out_ << "sampled_";
+    } else if (texture->IsMultisampled()) {
+      out_ << "multisampled_";
     } else if (texture->IsStorage()) {
       auto* storage = texture->AsStorage();
 
@@ -684,12 +687,6 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       case ast::type::TextureDimension::k2dArray:
         out_ << "2d_array";
         break;
-      case ast::type::TextureDimension::k2dMs:
-        out_ << "2d_ms";
-        break;
-      case ast::type::TextureDimension::k2dMsArray:
-        out_ << "2d_ms_array";
-        break;
       case ast::type::TextureDimension::k3d:
         out_ << "3d";
         break;
@@ -706,6 +703,14 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
     if (texture->IsSampled()) {
       auto* sampled = texture->AsSampled();
+
+      out_ << "<";
+      if (!EmitType(sampled->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (texture->IsMultisampled()) {
+      auto* sampled = texture->AsMultisampled();
 
       out_ << "<";
       if (!EmitType(sampled->type())) {

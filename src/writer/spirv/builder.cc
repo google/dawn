@@ -54,6 +54,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/storage_texture_type.h"
@@ -2039,7 +2040,6 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   auto dim = texture->dim();
   if (dim == ast::type::TextureDimension::k1dArray ||
       dim == ast::type::TextureDimension::k2dArray ||
-      dim == ast::type::TextureDimension::k2dMsArray ||
       dim == ast::type::TextureDimension::kCubeArray) {
     array_literal = 1u;
   }
@@ -2058,8 +2058,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t ms_literal = 0u;
-  if (dim == ast::type::TextureDimension::k2dMs ||
-      dim == ast::type::TextureDimension::k2dMsArray) {
+  if (texture->IsMultisampled()) {
     ms_literal = 1u;
   }
 
@@ -2069,7 +2068,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t sampled_literal = 2u;
-  if (texture->IsSampled() || texture->IsDepth()) {
+  if (texture->IsMultisampled() || texture->IsSampled() || texture->IsDepth()) {
     sampled_literal = 1u;
   }
 
@@ -2079,6 +2078,8 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
     type_id = GenerateTypeIfNeeded(&f32);
   } else if (texture->IsSampled()) {
     type_id = GenerateTypeIfNeeded(texture->AsSampled()->type());
+  } else if (texture->IsMultisampled()) {
+    type_id = GenerateTypeIfNeeded(texture->AsMultisampled()->type());
   } else if (texture->IsStorage()) {
     if (texture->AsStorage()->access() == ast::type::StorageAccess::kWrite) {
       ast::type::VoidType void_type;

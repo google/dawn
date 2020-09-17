@@ -657,6 +657,10 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kTextureDepthCubeArray, source,
             "texture_depth_cube_array"};
   }
+  if (str == "texture_multisampled_2d") {
+    return {Token::Type::kTextureMultisampled2d, source,
+            "texture_multisampled_2d"};
+  }
   if (str == "texture_ro_1d")
     return {Token::Type::kTextureStorageReadonly1d, source, "texture_ro_1d"};
   if (str == "texture_ro_1d_array")
@@ -680,12 +684,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
   if (str == "texture_sampled_2d_array") {
     return {Token::Type::kTextureSampled2dArray, source,
             "texture_sampled_2d_array"};
-  }
-  if (str == "texture_sampled_2d_ms")
-    return {Token::Type::kTextureSampled2dMs, source, "texture_sampled_2d_ms"};
-  if (str == "texture_sampled_2d_ms_array") {
-    return {Token::Type::kTextureSampled2dMsArray, source,
-            "texture_sampled_2d_ms_array"};
   }
   if (str == "texture_sampled_3d")
     return {Token::Type::kTextureSampled3d, source, "texture_sampled_3d"};

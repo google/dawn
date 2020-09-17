@@ -300,6 +300,8 @@ class Token {
     kTextureDepthCube,
     /// A 'texture_depth_cube_array'
     kTextureDepthCubeArray,
+    /// A 'texture_multisampled_2d'
+    kTextureMultisampled2d,
     /// A 'texture_ro_1d'
     kTextureStorageReadonly1d,
     /// A 'texture_ro_2d_array'
@@ -318,10 +320,6 @@ class Token {
     kTextureSampled2d,
     /// A 'texture_sampled_2d_array'
     kTextureSampled2dArray,
-    /// A 'texture_sampled_2d_ms'
-    kTextureSampled2dMs,
-    /// A 'texture_sampled_2d_ms_array'
-    kTextureSampled2dMsArray,
     /// A 'texture_sampled_3d'
     kTextureSampled3d,
     /// A 'texture_sampled_cube'
@@ -689,6 +687,10 @@ class Token {
   bool IsTextureDepthCubeArray() const {
     return type_ == Type::kTextureDepthCubeArray;
   }
+  /// @returns true if the token is a 'texture_multisample_2d'
+  bool IsTextureMultisampled2d() const {
+    return type_ == Type::kTextureMultisampled2d;
+  }
   /// @returns true if token is a 'texture_ro_1d'
   bool IsTextureStorageReadonly1d() const {
     return type_ == Type::kTextureStorageReadonly1d;
@@ -720,14 +722,6 @@ class Token {
   /// @returns true if token is a 'texture_sampled_2d_array'
   bool IsTextureSampled2dArray() const {
     return type_ == Type::kTextureSampled2dArray;
-  }
-  /// @returns true if token is a 'texture_sampled_2d_ms'
-  bool IsTextureSampled2dMs() const {
-    return type_ == Type::kTextureSampled2dMs;
-  }
-  /// @returns true if token is a 'texture_sampled_2d_ms_array'
-  bool IsTextureSampled2dMsArray() const {
-    return type_ == Type::kTextureSampled2dMsArray;
   }
   /// @returns true if token is a 'texture_sampled_3d'
   bool IsTextureSampled3d() const { return type_ == Type::kTextureSampled3d; }

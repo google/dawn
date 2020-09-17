@@ -17,6 +17,7 @@
 #include <cassert>
 
 #include "src/ast/type/depth_texture_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/storage_texture_type.h"
 
@@ -40,12 +41,6 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
       break;
     case TextureDimension::k2dArray:
       out << "2d_array";
-      break;
-    case TextureDimension::k2dMs:
-      out << "2d_ms";
-      break;
-    case TextureDimension::k2dMsArray:
-      out << "2d_ms_array";
       break;
     case TextureDimension::k3d:
       out << "3d";
@@ -73,6 +68,9 @@ bool TextureType::IsTexture() const {
 bool TextureType::IsDepth() const {
   return false;
 }
+bool TextureType::IsMultisampled() const {
+  return false;
+}
 bool TextureType::IsStorage() const {
   return false;
 }
@@ -83,6 +81,11 @@ bool TextureType::IsSampled() const {
 const DepthTextureType* TextureType::AsDepth() const {
   assert(IsDepth());
   return static_cast<const DepthTextureType*>(this);
+}
+
+const MultisampledTextureType* TextureType::AsMultisampled() const {
+  assert(IsMultisampled());
+  return static_cast<const MultisampledTextureType*>(this);
 }
 
 const SampledTextureType* TextureType::AsSampled() const {
@@ -98,6 +101,11 @@ const StorageTextureType* TextureType::AsStorage() const {
 DepthTextureType* TextureType::AsDepth() {
   assert(IsDepth());
   return static_cast<DepthTextureType*>(this);
+}
+
+MultisampledTextureType* TextureType::AsMultisampled() {
+  assert(IsMultisampled());
+  return static_cast<MultisampledTextureType*>(this);
 }
 
 SampledTextureType* TextureType::AsSampled() {

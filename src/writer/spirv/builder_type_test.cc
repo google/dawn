@@ -26,6 +26,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -770,6 +771,53 @@ inline std::ostream& operator<<(std::ostream& out, TextureType data) {
   }
   return out;
 }
+
+class MultisampledTextureTypeTest : public testing::TestWithParam<TextureType> {
+ public:
+  std::unique_ptr<ast::type::Type> get_type(TextureType param) {
+    if (param == TextureType::kF32) {
+      return std::make_unique<ast::type::F32Type>();
+    }
+    if (param == TextureType::kI32) {
+      return std::make_unique<ast::type::I32Type>();
+    }
+    return std::make_unique<ast::type::U32Type>();
+  }
+
+  std::string get_type_line(TextureType param) {
+    if (param == TextureType::kI32) {
+      return "%2 = OpTypeInt 32 1\n";
+    }
+    if (param == TextureType::kU32) {
+      return "%2 = OpTypeInt 32 0\n";
+    }
+    return "%2 = OpTypeFloat 32\n";
+  }
+};
+
+TEST_P(MultisampledTextureTypeTest, Generate_2d) {
+  auto param = GetParam();
+  auto type = get_type(param);
+
+  ast::type::MultisampledTextureType two_d(ast::type::TextureDimension::k2d,
+                                           type.get());
+
+  ast::Module mod;
+  Builder b(&mod);
+
+  auto id_two_d = b.GenerateTypeIfNeeded(&two_d);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id_two_d);
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            get_type_line(param) + "%1 = OpTypeImage %2 2D 0 0 1 1 Unknown\n");
+}
+
+INSTANTIATE_TEST_SUITE_P(BuilderTest_Type,
+                         MultisampledTextureTypeTest,
+                         testing::Values(TextureType::kU32,
+                                         TextureType::kI32,
+                                         TextureType::kF32));
 
 class SampledTextureTypeTest : public testing::TestWithParam<TextureType> {
  public:
