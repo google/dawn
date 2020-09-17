@@ -136,17 +136,17 @@ TEST(Math, AlignPtr) {
 // Tests for Align
 TEST(Math, Align) {
     // 0 aligns to 0
-    ASSERT_EQ(Align(0, 4), 0u);
-    ASSERT_EQ(Align(0, 256), 0u);
-    ASSERT_EQ(Align(0, 512), 0u);
+    ASSERT_EQ(Align(0u, 4), 0u);
+    ASSERT_EQ(Align(0u, 256), 0u);
+    ASSERT_EQ(Align(0u, 512), 0u);
 
     // Multiples align to self
-    ASSERT_EQ(Align(8, 8), 8u);
-    ASSERT_EQ(Align(16, 8), 16u);
-    ASSERT_EQ(Align(24, 8), 24u);
-    ASSERT_EQ(Align(256, 256), 256u);
-    ASSERT_EQ(Align(512, 256), 512u);
-    ASSERT_EQ(Align(768, 256), 768u);
+    ASSERT_EQ(Align(8u, 8), 8u);
+    ASSERT_EQ(Align(16u, 8), 16u);
+    ASSERT_EQ(Align(24u, 8), 24u);
+    ASSERT_EQ(Align(256u, 256), 256u);
+    ASSERT_EQ(Align(512u, 256), 512u);
+    ASSERT_EQ(Align(768u, 256), 768u);
 
     // Alignment with 1 is self
     for (uint32_t i = 0; i < 128; ++i) {
@@ -157,6 +157,10 @@ TEST(Math, Align) {
     for (uint32_t i = 1; i <= 64; ++i) {
         ASSERT_EQ(Align(64 + i, 64), 128u);
     }
+
+    // Test extrema
+    ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFF), 4), 0x100000000u);
+    ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
 }
 
 // Tests for IsPtrAligned

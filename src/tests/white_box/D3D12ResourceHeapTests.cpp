@@ -14,12 +14,18 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
 using namespace dawn_native::d3d12;
 
-class D3D12SmallTextureTests : public DawnTest {
+class D3D12ResourceHeapTests : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_SKIP_TEST_IF(UsesWire());
+    }
+
     std::vector<const char*> GetRequiredExtensions() override {
         mIsBCFormatSupported = SupportsExtensions({"texture_compression_bc"});
         if (!mIsBCFormatSupported) {
@@ -38,8 +44,7 @@ class D3D12SmallTextureTests : public DawnTest {
 };
 
 // Verify that creating a small compressed textures will be 4KB aligned.
-TEST_P(D3D12SmallTextureTests, AlignSmallCompressedTexture) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+TEST_P(D3D12ResourceHeapTests, AlignSmallCompressedTexture) {
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     // TODO(http://crbug.com/dawn/282): Investigate GPU/driver rejections of small alignment.
@@ -73,4 +78,28 @@ TEST_P(D3D12SmallTextureTests, AlignSmallCompressedTexture) {
               static_cast<uint64_t>(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT));
 }
 
-DAWN_INSTANTIATE_TEST(D3D12SmallTextureTests, D3D12Backend());
+// Verify creating a UBO will always be 256B aligned.
+TEST_P(D3D12ResourceHeapTests, AlignUBO) {
+    // Create a small UBO
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4 * 1024;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    Buffer* d3dBuffer = reinterpret_cast<Buffer*>(buffer.Get());
+
+    EXPECT_TRUE((d3dBuffer->GetD3D12Resource()->GetDesc().Width %
+                 static_cast<uint64_t>(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)) == 0u);
+
+    // Create a larger UBO
+    descriptor.size = (4 * 1024 * 1024) + 255;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+
+    buffer = device.CreateBuffer(&descriptor);
+    d3dBuffer = reinterpret_cast<Buffer*>(buffer.Get());
+
+    EXPECT_TRUE((d3dBuffer->GetD3D12Resource()->GetDesc().Width %
+                 static_cast<uint64_t>(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)) == 0u);
+}
+
+DAWN_INSTANTIATE_TEST(D3D12ResourceHeapTests, D3D12Backend());

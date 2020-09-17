@@ -98,14 +98,6 @@ bool IsAligned(uint32_t value, size_t alignment) {
     return (value & (alignment32 - 1)) == 0;
 }
 
-uint32_t Align(uint32_t value, size_t alignment) {
-    ASSERT(alignment <= UINT32_MAX);
-    ASSERT(IsPowerOfTwo(alignment));
-    ASSERT(alignment != 0);
-    uint32_t alignment32 = static_cast<uint32_t>(alignment);
-    return (value + (alignment32 - 1)) & ~(alignment32 - 1);
-}
-
 uint16_t Float32ToFloat16(float fp32) {
     uint32_t fp32i = BitCast<uint32_t>(fp32);
     uint32_t sign16 = (fp32i & 0x80000000) >> 16;

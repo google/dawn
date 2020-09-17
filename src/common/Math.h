@@ -51,7 +51,15 @@ uint64_t NextPowerOfTwo(uint64_t n);
 bool IsPtrAligned(const void* ptr, size_t alignment);
 void* AlignVoidPtr(void* ptr, size_t alignment);
 bool IsAligned(uint32_t value, size_t alignment);
-uint32_t Align(uint32_t value, size_t alignment);
+
+template <typename T>
+T Align(T value, size_t alignment) {
+    ASSERT(value <= std::numeric_limits<T>::max() - (alignment - 1));
+    ASSERT(IsPowerOfTwo(alignment));
+    ASSERT(alignment != 0);
+    T alignmentT = static_cast<T>(alignment);
+    return (value + (alignmentT - 1)) & ~(alignmentT - 1);
+}
 
 template <typename T>
 DAWN_FORCE_INLINE T* AlignPtr(T* ptr, size_t alignment) {

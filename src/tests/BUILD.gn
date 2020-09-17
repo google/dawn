@@ -396,7 +396,7 @@ source_set("dawn_white_box_tests_sources") {
     sources += [
       "white_box/D3D12DescriptorHeapTests.cpp",
       "white_box/D3D12ResidencyTests.cpp",
-      "white_box/D3D12SmallTextureTests.cpp",
+      "white_box/D3D12ResourceHeapTests.cpp",
     ]
   }
 

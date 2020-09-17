@@ -83,6 +83,15 @@ namespace dawn_native { namespace d3d12 {
                 return D3D12_HEAP_TYPE_DEFAULT;
             }
         }
+
+        size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
+            switch (usage) {
+                case wgpu::BufferUsage::Uniform:
+                    return D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+                default:
+                    return 1;
+            }
+        }
     }  // namespace
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
@@ -95,7 +104,14 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Alignment = 0;
         // TODO(cwallez@chromium.org): Have a global "zero" buffer that can do everything instead
         // of creating a new 4-byte buffer?
-        resourceDescriptor.Width = std::max(GetSize(), uint64_t(4u));
+        // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation forbids
+        // binding a CBV to an unaligned size. To prevent, one can always safely align the buffer
+        // desc size to the CBV data alignment as other buffer usages ignore it (no size check).
+        // The validation will still enforce bound checks with the unaligned size returned by
+        // GetSize().
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/uploading-resources#buffer-alignment
+        resourceDescriptor.Width =
+            Align(std::max(GetSize(), uint64_t(4u)), D3D12BufferSizeAlignment(GetUsage()));
         resourceDescriptor.Height = 1;
         resourceDescriptor.DepthOrArraySize = 1;
         resourceDescriptor.MipLevels = 1;
