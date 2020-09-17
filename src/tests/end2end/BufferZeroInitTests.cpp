@@ -44,6 +44,15 @@ namespace {
 }  // anonymous namespace
 
 class BufferZeroInitTest : public DawnTest {
+  protected:
+    std::vector<const char*> GetRequiredExtensions() override {
+        std::vector<const char*> requiredExtensions = {};
+        if (SupportsExtensions({"timestamp_query"})) {
+            requiredExtensions.push_back("timestamp_query");
+        }
+        return requiredExtensions;
+    }
+
   public:
     wgpu::Buffer CreateBuffer(uint64_t size,
                               wgpu::BufferUsage usage,
@@ -1157,6 +1166,72 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
     {
         constexpr uint64_t kOffset = 8u;
         TestBufferZeroInitAsIndirectBufferForDispatchIndirect(kOffset);
+    }
+}
+
+// Test the buffer will be lazily intialized correctly when its first use is in resolveQuerySet
+TEST_P(BufferZeroInitTest, ResolveQuerySet) {
+    // Timestamp query is not supported on OpenGL
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // TODO(hao.x.li@intel.com): Remove it after timestamp query is implementated on Vulkan and
+    // Metal
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal());
+
+    // Skip if timestamp extension is not supported on device
+    DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));
+
+    constexpr uint64_t kBufferSize = 16u;
+    constexpr wgpu::BufferUsage kBufferUsage =
+        wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopyDst;
+
+    wgpu::QuerySetDescriptor descriptor;
+    descriptor.count = 2u;
+    descriptor.type = wgpu::QueryType::Timestamp;
+    wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+
+    // Resolve data to the whole buffer doesn't need lazy initialization.
+    {
+        constexpr uint32_t kQueryCount = 2u;
+        constexpr uint64_t kDestinationOffset = 0u;
+
+        wgpu::Buffer destination = CreateBuffer(kBufferSize, kBufferUsage);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        encoder.WriteTimestamp(querySet, 1);
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kDestinationOffset);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
+    }
+
+    // Resolve data to partial of the buffer needs lazy initialization.
+    // destinationOffset == 0 and destinationOffset + 8 * queryCount < kBufferSize
+    {
+        constexpr uint32_t kQueryCount = 1u;
+        constexpr uint64_t kDestinationOffset = 0u;
+
+        wgpu::Buffer destination = CreateBuffer(kBufferSize, kBufferUsage);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kDestinationOffset);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+    }
+
+    // destinationOffset > 0 and destinationOffset + 8 * queryCount <= kBufferSize
+    {
+        constexpr uint32_t kQueryCount = 1;
+        constexpr uint64_t kDestinationOffset = 8u;
+
+        wgpu::Buffer destination = CreateBuffer(kBufferSize, kBufferUsage);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kDestinationOffset);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
     }
 }
 

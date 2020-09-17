@@ -28,13 +28,7 @@ class QueryTests : public DawnTest {
         descriptor.size = size;
         descriptor.usage = wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc |
                            wgpu::BufferUsage::CopyDst;
-        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-        // Initialize the buffer values to 0.
-        std::vector<uint64_t> myData = {0, 0};
-        device.GetDefaultQueue().WriteBuffer(buffer, 0, myData.data(), size);
-
-        return buffer;
+        return device.CreateBuffer(&descriptor);
     }
 };
 
