@@ -452,9 +452,12 @@ namespace dawn_native { namespace d3d12 {
     namespace {
         class VertexBufferTracker {
           public:
-            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset, uint64_t size) {
+            void OnSetVertexBuffer(VertexBufferSlot slot,
+                                   Buffer* buffer,
+                                   uint64_t offset,
+                                   uint64_t size) {
                 mStartSlot = std::min(mStartSlot, slot);
-                mEndSlot = std::max(mEndSlot, slot + 1);
+                mEndSlot = std::max(mEndSlot, ityp::Add(slot, VertexBufferSlot(uint8_t(1))));
 
                 auto* d3d12BufferView = &mD3D12BufferViews[slot];
                 d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
@@ -466,11 +469,8 @@ namespace dawn_native { namespace d3d12 {
                        const RenderPipeline* renderPipeline) {
                 ASSERT(renderPipeline != nullptr);
 
-                std::bitset<kMaxVertexBuffers> vertexBufferSlotsUsed =
-                    renderPipeline->GetVertexBufferSlotsUsed();
-
-                uint32_t startSlot = mStartSlot;
-                uint32_t endSlot = mEndSlot;
+                VertexBufferSlot startSlot = mStartSlot;
+                VertexBufferSlot endSlot = mEndSlot;
 
                 // If the vertex state has changed, we need to update the StrideInBytes
                 // for the D3D12 buffer views. We also need to extend the dirty range to
@@ -478,9 +478,11 @@ namespace dawn_native { namespace d3d12 {
                 if (mLastAppliedRenderPipeline != renderPipeline) {
                     mLastAppliedRenderPipeline = renderPipeline;
 
-                    for (uint32_t slot : IterateBitSet(vertexBufferSlotsUsed)) {
+                    for (VertexBufferSlot slot :
+                         IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
                         startSlot = std::min(startSlot, slot);
-                        endSlot = std::max(endSlot, slot + 1);
+                        endSlot =
+                            std::max(endSlot, ityp::Add(slot, VertexBufferSlot(uint8_t(1))));
                         mD3D12BufferViews[slot].StrideInBytes =
                             renderPipeline->GetVertexBuffer(slot).arrayStride;
                     }
@@ -494,11 +496,12 @@ namespace dawn_native { namespace d3d12 {
                 // to SetVertexBuffer. This makes it correct to only track the start
                 // and end of the dirty range. When Apply is called,
                 // we will at worst set non-dirty vertex buffers in duplicate.
-                uint32_t count = endSlot - startSlot;
-                commandList->IASetVertexBuffers(startSlot, count, &mD3D12BufferViews[startSlot]);
+                commandList->IASetVertexBuffers(static_cast<uint8_t>(startSlot),
+                                                static_cast<uint8_t>(ityp::Sub(endSlot, startSlot)),
+                                                &mD3D12BufferViews[startSlot]);
 
-                mStartSlot = kMaxVertexBuffers;
-                mEndSlot = 0;
+                mStartSlot = VertexBufferSlot(kMaxVertexBuffers);
+                mEndSlot = VertexBufferSlot(uint8_t(0));
             }
 
           private:
@@ -507,9 +510,10 @@ namespace dawn_native { namespace d3d12 {
             // represent the union of the dirty ranges (the union may have non-dirty
             // data in the middle of the range).
             const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
-            uint32_t mStartSlot = kMaxVertexBuffers;
-            uint32_t mEndSlot = 0;
-            std::array<D3D12_VERTEX_BUFFER_VIEW, kMaxVertexBuffers> mD3D12BufferViews = {};
+            VertexBufferSlot mStartSlot{kMaxVertexBuffers};
+            VertexBufferSlot mEndSlot{uint8_t(0)};
+            ityp::array<VertexBufferSlot, D3D12_VERTEX_BUFFER_VIEW, kMaxVertexBuffers>
+                mD3D12BufferViews = {};
         };
 
         class IndexBufferTracker {

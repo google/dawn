@@ -124,14 +124,15 @@ namespace dawn_native { namespace metal {
         // Add vertex buffers bound as storage buffers
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
-            for (uint32_t dawnIndex : IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
-                uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(dawnIndex);
+            for (VertexBufferSlot slot :
+                 IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
+                uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
 
                 spirv_cross::MSLResourceBinding mslBinding;
 
                 mslBinding.stage = spv::ExecutionModelVertex;
                 mslBinding.desc_set = kPullingBufferBindingSet;
-                mslBinding.binding = dawnIndex;
+                mslBinding.binding = static_cast<uint8_t>(slot);
                 mslBinding.msl_buffer = metalIndex;
                 compiler.add_msl_resource_binding(mslBinding);
             }

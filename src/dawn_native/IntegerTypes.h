@@ -36,6 +36,13 @@ namespace dawn_native {
     constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
         ColorAttachmentIndex(kMaxColorAttachments);
 
+    using VertexBufferSlot = TypedInteger<struct VertexBufferSlotT, uint8_t>;
+    using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
+
+    constexpr VertexBufferSlot kMaxVertexBuffersTyped = VertexBufferSlot(kMaxVertexBuffers);
+    constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
+        VertexAttributeLocation(kMaxVertexAttributes);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

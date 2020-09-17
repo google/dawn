@@ -1050,7 +1050,8 @@ namespace dawn_native { namespace vulkan {
                     VkBuffer buffer = ToBackend(cmd->buffer)->GetHandle();
                     VkDeviceSize offset = static_cast<VkDeviceSize>(cmd->offset);
 
-                    device->fn.CmdBindVertexBuffers(commands, cmd->slot, 1, &*buffer, &offset);
+                    device->fn.CmdBindVertexBuffers(commands, static_cast<uint8_t>(cmd->slot), 1,
+                                                    &*buffer, &offset);
                     break;
                 }
 

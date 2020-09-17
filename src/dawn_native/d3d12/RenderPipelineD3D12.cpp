@@ -419,17 +419,17 @@ namespace dawn_native { namespace d3d12 {
     D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors) {
         unsigned int count = 0;
-        for (auto i : IterateBitSet(GetAttributeLocationsUsed())) {
+        for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
             D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = (*inputElementDescriptors)[count++];
 
-            const VertexAttributeInfo& attribute = GetAttribute(i);
+            const VertexAttributeInfo& attribute = GetAttribute(loc);
 
             // If the HLSL semantic is TEXCOORDN the SemanticName should be "TEXCOORD" and the
             // SemanticIndex N
             inputElementDescriptor.SemanticName = "TEXCOORD";
-            inputElementDescriptor.SemanticIndex = static_cast<uint32_t>(i);
+            inputElementDescriptor.SemanticIndex = static_cast<uint8_t>(loc);
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
-            inputElementDescriptor.InputSlot = attribute.vertexBufferSlot;
+            inputElementDescriptor.InputSlot = static_cast<uint8_t>(attribute.vertexBufferSlot);
 
             const VertexBufferInfo& input = GetVertexBuffer(attribute.vertexBufferSlot);
 

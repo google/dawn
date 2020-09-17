@@ -215,7 +215,7 @@ namespace dawn_native {
 
             SetVertexBufferCmd* cmd =
                 allocator->Allocate<SetVertexBufferCmd>(Command::SetVertexBuffer);
-            cmd->slot = slot;
+            cmd->slot = VertexBufferSlot(static_cast<uint8_t>(slot));
             cmd->buffer = buffer;
             cmd->offset = offset;
             cmd->size = size;

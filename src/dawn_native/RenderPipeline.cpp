@@ -412,21 +412,24 @@ namespace dawn_native {
             mVertexState = VertexStateDescriptor();
         }
 
-        for (uint32_t slot = 0; slot < mVertexState.vertexBufferCount; ++slot) {
+        for (uint8_t slot = 0; slot < mVertexState.vertexBufferCount; ++slot) {
             if (mVertexState.vertexBuffers[slot].attributeCount == 0) {
                 continue;
             }
 
-            mVertexBufferSlotsUsed.set(slot);
-            mVertexBufferInfos[slot].arrayStride = mVertexState.vertexBuffers[slot].arrayStride;
-            mVertexBufferInfos[slot].stepMode = mVertexState.vertexBuffers[slot].stepMode;
+            VertexBufferSlot typedSlot(slot);
 
-            uint32_t location = 0;
+            mVertexBufferSlotsUsed.set(typedSlot);
+            mVertexBufferInfos[typedSlot].arrayStride =
+                mVertexState.vertexBuffers[slot].arrayStride;
+            mVertexBufferInfos[typedSlot].stepMode = mVertexState.vertexBuffers[slot].stepMode;
+
             for (uint32_t i = 0; i < mVertexState.vertexBuffers[slot].attributeCount; ++i) {
-                location = mVertexState.vertexBuffers[slot].attributes[i].shaderLocation;
+                VertexAttributeLocation location = VertexAttributeLocation(static_cast<uint8_t>(
+                    mVertexState.vertexBuffers[slot].attributes[i].shaderLocation));
                 mAttributeLocationsUsed.set(location);
                 mAttributeInfos[location].shaderLocation = location;
-                mAttributeInfos[location].vertexBufferSlot = slot;
+                mAttributeInfos[location].vertexBufferSlot = typedSlot;
                 mAttributeInfos[location].offset =
                     mVertexState.vertexBuffers[slot].attributes[i].offset;
                 mAttributeInfos[location].format =
@@ -489,23 +492,26 @@ namespace dawn_native {
         return &mVertexState;
     }
 
-    const std::bitset<kMaxVertexAttributes>& RenderPipelineBase::GetAttributeLocationsUsed() const {
+    const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
+    RenderPipelineBase::GetAttributeLocationsUsed() const {
         ASSERT(!IsError());
         return mAttributeLocationsUsed;
     }
 
-    const VertexAttributeInfo& RenderPipelineBase::GetAttribute(uint32_t location) const {
+    const VertexAttributeInfo& RenderPipelineBase::GetAttribute(
+        VertexAttributeLocation location) const {
         ASSERT(!IsError());
         ASSERT(mAttributeLocationsUsed[location]);
         return mAttributeInfos[location];
     }
 
-    const std::bitset<kMaxVertexBuffers>& RenderPipelineBase::GetVertexBufferSlotsUsed() const {
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+    RenderPipelineBase::GetVertexBufferSlotsUsed() const {
         ASSERT(!IsError());
         return mVertexBufferSlotsUsed;
     }
 
-    const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(uint32_t slot) const {
+    const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(VertexBufferSlot slot) const {
         ASSERT(!IsError());
         ASSERT(mVertexBufferSlotsUsed[slot]);
         return mVertexBufferInfos[slot];
@@ -582,12 +588,6 @@ namespace dawn_native {
         return mAttachmentState.Get();
     }
 
-    std::bitset<kMaxVertexAttributes> RenderPipelineBase::GetAttributesUsingVertexBuffer(
-        uint32_t slot) const {
-        ASSERT(!IsError());
-        return attributesUsingVertexBuffer[slot];
-    }
-
     size_t RenderPipelineBase::HashFunc::operator()(const RenderPipelineBase* pipeline) const {
         // Hash modules and layout
         size_t hash = PipelineBase::HashForCache(pipeline);
@@ -619,15 +619,15 @@ namespace dawn_native {
 
         // Hash vertex state
         HashCombine(&hash, pipeline->mAttributeLocationsUsed);
-        for (uint32_t i : IterateBitSet(pipeline->mAttributeLocationsUsed)) {
-            const VertexAttributeInfo& desc = pipeline->GetAttribute(i);
+        for (VertexAttributeLocation location : IterateBitSet(pipeline->mAttributeLocationsUsed)) {
+            const VertexAttributeInfo& desc = pipeline->GetAttribute(location);
             HashCombine(&hash, desc.shaderLocation, desc.vertexBufferSlot, desc.offset,
                         desc.format);
         }
 
         HashCombine(&hash, pipeline->mVertexBufferSlotsUsed);
-        for (uint32_t i : IterateBitSet(pipeline->mVertexBufferSlotsUsed)) {
-            const VertexBufferInfo& desc = pipeline->GetVertexBuffer(i);
+        for (VertexBufferSlot slot : IterateBitSet(pipeline->mVertexBufferSlotsUsed)) {
+            const VertexBufferInfo& desc = pipeline->GetVertexBuffer(slot);
             HashCombine(&hash, desc.arrayStride, desc.stepMode);
         }
 
@@ -709,9 +709,9 @@ namespace dawn_native {
             return false;
         }
 
-        for (uint32_t i : IterateBitSet(a->mAttributeLocationsUsed)) {
-            const VertexAttributeInfo& descA = a->GetAttribute(i);
-            const VertexAttributeInfo& descB = b->GetAttribute(i);
+        for (VertexAttributeLocation loc : IterateBitSet(a->mAttributeLocationsUsed)) {
+            const VertexAttributeInfo& descA = a->GetAttribute(loc);
+            const VertexAttributeInfo& descB = b->GetAttribute(loc);
             if (descA.shaderLocation != descB.shaderLocation ||
                 descA.vertexBufferSlot != descB.vertexBufferSlot || descA.offset != descB.offset ||
                 descA.format != descB.format) {
@@ -723,9 +723,9 @@ namespace dawn_native {
             return false;
         }
 
-        for (uint32_t i : IterateBitSet(a->mVertexBufferSlotsUsed)) {
-            const VertexBufferInfo& descA = a->GetVertexBuffer(i);
-            const VertexBufferInfo& descB = b->GetVertexBuffer(i);
+        for (VertexBufferSlot slot : IterateBitSet(a->mVertexBufferSlotsUsed)) {
+            const VertexBufferInfo& descA = a->GetVertexBuffer(slot);
+            const VertexBufferInfo& descB = b->GetVertexBuffer(slot);
             if (descA.arrayStride != descB.arrayStride || descA.stepMode != descB.stepMode) {
                 return false;
             }

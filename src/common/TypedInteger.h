@@ -16,6 +16,7 @@
 #define COMMON_TYPEDINTEGER_H_
 
 #include "common/Assert.h"
+#include "common/UnderlyingType.h"
 
 #include <limits>
 #include <type_traits>
@@ -131,6 +132,63 @@ namespace detail {
         }
 
         template <typename T2 = T>
+        static constexpr std::enable_if_t<std::is_unsigned<T2>::value, decltype(T(0) + T2(0))>
+        AddImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
+            static_assert(std::is_same<T, T2>::value, "");
+
+            // Overflow would wrap around
+            ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
+            return lhs.mValue + rhs.mValue;
+        }
+
+        template <typename T2 = T>
+        static constexpr std::enable_if_t<std::is_signed<T2>::value, decltype(T(0) + T2(0))>
+        AddImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
+            static_assert(std::is_same<T, T2>::value, "");
+
+            if (lhs.mValue > 0) {
+                // rhs is positive: |rhs| is at most the distance between max and |lhs|.
+                // rhs is negative: (positive + negative) won't overflow
+                ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - lhs.mValue);
+            } else {
+                // rhs is postive: (negative + positive) won't underflow
+                // rhs is negative: |rhs| isn't less than the (negative) distance between min
+                // and |lhs|
+                ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - lhs.mValue);
+            }
+            return lhs.mValue + rhs.mValue;
+        }
+
+        template <typename T2 = T>
+        static constexpr std::enable_if_t<std::is_unsigned<T>::value, decltype(T(0) - T2(0))>
+        SubImpl(TypedIntegerImpl<Tag, T> lhs, TypedIntegerImpl<Tag, T2> rhs) {
+            static_assert(std::is_same<T, T2>::value, "");
+
+            // Overflow would wrap around
+            ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
+            return lhs.mValue - rhs.mValue;
+        }
+
+        template <typename T2 = T>
+        static constexpr std::enable_if_t<std::is_signed<T>::value, decltype(T(0) - T2(0))> SubImpl(
+            TypedIntegerImpl<Tag, T> lhs,
+            TypedIntegerImpl<Tag, T2> rhs) {
+            static_assert(std::is_same<T, T2>::value, "");
+
+            if (lhs.mValue > 0) {
+                // rhs is positive: positive minus positive won't overflow
+                // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
+                // and max.
+                ASSERT(rhs.mValue >= lhs.mValue - std::numeric_limits<T>::max());
+            } else {
+                // rhs is positive: |rhs| is at most the distance between min and |lhs|
+                // rhs is negative: negative minus negative won't overflow
+                ASSERT(rhs.mValue <= lhs.mValue - std::numeric_limits<T>::min());
+            }
+            return lhs.mValue - rhs.mValue;
+        }
+
+        template <typename T2 = T>
         constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator-() const {
             static_assert(std::is_same<T, T2>::value, "");
             // The negation of the most negative value cannot be represented.
@@ -138,57 +196,16 @@ namespace detail {
             return TypedIntegerImpl(-this->mValue);
         }
 
-        template <typename T2 = T>
-        constexpr std::enable_if_t<std::is_unsigned<T2>::value, TypedIntegerImpl> operator+(
-            TypedIntegerImpl rhs) const {
-            static_assert(std::is_same<T, T2>::value, "");
-            // Overflow would wrap around
-            ASSERT(this->mValue + rhs.mValue >= this->mValue);
-
-            return TypedIntegerImpl(this->mValue + rhs.mValue);
+        constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const {
+            auto result = AddImpl(*this, rhs);
+            static_assert(std::is_same<T, decltype(result)>::value, "Use ityp::Add instead.");
+            return TypedIntegerImpl(result);
         }
 
-        template <typename T2 = T>
-        constexpr std::enable_if_t<std::is_unsigned<T2>::value, TypedIntegerImpl> operator-(
-            TypedIntegerImpl rhs) const {
-            static_assert(std::is_same<T, T2>::value, "");
-            // Overflow would wrap around
-            ASSERT(this->mValue - rhs.mValue <= this->mValue);
-            return TypedIntegerImpl(this->mValue - rhs.mValue);
-        }
-
-        template <typename T2 = T>
-        constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator+(
-            TypedIntegerImpl rhs) const {
-            static_assert(std::is_same<T, T2>::value, "");
-            if (this->mValue > 0) {
-                // rhs is positive: |rhs| is at most the distance between max and |this|.
-                // rhs is negative: (positive + negative) won't overflow
-                ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - this->mValue);
-            } else {
-                // rhs is postive: (negative + positive) won't underflow
-                // rhs is negative: |rhs| isn't less than the (negative) distance between min
-                // and |this|
-                ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - this->mValue);
-            }
-            return TypedIntegerImpl(this->mValue + rhs.mValue);
-        }
-
-        template <typename T2 = T>
-        constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator-(
-            TypedIntegerImpl rhs) const {
-            static_assert(std::is_same<T, T2>::value, "");
-            if (this->mValue > 0) {
-                // rhs is positive: positive minus positive won't overflow
-                // rhs is negative: |rhs| isn't less than the (negative) distance between |this|
-                // and max.
-                ASSERT(rhs.mValue >= this->mValue - std::numeric_limits<T>::max());
-            } else {
-                // rhs is positive: |rhs| is at most the distance between min and |this|
-                // rhs is negative: negative minus negative won't overflow
-                ASSERT(rhs.mValue <= this->mValue - std::numeric_limits<T>::min());
-            }
-            return TypedIntegerImpl(this->mValue - rhs.mValue);
+        constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const {
+            auto result = SubImpl(*this, rhs);
+            static_assert(std::is_same<T, decltype(result)>::value, "Use ityp::Sub instead.");
+            return TypedIntegerImpl(result);
         }
     };
 
@@ -208,5 +225,38 @@ namespace std {
     };
 
 }  // namespace std
+
+namespace ityp {
+
+    // These helpers below are provided since the default arithmetic operators for small integer
+    // types like uint8_t and uint16_t return integers, not their same type. To avoid lots of
+    // casting or conditional code between Release/Debug. Callsites should use ityp::Add(a, b) and
+    // ityp::Sub(a, b) instead.
+
+    template <typename Tag, typename T>
+    constexpr ::detail::TypedIntegerImpl<Tag, T> Add(::detail::TypedIntegerImpl<Tag, T> lhs,
+                                                     ::detail::TypedIntegerImpl<Tag, T> rhs) {
+        return ::detail::TypedIntegerImpl<Tag, T>(
+            static_cast<T>(::detail::TypedIntegerImpl<Tag, T>::AddImpl(lhs, rhs)));
+    }
+
+    template <typename Tag, typename T>
+    constexpr ::detail::TypedIntegerImpl<Tag, T> Sub(::detail::TypedIntegerImpl<Tag, T> lhs,
+                                                     ::detail::TypedIntegerImpl<Tag, T> rhs) {
+        return ::detail::TypedIntegerImpl<Tag, T>(
+            static_cast<T>(::detail::TypedIntegerImpl<Tag, T>::SubImpl(lhs, rhs)));
+    }
+
+    template <typename T>
+    constexpr std::enable_if_t<std::is_integral<T>::value, T> Add(T lhs, T rhs) {
+        return static_cast<T>(lhs + rhs);
+    }
+
+    template <typename T>
+    constexpr std::enable_if_t<std::is_integral<T>::value, T> Sub(T lhs, T rhs) {
+        return static_cast<T>(lhs - rhs);
+    }
+
+}  // namespace ityp
 
 #endif  // COMMON_TYPEDINTEGER_H_

@@ -431,9 +431,9 @@ namespace dawn_native { namespace metal {
         return mMtlDepthStencilState;
     }
 
-    uint32_t RenderPipeline::GetMtlVertexBufferIndex(uint32_t dawnIndex) const {
-        ASSERT(dawnIndex < kMaxVertexBuffers);
-        return mMtlVertexBufferIndices[dawnIndex];
+    uint32_t RenderPipeline::GetMtlVertexBufferIndex(VertexBufferSlot slot) const {
+        ASSERT(slot < kMaxVertexBuffersTyped);
+        return mMtlVertexBufferIndices[slot];
     }
 
     wgpu::ShaderStage RenderPipeline::GetStagesRequiringStorageBufferLength() const {
@@ -447,8 +447,8 @@ namespace dawn_native { namespace metal {
         uint32_t mtlVertexBufferIndex =
             ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
-        for (uint32_t dawnVertexBufferSlot : IterateBitSet(GetVertexBufferSlotsUsed())) {
-            const VertexBufferInfo& info = GetVertexBuffer(dawnVertexBufferSlot);
+        for (VertexBufferSlot slot : IterateBitSet(GetVertexBufferSlotsUsed())) {
+            const VertexBufferInfo& info = GetVertexBuffer(slot);
 
             MTLVertexBufferLayoutDescriptor* layoutDesc = [MTLVertexBufferLayoutDescriptor new];
             if (info.arrayStride == 0) {
@@ -456,10 +456,10 @@ namespace dawn_native { namespace metal {
                 // but the arrayStride must NOT be 0, so we made up it with
                 // max(attrib.offset + sizeof(attrib) for each attrib)
                 size_t maxArrayStride = 0;
-                for (uint32_t attribIndex : IterateBitSet(GetAttributeLocationsUsed())) {
-                    const VertexAttributeInfo& attrib = GetAttribute(attribIndex);
+                for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+                    const VertexAttributeInfo& attrib = GetAttribute(loc);
                     // Only use the attributes that use the current input
-                    if (attrib.vertexBufferSlot != dawnVertexBufferSlot) {
+                    if (attrib.vertexBufferSlot != slot) {
                         continue;
                     }
                     maxArrayStride = std::max(
@@ -479,18 +479,18 @@ namespace dawn_native { namespace metal {
             mtlVertexDescriptor.layouts[mtlVertexBufferIndex] = layoutDesc;
             [layoutDesc release];
 
-            mMtlVertexBufferIndices[dawnVertexBufferSlot] = mtlVertexBufferIndex;
+            mMtlVertexBufferIndices[slot] = mtlVertexBufferIndex;
             mtlVertexBufferIndex++;
         }
 
-        for (uint32_t i : IterateBitSet(GetAttributeLocationsUsed())) {
-            const VertexAttributeInfo& info = GetAttribute(i);
+        for (VertexAttributeLocation loc : IterateBitSet(GetAttributeLocationsUsed())) {
+            const VertexAttributeInfo& info = GetAttribute(loc);
 
             auto attribDesc = [MTLVertexAttributeDescriptor new];
             attribDesc.format = VertexFormatType(info.format);
             attribDesc.offset = info.offset;
             attribDesc.bufferIndex = mMtlVertexBufferIndices[info.vertexBufferSlot];
-            mtlVertexDescriptor.attributes[i] = attribDesc;
+            mtlVertexDescriptor.attributes[static_cast<uint8_t>(loc)] = attribDesc;
             [attribDesc release];
         }
 

@@ -142,13 +142,10 @@ namespace dawn_native { namespace opengl {
                 mIndexBuffer = ToBackend(buffer);
             }
 
-            void OnSetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset) {
+            void OnSetVertexBuffer(VertexBufferSlot slot, BufferBase* buffer, uint64_t offset) {
                 mVertexBuffers[slot] = ToBackend(buffer);
                 mVertexBufferOffsets[slot] = offset;
-
-                // Use 64 bit masks and make sure there are no shift UB
-                static_assert(kMaxVertexBuffers <= 8 * sizeof(unsigned long long) - 1, "");
-                mDirtyVertexBuffers |= 1ull << slot;
+                mDirtyVertexBuffers.set(slot);
             }
 
             void OnSetPipeline(RenderPipelineBase* pipeline) {
@@ -168,13 +165,14 @@ namespace dawn_native { namespace opengl {
                     mIndexBufferDirty = false;
                 }
 
-                for (uint32_t slot : IterateBitSet(mDirtyVertexBuffers &
-                                                   mLastPipeline->GetVertexBufferSlotsUsed())) {
-                    for (uint32_t location :
-                         IterateBitSet(mLastPipeline->GetAttributesUsingVertexBuffer(slot))) {
+                for (VertexBufferSlot slot : IterateBitSet(
+                         mDirtyVertexBuffers & mLastPipeline->GetVertexBufferSlotsUsed())) {
+                    for (VertexAttributeLocation location : IterateBitSet(
+                             ToBackend(mLastPipeline)->GetAttributesUsingVertexBuffer(slot))) {
                         const VertexAttributeInfo& attribute =
                             mLastPipeline->GetAttribute(location);
 
+                        GLuint attribIndex = static_cast<GLuint>(static_cast<uint8_t>(location));
                         GLuint buffer = mVertexBuffers[slot]->GetHandle();
                         uint64_t offset = mVertexBufferOffsets[slot];
 
@@ -186,11 +184,11 @@ namespace dawn_native { namespace opengl {
                         gl.BindBuffer(GL_ARRAY_BUFFER, buffer);
                         if (VertexFormatIsInt(attribute.format)) {
                             gl.VertexAttribIPointer(
-                                location, components, formatType, vertexBuffer.arrayStride,
+                                attribIndex, components, formatType, vertexBuffer.arrayStride,
                                 reinterpret_cast<void*>(
                                     static_cast<intptr_t>(offset + attribute.offset)));
                         } else {
-                            gl.VertexAttribPointer(location, components, formatType, normalized,
+                            gl.VertexAttribPointer(attribIndex, components, formatType, normalized,
                                                    vertexBuffer.arrayStride,
                                                    reinterpret_cast<void*>(static_cast<intptr_t>(
                                                        offset + attribute.offset)));
@@ -205,9 +203,9 @@ namespace dawn_native { namespace opengl {
             bool mIndexBufferDirty = false;
             Buffer* mIndexBuffer = nullptr;
 
-            std::bitset<kMaxVertexBuffers> mDirtyVertexBuffers;
-            std::array<Buffer*, kMaxVertexBuffers> mVertexBuffers;
-            std::array<uint64_t, kMaxVertexBuffers> mVertexBufferOffsets;
+            ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mDirtyVertexBuffers;
+            ityp::array<VertexBufferSlot, Buffer*, kMaxVertexBuffers> mVertexBuffers;
+            ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferOffsets;
 
             RenderPipelineBase* mLastPipeline = nullptr;
         };

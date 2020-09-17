@@ -32,6 +32,8 @@ namespace dawn_native { namespace opengl {
         RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
 
         GLenum GetGLPrimitiveTopology() const;
+        ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> GetAttributesUsingVertexBuffer(
+            VertexBufferSlot slot) const;
 
         void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
@@ -42,6 +44,11 @@ namespace dawn_native { namespace opengl {
         // TODO(yunchao.he@intel.com): vao need to be deduplicated between pipelines.
         GLuint mVertexArrayObject;
         GLenum mGlPrimitiveTopology;
+
+        ityp::array<VertexBufferSlot,
+                    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>,
+                    kMaxVertexBuffers>
+            mAttributesUsingVertexBuffer;
     };
 
 }}  // namespace dawn_native::opengl

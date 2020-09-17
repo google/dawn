@@ -506,16 +506,13 @@ namespace dawn_native { namespace metal {
                 : mLengthTracker(lengthTracker) {
             }
 
-            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
+            void OnSetVertexBuffer(VertexBufferSlot slot, Buffer* buffer, uint64_t offset) {
                 mVertexBuffers[slot] = buffer->GetMTLBuffer();
                 mVertexBufferOffsets[slot] = offset;
 
                 ASSERT(buffer->GetSize() < std::numeric_limits<uint32_t>::max());
                 mVertexBufferBindingSizes[slot] = static_cast<uint32_t>(buffer->GetSize() - offset);
-
-                // Use 64 bit masks and make sure there are no shift UB
-                static_assert(kMaxVertexBuffers <= 8 * sizeof(unsigned long long) - 1, "");
-                mDirtyVertexBuffers |= 1ull << slot;
+                mDirtyVertexBuffers.set(slot);
             }
 
             void OnSetPipeline(RenderPipeline* lastPipeline, RenderPipeline* pipeline) {
@@ -528,21 +525,21 @@ namespace dawn_native { namespace metal {
             void Apply(id<MTLRenderCommandEncoder> encoder,
                        RenderPipeline* pipeline,
                        bool enableVertexPulling) {
-                std::bitset<kMaxVertexBuffers> vertexBuffersToApply =
+                const auto& vertexBuffersToApply =
                     mDirtyVertexBuffers & pipeline->GetVertexBufferSlotsUsed();
 
-                for (uint32_t dawnIndex : IterateBitSet(vertexBuffersToApply)) {
-                    uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(dawnIndex);
+                for (VertexBufferSlot slot : IterateBitSet(vertexBuffersToApply)) {
+                    uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(slot);
 
                     if (enableVertexPulling) {
                         // Insert lengths for vertex buffers bound as storage buffers
                         mLengthTracker->data[SingleShaderStage::Vertex][metalIndex] =
-                            mVertexBufferBindingSizes[dawnIndex];
+                            mVertexBufferBindingSizes[slot];
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
                     }
 
-                    [encoder setVertexBuffers:&mVertexBuffers[dawnIndex]
-                                      offsets:&mVertexBufferOffsets[dawnIndex]
+                    [encoder setVertexBuffers:&mVertexBuffers[slot]
+                                      offsets:&mVertexBufferOffsets[slot]
                                     withRange:NSMakeRange(metalIndex, 1)];
                 }
 
@@ -551,10 +548,10 @@ namespace dawn_native { namespace metal {
 
           private:
             // All the indices in these arrays are Dawn vertex buffer indices
-            std::bitset<kMaxVertexBuffers> mDirtyVertexBuffers;
-            std::array<id<MTLBuffer>, kMaxVertexBuffers> mVertexBuffers;
-            std::array<NSUInteger, kMaxVertexBuffers> mVertexBufferOffsets;
-            std::array<uint32_t, kMaxVertexBuffers> mVertexBufferBindingSizes;
+            ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mDirtyVertexBuffers;
+            ityp::array<VertexBufferSlot, id<MTLBuffer>, kMaxVertexBuffers> mVertexBuffers;
+            ityp::array<VertexBufferSlot, NSUInteger, kMaxVertexBuffers> mVertexBufferOffsets;
+            ityp::array<VertexBufferSlot, uint32_t, kMaxVertexBuffers> mVertexBufferBindingSizes;
 
             StorageBufferLengthTracker* mLengthTracker;
         };

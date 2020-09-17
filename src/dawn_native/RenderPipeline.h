@@ -15,7 +15,9 @@
 #ifndef DAWNNATIVE_RENDERPIPELINE_H_
 #define DAWNNATIVE_RENDERPIPELINE_H_
 
+#include "common/TypedInteger.h"
 #include "dawn_native/AttachmentState.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/Pipeline.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -45,8 +47,8 @@ namespace dawn_native {
     struct VertexAttributeInfo {
         wgpu::VertexFormat format;
         uint64_t offset;
-        uint32_t shaderLocation;
-        uint32_t vertexBufferSlot;
+        VertexAttributeLocation shaderLocation;
+        VertexBufferSlot vertexBufferSlot;
     };
 
     struct VertexBufferInfo {
@@ -62,10 +64,11 @@ namespace dawn_native {
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
         const VertexStateDescriptor* GetVertexStateDescriptor() const;
-        const std::bitset<kMaxVertexAttributes>& GetAttributeLocationsUsed() const;
-        const VertexAttributeInfo& GetAttribute(uint32_t location) const;
-        const std::bitset<kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
-        const VertexBufferInfo& GetVertexBuffer(uint32_t slot) const;
+        const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
+        GetAttributeLocationsUsed() const;
+        const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
+        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
+        const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
 
         const ColorStateDescriptor* GetColorStateDescriptor(
             ColorAttachmentIndex attachmentSlot) const;
@@ -84,10 +87,6 @@ namespace dawn_native {
 
         const AttachmentState* GetAttachmentState() const;
 
-        std::bitset<kMaxVertexAttributes> GetAttributesUsingVertexBuffer(uint32_t slot) const;
-        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexBuffers>
-            attributesUsingVertexBuffer;
-
         // Functors necessary for the unordered_set<RenderPipelineBase*>-based cache.
         struct HashFunc {
             size_t operator()(const RenderPipelineBase* pipeline) const;
@@ -101,10 +100,11 @@ namespace dawn_native {
 
         // Vertex state
         VertexStateDescriptor mVertexState;
-        std::bitset<kMaxVertexAttributes> mAttributeLocationsUsed;
-        std::array<VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
-        std::bitset<kMaxVertexBuffers> mVertexBufferSlotsUsed;
-        std::array<VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
+        ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> mAttributeLocationsUsed;
+        ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes>
+            mAttributeInfos;
+        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
+        ityp::array<VertexBufferSlot, VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
 
         // Attachments
         Ref<AttachmentState> mAttachmentState;
