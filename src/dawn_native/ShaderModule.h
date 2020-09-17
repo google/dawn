@@ -129,6 +129,7 @@ namespace dawn_native {
 
         enum class Type { Undefined, Spirv, Wgsl };
         Type mType;
+        std::vector<uint32_t> mOriginalSpirv;
         std::vector<uint32_t> mSpirv;
         std::string mWgsl;
 

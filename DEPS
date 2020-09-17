@@ -72,7 +72,7 @@ deps = {
 
   # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
   'third_party/SPIRV-Tools': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@fd05605bef1c63c6f249c19ed90c7ba24f8a8150',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@34ef0c3fdc8e235fd6217a64c824b6ceac93be60',
     'condition': 'dawn_standalone',
   },
   'third_party/spirv-headers': {
