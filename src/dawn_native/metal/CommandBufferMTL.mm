@@ -766,6 +766,34 @@ namespace dawn_native { namespace metal {
                     return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
                 }
 
+                case Command::InsertDebugMarker: {
+                    // MTLCommandBuffer does not implement insertDebugSignpost
+                    SkipCommand(&mCommands, type);
+                    break;
+                }
+
+                case Command::PopDebugGroup: {
+                    mCommands.NextCommand<PopDebugGroupCmd>();
+
+                    if (@available(macos 10.13, *)) {
+                        [commandContext->GetCommands() popDebugGroup];
+                    }
+                    break;
+                }
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
+                    char* label = mCommands.NextData<char>(cmd->length + 1);
+
+                    if (@available(macos 10.13, *)) {
+                        NSString* mtlLabel = [[NSString alloc] initWithUTF8String:label];
+                        [commandContext->GetCommands() pushDebugGroup:mtlLabel];
+                        [mtlLabel release];
+                    }
+
+                    break;
+                }
+
                 default: {
                     UNREACHABLE();
                     break;
