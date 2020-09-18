@@ -1174,9 +1174,8 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Timestamp query is not supported on OpenGL
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
-    // TODO(hao.x.li@intel.com): Remove it after timestamp query is implementated on Vulkan and
-    // Metal
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal());
+    // TODO(hao.x.li@intel.com): Remove it after timestamp query is implementated on Metal
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     // Skip if timestamp extension is not supported on device
     DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));

@@ -194,6 +194,9 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
+    // TODO(hao.x.li@intel.com): Failed on old Intel Vulkan driver on Windows, need investigation.
+    DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
+
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kZero = 0;
 
@@ -229,4 +232,4 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(TimestampQueryTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(TimestampQueryTests, D3D12Backend(), VulkanBackend());

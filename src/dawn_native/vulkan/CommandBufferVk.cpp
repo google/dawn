@@ -27,6 +27,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
+#include "dawn_native/vulkan/QuerySetVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
@@ -400,6 +401,26 @@ namespace dawn_native { namespace vulkan {
 
             return {};
         }
+
+        void ResetUsedQuerySets(Device* device,
+                                VkCommandBuffer commands,
+                                const std::set<QuerySetBase*>& usedQuerySets) {
+            // TODO(hao.x.li@intel.com): Reset the queries based on the used indexes.
+            for (QuerySetBase* querySet : usedQuerySets) {
+                device->fn.CmdResetQueryPool(commands, ToBackend(querySet)->GetHandle(), 0,
+                                             querySet->GetQueryCount());
+            }
+        }
+
+        void RecordWriteTimestampCmd(CommandRecordingContext* recordingContext,
+                                     Device* device,
+                                     WriteTimestampCmd* cmd) {
+            VkCommandBuffer commands = recordingContext->commandBuffer;
+            QuerySet* querySet = ToBackend(cmd->querySet.Get());
+
+            device->fn.CmdWriteTimestamp(commands, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                                         querySet->GetHandle(), cmd->queryIndex);
+        }
     }  // anonymous namespace
 
     // static
@@ -532,6 +553,9 @@ namespace dawn_native { namespace vulkan {
 
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
         size_t nextPassNumber = 0;
+
+        // QuerySet must be reset between uses.
+        ResetUsedQuerySets(device, commands, GetResourceUsages().usedQuerySets);
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -730,11 +754,27 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::ResolveQuerySet: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                    Buffer* destination = ToBackend(cmd->destination.Get());
+
+                    destination->EnsureDataInitializedAsDestination(
+                        recordingContext, cmd->destinationOffset,
+                        cmd->queryCount * sizeof(uint64_t));
+                    destination->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+
+                    device->fn.CmdCopyQueryPoolResults(
+                        commands, querySet->GetHandle(), cmd->firstQuery, cmd->queryCount,
+                        destination->GetHandle(), cmd->destinationOffset, sizeof(uint64_t),
+                        VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+                    break;
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(recordingContext, device, cmd);
+                    break;
                 }
 
                 default: {
@@ -857,7 +897,10 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(recordingContext, device, cmd);
+                    break;
                 }
 
                 default: {
@@ -1130,7 +1173,10 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+
+                    RecordWriteTimestampCmd(recordingContext, device, cmd);
+                    break;
                 }
 
                 default: {
