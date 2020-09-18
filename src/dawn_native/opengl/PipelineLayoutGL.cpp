@@ -60,12 +60,6 @@ namespace dawn_native { namespace opengl {
                         mIndexInfo[group][bindingIndex] = storageTextureIndex;
                         storageTextureIndex++;
                         break;
-
-                    case wgpu::BindingType::StorageTexture:
-                        UNREACHABLE();
-                        break;
-
-                        // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset
                 }
             }
         }

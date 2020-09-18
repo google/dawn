@@ -42,10 +42,6 @@ namespace dawn_native {
                 case wgpu::BindingType::WriteonlyStorageTexture:
                     return wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
 
-                case wgpu::BindingType::StorageTexture:
-                    UNREACHABLE();
-                    return wgpu::ShaderStage::None;
-
                 case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                 case wgpu::BindingType::Sampler:

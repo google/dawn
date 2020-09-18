@@ -74,10 +74,6 @@ namespace dawn_native {
                         usageTracker->TextureViewUsedAs(view, wgpu::TextureUsage::Storage);
                         break;
                     }
-
-                    case wgpu::BindingType::StorageTexture:
-                        UNREACHABLE();
-                        break;
                 }
             }
         }

@@ -208,9 +208,6 @@ namespace dawn_native { namespace vulkan {
                                 // Don't require barriers.
                                 break;
 
-                            case wgpu::BindingType::StorageTexture:
-                                // Not implemented.
-
                             default:
                                 UNREACHABLE();
                                 break;

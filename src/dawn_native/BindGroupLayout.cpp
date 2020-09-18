@@ -47,10 +47,6 @@ namespace dawn_native {
                 break;
             }
 
-            case wgpu::BindingType::StorageTexture: {
-                return DAWN_VALIDATION_ERROR("Read-write storage texture binding is not supported");
-            }
-
             case wgpu::BindingType::UniformBuffer:
             case wgpu::BindingType::ReadonlyStorageBuffer:
             case wgpu::BindingType::Sampler:
@@ -114,7 +110,6 @@ namespace dawn_native {
             case wgpu::BindingType::SampledTexture:
                 return {};
 
-            case wgpu::BindingType::StorageTexture:
             default:
                 UNREACHABLE();
                 return {};
@@ -158,7 +153,6 @@ namespace dawn_native {
             case wgpu::BindingType::ComparisonSampler:
                 return DAWN_VALIDATION_ERROR("Sampler bindings may not be multisampled");
 
-            case wgpu::BindingType::StorageTexture:
             default:
                 UNREACHABLE();
                 return {};
@@ -248,8 +242,6 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR("Storage textures cannot be dynamic");
                     }
                     break;
-                case wgpu::BindingType::StorageTexture:
-                    return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
                 default:
                     UNREACHABLE();
                     break;
@@ -293,7 +285,6 @@ namespace dawn_native {
                 case wgpu::BindingType::SampledTexture:
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
-                case wgpu::BindingType::StorageTexture:
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
                     return false;

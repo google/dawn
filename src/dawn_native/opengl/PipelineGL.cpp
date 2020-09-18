@@ -157,10 +157,6 @@ namespace dawn_native { namespace opengl {
                         }
                         break;
                     }
-
-                    case wgpu::BindingType::StorageTexture:
-                        UNREACHABLE();
-                        break;
                 }
             }
         }

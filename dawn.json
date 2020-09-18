@@ -118,8 +118,7 @@
             {"value": 4, "name": "comparison sampler"},
             {"value": 5, "name": "sampled texture"},
             {"value": 6, "name": "readonly storage texture"},
-            {"value": 7, "name": "writeonly storage texture"},
-            {"value": 8, "name": "storage texture"}
+            {"value": 7, "name": "writeonly storage texture"}
         ]
     },
     "blend descriptor": {

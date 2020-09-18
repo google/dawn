@@ -52,7 +52,6 @@ namespace dawn_native { namespace opengl {
                 case wgpu::BindingType::ComparisonSampler:
                     break;
 
-                case wgpu::BindingType::StorageTexture:
                 default:
                     UNREACHABLE();
                     break;

@@ -470,7 +470,6 @@ namespace dawn_native {
                     case wgpu::BindingType::ComparisonSampler:
                         break;
 
-                    case wgpu::BindingType::StorageTexture:
                     default:
                         UNREACHABLE();
                         return DAWN_VALIDATION_ERROR("Unsupported binding type");
@@ -571,14 +570,15 @@ namespace dawn_native {
                             }
                             break;
                         }
-                        case wgpu::BindingType::StorageTexture: {
+                        case wgpu::BindingType::ReadonlyStorageTexture: {
                             spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
                             if (flags.get(spv::DecorationNonReadable)) {
                                 info->type = wgpu::BindingType::WriteonlyStorageTexture;
                             } else if (flags.get(spv::DecorationNonWritable)) {
                                 info->type = wgpu::BindingType::ReadonlyStorageTexture;
                             } else {
-                                info->type = wgpu::BindingType::StorageTexture;
+                                return DAWN_VALIDATION_ERROR(
+                                    "Read-write storage textures are not supported");
                             }
 
                             spirv_cross::SPIRType::ImageType imageType =
@@ -619,8 +619,9 @@ namespace dawn_native {
             DAWN_TRY(ExtractResourcesBinding(device, resources.storage_buffers, compiler,
                                              wgpu::BindingType::StorageBuffer,
                                              &metadata->bindings));
+            // ReadonlyStorageTexture is used as a tag to do general storage texture handling.
             DAWN_TRY(ExtractResourcesBinding(device, resources.storage_images, compiler,
-                                             wgpu::BindingType::StorageTexture,
+                                             wgpu::BindingType::ReadonlyStorageTexture,
                                              &metadata->bindings));
 
             // Extract the vertex attributes

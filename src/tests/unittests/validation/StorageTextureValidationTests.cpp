@@ -234,57 +234,36 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     // Read-write storage textures cannot be declared in a vertex shader by default.
     {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             layout(set = 0, binding = 0, rgba8) uniform image2D image0;
             void main() {
                 vec4 pixel = imageLoad(image0, ivec2(gl_VertexIndex, 0));
                 imageStore(image0, ivec2(gl_VertexIndex, 0), pixel * 2);
-            })");
-
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.layout = nullptr;
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = mDefaultFSModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            })"));
     }
 
     // Read-write storage textures cannot be declared in a fragment shader by default.
     {
-        wgpu::ShaderModule fsModule =
+        ASSERT_DEVICE_ERROR(
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
             #version 450
             layout(set = 0, binding = 0, rgba8) uniform image2D image0;
             void main() {
                 vec4 pixel = imageLoad(image0, ivec2(gl_FragCoord.xy));
                 imageStore(image0, ivec2(gl_FragCoord.xy), pixel * 2);
-            })");
-
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.layout = nullptr;
-        descriptor.vertexStage.module = mDefaultVSModule;
-        descriptor.cFragmentStage.module = fsModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            })"));
     }
 
     // Read-write storage textures cannot be declared in a compute shader by default.
     {
-        wgpu::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
             layout(set = 0, binding = 0, rgba8) uniform image2D image0;
             void main() {
                 vec4 pixel = imageLoad(image0, ivec2(gl_LocalInvocationID.xy));
                 imageStore(image0, ivec2(gl_LocalInvocationID.xy), pixel * 2);
-            })");
-
-        wgpu::ComputePipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.computeStage.module = csModule;
-        descriptor.computeStage.entryPoint = "main";
-
-        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
+            })"));
     }
 }
 
@@ -296,16 +275,13 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
         wgpu::BindingType type;
         bool valid;
     };
-    constexpr std::array<TestSpec, 9> kTestSpecs = {
+    constexpr std::array<TestSpec, 6> kTestSpecs = {
         {{wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageTexture, true},
          {wgpu::ShaderStage::Vertex, wgpu::BindingType::WriteonlyStorageTexture, false},
-         {wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageTexture, false},
          {wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, true},
          {wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, true},
-         {wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageTexture, false},
          {wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, true},
-         {wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, true},
-         {wgpu::ShaderStage::Compute, wgpu::BindingType::StorageTexture, false}}};
+         {wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, true}}};
 
     for (const auto& testSpec : kTestSpecs) {
         wgpu::BindGroupLayoutEntry entry = {0, testSpec.stage, testSpec.type};

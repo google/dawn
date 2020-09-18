@@ -477,10 +477,6 @@ namespace dawn_native { namespace metal {
                             }
                             break;
                         }
-
-                        case wgpu::BindingType::StorageTexture:
-                            UNREACHABLE();
-                            break;
                     }
                 }
             }
