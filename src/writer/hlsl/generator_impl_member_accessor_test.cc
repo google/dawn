@@ -80,8 +80,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load) {
   // struct Data {
-  //   [[offset 0]] a : i32;
-  //   [[offset 4]] b : f32;
+  //   [[offset(0)]] a : i32;
+  //   [[offset(4)]] b : f32;
   // };
   // var<storage_buffer> data : Data;
   // data.b;
@@ -129,8 +129,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Int) {
   // struct Data {
-  //   [[offset 0]] a : i32;
-  //   [[offset 4]] b : f32;
+  //   [[offset(0)]] a : i32;
+  //   [[offset(4)]] b : f32;
   // };
   // var<storage_buffer> data : Data;
   // data.a;
@@ -177,8 +177,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix) {
   // struct Data {
-  //   [[offset 0]] z : f32;
-  //   [[offset 4]] a : mat2x3<f32>;
+  //   [[offset(0)]] z : f32;
+  //   [[offset(4)]] a : mat2x3<f32>;
   // };
   // var<storage_buffer> data : Data;
   // mat2x3<f32> b;
@@ -241,8 +241,8 @@ data.Store3(4 + 16, asuint(_tint_tmp[1]));
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix_Empty) {
   // struct Data {
-  //   [[offset 0]] z : f32;
-  //   [[offset 4]] a : mat2x3<f32>;
+  //   [[offset(0)]] z : f32;
+  //   [[offset(4)]] a : mat2x3<f32>;
   // };
   // var<storage_buffer> data : Data;
   // data.a = mat2x3<f32>();
@@ -303,8 +303,8 @@ data.Store3(4 + 16, asuint(_tint_tmp[1]));
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix) {
   // struct Data {
-  //   [[offset 0]] z : f32;
-  //   [[offset 4]] a : mat3x2<f32>;
+  //   [[offset(0)]] z : f32;
+  //   [[offset(4)]] a : mat3x2<f32>;
   // };
   // var<storage_buffer> data : Data;
   // data.a;
@@ -356,12 +356,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Nested) {
   // struct Data {
-  //   [[offset 0]] z : f32;
-  //   [[offset 4]] a : mat2x3<f32;
+  //   [[offset(0)]] z : f32;
+  //   [[offset(4)]] a : mat2x3<f32;
   // };
   // struct Outer {
-  //   [[offset 0]] c : f32;
-  //   [[offset 4]] b : Data;
+  //   [[offset(0)]] c : f32;
+  //   [[offset(4)]] b : Data;
   // };
   // var<storage_buffer> data : Outer;
   // data.b.a;
@@ -413,7 +413,7 @@ TEST_F(
     HlslGeneratorImplTest_MemberAccessor,
     EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_By3_Is_16_Bytes) {
   // struct Data {
-  //   [[offset 4]] a : mat3x3<f32;
+  //   [[offset(4)]] a : mat3x3<f32;
   // };
   // var<storage_buffer> data : Data;
   // data.a;
@@ -460,8 +460,8 @@ TEST_F(
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Single_Element) {
   // struct Data {
-  //   [[offset 0]] z : f32;
-  //   [[offset 16]] a : mat4x3<f32>;
+  //   [[offset(0)]] z : f32;
+  //   [[offset(16)]] a : mat4x3<f32>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[2][1];
@@ -516,7 +516,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
-  //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[2];
@@ -564,7 +564,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
-  //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[(2 + 4) - 3];
@@ -620,8 +620,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store) {
   // struct Data {
-  //   [[offset 0]] a : i32;
-  //   [[offset 4]] b : f32;
+  //   [[offset(0)]] a : i32;
+  //   [[offset(4)]] b : f32;
   // };
   // var<storage_buffer> data : Data;
   // data.b = 2.3f;
@@ -674,7 +674,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_ToArray) {
   // struct Data {
-  //   [[offset 0]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[2] = 2;
@@ -727,8 +727,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Int) {
   // struct Data {
-  //   [[offset 0]] a : i32;
-  //   [[offset 4]] b : f32;
+  //   [[offset(0)]] a : i32;
+  //   [[offset(4)]] b : f32;
   // };
   // var<storage_buffer> data : Data;
   // data.a = 2;
@@ -781,8 +781,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Vec3) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // var<storage_buffer> data : Data;
   // data.b;
@@ -833,8 +833,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Vec3) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // var<storage_buffer> data : Data;
   // data.b = vec3<f32>(2.3f, 1.2f, 0.2f);
@@ -903,8 +903,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;
@@ -976,8 +976,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;
@@ -1052,8 +1052,8 @@ TEST_F(
     HlslGeneratorImplTest_MemberAccessor,
     EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;
@@ -1127,8 +1127,8 @@ TEST_F(
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Index) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;
@@ -1203,8 +1203,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_MultiLevel) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;
@@ -1295,8 +1295,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Swizzle_SingleLetter) {
   // struct Data {
-  //   [[offset 0]] a : vec3<i32>;
-  //   [[offset 16]] b : vec3<f32>;
+  //   [[offset(0)]] a : vec3<i32>;
+  //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride 32]] array<Data, 4>;

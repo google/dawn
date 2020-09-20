@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, StructDecl_Parses) {
   auto* p = parser(R"(
 struct {
   a : i32;
-  [[offset 4 ]] b : f32;
+  [[offset(4)]] b : f32;
 })");
   auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());

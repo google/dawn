@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyBlock) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
-  auto* p = parser("[[offset 4]]");
+  auto* p = parser("[[offset(4)]]");
   auto deco = p->struct_member_decoration_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(deco.size(), 1u);
@@ -45,24 +45,24 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_HandlesDuplicate) {
-  auto* p = parser("[[offset 2, offset 4]]");
+  auto* p = parser("[[offset(2), offset(4)]]");
   auto deco = p->struct_member_decoration_decl();
   ASSERT_TRUE(p->has_error()) << p->error();
-  EXPECT_EQ(p->error(), "1:21: duplicate offset decoration found");
+  EXPECT_EQ(p->error(), "1:23: duplicate offset decoration found");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
-  auto* p = parser("[[offset nan]]");
+  auto* p = parser("[[offset(nan)]]");
   auto deco = p->struct_member_decoration_decl();
   ASSERT_TRUE(p->has_error()) << p->error();
   EXPECT_EQ(p->error(), "1:10: invalid value for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {
-  auto* p = parser("[[offset 4");
+  auto* p = parser("[[offset(4)");
   auto deco = p->struct_member_decoration_decl();
   ASSERT_TRUE(p->has_error()) << p->error();
-  EXPECT_EQ(p->error(), "1:11: missing ]] for struct member decoration");
+  EXPECT_EQ(p->error(), "1:12: missing ]] for struct member decoration");
 }
 
 }  // namespace

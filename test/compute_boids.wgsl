@@ -42,22 +42,22 @@ entry_point fragment as "frag_main" = frag_main;
 
 # compute shader
 type Particle = [[block]] struct {
-  [[offset 0]] pos : vec2<f32>;
-  [[offset 8]] vel : vec2<f32>;
+  [[offset(0)]] pos : vec2<f32>;
+  [[offset(8)]] vel : vec2<f32>;
 };
 
 type SimParams = [[block]] struct {
-  [[offset 0]] deltaT : f32;
-  [[offset 4]] rule1Distance : f32;
-  [[offset 8]] rule2Distance : f32;
-  [[offset 12]] rule3Distance : f32;
-  [[offset 16]] rule1Scale : f32;
-  [[offset 20]] rule2Scale : f32;
-  [[offset 24]] rule3Scale : f32;
+  [[offset(0)]] deltaT : f32;
+  [[offset(4)]] rule1Distance : f32;
+  [[offset(8)]] rule2Distance : f32;
+  [[offset(12)]] rule3Distance : f32;
+  [[offset(16)]] rule1Scale : f32;
+  [[offset(20)]] rule2Scale : f32;
+  [[offset(24)]] rule3Scale : f32;
 };
 
 type Particles = [[block]] struct {
-  [[offset 0]] particles : [[stride 16]] array<Particle, 5>;
+  [[offset(0)]] particles : [[stride 16]] array<Particle, 5>;
 };
 
 [[binding 0, set 0]] var<uniform> params : SimParams;

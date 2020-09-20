@@ -17,7 +17,7 @@ entry_point fragment = frag_main;
 
 # Vertex shader
 type Uniforms = [[block]] struct {
-  [[offset 0]] modelViewProjectionMatrix : mat4x4<f32>;
+  [[offset(0)]] modelViewProjectionMatrix : mat4x4<f32>;
 };
 
 [[binding 0, set 0]] var<uniform> uniforms : Uniforms;

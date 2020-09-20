@@ -62,7 +62,7 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_Struct) {
   ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
   EXPECT_EQ(g.result(), R"(type a = struct {
   a : f32;
-  [[offset 4]] b : i32;
+  [[offset(4)]] b : i32;
 };
 )");
 }

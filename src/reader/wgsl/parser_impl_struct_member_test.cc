@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto* p = parser("[[offset 2]] a : i32;");
+  auto* p = parser("[[offset(2)]] a : i32;");
   auto m = p->struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(m, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
-  auto* p = parser("[[offset nan]] a : i32;");
+  auto* p = parser("[[offset(nan)]] a : i32;");
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
@@ -61,11 +61,11 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidVariable) {
-  auto* p = parser("[[offset 4]] a : B;");
+  auto* p = parser("[[offset(4)]] a : B;");
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
-  EXPECT_EQ(p->error(), "1:18: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:19: unknown type alias 'B'");
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {

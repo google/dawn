@@ -633,7 +633,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
           // TODO(dsinclair): Split this out when we have more then one
           assert(deco->IsOffset());
 
-          out_ << "offset " << deco->AsOffset()->offset();
+          out_ << "offset(" << deco->AsOffset()->offset() << ")";
         }
         out_ << "]] ";
       }

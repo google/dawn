@@ -1641,7 +1641,7 @@ ast::StructMemberDecorationList ParserImpl::struct_member_decoration_decl() {
 }
 
 // struct_member_decoration
-//   : OFFSET INT_LITERAL
+//   : OFFSET PAREN_LEFT INT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::StructMemberDecoration>
 ParserImpl::struct_member_decoration() {
   auto t = peek();
@@ -1651,6 +1651,12 @@ ParserImpl::struct_member_decoration() {
   next();  // Consume the peek
 
   t = next();
+  if (!t.IsParenLeft()) {
+    set_error(t, "missing ( for offset");
+    return nullptr;
+  }
+
+  t = next();
   if (!t.IsSintLiteral()) {
     set_error(t, "invalid value for offset decoration");
     return nullptr;
@@ -1658,6 +1664,12 @@ ParserImpl::struct_member_decoration() {
   int32_t val = t.to_i32();
   if (val < 0) {
     set_error(t, "offset value must be >= 0");
+    return nullptr;
+  }
+
+  t = next();
+  if (!t.IsParenRight()) {
+    set_error(t, "missing ) for offset");
     return nullptr;
   }
 

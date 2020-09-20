@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
-  auto* p = parser("offset 4");
+  auto* p = parser("offset(4)");
   auto deco = p->struct_member_decoration();
   ASSERT_NE(deco, nullptr);
   ASSERT_FALSE(p->has_error());
@@ -33,16 +33,32 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   EXPECT_EQ(o->offset(), 4u);
 }
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
-  auto* p = parser("offset");
+TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
+  auto* p = parser("offset 4)");
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:7: invalid value for offset decoration");
+  EXPECT_EQ(p->error(), "1:8: missing ( for offset");
+}
+
+TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
+  auto* p = parser("offset(4");
+  auto deco = p->struct_member_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: missing ) for offset");
+}
+
+TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
+  auto* p = parser("offset()");
+  auto deco = p->struct_member_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: invalid value for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
-  auto* p = parser("offset nan");
+  auto* p = parser("offset(nan)");
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());

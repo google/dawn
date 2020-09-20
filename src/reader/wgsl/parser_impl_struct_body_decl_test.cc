@@ -47,7 +47,7 @@ TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
 TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
   auto* p = parser(R"(
 {
-  [[offset nan]] a : i32;
+  [[offset(nan)]] a : i32;
 })");
   auto m = p->struct_body_decl();
   ASSERT_TRUE(p->has_error());

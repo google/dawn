@@ -91,7 +91,8 @@ TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
 
 TEST_F(ParserImplTest, TypeDecl_Struct_WithStride) {
   auto* p = parser(
-      "type a = [[block]] struct { [[offset 0]] data: [[stride 4]] array<f32>; "
+      "type a = [[block]] struct { [[offset(0)]] data: [[stride 4]] "
+      "array<f32>; "
       "}");
   auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
