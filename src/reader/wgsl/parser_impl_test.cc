@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, Parses) {
   auto* p = parser(R"(
 import "GLSL.std.430" as glsl;
 
-[[location 0]] var<out> gl_FragColor : vec4<f32>;
+[[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
 entry_point vertex = main;
 fn main() -> void {

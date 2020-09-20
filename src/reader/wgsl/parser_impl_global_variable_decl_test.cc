@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto* p = parser("[[binding 2, set 1]] var<out> a : f32");
+  auto* p = parser("[[binding(2), set(1)]] var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -78,11 +78,11 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
-  auto* p = parser("[[binding]] var<out> a : f32");
+  auto* p = parser("[[binding()]] var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: invalid value for binding decoration");
+  EXPECT_EQ(p->error(), "1:11: invalid value for binding decoration");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {

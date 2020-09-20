@@ -37,8 +37,8 @@ namespace {
 using MslGeneratorImplTest = testing::Test;
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Input) {
-  // [[location 0]] var<in> foo : f32;
-  // [[location 1]] var<in> bar : i32;
+  // [[location(0)]] var<in> foo : f32;
+  // [[location(1)]] var<in> bar : i32;
   //
   // struct vtx_main_in {
   //   float foo [[attribute(0)]];
@@ -103,8 +103,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Input) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Output) {
-  // [[location 0]] var<out> foo : f32;
-  // [[location 1]] var<out> bar : i32;
+  // [[location(0)]] var<out> foo : f32;
+  // [[location(1)]] var<out> bar : i32;
   //
   // struct vtx_main_out {
   //   float foo [[user(locn0)]];
@@ -169,8 +169,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Output) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Input) {
-  // [[location 0]] var<in> foo : f32;
-  // [[location 1]] var<in> bar : i32;
+  // [[location(0)]] var<in> foo : f32;
+  // [[location(1)]] var<in> bar : i32;
   //
   // struct frag_main_in {
   //   float foo [[user(locn0)]];
@@ -235,8 +235,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Input) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Output) {
-  // [[location 0]] var<out> foo : f32;
-  // [[location 1]] var<out> bar : i32;
+  // [[location(0)]] var<out> foo : f32;
+  // [[location(1)]] var<out> bar : i32;
   //
   // struct frag_main_out {
   //   float foo [[color(0)]];
@@ -301,8 +301,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Output) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Input) {
-  // [[location 0]] var<in> foo : f32;
-  // [[location 1]] var<in> bar : i32;
+  // [[location(0)]] var<in> foo : f32;
+  // [[location(1)]] var<in> bar : i32;
   //
   // -> Error, not allowed
 
@@ -359,8 +359,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Input) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Output) {
-  // [[location 0]] var<out> foo : f32;
-  // [[location 1]] var<out> bar : i32;
+  // [[location(0)]] var<out> foo : f32;
+  // [[location(1)]] var<out> bar : i32;
   //
   // -> Error not allowed
 
@@ -420,8 +420,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Builtins) {
   // Output builtins go in the output struct, input builtins will be passed
   // as input parameters to the entry point function.
 
-  // [[builtin frag_coord]] var<in> coord : vec4<f32>;
-  // [[builtin frag_depth]] var<out> depth : f32;
+  // [[builtin(frag_coord)]] var<in> coord : vec4<f32>;
+  // [[builtin(frag_depth)]] var<out> depth : f32;
   //
   // struct main_out {
   //   float depth [[depth(any)]];

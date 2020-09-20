@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[[location 0]] var<out> gl_FragColor : vec4<f32>;
+[[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
 fn bar() -> void {
   return;

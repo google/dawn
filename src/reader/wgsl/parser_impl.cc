@@ -492,25 +492,43 @@ ast::VariableDecorationList ParserImpl::variable_decoration_list() {
 }
 
 // variable_decoration
-//  : LOCATION INT_LITERAL
-//  | BUILTIN IDENT
-//  | BINDING INT_LITERAL
-//  | SET INT_LITERAL
+//  : LOCATION PAREN_LEFT INT_LITERAL PAREN_RIGHT
+//  | BUILTIN PAREN_LEFT IDENT PAREN_RIGHT
+//  | BINDING PAREN_LEFT INT_LITERAL PAREN_RIGHT
+//  | SET INT PAREN_LEFT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   auto t = peek();
   if (t.IsLocation()) {
     next();  // consume the peek
 
     t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for location decoration");
+      return {};
+    }
+
+    t = next();
     if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for location decoration");
       return {};
     }
+    int32_t val = t.to_i32();
 
-    return std::make_unique<ast::LocationDecoration>(t.to_i32());
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for location decoration");
+      return {};
+    }
+    return std::make_unique<ast::LocationDecoration>(val);
   }
   if (t.IsBuiltin()) {
     next();  // consume the peek
+
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for builtin decoration");
+      return {};
+    }
 
     t = next();
     if (!t.IsIdentifier() || t.to_str().empty()) {
@@ -524,29 +542,60 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       return {};
     }
 
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for builtin decoration");
+      return {};
+    }
     return std::make_unique<ast::BuiltinDecoration>(builtin);
   }
   if (t.IsBinding()) {
     next();  // consume the peek
 
     t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for binding decoration");
+      return {};
+    }
+
+    t = next();
     if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for binding decoration");
       return {};
     }
+    int32_t val = t.to_i32();
 
-    return std::make_unique<ast::BindingDecoration>(t.to_i32());
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for binding decoration");
+      return {};
+    }
+
+    return std::make_unique<ast::BindingDecoration>(val);
   }
   if (t.IsSet()) {
     next();  // consume the peek
+
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for set decoration");
+      return {};
+    }
 
     t = next();
     if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for set decoration");
       return {};
     }
+    uint32_t val = t.to_i32();
 
-    return std::make_unique<ast::SetDecoration>(t.to_i32());
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for set decoration");
+      return {};
+    }
+
+    return std::make_unique<ast::SetDecoration>(val);
   }
 
   return nullptr;

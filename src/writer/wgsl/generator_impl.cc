@@ -791,13 +791,13 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
     first = false;
 
     if (deco->IsBinding()) {
-      out_ << "binding " << deco->AsBinding()->value();
+      out_ << "binding(" << deco->AsBinding()->value() << ")";
     } else if (deco->IsSet()) {
-      out_ << "set " << deco->AsSet()->value();
+      out_ << "set(" << deco->AsSet()->value() << ")";
     } else if (deco->IsLocation()) {
-      out_ << "location " << deco->AsLocation()->value();
+      out_ << "location(" << deco->AsLocation()->value() << ")";
     } else if (deco->IsBuiltin()) {
-      out_ << "builtin " << deco->AsBuiltin()->value();
+      out_ << "builtin(" << deco->AsBuiltin()->value() << ")";
     } else {
       error_ = "unknown variable decoration";
       return false;

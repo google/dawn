@@ -20,12 +20,12 @@ type Uniforms = [[block]] struct {
   [[offset(0)]] modelViewProjectionMatrix : mat4x4<f32>;
 };
 
-[[binding 0, set 0]] var<uniform> uniforms : Uniforms;
+[[binding(0), set(0)]] var<uniform> uniforms : Uniforms;
 
-[[location 0]] var<in> cur_position : vec4<f32>;
-[[location 1]] var<in> color : vec4<f32>;
-[[location 0]] var<out> vtxFragColor : vec4<f32>;
-[[builtin position]] var<out> Position : vec4<f32>;
+[[location(0)]] var<in> cur_position : vec4<f32>;
+[[location(1)]] var<in> color : vec4<f32>;
+[[location(0)]] var<out> vtxFragColor : vec4<f32>;
+[[builtin(position)]] var<out> Position : vec4<f32>;
 
 fn vtx_main() -> void {
    Position = uniforms.modelViewProjectionMatrix * cur_position;
@@ -34,8 +34,8 @@ fn vtx_main() -> void {
 }
 
 # Fragment shader
-[[location 0]] var<in> fragColor : vec4<f32>;
-[[location 0]] var<out> outColor : vec4<f32>;
+[[location(0)]] var<in> fragColor : vec4<f32>;
+[[location(0)]] var<out> outColor : vec4<f32>;
 
 fn frag_main() -> void {
   outColor = fragColor;

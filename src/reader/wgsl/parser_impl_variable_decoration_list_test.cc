@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
-  auto* p = parser(R"([[location 4, builtin position]])");
+  auto* p = parser(R"([[location(4), builtin(position)]])");
   auto decos = p->variable_decoration_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(decos.size(), 2u);
@@ -49,28 +49,28 @@ TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {
-  auto* p = parser(R"([[builtin position, ]])");
+  auto* p = parser(R"([[builtin(position), ]])");
   auto decos = p->variable_decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:21: missing variable decoration after comma");
+  ASSERT_EQ(p->error(), "1:22: missing variable decoration after comma");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_MissingComma) {
-  auto* p = parser(R"([[binding 4 location 5]])");
+  auto* p = parser(R"([[binding(4) location(5)]])");
   auto decos = p->variable_decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:13: missing comma in variable decoration list");
+  ASSERT_EQ(p->error(), "1:14: missing comma in variable decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
-  auto* p = parser(R"([[location bad]])");
+  auto* p = parser(R"([[location(bad)]])");
   auto decos = p->variable_decoration_list();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:12: invalid value for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
-  auto* p = parser("[[builtin invalid]]");
+  auto* p = parser("[[builtin(invalid)]]");
   auto decos = p->variable_decoration_list();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:11: invalid value for builtin decoration");

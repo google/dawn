@@ -64,7 +64,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitVariable(&dv)) << g.error();
-  EXPECT_EQ(g.result(), R"([[location 2]] var a : f32;
+  EXPECT_EQ(g.result(), R"([[location(2)]] var a : f32;
 )");
 }
 
@@ -85,8 +85,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitVariable(&dv)) << g.error();
-  EXPECT_EQ(g.result(),
-            R"([[builtin position, binding 0, set 1, location 2]] var a : f32;
+  EXPECT_EQ(
+      g.result(),
+      R"([[builtin(position), binding(0), set(1), location(2)]] var a : f32;
 )");
 }
 
