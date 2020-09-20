@@ -1334,7 +1334,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t, uint32_t stride) {
 // array_decoration_list
 //   : ATTR_LEFT (array_decoration COMMA)* array_decoration ATTR_RIGHT
 // array_decoration
-//   : STRIDE INT_LITERAL
+//   : STRIDE PAREN_LEFT INT_LITERAL PAREN_RIGHT
 //
 // As there is currently only one decoration I'm combining these for now.
 // we can split apart later if needed.
@@ -1352,6 +1352,12 @@ uint32_t ParserImpl::array_decoration_list() {
   next();  // consume the peek of stride
 
   t = next();
+  if (!t.IsParenLeft()) {
+    set_error(t, "missing ( for stride attribute");
+    return 0;
+  }
+
+  t = next();
   if (!t.IsSintLiteral()) {
     set_error(t, "missing value for stride decoration");
     return 0;
@@ -1360,8 +1366,14 @@ uint32_t ParserImpl::array_decoration_list() {
     set_error(t, "invalid stride value: " + t.to_str());
     return 0;
   }
-
   uint32_t stride = static_cast<uint32_t>(t.to_i32());
+
+  t = next();
+  if (!t.IsParenRight()) {
+    set_error(t, "missing ) for stride attribute");
+    return 0;
+  }
+
   t = next();
   if (!t.IsAttrRight()) {
     set_error(t, "missing ]] for array decoration");

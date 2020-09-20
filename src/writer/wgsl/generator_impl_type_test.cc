@@ -67,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_WithStride) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&a)) << g.error();
-  EXPECT_EQ(g.result(), "[[stride 16]] array<bool, 4>");
+  EXPECT_EQ(g.result(), "[[stride(16)]] array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {

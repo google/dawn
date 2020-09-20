@@ -516,7 +516,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[2];
@@ -564,7 +564,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[(2 + 4) - 3];
@@ -674,7 +674,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_ToArray) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride 4]] array<i32, 5>;
+  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage_buffer> data : Data;
   // data.a[2] = 2;
@@ -907,7 +907,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;
@@ -980,7 +980,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;
@@ -1056,7 +1056,7 @@ TEST_F(
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;
@@ -1131,7 +1131,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;
@@ -1207,7 +1207,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;
@@ -1299,7 +1299,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(16)]] b : vec3<f32>;
   // };
   // struct Pre {
-  //   var c : [[stride 32]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
   // var<storage_buffer> data : Pre;

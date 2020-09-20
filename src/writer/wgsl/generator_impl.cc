@@ -572,7 +572,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     auto* ary = type->AsArray();
 
     if (ary->has_array_stride()) {
-      out_ << "[[stride " << ary->array_stride() << "]] ";
+      out_ << "[[stride(" << ary->array_stride() << ")]] ";
     }
 
     out_ << "array<";
