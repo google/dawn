@@ -86,6 +86,8 @@ set(TINT_LIB_SRCS
   ast/float_literal.h
   ast/function.cc
   ast/function.h
+  ast/function_decoration.cc
+  ast/function_decoration.h
   ast/identifier_expression.cc
   ast/identifier_expression.h
   ast/if_statement.cc

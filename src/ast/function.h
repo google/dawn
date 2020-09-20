@@ -25,6 +25,7 @@
 #include "src/ast/block_statement.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/expression.h"
+#include "src/ast/function_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/node.h"
 #include "src/ast/set_decoration.h"
@@ -80,6 +81,14 @@ class Function : public Node {
   void set_params(VariableList params) { params_ = std::move(params); }
   /// @returns the function params
   const VariableList& params() const { return params_; }
+
+  /// Adds a decoration to the function
+  /// @param deco the decoration to set
+  void add_decoration(std::unique_ptr<FunctionDecoration> deco) {
+    decorations_.push_back(std::move(deco));
+  }
+  /// @returns the decorations attached to this function
+  const FunctionDecorationList& decorations() const { return decorations_; }
 
   /// Adds the given variable to the list of referenced module variables if it
   /// is not already included.
@@ -157,6 +166,7 @@ class Function : public Node {
   std::unique_ptr<BlockStatement> body_;
   std::vector<Variable*> referenced_module_vars_;
   std::vector<std::string> ancestor_entry_points_;
+  FunctionDecorationList decorations_;
 };
 
 /// A list of unique functions

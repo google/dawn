@@ -24,6 +24,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
+// #include "src/ast/workgroup_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -296,6 +297,28 @@ TEST_F(FunctionTest, ToStr) {
   }
 )");
 }
+
+// TEST_F(FunctionTest, ToStr_WithDecoration) {
+//   type::VoidType void_type;
+//   type::I32Type i32;
+
+//   auto block = std::make_unique<ast::BlockStatement>();
+//   block->append(std::make_unique<DiscardStatement>());
+
+//   Function f("func", {}, &void_type);
+//   f.set_body(std::move(block));
+//   f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6));
+
+//   std::ostringstream out;
+//   f.to_str(out, 2);
+//   EXPECT_EQ(out.str(), R"(  Function func -> __void
+//   workgroup_size 2 4 6
+//   ()
+//   {
+//     Discard{}
+//   }
+// )");
+// }
 
 TEST_F(FunctionTest, ToStr_WithParams) {
   type::VoidType void_type;

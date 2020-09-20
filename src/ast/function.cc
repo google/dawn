@@ -191,6 +191,11 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   out << "Function " << name_ << " -> " << return_type_->type_name()
       << std::endl;
 
+  for (const auto& deco : decorations()) {
+    make_indent(out, indent);
+    deco->to_str(out);
+  }
+
   make_indent(out, indent);
   out << "(";
 

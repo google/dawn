@@ -265,6 +265,8 @@ source_set("libtint_core_src") {
     "src/ast/float_literal.h",
     "src/ast/function.cc",
     "src/ast/function.h",
+    "src/ast/function_decoration.cc",
+    "src/ast/function_decoration.h",
     "src/ast/identifier_expression.cc",
     "src/ast/identifier_expression.h",
     "src/ast/if_statement.cc",
