@@ -49,11 +49,7 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!CheckImports(module)) {
     return false;
   }
-  if (!ValidateFunctions(module->functions())) {
-    return false;
-  }
-  // ValidateEntryPoints must be done after populating function_stack_
-  if (!ValidateEntryPoints(module->entry_points())) {
+  if (!ValidateFunctions(module, module->functions())) {
     return false;
   }
 
@@ -86,71 +82,66 @@ bool ValidatorImpl::ValidateGlobalVariables(
   return true;
 }
 
-bool ValidatorImpl::ValidateEntryPoints(const ast::EntryPointList& eps) {
+bool ValidatorImpl::ValidateFunctions(const ast::Module* mod,
+                                      const ast::FunctionList& funcs) {
   ScopeStack<ast::PipelineStage> entry_point_map;
   entry_point_map.push_scope();
-  for (const auto& ep : eps) {
-    auto* ep_ptr = ep.get();
-    ast::Function* func = nullptr;
-    if (!function_stack_.get(ep_ptr->function_name(), &func)) {
-      set_error(ep_ptr->source(),
-                "v-0019: Function used in entry point does not exist: '" +
-                    ep_ptr->function_name() + "'");
+
+  size_t pipeline_count = 0;
+  for (const auto& func : funcs) {
+    // The entry points will be checked later to see if their duplicated
+    if (function_stack_.has(func->name()) &&
+        !entry_point_map.has(func->name())) {
+      set_error(func->source(),
+                "v-0016: function names must be unique '" + func->name() + "'");
       return false;
     }
 
-    if (!func->return_type()->IsVoid()) {
-      set_error(ep_ptr->source(),
-                "v-0024: Entry point function must return void: '" +
-                    ep_ptr->function_name() + "'");
-      return false;
-    }
+    if (func->pipeline_stage() != ast::PipelineStage::kNone) {
+      pipeline_count++;
 
-    if (func->params().size() != 0) {
-      set_error(ep_ptr->source(),
-                "v-0023: Entry point function must accept no parameters: '" +
-                    ep_ptr->function_name() + "'");
-      return false;
-    }
-
-    ast::PipelineStage pipeline_stage;
-    if (entry_point_map.get(ep_ptr->name(), &pipeline_stage)) {
-      if (pipeline_stage == ep_ptr->stage()) {
-        set_error(ep_ptr->source(),
-                  "v-0020: The pair of <entry point name, pipeline stage> must "
-                  "be unique");
+      if (!func->return_type()->IsVoid()) {
+        set_error(func->source(),
+                  "v-0024: Entry point function must return void: '" +
+                      func->name() + "'");
         return false;
       }
+
+      if (func->params().size() != 0) {
+        set_error(func->source(),
+                  "v-0023: Entry point function must accept no parameters: '" +
+                      func->name() + "'");
+        return false;
+      }
+
+      ast::PipelineStage pipeline_stage;
+      if (entry_point_map.get(func->name(), &pipeline_stage)) {
+        if (pipeline_stage == func->pipeline_stage()) {
+          set_error(
+              func->source(),
+              "v-0020: The pair of <entry point name, pipeline stage> must "
+              "be unique");
+          return false;
+        }
+      }
+      entry_point_map.set(func->name(), func->pipeline_stage());
     }
-    entry_point_map.set(ep_ptr->name(), ep_ptr->stage());
+
+    function_stack_.set(func->name(), func.get());
+    current_function_ = func.get();
+    if (!ValidateFunction(func.get())) {
+      return false;
+    }
+    current_function_ = nullptr;
   }
 
-  if (eps.empty()) {
+  if (pipeline_count == 0 && mod->entry_points().empty()) {
     set_error(Source{0, 0},
               "v-0003: At least one of vertex, fragment or compute shader must "
               "be present");
     return false;
   }
-  entry_point_map.pop_scope();
-  return true;
-}
 
-bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
-  for (const auto& func : funcs) {
-    auto* func_ptr = func.get();
-    if (function_stack_.has(func_ptr->name())) {
-      set_error(func_ptr->source(), "v-0016: function names must be unique '" +
-                                        func_ptr->name() + "'");
-      return false;
-    }
-
-    function_stack_.set(func_ptr->name(), func_ptr);
-    current_function_ = func_ptr;
-    if (!ValidateFunction(func_ptr)) {
-      return false;
-    }
-    current_function_ = nullptr;
-  }
   return true;
 }
 

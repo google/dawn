@@ -34,9 +34,11 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
@@ -263,10 +265,8 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   auto global_var = std::make_unique<ast::Variable>(
       Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
   mod()->AddGlobalVariable(std::move(global_var));
-  AddFakeEntryPoint();
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
+      << v()->error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
@@ -341,11 +341,13 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   // var global_var: f32 = 2.1;
-  // fn my_func() -> f32 {
+  // fn my_func() -> void {
   //   global_var = 3.14;
-  //   return 3.14;
+  //   return;
   // }
   ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
   auto global_var = std::make_unique<ast::Variable>(
       "global_var", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(
@@ -354,30 +356,23 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   mod()->AddGlobalVariable(std::move(global_var));
 
   auto lhs = std::make_unique<ast::IdentifierExpression>("global_var");
-  auto* lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
-  auto* rhs_ptr = rhs.get();
-  auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
 
   ast::VariableList params;
   auto func =
-      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+      std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
       Source{12, 34}, std::move(lhs), std::move(rhs)));
-  body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
+  body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  auto* func_ptr = func.get();
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
-  AddFakeEntryPoint();
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
@@ -467,9 +462,31 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
-  AddFakeEntryPoint();
 
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
+      << v()->error();
+}
+
+TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
+  // var global_var : f32 = 0.1;
+  // var global_var : i32 = 0;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  auto var0 = std::make_unique<ast::Variable>(
+      "global_var", ast::StorageClass::kPrivate, &f32);
+  var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.1)));
+  mod()->AddGlobalVariable(std::move(var0));
+
+  auto var1 = std::make_unique<ast::Variable>(
+      Source{12, 34}, "global_var", ast::StorageClass::kPrivate, &f32);
+  var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 0)));
+  mod()->AddGlobalVariable(std::move(var1));
+
+  EXPECT_FALSE(v()->ValidateGlobalVariables(mod()->global_variables()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0011: redeclared global identifier 'global_var'");
 }
 
 TEST_F(ValidatorTest, AssignToConstant_Fail) {
@@ -501,28 +518,6 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
 
   EXPECT_FALSE(v()->ValidateStatements(body.get()));
   EXPECT_EQ(v()->error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
-}
-
-TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
-  // var global_var : f32 = 0.1;
-  // var global_var : i32 = 0;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  auto var0 = std::make_unique<ast::Variable>(
-      "global_var", ast::StorageClass::kPrivate, &f32);
-  var0->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 0.1)));
-  mod()->AddGlobalVariable(std::move(var0));
-
-  auto var1 = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kPrivate, &f32);
-  var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 0)));
-  mod()->AddGlobalVariable(std::move(var1));
-
-  EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0011: redeclared global identifier 'global_var'");
 }
 
 TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
@@ -699,10 +694,11 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
                                                              std::move(var1)));
   body1->append(std::make_unique<ast::ReturnStatement>());
   func1->set_body(std::move(body1));
+  func1->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
 
   mod()->AddFunction(std::move(func0));
   mod()->AddFunction(std::move(func1));
-  AddFakeEntryPoint();
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();

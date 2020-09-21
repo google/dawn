@@ -379,14 +379,12 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
 }
 
 TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
-  // entry_point vertex = main
   // type MyInt = u32;
-  // fn main()->void {
-  //   var v: MyInt;
-  //   switch(v){
-  //     default: {}
-  //   }
+  // var v: MyInt;
+  // switch(v){
+  //   default: {}
   // }
+
   ast::type::U32Type u32;
   ast::type::AliasType my_int{"MyInt", &u32};
 
@@ -406,21 +404,11 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   block->append(
       std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
-  block->append(std::make_unique<ast::ReturnStatement>());
 
-  ast::type::VoidType void_type;
-  ast::VariableList params;
-  auto func =
-      std::make_unique<ast::Function>("main", std::move(params), &void_type);
-  func->set_body(std::move(block));
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "", "main");
-  mod()->AddFunction(std::move(func));
   mod()->AddAliasType(&my_int);
-  mod()->AddEntryPoint(std::move(entry_point));
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
+  EXPECT_TRUE(v()->ValidateStatements(block.get())) << v()->error();
 }
 
 }  // namespace

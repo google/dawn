@@ -18,9 +18,11 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/entry_point.h"
+#include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
@@ -74,19 +76,23 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
+  // [[stage(vertex)]]
   // fn func -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
+
   auto func =
       std::make_unique<ast::Function>("func", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
-  AddFakeEntryPoint();
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_TRUE(td()->DetermineFunctions(mod()->functions())) << td()->error();
+  EXPECT_TRUE(v()->ValidateFunctions(mod(), mod()->functions()))
+      << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
@@ -220,93 +226,46 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   EXPECT_EQ(v()->error(), "12:34: v-0004: recursion is not allowed: 'func'");
 }
 
-TEST_F(ValidateFunctionTest, EntryPointFunctionMissing_Fail) {
-  // entry_point vertex as "main" = vtx_main
-  // fn frag_main() -> void { return; }
-  ast::type::VoidType void_type;
-  ast::VariableList params;
-  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
-                                              &void_type);
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kVertex, "main", "frag_main");
-
-  mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0019: Function used in entry point does not exist: "
-            "'frag_main'");
-}
-
-TEST_F(ValidateFunctionTest, EntryPointFunctionExist_Pass) {
-  // entry_point vertex as "main" = vtx_main
-  // fn vtx_main() -> void { return; }
-  ast::type::VoidType void_type;
-  ast::VariableList params;
-  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
-                                              &void_type);
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "main", "vtx_main");
-
-  mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
-}
-
-TEST_F(ValidateFunctionTest, EntryPointFunctionNotVoid_Fail) {
-  // entry_point vertex as "main" = vtx_main
+TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
+  // [[stage(vertex)]]
   // fn vtx_main() -> i32 { return 0; }
   ast::type::I32Type i32;
   ast::VariableList params;
-  auto func =
-      std::make_unique<ast::Function>("vtx_main", std::move(params), &i32);
+  auto func = std::make_unique<ast::Function>(Source{12, 34}, "vtx_main",
+                                              std::move(params), &i32);
   auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
   func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kVertex, "main", "vtx_main");
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
 
   mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
             "12:34: v-0024: Entry point function must return void: 'vtx_main'");
 }
 
-TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
-  // entry_point vertex as "func" = vtx_func
+TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
+  // [[stage(vertex)]]
   // fn vtx_func(a : i32) -> void { return; }
   ast::type::I32Type i32;
   ast::type::VoidType void_type;
   ast::VariableList params;
   params.push_back(
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32));
-  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
-                                              &void_type);
+  auto func = std::make_unique<ast::Function>(Source{12, 34}, "vtx_func",
+                                              std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kVertex, "func", "vtx_func");
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
 
   mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
@@ -314,26 +273,31 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionWithParams_Fail) {
             "'vtx_func'");
 }
 
-TEST_F(ValidateFunctionTest, EntryPointFunctionPairMustBeUniqueDuplicate_Fail) {
-  // entry_point vertex  = vtx_main
-  // entry_point vertex  = vtx_main
-  // fn vtx_main() -> void { return; }
+TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
+  // [[stage(vertex)]]
+  // fn main() -> void { return ;}
+  // [[stage(vertex)]]
+  // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>("vtx_main", std::move(params),
-                                              &void_type);
+  auto func = std::make_unique<ast::Function>(Source{5, 6}, "main",
+                                              std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "", "vtx_main");
-  auto entry_point_copy = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kVertex, "", "vtx_main");
-
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
-  mod()->AddEntryPoint(std::move(entry_point_copy));
+
+  func = std::make_unique<ast::Function>(Source{12, 34}, "main",
+                                         std::move(params), &void_type);
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(func));
+
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
@@ -341,46 +305,37 @@ TEST_F(ValidateFunctionTest, EntryPointFunctionPairMustBeUniqueDuplicate_Fail) {
             "must be unique");
 }
 
-TEST_F(ValidateFunctionTest, EntryPointFunctionPairMustBeUniqueTowVertex_Fail) {
-  // entry_point vertex as "main" = vtx_func1
-  // entry_point vertex as "main" = vtx_func0
-  // fn vtx_func1() -> void { return; }
-  // fn vtx_func0() -> void { return; }
+TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
+  // [[stage(vertex)]]
+  // fn main() -> void { return; }
+  // [[stage(fragment)]]
+  // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>("vtx_func0", std::move(params),
-                                              &void_type);
+  auto func = std::make_unique<ast::Function>(Source{5, 6}, "main",
+                                              std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-
-  ast::VariableList params1;
-  auto func1 = std::make_unique<ast::Function>("vtx_func1", std::move(params1),
-                                               &void_type);
-  auto body1 = std::make_unique<ast::BlockStatement>();
-  body1->append(std::make_unique<ast::ReturnStatement>());
-  func1->set_body(std::move(body1));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "main", "vtx_func0");
-  auto entry_point1 = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kVertex, "main", "vtx_func1");
-
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
-  mod()->AddFunction(std::move(func1));
-  mod()->AddEntryPoint(std::move(entry_point));
-  mod()->AddEntryPoint(std::move(entry_point1));
+
+  func = std::make_unique<ast::Function>(Source{12, 34}, "main",
+                                         std::move(params), &void_type);
+  body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  mod()->AddFunction(std::move(func));
+
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0020: The pair of <entry point name, pipeline stage> "
-            "must be unique");
+  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
-TEST_F(ValidateFunctionTest,
-       EntryPointFunctionPairMustBeUniqueSameFuncDiffStage_Pass) {
-  // entry_point vertex as "main" = vtx_func
-  // entry_point fragment as "main" = vtx_func
+TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
+  // [[stage(vertex)]]
   // fn vtx_func() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
@@ -389,42 +344,15 @@ TEST_F(ValidateFunctionTest,
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "main", "vtx_func");
-  auto entry_point1 = std::make_unique<ast::EntryPoint>(
-      Source{12, 34}, ast::PipelineStage::kFragment, "main", "vtx_func");
-
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
-  mod()->AddEntryPoint(std::move(entry_point1));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
-}
-
-TEST_F(ValidateFunctionTest,
-       AtLeastOneOfVertexFragmentComputeShaderMustBePeresent_Pass) {
-  // entry_point vertex as "main" = vtx_func
-  // fn vtx_func() -> void { return; }
-  ast::type::VoidType void_type;
-  ast::VariableList params;
-  auto func = std::make_unique<ast::Function>("vtx_func", std::move(params),
-                                              &void_type);
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
-
-  auto entry_point = std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kVertex, "main", "vtx_func");
-  mod()->AddFunction(std::move(func));
-  mod()->AddEntryPoint(std::move(entry_point));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
 }
 
-TEST_F(ValidateFunctionTest,
-       AtLeastOneOfVertexFragmentComputeShaderMustBePeresent_Fail) {
+TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   // fn vtx_func() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;

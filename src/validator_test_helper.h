@@ -37,8 +37,6 @@ class ValidatorTestHelper {
   /// A handle to the created module
   /// @return a pointer to the test module
   ast::Module* mod() { return &mod_; }
-  /// Creates a function and add an entry point to it
-  void AddFakeEntryPoint();
 
  private:
   std::unique_ptr<ValidatorImpl> v_;

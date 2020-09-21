@@ -58,9 +58,11 @@ class ValidatorImpl {
   /// @returns true if the validation was successful
   bool ValidateGlobalVariables(const ast::VariableList& global_vars);
   /// Validates Functions
+  /// @param mod the module
   /// @param funcs the functions to check
   /// @returns true if the validation was successful
-  bool ValidateFunctions(const ast::FunctionList& funcs);
+  bool ValidateFunctions(const ast::Module* mod,
+                         const ast::FunctionList& funcs);
   /// Validates a function
   /// @param func the function to check
   /// @returns true if the validation was successful

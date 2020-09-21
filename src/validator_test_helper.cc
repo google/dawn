@@ -24,22 +24,4 @@ ValidatorTestHelper::ValidatorTestHelper() {
 
 ValidatorTestHelper::~ValidatorTestHelper() = default;
 
-void ValidatorTestHelper::AddFakeEntryPoint() {
-  // entry_point vertex as "fake_entry_point" = fake_func
-  // fn fake_func() -> void {}
-  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kVertex,
-                                              "fake_entry_point", "fake_func");
-  ast::VariableList fake_params;
-  auto fake_func = std::make_unique<ast::Function>(
-      "fake_func", std::move(fake_params),
-      ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
-  auto fake_body = std::make_unique<ast::BlockStatement>();
-  auto return_stmt = std::make_unique<ast::ReturnStatement>();
-  fake_body->append(std::move(return_stmt));
-  fake_func->set_body(std::move(fake_body));
-  mod()->AddFunction(std::move(fake_func));
-  mod()->AddEntryPoint(std::move(ep));
-  return;
-}
-
 }  // namespace tint
