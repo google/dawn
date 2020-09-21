@@ -44,6 +44,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -433,6 +434,9 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
       std::tie(x, y, z) = deco->AsWorkgroup()->values();
       out_ << "workgroup_size(" << std::to_string(x) << ", "
            << std::to_string(y) << ", " << std::to_string(z) << ")";
+    }
+    if (deco->IsStage()) {
+      out_ << "stage(" << deco->AsStage()->value() << ")";
     }
     out_ << "]]" << std::endl;
   }

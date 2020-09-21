@@ -15,7 +15,9 @@
 #include "gtest/gtest.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/function.h"
+#include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
@@ -78,7 +80,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecorations) {
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::DiscardStatement>());
   body->append(std::make_unique<ast::ReturnStatement>());
@@ -93,6 +95,54 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecorations) {
 
   ASSERT_TRUE(g.EmitFunction(&func));
   EXPECT_EQ(g.result(), R"(  [[workgroup_size(2, 4, 6)]]
+  fn my_func() -> void {
+    discard;
+    return;
+  }
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
+
+  ast::type::VoidType void_type;
+  ast::Function func("my_func", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func.set_body(std::move(body));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitFunction(&func));
+  EXPECT_EQ(g.result(), R"(  [[stage(fragment)]]
+  fn my_func() -> void {
+    discard;
+    return;
+  }
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
+
+  ast::type::VoidType void_type;
+  ast::Function func("my_func", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+  func.set_body(std::move(body));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitFunction(&func));
+  EXPECT_EQ(g.result(), R"(  [[stage(fragment)]]
+  [[workgroup_size(2, 4, 6)]]
   fn my_func() -> void {
     discard;
     return;
