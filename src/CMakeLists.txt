@@ -431,6 +431,8 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_exclusive_or_expression_test.cc
     reader/wgsl/parser_impl_for_stmt_test.cc
     reader/wgsl/parser_impl_function_decl_test.cc
+    reader/wgsl/parser_impl_function_decoration_list_test.cc
+    reader/wgsl/parser_impl_function_decoration_test.cc
     reader/wgsl/parser_impl_function_header_test.cc
     reader/wgsl/parser_impl_function_type_decl_test.cc
     reader/wgsl/parser_impl_global_constant_decl_test.cc

@@ -82,6 +82,12 @@ class Function : public Node {
   /// @returns the function params
   const VariableList& params() const { return params_; }
 
+  /// Sets the function decorations
+  /// @param decos the decorations to set. This will overwrite any existing
+  /// decorations
+  void set_decorations(ast::FunctionDecorationList decos) {
+    decorations_ = std::move(decos);
+  }
   /// Adds a decoration to the function
   /// @param deco the decoration to set
   void add_decoration(std::unique_ptr<FunctionDecoration> deco) {

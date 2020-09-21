@@ -88,7 +88,6 @@ INSTANTIATE_TEST_SUITE_P(
         HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFacing"},
         HlslBuiltinData{ast::Builtin::kFragCoord, "SV_Position"},
         HlslBuiltinData{ast::Builtin::kFragDepth, "SV_Depth"},
-        HlslBuiltinData{ast::Builtin::kWorkgroupSize, ""},
         HlslBuiltinData{ast::Builtin::kLocalInvocationId, "SV_GroupThreadID"},
         HlslBuiltinData{ast::Builtin::kLocalInvocationIdx, "SV_GroupIndex"},
         HlslBuiltinData{ast::Builtin::kGlobalInvocationId,

@@ -349,6 +349,8 @@ std::string Token::TypeToName(Type type) {
       return "void";
     case Token::Type::kWorkgroup:
       return "workgroup";
+    case Token::Type::kWorkgroupSize:
+      return "workgroup_size";
   }
 
   return "<unknown>";

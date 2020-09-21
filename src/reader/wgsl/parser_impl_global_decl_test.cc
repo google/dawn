@@ -166,6 +166,16 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
   EXPECT_EQ(m.functions()[0]->name(), "main");
 }
 
+TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
+  auto* p = parser("[[workgroup_size(2)]] fn main() -> void { return; }");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto m = p->module();
+  ASSERT_EQ(m.functions().size(), 1u);
+  EXPECT_EQ(m.functions()[0]->name(), "main");
+}
+
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
   auto* p = parser("fn main() -> { return; }");
   p->global_decl();

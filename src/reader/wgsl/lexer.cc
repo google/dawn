@@ -729,7 +729,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kVoid, source, "void"};
   if (str == "workgroup")
     return {Token::Type::kWorkgroup, source, "workgroup"};
-
+  if (str == "workgroup_size")
+    return {Token::Type::kWorkgroupSize, source, "workgroup_size"};
   return {};
 }
 

@@ -215,8 +215,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{SpvBuiltInFrontFacing, true, ast::Builtin::kFrontFacing},
         BuiltinCase{SpvBuiltInFragCoord, true, ast::Builtin::kFragCoord},
         BuiltinCase{SpvBuiltInFragDepth, true, ast::Builtin::kFragDepth},
-        BuiltinCase{SpvBuiltInWorkgroupSize, true,
-                    ast::Builtin::kWorkgroupSize},
         BuiltinCase{SpvBuiltInLocalInvocationId, true,
                     ast::Builtin::kLocalInvocationId},
         BuiltinCase{SpvBuiltInLocalInvocationIndex, true,

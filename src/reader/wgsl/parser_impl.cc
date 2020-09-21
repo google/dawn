@@ -63,6 +63,7 @@
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
 #include "src/type_manager.h"
 
@@ -95,9 +96,6 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "frag_depth") {
     return ast::Builtin::kFragDepth;
   }
-  if (str == "workgroup_size") {
-    return ast::Builtin::kWorkgroupSize;
-  }
   if (str == "local_invocation_id") {
     return ast::Builtin::kLocalInvocationId;
   }
@@ -108,6 +106,14 @@ ast::Builtin ident_to_builtin(const std::string& str) {
     return ast::Builtin::kGlobalInvocationId;
   }
   return ast::Builtin::kNone;
+}
+
+bool IsVariableDecoration(Token t) {
+  return t.IsLocation() || t.IsBuiltin() || t.IsBinding() || t.IsSet();
+}
+
+bool IsFunctionDecoration(Token t) {
+  return t.IsWorkgroupSize();
 }
 
 }  // namespace
@@ -444,18 +450,25 @@ ast::VariableDecorationList ParserImpl::variable_decoration_list() {
   if (!t.IsAttrLeft())
     return decos;
 
+  // Check the empty list before verifying the contents
+  t = peek(1);
+  if (t.IsAttrRight()) {
+    set_error(t, "empty variable decoration list");
+    return {};
+  }
+
+  // Make sure we're looking at variable decorations not some other kind
+  if (!IsVariableDecoration(peek(1))) {
+    return decos;
+  }
+
   next();  // consume the peek
 
   auto deco = variable_decoration();
   if (has_error())
     return {};
   if (deco == nullptr) {
-    t = peek();
-    if (t.IsAttrRight()) {
-      set_error(t, "empty variable decoration list");
-      return {};
-    }
-    set_error(t, "missing variable decoration for decoration list");
+    set_error(peek(), "missing variable decoration for decoration list");
     return {};
   }
   for (;;) {
@@ -1738,13 +1751,29 @@ ParserImpl::struct_member_decoration() {
 }
 
 // function_decl
-//   : function_header body_stmt
+//   : function_decoration_decl* function_header body_stmt
 std::unique_ptr<ast::Function> ParserImpl::function_decl() {
+  ast::FunctionDecorationList decos;
+  for (;;) {
+    size_t s = decos.size();
+    if (!function_decoration_decl(decos)) {
+      return nullptr;
+    }
+    if (decos.size() == s) {
+      break;
+    }
+  }
+
   auto f = function_header();
   if (has_error())
     return nullptr;
-  if (f == nullptr)
+  if (f == nullptr) {
+    if (decos.size() > 0) {
+      set_error(peek(), "error parsing function declaration");
+    }
     return nullptr;
+  }
+  f->set_decorations(std::move(decos));
 
   auto body = body_stmt();
   if (has_error())
@@ -1752,6 +1781,131 @@ std::unique_ptr<ast::Function> ParserImpl::function_decl() {
 
   f->set_body(std::move(body));
   return f;
+}
+
+// function_decoration_decl
+//   : ATTR_LEFT (function_decoration COMMA)* function_decoration ATTR_RIGHT
+bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
+  auto t = peek();
+  if (!t.IsAttrLeft()) {
+    return true;
+  }
+  // Handle error on empty attributes before the type check
+  t = peek(1);
+  if (t.IsAttrRight()) {
+    set_error(t, "missing decorations for function decoration block");
+    return false;
+  }
+
+  // Make sure we're looking at function decorations and not some other kind
+  if (!IsFunctionDecoration(peek(1))) {
+    return true;
+  }
+
+  next();  // Consume the peek
+
+  size_t count = 0;
+  for (;;) {
+    auto deco = function_decoration();
+    if (has_error()) {
+      return false;
+    }
+    if (deco == nullptr) {
+      set_error(peek(), "expected decoration but none found");
+      return false;
+    }
+    decos.push_back(std::move(deco));
+    count++;
+
+    t = peek();
+    if (!t.IsComma()) {
+      break;
+    }
+    next();  // Consume the peek
+  }
+  if (count == 0) {
+    set_error(peek(), "missing decorations for function decoration block");
+    return false;
+  }
+
+  t = next();
+  if (!t.IsAttrRight()) {
+    set_error(t, "missing ]] for function decorations");
+    return false;
+  }
+  return true;
+}
+
+// function_decoration
+//   : TODO(dsinclair) STAGE PAREN_LEFT pipeline_stage PAREN_RIGHT
+//   | WORKGROUP_SIZE PAREN_LEFT INT_LITERAL
+//         (COMMA INT_LITERAL (COMMA INT_LITERAL)?)? PAREN_RIGHT
+std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
+  auto t = peek();
+  if (t.IsWorkgroupSize()) {
+    next();  // Consume the peek
+
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for workgroup_size");
+      return nullptr;
+    }
+
+    t = next();
+    if (!t.IsSintLiteral()) {
+      set_error(t, "missing x value for workgroup_size");
+      return nullptr;
+    }
+    if (t.to_i32() <= 0) {
+      set_error(t, "invalid value for workgroup_size x parameter");
+      return nullptr;
+    }
+    int32_t x = t.to_i32();
+    int32_t y = 1;
+    int32_t z = 1;
+
+    t = peek();
+    if (t.IsComma()) {
+      next();  // Consume the peek
+
+      t = next();
+      if (!t.IsSintLiteral()) {
+        set_error(t, "missing y value for workgroup_size");
+        return nullptr;
+      }
+      if (t.to_i32() <= 0) {
+        set_error(t, "invalid value for workgroup_size y parameter");
+        return nullptr;
+      }
+      y = t.to_i32();
+
+      t = peek();
+      if (t.IsComma()) {
+        next();  // Consume the peek
+
+        t = next();
+        if (!t.IsSintLiteral()) {
+          set_error(t, "missing z value for workgroup_size");
+          return nullptr;
+        }
+        if (t.to_i32() <= 0) {
+          set_error(t, "invalid value for workgroup_size z parameter");
+          return nullptr;
+        }
+        z = t.to_i32();
+      }
+    }
+
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for workgroup_size");
+      return nullptr;
+    }
+
+    return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),
+                                                      uint32_t(z));
+  }
+  return nullptr;
 }
 
 // function_type_decl

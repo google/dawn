@@ -47,10 +47,6 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "frag_depth";
       break;
     }
-    case Builtin::kWorkgroupSize: {
-      out << "workgroup_size";
-      break;
-    }
     case Builtin::kLocalInvocationId: {
       out << "local_invocation_id";
       break;

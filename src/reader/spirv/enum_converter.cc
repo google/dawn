@@ -80,8 +80,6 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
       return ast::Builtin::kFragCoord;
     case SpvBuiltInFragDepth:
       return ast::Builtin::kFragDepth;
-    case SpvBuiltInWorkgroupSize:
-      return ast::Builtin::kWorkgroupSize;
     case SpvBuiltInLocalInvocationId:
       return ast::Builtin::kLocalInvocationId;
     case SpvBuiltInLocalInvocationIndex:

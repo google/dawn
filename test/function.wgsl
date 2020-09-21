@@ -15,3 +15,9 @@
 fn main() -> f32 {
     return ((2. * 3.) - 4.) / 5.;
 }
+
+[[workgroup_size(2)]]
+fn ep() -> void {
+  return;
+}
+entry_point compute = ep;

@@ -1395,11 +1395,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "SV_Position";
     case ast::Builtin::kFragDepth:
       return "SV_Depth";
-    // TODO(dsinclair): Ignore for now. This has been removed as a builtin
-    // in the spec. Need to update Tint to match.
-    // https://github.com/gpuweb/gpuweb/pull/824
-    case ast::Builtin::kWorkgroupSize:
-      return "";
     case ast::Builtin::kLocalInvocationId:
       return "SV_GroupThreadID";
     case ast::Builtin::kLocalInvocationIdx:

@@ -182,6 +182,13 @@ class ParserImpl {
   /// Parses a `function_decl` grammar element
   /// @returns the parsed function, nullptr otherwise
   std::unique_ptr<ast::Function> function_decl();
+  /// Parses a `function_decoration_decl` grammar element
+  /// @param decos list to store the parsed decorations
+  /// @returns true on successful parse; false otherwise
+  bool function_decoration_decl(ast::FunctionDecorationList& decos);
+  /// Parses a `function_decoration` grammar element
+  /// @returns the parsed decoration, nullptr otherwise
+  std::unique_ptr<ast::FunctionDecoration> function_decoration();
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* texture_sampler_types();

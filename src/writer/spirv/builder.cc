@@ -2309,8 +2309,6 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
       return SpvBuiltInFragCoord;
     case ast::Builtin::kFragDepth:
       return SpvBuiltInFragDepth;
-    case ast::Builtin::kWorkgroupSize:
-      return SpvBuiltInWorkgroupSize;
     case ast::Builtin::kLocalInvocationId:
       return SpvBuiltInLocalInvocationId;
     case ast::Builtin::kLocalInvocationIdx:

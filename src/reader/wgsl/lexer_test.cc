@@ -542,7 +542,8 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"vec4", Token::Type::kVec4},
         TokenData{"vertex", Token::Type::kVertex},
         TokenData{"void", Token::Type::kVoid},
-        TokenData{"workgroup", Token::Type::kWorkgroup}));
+        TokenData{"workgroup", Token::Type::kWorkgroup},
+        TokenData{"workgroup_size", Token::Type::kWorkgroupSize}));
 
 using KeywordTest_Reserved = testing::TestWithParam<const char*>;
 TEST_P(KeywordTest_Reserved, Parses) {

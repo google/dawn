@@ -359,7 +359,9 @@ class Token {
     /// A 'void'
     kVoid,
     /// A 'workgroup'
-    kWorkgroup
+    kWorkgroup,
+    /// A 'workgroup_size'
+    kWorkgroupSize,
   };
 
   /// Converts a token type to a name
@@ -777,6 +779,8 @@ class Token {
   bool IsVoid() const { return type_ == Type::kVoid; }
   /// @returns true if token is a 'workgroup'
   bool IsWorkgroup() const { return type_ == Type::kWorkgroup; }
+  /// @returns true if token is a 'workgroup_size'
+  bool IsWorkgroupSize() const { return type_ == Type::kWorkgroupSize; }
 
   /// @returns the source line of the token
   size_t line() const { return source_.line; }

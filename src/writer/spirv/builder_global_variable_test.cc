@@ -389,7 +389,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{ast::Builtin::kFrontFacing, SpvBuiltInFrontFacing},
         BuiltinData{ast::Builtin::kFragCoord, SpvBuiltInFragCoord},
         BuiltinData{ast::Builtin::kFragDepth, SpvBuiltInFragDepth},
-        BuiltinData{ast::Builtin::kWorkgroupSize, SpvBuiltInWorkgroupSize},
         BuiltinData{ast::Builtin::kLocalInvocationId,
                     SpvBuiltInLocalInvocationId},
         BuiltinData{ast::Builtin::kLocalInvocationIdx,

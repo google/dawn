@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, VariableDecorationList_Empty) {
 TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
   auto* p = parser(R"([[invalid]])");
   auto decos = p->variable_decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:3: missing variable decoration for decoration list");
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(decos.empty());
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {

@@ -116,7 +116,6 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
                     MslBuiltinData{ast::Builtin::kFragCoord, "position"},
                     MslBuiltinData{ast::Builtin::kFragDepth, "depth(any)"},
-                    MslBuiltinData{ast::Builtin::kWorkgroupSize, ""},
                     MslBuiltinData{ast::Builtin::kLocalInvocationId,
                                    "thread_position_in_threadgroup"},
                     MslBuiltinData{ast::Builtin::kLocalInvocationIdx,
