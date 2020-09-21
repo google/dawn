@@ -597,7 +597,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                      Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else {
+  } else if (!var->type()->IsTexture() && !var->type()->IsSampler()) {
     // If we don't have a constructor and we're an Output or Private variable
     // then WGSL requires an initializer.
     if (var->storage_class() == ast::StorageClass::kPrivate ||
