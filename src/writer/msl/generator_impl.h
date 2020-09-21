@@ -121,10 +121,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param ep the entry point
   /// @returns true if the entry point data was emitted
   bool EmitEntryPointData(ast::EntryPoint* ep);
+  /// Handles emitting information for an entry point
+  /// @param func the entry point function
+  /// @returns true if the entry point data was emitted
+  bool EmitEntryPointData(ast::Function* func);
   /// Handles emitting the entry point function
   /// @param ep the entry point
   /// @returns true if the entry point function was emitted
   bool EmitEntryPointFunction(ast::EntryPoint* ep);
+  /// Handles emitting the entry point function
+  /// @param func the entry point function
+  /// @returns true if the entry point function was emitted
+  bool EmitEntryPointFunction(ast::Function* func);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted

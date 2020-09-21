@@ -130,6 +130,17 @@ bool GeneratorImpl::Generate() {
     }
   }
 
+  // Make sure all entry point data is emitted before the entry point functions
+  for (const auto& func : module_->functions()) {
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+
+    if (!EmitEntryPointData(func.get())) {
+      return false;
+    }
+  }
+
   for (const auto& func : module_->functions()) {
     if (!EmitFunction(func.get())) {
       return false;
@@ -138,6 +149,15 @@ bool GeneratorImpl::Generate() {
 
   for (const auto& ep : module_->entry_points()) {
     if (!EmitEntryPointFunction(ep.get())) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+  for (const auto& func : module_->functions()) {
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+    if (!EmitEntryPointFunction(func.get())) {
       return false;
     }
     out_ << std::endl;
@@ -1011,6 +1031,119 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
   return true;
 }
 
+bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
+  std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>>
+      out_variables;
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_locations.push_back({var, deco->value()});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var, deco});
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var, deco});
+    }
+  }
+
+  if (!in_locations.empty()) {
+    auto in_struct_name =
+        generate_name(func->name() + "_" + kInStructNameSuffix);
+    auto in_var_name = generate_name(kTintStructInVarPrefix);
+    ep_name_to_in_data_[func->name()] = {in_struct_name, in_var_name};
+
+    make_indent();
+    out_ << "struct " << in_struct_name << " {" << std::endl;
+
+    increment_indent();
+
+    for (auto& data : in_locations) {
+      auto* var = data.first;
+      uint32_t loc = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " [[";
+      if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
+        out_ << "attribute(" << loc << ")";
+      } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
+        out_ << "user(locn" << loc << ")";
+      } else {
+        error_ = "invalid location variable for pipeline stage";
+        return false;
+      }
+      out_ << "]];" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+
+    out_ << "};" << std::endl << std::endl;
+  }
+
+  if (!out_variables.empty()) {
+    auto out_struct_name =
+        generate_name(func->name() + "_" + kOutStructNameSuffix);
+    auto out_var_name = generate_name(kTintStructOutVarPrefix);
+    ep_name_to_out_data_[func->name()] = {out_struct_name, out_var_name};
+
+    make_indent();
+    out_ << "struct " << out_struct_name << " {" << std::endl;
+
+    increment_indent();
+    for (auto& data : out_variables) {
+      auto* var = data.first;
+      auto* deco = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " [[";
+
+      if (deco->IsLocation()) {
+        auto loc = deco->AsLocation()->value();
+        if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
+          out_ << "user(locn" << loc << ")";
+        } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
+          out_ << "color(" << loc << ")";
+        } else {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out_ << attr;
+      } else {
+        error_ = "unsupported variable decoration for entry point output";
+        return false;
+      }
+      out_ << "]];" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+    out_ << "};" << std::endl << std::endl;
+  }
+
+  return true;
+}
+
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
@@ -1097,7 +1230,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   make_indent();
 
   // Entry points will be emitted later, skip for now.
-  if (module_->IsFunctionEntryPoint(func->name())) {
+  if (func->IsEntryPoint() || module_->IsFunctionEntryPoint(func->name())) {
     return true;
   }
 
@@ -1284,6 +1417,132 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   }
 
   EmitStage(ep->stage());
+  out_ << " ";
+
+  // This is an entry point, the return type is the entry point output structure
+  // if one exists, or void otherwise.
+  auto out_data = ep_name_to_out_data_.find(current_ep_name_);
+  bool has_out_data = out_data != ep_name_to_out_data_.end();
+  if (has_out_data) {
+    out_ << out_data->second.struct_name;
+  } else {
+    out_ << "void";
+  }
+  out_ << " " << namer_.NameFor(current_ep_name_) << "(";
+
+  bool first = true;
+  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
+  if (in_data != ep_name_to_in_data_.end()) {
+    out_ << in_data->second.struct_name << " " << in_data->second.var_name
+         << " [[stage_in]]";
+    first = false;
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() != ast::StorageClass::kInput) {
+      continue;
+    }
+
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* builtin = data.second;
+
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+
+    auto attr = builtin_to_attribute(builtin->value());
+    if (attr.empty()) {
+      error_ = "unknown builtin";
+      return false;
+    }
+    out_ << " " << var->name() << " [[" << attr << "]]";
+  }
+
+  for (auto data : func->referenced_uniform_variables()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    if (binding == nullptr) {
+      error_ = "unable to find binding information for uniform: " + var->name();
+      return false;
+    }
+    // auto* set = data.second.set;
+
+    out_ << "constant ";
+    // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
+    // updated to handle arrays property.
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
+  }
+
+  for (auto data : func->referenced_storagebuffer_variables()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    // auto* set = data.second.set;
+
+    out_ << "device ";
+    // TODO(dsinclair): Can you have a storagebuffer have an array? If so, this
+    // needs to be updated to handle arrays property.
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
+  }
+
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  if (has_out_data) {
+    make_indent();
+    out_ << out_data->second.struct_name << " " << out_data->second.var_name
+         << " = {};" << std::endl;
+  }
+
+  generating_entry_point_ = true;
+  for (const auto& s : *(func->body())) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+  generating_entry_point_ = false;
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  current_ep_name_ = "";
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
+  make_indent();
+
+  current_ep_name_ = func->name();
+
+  EmitStage(func->pipeline_stage());
   out_ << " ";
 
   // This is an entry point, the return type is the entry point output structure
