@@ -83,6 +83,10 @@ class TypeDeterminer {
   /// @param stmt the statement to check
   /// @returns false on error
   bool DetermineVariableStorageClass(ast::Statement* stmt);
+  /// Determines the result type based off a storage texture format
+  /// @param tex the storage texture
+  /// @returns false on error
+  bool DetermineStorageTextureSubtype(ast::type::StorageTextureType* tex);
 
   /// Testing method to set a given variable into the type stack
   /// @param var the variable to set
@@ -118,8 +122,6 @@ class TypeDeterminer {
   bool DetermineIntrinsic(const std::string& name, ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
-
-  bool DetermineStorageTextureSubtype(ast::type::StorageTextureType* tex);
 
   Context& ctx_;
   ast::Module* mod_;
