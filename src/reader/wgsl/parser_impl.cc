@@ -2089,19 +2089,21 @@ ast::PipelineStage ParserImpl::pipeline_stage() {
 //   : BRACKET_LEFT statements BRACKET_RIGHT
 std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
   auto t = peek();
-  if (!t.IsBraceLeft())
-    return {};
+  if (!t.IsBraceLeft()) {
+    set_error(t, "missing {");
+    return nullptr;
+  }
 
   next();  // Consume the peek
 
   auto stmts = statements();
   if (has_error())
-    return {};
+    return nullptr;
 
   t = next();
   if (!t.IsBraceRight()) {
     set_error(t, "missing }");
-    return {};
+    return nullptr;
   }
 
   return stmts;
@@ -2165,7 +2167,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::statements() {
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
 //   | assignment_stmt SEMICOLON
-//   | body_stmt
+//   | body_stmt?
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
   auto t = peek();
   if (t.IsSemicolon()) {
@@ -2281,11 +2283,14 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     return assign;
   }
 
-  auto body = body_stmt();
-  if (has_error())
-    return nullptr;
-  if (body != nullptr)
-    return body;
+  t = peek();
+  if (t.IsBraceLeft()) {
+    auto body = body_stmt();
+    if (has_error())
+      return nullptr;
+    if (body != nullptr)
+      return body;
+  }
 
   return nullptr;
 }
@@ -2392,12 +2397,6 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
     return nullptr;
   }
 
-  t = peek();
-  if (!t.IsBraceLeft()) {
-    set_error(t, "missing {");
-    return nullptr;
-  }
-
   auto body = body_stmt();
   if (has_error())
     return nullptr;
@@ -2440,12 +2439,6 @@ ast::ElseStatementList ParserImpl::elseif_stmt() {
       return {};
     }
 
-    t = peek();
-    if (!t.IsBraceLeft()) {
-      set_error(t, "missing {");
-      return {};
-    }
-
     auto body = body_stmt();
     if (has_error())
       return {};
@@ -2470,12 +2463,6 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
 
   auto source = t.source();
   next();  // Consume the peek
-
-  t = peek();
-  if (!t.IsBraceLeft()) {
-    set_error(t, "missing {");
-    return nullptr;
-  }
 
   auto body = body_stmt();
   if (has_error())
@@ -2889,8 +2876,8 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
   if (!t.IsContinuing()) {
     return std::make_unique<ast::BlockStatement>();
   }
-
   next();  // Consume the peek
+
   return body_stmt();
 }
 
