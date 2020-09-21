@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -188,6 +189,47 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Invalid) {
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:22: missing z value for workgroup_size");
+}
+
+TEST_F(ParserImplTest, FunctionDecoration_Stage) {
+  auto* p = parser("stage(compute)");
+  auto deco = p->function_decoration();
+  ASSERT_NE(deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(deco->IsStage());
+  EXPECT_EQ(deco->AsStage()->value(), ast::PipelineStage::kCompute);
+}
+
+TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingValue) {
+  auto* p = parser("stage()");
+  auto deco = p->function_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:7: invalid value for stage decoration");
+}
+
+TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingInvalid) {
+  auto* p = parser("stage(nan)");
+  auto deco = p->function_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:7: invalid value for stage decoration");
+}
+
+TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingLeftParen) {
+  auto* p = parser("stage compute)");
+  auto deco = p->function_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:7: missing ( for stage decoration");
+}
+
+TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingRightParen) {
+  auto* p = parser("stage(compute");
+  auto deco = p->function_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:14: missing ) for stage decoration");
 }
 
 }  // namespace

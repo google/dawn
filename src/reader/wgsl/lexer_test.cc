@@ -496,6 +496,7 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"sampler", Token::Type::kSampler},
         TokenData{"sampler_comparison", Token::Type::kComparisonSampler},
         TokenData{"set", Token::Type::kSet},
+        TokenData{"stage", Token::Type::kStage},
         TokenData{"storage_buffer", Token::Type::kStorageBuffer},
         TokenData{"stride", Token::Type::kStride},
         TokenData{"struct", Token::Type::kStruct},

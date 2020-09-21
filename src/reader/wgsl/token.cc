@@ -277,6 +277,8 @@ std::string Token::TypeToName(Type type) {
       return "storage_buffer";
     case Token::Type::kStride:
       return "stride";
+    case Token::Type::kStage:
+      return "stage";
     case Token::Type::kStruct:
       return "struct";
     case Token::Type::kSwitch:

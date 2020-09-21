@@ -16,6 +16,7 @@ fn main() -> f32 {
     return ((2. * 3.) - 4.) / 5.;
 }
 
+[[stage(compute)]]
 [[workgroup_size(2)]]
 fn ep() -> void {
   return;

@@ -122,6 +122,8 @@ set(TINT_LIB_SRCS
   ast/set_decoration.h
   ast/sint_literal.cc
   ast/sint_literal.h
+  ast/stage_decoration.cc
+  ast/stage_decoration.h
   ast/statement.cc
   ast/statement.h
   ast/storage_class.cc
@@ -331,6 +333,7 @@ set(TINT_TEST_SRCS
   ast/scalar_constructor_expression_test.cc
   ast/set_decoration_test.cc
   ast/sint_literal_test.cc
+  ast/stage_decoration_test.cc
   ast/struct_member_test.cc
   ast/struct_member_offset_decoration_test.cc
   ast/struct_test.cc

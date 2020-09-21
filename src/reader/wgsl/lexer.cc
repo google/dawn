@@ -637,6 +637,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
   if (str == "set")
     return {Token::Type::kSet, source, "set"};
+  if (str == "stage")
+    return {Token::Type::kStage, source, "stage"};
   if (str == "storage_buffer")
     return {Token::Type::kStorageBuffer, source, "storage_buffer"};
   if (str == "stride")

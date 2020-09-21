@@ -41,6 +41,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/alias_type.h"
@@ -113,7 +114,7 @@ bool IsVariableDecoration(Token t) {
 }
 
 bool IsFunctionDecoration(Token t) {
-  return t.IsWorkgroupSize();
+  return t.IsWorkgroupSize() || t.IsStage();
 }
 
 }  // namespace
@@ -1837,7 +1838,7 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
 }
 
 // function_decoration
-//   : TODO(dsinclair) STAGE PAREN_LEFT pipeline_stage PAREN_RIGHT
+//   : STAGE PAREN_LEFT pipeline_stage PAREN_RIGHT
 //   | WORKGROUP_SIZE PAREN_LEFT INT_LITERAL
 //         (COMMA INT_LITERAL (COMMA INT_LITERAL)?)? PAREN_RIGHT
 std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
@@ -1904,6 +1905,31 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
     return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),
                                                       uint32_t(z));
+  }
+  if (t.IsStage()) {
+    next();  // Consume the peek
+
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for stage decoration");
+      return nullptr;
+    }
+
+    auto stage = pipeline_stage();
+    if (has_error()) {
+      return nullptr;
+    }
+    if (stage == ast::PipelineStage::kNone) {
+      set_error(peek(), "invalid value for stage decoration");
+      return nullptr;
+    }
+
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for stage decoration");
+      return nullptr;
+    }
+    return std::make_unique<ast::StageDecoration>(stage);
   }
   return nullptr;
 }

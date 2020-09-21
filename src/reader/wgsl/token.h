@@ -286,6 +286,8 @@ class Token {
     kSet,
     /// A 'storage_buffer'
     kStorageBuffer,
+    /// A 'stage'
+    kStage,
     /// A 'stride'
     kStride,
     /// A 'struct'
@@ -511,6 +513,8 @@ class Token {
   bool IsCase() const { return type_ == Type::kCase; }
   /// @returns true if token is a 'cast'
   bool IsCast() const { return type_ == Type::kCast; }
+  /// @returns true if token is a 'sampler_comparison'
+  bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
   /// @returns true if token is a 'compute'
   bool IsCompute() const { return type_ == Type::kCompute; }
   /// @returns true if token is a 'const'
@@ -665,10 +669,10 @@ class Token {
   bool IsReturn() const { return type_ == Type::kReturn; }
   /// @returns true if token is a 'sampler'
   bool IsSampler() const { return type_ == Type::kSampler; }
-  /// @returns true if token is a 'sampler_comparison'
-  bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
   /// @returns true if token is a 'set'
   bool IsSet() const { return type_ == Type::kSet; }
+  /// @returns true if token is a 'stage'
+  bool IsStage() const { return type_ == Type::kStage; }
   /// @returns true if token is a 'storage_buffer'
   bool IsStorageBuffer() const { return type_ == Type::kStorageBuffer; }
   /// @returns true if token is a 'stride'
