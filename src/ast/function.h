@@ -28,6 +28,7 @@
 #include "src/ast/function_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/node.h"
+#include "src/ast/pipeline_stage.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/type/type.h"
@@ -99,6 +100,9 @@ class Function : public Node {
   /// @returns the workgroup size {x, y, z} for the function. {1, 1, 1} will be
   /// return if no workgroup size was set.
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() const;
+
+  /// @returns the functions pipeline stage or None if not set
+  ast::PipelineStage pipeline_stage() const;
 
   /// Adds the given variable to the list of referenced module variables if it
   /// is not already included.

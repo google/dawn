@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "src/ast/decorated_variable.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {
@@ -54,6 +55,15 @@ std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
     }
   }
   return {1, 1, 1};
+}
+
+ast::PipelineStage Function::pipeline_stage() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsStage()) {
+      return deco->AsStage()->value();
+    }
+  }
+  return ast::PipelineStage::kNone;
 }
 
 void Function::add_referenced_module_variable(Variable* var) {
