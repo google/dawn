@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/function_decoration.h"
-
-#include <assert.h>
-
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {
 namespace ast {
 
-FunctionDecoration::FunctionDecoration() = default;
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x) : x_(x) {}
 
-FunctionDecoration::~FunctionDecoration() = default;
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x, uint32_t y)
+    : x_(x), y_(y) {}
 
-bool FunctionDecoration::IsWorkgroup() const {
-  return false;
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z)
+    : x_(x), y_(y), z_(z) {}
+
+WorkgroupDecoration::~WorkgroupDecoration() = default;
+
+bool WorkgroupDecoration::IsWorkgroup() const {
+  return true;
 }
 
-const WorkgroupDecoration* FunctionDecoration::AsWorkgroup() const {
-  assert(IsWorkgroup());
-  return static_cast<const WorkgroupDecoration*>(this);
+void WorkgroupDecoration::to_str(std::ostream& out) const {
+  out << "WorkgroupDecoration{" << x_ << " " << y_ << " " << z_ << "}"
+      << std::endl;
 }
 
 }  // namespace ast

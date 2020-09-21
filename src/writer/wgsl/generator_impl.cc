@@ -63,6 +63,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/workgroup_decoration.h"
 
 namespace tint {
 namespace writer {
@@ -422,8 +423,21 @@ bool GeneratorImpl::EmitImport(const ast::Import* import) {
 }
 
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
-  make_indent();
+  for (auto& deco : func->decorations()) {
+    make_indent();
+    out_ << "[[";
+    if (deco->IsWorkgroup()) {
+      uint32_t x = 0;
+      uint32_t y = 0;
+      uint32_t z = 0;
+      std::tie(x, y, z) = deco->AsWorkgroup()->values();
+      out_ << "workgroup_size(" << std::to_string(x) << ", "
+           << std::to_string(y) << ", " << std::to_string(z) << ")";
+    }
+    out_ << "]]" << std::endl;
+  }
 
+  make_indent();
   out_ << "fn " << func->name() << "(";
 
   bool first = true;

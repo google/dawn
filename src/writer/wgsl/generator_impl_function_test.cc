@@ -20,6 +20,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -71,6 +72,28 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 
   ASSERT_TRUE(g.EmitFunction(&func));
   EXPECT_EQ(g.result(), R"(  fn my_func(a : f32, b : i32) -> void {
+    discard;
+    return;
+  }
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecorations) {
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::DiscardStatement>());
+  body->append(std::make_unique<ast::ReturnStatement>());
+
+  ast::type::VoidType void_type;
+  ast::Function func("my_func", {}, &void_type);
+  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+  func.set_body(std::move(body));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitFunction(&func));
+  EXPECT_EQ(g.result(), R"(  [[workgroup_size(2, 4, 6)]]
+  fn my_func() -> void {
     discard;
     return;
   }

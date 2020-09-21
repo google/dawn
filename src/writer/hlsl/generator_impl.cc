@@ -1428,9 +1428,12 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   }
 
   if (ep->stage() == ast::PipelineStage::kCompute) {
-    // TODO(dsinclair): When we have a way to set the thread group size this
-    // should be updated.
-    out << "[numthreads(1, 1, 1)]" << std::endl;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t z = 0;
+    std::tie(x, y, z) = func->workgroup_size();
+    out << "[numthreads(" << std::to_string(x) << ", " << std::to_string(y)
+        << ", " << std::to_string(z) << ")]" << std::endl;
     make_indent(out);
   }
 

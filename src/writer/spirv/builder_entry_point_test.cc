@@ -25,6 +25,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
@@ -261,6 +262,23 @@ TEST_F(BuilderTest, ExecutionModel_Compute_LocalSize) {
 
   EXPECT_EQ(DumpInstructions(b.preamble()),
             R"(OpExecutionMode %3 LocalSize 1 1 1
+)");
+}
+
+TEST_F(BuilderTest, ExecutionModel_Compute_LocalSize_WithWorkgroup) {
+  ast::type::VoidType void_type;
+
+  ast::Function func("main", {}, &void_type);
+  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+  ast::EntryPoint ep(ast::PipelineStage::kCompute, "main", "main");
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateExecutionModes(&ep));
+
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %3 LocalSize 2 4 6
 )");
 }
 

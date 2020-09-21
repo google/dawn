@@ -22,10 +22,18 @@
 namespace tint {
 namespace ast {
 
+class WorkgroupDecoration;
+
 /// A decoration attached to a function
 class FunctionDecoration {
  public:
   virtual ~FunctionDecoration();
+
+  /// @returns true if this is a workgroup decoration
+  virtual bool IsWorkgroup() const;
+
+  /// @returns the decoration as a workgroup decoration
+  const WorkgroupDecoration* AsWorkgroup() const;
 
   /// Outputs the function decoration to the given stream
   /// @param out the stream to output too

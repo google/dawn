@@ -90,6 +90,10 @@ class Function : public Node {
   /// @returns the decorations attached to this function
   const FunctionDecorationList& decorations() const { return decorations_; }
 
+  /// @returns the workgroup size {x, y, z} for the function. {1, 1, 1} will be
+  /// return if no workgroup size was set.
+  std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() const;
+
   /// Adds the given variable to the list of referenced module variables if it
   /// is not already included.
   /// @param var the module variable to add

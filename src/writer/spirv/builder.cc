@@ -359,10 +359,15 @@ bool Builder::GenerateExecutionModes(ast::EntryPoint* ep) {
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
   } else if (ep->stage() == ast::PipelineStage::kCompute) {
-    // TODO(dsinclair): Support LocalSize other then (1, 1, 1)
+    auto* func = func_name_to_func_[ep->function_name()];
+
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t z = 0;
+    std::tie(x, y, z) = func->workgroup_size();
     push_preamble(spv::Op::OpExecutionMode,
                   {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
-                   Operand::Int(1), Operand::Int(1), Operand::Int(1)});
+                   Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
   return true;

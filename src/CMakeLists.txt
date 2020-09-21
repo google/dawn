@@ -190,6 +190,8 @@ set(TINT_LIB_SRCS
   ast/variable_decoration.h
   ast/variable_decl_statement.cc
   ast/variable_decl_statement.h
+  ast/workgroup_decoration.cc
+  ast/workgroup_decoration.h
   context.h
   context.cc
   reader/reader.cc
@@ -354,6 +356,7 @@ set(TINT_TEST_SRCS
   ast/unary_op_expression_test.cc
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
+  ast/workgroup_decoration_test.cc
   scope_stack_test.cc
   type_determiner_test.cc
   type_manager_test.cc

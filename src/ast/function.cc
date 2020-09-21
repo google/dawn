@@ -17,6 +17,7 @@
 #include <sstream>
 
 #include "src/ast/decorated_variable.h"
+#include "src/ast/workgroup_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -45,6 +46,15 @@ Function::Function(const Source& source,
 Function::Function(Function&&) = default;
 
 Function::~Function() = default;
+
+std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsWorkgroup()) {
+      return deco->AsWorkgroup()->values();
+    }
+  }
+  return {1, 1, 1};
+}
 
 void Function::add_referenced_module_variable(Variable* var) {
   for (const auto* v : referenced_module_vars_) {

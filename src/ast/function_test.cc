@@ -24,7 +24,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
-// #include "src/ast/workgroup_decoration.h"
+#include "src/ast/workgroup_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -298,27 +298,27 @@ TEST_F(FunctionTest, ToStr) {
 )");
 }
 
-// TEST_F(FunctionTest, ToStr_WithDecoration) {
-//   type::VoidType void_type;
-//   type::I32Type i32;
+TEST_F(FunctionTest, ToStr_WithDecoration) {
+  type::VoidType void_type;
+  type::I32Type i32;
 
-//   auto block = std::make_unique<ast::BlockStatement>();
-//   block->append(std::make_unique<DiscardStatement>());
+  auto block = std::make_unique<ast::BlockStatement>();
+  block->append(std::make_unique<DiscardStatement>());
 
-//   Function f("func", {}, &void_type);
-//   f.set_body(std::move(block));
-//   f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6));
+  Function f("func", {}, &void_type);
+  f.set_body(std::move(block));
+  f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6));
 
-//   std::ostringstream out;
-//   f.to_str(out, 2);
-//   EXPECT_EQ(out.str(), R"(  Function func -> __void
-//   workgroup_size 2 4 6
-//   ()
-//   {
-//     Discard{}
-//   }
-// )");
-// }
+  std::ostringstream out;
+  f.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  Function func -> __void
+  WorkgroupDecoration{2 4 6}
+  ()
+  {
+    Discard{}
+  }
+)");
+}
 
 TEST_F(FunctionTest, ToStr_WithParams) {
   type::VoidType void_type;
@@ -396,6 +396,33 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 
   EXPECT_EQ(f.get_last_statement(), nullptr);
 }
+
+TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
+  type::VoidType void_type;
+  Function f("f", {}, &void_type);
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint32_t z = 0;
+  std::tie(x, y, z) = f.workgroup_size();
+  EXPECT_EQ(x, 1u);
+  EXPECT_EQ(y, 1u);
+  EXPECT_EQ(z, 1u);
+}
+
+TEST_F(FunctionTest, WorkgroupSize) {
+  type::VoidType void_type;
+  Function f("f", {}, &void_type);
+  f.add_decoration(std::make_unique<WorkgroupDecoration>(2u, 4u, 6u));
+
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint32_t z = 0;
+  std::tie(x, y, z) = f.workgroup_size();
+  EXPECT_EQ(x, 2u);
+  EXPECT_EQ(y, 4u);
+  EXPECT_EQ(z, 6u);
+}
+
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -39,6 +39,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
@@ -1216,6 +1217,35 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_EntryPoint_Compute) {
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
   EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+void main() {
+  return;
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Function_EntryPoint_Compute_WithWorkgroup) {
+  ast::type::VoidType void_type;
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("comp_main", std::move(params),
+                                              &void_type);
+  func->add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  mod()->AddFunction(std::move(func));
+
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
+                                              "main", "comp_main");
+  mod()->AddEntryPoint(std::move(ep));
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
 void main() {
   return;
 }
