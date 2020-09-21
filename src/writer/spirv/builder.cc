@@ -1538,12 +1538,16 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
   // TODO: Remove the LOD param from textureLoad on storage textures when
   // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
   if (name == "textureLoad") {
-    auto spirv_params = {std::move(wgsl_params[0]),
-                         std::move(wgsl_params[1]),
-                         std::move(wgsl_params[2]),
-                         std::move(wgsl_params[3]),
-                         Operand::Int(SpvImageOperandsLodMask),
-                         std::move(wgsl_params[4])};
+    std::vector<Operand> spirv_params = {
+        std::move(wgsl_params[0]), std::move(wgsl_params[1]),
+        std::move(wgsl_params[2]), std::move(wgsl_params[3])};
+    if (texture_type->IsMultisampled()) {
+      spirv_params.push_back(Operand::Int(SpvImageOperandsSampleMask));
+    } else {
+      spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
+    }
+    spirv_params.push_back(std::move(wgsl_params[4]));
+
     auto op = spv::Op::OpImageFetch;
     if (texture_type->IsStorage()) {
       op = spv::Op::OpImageRead;

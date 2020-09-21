@@ -43,6 +43,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/storage_texture_type.h"
@@ -617,16 +618,25 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
     ast::type::TextureType* texture =
         texture_param->result_type()->UnwrapPtrIfNeeded()->AsTexture();
 
-    if (!texture->IsStorage() && !texture->IsSampled()) {
+    if (!texture->IsStorage() &&
+        !(texture->IsSampled() || texture->IsMultisampled())) {
       set_error(expr->source(), "invalid texture for " + name);
       return false;
     }
 
+    ast::type::Type* type = nullptr;
+    if (texture->IsStorage()) {
+      type = texture->AsStorage()->type();
+    } else if (texture->IsSampled()) {
+      type = texture->AsSampled()->type();
+    } else if (texture->IsMultisampled()) {
+      type = texture->AsMultisampled()->type();
+    } else {
+      set_error(expr->source(), "unknown texture type for texture sampling");
+      return false;
+    }
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-            texture->IsStorage() ? texture->AsStorage()->type()
-                                 : texture->AsSampled()->type(),
-            4)));
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(type, 4)));
     return true;
   }
   if (name == "dot") {

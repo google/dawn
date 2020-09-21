@@ -25,6 +25,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/u32_type.h"
@@ -630,6 +631,63 @@ TEST_F(BuilderTest, Call_TextureLoad_Sampled_2d) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%7 = OpLoad %3 %1
 %5 = OpImageFetch %6 %7 %11 Lod %13
+)");
+}
+
+TEST_F(BuilderTest, Call_TextureLoad_Multisampled_2d) {
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::VectorType vec2(&f32, 2);
+  ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d, &f32);
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  Builder b(&mod);
+
+  b.push_function(Function{});
+
+  ast::Variable tex("texture", ast::StorageClass::kNone, &s);
+  td.RegisterVariableForTesting(&tex);
+  ASSERT_TRUE(b.GenerateGlobalVariable(&tex)) << b.error();
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("textureLoad"),
+      std::move(call_params));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%6 = OpTypeVector %4 4
+%8 = OpTypeVector %4 2
+%9 = OpConstant %4 1
+%10 = OpConstant %4 2
+%11 = OpConstantComposite %8 %9 %10
+%12 = OpTypeInt 32 1
+%13 = OpConstant %12 2
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%5 = OpImageFetch %6 %7 %11 Sample %13
 )");
 }
 
