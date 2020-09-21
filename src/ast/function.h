@@ -104,6 +104,11 @@ class Function : public Node {
   /// @returns the functions pipeline stage or None if not set
   ast::PipelineStage pipeline_stage() const;
 
+  /// @returns true if this function is an entry point
+  bool IsEntryPoint() const {
+    return pipeline_stage() != ast::PipelineStage::kNone;
+  }
+
   /// Adds the given variable to the list of referenced module variables if it
   /// is not already included.
   /// @param var the module variable to add

@@ -842,6 +842,7 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/builder_discard_test.cc",
     "src/writer/spirv/builder_entry_point_test.cc",
     "src/writer/spirv/builder_format_conversion_test.cc",
+    "src/writer/spirv/builder_function_decoration_test.cc",
     "src/writer/spirv/builder_function_test.cc",
     "src/writer/spirv/builder_function_variable_test.cc",
     "src/writer/spirv/builder_global_variable_test.cc",

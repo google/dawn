@@ -97,7 +97,7 @@ bool ValidatorImpl::ValidateFunctions(const ast::Module* mod,
       return false;
     }
 
-    if (func->pipeline_stage() != ast::PipelineStage::kNone) {
+    if (func->IsEntryPoint()) {
       pipeline_count++;
 
       if (!func->return_type()->IsVoid()) {

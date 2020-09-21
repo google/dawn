@@ -18,10 +18,10 @@
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
@@ -36,75 +36,45 @@ namespace writer {
 namespace spirv {
 namespace {
 
-// TODO(dsinclair): These have all been ported to stage decorations and this
-// whole file can be deleted when we remove EntryPoint.
-
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, EntryPoint) {
+TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::type::VoidType void_type;
 
-  ast::Function func("frag_main", {}, &void_type);
-  ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
+  ast::Function func("main", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
 
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateEntryPoint(&ep)) << b.error();
-
-  EXPECT_EQ(DumpInstructions(b.preamble()), R"(OpEntryPoint Fragment %3 "main"
+  EXPECT_EQ(DumpInstructions(b.preamble()), R"(OpEntryPoint Vertex %3 "main"
 )");
 }
 
-TEST_F(BuilderTest, EntryPoint_WithoutName) {
-  ast::type::VoidType void_type;
-
-  ast::Function func("compute_main", {}, &void_type);
-  ast::EntryPoint ep(ast::PipelineStage::kCompute, "", "compute_main");
-
-  ast::Module mod;
-  Builder b(&mod);
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateEntryPoint(&ep)) << b.error();
-
-  EXPECT_EQ(DumpInstructions(b.preamble()),
-            R"(OpEntryPoint GLCompute %3 "compute_main"
-)");
-}
-
-TEST_F(BuilderTest, EntryPoint_BadFunction) {
-  ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
-
-  ast::Module mod;
-  Builder b(&mod);
-  EXPECT_FALSE(b.GenerateEntryPoint(&ep));
-  EXPECT_EQ(b.error(), "unable to find ID for function: frag_main");
-}
-
-struct EntryPointStageData {
+struct FunctionStageData {
   ast::PipelineStage stage;
   SpvExecutionModel model;
 };
-inline std::ostream& operator<<(std::ostream& out, EntryPointStageData data) {
+inline std::ostream& operator<<(std::ostream& out, FunctionStageData data) {
   out << data.stage;
   return out;
 }
-using EntryPointStageTest = testing::TestWithParam<EntryPointStageData>;
-TEST_P(EntryPointStageTest, Emit) {
+using FunctionDecoration_StageTest = testing::TestWithParam<FunctionStageData>;
+TEST_P(FunctionDecoration_StageTest, Emit) {
   auto params = GetParam();
 
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  ast::EntryPoint ep(params.stage, "", "main");
+  func.add_decoration(std::make_unique<ast::StageDecoration>(params.stage));
 
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateEntryPoint(&ep)) << b.error();
 
   auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1u);
+  ASSERT_TRUE(preamble.size() >= 1u);
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
   ASSERT_GE(preamble[0].operands().size(), 3u);
@@ -112,27 +82,27 @@ TEST_P(EntryPointStageTest, Emit) {
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    EntryPointStageTest,
-    testing::Values(EntryPointStageData{ast::PipelineStage::kVertex,
-                                        SpvExecutionModelVertex},
-                    EntryPointStageData{ast::PipelineStage::kFragment,
-                                        SpvExecutionModelFragment},
-                    EntryPointStageData{ast::PipelineStage::kCompute,
-                                        SpvExecutionModelGLCompute}));
+    FunctionDecoration_StageTest,
+    testing::Values(FunctionStageData{ast::PipelineStage::kVertex,
+                                      SpvExecutionModelVertex},
+                    FunctionStageData{ast::PipelineStage::kFragment,
+                                      SpvExecutionModelFragment},
+                    FunctionStageData{ast::PipelineStage::kCompute,
+                                      SpvExecutionModelGLCompute}));
 
-TEST_F(BuilderTest, EntryPoint_WithUnusedInterfaceIds) {
+TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::type::F32Type f32;
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   auto v_in =
       std::make_unique<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
   auto v_out = std::make_unique<ast::Variable>(
       "my_out", ast::StorageClass::kOutput, &f32);
   auto v_wg = std::make_unique<ast::Variable>(
       "my_wg", ast::StorageClass::kWorkgroup, &f32);
-  ast::EntryPoint ep(ast::PipelineStage::kVertex, "", "main");
 
   ast::Module mod;
   Builder b(&mod);
@@ -145,7 +115,6 @@ TEST_F(BuilderTest, EntryPoint_WithUnusedInterfaceIds) {
   mod.AddGlobalVariable(std::move(v_wg));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateEntryPoint(&ep)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
 OpName %4 "my_out"
 OpName %7 "my_wg"
@@ -167,11 +136,13 @@ OpName %11 "main"
 )");
 }
 
-TEST_F(BuilderTest, EntryPoint_WithUsedInterfaceIds) {
+TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::type::F32Type f32;
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
@@ -192,7 +163,6 @@ TEST_F(BuilderTest, EntryPoint_WithUsedInterfaceIds) {
       "my_out", ast::StorageClass::kOutput, &f32);
   auto v_wg = std::make_unique<ast::Variable>(
       "my_wg", ast::StorageClass::kWorkgroup, &f32);
-  ast::EntryPoint ep(ast::PipelineStage::kVertex, "", "main");
 
   Context ctx;
   ast::Module mod;
@@ -214,7 +184,6 @@ TEST_F(BuilderTest, EntryPoint_WithUsedInterfaceIds) {
   mod.AddGlobalVariable(std::move(v_wg));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateEntryPoint(&ep)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
 OpName %4 "my_out"
 OpName %7 "my_wg"
@@ -233,6 +202,52 @@ OpName %11 "main"
 )");
   EXPECT_EQ(DumpInstructions(b.preamble()),
             R"(OpEntryPoint Vertex %11 "main" %4 %1
+)");
+}
+
+TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
+  ast::type::VoidType void_type;
+
+  ast::Function func("main", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %3 OriginUpperLeft
+)");
+}
+
+TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
+  ast::type::VoidType void_type;
+
+  ast::Function func("main", {}, &void_type);
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %3 LocalSize 1 1 1
+)");
+}
+
+TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
+  ast::type::VoidType void_type;
+
+  ast::Function func("main", {}, &void_type);
+  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+  func.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %3 LocalSize 2 4 6
 )");
 }
 

@@ -220,7 +220,7 @@ bool TypeDeterminer::Determine() {
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
   for (const auto& func : mod_->functions()) {
-    if (func->pipeline_stage() == ast::PipelineStage::kNone) {
+    if (!func->IsEntryPoint()) {
       continue;
     }
     for (const auto& callee : caller_to_callee_[func->name()]) {

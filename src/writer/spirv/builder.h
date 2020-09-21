@@ -188,10 +188,20 @@ class Builder {
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
   bool GenerateEntryPoint(ast::EntryPoint* ep);
+  /// Generates an entry point instruction
+  /// @param func the function
+  /// @param id the id of the function
+  /// @returns true if the instruction was generated, false otherwise
+  bool GenerateEntryPoint(ast::Function* func, uint32_t id);
   /// Generates execution modes for an entry point
   /// @param ep the entry point
   /// @returns false on failure
   bool GenerateExecutionModes(ast::EntryPoint* ep);
+  /// Generates execution modes for an entry point
+  /// @param func the function
+  /// @param id the id of the function
+  /// @returns false on failure
+  bool GenerateExecutionModes(ast::Function* func, uint32_t id);
   /// Generates an expression
   /// @param expr the expression to generate
   /// @returns the resulting ID of the exp = {};ression or 0 on error

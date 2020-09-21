@@ -21,4 +21,3 @@ fn main() -> f32 {
 fn ep() -> void {
   return;
 }
-entry_point compute = ep;
