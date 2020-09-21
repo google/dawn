@@ -45,21 +45,22 @@ namespace {
 
 using MslGeneratorImplTest = testing::Test;
 
-TEST_F(MslGeneratorImplTest, DISABLED_Generate) {
+TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
   ast::Module m;
   m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                                 &void_type));
   m.AddEntryPoint(std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kCompute, "my_func", ""));
+      ast::PipelineStage::kCompute, "", "my_func"));
 
   GeneratorImpl g(&m);
 
   ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#import <metal_lib>
+  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
-compute void my_func() {
+kernel void my_func() {
 }
+
 )");
 }
 
