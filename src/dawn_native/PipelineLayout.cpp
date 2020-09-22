@@ -28,31 +28,12 @@ namespace dawn_native {
 
         bool InferredBindGroupLayoutEntriesCompatible(const BindGroupLayoutEntry& lhs,
                                                       const BindGroupLayoutEntry& rhs) {
-            // Minimum buffer binding size excluded because we take the maximum seen across stages
-            return lhs.binding == rhs.binding && lhs.visibility == rhs.visibility &&
-                   lhs.type == rhs.type && lhs.hasDynamicOffset == rhs.hasDynamicOffset &&
+            // Minimum buffer binding size excluded because we take the maximum seen across stages.
+            // Visibility is excluded because we take the OR across stages.
+            return lhs.binding == rhs.binding && lhs.type == rhs.type &&
+                   lhs.hasDynamicOffset == rhs.hasDynamicOffset &&
                    lhs.multisampled == rhs.multisampled && lhs.viewDimension == rhs.viewDimension &&
                    lhs.textureComponentType == rhs.textureComponentType;
-        }
-
-        wgpu::ShaderStage GetShaderStageVisibilityWithBindingType(wgpu::BindingType bindingType) {
-            // TODO(jiawei.shao@intel.com): support read-only and read-write storage textures.
-            switch (bindingType) {
-                case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    return wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
-
-                case wgpu::BindingType::UniformBuffer:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler:
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                    return wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment |
-                           wgpu::ShaderStage::Compute;
-            }
-
-            return {};
         }
 
     }  // anonymous namespace
@@ -142,22 +123,7 @@ namespace dawn_native {
 
                     BindGroupLayoutEntry bindingSlot;
                     bindingSlot.binding = static_cast<uint32_t>(bindingNumber);
-
-                    DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(bindingInfo.type,
-                                                                          StageBit(shaderStage)));
-                    DAWN_TRY(ValidateStorageTextureFormat(device, bindingInfo.type,
-                                                          bindingInfo.storageTextureFormat));
-                    DAWN_TRY(ValidateStorageTextureViewDimension(bindingInfo.type,
-                                                                 bindingInfo.viewDimension));
-
-                    if (bindingInfo.multisampled) {
-                        DAWN_TRY(ValidateBindingCanBeMultisampled(bindingInfo.type,
-                                                                  bindingInfo.viewDimension));
-                    }
-
-                    bindingSlot.visibility =
-                        GetShaderStageVisibilityWithBindingType(bindingInfo.type);
-
+                    bindingSlot.visibility = StageBit(shaderStage);
                     bindingSlot.type = bindingInfo.type;
                     bindingSlot.hasDynamicOffset = false;
                     bindingSlot.multisampled = bindingInfo.multisampled;
@@ -181,10 +147,13 @@ namespace dawn_native {
                                     "not compatible with previous declaration");
                             }
 
-                            // Use the max |minBufferBindingSize| we find
+                            // Use the max |minBufferBindingSize| we find.
                             existingEntry->minBufferBindingSize =
                                 std::max(existingEntry->minBufferBindingSize,
                                          bindingSlot.minBufferBindingSize);
+
+                            // Use the OR of all the stages at which we find this binding.
+                            existingEntry->visibility |= bindingSlot.visibility;
 
                             // Already used slot, continue
                             continue;
@@ -206,36 +175,38 @@ namespace dawn_native {
             }
         }
 
-        DAWN_TRY(ValidateBindingCounts(bindingCounts));
-
-        ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bindGroupLayouts = {};
+        // Create the deduced BGLs, validating if they are valid.
+        ityp::array<BindGroupIndex, Ref<BindGroupLayoutBase>, kMaxBindGroups> bindGroupLayouts = {};
         for (BindGroupIndex group(0); group < bindGroupLayoutCount; ++group) {
             BindGroupLayoutDescriptor desc = {};
             desc.entries = entryData[group].data();
             desc.entryCount = static_cast<uint32_t>(entryCounts[group]);
 
-            // We should never produce a bad descriptor.
-            ASSERT(!ValidateBindGroupLayoutDescriptor(device, &desc).IsError());
+            DAWN_TRY(ValidateBindGroupLayoutDescriptor(device, &desc));
+            DAWN_TRY_ASSIGN(bindGroupLayouts[group], device->GetOrCreateBindGroupLayout(&desc));
 
-            Ref<BindGroupLayoutBase> bgl;
-            DAWN_TRY_ASSIGN(bgl, device->GetOrCreateBindGroupLayout(&desc));
-            bindGroupLayouts[group] = bgl.Detach();
+            ASSERT(!bindGroupLayouts[group]->IsError());
         }
 
-        PipelineLayoutDescriptor desc = {};
-        desc.bindGroupLayouts = bindGroupLayouts.data();
-        desc.bindGroupLayoutCount = static_cast<uint32_t>(bindGroupLayoutCount);
-        PipelineLayoutBase* pipelineLayout = device->CreatePipelineLayout(&desc);
-        ASSERT(!pipelineLayout->IsError());
-
-        // These bind group layouts are created internally and referenced by the pipeline layout.
-        // Release the external refcount.
-        for (BindGroupIndex group(0); group < bindGroupLayoutCount; ++group) {
-            if (bindGroupLayouts[group] != nullptr) {
-                bindGroupLayouts[group]->Release();
+        // Create the deduced pipeline layout, validating if it is valid.
+        PipelineLayoutBase* pipelineLayout = nullptr;
+        {
+            ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bgls = {};
+            for (BindGroupIndex group(0); group < bindGroupLayoutCount; ++group) {
+                bgls[group] = bindGroupLayouts[group].Get();
             }
+
+            PipelineLayoutDescriptor desc = {};
+            desc.bindGroupLayouts = bgls.data();
+            desc.bindGroupLayoutCount = static_cast<uint32_t>(bindGroupLayoutCount);
+
+            DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc));
+            DAWN_TRY_ASSIGN(pipelineLayout, device->GetOrCreatePipelineLayout(&desc));
+
+            ASSERT(!pipelineLayout->IsError());
         }
 
+        // Sanity check in debug that the pipeline layout is compatible with the current pipeline.
         for (const StageAndDescriptor& stage : stages) {
             const EntryPointMetadata& metadata =
                 stage.second->module->GetEntryPoint(stage.second->entryPoint, stage.first);

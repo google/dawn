@@ -32,22 +32,8 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
+    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                                  const BindGroupLayoutDescriptor* descriptor);
-
-    MaybeError ValidateBindingTypeWithShaderStageVisibility(
-        wgpu::BindingType bindingType,
-        wgpu::ShaderStage shaderStageVisibility);
-
-    MaybeError ValidateStorageTextureFormat(DeviceBase* device,
-                                            wgpu::BindingType bindingType,
-                                            wgpu::TextureFormat storageTextureFormat);
-
-    MaybeError ValidateStorageTextureViewDimension(wgpu::BindingType bindingType,
-                                                   wgpu::TextureViewDimension dimension);
-
-    MaybeError ValidateBindingCanBeMultisampled(wgpu::BindingType bindingType,
-                                                wgpu::TextureViewDimension viewDimension);
 
     // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
     // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers

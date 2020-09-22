@@ -57,10 +57,6 @@ namespace dawn_native {
             case wgpu::BindingType::WriteonlyStorageTexture:
                 perStageBindingCountMember = &PerStageBindingCounts::storageTextureCount;
                 break;
-
-            default:
-                UNREACHABLE();
-                break;
         }
 
         ASSERT(perStageBindingCountMember != nullptr);
