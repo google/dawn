@@ -139,6 +139,18 @@ bool GeneratorImpl::Generate(std::ostream& out) {
       return false;
     }
   }
+
+  // Make sure all entry point data is emitted before the entry point functions
+  for (const auto& func : module_->functions()) {
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+
+    if (!EmitEntryPointData(out, func.get())) {
+      return false;
+    }
+  }
+
   for (const auto& func : module_->functions()) {
     if (!EmitFunction(out, func.get())) {
       return false;
@@ -151,6 +163,15 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     out << std::endl;
   }
 
+  for (const auto& func : module_->functions()) {
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+    if (!EmitEntryPointFunction(out, func.get())) {
+      return false;
+    }
+    out << std::endl;
+  }
   return true;
 }
 
@@ -1085,7 +1106,7 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
   make_indent(out);
 
   // Entry points will be emitted later, skip for now.
-  if (module_->IsFunctionEntryPoint(func->name())) {
+  if (func->IsEntryPoint() || module_->IsFunctionEntryPoint(func->name())) {
     return true;
   }
 
@@ -1381,6 +1402,186 @@ bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::EntryPoint* ep) {
   return true;
 }
 
+bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_variables.push_back({var, deco});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      outvariables.push_back({var, deco});
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    auto* deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_variables.push_back({var, deco});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      outvariables.push_back({var, deco});
+    }
+  }
+
+  bool emitted_uniform = false;
+  for (auto data : func->referenced_uniform_variables()) {
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    if (binding == nullptr) {
+      error_ = "unable to find binding information for uniform: " + var->name();
+      return false;
+    }
+    // auto* set = data.second.set;
+
+    auto* type = var->type()->UnwrapAliasesIfNeeded();
+    if (type->IsStruct()) {
+      auto* strct = type->AsStruct();
+
+      out << "ConstantBuffer<" << strct->name() << "> " << var->name()
+          << " : register(b" << binding->value() << ");" << std::endl;
+    } else {
+      // TODO(dsinclair): There is outstanding spec work to require all uniform
+      // buffers to be [[block]] decorated, which means structs. This is
+      // currently not the case, so this code handles the cases where the data
+      // is not a block.
+      // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
+      //           https://github.com/gpuweb/gpuweb/issues/1008
+      out << "cbuffer : register(b" << binding->value() << ") {" << std::endl;
+
+      increment_indent();
+      make_indent(out);
+      if (!EmitType(out, type, "")) {
+        return false;
+      }
+      out << " " << var->name() << ";" << std::endl;
+      decrement_indent();
+      out << "};" << std::endl;
+    }
+
+    emitted_uniform = true;
+  }
+  if (emitted_uniform) {
+    out << std::endl;
+  }
+
+  bool emitted_storagebuffer = false;
+  for (auto data : func->referenced_storagebuffer_variables()) {
+    auto* var = data.first;
+    auto* binding = data.second.binding;
+
+    out << "RWByteAddressBuffer " << var->name() << " : register(u"
+        << binding->value() << ");" << std::endl;
+    emitted_storagebuffer = true;
+  }
+  if (emitted_storagebuffer) {
+    out << std::endl;
+  }
+
+  if (!in_variables.empty()) {
+    auto in_struct_name =
+        generate_name(func->name() + "_" + kInStructNameSuffix);
+    auto in_var_name = generate_name(kTintStructInVarPrefix);
+    ep_name_to_in_data_[func->name()] = {in_struct_name, in_var_name};
+
+    make_indent(out);
+    out << "struct " << in_struct_name << " {" << std::endl;
+
+    increment_indent();
+
+    for (auto& data : in_variables) {
+      auto* var = data.first;
+      auto* deco = data.second;
+
+      make_indent(out);
+      if (!EmitType(out, var->type(), var->name())) {
+        return false;
+      }
+
+      out << " " << var->name() << " : ";
+      if (deco->IsLocation()) {
+        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
+        out << "TEXCOORD" << deco->AsLocation()->value();
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out << attr;
+      } else {
+        error_ = "unsupported variable decoration for entry point output";
+        return false;
+      }
+      out << ";" << std::endl;
+    }
+    decrement_indent();
+    make_indent(out);
+
+    out << "};" << std::endl << std::endl;
+  }
+
+  if (!outvariables.empty()) {
+    auto outstruct_name =
+        generate_name(func->name() + "_" + kOutStructNameSuffix);
+    auto outvar_name = generate_name(kTintStructOutVarPrefix);
+    ep_name_to_out_data_[func->name()] = {outstruct_name, outvar_name};
+
+    make_indent(out);
+    out << "struct " << outstruct_name << " {" << std::endl;
+
+    increment_indent();
+    for (auto& data : outvariables) {
+      auto* var = data.first;
+      auto* deco = data.second;
+
+      make_indent(out);
+      if (!EmitType(out, var->type(), var->name())) {
+        return false;
+      }
+
+      out << " " << var->name() << " : ";
+
+      if (deco->IsLocation()) {
+        auto loc = deco->AsLocation()->value();
+        if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
+          out << "TEXCOORD" << loc;
+        } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
+          out << "SV_Target" << loc << "";
+        } else {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out << attr;
+      } else {
+        error_ = "unsupported variable decoration for entry point output";
+        return false;
+      }
+      out << ";" << std::endl;
+    }
+    decrement_indent();
+    make_indent(out);
+    out << "};" << std::endl << std::endl;
+  }
+
+  return true;
+}
+
 std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
   switch (builtin) {
     case ast::Builtin::kPosition:
@@ -1423,6 +1624,62 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   }
 
   if (ep->stage() == ast::PipelineStage::kCompute) {
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t z = 0;
+    std::tie(x, y, z) = func->workgroup_size();
+    out << "[numthreads(" << std::to_string(x) << ", " << std::to_string(y)
+        << ", " << std::to_string(z) << ")]" << std::endl;
+    make_indent(out);
+  }
+
+  auto outdata = ep_name_to_out_data_.find(current_ep_name_);
+  bool has_outdata = outdata != ep_name_to_out_data_.end();
+  if (has_outdata) {
+    out << outdata->second.struct_name;
+  } else {
+    out << "void";
+  }
+  out << " " << namer_.NameFor(current_ep_name_) << "(";
+
+  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
+  if (in_data != ep_name_to_in_data_.end()) {
+    out << in_data->second.struct_name << " " << in_data->second.var_name;
+  }
+  out << ") {" << std::endl;
+
+  increment_indent();
+
+  if (has_outdata) {
+    make_indent(out);
+    out << outdata->second.struct_name << " " << outdata->second.var_name << ";"
+        << std::endl;
+  }
+
+  generating_entry_point_ = true;
+  for (const auto& s : *(func->body())) {
+    if (!EmitStatement(out, s.get())) {
+      return false;
+    }
+  }
+  generating_entry_point_ = false;
+
+  decrement_indent();
+  make_indent(out);
+  out << "}" << std::endl;
+
+  current_ep_name_ = "";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
+                                           ast::Function* func) {
+  make_indent(out);
+
+  current_ep_name_ = func->name();
+
+  if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
     uint32_t x = 0;
     uint32_t y = 0;
     uint32_t z = 0;

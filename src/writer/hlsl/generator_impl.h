@@ -196,11 +196,21 @@ class GeneratorImpl {
   /// @param ep the entry point
   /// @returns true if the entry point data was emitted
   bool EmitEntryPointData(std::ostream& out, ast::EntryPoint* ep);
+  /// Handles emitting information for an entry point
+  /// @param out the output stream
+  /// @param func the entry point
+  /// @returns true if the entry point data was emitted
+  bool EmitEntryPointData(std::ostream& out, ast::Function* func);
   /// Handles emitting the entry point function
   /// @param out the output stream
   /// @param ep the entry point
   /// @returns true if the entry point function was emitted
   bool EmitEntryPointFunction(std::ostream& out, ast::EntryPoint* ep);
+  /// Handles emitting the entry point function
+  /// @param out the output stream
+  /// @param func the entry point
+  /// @returns true if the entry point function was emitted
+  bool EmitEntryPointFunction(std::ostream& out, ast::Function* func);
   /// Handles an if statement
   /// @param out the output stream
   /// @param stmt the statement to emit
