@@ -17,6 +17,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/function.h"
+#include "src/ast/module.h"
+#include "src/ast/type/void_type.h"
 
 namespace tint {
 namespace writer {
@@ -26,13 +29,17 @@ namespace {
 using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
+  ast::type::VoidType void_type;
+
   ast::Module m;
-  m.AddImport(std::make_unique<ast::Import>("GLSL.std.430", "a"));
+  m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
+                                                &void_type));
 
   GeneratorImpl g;
 
   ASSERT_TRUE(g.Generate(m)) << g.error();
-  EXPECT_EQ(g.result(), R"(import "GLSL.std.430" as a;
+  EXPECT_EQ(g.result(), R"(fn my_func() -> void {
+}
 
 )");
 }

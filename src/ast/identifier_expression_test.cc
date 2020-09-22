@@ -24,19 +24,11 @@ using IdentifierExpressionTest = testing::Test;
 
 TEST_F(IdentifierExpressionTest, Creation) {
   IdentifierExpression i("ident");
-  ASSERT_EQ(i.segments().size(), 1u);
-  EXPECT_EQ(i.segments()[0], "ident");
-  EXPECT_EQ(i.path(), "");
   EXPECT_EQ(i.name(), "ident");
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-  IdentifierExpression i(Source{20, 2}, {"ns1", "ns2", "ident"});
-  ASSERT_EQ(i.segments().size(), 3u);
-  EXPECT_EQ(i.segments()[0], "ns1");
-  EXPECT_EQ(i.segments()[1], "ns2");
-  EXPECT_EQ(i.segments()[2], "ident");
-  EXPECT_EQ(i.path(), "ns1::ns2");
+  IdentifierExpression i(Source{20, 2}, "ident");
   EXPECT_EQ(i.name(), "ident");
 
   auto src = i.source();
@@ -54,18 +46,8 @@ TEST_F(IdentifierExpressionTest, IsValid) {
   EXPECT_TRUE(i.IsValid());
 }
 
-TEST_F(IdentifierExpressionTest, IsValid_WithNamespaces) {
-  IdentifierExpression i({"ns1", "n2", "ident"});
-  EXPECT_TRUE(i.IsValid());
-}
-
 TEST_F(IdentifierExpressionTest, IsValid_BlankName) {
   IdentifierExpression i("");
-  EXPECT_FALSE(i.IsValid());
-}
-
-TEST_F(IdentifierExpressionTest, IsValid_BlankNamespace) {
-  IdentifierExpression i({"ns1", "", "ident"});
   EXPECT_FALSE(i.IsValid());
 }
 
@@ -74,14 +56,6 @@ TEST_F(IdentifierExpressionTest, ToStr) {
   std::ostringstream out;
   i.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Identifier{ident}
-)");
-}
-
-TEST_F(IdentifierExpressionTest, ToStr_WithNamespace) {
-  IdentifierExpression i({"ns1", "ns2", "ident"});
-  std::ostringstream out;
-  i.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Identifier{ns1::ns2::ident}
 )");
 }
 

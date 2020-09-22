@@ -203,7 +203,6 @@ void ParserImpl::translation_unit() {
 
 // global_decl
 //  : SEMICOLON
-//  | import_decl SEMICOLON
 //  | global_variable_decl SEMICLON
 //  | global_constant_decl SEMICOLON
 //  | type_alias SEMICOLON
@@ -215,19 +214,6 @@ void ParserImpl::global_decl() {
 
   if (t.IsSemicolon()) {
     next();  // consume the peek
-    return;
-  }
-
-  auto import = import_decl();
-  if (has_error())
-    return;
-  if (import != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for import");
-      return;
-    }
-    module_.AddImport(std::move(import));
     return;
   }
 
@@ -279,69 +265,6 @@ void ParserImpl::global_decl() {
   }
 
   set_error(t);
-}
-
-// import_decl
-//  : IMPORT STRING_LITERAL AS (IDENT NAMESPACE)* IDENT
-std::unique_ptr<ast::Import> ParserImpl::import_decl() {
-  auto t = peek();
-  if (!t.IsImport())
-    return {};
-
-  auto source = t.source();
-  next();  // consume the import token
-
-  t = next();
-  if (!t.IsStringLiteral()) {
-    set_error(t, "missing path for import");
-    return {};
-  }
-  auto path = t.to_str();
-  if (path.length() == 0) {
-    set_error(t, "import path must not be empty");
-    return {};
-  }
-
-  t = next();
-  if (!t.IsAs()) {
-    set_error(t, "missing 'as' for import");
-    return {};
-  }
-
-  std::string name = "";
-  for (;;) {
-    t = peek();
-    if (!t.IsIdentifier()) {
-      break;
-    }
-    next();  // consume the peek
-
-    name += t.to_str();
-
-    t = peek();
-    if (!t.IsNamespace()) {
-      break;
-    }
-    next();  // consume the peek
-
-    name += "::";
-  }
-  if (name.length() == 0) {
-    if (t.IsEof() || t.IsSemicolon()) {
-      set_error(t, "missing name for import");
-    } else {
-      set_error(t, "invalid name for import");
-    }
-    return {};
-  }
-  if (name.length() > 2) {
-    auto end = name.length() - 1;
-    if (name[end] == ':' && name[end - 1] == ':') {
-      set_error(t, "invalid name for import");
-      return {};
-    }
-  }
-  return std::make_unique<ast::Import>(source, path, name);
 }
 
 // global_variable_decl
@@ -2840,7 +2763,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
 }
 
 // primary_expression
-//   : (IDENT NAMESPACE)* IDENT
+//   : IDENT
 //   | type_decl PAREN_LEFT argument_expression_list* PAREN_RIGHT
 //   | const_literal
 //   | paren_rhs_stmt
@@ -2911,24 +2834,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   } else if (t.IsIdentifier()) {
     next();  // Consume the peek
 
-    std::vector<std::string> ident;
-    ident.push_back(t.to_str());
-    for (;;) {
-      t = peek();
-      if (!t.IsNamespace())
-        break;
-
-      next();  // Consume the peek
-      t = next();
-      if (!t.IsIdentifier()) {
-        set_error(t, "identifier expected");
-        return nullptr;
-      }
-
-      ident.push_back(t.to_str());
-    }
-    return std::make_unique<ast::IdentifierExpression>(source,
-                                                       std::move(ident));
+    return std::make_unique<ast::IdentifierExpression>(source, t.to_str());
   }
 
   auto* type = type_decl();

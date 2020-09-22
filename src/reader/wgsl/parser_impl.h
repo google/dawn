@@ -28,7 +28,6 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/function.h"
-#include "src/ast/import.h"
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
@@ -123,9 +122,6 @@ class ParserImpl {
   void translation_unit();
   /// Parses the `global_decl` grammar element
   void global_decl();
-  /// Parses the `import_decl grammar element
-  /// @returns the import object or nullptr if an error was encountered
-  std::unique_ptr<ast::Import> import_decl();
   /// Parses a `global_variable_decl` grammar element
   /// @returns the variable parsed or nullptr
   std::unique_ptr<ast::Variable> global_variable_decl();

@@ -21,7 +21,6 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/alias_type.h"
@@ -135,10 +134,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
-  /// Handles generating an import command
-  /// @param import the import to generate
-  /// @returns true if the import was emitted
-  bool EmitImport(const ast::Import* import);
   /// Handles generating constructor expressions
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted

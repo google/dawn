@@ -30,7 +30,9 @@
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -180,6 +182,164 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
                          IntrinsicFloatTest,
                          testing::Values(IntrinsicData{"isNan", "OpIsNan"},
                                          IntrinsicData{"isInf", "OpIsInf"}));
+
+using IntrinsicIntTest = testing::TestWithParam<IntrinsicData>;
+TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpLoad %3 %1
+%5 = )" + param.op +
+                " %3 %6\n");
+}
+
+TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec3(&i32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%6 = )" + param.op +
+                " %3 %7\n");
+}
+
+TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &u32);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpLoad %3 %1
+%5 = )" + param.op +
+                " %3 %6\n");
+}
+
+TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec3(&u32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%6 = )" + param.op +
+                " %3 %7\n");
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    IntrinsicIntTest,
+    testing::Values(IntrinsicData{"countOneBits", "OpBitCount"},
+                    IntrinsicData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(BuilderTest, Call_Dot) {
   ast::type::F32Type f32;
@@ -1212,6 +1372,1347 @@ TEST_F(BuilderTest, Call_TextureSampleCompare_Twice) {
 %20 = OpLoad %7 %5
 %21 = OpSampledImage %15 %19 %20
 %18 = OpImageSampleDrefExplicitLod %4 %21 %14 %13 Lod %17
+)");
+}
+
+TEST_F(BuilderTest, Call_GLSLMethod_WithLoad) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  auto var = std::make_unique<ast::Variable>("ident",
+                                             ast::StorageClass::kPrivate, &f32);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("round"),
+                           std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
+OpName %1 "ident"
+OpName %7 "a_func"
+%3 = OpTypeFloat 32
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%11 = OpLoad %3 %1
+%9 = OpExtInst %3 %10 Round %11
+OpFunctionEnd
+)");
+}
+
+using Intrinsic_Builtin_SingleParam_Float_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_SingleParam_Float_Test,
+                         testing::Values(IntrinsicData{"abs", "FAbs"},
+                                         IntrinsicData{"acos", "Acos"},
+                                         IntrinsicData{"asin", "Asin"},
+                                         IntrinsicData{"atan", "Atan"},
+                                         IntrinsicData{"ceil", "Ceil"},
+                                         IntrinsicData{"cos", "Cos"},
+                                         IntrinsicData{"cosh", "Cosh"},
+                                         IntrinsicData{"exp", "Exp"},
+                                         IntrinsicData{"exp2", "Exp2"},
+                                         IntrinsicData{"floor", "Floor"},
+                                         IntrinsicData{"fract", "Fract"},
+                                         IntrinsicData{"inverseSqrt",
+                                                       "InverseSqrt"},
+                                         IntrinsicData{"log", "Log"},
+                                         IntrinsicData{"log2", "Log2"},
+                                         IntrinsicData{"round", "Round"},
+                                         IntrinsicData{"sign", "FSign"},
+                                         IntrinsicData{"sin", "Sin"},
+                                         IntrinsicData{"sinh", "Sinh"},
+                                         IntrinsicData{"sqrt", "Sqrt"},
+                                         IntrinsicData{"tan", "Tan"},
+                                         IntrinsicData{"tanh", "Tanh"},
+                                         IntrinsicData{"trunc", "Trunc"}));
+
+TEST_F(BuilderTest, Call_Length_Scalar) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("length"), std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 Length %8
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call_Length_Vector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("length"), std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpTypeVector %6 2
+%9 = OpConstant %6 1
+%10 = OpConstantComposite %8 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 Length %10
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call_Normalize) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("normalize"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 Normalize %10
+OpFunctionEnd
+)");
+}
+
+using Intrinsic_Builtin_DualParam_Float_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_DualParam_Float_Test,
+                         testing::Values(IntrinsicData{"atan2", "Atan2"},
+                                         IntrinsicData{"max", "NMax"},
+                                         IntrinsicData{"min", "NMin"},
+                                         IntrinsicData{"pow", "Pow"},
+                                         IntrinsicData{"reflect", "Reflect"},
+                                         IntrinsicData{"step", "Step"}));
+
+TEST_F(BuilderTest, Call_Distance_Scalar) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("distance"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 Distance %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call_Distance_Vector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("distance"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpTypeVector %6 2
+%9 = OpConstant %6 1
+%10 = OpConstantComposite %8 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 Distance %10 %10
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call_Cross) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("cross"),
+                           std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 3
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 Cross %10 %10
+OpFunctionEnd
+)");
+}
+
+using Intrinsic_Builtin_ThreeParam_Float_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    Intrinsic_Builtin_ThreeParam_Float_Test,
+    testing::Values(IntrinsicData{"clamp", "NClamp"},
+                    IntrinsicData{"faceForward", "FaceForward"},
+                    IntrinsicData{"fma", "Fma"},
+                    IntrinsicData{"mix", "FMix"},
+
+                    IntrinsicData{"smoothStep", "SmoothStep"}));
+
+using Intrinsic_Builtin_SingleParam_Sint_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 1
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_SingleParam_Sint_Test,
+                         testing::Values(IntrinsicData{"abs", "SAbs"}));
+
+using Intrinsic_Builtin_SingleParam_Uint_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_SingleParam_Uint_Test,
+                         testing::Values(IntrinsicData{"abs", "SAbs"}));
+
+using Intrinsic_Builtin_DualParam_SInt_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 1
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_DualParam_SInt_Test,
+                         testing::Values(IntrinsicData{"max", "SMax"},
+                                         IntrinsicData{"min", "SMin"}));
+
+using Intrinsic_Builtin_DualParam_UInt_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_DualParam_UInt_Test,
+                         testing::Values(IntrinsicData{"max", "UMax"},
+                                         IntrinsicData{"min", "UMin"}));
+
+using Intrinsic_Builtin_ThreeParam_Sint_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 1
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_ThreeParam_Sint_Test,
+                         testing::Values(IntrinsicData{"clamp", "SClamp"}));
+
+using Intrinsic_Builtin_ThreeParam_Uint_Test =
+    testing::TestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%8 = OpConstant %6 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                R"( %8 %8 %8
+OpFunctionEnd
+)");
+}
+
+TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 2);
+  ast::type::VoidType void_type;
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                R"( %10 %10 %10
+OpFunctionEnd
+)");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         Intrinsic_Builtin_ThreeParam_Uint_Test,
+                         testing::Values(IntrinsicData{"clamp", "UClamp"}));
+
+TEST_F(BuilderTest, Call_Determinant) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kPrivate, &mat);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("determinant"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %5 "var"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%9 = OpTypeFloat 32
+%8 = OpTypeVector %9 3
+%7 = OpTypeMatrix %8 3
+%6 = OpTypePointer Private %7
+%10 = OpConstantNull %7
+%5 = OpVariable %6 Private %10
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%13 = OpLoad %7 %5
+%11 = OpExtInst %9 %12 Determinant %13
+OpFunctionEnd
 )");
 }
 

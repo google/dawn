@@ -19,7 +19,6 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/function.h"
-#include "src/ast/import.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 
@@ -32,7 +31,7 @@ using ModuleTest = testing::Test;
 TEST_F(ModuleTest, Creation) {
   Module m;
 
-  EXPECT_EQ(m.imports().size(), 0u);
+  EXPECT_EQ(m.functions().size(), 0u);
 }
 
 TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
@@ -40,44 +39,6 @@ TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
   const auto str = m.to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
-}
-
-TEST_F(ModuleTest, Imports) {
-  Module m;
-
-  m.AddImport(std::make_unique<Import>("GLSL.std.430", "std::glsl"));
-  m.AddImport(std::make_unique<Import>("OpenCL.debug.100", "std::debug"));
-
-  EXPECT_EQ(2u, m.imports().size());
-  EXPECT_EQ("std::glsl", m.imports()[0]->name());
-}
-
-TEST_F(ModuleTest, ToStrWithImport) {
-  Module m;
-  m.AddImport(std::make_unique<Import>("GLSL.std.430", "std::glsl"));
-  const auto str = m.to_str();
-  EXPECT_EQ(str, R"(Module{
-  Import{"GLSL.std.430" as std::glsl}
-}
-)");
-}
-
-TEST_F(ModuleTest, LookupImport) {
-  Module m;
-
-  auto i = std::make_unique<Import>("GLSL.std.430", "std::glsl");
-  m.AddImport(std::move(i));
-  m.AddImport(std::make_unique<Import>("OpenCL.debug.100", "std::debug"));
-
-  auto* import = m.FindImportByName("std::glsl");
-  ASSERT_NE(nullptr, import);
-  EXPECT_EQ(import->path(), "GLSL.std.430");
-  EXPECT_EQ(import->name(), "std::glsl");
-}
-
-TEST_F(ModuleTest, LookupImportMissing) {
-  Module m;
-  EXPECT_EQ(nullptr, m.FindImportByName("Missing"));
 }
 
 TEST_F(ModuleTest, LookupFunction) {
@@ -98,24 +59,6 @@ TEST_F(ModuleTest, LookupFunctionMissing) {
 TEST_F(ModuleTest, IsValid_Empty) {
   Module m;
   EXPECT_TRUE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_Import) {
-  Module m;
-  m.AddImport(std::make_unique<Import>("GLSL.std.430", "std::glsl"));
-  EXPECT_TRUE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_Null_Import) {
-  Module m;
-  m.AddImport(nullptr);
-  EXPECT_FALSE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_Invalid_Import) {
-  Module m;
-  m.AddImport(std::make_unique<Import>());
-  EXPECT_FALSE(m.IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {

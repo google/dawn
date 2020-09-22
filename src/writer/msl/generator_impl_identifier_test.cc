@@ -24,16 +24,7 @@ namespace {
 
 using MslGeneratorImplTest = testing::Test;
 
-TEST_F(MslGeneratorImplTest, DISABLED_EmitExpression_Identifier) {
-  ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "std::glsl");
-}
-
-TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single) {
+TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
   ast::IdentifierExpression i("foo");
 
   ast::Module m;
@@ -49,16 +40,6 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
   GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
   EXPECT_EQ(g.result(), "virtual_tint_0");
-}
-
-// TODO(dsinclair): Handle import names
-TEST_F(MslGeneratorImplTest, DISABLED_EmitIdentifierExpression_MultipleNames) {
-  ast::IdentifierExpression i({"std", "glsl", "init"});
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "std::glsl::init");
 }
 
 }  // namespace

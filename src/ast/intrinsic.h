@@ -15,41 +15,111 @@
 #ifndef SRC_AST_INTRINSIC_H_
 #define SRC_AST_INTRINSIC_H_
 
+#include <ostream>
 #include <string>
 
 namespace tint {
 namespace ast {
+
+enum class Intrinsic {
+  kNone = -1,
+
+  kAbs,
+  kAcos,
+  kAll,
+  kAny,
+  kAsin,
+  kAtan,
+  kAtan2,
+  kCeil,
+  kClamp,
+  kCos,
+  kCosh,
+  kCountOneBits,
+  kCross,
+  kDeterminant,
+  kDistance,
+  kDot,
+  kDpdx,
+  kDpdxCoarse,
+  kDpdxFine,
+  kDpdy,
+  kDpdyCoarse,
+  kDpdyFine,
+  kExp,
+  kExp2,
+  kFaceForward,
+  kFloor,
+  kFma,
+  kFract,
+  kFrexp,
+  kFwidth,
+  kFwidthCoarse,
+  kFwidthFine,
+  kInverseSqrt,
+  kIsFinite,
+  kIsInf,
+  kIsNan,
+  kIsNormal,
+  kLdexp,
+  kLength,
+  kLog,
+  kLog2,
+  kMax,
+  kMin,
+  kMix,
+  kModf,
+  kNormalize,
+  kOuterProduct,
+  kPow,
+  kReflect,
+  kReverseBits,
+  kRound,
+  kSelect,
+  kSign,
+  kSin,
+  kSinh,
+  kSmoothStep,
+  kSqrt,
+  kStep,
+  kTan,
+  kTanh,
+  kTextureLoad,
+  kTextureSample,
+  kTextureSampleBias,
+  kTextureSampleCompare,
+  kTextureSampleLevel,
+  kTrunc
+};
+
+std::ostream& operator<<(std::ostream& out, Intrinsic i);
+
 namespace intrinsic {
 
 /// Determines if the given |name| is a coarse derivative
-/// @param name the name to check
+/// @param i the intrinsic
 /// @returns true if the given derivative is coarse.
-bool IsCoarseDerivative(const std::string& name);
+bool IsCoarseDerivative(ast::Intrinsic i);
 
 /// Determines if the given |name| is a fine derivative
-/// @param name the name to check
+/// @param i the intrinsic
 /// @returns true if the given derivative is fine.
-bool IsFineDerivative(const std::string& name);
+bool IsFineDerivative(ast::Intrinsic i);
 
 /// Determine if the given |name| is a derivative intrinsic
-/// @param name the name to check
+/// @param i the intrinsic
 /// @returns true if the given |name| is a derivative intrinsic
-bool IsDerivative(const std::string& name);
+bool IsDerivative(ast::Intrinsic i);
 
 /// Determines if the given |name| is a float classification intrinsic
-/// @param name the name to check
+/// @param i the intrinsic
 /// @returns true if the given |name| is a float intrinsic
-bool IsFloatClassificationIntrinsic(const std::string& name);
+bool IsFloatClassificationIntrinsic(ast::Intrinsic i);
 
 /// Determines if the given |name| is a texture operation intrinsic
-/// @param name the name to check
+/// @param i the intrinsic
 /// @returns true if the given |name| is a texture operation intrinsic
-bool IsTextureOperationIntrinsic(const std::string& name);
-
-/// Determines if the given |name| is an intrinsic
-/// @param name the name to check
-/// @returns true if the given |name| is an intrinsic
-bool IsIntrinsic(const std::string& name);
+bool IsTextureIntrinsic(ast::Intrinsic i);
 
 }  // namespace intrinsic
 }  // namespace ast

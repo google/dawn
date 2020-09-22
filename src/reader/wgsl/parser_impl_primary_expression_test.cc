@@ -43,25 +43,6 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   EXPECT_EQ(ident->name(), "a");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_Ident_WithNamespace) {
-  auto* p = parser("a::b::c::d");
-  auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsIdentifier());
-  auto* ident = e->AsIdentifier();
-  EXPECT_EQ(ident->path(), "a::b::c");
-  EXPECT_EQ(ident->name(), "d");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Ident_MissingIdent) {
-  auto* p = parser("a::");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:4: identifier expected");
-}
-
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   auto* p = parser("vec4<i32>(1, 2, 3, 4))");
   auto e = p->primary_expression();

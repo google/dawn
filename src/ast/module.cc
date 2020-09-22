@@ -27,15 +27,6 @@ Module::Module(Module&&) = default;
 
 Module::~Module() = default;
 
-Import* Module::FindImportByName(const std::string& name) const {
-  for (const auto& import : imports_) {
-    if (import->name() == name) {
-      return import.get();
-    }
-  }
-  return nullptr;
-}
-
 Function* Module::FindFunctionByName(const std::string& name) const {
   for (const auto& func : functions_) {
     if (func->name() == name) {
@@ -56,11 +47,6 @@ Function* Module::FindFunctionByNameAndStage(const std::string& name,
 }
 
 bool Module::IsValid() const {
-  for (const auto& import : imports_) {
-    if (import == nullptr || !import->IsValid()) {
-      return false;
-    }
-  }
   for (const auto& var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
       return false;
@@ -84,9 +70,6 @@ std::string Module::to_str() const {
 
   out << "Module{" << std::endl;
   const auto indent = 2;
-  for (const auto& import : imports_) {
-    import->to_str(out, indent);
-  }
   for (const auto& var : global_variables_) {
     var->to_str(out, indent);
   }

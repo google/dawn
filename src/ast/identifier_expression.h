@@ -16,10 +16,9 @@
 #define SRC_AST_IDENTIFIER_EXPRESSION_H_
 
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "src/ast/expression.h"
+#include "src/ast/intrinsic.h"
 
 namespace tint {
 namespace ast {
@@ -34,31 +33,20 @@ class IdentifierExpression : public Expression {
   /// @param source the source
   /// @param name the name
   IdentifierExpression(const Source& source, const std::string& name);
-  /// Constructor
-  /// @param segments the name segments
-  explicit IdentifierExpression(std::vector<std::string> segments);
-  /// Constructor
-  /// @param source the identifier expression source
-  /// @param segments the name segments
-  IdentifierExpression(const Source& source, std::vector<std::string> segments);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
 
-  /// Sets the name segments
-  /// @param segments the name segments
-  void set_segments(std::vector<std::string> segments) {
-    segments_ = std::move(segments);
-  }
-  /// @returns the name
-  std::vector<std::string> segments() const { return segments_; }
-
-  /// @returns true if this identifier has a path component
-  bool has_path() const { return segments_.size() > 1; }
-  /// @returns the path part of the identifier or blank if no path
-  std::string path() const;
   /// @returns the name part of the identifier
-  std::string name() const { return segments_.back(); }
+  std::string name() const { return name_; }
+
+  /// Sets the intrinsic for this identifier
+  /// @param i the intrinsic to set
+  void set_intrinsic(Intrinsic i) { intrinsic_ = i; }
+  /// @returns the intrinsic this identifier represents
+  Intrinsic intrinsic() const { return intrinsic_; }
+  /// @returns true if this identifier is for an intrinsic
+  bool IsIntrinsic() const { return intrinsic_ != Intrinsic::kNone; }
 
   /// @returns true if this is an identifier expression
   bool IsIdentifier() const override;
@@ -74,7 +62,8 @@ class IdentifierExpression : public Expression {
  private:
   IdentifierExpression(const IdentifierExpression&) = delete;
 
-  std::vector<std::string> segments_;
+  Intrinsic intrinsic_ = Intrinsic::kNone;
+  std::string name_;
 };
 
 }  // namespace ast

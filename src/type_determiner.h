@@ -107,6 +107,10 @@ class TypeDeterminer {
                                  const ast::ExpressionList& params,
                                  uint32_t* id);
 
+  /// Sets the intrinsic data information for the identifier if needed
+  /// @param ident the identifier expression
+  void SetIntrinsicIfNeeded(ast::IdentifierExpression* ident);
+
  private:
   void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(ast::Variable* var);
@@ -119,7 +123,8 @@ class TypeDeterminer {
   bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
-  bool DetermineIntrinsic(const std::string& name, ast::CallExpression* expr);
+  bool DetermineIntrinsic(ast::IdentifierExpression* name,
+                          ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 

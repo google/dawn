@@ -44,23 +44,6 @@ TEST_F(SpvParserTest, Import_ImportGlslStd450) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   EXPECT_THAT(p->glsl_std_450_imports(), ElementsAre(1));
-  const auto module_ast = p->module().to_str();
-  EXPECT_THAT(module_ast, HasSubstr(R"(Import{"GLSL.std.450" as std::glsl})"));
-}
-
-TEST_F(SpvParserTest, Import_ImportGlslStd450Twice) {
-  auto* p = parser(test::Assemble(R"(
-    %1  = OpExtInstImport "GLSL.std.450"
-    %42 = OpExtInstImport "GLSL.std.450"
-  )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  EXPECT_THAT(p->glsl_std_450_imports(), UnorderedElementsAre(1, 42));
-  const auto module = p->module();
-  EXPECT_EQ(module.imports().size(), 1u);
-  const auto module_ast = module.to_str();
-  // TODO(dneto): Use a matcher to show there is only one import.
-  EXPECT_THAT(module_ast, HasSubstr(R"(Import{"GLSL.std.450" as std::glsl})"));
 }
 
 // TODO(dneto): We don't currently support other kinds of extended instruction

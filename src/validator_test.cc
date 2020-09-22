@@ -63,33 +63,6 @@ namespace {
 
 class ValidatorTest : public ValidatorTestHelper, public testing::Test {};
 
-TEST_F(ValidatorTest, Import) {
-  ast::Module m;
-  m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
-
-  EXPECT_TRUE(v()->CheckImports(&m));
-}
-
-TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
-  ast::Module m;
-  m.AddImport(
-      std::make_unique<ast::Import>(Source{12, 34}, "not.GLSL", "glsl"));
-
-  EXPECT_FALSE(v()->CheckImports(&m));
-  ASSERT_TRUE(v()->has_error());
-  EXPECT_EQ(v()->error(), "12:34: v-0001: unknown import: not.GLSL");
-}
-
-TEST_F(ValidatorTest, Import_Fail_Typo) {
-  ast::Module m;
-  m.AddImport(
-      std::make_unique<ast::Import>(Source{12, 34}, "GLSL.std.4501", "glsl"));
-
-  EXPECT_FALSE(v()->CheckImports(&m));
-  ASSERT_TRUE(v()->has_error());
-  EXPECT_EQ(v()->error(), "12:34: v-0001: unknown import: GLSL.std.4501");
-}
-
 TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   // 1 = my_var;
   ast::type::I32Type i32;

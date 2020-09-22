@@ -16,7 +16,6 @@
 
 #include <sstream>
 
-#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -31,7 +30,6 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -469,44 +467,46 @@ bool GeneratorImpl::EmitBreak(std::ostream& out, ast::BreakStatement*) {
   return true;
 }
 
-std::string GeneratorImpl::generate_intrinsic_name(const std::string& name) {
-  if (name == "any") {
+std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
+  if (intrinsic == ast::Intrinsic::kAny) {
     return "any";
   }
-  if (name == "all") {
+  if (intrinsic == ast::Intrinsic::kAll) {
     return "all";
   }
-  if (name == "dot") {
+  if (intrinsic == ast::Intrinsic::kDot) {
     return "dot";
   }
-  if (name == "is_finite") {
+  if (intrinsic == ast::Intrinsic::kIsFinite) {
     return "isfinite";
   }
-  if (name == "is_inf") {
+  if (intrinsic == ast::Intrinsic::kIsInf) {
     return "isinf";
   }
-  if (name == "is_nan") {
+  if (intrinsic == ast::Intrinsic::kIsNan) {
     return "isnan";
   }
-  if (name == "dpdy") {
+  if (intrinsic == ast::Intrinsic::kDpdy) {
     return "ddy";
   }
-  if (name == "dpdy_fine") {
+  if (intrinsic == ast::Intrinsic::kDpdyFine) {
     return "ddy_fine";
   }
-  if (name == "dpdy_coarse") {
+  if (intrinsic == ast::Intrinsic::kDpdyCoarse) {
     return "ddy_coarse";
   }
-  if (name == "dpdx") {
+  if (intrinsic == ast::Intrinsic::kDpdx) {
     return "ddx";
   }
-  if (name == "dpdx_fine") {
+  if (intrinsic == ast::Intrinsic::kDpdxFine) {
     return "ddx_fine";
   }
-  if (name == "dpdx_coarse") {
+  if (intrinsic == ast::Intrinsic::kDpdxCoarse) {
     return "ddx_coarse";
   }
-  if (name == "fwidth" || name == "fwidth_fine" || name == "fwidth_coarse") {
+  if (intrinsic == ast::Intrinsic::kFwidth ||
+      intrinsic == ast::Intrinsic::kFwidthFine ||
+      intrinsic == ast::Intrinsic::kFwidthCoarse) {
     return "fwidth";
   }
   return "";
@@ -521,15 +521,15 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   auto* ident = expr->func()->AsIdentifier();
-  if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
+  if (ident->IsIntrinsic()) {
     const auto& params = expr->params();
-    if (ident->name() == "select") {
+    if (ident->intrinsic() == ast::Intrinsic::kSelect) {
       error_ = "select not supported in HLSL backend yet";
       return false;
-    } else if (ident->name() == "is_normal") {
+    } else if (ident->intrinsic() == ast::Intrinsic::kIsNormal) {
       error_ = "is_normal not supported in HLSL backend yet";
       return false;
-    } else if (ident->name() == "outer_product") {
+    } else if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
       error_ = "outer_product not supported yet";
       return false;
       // TODO(dsinclair): This gets tricky. We need to generate two variables to
@@ -582,11 +582,15 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
       // out << ")";
     } else {
-      auto name = generate_intrinsic_name(ident->name());
+      auto name = generate_intrinsic_name(ident->intrinsic());
       if (name.empty()) {
-        error_ = "unable to determine intrinsic name for intrinsic: " +
-                 ident->name();
-        return false;
+        if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
+          error_ = "Textures not implemented yet";
+          return false;
+        }
+        if (!EmitBuiltinName(pre, out, expr)) {
+          return false;
+        }
       }
 
       make_indent(out);
@@ -609,162 +613,39 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return true;
   }
 
-  if (!ident->has_path()) {
-    auto name = ident->name();
-    auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
-    if (it != ep_func_name_remapped_.end()) {
-      name = it->second;
-    }
+  auto name = ident->name();
+  auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
+  if (it != ep_func_name_remapped_.end()) {
+    name = it->second;
+  }
 
-    auto* func = module_->FindFunctionByName(ident->name());
-    if (func == nullptr) {
-      error_ = "Unable to find function: " + name;
-      return false;
-    }
+  auto* func = module_->FindFunctionByName(ident->name());
+  if (func == nullptr) {
+    error_ = "Unable to find function: " + name;
+    return false;
+  }
 
-    out << name << "(";
+  out << name << "(";
 
-    bool first = true;
-    if (has_referenced_in_var_needing_struct(func)) {
-      auto var_name = current_ep_var_name(VarType::kIn);
-      if (!var_name.empty()) {
-        out << var_name;
-        first = false;
-      }
+  bool first = true;
+  if (has_referenced_in_var_needing_struct(func)) {
+    auto var_name = current_ep_var_name(VarType::kIn);
+    if (!var_name.empty()) {
+      out << var_name;
+      first = false;
     }
-    if (has_referenced_out_var_needing_struct(func)) {
-      auto var_name = current_ep_var_name(VarType::kOut);
-      if (!var_name.empty()) {
-        if (!first) {
-          out << ", ";
-        }
-        first = false;
-        out << var_name;
-      }
-    }
-
-    const auto& params = expr->params();
-    for (const auto& param : params) {
+  }
+  if (has_referenced_out_var_needing_struct(func)) {
+    auto var_name = current_ep_var_name(VarType::kOut);
+    if (!var_name.empty()) {
       if (!first) {
         out << ", ";
       }
       first = false;
-
-      if (!EmitExpression(pre, out, param.get())) {
-        return false;
-      }
+      out << var_name;
     }
-
-    out << ")";
-  } else {
-    return EmitImportFunction(pre, out, expr);
-  }
-  return true;
-}
-
-bool GeneratorImpl::EmitImportFunction(std::ostream& pre,
-                                       std::ostream& out,
-                                       ast::CallExpression* expr) {
-  auto* ident = expr->func()->AsIdentifier();
-
-  auto* imp = module_->FindImportByName(ident->path());
-  if (imp == nullptr) {
-    error_ = "unable to find import for " + ident->path();
-    return 0;
-  }
-  auto id = imp->GetIdForMethod(ident->name());
-  if (id == 0) {
-    error_ = "unable to lookup: " + ident->name() + " in " + ident->path();
   }
 
-  switch (id) {
-    case GLSLstd450Acos:
-    case GLSLstd450Asin:
-    case GLSLstd450Atan:
-    case GLSLstd450Atan2:
-    case GLSLstd450Ceil:
-    case GLSLstd450Cos:
-    case GLSLstd450Cosh:
-    case GLSLstd450Cross:
-    case GLSLstd450Degrees:
-    case GLSLstd450Determinant:
-    case GLSLstd450Distance:
-    case GLSLstd450Exp:
-    case GLSLstd450Exp2:
-    case GLSLstd450FaceForward:
-    case GLSLstd450Floor:
-    case GLSLstd450Fma:
-    case GLSLstd450Length:
-    case GLSLstd450Log:
-    case GLSLstd450Log2:
-    case GLSLstd450Normalize:
-    case GLSLstd450Pow:
-    case GLSLstd450Radians:
-    case GLSLstd450Reflect:
-    case GLSLstd450Round:
-    case GLSLstd450Sin:
-    case GLSLstd450Sinh:
-    case GLSLstd450SmoothStep:
-    case GLSLstd450Sqrt:
-    case GLSLstd450Step:
-    case GLSLstd450Tan:
-    case GLSLstd450Tanh:
-    case GLSLstd450Trunc:
-      out << ident->name();
-      break;
-    case GLSLstd450Fract:
-      out << "frac";
-      break;
-    case GLSLstd450InterpolateAtCentroid:
-      out << "EvaluateAttributeAtCentroid";
-      break;
-    case GLSLstd450InverseSqrt:
-      out << "rsqrt";
-      break;
-    case GLSLstd450FMix:
-      out << "mix";
-      break;
-    case GLSLstd450SSign:
-    case GLSLstd450FSign:
-      out << "sign";
-      break;
-    case GLSLstd450FAbs:
-    case GLSLstd450SAbs:
-      out << "abs";
-      break;
-    case GLSLstd450FMax:
-    case GLSLstd450NMax:
-    case GLSLstd450SMax:
-    case GLSLstd450UMax:
-      out << "max";
-      break;
-    case GLSLstd450FMin:
-    case GLSLstd450NMin:
-    case GLSLstd450SMin:
-    case GLSLstd450UMin:
-      out << "min";
-      break;
-    case GLSLstd450FClamp:
-    case GLSLstd450SClamp:
-    case GLSLstd450NClamp:
-    case GLSLstd450UClamp:
-      out << "clamp";
-      break;
-    // TODO(dsinclair): Determine mappings for the following
-    case GLSLstd450Atanh:
-    case GLSLstd450Asinh:
-    case GLSLstd450Acosh:
-    case GLSLstd450FindILsb:
-    case GLSLstd450FindUMsb:
-    case GLSLstd450FindSMsb:
-    case GLSLstd450MatrixInverse:
-    case GLSLstd450RoundEven:
-      error_ = "Unknown import method: " + ident->name();
-      return false;
-  }
-
-  out << "(";
-  bool first = true;
   const auto& params = expr->params();
   for (const auto& param : params) {
     if (!first) {
@@ -776,7 +657,69 @@ bool GeneratorImpl::EmitImportFunction(std::ostream& pre,
       return false;
     }
   }
+
   out << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitBuiltinName(std::ostream&,
+                                    std::ostream& out,
+                                    ast::CallExpression* expr) {
+  auto* ident = expr->func()->AsIdentifier();
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kAcos:
+    case ast::Intrinsic::kAsin:
+    case ast::Intrinsic::kAtan:
+    case ast::Intrinsic::kAtan2:
+    case ast::Intrinsic::kCeil:
+    case ast::Intrinsic::kCos:
+    case ast::Intrinsic::kCosh:
+    case ast::Intrinsic::kCross:
+    case ast::Intrinsic::kDeterminant:
+    case ast::Intrinsic::kDistance:
+    case ast::Intrinsic::kExp:
+    case ast::Intrinsic::kExp2:
+    case ast::Intrinsic::kFloor:
+    case ast::Intrinsic::kFma:
+    case ast::Intrinsic::kLength:
+    case ast::Intrinsic::kLog:
+    case ast::Intrinsic::kLog2:
+    case ast::Intrinsic::kNormalize:
+    case ast::Intrinsic::kPow:
+    case ast::Intrinsic::kReflect:
+    case ast::Intrinsic::kRound:
+    case ast::Intrinsic::kSin:
+    case ast::Intrinsic::kSinh:
+    case ast::Intrinsic::kSqrt:
+    case ast::Intrinsic::kStep:
+    case ast::Intrinsic::kTan:
+    case ast::Intrinsic::kTanh:
+    case ast::Intrinsic::kTrunc:
+    case ast::Intrinsic::kMix:
+    case ast::Intrinsic::kSign:
+    case ast::Intrinsic::kAbs:
+    case ast::Intrinsic::kMax:
+    case ast::Intrinsic::kMin:
+    case ast::Intrinsic::kClamp:
+      out << ident->name();
+      break;
+    case ast::Intrinsic::kFaceForward:
+      out << "faceforward";
+      break;
+    case ast::Intrinsic::kFract:
+      out << "frac";
+      break;
+    case ast::Intrinsic::kInverseSqrt:
+      out << "rsqrt";
+      break;
+    case ast::Intrinsic::kSmoothStep:
+      out << "smoothstep";
+      break;
+    default:
+      error_ = "Unknown builtin method: " + ident->name();
+      return false;
+  }
 
   return true;
 }
@@ -957,12 +900,6 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    std::ostream& out,
                                    ast::IdentifierExpression* expr) {
   auto* ident = expr->AsIdentifier();
-  if (ident->has_path()) {
-    // TODO(dsinclair): Handle identifier with path
-    error_ = "Identifier paths not handled yet.";
-    return false;
-  }
-
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
     if (global_is_in_struct(var)) {
@@ -1832,10 +1769,6 @@ bool GeneratorImpl::is_storage_buffer_access(
   // Check if this is a storage buffer variable
   if (structure->IsIdentifier()) {
     auto* ident = expr->structure()->AsIdentifier();
-    if (ident->has_path()) {
-      return false;
-    }
-
     ast::Variable* var = nullptr;
     if (!global_variables_.get(ident->name(), &var)) {
       return false;

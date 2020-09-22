@@ -27,35 +27,6 @@ TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
   ASSERT_FALSE(p->has_error()) << p->error();
 }
 
-TEST_F(ParserImplTest, GlobalDecl_Import) {
-  auto* p = parser(R"(import "GLSL.std.430" as glsl;)");
-  p->global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto m = p->module();
-  ASSERT_EQ(1u, m.imports().size());
-
-  const auto& import = m.imports()[0];
-  EXPECT_EQ("GLSL.std.430", import->path());
-  EXPECT_EQ("glsl", import->name());
-}
-
-TEST_F(ParserImplTest, GlobalDecl_Import_Invalid) {
-  auto* p = parser(R"(import as glsl;)");
-  p->global_decl();
-
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: missing path for import");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_Import_Invalid_MissingSemicolon) {
-  auto* p = parser(R"(import "GLSL.std.430" as glsl)");
-  p->global_decl();
-
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:30: missing ';' for import");
-}
-
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   auto* p = parser("var<out> a : vec2<i32> = vec2<i32>(1, 2);");
   p->global_decl();

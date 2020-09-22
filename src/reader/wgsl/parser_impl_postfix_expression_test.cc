@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
-  auto* p = parser("std::test(1, b, 2 + 3 / b)");
+  auto* p = parser("test(1, b, 2 + 3 / b)");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -115,7 +115,6 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
-  EXPECT_EQ(func->path(), "std");
   EXPECT_EQ(func->name(), "test");
 
   EXPECT_EQ(c->params().size(), 3u);

@@ -17,7 +17,6 @@
 #include <memory>
 #include <vector>
 
-#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -56,104 +55,6 @@
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
-namespace {
-
-// Most of these are floating-point general except the below which are only
-// FP16 and FP32. We only have FP32 at this point so the below works, if we
-// get FP64 support or otherwise we'll need to differentiate.
-//   * radians
-//   * degrees
-//   * sin, cos, tan
-//   * asin, acos, atan
-//   * sinh, cosh, tanh
-//   * asinh, acosh, atanh
-//   * exp, exp2
-//   * log, log2
-enum class GlslDataType {
-  kFloatScalarOrVector,
-  kIntScalarOrVector,
-  kFloatVector,
-  kMatrix
-};
-struct GlslData {
-  const char* name;
-  uint8_t param_count;
-  uint32_t op_id;
-  GlslDataType type;
-  uint8_t vector_count;
-};
-
-constexpr const GlslData kGlslData[] = {
-    {"acos", 1, GLSLstd450Acos, GlslDataType::kFloatScalarOrVector, 0},
-    {"acosh", 1, GLSLstd450Acosh, GlslDataType::kFloatScalarOrVector, 0},
-    {"asin", 1, GLSLstd450Asin, GlslDataType::kFloatScalarOrVector, 0},
-    {"asinh", 1, GLSLstd450Asinh, GlslDataType::kFloatScalarOrVector, 0},
-    {"atan", 1, GLSLstd450Atan, GlslDataType::kFloatScalarOrVector, 0},
-    {"atan2", 2, GLSLstd450Atan2, GlslDataType::kFloatScalarOrVector, 0},
-    {"atanh", 1, GLSLstd450Atanh, GlslDataType::kFloatScalarOrVector, 0},
-    {"ceil", 1, GLSLstd450Ceil, GlslDataType::kFloatScalarOrVector, 0},
-    {"cos", 1, GLSLstd450Cos, GlslDataType::kFloatScalarOrVector, 0},
-    {"cosh", 1, GLSLstd450Cosh, GlslDataType::kFloatScalarOrVector, 0},
-    {"cross", 2, GLSLstd450Cross, GlslDataType::kFloatVector, 3},
-    {"degrees", 1, GLSLstd450Degrees, GlslDataType::kFloatScalarOrVector, 0},
-    {"determinant", 1, GLSLstd450Determinant, GlslDataType::kMatrix, 0},
-    {"distance", 2, GLSLstd450Distance, GlslDataType::kFloatScalarOrVector, 0},
-    {"exp", 1, GLSLstd450Exp, GlslDataType::kFloatScalarOrVector, 0},
-    {"exp2", 1, GLSLstd450Exp2, GlslDataType::kFloatScalarOrVector, 0},
-    {"fabs", 1, GLSLstd450FAbs, GlslDataType::kFloatScalarOrVector, 0},
-    {"faceforward", 3, GLSLstd450FaceForward,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"fclamp", 3, GLSLstd450FClamp, GlslDataType::kFloatScalarOrVector, 0},
-    {"findilsb", 1, GLSLstd450FindILsb, GlslDataType::kIntScalarOrVector, 0},
-    {"findumsb", 1, GLSLstd450FindUMsb, GlslDataType::kIntScalarOrVector, 0},
-    {"findsmsb", 1, GLSLstd450FindSMsb, GlslDataType::kIntScalarOrVector, 0},
-    {"floor", 1, GLSLstd450Floor, GlslDataType::kFloatScalarOrVector, 0},
-    {"fma", 3, GLSLstd450Fma, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmax", 2, GLSLstd450FMax, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmin", 2, GLSLstd450FMin, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmix", 3, GLSLstd450FMix, GlslDataType::kFloatScalarOrVector, 0},
-    {"fract", 1, GLSLstd450Fract, GlslDataType::kFloatScalarOrVector, 0},
-    {"fsign", 1, GLSLstd450FSign, GlslDataType::kFloatScalarOrVector, 0},
-    {"interpolateatcentroid", 1, GLSLstd450InterpolateAtCentroid,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"inversesqrt", 1, GLSLstd450InverseSqrt,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"length", 1, GLSLstd450Length, GlslDataType::kFloatScalarOrVector, 0},
-    {"log", 1, GLSLstd450Log, GlslDataType::kFloatScalarOrVector, 0},
-    {"log2", 1, GLSLstd450Log2, GlslDataType::kFloatScalarOrVector, 0},
-    {"matrixinverse", 1, GLSLstd450MatrixInverse, GlslDataType::kMatrix, 0},
-    {"nclamp", 3, GLSLstd450NClamp, GlslDataType::kFloatScalarOrVector, 0},
-    {"nmax", 2, GLSLstd450NMax, GlslDataType::kFloatScalarOrVector, 0},
-    {"nmin", 2, GLSLstd450NMin, GlslDataType::kFloatScalarOrVector, 0},
-    {"normalize", 1, GLSLstd450Normalize, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"pow", 2, GLSLstd450Pow, GlslDataType::kFloatScalarOrVector, 0},
-    {"radians", 1, GLSLstd450Radians, GlslDataType::kFloatScalarOrVector, 0},
-    {"reflect", 2, GLSLstd450Reflect, GlslDataType::kFloatScalarOrVector, 0},
-    {"round", 1, GLSLstd450Round, GlslDataType::kFloatScalarOrVector, 0},
-    {"roundeven", 1, GLSLstd450RoundEven, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector, 0},
-    {"sclamp", 3, GLSLstd450SClamp, GlslDataType::kIntScalarOrVector, 0},
-    {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector, 0},
-    {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector, 0},
-    {"smax", 2, GLSLstd450SMax, GlslDataType::kIntScalarOrVector, 0},
-    {"smin", 2, GLSLstd450SMin, GlslDataType::kIntScalarOrVector, 0},
-    {"smoothstep", 3, GLSLstd450SmoothStep, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"sqrt", 1, GLSLstd450Sqrt, GlslDataType::kFloatScalarOrVector, 0},
-    {"ssign", 1, GLSLstd450SSign, GlslDataType::kIntScalarOrVector, 0},
-    {"step", 2, GLSLstd450Step, GlslDataType::kFloatScalarOrVector, 0},
-    {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector, 0},
-    {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector, 0},
-    {"trunc", 1, GLSLstd450Trunc, GlslDataType::kFloatScalarOrVector, 0},
-    {"uclamp", 3, GLSLstd450UClamp, GlslDataType::kIntScalarOrVector, 0},
-    {"umax", 2, GLSLstd450UMax, GlslDataType::kIntScalarOrVector, 0},
-    {"umin", 2, GLSLstd450UMin, GlslDataType::kIntScalarOrVector, 0},
-};
-constexpr const uint32_t kGlslDataCount = sizeof(kGlslData) / sizeof(GlslData);
-
-}  // namespace
 
 TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
     : ctx_(*ctx), mod_(mod) {}
@@ -471,6 +372,9 @@ bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
+  if (!DetermineResultType(expr->func())) {
+    return false;
+  }
   if (!DetermineResultType(expr->params())) {
     return false;
   }
@@ -481,31 +385,10 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   if (expr->func()->IsIdentifier()) {
     auto* ident = expr->func()->AsIdentifier();
 
-    if (ast::intrinsic::IsIntrinsic(ident->name())) {
-      if (!DetermineIntrinsic(ident->name(), expr))
-        return false;
-
-    } else if (ident->has_path()) {
-      auto* imp = mod_->FindImportByName(ident->path());
-      if (imp == nullptr) {
-        set_error(expr->source(), "Unable to find import for " + ident->name());
+    if (ident->IsIntrinsic()) {
+      if (!DetermineIntrinsic(ident, expr)) {
         return false;
       }
-
-      uint32_t ext_id = 0;
-      auto* result_type = GetImportData(expr->source(), imp->path(),
-                                        ident->name(), expr->params(), &ext_id);
-      if (result_type == nullptr) {
-        if (error_.empty()) {
-          set_error(expr->source(),
-                    "Unable to determine result type for GLSL expression " +
-                        ident->name());
-        }
-        return false;
-      }
-
-      imp->AddMethodId(ident->name(), ext_id);
-      expr->func()->set_result_type(result_type);
     } else {
       if (current_function_) {
         caller_to_callee_[current_function_->name()].push_back(ident->name());
@@ -547,41 +430,111 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   return true;
 }
 
-bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
+namespace {
+
+enum class IntrinsicDataType {
+  kFloatOrIntScalarOrVector,
+  kFloatScalarOrVector,
+  kIntScalarOrVector,
+  kFloatVector,
+  kMatrix,
+};
+struct IntrinsicData {
+  ast::Intrinsic intrinsic;
+  uint8_t param_count;
+  IntrinsicDataType data_type;
+  uint8_t vector_size;
+};
+
+// Note, this isn't all the intrinsics. Some are handled specially before
+// we get to the generic code. See the DetermineIntrinsic code below.
+constexpr const IntrinsicData kIntrinsicData[] = {
+    {ast::Intrinsic::kAbs, 1, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
+    {ast::Intrinsic::kAcos, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kAsin, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kAtan, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kAtan2, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kCeil, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kClamp, 3, IntrinsicDataType::kFloatOrIntScalarOrVector,
+     0},
+    {ast::Intrinsic::kCos, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kCosh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kCountOneBits, 1, IntrinsicDataType::kIntScalarOrVector,
+     0},
+    {ast::Intrinsic::kCross, 2, IntrinsicDataType::kFloatVector, 3},
+    {ast::Intrinsic::kDeterminant, 1, IntrinsicDataType::kMatrix, 0},
+    {ast::Intrinsic::kDistance, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kExp, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kExp2, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kFaceForward, 3, IntrinsicDataType::kFloatScalarOrVector,
+     0},
+    {ast::Intrinsic::kFloor, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kFma, 3, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kFract, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kFrexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kInverseSqrt, 1, IntrinsicDataType::kFloatScalarOrVector,
+     0},
+    {ast::Intrinsic::kLdexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kLength, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kLog, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kLog2, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kMax, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
+    {ast::Intrinsic::kMin, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
+    {ast::Intrinsic::kMix, 3, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kModf, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kNormalize, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kReverseBits, 1, IntrinsicDataType::kIntScalarOrVector, 0},
+    {ast::Intrinsic::kRound, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kSign, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kSin, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kSinh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kSmoothStep, 3, IntrinsicDataType::kFloatScalarOrVector,
+     0},
+    {ast::Intrinsic::kSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kStep, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kTan, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kTanh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kTrunc, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+};
+
+constexpr const uint32_t kIntrinsicDataCount =
+    sizeof(kIntrinsicData) / sizeof(IntrinsicData);
+
+}  // namespace
+
+bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                                         ast::CallExpression* expr) {
-  if (ast::intrinsic::IsDerivative(name)) {
+  if (ast::intrinsic::IsDerivative(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(), "incorrect number of parameters for " + name);
+      set_error(expr->source(),
+                "incorrect number of parameters for " + ident->name());
       return false;
     }
 
     // The result type must be the same as the type of the parameter.
-    auto& param = expr->params()[0];
-    if (!DetermineResultType(param.get())) {
-      return false;
-    }
-    expr->func()->set_result_type(param->result_type()->UnwrapPtrIfNeeded());
+    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    expr->func()->set_result_type(param_type);
     return true;
   }
-  if (name == "any" || name == "all") {
+  if (ident->intrinsic() == ast::Intrinsic::kAny ||
+      ident->intrinsic() == ast::Intrinsic::kAll) {
     expr->func()->set_result_type(
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
     return true;
   }
-  if (ast::intrinsic::IsFloatClassificationIntrinsic(name)) {
+  if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(), "incorrect number of parameters for " + name);
+      set_error(expr->source(),
+                "incorrect number of parameters for " + ident->name());
       return false;
     }
 
     auto* bool_type =
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
 
-    auto& param = expr->params()[0];
-    if (!DetermineResultType(param.get())) {
-      return false;
-    }
-    auto* param_type = param->result_type()->UnwrapPtrIfNeeded();
+    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     if (param_type->IsVector()) {
       expr->func()->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -591,31 +544,31 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
     }
     return true;
   }
-  if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
+  if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
     // TODO: Remove the LOD param from textureLoad on storage textures when
     // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
     uint32_t num_of_params =
-        (name == "textureLoad" || name == "textureSample") ? 3 : 4;
+        (ident->intrinsic() == ast::Intrinsic::kTextureLoad ||
+         ident->intrinsic() == ast::Intrinsic::kTextureSample)
+            ? 3
+            : 4;
     if (expr->params().size() != num_of_params) {
       set_error(expr->source(),
-                "incorrect number of parameters for " + name + ", got " +
-                    std::to_string(expr->params().size()) + " and expected " +
-                    std::to_string(num_of_params));
+                "incorrect number of parameters for " + ident->name() +
+                    ", got " + std::to_string(expr->params().size()) +
+                    " and expected " + std::to_string(num_of_params));
       return false;
     }
 
-    if (name == "textureSampleCompare") {
+    if (ident->intrinsic() == ast::Intrinsic::kTextureSampleCompare) {
       expr->func()->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
       return true;
     }
 
     auto& texture_param = expr->params()[0];
-    if (!DetermineResultType(texture_param.get())) {
-      return false;
-    }
     if (!texture_param->result_type()->UnwrapPtrIfNeeded()->IsTexture()) {
-      set_error(expr->source(), "invalid first argument for " + name);
+      set_error(expr->source(), "invalid first argument for " + ident->name());
       return false;
     }
     ast::type::TextureType* texture =
@@ -623,7 +576,7 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
 
     if (!texture->IsStorage() &&
         !(texture->IsSampled() || texture->IsMultisampled())) {
-      set_error(expr->source(), "invalid texture for " + name);
+      set_error(expr->source(), "invalid texture for " + ident->name());
       return false;
     }
 
@@ -642,29 +595,22 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
         ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(type, 4)));
     return true;
   }
-  if (name == "dot") {
+  if (ident->intrinsic() == ast::Intrinsic::kDot) {
     expr->func()->set_result_type(
         ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
     return true;
   }
-  if (name == "outerProduct") {
+  if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
     if (expr->params().size() != 2) {
       set_error(expr->source(),
-                "incorrect number of parameters for outer_product");
+                "incorrect number of parameters for " + ident->name());
       return false;
     }
 
-    auto& param0 = expr->params()[0];
-    auto& param1 = expr->params()[1];
-    if (!DetermineResultType(param0.get()) ||
-        !DetermineResultType(param1.get())) {
-      return false;
-    }
-
-    auto* param0_type = param0->result_type()->UnwrapPtrIfNeeded();
-    auto* param1_type = param1->result_type()->UnwrapPtrIfNeeded();
+    auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
     if (!param0_type->IsVector() || !param1_type->IsVector()) {
-      set_error(expr->source(), "invalid parameter type for outer_product");
+      set_error(expr->source(), "invalid parameter type for " + ident->name());
       return false;
     }
 
@@ -674,24 +620,121 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
             param0_type->AsVector()->size(), param1_type->AsVector()->size())));
     return true;
   }
-  if (name == "select") {
+  if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
-      set_error(expr->source(),
-                "incorrect number of parameters for select expected 3 got " +
-                    std::to_string(expr->params().size()));
+      set_error(expr->source(), "incorrect number of parameters for " +
+                                    ident->name() + " expected 3 got " +
+                                    std::to_string(expr->params().size()));
       return false;
     }
 
     // The result type must be the same as the type of the parameter.
-    auto& param = expr->params()[0];
-    if (!DetermineResultType(param.get())) {
-      return false;
-    }
-    expr->func()->set_result_type(param->result_type()->UnwrapPtrIfNeeded());
+    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    expr->func()->set_result_type(param_type);
     return true;
   }
 
-  return false;
+  const IntrinsicData* data = nullptr;
+  for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
+    if (ident->intrinsic() == kIntrinsicData[i].intrinsic) {
+      data = &kIntrinsicData[i];
+      break;
+    }
+  }
+  if (data == nullptr) {
+    return false;
+  }
+
+  if (expr->params().size() != data->param_count) {
+    set_error(expr->source(), "incorrect number of parameters for " +
+                                  ident->name() + ". Expected " +
+                                  std::to_string(data->param_count) + " got " +
+                                  std::to_string(expr->params().size()));
+    return false;
+  }
+
+  std::vector<ast::type::Type*> result_types;
+  for (uint32_t i = 0; i < data->param_count; ++i) {
+    result_types.push_back(
+        expr->params()[i]->result_type()->UnwrapPtrIfNeeded());
+
+    switch (data->data_type) {
+      case IntrinsicDataType::kFloatOrIntScalarOrVector:
+        if (!result_types.back()->is_float_scalar_or_vector() &&
+            !result_types.back()->is_integer_scalar_or_vector()) {
+          set_error(expr->source(),
+                    "incorrect type for " + ident->name() + ". " +
+                        "Requires float or int, scalar or vector values");
+          return false;
+        }
+        break;
+      case IntrinsicDataType::kFloatScalarOrVector:
+        if (!result_types.back()->is_float_scalar_or_vector()) {
+          set_error(expr->source(),
+                    "incorrect type for " + ident->name() + ". " +
+                        "Requires float scalar or float vector values");
+          return false;
+        }
+
+        break;
+      case IntrinsicDataType::kIntScalarOrVector:
+        if (!result_types.back()->is_integer_scalar_or_vector()) {
+          set_error(expr->source(),
+                    "incorrect type for " + ident->name() + ". " +
+                        "Requires integer scalar or integer vector values");
+          return false;
+        }
+        break;
+      case IntrinsicDataType::kFloatVector:
+        if (!result_types.back()->is_float_vector()) {
+          set_error(expr->source(), "incorrect type for " + ident->name() +
+                                        ". " + "Requires float vector values");
+          return false;
+        }
+        if (data->vector_size > 0 &&
+            result_types.back()->AsVector()->size() != data->vector_size) {
+          set_error(expr->source(), "incorrect vector size for " +
+                                        ident->name() + ". " + "Requires " +
+                                        std::to_string(data->vector_size) +
+                                        " elements");
+          return false;
+        }
+        break;
+      case IntrinsicDataType::kMatrix:
+        if (!result_types.back()->IsMatrix()) {
+          set_error(expr->source(), "incorrect type for " + ident->name() +
+                                        ". Requires matrix value");
+          return false;
+        }
+        break;
+    }
+  }
+
+  // Verify all the parameter types match
+  for (size_t i = 1; i < data->param_count; ++i) {
+    if (result_types[0] != result_types[i]) {
+      set_error(expr->source(),
+                "mismatched parameter types for " + ident->name());
+      return false;
+    }
+  }
+
+  // Handle functions which aways return the type, even if a vector is
+  // provided.
+  if (ident->intrinsic() == ast::Intrinsic::kLength ||
+      ident->intrinsic() == ast::Intrinsic::kDistance) {
+    expr->func()->set_result_type(result_types[0]->is_float_scalar()
+                                      ? result_types[0]
+                                      : result_types[0]->AsVector()->type());
+    return true;
+  }
+  // The determinant returns the component type of the columns
+  if (ident->intrinsic() == ast::Intrinsic::kDeterminant) {
+    expr->func()->set_result_type(result_types[0]->AsMatrix()->type());
+    return true;
+  }
+  expr->func()->set_result_type(result_types[0]);
+  return true;
 }
 
 bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
@@ -719,12 +762,6 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
-  if (expr->has_path()) {
-    set_error(expr->source(),
-              "determine identifier should not be called with imports");
-    return false;
-  }
-
   auto name = expr->name();
   ast::Variable* var;
   if (variable_stack_.get(name, &var)) {
@@ -750,7 +787,145 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
+  SetIntrinsicIfNeeded(expr);
+
   return true;
+}
+
+void TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
+  if (ident->name() == "abs") {
+    ident->set_intrinsic(ast::Intrinsic::kAbs);
+  } else if (ident->name() == "acos") {
+    ident->set_intrinsic(ast::Intrinsic::kAcos);
+  } else if (ident->name() == "all") {
+    ident->set_intrinsic(ast::Intrinsic::kAll);
+  } else if (ident->name() == "any") {
+    ident->set_intrinsic(ast::Intrinsic::kAny);
+  } else if (ident->name() == "asin") {
+    ident->set_intrinsic(ast::Intrinsic::kAsin);
+  } else if (ident->name() == "atan") {
+    ident->set_intrinsic(ast::Intrinsic::kAtan);
+  } else if (ident->name() == "atan2") {
+    ident->set_intrinsic(ast::Intrinsic::kAtan2);
+  } else if (ident->name() == "ceil") {
+    ident->set_intrinsic(ast::Intrinsic::kCeil);
+  } else if (ident->name() == "clamp") {
+    ident->set_intrinsic(ast::Intrinsic::kClamp);
+  } else if (ident->name() == "cos") {
+    ident->set_intrinsic(ast::Intrinsic::kCos);
+  } else if (ident->name() == "cosh") {
+    ident->set_intrinsic(ast::Intrinsic::kCosh);
+  } else if (ident->name() == "countOneBits") {
+    ident->set_intrinsic(ast::Intrinsic::kCountOneBits);
+  } else if (ident->name() == "cross") {
+    ident->set_intrinsic(ast::Intrinsic::kCross);
+  } else if (ident->name() == "determinant") {
+    ident->set_intrinsic(ast::Intrinsic::kDeterminant);
+  } else if (ident->name() == "distance") {
+    ident->set_intrinsic(ast::Intrinsic::kDistance);
+  } else if (ident->name() == "dot") {
+    ident->set_intrinsic(ast::Intrinsic::kDot);
+  } else if (ident->name() == "dpdx") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdx);
+  } else if (ident->name() == "dpdxCoarse") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdxCoarse);
+  } else if (ident->name() == "dpdxFine") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdxFine);
+  } else if (ident->name() == "dpdy") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdy);
+  } else if (ident->name() == "dpdyCoarse") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdyCoarse);
+  } else if (ident->name() == "dpdyFine") {
+    ident->set_intrinsic(ast::Intrinsic::kDpdyFine);
+  } else if (ident->name() == "exp") {
+    ident->set_intrinsic(ast::Intrinsic::kExp);
+  } else if (ident->name() == "exp2") {
+    ident->set_intrinsic(ast::Intrinsic::kExp2);
+  } else if (ident->name() == "faceForward") {
+    ident->set_intrinsic(ast::Intrinsic::kFaceForward);
+  } else if (ident->name() == "floor") {
+    ident->set_intrinsic(ast::Intrinsic::kFloor);
+  } else if (ident->name() == "fma") {
+    ident->set_intrinsic(ast::Intrinsic::kFma);
+  } else if (ident->name() == "fract") {
+    ident->set_intrinsic(ast::Intrinsic::kFract);
+  } else if (ident->name() == "frexp") {
+    ident->set_intrinsic(ast::Intrinsic::kFrexp);
+  } else if (ident->name() == "fwidth") {
+    ident->set_intrinsic(ast::Intrinsic::kFwidth);
+  } else if (ident->name() == "fwidthCoarse") {
+    ident->set_intrinsic(ast::Intrinsic::kFwidthCoarse);
+  } else if (ident->name() == "fwidthFine") {
+    ident->set_intrinsic(ast::Intrinsic::kFwidthFine);
+  } else if (ident->name() == "inverseSqrt") {
+    ident->set_intrinsic(ast::Intrinsic::kInverseSqrt);
+  } else if (ident->name() == "isFinite") {
+    ident->set_intrinsic(ast::Intrinsic::kIsFinite);
+  } else if (ident->name() == "isInf") {
+    ident->set_intrinsic(ast::Intrinsic::kIsInf);
+  } else if (ident->name() == "isNan") {
+    ident->set_intrinsic(ast::Intrinsic::kIsNan);
+  } else if (ident->name() == "isNormal") {
+    ident->set_intrinsic(ast::Intrinsic::kIsNormal);
+  } else if (ident->name() == "ldexp") {
+    ident->set_intrinsic(ast::Intrinsic::kLdexp);
+  } else if (ident->name() == "length") {
+    ident->set_intrinsic(ast::Intrinsic::kLength);
+  } else if (ident->name() == "log") {
+    ident->set_intrinsic(ast::Intrinsic::kLog);
+  } else if (ident->name() == "log2") {
+    ident->set_intrinsic(ast::Intrinsic::kLog2);
+  } else if (ident->name() == "max") {
+    ident->set_intrinsic(ast::Intrinsic::kMax);
+  } else if (ident->name() == "min") {
+    ident->set_intrinsic(ast::Intrinsic::kMin);
+  } else if (ident->name() == "mix") {
+    ident->set_intrinsic(ast::Intrinsic::kMix);
+  } else if (ident->name() == "modf") {
+    ident->set_intrinsic(ast::Intrinsic::kModf);
+  } else if (ident->name() == "normalize") {
+    ident->set_intrinsic(ast::Intrinsic::kNormalize);
+  } else if (ident->name() == "outerProduct") {
+    ident->set_intrinsic(ast::Intrinsic::kOuterProduct);
+  } else if (ident->name() == "pow") {
+    ident->set_intrinsic(ast::Intrinsic::kPow);
+  } else if (ident->name() == "reflect") {
+    ident->set_intrinsic(ast::Intrinsic::kReflect);
+  } else if (ident->name() == "reverseBits") {
+    ident->set_intrinsic(ast::Intrinsic::kReverseBits);
+  } else if (ident->name() == "round") {
+    ident->set_intrinsic(ast::Intrinsic::kRound);
+  } else if (ident->name() == "select") {
+    ident->set_intrinsic(ast::Intrinsic::kSelect);
+  } else if (ident->name() == "sign") {
+    ident->set_intrinsic(ast::Intrinsic::kSign);
+  } else if (ident->name() == "sin") {
+    ident->set_intrinsic(ast::Intrinsic::kSin);
+  } else if (ident->name() == "sinh") {
+    ident->set_intrinsic(ast::Intrinsic::kSinh);
+  } else if (ident->name() == "smoothStep") {
+    ident->set_intrinsic(ast::Intrinsic::kSmoothStep);
+  } else if (ident->name() == "sqrt") {
+    ident->set_intrinsic(ast::Intrinsic::kSqrt);
+  } else if (ident->name() == "step") {
+    ident->set_intrinsic(ast::Intrinsic::kStep);
+  } else if (ident->name() == "tan") {
+    ident->set_intrinsic(ast::Intrinsic::kTan);
+  } else if (ident->name() == "tanh") {
+    ident->set_intrinsic(ast::Intrinsic::kTanh);
+  } else if (ident->name() == "textureLoad") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
+  } else if (ident->name() == "textureSample") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureSample);
+  } else if (ident->name() == "textureSampleBias") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureSampleBias);
+  } else if (ident->name() == "textureSampleCompare") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureSampleCompare);
+  } else if (ident->name() == "textureSampleLevel") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureSampleLevel);
+  } else if (ident->name() == "trunc") {
+    ident->set_intrinsic(ast::Intrinsic::kTrunc);
+  }
 }
 
 bool TypeDeterminer::DetermineMemberAccessor(
@@ -960,103 +1135,6 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
   }
 
   return false;
-}
-
-ast::type::Type* TypeDeterminer::GetImportData(
-    const Source& source,
-    const std::string& path,
-    const std::string& name,
-    const ast::ExpressionList& params,
-    uint32_t* id) {
-  if (path != "GLSL.std.450") {
-    set_error(source, "unknown import path " + path);
-    return nullptr;
-  }
-
-  const GlslData* data = nullptr;
-  for (uint32_t i = 0; i < kGlslDataCount; ++i) {
-    if (name == kGlslData[i].name) {
-      data = &kGlslData[i];
-      break;
-    }
-  }
-  if (data == nullptr) {
-    return nullptr;
-  }
-
-  if (params.size() != data->param_count) {
-    set_error(source, "incorrect number of parameters for " + name +
-                          ". Expected " + std::to_string(data->param_count) +
-                          " got " + std::to_string(params.size()));
-    return nullptr;
-  }
-
-  std::vector<ast::type::Type*> result_types;
-  for (uint32_t i = 0; i < data->param_count; ++i) {
-    result_types.push_back(params[i]->result_type()->UnwrapPtrIfNeeded());
-
-    switch (data->type) {
-      case GlslDataType::kFloatScalarOrVector:
-        if (!result_types.back()->is_float_scalar_or_vector()) {
-          set_error(source, "incorrect type for " + name + ". " +
-                                "Requires float scalar or float vector values");
-          return nullptr;
-        }
-
-        break;
-      case GlslDataType::kIntScalarOrVector:
-        if (!result_types.back()->is_integer_scalar_or_vector()) {
-          set_error(source,
-                    "incorrect type for " + name + ". " +
-                        "Requires integer scalar or integer vector values");
-          return nullptr;
-        }
-        break;
-      case GlslDataType::kFloatVector:
-        if (!result_types.back()->is_float_vector()) {
-          set_error(source, "incorrect type for " + name + ". " +
-                                "Requires float vector values");
-          return nullptr;
-        }
-        if (data->vector_count > 0 &&
-            result_types.back()->AsVector()->size() != data->vector_count) {
-          set_error(source,
-                    "incorrect vector size for " + name + ". " + "Requires " +
-                        std::to_string(data->vector_count) + " elements");
-          return nullptr;
-        }
-        break;
-      case GlslDataType::kMatrix:
-        if (!result_types.back()->IsMatrix()) {
-          set_error(source,
-                    "incorrect type for " + name + ". Requires matrix value");
-          return nullptr;
-        }
-        break;
-    }
-  }
-
-  // Verify all the parameter types match
-  for (size_t i = 1; i < data->param_count; ++i) {
-    if (result_types[0] != result_types[i]) {
-      error_ = "mismatched parameter types for " + name;
-      return nullptr;
-    }
-  }
-
-  *id = data->op_id;
-
-  // Handle functions which aways return the type, even if a vector is provided.
-  if (name == "length" || name == "distance") {
-    return result_types[0]->is_float_scalar()
-               ? result_types[0]
-               : result_types[0]->AsVector()->type();
-  }
-  // The determinant returns the component type of the columns
-  if (name == "determinant") {
-    return result_types[0]->AsMatrix()->type();
-  }
-  return result_types[0];
 }
 
 }  // namespace tint

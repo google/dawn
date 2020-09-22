@@ -17,6 +17,7 @@
 #include <sstream>
 #include <utility>
 
+#include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
@@ -68,10 +69,14 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 
+#include <iostream>
+
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
+
+const char kGLSLstd450[] = "GLSL.std.450";
 
 uint32_t size_of(const InstructionList& instructions) {
   uint32_t size = 0;
@@ -147,6 +152,119 @@ ast::type::MatrixType* GetNestedMatrixType(ast::type::Type* type) {
   return type->IsMatrix() ? type->AsMatrix() : nullptr;
 }
 
+uint32_t intrinsic_to_glsl_method(ast::type::Type* type,
+                                  ast::Intrinsic intrinsic) {
+  switch (intrinsic) {
+    case ast::Intrinsic::kAbs:
+      if (type->is_float_scalar_or_vector()) {
+        return GLSLstd450FAbs;
+      } else {
+        return GLSLstd450SAbs;
+      }
+    case ast::Intrinsic::kAcos:
+      return GLSLstd450Acos;
+    case ast::Intrinsic::kAsin:
+      return GLSLstd450Asin;
+    case ast::Intrinsic::kAtan:
+      return GLSLstd450Atan;
+    case ast::Intrinsic::kAtan2:
+      return GLSLstd450Atan2;
+    case ast::Intrinsic::kCeil:
+      return GLSLstd450Ceil;
+    case ast::Intrinsic::kClamp:
+      if (type->is_float_scalar_or_vector()) {
+        return GLSLstd450NClamp;
+      } else if (type->is_unsigned_scalar_or_vector()) {
+        return GLSLstd450UClamp;
+      } else {
+        return GLSLstd450SClamp;
+      }
+    case ast::Intrinsic::kCos:
+      return GLSLstd450Cos;
+    case ast::Intrinsic::kCosh:
+      return GLSLstd450Cosh;
+    case ast::Intrinsic::kCross:
+      return GLSLstd450Cross;
+    case ast::Intrinsic::kDeterminant:
+      return GLSLstd450Determinant;
+    case ast::Intrinsic::kDistance:
+      return GLSLstd450Distance;
+    case ast::Intrinsic::kExp:
+      return GLSLstd450Exp;
+    case ast::Intrinsic::kExp2:
+      return GLSLstd450Exp2;
+    case ast::Intrinsic::kFaceForward:
+      return GLSLstd450FaceForward;
+    case ast::Intrinsic::kFloor:
+      return GLSLstd450Floor;
+    case ast::Intrinsic::kFma:
+      return GLSLstd450Fma;
+    case ast::Intrinsic::kFract:
+      return GLSLstd450Fract;
+    case ast::Intrinsic::kFrexp:
+      return GLSLstd450Frexp;
+    case ast::Intrinsic::kInverseSqrt:
+      return GLSLstd450InverseSqrt;
+    case ast::Intrinsic::kLdexp:
+      return GLSLstd450Ldexp;
+    case ast::Intrinsic::kLength:
+      return GLSLstd450Length;
+    case ast::Intrinsic::kLog:
+      return GLSLstd450Log;
+    case ast::Intrinsic::kLog2:
+      return GLSLstd450Log2;
+    case ast::Intrinsic::kMax:
+      if (type->is_float_scalar_or_vector()) {
+        return GLSLstd450NMax;
+      } else if (type->is_unsigned_scalar_or_vector()) {
+        return GLSLstd450UMax;
+      } else {
+        return GLSLstd450SMax;
+      }
+    case ast::Intrinsic::kMin:
+      if (type->is_float_scalar_or_vector()) {
+        return GLSLstd450NMin;
+      } else if (type->is_unsigned_scalar_or_vector()) {
+        return GLSLstd450UMin;
+      } else {
+        return GLSLstd450SMin;
+      }
+    case ast::Intrinsic::kMix:
+      return GLSLstd450FMix;
+    case ast::Intrinsic::kModf:
+      return GLSLstd450Modf;
+    case ast::Intrinsic::kNormalize:
+      return GLSLstd450Normalize;
+    case ast::Intrinsic::kPow:
+      return GLSLstd450Pow;
+    case ast::Intrinsic::kReflect:
+      return GLSLstd450Reflect;
+    case ast::Intrinsic::kRound:
+      return GLSLstd450Round;
+    case ast::Intrinsic::kSign:
+      return GLSLstd450FSign;
+    case ast::Intrinsic::kSin:
+      return GLSLstd450Sin;
+    case ast::Intrinsic::kSinh:
+      return GLSLstd450Sinh;
+    case ast::Intrinsic::kSmoothStep:
+      return GLSLstd450SmoothStep;
+    case ast::Intrinsic::kSqrt:
+      return GLSLstd450Sqrt;
+    case ast::Intrinsic::kStep:
+      return GLSLstd450Step;
+    case ast::Intrinsic::kTan:
+      return GLSLstd450Tan;
+    case ast::Intrinsic::kTanh:
+      return GLSLstd450Tanh;
+    case ast::Intrinsic::kTrunc:
+      return GLSLstd450Trunc;
+    default:
+      break;
+  }
+  return 0;
+}
+
 }  // namespace
 
 Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
@@ -164,10 +282,6 @@ bool Builder::Build() {
   push_capability(SpvCapabilityVulkanMemoryModel);
   push_preamble(spv::Op::OpExtension,
                 {Operand::String("SPV_KHR_vulkan_memory_model")});
-
-  for (const auto& imp : mod_->imports()) {
-    GenerateImport(imp.get());
-  }
 
   push_preamble(spv::Op::OpMemoryModel,
                 {Operand::Int(SpvAddressingModelLogical),
@@ -853,18 +967,6 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 uint32_t Builder::GenerateIdentifierExpression(
     ast::IdentifierExpression* expr) {
   uint32_t val = 0;
-  if (expr->has_path()) {
-    auto* imp = mod_->FindImportByName(expr->path());
-    if (imp == nullptr) {
-      error_ = "unable to find import for " + expr->path();
-      return 0;
-    }
-    val = imp->GetIdForMethod(expr->name());
-    if (val == 0) {
-      error_ = "unable to lookup: " + expr->name() + " in " + expr->path();
-    }
-    return val;
-  }
   if (scope_stack_.get(expr->name(), &val)) {
     return val;
   }
@@ -920,14 +1022,18 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
   return result_id;
 }
 
-void Builder::GenerateImport(ast::Import* imp) {
+void Builder::GenerateGLSLstd450Import() {
+  if (import_name_to_id_.find(kGLSLstd450) != import_name_to_id_.end()) {
+    return;
+  }
+
   auto result = result_op();
   auto id = result.to_i();
 
   push_preamble(spv::Op::OpExtInstImport,
-                {result, Operand::String(imp->path())});
+                {result, Operand::String(kGLSLstd450)});
 
-  import_name_to_id_[imp->name()] = id;
+  import_name_to_id_[kGLSLstd450] = id;
 }
 
 uint32_t Builder::GenerateConstructorExpression(
@@ -1361,8 +1467,8 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 
   auto* ident = expr->func()->AsIdentifier();
 
-  if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
-    return GenerateIntrinsic(ident->name(), expr);
+  if (ident->IsIntrinsic()) {
+    return GenerateIntrinsic(ident, expr);
   }
 
   auto type_id = GenerateTypeIfNeeded(expr->func()->result_type());
@@ -1373,45 +1479,14 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
-  spv::Op op = spv::Op::OpNop;
   OperandList ops = {Operand::Int(type_id), result};
 
-  // Handle regular function calls
-  if (!ident->has_path()) {
-    auto func_id = func_name_to_id_[ident->name()];
-    if (func_id == 0) {
-      error_ = "unable to find called function: " + ident->name();
-      return 0;
-    }
-    ops.push_back(Operand::Int(func_id));
-
-    op = spv::Op::OpFunctionCall;
-  } else {
-    // Imported function call
-    auto set_iter = import_name_to_id_.find(ident->path());
-    if (set_iter == import_name_to_id_.end()) {
-      error_ = "unknown import " + ident->path();
-      return 0;
-    }
-    auto set_id = set_iter->second;
-
-    auto* imp = mod_->FindImportByName(ident->path());
-    if (imp == nullptr) {
-      error_ = "unknown import " + ident->path();
-      return 0;
-    }
-
-    auto inst_id = imp->GetIdForMethod(ident->name());
-    if (inst_id == 0) {
-      error_ = "unknown method " + ident->name();
-      return 0;
-    }
-
-    ops.push_back(Operand::Int(set_id));
-    ops.push_back(Operand::Int(inst_id));
-
-    op = spv::Op::OpExtInst;
+  auto func_id = func_name_to_id_[ident->name()];
+  if (func_id == 0) {
+    error_ = "unable to find called function: " + ident->name();
+    return 0;
   }
+  ops.push_back(Operand::Int(func_id));
 
   for (const auto& param : expr->params()) {
     auto id = GenerateExpression(param.get());
@@ -1422,12 +1497,12 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     ops.push_back(Operand::Int(id));
   }
 
-  push_function_inst(op, std::move(ops));
+  push_function_inst(spv::Op::OpFunctionCall, std::move(ops));
 
   return result_id;
 }
 
-uint32_t Builder::GenerateIntrinsic(const std::string& name,
+uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
                                     ast::CallExpression* call) {
   auto result = result_op();
   auto result_id = result.to_i();
@@ -1438,6 +1513,76 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
   }
 
   OperandList params = {Operand::Int(result_type_id), result};
+
+  auto intrinsic = ident->intrinsic();
+  if (ast::intrinsic::IsFineDerivative(intrinsic) ||
+      ast::intrinsic::IsCoarseDerivative(intrinsic)) {
+    push_capability(SpvCapabilityDerivativeControl);
+  }
+
+  spv::Op op = spv::Op::OpNop;
+  if (intrinsic == ast::Intrinsic::kAny) {
+    op = spv::Op::OpAny;
+  } else if (intrinsic == ast::Intrinsic::kAll) {
+    op = spv::Op::OpAll;
+  } else if (intrinsic == ast::Intrinsic::kCountOneBits) {
+    op = spv::Op::OpBitCount;
+  } else if (intrinsic == ast::Intrinsic::kDot) {
+    op = spv::Op::OpDot;
+  } else if (intrinsic == ast::Intrinsic::kDpdx) {
+    op = spv::Op::OpDPdx;
+  } else if (intrinsic == ast::Intrinsic::kDpdxCoarse) {
+    op = spv::Op::OpDPdxCoarse;
+  } else if (intrinsic == ast::Intrinsic::kDpdxFine) {
+    op = spv::Op::OpDPdxFine;
+  } else if (intrinsic == ast::Intrinsic::kDpdy) {
+    op = spv::Op::OpDPdy;
+  } else if (intrinsic == ast::Intrinsic::kDpdyCoarse) {
+    op = spv::Op::OpDPdyCoarse;
+  } else if (intrinsic == ast::Intrinsic::kDpdyFine) {
+    op = spv::Op::OpDPdyFine;
+  } else if (intrinsic == ast::Intrinsic::kFwidth) {
+    op = spv::Op::OpFwidth;
+  } else if (intrinsic == ast::Intrinsic::kFwidthCoarse) {
+    op = spv::Op::OpFwidthCoarse;
+  } else if (intrinsic == ast::Intrinsic::kFwidthFine) {
+    op = spv::Op::OpFwidthFine;
+  } else if (intrinsic == ast::Intrinsic::kIsInf) {
+    op = spv::Op::OpIsInf;
+  } else if (intrinsic == ast::Intrinsic::kIsNan) {
+    op = spv::Op::OpIsNan;
+  } else if (intrinsic == ast::Intrinsic::kOuterProduct) {
+    op = spv::Op::OpOuterProduct;
+  } else if (intrinsic == ast::Intrinsic::kReverseBits) {
+    op = spv::Op::OpBitReverse;
+  } else if (intrinsic == ast::Intrinsic::kSelect) {
+    op = spv::Op::OpSelect;
+  } else if (!ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
+    GenerateGLSLstd450Import();
+
+    auto set_iter = import_name_to_id_.find(kGLSLstd450);
+    if (set_iter == import_name_to_id_.end()) {
+      error_ = std::string("unknown import ") + kGLSLstd450;
+      return 0;
+    }
+    auto set_id = set_iter->second;
+    auto inst_id =
+        intrinsic_to_glsl_method(ident->result_type(), ident->intrinsic());
+    if (inst_id == 0) {
+      error_ = "unknown method " + ident->name();
+      return 0;
+    }
+
+    params.push_back(Operand::Int(set_id));
+    params.push_back(Operand::Int(inst_id));
+
+    op = spv::Op::OpExtInst;
+  }
+  if (!ast::intrinsic::IsTextureIntrinsic(intrinsic) && op == spv::Op::OpNop) {
+    error_ = "unable to determine operator for: " + ident->name();
+    return 0;
+  }
+
   for (const auto& p : call->params()) {
     auto val_id = GenerateExpression(p.get());
     if (val_id == 0) {
@@ -1448,59 +1593,16 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     params.push_back(Operand::Int(val_id));
   }
 
-  if (ast::intrinsic::IsTextureOperationIntrinsic(name)) {
-    return GenerateTextureIntrinsic(name, call, result_id, params);
+  if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
+    return GenerateTextureIntrinsic(ident, call, result_id, params);
   }
 
-  if (ast::intrinsic::IsFineDerivative(name) ||
-      ast::intrinsic::IsCoarseDerivative(name)) {
-    push_capability(SpvCapabilityDerivativeControl);
-  }
-
-  spv::Op op = spv::Op::OpNop;
-  if (name == "any") {
-    op = spv::Op::OpAny;
-  } else if (name == "all") {
-    op = spv::Op::OpAll;
-  } else if (name == "dot") {
-    op = spv::Op::OpDot;
-  } else if (name == "dpdx") {
-    op = spv::Op::OpDPdx;
-  } else if (name == "dpdxCoarse") {
-    op = spv::Op::OpDPdxCoarse;
-  } else if (name == "dpdxFine") {
-    op = spv::Op::OpDPdxFine;
-  } else if (name == "dpdy") {
-    op = spv::Op::OpDPdy;
-  } else if (name == "dpdyCoarse") {
-    op = spv::Op::OpDPdyCoarse;
-  } else if (name == "dpdyFine") {
-    op = spv::Op::OpDPdyFine;
-  } else if (name == "fwidth") {
-    op = spv::Op::OpFwidth;
-  } else if (name == "fwidthCoarse") {
-    op = spv::Op::OpFwidthCoarse;
-  } else if (name == "fwidthFine") {
-    op = spv::Op::OpFwidthFine;
-  } else if (name == "isInf") {
-    op = spv::Op::OpIsInf;
-  } else if (name == "isNan") {
-    op = spv::Op::OpIsNan;
-  } else if (name == "outerProduct") {
-    op = spv::Op::OpOuterProduct;
-  } else if (name == "select") {
-    op = spv::Op::OpSelect;
-  }
-  if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " + name;
-    return 0;
-  }
   push_function_inst(op, params);
 
   return result_id;
 }
 
-uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
+uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                            ast::CallExpression* call,
                                            uint32_t result_id,
                                            OperandList wgsl_params) {
@@ -1512,7 +1614,7 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
 
   // TODO: Remove the LOD param from textureLoad on storage textures when
   // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
-  if (name == "textureLoad") {
+  if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
     std::vector<Operand> spirv_params = {
         std::move(wgsl_params[0]), std::move(wgsl_params[1]),
         std::move(wgsl_params[2]), std::move(wgsl_params[3])};
@@ -1538,17 +1640,17 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
                                         std::move(wgsl_params[3]))),
       std::move(wgsl_params[4])};
 
-  if (name == "textureSample") {
+  if (ident->intrinsic() == ast::Intrinsic::kTextureSample) {
     op = spv::Op::OpImageSampleImplicitLod;
-  } else if (name == "textureSampleLevel") {
+  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleLevel) {
     op = spv::Op::OpImageSampleExplicitLod;
     spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
     spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (name == "textureSampleBias") {
+  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleBias) {
     op = spv::Op::OpImageSampleImplicitLod;
     spirv_params.push_back(Operand::Int(SpvImageOperandsBiasMask));
     spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (name == "textureSampleCompare") {
+  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleCompare) {
     op = spv::Op::OpImageSampleDrefExplicitLod;
     spirv_params.push_back(std::move(wgsl_params[5]));
 
@@ -1558,7 +1660,7 @@ uint32_t Builder::GenerateTextureIntrinsic(const std::string& name,
     spirv_params.push_back(Operand::Int(GenerateLiteralIfNeeded(&float_0)));
   }
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " + name;
+    error_ = "unable to determine operator for: " + ident->name();
     return 0;
   }
   push_function_inst(op, spirv_params);

@@ -327,7 +327,7 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450Normalize:
       return "normalize";
     case GLSLstd450FClamp:
-      return "fclamp";
+      return "clamp";
     case GLSLstd450Length:
       return "length";
     default:
@@ -2805,8 +2805,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     Fail() << "unhandled GLSL.std.450 instruction " << ext_opcode;
     return {};
   }
-  auto func = std::make_unique<ast::IdentifierExpression>(
-      std::vector<std::string>{parser_impl_.GlslStd450Prefix(), name});
+
+  auto func = std::make_unique<ast::IdentifierExpression>(name);
   ast::ExpressionList operands;
   // All parameters to GLSL.std.450 extended instructions are IDs.
   for (uint32_t iarg = 2; iarg < inst.NumInOperands(); ++iarg) {

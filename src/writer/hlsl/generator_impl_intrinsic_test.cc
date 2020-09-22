@@ -29,36 +29,36 @@ namespace {
 using HlslGeneratorImplTest_Intrinsic = TestHelper;
 
 struct IntrinsicData {
-  const char* name;
+  ast::Intrinsic intrinsic;
   const char* hlsl_name;
 };
 inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
-  out << data.name;
+  out << data.hlsl_name;
   return out;
 }
 using HlslIntrinsicTest = TestHelperBase<testing::TestWithParam<IntrinsicData>>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
-  EXPECT_EQ(gen().generate_intrinsic_name(param.name), param.hlsl_name);
+  EXPECT_EQ(gen().generate_intrinsic_name(param.intrinsic), param.hlsl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Intrinsic,
     HlslIntrinsicTest,
-    testing::Values(IntrinsicData{"any", "any"},
-                    IntrinsicData{"all", "all"},
-                    IntrinsicData{"dot", "dot"},
-                    IntrinsicData{"dpdx", "ddx"},
-                    IntrinsicData{"dpdx_coarse", "ddx_coarse"},
-                    IntrinsicData{"dpdx_fine", "ddx_fine"},
-                    IntrinsicData{"dpdy", "ddy"},
-                    IntrinsicData{"dpdy_coarse", "ddy_coarse"},
-                    IntrinsicData{"dpdy_fine", "ddy_fine"},
-                    IntrinsicData{"fwidth", "fwidth"},
-                    IntrinsicData{"fwidth_coarse", "fwidth"},
-                    IntrinsicData{"fwidth_fine", "fwidth"},
-                    IntrinsicData{"is_finite", "isfinite"},
-                    IntrinsicData{"is_inf", "isinf"},
-                    IntrinsicData{"is_nan", "isnan"}));
+    testing::Values(IntrinsicData{ast::Intrinsic::kAny, "any"},
+                    IntrinsicData{ast::Intrinsic::kAll, "all"},
+                    IntrinsicData{ast::Intrinsic::kDot, "dot"},
+                    IntrinsicData{ast::Intrinsic::kDpdx, "ddx"},
+                    IntrinsicData{ast::Intrinsic::kDpdxCoarse, "ddx_coarse"},
+                    IntrinsicData{ast::Intrinsic::kDpdxFine, "ddx_fine"},
+                    IntrinsicData{ast::Intrinsic::kDpdy, "ddy"},
+                    IntrinsicData{ast::Intrinsic::kDpdyCoarse, "ddy_coarse"},
+                    IntrinsicData{ast::Intrinsic::kDpdyFine, "ddy_fine"},
+                    IntrinsicData{ast::Intrinsic::kFwidth, "fwidth"},
+                    IntrinsicData{ast::Intrinsic::kFwidthCoarse, "fwidth"},
+                    IntrinsicData{ast::Intrinsic::kFwidthFine, "fwidth"},
+                    IntrinsicData{ast::Intrinsic::kIsFinite, "isfinite"},
+                    IntrinsicData{ast::Intrinsic::kIsInf, "isinf"},
+                    IntrinsicData{ast::Intrinsic::kIsNan, "isnan"}));
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_IsNormal) {
   FAIL();
@@ -101,7 +101,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
-  EXPECT_EQ(gen().generate_intrinsic_name("unknown name"), "");
+  EXPECT_EQ(gen().generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
@@ -111,6 +111,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
 
   ast::CallExpression call(std::make_unique<ast::IdentifierExpression>("dot"),
                            std::move(params));
+
+  ASSERT_TRUE(td().DetermineResultType(&call)) << td().error();
 
   gen().increment_indent();
   ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();

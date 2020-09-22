@@ -46,9 +46,6 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!ValidateGlobalVariables(module->global_variables())) {
     return false;
   }
-  if (!CheckImports(module)) {
-    return false;
-  }
   if (!ValidateFunctions(module->functions())) {
     return false;
   }
@@ -330,9 +327,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
   if (expr->func()->IsIdentifier()) {
     auto* ident = expr->func()->AsIdentifier();
     auto func_name = ident->name();
-    if (ident->has_path()) {
-      // TODO(sarahM0): validate import statements
-    } else if (ast::intrinsic::IsIntrinsic(ident->name())) {
+    if (ident->IsIntrinsic()) {
       // TODO(sarahM0): validate intrinsics - tied with type-determiner
     } else {
       if (!function_stack_.has(func_name)) {
@@ -429,16 +424,6 @@ bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
     set_error(ident->source(),
               "v-0006: '" + ident->name() + "' is not declared");
     return false;
-  }
-  return true;
-}
-
-bool ValidatorImpl::CheckImports(const ast::Module* module) {
-  for (const auto& import : module->imports()) {
-    if (import->path() != "GLSL.std.450") {
-      set_error(import->source(), "v-0001: unknown import: " + import->path());
-      return false;
-    }
   }
   return true;
 }

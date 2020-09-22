@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "src/ast/function.h"
-#include "src/ast/import.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/variable.h"
 
@@ -35,18 +34,6 @@ class Module {
   /// Move constructor
   Module(Module&&);
   ~Module();
-
-  /// Add the given import to the module
-  /// @param import The import to add.
-  void AddImport(std::unique_ptr<Import> import) {
-    imports_.push_back(std::move(import));
-  }
-  /// @returns the imports for this module
-  const ImportList& imports() const { return imports_; }
-  /// Find the import of the given name
-  /// @param name The import name to search for
-  /// @returns the import with the given name if found, nullptr otherwise.
-  Import* FindImportByName(const std::string& name) const;
 
   /// Add a global variable to the module
   /// @param var the variable to add
@@ -94,7 +81,6 @@ class Module {
  private:
   Module(const Module&) = delete;
 
-  ImportList imports_;
   VariableList global_variables_;
   // The alias types are owned by the type manager
   std::vector<type::AliasType*> alias_types_;

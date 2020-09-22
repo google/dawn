@@ -19,6 +19,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -150,10 +151,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
-  /// Handles genreating an import expression
-  /// @param expr the expression
-  /// @returns true if the expression was successfully emitted.
-  bool EmitImportFunction(ast::CallExpression* expr);
+  /// Handles generating a builtin name
+  /// @param ident the identifier to build the name from
+  /// @returns true if the name was successfully emitted.
+  bool EmitBuiltinName(ast::IdentifierExpression* ident);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
@@ -230,9 +231,9 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the name
   std::string generate_name(const std::string& prefix);
   /// Generates an intrinsic name from the given name
-  /// @param name the name to convert to an intrinsic
+  /// @param intrinsic the intrinsic to convert to an method name
   /// @returns the intrinsic name or blank on error
-  std::string generate_intrinsic_name(const std::string& name);
+  std::string generate_intrinsic_name(ast::Intrinsic intrinsic);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

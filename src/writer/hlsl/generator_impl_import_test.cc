@@ -58,59 +58,40 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  auto ident = std::make_unique<ast::IdentifierExpression>(param.name);
+  ast::CallExpression expr(std::move(ident), std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.00000000f)");
 }
-INSTANTIATE_TEST_SUITE_P(
-    HlslGeneratorImplTest_Import,
-    HlslImportData_SingleParamTest,
-    testing::Values(HlslImportData{"acos", "acos"},
-                    HlslImportData{"asin", "asin"},
-                    HlslImportData{"atan", "atan"},
-                    HlslImportData{"cos", "cos"},
-                    HlslImportData{"cosh", "cosh"},
-                    HlslImportData{"ceil", "ceil"},
-                    HlslImportData{"degrees", "degrees"},
-                    HlslImportData{"exp", "exp"},
-                    HlslImportData{"exp2", "exp2"},
-                    HlslImportData{"fabs", "abs"},
-                    HlslImportData{"floor", "floor"},
-                    HlslImportData{"fract", "frac"},
-                    HlslImportData{"interpolateatcentroid",
-                                   "EvaluateAttributeAtCentroid"},
-                    HlslImportData{"inversesqrt", "rsqrt"},
-                    HlslImportData{"length", "length"},
-                    HlslImportData{"log", "log"},
-                    HlslImportData{"log2", "log2"},
-                    HlslImportData{"normalize", "normalize"},
-                    HlslImportData{"radians", "radians"},
-                    HlslImportData{"round", "round"},
-                    HlslImportData{"fsign", "sign"},
-                    HlslImportData{"sin", "sin"},
-                    HlslImportData{"sinh", "sinh"},
-                    HlslImportData{"sqrt", "sqrt"},
-                    HlslImportData{"tan", "tan"},
-                    HlslImportData{"tanh", "tanh"},
-                    HlslImportData{"trunc", "trunc"}));
-
-TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_Acosh) {
-  FAIL();
-}
-
-TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_ASinh) {
-  FAIL();
-}
-
-TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_ATanh) {
-  FAIL();
-}
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
+                         HlslImportData_SingleParamTest,
+                         testing::Values(HlslImportData{"abs", "abs"},
+                                         HlslImportData{"acos", "acos"},
+                                         HlslImportData{"asin", "asin"},
+                                         HlslImportData{"atan", "atan"},
+                                         HlslImportData{"cos", "cos"},
+                                         HlslImportData{"cosh", "cosh"},
+                                         HlslImportData{"ceil", "ceil"},
+                                         HlslImportData{"exp", "exp"},
+                                         HlslImportData{"exp2", "exp2"},
+                                         HlslImportData{"floor", "floor"},
+                                         HlslImportData{"fract", "frac"},
+                                         HlslImportData{"inverseSqrt", "rsqrt"},
+                                         HlslImportData{"length", "length"},
+                                         HlslImportData{"log", "log"},
+                                         HlslImportData{"log2", "log2"},
+                                         HlslImportData{"normalize",
+                                                        "normalize"},
+                                         HlslImportData{"round", "round"},
+                                         HlslImportData{"sign", "sign"},
+                                         HlslImportData{"sin", "sin"},
+                                         HlslImportData{"sinh", "sinh"},
+                                         HlslImportData{"sqrt", "sqrt"},
+                                         HlslImportData{"tan", "tan"},
+                                         HlslImportData{"tanh", "tanh"},
+                                         HlslImportData{"trunc", "trunc"}));
 
 using HlslImportData_SingleIntParamTest =
     TestHelperBase<testing::TestWithParam<HlslImportData>>;
@@ -123,20 +104,17 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleIntParamTest,
-                         testing::Values(HlslImportData{"sabs", "abs"},
-                                         HlslImportData{"ssign", "sign"}));
+                         testing::Values(HlslImportData{"abs", "abs"}));
 
 using HlslImportData_DualParamTest =
     TestHelperBase<testing::TestWithParam<HlslImportData>>;
@@ -151,14 +129,12 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(),
             std::string(param.hlsl_name) + "(1.00000000f, 2.00000000f)");
 }
@@ -166,10 +142,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParamTest,
                          testing::Values(HlslImportData{"atan2", "atan2"},
                                          HlslImportData{"distance", "distance"},
-                                         HlslImportData{"fmax", "max"},
-                                         HlslImportData{"fmin", "min"},
-                                         HlslImportData{"nmax", "max"},
-                                         HlslImportData{"nmin", "min"},
+                                         HlslImportData{"max", "max"},
+                                         HlslImportData{"min", "min"},
                                          HlslImportData{"pow", "pow"},
                                          HlslImportData{"reflect", "reflect"},
                                          HlslImportData{"step", "step"}));
@@ -203,14 +177,12 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(type_params)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(),
             std::string(param.hlsl_name) +
                 "(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f), "
@@ -233,22 +205,18 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_Int_Test,
-                         testing::Values(HlslImportData{"smax", "max"},
-                                         HlslImportData{"smin", "min"},
-                                         HlslImportData{"umax", "max"},
-                                         HlslImportData{"umin", "min"}));
+                         testing::Values(HlslImportData{"max", "max"},
+                                         HlslImportData{"min", "min"}));
 
 using HlslImportData_TripleParamTest =
     TestHelperBase<testing::TestWithParam<HlslImportData>>;
@@ -265,25 +233,22 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) +
                           "(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Import,
     HlslImportData_TripleParamTest,
-    testing::Values(HlslImportData{"faceforward", "faceforward"},
+    testing::Values(HlslImportData{"faceForward", "faceforward"},
                     HlslImportData{"fma", "fma"},
-                    HlslImportData{"fclamp", "clamp"},
-                    HlslImportData{"nclamp", "clamp"},
-                    HlslImportData{"smoothstep", "smoothstep"}));
+                    HlslImportData{"clamp", "clamp"},
+                    HlslImportData{"smoothStep", "smoothstep"}));
 
 TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
   FAIL();
@@ -304,20 +269,17 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 3)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", param.name}),
-                           std::move(params));
-
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>(param.name),
+      std::move(params));
 
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_TripleParam_Int_Test,
-                         testing::Values(HlslImportData{"sclamp", "clamp"},
-                                         HlslImportData{"uclamp", "clamp"}));
+                         testing::Values(HlslImportData{"clamp", "clamp"}));
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::type::F32Type f32;
@@ -329,17 +291,16 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
-                               std::vector<std::string>{"std", "determinant"}),
-                           std::move(params));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("determinant"),
+      std::move(params));
 
   mod()->AddGlobalVariable(std::move(var));
-  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
 
   // Register the global
   ASSERT_TRUE(td().Determine()) << td().error();
   ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitImportFunction(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
   EXPECT_EQ(result(), std::string("determinant(var)"));
 }
 

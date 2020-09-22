@@ -19,7 +19,6 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -30,24 +29,7 @@ namespace {
 
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, InsertsPreambleWithImport) {
-  ast::Module m;
-  m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
-
-  Builder b(&m);
-  ASSERT_TRUE(b.Build());
-  ASSERT_EQ(b.capabilities().size(), 2u);
-  ASSERT_EQ(b.preamble().size(), 3u);
-
-  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
-OpCapability VulkanMemoryModel
-OpExtension "SPV_KHR_vulkan_memory_model"
-%1 = OpExtInstImport "GLSL.std.450"
-OpMemoryModel Logical Vulkan
-)");
-}
-
-TEST_F(BuilderTest, InsertsPreambleWithoutImport) {
+TEST_F(BuilderTest, InsertsPreamble) {
   ast::Module m;
   Builder b(&m);
   ASSERT_TRUE(b.Build());

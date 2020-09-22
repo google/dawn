@@ -32,7 +32,6 @@
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/ast/expression.h"
-#include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/alias_type.h"
@@ -135,9 +134,6 @@ class ParserImpl : Reader {
   const std::unordered_set<uint32_t>& glsl_std_450_imports() const {
     return glsl_std_450_imports_;
   }
-
-  /// @returns the import prefix to use for the GLSL.std.450 import.
-  std::string GlslStd450Prefix() const { return "std::glsl"; }
 
   /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
   /// If the type is only used for builtins, then register that specially,
@@ -460,8 +456,6 @@ class ParserImpl : Reader {
   // instruction is line 1.
   std::unordered_map<const spvtools::opt::Instruction*, Source> inst_source_;
 
-  /// Maps a SPIR-V ID for an external instruction import to an AST import
-  std::unordered_map<uint32_t, ast::Import*> import_map_;
   // The set of IDs that are imports of the GLSL.std.450 extended instruction
   // sets.
   std::unordered_set<uint32_t> glsl_std_450_imports_;

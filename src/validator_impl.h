@@ -76,10 +76,6 @@ class ValidatorImpl {
   /// @param assign the assignment to check
   /// @returns true if the validation was successful
   bool ValidateAssign(const ast::AssignmentStatement* assign);
-  /// Validates v-0001: Only allowed import is "GLSL.std.450"
-  /// @param module the modele to check imports
-  /// @returns ture if input complies with v-0001 rule
-  bool CheckImports(const ast::Module* module);
   /// Validates an expression
   /// @param expr the expression to check
   /// @return true if the expression is valid

@@ -247,8 +247,7 @@ class Builder {
   /// @returns true on success
   bool GenerateIfStatement(ast::IfStatement* stmt);
   /// Generates an import instruction
-  /// @param imp the import
-  void GenerateImport(ast::Import* imp);
+  void GenerateGLSLstd450Import();
   /// Generates a constructor expression
   /// @param expr the expression to generate
   /// @param is_global_init set true if this is a global variable constructor
@@ -283,19 +282,19 @@ class Builder {
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateCallExpression(ast::CallExpression* expr);
   /// Generates an intrinsic call
-  /// @param name the intrinsic name
+  /// @param ident the intrinsic expression
   /// @param call the call expression
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateIntrinsic(const std::string& name,
+  uint32_t GenerateIntrinsic(ast::IdentifierExpression* ident,
                              ast::CallExpression* call);
   /// Generates a texture intrinsic call
-  /// @param name the texture intrinsic name
+  /// @param ident the texture intrinsic
   /// @param call the call expression
   /// @param result_id result ID of the texture instruction
   /// @param wgsl_params SPIR-V arguments for WGSL-specific intrinsic's call
   /// parameters
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateTextureIntrinsic(const std::string& name,
+  uint32_t GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                     ast::CallExpression* call,
                                     uint32_t result_id,
                                     OperandList wgsl_params);

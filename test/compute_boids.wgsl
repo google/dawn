@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import "GLSL.std.450" as std;
-
 # vertex shader
 
 [[location(0)]] var<in> a_particlePos : vec2<f32>;
@@ -23,10 +21,10 @@ import "GLSL.std.450" as std;
 
 [[stage(vertex)]]
 fn vert_main() -> void {
-  var angle : f32 = -std::atan2(a_particleVel.x, a_particleVel.y);
+  var angle : f32 = -atan2(a_particleVel.x, a_particleVel.y);
   var pos : vec2<f32> = vec2<f32>(
-      (a_pos.x * std::cos(angle)) - (a_pos.y * std::sin(angle)),
-      (a_pos.x * std::sin(angle)) + (a_pos.y * std::cos(angle)));
+      (a_pos.x * cos(angle)) - (a_pos.y * sin(angle)),
+      (a_pos.x * sin(angle)) + (a_pos.y * cos(angle)));
   gl_Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
   return;
 }
@@ -97,14 +95,14 @@ fn comp_main() -> void {
     pos = particlesA.particles[i].pos.xy;
     vel = particlesA.particles[i].vel.xy;
 
-    if (std::distance(pos, vPos) < params.rule1Distance) {
+    if (distance(pos, vPos) < params.rule1Distance) {
       cMass = cMass + pos;
       cMassCount = cMassCount + 1;
     }
-    if (std::distance(pos, vPos) < params.rule2Distance) {
+    if (distance(pos, vPos) < params.rule2Distance) {
       colVel = colVel - (pos - vPos);
     }
-    if (std::distance(pos, vPos) < params.rule3Distance) {
+    if (distance(pos, vPos) < params.rule3Distance) {
       cVel = cVel + vel;
       cVelCount = cVelCount + 1;
     }
@@ -125,7 +123,7 @@ fn comp_main() -> void {
       (cVel * params.rule3Scale);
 
   # clamp velocity for a more pleasing simulation
-  vVel = std::normalize(vVel) * std::fclamp(std::length(vVel), 0.0, 0.1);
+  vVel = normalize(vVel) * clamp(length(vVel), 0.0, 0.1);
 
   # kinematic update
   vPos = vPos + (vVel * params.deltaT);

@@ -90,8 +90,6 @@ set(TINT_LIB_SRCS
   ast/identifier_expression.h
   ast/if_statement.cc
   ast/if_statement.h
-  ast/import.cc
-  ast/import.h
   ast/int_literal.cc
   ast/int_literal.h
   ast/intrinsic.cc
@@ -319,7 +317,6 @@ set(TINT_TEST_SRCS
   ast/function_test.cc
   ast/identifier_expression_test.cc
   ast/if_statement_test.cc
-  ast/import_test.cc
   ast/int_literal_test.cc
   ast/location_decoration_test.cc
   ast/loop_statement_test.cc
@@ -439,7 +436,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_global_variable_decl_test.cc
     reader/wgsl/parser_impl_if_stmt_test.cc
     reader/wgsl/parser_impl_image_storage_type_test.cc
-    reader/wgsl/parser_impl_import_decl_test.cc
     reader/wgsl/parser_impl_inclusive_or_expression_test.cc
     reader/wgsl/parser_impl_logical_and_expression_test.cc
     reader/wgsl/parser_impl_logical_or_expression_test.cc
@@ -538,7 +534,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_function_test.cc
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_if_test.cc
-    writer/wgsl/generator_impl_import_test.cc
     writer/wgsl/generator_impl_loop_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc
     writer/wgsl/generator_impl_return_test.cc

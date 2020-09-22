@@ -18,62 +18,27 @@ namespace tint {
 namespace ast {
 
 IdentifierExpression::IdentifierExpression(const std::string& name)
-    : Expression(), segments_({name}) {}
+    : Expression(), name_(name) {}
 
 IdentifierExpression::IdentifierExpression(const Source& source,
                                            const std::string& name)
-    : Expression(source), segments_({name}) {}
-
-IdentifierExpression::IdentifierExpression(std::vector<std::string> segments)
-    : Expression(), segments_(std::move(segments)) {}
-
-IdentifierExpression::IdentifierExpression(const Source& source,
-                                           std::vector<std::string> segments)
-    : Expression(source), segments_(std::move(segments)) {}
+    : Expression(source), name_(name) {}
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
 IdentifierExpression::~IdentifierExpression() = default;
-
-std::string IdentifierExpression::path() const {
-  if (segments_.size() < 2) {
-    return "";
-  }
-
-  std::string path = "";
-  // We skip the last segment as that's the name, not part of the path
-  for (size_t i = 0; i < segments_.size() - 1; ++i) {
-    if (i > 0) {
-      path += "::";
-    }
-    path += segments_[i];
-  }
-  return path;
-}
 
 bool IdentifierExpression::IsIdentifier() const {
   return true;
 }
 
 bool IdentifierExpression::IsValid() const {
-  if (segments_.size() == 0)
-    return false;
-
-  for (const auto& segment : segments_) {
-    if (segment.size() == 0)
-      return false;
-  }
-  return true;
+  return !name_.empty();
 }
 
 void IdentifierExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Identifier{";
-  if (has_path()) {
-    out << path() << "::";
-  }
-  out << name();
-  out << "}" << std::endl;
+  out << "Identifier{" << name_ << "}" << std::endl;
 }
 
 }  // namespace ast

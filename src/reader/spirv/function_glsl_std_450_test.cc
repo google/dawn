@@ -434,30 +434,28 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float_Floating,
-                         ::testing::Values(GlslStd450Case{
-                             "Length", "std::glsl::length"}));
+                         ::testing::Values(GlslStd450Case{"Length", "length"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float_FloatingFloating,
-                         ::testing::Values(GlslStd450Case{
-                             "Distance", "std::glsl::distance"}));
+                         ::testing::Values(GlslStd450Case{"Distance",
+                                                          "distance"}));
 
-INSTANTIATE_TEST_SUITE_P(
-    Samples,
-    SpvParserTest_GlslStd450_Floating_Floating,
-    ::testing::Values(GlslStd450Case{"Sin", "std::glsl::sin"},
-                      GlslStd450Case{"Cos", "std::glsl::cos"},
-                      GlslStd450Case{"Normalize", "std::glsl::normalize"}));
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Floating_Floating,
+                         ::testing::Values(GlslStd450Case{"Sin", "sin"},
+                                           GlslStd450Case{"Cos", "cos"},
+                                           GlslStd450Case{"Normalize",
+                                                          "normalize"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_FloatingFloating,
-                         ::testing::Values(GlslStd450Case{"Atan2",
-                                                          "std::glsl::atan2"}));
+                         ::testing::Values(GlslStd450Case{"Atan2", "atan2"}));
 
 INSTANTIATE_TEST_SUITE_P(
     Samples,
     SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
-    ::testing::Values(GlslStd450Case{"FClamp", "std::glsl::fclamp"}));
+    ::testing::Values(GlslStd450Case{"FClamp", "clamp"}));
 
 }  // namespace
 }  // namespace spirv

@@ -75,15 +75,6 @@ GeneratorImpl::GeneratorImpl() = default;
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(const ast::Module& module) {
-  for (const auto& import : module.imports()) {
-    if (!EmitImport(import.get())) {
-      return false;
-    }
-  }
-  if (!module.imports().empty()) {
-    out_ << std::endl;
-  }
-
   for (auto* const alias : module.alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
@@ -114,16 +105,6 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
 bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
                                        ast::PipelineStage stage,
                                        const std::string& name) {
-  // TODO(dsinclair): We're always emitting imports even if they aren't needed.
-  for (const auto& import : module.imports()) {
-    if (!EmitImport(import.get())) {
-      return false;
-    }
-  }
-  if (!module.imports().empty()) {
-    out_ << std::endl;
-  }
-
   auto* func = module.FindFunctionByNameAndStage(name, stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
@@ -365,17 +346,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->AsIdentifier();
-  if (ident->has_path()) {
-    out_ << ident->path() << "::";
-  }
   out_ << ident->name();
-  return true;
-}
-
-bool GeneratorImpl::EmitImport(const ast::Import* import) {
-  make_indent();
-  out_ << R"(import ")" << import->path() << R"(" as )" << import->name() << ";"
-       << std::endl;
   return true;
 }
 
