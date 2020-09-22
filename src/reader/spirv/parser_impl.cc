@@ -526,7 +526,7 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
   if (!RegisterUserAndStructMemberNames()) {
     return false;
   }
-  if (!EmitEntryPoints()) {
+  if (!RegisterEntryPoints()) {
     return false;
   }
   if (!RegisterTypes()) {
@@ -625,21 +625,20 @@ bool ParserImpl::IsValidIdentifier(const std::string& str) {
   return true;
 }
 
-bool ParserImpl::EmitEntryPoints() {
+bool ParserImpl::RegisterEntryPoints() {
   for (const spvtools::opt::Instruction& entry_point :
        module_->entry_points()) {
     const auto stage = SpvExecutionModel(entry_point.GetSingleWordInOperand(0));
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
     const std::string ep_name = entry_point.GetOperand(2).AsString();
-    const std::string name = namer_.GetName(function_id);
 
+    EntryPointInfo info{ep_name, enum_converter_.ToPipelineStage(stage)};
     if (!IsValidIdentifier(ep_name)) {
       return Fail() << "entry point name is not a valid WGSL identifier: "
                     << ep_name;
     }
 
-    ast_module_.AddEntryPoint(std::make_unique<ast::EntryPoint>(
-        enum_converter_.ToPipelineStage(stage), ep_name, name));
+    function_to_ep_info_[function_id].push_back(info);
   }
   // The enum conversion could have failed, so return the existing status value.
   return success_;
@@ -1396,8 +1395,21 @@ bool ParserImpl::EmitFunctions() {
     if (!success_) {
       return false;
     }
-    FunctionEmitter emitter(this, *f);
-    success_ = emitter.Emit();
+
+    auto id = f->result_id();
+    auto it = function_to_ep_info_.find(id);
+    if (it == function_to_ep_info_.end()) {
+      FunctionEmitter emitter(this, *f, nullptr);
+      success_ = emitter.Emit();
+    } else {
+      for (const auto& ep : it->second) {
+        FunctionEmitter emitter(this, *f, &ep);
+        success_ = emitter.Emit();
+        if (!success_) {
+          return false;
+        }
+      }
+    }
   }
   return success_;
 }

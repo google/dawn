@@ -68,6 +68,89 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   EXPECT_THAT(module_ast, Not(HasSubstr("Function{")));
 }
 
+TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Vertex) {
+  std::string input = Names({"main"}) + R"(OpEntryPoint Vertex %main "main"
+)" + CommonTypes() + R"(
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto* p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  const auto module_ast = p->module().to_str();
+  EXPECT_THAT(module_ast, HasSubstr(R"(
+  Function main -> __void
+  StageDecoration{vertex}
+  ()
+  {)"));
+}
+
+TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Fragment) {
+  std::string input = Names({"main"}) + R"(OpEntryPoint Fragment %main "main"
+)" + CommonTypes() + R"(
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto* p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  const auto module_ast = p->module().to_str();
+  EXPECT_THAT(module_ast, HasSubstr(R"(
+  Function main -> __void
+  StageDecoration{fragment}
+  ()
+  {)"));
+}
+
+TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
+  std::string input = Names({"main"}) + R"(OpEntryPoint GLCompute %main "main"
+)" + CommonTypes() + R"(
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto* p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  const auto module_ast = p->module().to_str();
+  EXPECT_THAT(module_ast, HasSubstr(R"(
+  Function main -> __void
+  StageDecoration{compute}
+  ()
+  {)"));
+}
+
+TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_MultipleEntryPoints) {
+  std::string input = Names({"main"}) +
+                      R"(OpEntryPoint GLCompute %main "comp_main"
+OpEntryPoint Fragment %main "frag_main"
+)" + CommonTypes() + R"(
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto* p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  const auto module_ast = p->module().to_str();
+  EXPECT_THAT(module_ast, HasSubstr(R"(
+  Function frag_main -> __void
+  StageDecoration{fragment}
+  ()
+  {)"));
+  EXPECT_THAT(module_ast, HasSubstr(R"(
+  Function comp_main -> __void
+  StageDecoration{compute}
+  ()
+  {)"));
+}
+
 TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   auto* p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
      %main = OpFunction %void None %voidfn

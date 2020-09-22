@@ -222,6 +222,7 @@ if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
     reader/spirv/construct.h
     reader/spirv/construct.cc
+    reader/spirv/entry_point_info.h
     reader/spirv/enum_converter.h
     reader/spirv/enum_converter.cc
     reader/spirv/fail_stream.h
@@ -396,7 +397,6 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/namer_test.cc
     reader/spirv/parser_impl_convert_member_decoration_test.cc
     reader/spirv/parser_impl_convert_type_test.cc
-    reader/spirv/parser_impl_entry_point_test.cc
     reader/spirv/parser_impl_function_decl_test.cc
     reader/spirv/parser_impl_get_decorations_test.cc
     reader/spirv/parser_impl_import_test.cc

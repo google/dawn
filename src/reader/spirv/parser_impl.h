@@ -38,6 +38,7 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/type.h"
 #include "src/reader/reader.h"
+#include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
@@ -239,10 +240,10 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterUserAndStructMemberNames();
 
-  /// Emit entry point AST nodes.
+  /// Register entry point information.
   /// This is a no-op if the parser has already failed.
   /// @returns true if parser is still successful.
-  bool EmitEntryPoints();
+  bool RegisterEntryPoints();
 
   /// Register Tint AST types for SPIR-V types, including type aliases as
   /// needed.  This is a no-op if the parser has already failed.
@@ -489,6 +490,10 @@ class ParserImpl : Reader {
   // on the struct.  The new style is to use the StorageBuffer storage class
   // and Block decoration.
   std::unordered_set<uint32_t> remap_buffer_block_type_;
+
+  // Maps function_id to a list of entrypoint information
+  std::unordered_map<uint32_t, std::vector<EntryPointInfo>>
+      function_to_ep_info_;
 };
 
 }  // namespace spirv

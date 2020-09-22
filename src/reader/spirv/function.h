@@ -35,6 +35,7 @@
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"
 #include "src/reader/spirv/construct.h"
+#include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
@@ -282,6 +283,14 @@ class FunctionEmitter {
   /// @param pi a ParserImpl which has already executed BuildInternalModule
   /// @param function the function to emit
   FunctionEmitter(ParserImpl* pi, const spvtools::opt::Function& function);
+  /// Creates a FunctionEmitter, and prepares to write to the AST module
+  /// in |pi|.
+  /// @param pi a ParserImpl which has already executed BuildInternalModule
+  /// @param function the function to emit
+  /// @param ep_info entry point information for this function, or nullptr
+  FunctionEmitter(ParserImpl* pi,
+                  const spvtools::opt::Function& function,
+                  const EntryPointInfo* ep_info);
   /// Destructor
   ~FunctionEmitter();
 
@@ -818,6 +827,9 @@ class FunctionEmitter {
 
   // Structured constructs, where enclosing constructs precede their children.
   ConstructList constructs_;
+
+  // Information about entry point, if this function is referenced by one
+  const EntryPointInfo* ep_info_ = nullptr;
 };
 
 }  // namespace spirv

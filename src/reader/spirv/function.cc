@@ -48,6 +48,7 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
@@ -447,7 +448,8 @@ DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
 DefInfo::~DefInfo() = default;
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
-                                 const spvtools::opt::Function& function)
+                                 const spvtools::opt::Function& function,
+                                 const EntryPointInfo* ep_info)
     : parser_impl_(*pi),
       ast_module_(pi->get_module()),
       ir_context_(*(pi->ir_context())),
@@ -456,9 +458,14 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       type_mgr_(ir_context_.get_type_mgr()),
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
-      function_(function) {
+      function_(function),
+      ep_info_(ep_info) {
   PushNewStatementBlock(nullptr, 0, nullptr);
 }
+
+FunctionEmitter::FunctionEmitter(ParserImpl* pi,
+                                 const spvtools::opt::Function& function)
+    : FunctionEmitter(pi, function, nullptr) {}
 
 FunctionEmitter::~FunctionEmitter() = default;
 
@@ -583,7 +590,13 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
     return false;
   }
 
-  const auto name = namer_.Name(function_.result_id());
+  std::string name;
+  if (ep_info_ == nullptr) {
+    name = namer_.Name(function_.result_id());
+  } else {
+    name = ep_info_->name;
+  }
+
   // Surprisingly, the "type id" on an OpFunction is the result type of the
   // function, not the type of the function.  This is the one exceptional case
   // in SPIR-V where the type ID is not the type of the result ID.
@@ -617,6 +630,12 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
 
   auto ast_fn =
       std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty);
+
+  if (ep_info_ != nullptr) {
+    ast_fn->add_decoration(
+        std::make_unique<ast::StageDecoration>(ep_info_->stage));
+  }
+
   ast_module_.AddFunction(std::move(ast_fn));
 
   return success();
