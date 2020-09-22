@@ -20,7 +20,6 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/constructor_expression.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/import.h"
 #include "src/ast/module.h"
@@ -116,10 +115,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitElse(ast::ElseStatement* stmt);
-  /// Handles generating an entry_point command
-  /// @param ep the entry point
-  /// @returns true if the entry point was emitted
-  bool EmitEntryPoint(const ast::EntryPoint* ep);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted

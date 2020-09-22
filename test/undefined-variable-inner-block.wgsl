@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+[[stage(fragment)]]
 fn main() -> void {
     var a : f32 = 2.0;
    { a = 3.14;}
     return;
 }
-entry_point fragment = main;

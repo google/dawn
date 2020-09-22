@@ -503,8 +503,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kElse, source, "else"};
   if (str == "elseif")
     return {Token::Type::kElseIf, source, "elseif"};
-  if (str == "entry_point")
-    return {Token::Type::kEntryPoint, source, "entry_point"};
   if (str == "f32")
     return {Token::Type::kF32, source, "f32"};
   if (str == "fallthrough")

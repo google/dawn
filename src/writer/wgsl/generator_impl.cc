@@ -84,14 +84,6 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     out_ << std::endl;
   }
 
-  for (const auto& ep : module.entry_points()) {
-    if (!EmitEntryPoint(ep.get())) {
-      return false;
-    }
-  }
-  if (!module.entry_points().empty())
-    out_ << std::endl;
-
   for (auto* const alias : module.alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
@@ -132,27 +124,8 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
     out_ << std::endl;
   }
 
-  bool found_entry_point = false;
-  std::string ep_function_name = "";
-  for (const auto& ep : module.entry_points()) {
-    std::string ep_name = ep->name();
-    if (ep_name.empty()) {
-      ep_name = ep->function_name();
-    }
-    ep_function_name = ep->function_name();
-
-    if (ep->stage() != stage || ep_name != name) {
-      continue;
-    }
-    if (!EmitEntryPoint(ep.get())) {
-      return false;
-    }
-    found_entry_point = true;
-    break;
-  }
-  out_ << std::endl;
-
-  if (!found_entry_point) {
+  auto* func = module.FindFunctionByNameAndStage(name, stage);
+  if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
   }
@@ -176,12 +149,6 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
     if (!EmitVariable(var.get())) {
       return false;
     }
-  }
-
-  auto* func = module.FindFunctionByName(ep_function_name);
-  if (!func) {
-    error_ = "Unable to find entry point function: " + ep_function_name;
-    return false;
   }
 
   bool found_func_variable = false;
@@ -221,17 +188,6 @@ bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
     return false;
   }
   out_ << ";" << std::endl;
-
-  return true;
-}
-
-bool GeneratorImpl::EmitEntryPoint(const ast::EntryPoint* ep) {
-  make_indent();
-  out_ << "entry_point " << ep->stage() << " ";
-  if (!ep->name().empty() && ep->name() != ep->function_name()) {
-    out_ << R"(as ")" << ep->name() << R"(" )";
-  }
-  out_ << "= " << ep->function_name() << ";" << std::endl;
 
   return true;
 }

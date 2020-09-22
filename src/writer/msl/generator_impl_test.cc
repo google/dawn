@@ -17,11 +17,11 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -48,10 +48,12 @@ using MslGeneratorImplTest = testing::Test;
 TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
   ast::Module m;
-  m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                                &void_type));
-  m.AddEntryPoint(std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kCompute, "", "my_func"));
+
+  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
+                                              &void_type);
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  m.AddFunction(std::move(func));
 
   GeneratorImpl g(&m);
 

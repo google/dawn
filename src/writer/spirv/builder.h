@@ -185,18 +185,10 @@ class Builder {
   /// @returns true if the statement was successfully generated
   bool GenerateDiscardStatement(ast::DiscardStatement* stmt);
   /// Generates an entry point instruction
-  /// @param ep the entry point
-  /// @returns true if the instruction was generated, false otherwise
-  bool GenerateEntryPoint(ast::EntryPoint* ep);
-  /// Generates an entry point instruction
   /// @param func the function
   /// @param id the id of the function
   /// @returns true if the instruction was generated, false otherwise
   bool GenerateEntryPoint(ast::Function* func, uint32_t id);
-  /// Generates execution modes for an entry point
-  /// @param ep the entry point
-  /// @returns false on failure
-  bool GenerateExecutionModes(ast::EntryPoint* ep);
   /// Generates execution modes for an entry point
   /// @param func the function
   /// @param id the id of the function
@@ -422,19 +414,6 @@ class Builder {
       return 0;
     }
     return func_name_to_id_[name];
-  }
-
-  /// Retrieves the id for an entry point function, or 0 if not found.
-  /// Emits an error if not found.
-  /// @param ep the entry point
-  /// @returns 0 on error
-  uint32_t id_for_entry_point(ast::EntryPoint* ep) {
-    auto id = id_for_func_name(ep->function_name());
-    if (id == 0) {
-      error_ = "unable to find ID for function: " + ep->function_name();
-      return 0;
-    }
-    return id;
   }
 
   ast::Module* mod_;

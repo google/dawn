@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
 #include "src/ast/type/alias_type.h"
@@ -60,19 +59,6 @@ class Module {
   /// @returns the global variables for the module
   VariableList& global_variables() { return global_variables_; }
 
-  /// Adds an entry point to the module
-  /// @param ep the entry point to add
-  void AddEntryPoint(std::unique_ptr<EntryPoint> ep) {
-    entry_points_.push_back(std::move(ep));
-  }
-  /// @returns the entry points in the module
-  const EntryPointList& entry_points() const { return entry_points_; }
-
-  /// Checks if the given function name is an entry point function
-  /// @param name the function name
-  /// @returns true if name is an entry point function
-  bool IsFunctionEntryPoint(const std::string& name) const;
-
   /// Adds a type alias to the module
   /// @param type the alias to add
   void AddAliasType(type::AliasType* type) { alias_types_.push_back(type); }
@@ -92,6 +78,12 @@ class Module {
   /// @param name the name to search for
   /// @returns the associated function or nullptr if none exists
   Function* FindFunctionByName(const std::string& name) const;
+  /// Returns the function with the given name
+  /// @param name the name to search for
+  /// @param stage the pipeline stage
+  /// @returns the associated function or nullptr if none exists
+  Function* FindFunctionByNameAndStage(const std::string& name,
+                                       ast::PipelineStage stage) const;
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;
@@ -104,7 +96,6 @@ class Module {
 
   ImportList imports_;
   VariableList global_variables_;
-  EntryPointList entry_points_;
   // The alias types are owned by the type manager
   std::vector<type::AliasType*> alias_types_;
   FunctionList functions_;

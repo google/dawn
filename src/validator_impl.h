@@ -20,7 +20,6 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_expression.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -58,11 +57,9 @@ class ValidatorImpl {
   /// @returns true if the validation was successful
   bool ValidateGlobalVariables(const ast::VariableList& global_vars);
   /// Validates Functions
-  /// @param mod the module
   /// @param funcs the functions to check
   /// @returns true if the validation was successful
-  bool ValidateFunctions(const ast::Module* mod,
-                         const ast::FunctionList& funcs);
+  bool ValidateFunctions(const ast::FunctionList& funcs);
   /// Validates a function
   /// @param func the function to check
   /// @returns true if the validation was successful
@@ -112,11 +109,6 @@ class ValidatorImpl {
   /// @param expr the call to validate
   /// @returns true if successful
   bool ValidateCallExpr(const ast::CallExpression* expr);
-  /// Validates entry points
-  /// this funtion must be called after populating function_stack_
-  /// @param eps the vector of entry points to check
-  /// @return true if the validation was successful
-  bool ValidateEntryPoints(const ast::EntryPointList& eps);
   /// Validates switch statements
   /// @param s the switch statement to check
   /// @returns true if the valdiation was successful

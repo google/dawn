@@ -108,30 +108,6 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
   EXPECT_EQ(p->error(), "1:38: missing ';' for constant declaration");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_EntryPoint) {
-  auto* p = parser("entry_point vertex = main;");
-  p->global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto m = p->module();
-  ASSERT_EQ(m.entry_points().size(), 1u);
-  EXPECT_EQ(m.entry_points()[0]->name(), "main");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_EntryPoint_Invalid) {
-  auto* p = parser("entry_point main;");
-  p->global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_EntryPoint_MissingSemicolon) {
-  auto* p = parser("entry_point vertex = main");
-  p->global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:26: missing ';' for entry point");
-}
-
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   auto* p = parser("type A = i32;");
   p->global_decl();

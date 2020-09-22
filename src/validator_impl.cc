@@ -49,7 +49,7 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!CheckImports(module)) {
     return false;
   }
-  if (!ValidateFunctions(module, module->functions())) {
+  if (!ValidateFunctions(module->functions())) {
     return false;
   }
 
@@ -82,8 +82,7 @@ bool ValidatorImpl::ValidateGlobalVariables(
   return true;
 }
 
-bool ValidatorImpl::ValidateFunctions(const ast::Module* mod,
-                                      const ast::FunctionList& funcs) {
+bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
   ScopeStack<ast::PipelineStage> entry_point_map;
   entry_point_map.push_scope();
 
@@ -135,7 +134,7 @@ bool ValidatorImpl::ValidateFunctions(const ast::Module* mod,
     current_function_ = nullptr;
   }
 
-  if (pipeline_count == 0 && mod->entry_points().empty()) {
+  if (pipeline_count == 0) {
     set_error(Source{0, 0},
               "v-0003: At least one of vertex, fragment or compute shader must "
               "be present");

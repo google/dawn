@@ -15,9 +15,9 @@
 # Vertex shader
 var<private> a : i32;
 
+[[stage(vertex)]]
 fn main() -> void {
   a = 2;
   return;
 }
-entry_point vertex as "main" = main;
 

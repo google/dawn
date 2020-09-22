@@ -206,7 +206,6 @@ void ParserImpl::translation_unit() {
 //  | import_decl SEMICOLON
 //  | global_variable_decl SEMICLON
 //  | global_constant_decl SEMICOLON
-//  | entry_point_decl SEMICOLON
 //  | type_alias SEMICOLON
 //  | function_decl
 void ParserImpl::global_decl() {
@@ -255,19 +254,6 @@ void ParserImpl::global_decl() {
       return;
     }
     module_.AddGlobalVariable(std::move(gc));
-    return;
-  }
-
-  auto ep = entry_point_decl();
-  if (has_error())
-    return;
-  if (ep != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for entry point");
-      return;
-    }
-    module_.AddEntryPoint(std::move(ep));
     return;
   }
 
@@ -2034,60 +2020,6 @@ ast::VariableList ParserImpl::param_list() {
   }
 
   return ret;
-}
-
-// entry_point_decl
-//   : ENTRY_POINT pipeline_stage EQUAL IDENT
-//   | ENTRY_POINT pipeline_stage AS STRING_LITERAL EQUAL IDENT
-//   | ENTRY_POINT pipeline_stage AS IDENT EQUAL IDENT
-std::unique_ptr<ast::EntryPoint> ParserImpl::entry_point_decl() {
-  auto t = peek();
-  auto source = t.source();
-  if (!t.IsEntryPoint())
-    return nullptr;
-
-  next();  // Consume the peek
-
-  auto stage = pipeline_stage();
-  if (has_error())
-    return nullptr;
-  if (stage == ast::PipelineStage::kNone) {
-    set_error(peek(), "missing pipeline stage for entry point");
-    return nullptr;
-  }
-
-  t = next();
-  std::string name;
-  if (t.IsAs()) {
-    t = next();
-    if (t.IsStringLiteral()) {
-      name = t.to_str();
-    } else if (t.IsIdentifier()) {
-      name = t.to_str();
-    } else {
-      set_error(t, "invalid name for entry point");
-      return nullptr;
-    }
-    t = next();
-  }
-
-  if (!t.IsEqual()) {
-    set_error(t, "missing = for entry point");
-    return nullptr;
-  }
-
-  t = next();
-  if (!t.IsIdentifier()) {
-    set_error(t, "invalid function name for entry point");
-    return nullptr;
-  }
-  auto fn_name = t.to_str();
-
-  // Set the name to the function name if it isn't provided
-  if (name.length() == 0)
-    name = fn_name;
-
-  return std::make_unique<ast::EntryPoint>(source, stage, name, fn_name);
 }
 
 // pipeline_stage

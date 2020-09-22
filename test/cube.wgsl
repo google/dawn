@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-entry_point vertex = vtx_main;
-entry_point fragment = frag_main;
-
 # Vertex shader
 type Uniforms = [[block]] struct {
   [[offset(0)]] modelViewProjectionMatrix : mat4x4<f32>;
@@ -27,6 +24,7 @@ type Uniforms = [[block]] struct {
 [[location(0)]] var<out> vtxFragColor : vec4<f32>;
 [[builtin(position)]] var<out> Position : vec4<f32>;
 
+[[stage(vertex)]]
 fn vtx_main() -> void {
    Position = uniforms.modelViewProjectionMatrix * cur_position;
    vtxFragColor = color;
@@ -37,6 +35,7 @@ fn vtx_main() -> void {
 [[location(0)]] var<in> fragColor : vec4<f32>;
 [[location(0)]] var<out> outColor : vec4<f32>;
 
+[[stage(fragment)]]
 fn frag_main() -> void {
   outColor = fragColor;
   return;

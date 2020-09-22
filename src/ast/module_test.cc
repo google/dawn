@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "gmock/gmock.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
 #include "src/ast/type/f32_type.h"
@@ -91,19 +90,6 @@ TEST_F(ModuleTest, LookupFunction) {
   EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
 }
 
-TEST_F(ModuleTest, IsEntryPoint) {
-  type::F32Type f32;
-  Module m;
-
-  auto func = std::make_unique<Function>("other_func", VariableList{}, &f32);
-  m.AddFunction(std::move(func));
-
-  m.AddEntryPoint(
-      std::make_unique<EntryPoint>(PipelineStage::kVertex, "main", "vtx_main"));
-  EXPECT_TRUE(m.IsFunctionEntryPoint("vtx_main"));
-  EXPECT_FALSE(m.IsFunctionEntryPoint("other_func"));
-}
-
 TEST_F(ModuleTest, LookupFunctionMissing) {
   Module m;
   EXPECT_EQ(nullptr, m.FindFunctionByName("Missing"));
@@ -152,25 +138,6 @@ TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
 
   Module m;
   m.AddGlobalVariable(std::move(var));
-  EXPECT_FALSE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_EntryPoint) {
-  Module m;
-  m.AddEntryPoint(
-      std::make_unique<EntryPoint>(PipelineStage::kVertex, "main", "vtx_main"));
-  EXPECT_TRUE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_Null_EntryPoint) {
-  Module m;
-  m.AddEntryPoint(nullptr);
-  EXPECT_FALSE(m.IsValid());
-}
-
-TEST_F(ModuleTest, IsValid_Invalid_EntryPoint) {
-  Module m;
-  m.AddEntryPoint(std::make_unique<EntryPoint>());
   EXPECT_FALSE(m.IsValid());
 }
 

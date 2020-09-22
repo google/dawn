@@ -45,12 +45,14 @@ Function* Module::FindFunctionByName(const std::string& name) const {
   return nullptr;
 }
 
-bool Module::IsFunctionEntryPoint(const std::string& name) const {
-  for (const auto& ep : entry_points_) {
-    if (ep->function_name() == name)
-      return true;
+Function* Module::FindFunctionByNameAndStage(const std::string& name,
+                                             ast::PipelineStage stage) const {
+  for (const auto& func : functions_) {
+    if (func->name() == name && func->pipeline_stage() == stage) {
+      return func.get();
+    }
   }
-  return false;
+  return nullptr;
 }
 
 bool Module::IsValid() const {
@@ -61,11 +63,6 @@ bool Module::IsValid() const {
   }
   for (const auto& var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
-      return false;
-    }
-  }
-  for (const auto& ep : entry_points_) {
-    if (ep == nullptr || !ep->IsValid()) {
       return false;
     }
   }
@@ -92,9 +89,6 @@ std::string Module::to_str() const {
   }
   for (const auto& var : global_variables_) {
     var->to_str(out, indent);
-  }
-  for (const auto& ep : entry_points_) {
-    ep->to_str(out, indent);
   }
   for (auto* const alias : alias_types_) {
     for (size_t i = 0; i < indent; ++i) {

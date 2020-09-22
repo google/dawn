@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -30,10 +29,9 @@ using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
-  mod()->AddFunction(std::make_unique<ast::Function>(
-      "my_func", ast::VariableList{}, &void_type));
-  mod()->AddEntryPoint(std::make_unique<ast::EntryPoint>(
-      ast::PipelineStage::kFragment, "", "my_func"));
+  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
+                                              &void_type);
+  mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(gen().Generate(out())) << gen().error();
   EXPECT_EQ(result(), R"(void my_func() {

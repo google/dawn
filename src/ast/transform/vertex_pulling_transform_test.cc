@@ -17,6 +17,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/function.h"
+#include "src/ast/pipeline_stage.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -38,11 +40,12 @@ class VertexPullingTransformHelper {
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    mod()->AddEntryPoint(std::make_unique<EntryPoint>(PipelineStage::kVertex,
-                                                      "main", "vtx_main"));
-    mod()->AddFunction(std::make_unique<Function>(
-        "vtx_main", VariableList{},
-        ctx_.type_mgr().Get(std::make_unique<type::VoidType>())));
+    auto func = std::make_unique<Function>(
+        "main", VariableList{},
+        ctx_.type_mgr().Get(std::make_unique<type::VoidType>()));
+    func->add_decoration(
+        std::make_unique<ast::StageDecoration>(ast::PipelineStage ::kVertex));
+    mod()->AddFunction(std::move(func));
   }
 
   // Set up the transformation, after building the module
@@ -71,6 +74,7 @@ class VertexPullingTransformHelper {
     mod_->AddGlobalVariable(std::move(var));
   }
 
+  Context* ctx() { return &ctx_; }
   ast::Module* mod() { return mod_.get(); }
   VertexPullingTransform* transform() { return transform_.get(); }
 
@@ -104,25 +108,21 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
-  InitBasicModule();
-  mod()->entry_points()[0]->set_pipeline_stage(PipelineStage::kFragment);
+  auto func = std::make_unique<Function>(
+      "main", VariableList{},
+      ctx()->type_mgr().Get(std::make_unique<type::VoidType>()));
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  mod()->AddFunction(std::move(func));
 
   InitTransform({});
   EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->GetError(), "Entry point is not for vertex stage");
+  EXPECT_EQ(transform()->GetError(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, BasicModule) {
   InitBasicModule();
   InitTransform({});
-  EXPECT_TRUE(transform()->Run());
-}
-
-TEST_F(VertexPullingTransformTest, EntryPointUsingFunctionName) {
-  InitBasicModule();
-  mod()->entry_points()[0]->set_name("");
-  InitTransform({});
-  transform()->SetEntryPoint("vtx_main");
   EXPECT_TRUE(transform()->Run());
 }
 
@@ -159,8 +159,8 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{
@@ -240,8 +240,8 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{
@@ -321,8 +321,8 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{
@@ -454,8 +454,8 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{
@@ -573,8 +573,8 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{
@@ -777,8 +777,8 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
     storage_buffer
     __struct_
   }
-  EntryPoint{vertex as main = vtx_main}
-  Function vtx_main -> __void
+  Function main -> __void
+  StageDecoration{vertex}
   ()
   {
     Block{

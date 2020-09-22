@@ -77,29 +77,15 @@ bool VertexPullingTransform::Run() {
   }
 
   // Find entry point
-  EntryPoint* entry_point = nullptr;
-  for (const auto& entry : mod_->entry_points()) {
-    if (entry->name() == entry_point_name_ ||
-        (entry->name().empty() &&
-         entry->function_name() == entry_point_name_)) {
-      entry_point = entry.get();
-      break;
-    }
-  }
-
-  if (entry_point == nullptr) {
+  auto* func = mod_->FindFunctionByNameAndStage(entry_point_name_,
+                                                PipelineStage::kVertex);
+  if (func == nullptr) {
     SetError("Vertex stage entry point not found");
     return false;
   }
 
-  // Check entry point is the right stage
-  if (entry_point->stage() != PipelineStage::kVertex) {
-    SetError("Entry point is not for vertex stage");
-    return false;
-  }
-
   // Save the vertex function
-  auto* vertex_func = mod_->FindFunctionByName(entry_point->function_name());
+  auto* vertex_func = mod_->FindFunctionByName(func->name());
 
   // TODO(idanr): Need to check shader locations in descriptor cover all
   // attributes

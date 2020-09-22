@@ -150,8 +150,6 @@ class Token {
     kElse,
     /// A 'elseif'
     kElseIf,
-    /// A 'entry_point'
-    kEntryPoint,
     /// A 'f32'
     kF32,
     /// A 'fallthrough'
@@ -531,8 +529,6 @@ class Token {
   bool IsElse() const { return type_ == Type::kElse; }
   /// @returns true if token is a 'elseif'
   bool IsElseIf() const { return type_ == Type::kElseIf; }
-  /// @returns true if token is a 'entry_point'
-  bool IsEntryPoint() const { return type_ == Type::kEntryPoint; }
   /// @returns true if token is a 'f32'
   bool IsF32() const { return type_ == Type::kF32; }
   /// @returns true if token is a 'fallthrough'

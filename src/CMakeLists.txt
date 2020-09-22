@@ -76,8 +76,6 @@ set(TINT_LIB_SRCS
   ast/discard_statement.h
   ast/else_statement.cc
   ast/else_statement.h
-  ast/entry_point.cc
-  ast/entry_point.h
   ast/expression.cc
   ast/expression.h
   ast/fallthrough_statement.cc
@@ -315,7 +313,6 @@ set(TINT_TEST_SRCS
   ast/discard_statement_test.cc
   ast/decorated_variable_test.cc
   ast/else_statement_test.cc
-  ast/entry_point_test.cc
   ast/expression_test.cc
   ast/fallthrough_statement_test.cc
   ast/float_literal_test.cc
@@ -429,7 +426,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_depth_texture_type_test.cc
     reader/wgsl/parser_impl_else_stmt_test.cc
     reader/wgsl/parser_impl_elseif_stmt_test.cc
-    reader/wgsl/parser_impl_entry_point_decl_test.cc
     reader/wgsl/parser_impl_equality_expression_test.cc
     reader/wgsl/parser_impl_exclusive_or_expression_test.cc
     reader/wgsl/parser_impl_for_stmt_test.cc
@@ -500,7 +496,6 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_cast_expression_test.cc
     writer/spirv/builder_constructor_expression_test.cc
     writer/spirv/builder_discard_test.cc
-    writer/spirv/builder_entry_point_test.cc
     writer/spirv/builder_format_conversion_test.cc
     writer/spirv/builder_function_decoration_test.cc
     writer/spirv/builder_function_test.cc
@@ -539,7 +534,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_constructor_test.cc
     writer/wgsl/generator_impl_continue_test.cc
     writer/wgsl/generator_impl_discard_test.cc
-    writer/wgsl/generator_impl_entry_point_test.cc
     writer/wgsl/generator_impl_fallthrough_test.cc
     writer/wgsl/generator_impl_function_test.cc
     writer/wgsl/generator_impl_identifier_test.cc
@@ -571,7 +565,6 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_constructor_test.cc
     writer/msl/generator_impl_continue_test.cc
     writer/msl/generator_impl_discard_test.cc
-    writer/msl/generator_impl_entry_point_test.cc
     writer/msl/generator_impl_function_entry_point_data_test.cc
     writer/msl/generator_impl_function_test.cc
     writer/msl/generator_impl_identifier_test.cc
@@ -606,7 +599,6 @@ if (${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator_impl_constructor_test.cc
     writer/hlsl/generator_impl_continue_test.cc
     writer/hlsl/generator_impl_discard_test.cc
-    writer/hlsl/generator_impl_entry_point_test.cc
     writer/hlsl/generator_impl_function_entry_point_data_test.cc
     writer/hlsl/generator_impl_function_test.cc
     writer/hlsl/generator_impl_identifier_test.cc

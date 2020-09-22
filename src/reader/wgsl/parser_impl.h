@@ -27,7 +27,6 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/else_statement.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
 #include "src/ast/literal.h"
@@ -222,9 +221,6 @@ class ParserImpl {
   /// Parses a `param_list` grammar element
   /// @returns the parsed variables
   ast::VariableList param_list();
-  /// Parses a `entry_point_decl` grammar element
-  /// @returns the EntryPoint or nullptr on error
-  std::unique_ptr<ast::EntryPoint> entry_point_decl();
   /// Parses a `pipeline_stage` grammar element
   /// @returns the pipeline stage or PipelineStage::kNone if none matched
   ast::PipelineStage pipeline_stage();

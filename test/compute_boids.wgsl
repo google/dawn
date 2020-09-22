@@ -21,7 +21,8 @@ import "GLSL.std.450" as std;
 [[location(2)]] var<in> a_pos : vec2<f32>;
 [[builtin(position)]] var<out> gl_Position : vec4<f32>;
 
-fn vtx_main() -> void {
+[[stage(vertex)]]
+fn vert_main() -> void {
   var angle : f32 = -std::atan2(a_particleVel.x, a_particleVel.y);
   var pos : vec2<f32> = vec2<f32>(
       (a_pos.x * std::cos(angle)) - (a_pos.y * std::sin(angle)),
@@ -29,16 +30,15 @@ fn vtx_main() -> void {
   gl_Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
   return;
 }
-entry_point vertex as "vert_main" = vtx_main;
 
 # fragment shader
 [[location(0)]] var<out> fragColor : vec4<f32>;
 
+[[stage(fragment)]]
 fn frag_main() -> void {
   fragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
   return;
 }
-entry_point fragment as "frag_main" = frag_main;
 
 # compute shader
 type Particle = [[block]] struct {
@@ -67,7 +67,8 @@ type Particles = [[block]] struct {
 [[builtin(global_invocation_id)]] var<in> gl_GlobalInvocationID : vec3<u32>;
 
 # https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
-fn compute_main() -> void {
+[[stage(compute)]]
+fn comp_main() -> void {
   var index : u32 = gl_GlobalInvocationID.x;
   if (index >= 5) {
     return;
@@ -149,5 +150,3 @@ fn compute_main() -> void {
 
   return;
 }
-entry_point compute as "comp_main" = compute_main;
-

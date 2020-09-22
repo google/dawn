@@ -139,8 +139,6 @@ std::string Token::TypeToName(Type type) {
       return "else";
     case Token::Type::kElseIf:
       return "elseif";
-    case Token::Type::kEntryPoint:
-      return "entry_point";
     case Token::Type::kF32:
       return "f32";
     case Token::Type::kFallthrough:

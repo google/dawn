@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -91,8 +90,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->DetermineFunctions(mod()->functions())) << td()->error();
-  EXPECT_TRUE(v()->ValidateFunctions(mod(), mod()->functions()))
-      << v()->error();
+  EXPECT_TRUE(v()->ValidateFunctions(mod()->functions())) << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {

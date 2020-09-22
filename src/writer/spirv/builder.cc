@@ -185,19 +185,6 @@ bool Builder::Build() {
     }
   }
 
-  // Note, the entry points must be generated after the functions as they need
-  // to be able to lookup the function information based on the name.
-  for (const auto& ep : mod_->entry_points()) {
-    if (!GenerateEntryPoint(ep.get())) {
-      return false;
-    }
-  }
-  for (const auto& ep : mod_->entry_points()) {
-    if (!GenerateExecutionModes(ep.get())) {
-      return false;
-    }
-  }
-
   return true;
 }
 
@@ -301,52 +288,6 @@ bool Builder::GenerateDiscardStatement(ast::DiscardStatement*) {
   return true;
 }
 
-bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
-  auto name = ep->name();
-  if (name.empty()) {
-    name = ep->function_name();
-  }
-  const auto id = id_for_entry_point(ep);
-  if (id == 0) {
-    return false;
-  }
-
-  auto stage = pipeline_stage_to_execution_model(ep->stage());
-  if (stage == SpvExecutionModelMax) {
-    error_ = "Unknown pipeline stage provided";
-    return false;
-  }
-
-  OperandList operands = {Operand::Int(stage), Operand::Int(id),
-                          Operand::String(name)};
-
-  auto* func = func_name_to_func_[ep->function_name()];
-  if (func == nullptr) {
-    error_ = "processing an entry point when the function has not been seen.";
-    return false;
-  }
-
-  for (const auto* var : func->referenced_module_variables()) {
-    // For SPIR-V 1.3 we only output Input/output variables. If we update to
-    // SPIR-V 1.4 or later this should be all variables.
-    if (var->storage_class() != ast::StorageClass::kInput &&
-        var->storage_class() != ast::StorageClass::kOutput) {
-      continue;
-    }
-
-    uint32_t var_id;
-    if (!scope_stack_.get(var->name(), &var_id)) {
-      error_ = "unable to find ID for global variable: " + var->name();
-      return false;
-    }
-
-    operands.push_back(Operand::Int(var_id));
-  }
-  push_preamble(spv::Op::OpEntryPoint, operands);
-
-  return true;
-}
-
 bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
   auto stage = pipeline_stage_to_execution_model(func->pipeline_stage());
   if (stage == SpvExecutionModelMax) {
@@ -374,32 +315,6 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
     operands.push_back(Operand::Int(var_id));
   }
   push_preamble(spv::Op::OpEntryPoint, operands);
-
-  return true;
-}
-
-bool Builder::GenerateExecutionModes(ast::EntryPoint* ep) {
-  const auto id = id_for_entry_point(ep);
-  if (id == 0) {
-    return false;
-  }
-
-  // WGSL fragment shader origin is upper left
-  if (ep->stage() == ast::PipelineStage::kFragment) {
-    push_preamble(
-        spv::Op::OpExecutionMode,
-        {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
-  } else if (ep->stage() == ast::PipelineStage::kCompute) {
-    auto* func = func_name_to_func_[ep->function_name()];
-
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t z = 0;
-    std::tie(x, y, z) = func->workgroup_size();
-    push_preamble(spv::Op::OpExecutionMode,
-                  {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
-                   Operand::Int(x), Operand::Int(y), Operand::Int(z)});
-  }
 
   return true;
 }

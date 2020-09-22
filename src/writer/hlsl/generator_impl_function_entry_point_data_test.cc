@@ -14,7 +14,6 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/decorated_variable.h"
-#include "src/ast/entry_point.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"

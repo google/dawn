@@ -211,14 +211,6 @@ bool TypeDeterminer::Determine() {
 
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
-  for (const auto& ep : mod_->entry_points()) {
-    for (const auto& callee : caller_to_callee_[ep->function_name()]) {
-      set_entry_points(callee, ep->name());
-    }
-  }
-
-  // Walk over the caller to callee information and update functions with which
-  // entry points call those functions.
   for (const auto& func : mod_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;

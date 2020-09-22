@@ -429,7 +429,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"discard", Token::Type::kDiscard},
         TokenData{"else", Token::Type::kElse},
         TokenData{"elseif", Token::Type::kElseIf},
-        TokenData{"entry_point", Token::Type::kEntryPoint},
         TokenData{"f32", Token::Type::kF32},
         TokenData{"fallthrough", Token::Type::kFallthrough},
         TokenData{"false", Token::Type::kFalse},
