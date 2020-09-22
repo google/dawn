@@ -300,7 +300,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
                                   const wgpu::Color& clearColor,
                                   ID3D11Texture2D** d3d11TextureOut,
                                   IDXGIKeyedMutex** dxgiKeyedMutexOut,
-                                  bool isCleared = true) const {
+                                  bool isInitialized = true) const {
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = mD3d11Device->CreateTexture2D(d3dDescriptor, nullptr, &d3d11Texture);
         ASSERT_EQ(hr, S_OK);
@@ -339,7 +339,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
             reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor);
         externDesc.sharedHandle = sharedHandle;
         externDesc.acquireMutexKey = 1;
-        externDesc.isCleared = isCleared;
+        externDesc.isInitialized = isInitialized;
         WGPUTexture dawnTexture = dawn_native::d3d12::WrapSharedHandle(device.Get(), &externDesc);
 
         *dawnTextureOut = wgpu::Texture::Acquire(dawnTexture);
@@ -502,9 +502,9 @@ TEST_P(D3D12SharedHandleUsageTests, ClearTwiceInD3D12ReadbackInD3D11) {
 }
 
 // 1. Create and clear a D3D11 texture with clearColor
-// 2. Import the texture with isCleared = false
+// 2. Import the texture with isInitialized = false
 // 3. Verify clearColor is not visible in wrapped texture
-TEST_P(D3D12SharedHandleUsageTests, UnclearedTextureIsCleared) {
+TEST_P(D3D12SharedHandleUsageTests, UninitializedTextureIsCleared) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     const wgpu::Color clearColor{1.0f, 0.0f, 0.0f, 1.0f};

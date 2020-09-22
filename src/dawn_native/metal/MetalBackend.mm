@@ -28,7 +28,7 @@ namespace dawn_native { namespace metal {
     }
 
     ExternalImageDescriptorIOSurface::ExternalImageDescriptorIOSurface()
-        : ExternalImageDescriptor(ExternalImageDescriptorType::IOSurface) {
+        : ExternalImageDescriptor(ExternalImageType::IOSurface) {
     }
 
     WGPUTexture WrapIOSurface(WGPUDevice cDevice,

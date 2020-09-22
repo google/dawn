@@ -59,51 +59,75 @@ namespace dawn_native { namespace vulkan {
         return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
-#ifdef DAWN_PLATFORM_LINUX
-    ExternalImageDescriptorFD::ExternalImageDescriptorFD(ExternalImageDescriptorType descType)
-        : ExternalImageDescriptor(descType) {
-    }
-
+#if defined(DAWN_PLATFORM_LINUX)
     ExternalImageDescriptorOpaqueFD::ExternalImageDescriptorOpaqueFD()
-        : ExternalImageDescriptorFD(ExternalImageDescriptorType::OpaqueFD) {
+        : ExternalImageDescriptorFD(ExternalImageType::OpaqueFD) {
     }
 
     ExternalImageDescriptorDmaBuf::ExternalImageDescriptorDmaBuf()
-        : ExternalImageDescriptorFD(ExternalImageDescriptorType::DmaBuf) {
+        : ExternalImageDescriptorFD(ExternalImageType::DmaBuf) {
+    }
+
+    ExternalImageExportInfoOpaqueFD::ExternalImageExportInfoOpaqueFD()
+        : ExternalImageExportInfoFD(ExternalImageType::OpaqueFD) {
+    }
+
+    ExternalImageExportInfoDmaBuf::ExternalImageExportInfoDmaBuf()
+        : ExternalImageExportInfoFD(ExternalImageType::DmaBuf) {
     }
 
     int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice, WGPUTexture cTexture) {
+        // Doesn't actually matter if we use OpaqueFD or DmaBuf since these paths are the same right
+        // now. This function will be removed.
         Device* device = reinterpret_cast<Device*>(cDevice);
-        Texture* texture = reinterpret_cast<Texture*>(cTexture);
-
-        if (!texture) {
+        device->EmitDeprecationWarning(
+            "ExportSignalSemaphoreOpaqueFD is deprecated. Please use ExportVulkanImage instead.");
+        ExternalImageExportInfoOpaqueFD info;
+        if (!ExportVulkanImage(cTexture, VK_IMAGE_LAYOUT_GENERAL, &info)) {
             return -1;
         }
-
-        ExternalSemaphoreHandle outHandle;
-        if (device->ConsumedError(device->SignalAndExportExternalTexture(texture, &outHandle))) {
-            return -1;
-        }
-
-        return outHandle;
+        return info.semaphoreHandles[0];
     }
+#endif  // DAWN_PLATFORM_LINUX
 
-    WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptor* descriptor) {
-        Device* device = reinterpret_cast<Device*>(cDevice);
-
+    WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptorVk* descriptor) {
         switch (descriptor->type) {
-            case ExternalImageDescriptorType::OpaqueFD:
-            case ExternalImageDescriptorType::DmaBuf: {
+#if defined(DAWN_PLATFORM_LINUX)
+            case ExternalImageType::OpaqueFD:
+            case ExternalImageType::DmaBuf: {
                 const ExternalImageDescriptorFD* fdDescriptor =
                     static_cast<const ExternalImageDescriptorFD*>(descriptor);
+                Device* device = reinterpret_cast<Device*>(cDevice);
                 TextureBase* texture = device->CreateTextureWrappingVulkanImage(
-                    descriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
+                    fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
                 return reinterpret_cast<WGPUTexture>(texture);
             }
+#endif  // DAWN_PLATFORM_LINUX
             default:
                 return nullptr;
         }
     }
-#endif
+
+    bool ExportVulkanImage(WGPUTexture cTexture,
+                           VkImageLayout desiredLayout,
+                           ExternalImageExportInfoVk* info) {
+        if (cTexture == nullptr) {
+            return false;
+        }
+        switch (info->type) {
+#if defined(DAWN_PLATFORM_LINUX)
+            case ExternalImageType::OpaqueFD:
+            case ExternalImageType::DmaBuf: {
+                Texture* texture = reinterpret_cast<Texture*>(cTexture);
+                Device* device = ToBackend(texture->GetDevice());
+                ExternalImageExportInfoFD* fdInfo = static_cast<ExternalImageExportInfoFD*>(info);
+                return device->SignalAndExportExternalTexture(texture, desiredLayout, fdInfo,
+                                                              &fdInfo->semaphoreHandles);
+            }
+#endif  // DAWN_PLATFORM_LINUX
+            default:
+                return false;
+        }
+    }
 
 }}  // namespace dawn_native::vulkan

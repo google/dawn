@@ -462,7 +462,7 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<Texture*> Texture::CreateFromExternal(
         Device* device,
-        const ExternalImageDescriptor* descriptor,
+        const ExternalImageDescriptorVk* descriptor,
         const TextureDescriptor* textureDescriptor,
         external_memory::Service* externalMemoryService) {
         Ref<Texture> texture =
@@ -537,7 +537,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     // Internally managed, but imported from external handle
-    MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor,
+    MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
                                                external_memory::Service* externalMemoryService) {
         VkFormat format = VulkanImageFormat(ToBackend(GetDevice()), GetFormat().format);
         VkImageUsageFlags usage = VulkanImageUsage(GetUsage(), GetFormat());
@@ -546,6 +546,9 @@ namespace dawn_native { namespace vulkan {
         }
 
         mExternalState = ExternalState::PendingAcquire;
+
+        mPendingAcquireOldLayout = descriptor->releasedOldLayout;
+        mPendingAcquireNewLayout = descriptor->releasedNewLayout;
 
         VkImageCreateInfo baseCreateInfo = {};
         FillVulkanCreateInfoSizesAndType(*this, &baseCreateInfo);
@@ -571,7 +574,7 @@ namespace dawn_native { namespace vulkan {
         mHandle = nativeImage;
     }
 
-    MaybeError Texture::BindExternalMemory(const ExternalImageDescriptor* descriptor,
+    MaybeError Texture::BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
                                            VkSemaphore signalSemaphore,
                                            VkDeviceMemory externalMemoryAllocation,
                                            std::vector<VkSemaphore> waitSemaphores) {
@@ -580,8 +583,8 @@ namespace dawn_native { namespace vulkan {
             device->fn.BindImageMemory(device->GetVkDevice(), mHandle, externalMemoryAllocation, 0),
             "BindImageMemory (external)"));
 
-        // Don't clear imported texture if already cleared
-        if (descriptor->isCleared) {
+        // Don't clear imported texture if already initialized
+        if (descriptor->isInitialized) {
             SetIsSubresourceContentInitialized(true, GetAllSubresources());
         }
 
@@ -592,7 +595,10 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError Texture::SignalAndDestroy(VkSemaphore* outSignalSemaphore) {
+    MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
+                                              VkSemaphore* signalSemaphore,
+                                              VkImageLayout* releasedOldLayout,
+                                              VkImageLayout* releasedNewLayout) {
         Device* device = ToBackend(GetDevice());
 
         if (mExternalState == ExternalState::Released) {
@@ -605,17 +611,60 @@ namespace dawn_native { namespace vulkan {
         }
 
         ASSERT(mSignalSemaphore != VK_NULL_HANDLE);
+        ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
 
         // Release the texture
-        mExternalState = ExternalState::PendingRelease;
-        TransitionFullUsage(device->GetPendingRecordingContext(), wgpu::TextureUsage::None);
+        mExternalState = ExternalState::Released;
+
+        wgpu::TextureUsage usage = mSubresourceLastUsages[0];
+
+        VkImageMemoryBarrier barrier;
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.pNext = nullptr;
+        barrier.image = GetHandle();
+        barrier.subresourceRange.aspectMask = VulkanAspectMask(GetFormat().aspects);
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+
+        barrier.srcAccessMask = VulkanAccessFlags(usage, GetFormat());
+        barrier.dstAccessMask = 0;  // The barrier must be paired with another barrier that will
+                                    // specify the dst access mask on the importing queue.
+
+        barrier.oldLayout = VulkanImageLayout(usage, GetFormat());
+        if (desiredLayout == VK_IMAGE_LAYOUT_UNDEFINED) {
+            // VK_IMAGE_LAYOUT_UNDEFINED is invalid here. We use it as a
+            // special value to indicate no layout transition should be done.
+            barrier.newLayout = barrier.oldLayout;
+        } else {
+            barrier.newLayout = desiredLayout;
+        }
+
+        barrier.srcQueueFamilyIndex = device->GetGraphicsQueueFamily();
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+
+        VkPipelineStageFlags srcStages = VulkanPipelineStage(usage, GetFormat());
+        VkPipelineStageFlags dstStages =
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;  // We don't know when the importing queue will need
+                                                // the texture, so pass
+                                                // VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT to ensure
+                                                // the barrier happens-before any usage in the
+                                                // importing queue.
+
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+        device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
+                                      nullptr, 0, nullptr, 1, &barrier);
 
         // Queue submit to signal we are done with the texture
-        device->GetPendingRecordingContext()->signalSemaphores.push_back(mSignalSemaphore);
+        recordingContext->signalSemaphores.push_back(mSignalSemaphore);
         DAWN_TRY(device->SubmitPendingCommands());
 
-        // Write out the signal semaphore
-        *outSignalSemaphore = mSignalSemaphore;
+        // Write out the layouts and signal semaphore
+        *releasedOldLayout = barrier.oldLayout;
+        *releasedNewLayout = barrier.newLayout;
+        *signalSemaphore = mSignalSemaphore;
+
         mSignalSemaphore = VK_NULL_HANDLE;
 
         // Destroy the texture so it can't be used again
@@ -688,26 +737,58 @@ namespace dawn_native { namespace vulkan {
                     SubresourceRange::SingleMipAndLayer(0, 0, GetFormat().aspects)));
             }
 
+            VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
             // Transfer texture from external queue to graphics queue
-            (*barriers)[transitionBarrierStart].srcQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
-            (*barriers)[transitionBarrierStart].dstQueueFamilyIndex =
-                ToBackend(GetDevice())->GetGraphicsQueueFamily();
-            // Don't override oldLayout to leave it as VK_IMAGE_LAYOUT_UNDEFINED
-            // TODO(http://crbug.com/dawn/200)
-            mExternalState = ExternalState::Acquired;
-        } else if (mExternalState == ExternalState::PendingRelease) {
-            if (barriers->size() == transitionBarrierStart) {
-                barriers->push_back(BuildMemoryBarrier(
-                    GetFormat(), mHandle, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                    SubresourceRange::SingleMipAndLayer(0, 0, GetFormat().aspects)));
+            barrier->srcQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+            barrier->dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
+
+            // srcAccessMask means nothing when importing. Queue transfers require a barrier on
+            // both the importing and exporting queues. The exporting queue should have specified
+            // this.
+            barrier->srcAccessMask = 0;
+
+            // This should be the first barrier after import.
+            ASSERT(barrier->oldLayout == VK_IMAGE_LAYOUT_UNDEFINED);
+
+            // Save the desired layout. We may need to transition through an intermediate
+            // |mPendingAcquireLayout| first.
+            VkImageLayout desiredLayout = barrier->newLayout;
+
+            bool isInitialized = IsSubresourceContentInitialized(GetAllSubresources());
+
+            // We don't care about the pending old layout if the texture is uninitialized. The
+            // driver is free to discard it. Likewise, we don't care about the pending new layout if
+            // the texture is uninitialized. We can skip the layout transition.
+            if (!isInitialized) {
+                barrier->oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                barrier->newLayout = desiredLayout;
+            } else {
+                barrier->oldLayout = mPendingAcquireOldLayout;
+                barrier->newLayout = mPendingAcquireNewLayout;
             }
 
-            // Transfer texture from graphics queue to external queue
-            (*barriers)[transitionBarrierStart].srcQueueFamilyIndex =
-                ToBackend(GetDevice())->GetGraphicsQueueFamily();
-            (*barriers)[transitionBarrierStart].dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
-            (*barriers)[transitionBarrierStart].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-            mExternalState = ExternalState::Released;
+            // If these are unequal, we need an another barrier to transition the layout.
+            if (barrier->newLayout != desiredLayout) {
+                VkImageMemoryBarrier layoutBarrier;
+                layoutBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                layoutBarrier.pNext = nullptr;
+                layoutBarrier.image = GetHandle();
+                layoutBarrier.subresourceRange = barrier->subresourceRange;
+
+                // Transition from the acquired new layout to the desired layout.
+                layoutBarrier.oldLayout = barrier->newLayout;
+                layoutBarrier.newLayout = desiredLayout;
+
+                // We already transitioned these.
+                layoutBarrier.srcAccessMask = 0;
+                layoutBarrier.dstAccessMask = 0;
+                layoutBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                layoutBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+                barriers->push_back(layoutBarrier);
+            }
+
+            mExternalState = ExternalState::Acquired;
         }
 
         mLastExternalState = mExternalState;

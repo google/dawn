@@ -97,13 +97,13 @@ namespace {
         wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
                                     IOSurfaceRef ioSurface,
                                     uint32_t plane,
-                                    bool isCleared = true) {
+                                    bool isInitialized = true) {
             dawn_native::metal::ExternalImageDescriptorIOSurface externDesc;
             externDesc.cTextureDescriptor =
                 reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
             externDesc.ioSurface = ioSurface;
             externDesc.plane = plane;
-            externDesc.isCleared = isCleared;
+            externDesc.isInitialized = isInitialized;
             WGPUTexture texture = dawn_native::metal::WrapIOSurface(device.Get(), &externDesc);
             return wgpu::Texture::Acquire(texture);
         }
@@ -446,8 +446,8 @@ TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
     DoClearTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data));
 }
 
-// Test that texture with color is cleared when isCleared = false
-TEST_P(IOSurfaceUsageTests, UnclearedTextureIsCleared) {
+// Test that texture with color is cleared when isInitialized = false
+TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
@@ -465,7 +465,7 @@ TEST_P(IOSurfaceUsageTests, UnclearedTextureIsCleared) {
     textureDescriptor.mipLevelCount = 1;
     textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
 
-    // wrap ioSurface and ensure color is not visible when isCleared set to false
+    // wrap ioSurface and ensure color is not visible when isInitialized set to false
     wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), 0, false);
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
 }

@@ -69,12 +69,13 @@ namespace dawn_native { namespace vulkan {
         // Dawn Native API
 
         TextureBase* CreateTextureWrappingVulkanImage(
-            const ExternalImageDescriptor* descriptor,
+            const ExternalImageDescriptorVk* descriptor,
             ExternalMemoryHandle memoryHandle,
             const std::vector<ExternalSemaphoreHandle>& waitHandles);
-
-        MaybeError SignalAndExportExternalTexture(Texture* texture,
-                                                  ExternalSemaphoreHandle* outHandle);
+        bool SignalAndExportExternalTexture(Texture* texture,
+                                            VkImageLayout desiredLayout,
+                                            ExternalImageExportInfoVk* info,
+                                            std::vector<ExternalSemaphoreHandle>* semaphoreHandle);
 
         // Dawn API
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
@@ -192,7 +193,7 @@ namespace dawn_native { namespace vulkan {
         // There is always a valid recording context stored in mRecordingContext
         CommandRecordingContext mRecordingContext;
 
-        MaybeError ImportExternalImage(const ExternalImageDescriptor* descriptor,
+        MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                        ExternalMemoryHandle memoryHandle,
                                        VkImage image,
                                        const std::vector<ExternalSemaphoreHandle>& waitHandles,

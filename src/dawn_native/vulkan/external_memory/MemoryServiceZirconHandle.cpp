@@ -71,8 +71,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         // TODO(http://crbug.com/dawn/206): Investigate dedicated only images
         VkFlags memoryFlags =
             externalFormatProperties.externalMemoryProperties.externalMemoryFeatures;
-        return (memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT_KHR) &&
-               !(memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_KHR);
+        return (memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT_KHR) != 0;
     }
 
     bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
@@ -84,7 +83,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) {
-        if (descriptor->type != ExternalImageDescriptorType::OpaqueFD) {
+        if (descriptor->type != ExternalImageType::OpaqueFD) {
             return DAWN_VALIDATION_ERROR("ExternalImageDescriptor is not an OpaqueFD descriptor");
         }
         const ExternalImageDescriptorOpaqueFD* opaqueFDDescriptor =

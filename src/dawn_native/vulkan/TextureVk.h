@@ -49,7 +49,7 @@ namespace dawn_native { namespace vulkan {
         // image must be bound via Texture::BindExternalMemory.
         static ResultOrError<Texture*> CreateFromExternal(
             Device* device,
-            const ExternalImageDescriptor* descriptor,
+            const ExternalImageDescriptorVk* descriptor,
             const TextureDescriptor* textureDescriptor,
             external_memory::Service* externalMemoryService);
 
@@ -84,20 +84,24 @@ namespace dawn_native { namespace vulkan {
         void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  const SubresourceRange& range);
 
-        MaybeError SignalAndDestroy(VkSemaphore* outSignalSemaphore);
         // Binds externally allocated memory to the VkImage and on success, takes ownership of
         // semaphores.
-        MaybeError BindExternalMemory(const ExternalImageDescriptor* descriptor,
+        MaybeError BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
                                       VkSemaphore signalSemaphore,
                                       VkDeviceMemory externalMemoryAllocation,
                                       std::vector<VkSemaphore> waitSemaphores);
+
+        MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
+                                         VkSemaphore* signalSemaphore,
+                                         VkImageLayout* releasedOldLayout,
+                                         VkImageLayout* releasedNewLayout);
 
       private:
         ~Texture() override;
         using TextureBase::TextureBase;
 
         MaybeError InitializeAsInternalTexture();
-        MaybeError InitializeFromExternal(const ExternalImageDescriptor* descriptor,
+        MaybeError InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
                                           external_memory::Service* externalMemoryService);
         void InitializeForSwapChain(VkImage nativeImage);
 
@@ -119,11 +123,13 @@ namespace dawn_native { namespace vulkan {
             InternalOnly,
             PendingAcquire,
             Acquired,
-            PendingRelease,
             Released
         };
         ExternalState mExternalState = ExternalState::InternalOnly;
         ExternalState mLastExternalState = ExternalState::InternalOnly;
+
+        VkImageLayout mPendingAcquireOldLayout;
+        VkImageLayout mPendingAcquireNewLayout;
 
         VkSemaphore mSignalSemaphore = VK_NULL_HANDLE;
         std::vector<VkSemaphore> mWaitRequirements;

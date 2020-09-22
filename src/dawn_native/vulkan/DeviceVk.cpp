@@ -658,7 +658,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError Device::ImportExternalImage(const ExternalImageDescriptor* descriptor,
+    MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                            ExternalMemoryHandle memoryHandle,
                                            VkImage image,
                                            const std::vector<ExternalSemaphoreHandle>& waitHandles,
@@ -702,22 +702,35 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError Device::SignalAndExportExternalTexture(Texture* texture,
-                                                      ExternalSemaphoreHandle* outHandle) {
-        DAWN_TRY(ValidateObject(texture));
+    bool Device::SignalAndExportExternalTexture(
+        Texture* texture,
+        VkImageLayout desiredLayout,
+        ExternalImageExportInfoVk* info,
+        std::vector<ExternalSemaphoreHandle>* semaphoreHandles) {
+        return !ConsumedError([&]() -> MaybeError {
+            DAWN_TRY(ValidateObject(texture));
 
-        VkSemaphore outSignalSemaphore;
-        DAWN_TRY(texture->SignalAndDestroy(&outSignalSemaphore));
+            VkSemaphore signalSemaphore;
+            VkImageLayout releasedOldLayout;
+            VkImageLayout releasedNewLayout;
+            DAWN_TRY(texture->ExportExternalTexture(desiredLayout, &signalSemaphore,
+                                                    &releasedOldLayout, &releasedNewLayout));
 
-        // This has to happen right after SignalAndDestroy, since the semaphore will be
-        // deleted when the fenced deleter runs after the queue submission
-        DAWN_TRY_ASSIGN(*outHandle, mExternalSemaphoreService->ExportSemaphore(outSignalSemaphore));
+            ExternalSemaphoreHandle semaphoreHandle;
+            DAWN_TRY_ASSIGN(semaphoreHandle,
+                            mExternalSemaphoreService->ExportSemaphore(signalSemaphore));
+            semaphoreHandles->push_back(semaphoreHandle);
+            info->releasedOldLayout = releasedOldLayout;
+            info->releasedNewLayout = releasedNewLayout;
+            info->isInitialized =
+                texture->IsSubresourceContentInitialized(texture->GetAllSubresources());
 
-        return {};
+            return {};
+        }());
     }
 
     TextureBase* Device::CreateTextureWrappingVulkanImage(
-        const ExternalImageDescriptor* descriptor,
+        const ExternalImageDescriptorVk* descriptor,
         ExternalMemoryHandle memoryHandle,
         const std::vector<ExternalSemaphoreHandle>& waitHandles) {
         const TextureDescriptor* textureDescriptor =

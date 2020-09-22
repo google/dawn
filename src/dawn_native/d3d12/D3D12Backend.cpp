@@ -48,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
-        : ExternalImageDescriptor(ExternalImageDescriptorType::DXGISharedHandle) {
+        : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {
     }
 
     uint64_t SetExternalMemoryReservation(WGPUDevice device,

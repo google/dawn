@@ -195,8 +195,14 @@ namespace dawn_native {
         return GetProcMapNamesForTestingInternal();
     }
 
-    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageDescriptorType type)
-        : type(type) {
+    // ExternalImageDescriptor
+
+    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageType type) : type(type) {
+    }
+
+    // ExternalImageExportInfo
+
+    ExternalImageExportInfo::ExternalImageExportInfo(ExternalImageType type) : type(type) {
     }
 
 }  // namespace dawn_native
