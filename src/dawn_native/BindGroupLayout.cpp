@@ -26,163 +26,38 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateBindingTypeWithShaderStageVisibility(
-        wgpu::BindingType bindingType,
-        wgpu::ShaderStage shaderStageVisibility) {
-        // TODO(jiawei.shao@intel.com): support read-write storage textures.
-        switch (bindingType) {
-            case wgpu::BindingType::StorageBuffer: {
-                if ((shaderStageVisibility & wgpu::ShaderStage::Vertex) != 0) {
+    namespace {
+        MaybeError ValidateStorageTextureFormat(DeviceBase* device,
+                                                wgpu::TextureFormat storageTextureFormat) {
+            const Format* format = nullptr;
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
+
+            ASSERT(format != nullptr);
+            if (!format->supportsStorageUsage) {
+                return DAWN_VALIDATION_ERROR("Texture format does not support storage textures");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateStorageTextureViewDimension(wgpu::TextureViewDimension dimension) {
+            switch (dimension) {
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
                     return DAWN_VALIDATION_ERROR(
-                        "storage buffer binding is not supported in vertex shader");
-                }
-                break;
+                        "Cube map and cube map texture views cannot be used as storage textures");
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e3D:
+                    return {};
+
+                case wgpu::TextureViewDimension::Undefined:
+                    UNREACHABLE();
             }
-
-            case wgpu::BindingType::WriteonlyStorageTexture: {
-                if ((shaderStageVisibility & wgpu::ShaderStage::Vertex) != 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "write-only storage texture binding is not supported in vertex shader");
-                }
-                break;
-            }
-
-            case wgpu::BindingType::UniformBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
-            case wgpu::BindingType::SampledTexture:
-            case wgpu::BindingType::ReadonlyStorageTexture:
-                break;
         }
-
-        return {};
-    }
-
-    MaybeError ValidateStorageTextureFormat(DeviceBase* device,
-                                            wgpu::BindingType bindingType,
-                                            wgpu::TextureFormat storageTextureFormat) {
-        switch (bindingType) {
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture: {
-                if (storageTextureFormat == wgpu::TextureFormat::Undefined) {
-                    return DAWN_VALIDATION_ERROR("Storage texture format is missing");
-                }
-                DAWN_TRY(ValidateTextureFormat(storageTextureFormat));
-
-                const Format* format = nullptr;
-                DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
-                ASSERT(format != nullptr);
-                if (!format->supportsStorageUsage) {
-                    return DAWN_VALIDATION_ERROR("The storage texture format is not supported");
-                }
-                break;
-            }
-
-            case wgpu::BindingType::StorageBuffer:
-            case wgpu::BindingType::UniformBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
-            case wgpu::BindingType::SampledTexture:
-                break;
-            default:
-                UNREACHABLE();
-                break;
-        }
-
-        return {};
-    }
-
-    MaybeError ValidateStorageTextureViewDimension(wgpu::BindingType bindingType,
-                                                   wgpu::TextureViewDimension dimension) {
-        switch (bindingType) {
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture: {
-                break;
-            }
-
-            case wgpu::BindingType::StorageBuffer:
-            case wgpu::BindingType::UniformBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
-            case wgpu::BindingType::SampledTexture:
-                return {};
-
-            default:
-                UNREACHABLE();
-                return {};
-        }
-
-        switch (dimension) {
-            case wgpu::TextureViewDimension::Cube:
-            case wgpu::TextureViewDimension::CubeArray:
-                return DAWN_VALIDATION_ERROR(
-                    "Cube map and cube map texture views cannot be used as storage textures");
-
-            case wgpu::TextureViewDimension::e1D:
-            case wgpu::TextureViewDimension::e2D:
-            case wgpu::TextureViewDimension::e2DArray:
-            case wgpu::TextureViewDimension::e3D:
-                return {};
-
-            case wgpu::TextureViewDimension::Undefined:
-            default:
-                UNREACHABLE();
-                return {};
-        }
-    }
-
-    MaybeError ValidateBindingCanBeMultisampled(wgpu::BindingType bindingType,
-                                                wgpu::TextureViewDimension viewDimension) {
-        switch (bindingType) {
-            case wgpu::BindingType::SampledTexture:
-                break;
-
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture:
-                return DAWN_VALIDATION_ERROR("Storage texture bindings may not be multisampled");
-
-            case wgpu::BindingType::StorageBuffer:
-            case wgpu::BindingType::UniformBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-                return DAWN_VALIDATION_ERROR("Buffer bindings may not be multisampled");
-
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
-                return DAWN_VALIDATION_ERROR("Sampler bindings may not be multisampled");
-
-            default:
-                UNREACHABLE();
-                return {};
-        }
-
-        switch (viewDimension) {
-            case wgpu::TextureViewDimension::e2D:
-                break;
-
-            case wgpu::TextureViewDimension::e2DArray:
-                return DAWN_VALIDATION_ERROR("2D array texture bindings may not be multisampled");
-
-            case wgpu::TextureViewDimension::Cube:
-            case wgpu::TextureViewDimension::CubeArray:
-                return DAWN_VALIDATION_ERROR("Cube texture bindings may not be multisampled");
-
-            case wgpu::TextureViewDimension::e3D:
-                return DAWN_VALIDATION_ERROR("3D texture bindings may not be multisampled");
-
-            case wgpu::TextureViewDimension::e1D:
-                return DAWN_VALIDATION_ERROR("1D texture bindings may not be multisampled");
-
-            case wgpu::TextureViewDimension::Undefined:
-            default:
-                UNREACHABLE();
-                return {};
-        }
-
-        return {};
-    }
+    }  // anonymous namespace
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                                  const BindGroupLayoutDescriptor* descriptor) {
@@ -210,41 +85,51 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
-            DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(entry.type, entry.visibility));
-
-            DAWN_TRY(ValidateStorageTextureFormat(device, entry.type, entry.storageTextureFormat));
-
-            DAWN_TRY(ValidateStorageTextureViewDimension(entry.type, viewDimension));
-
-            if (entry.multisampled) {
-                DAWN_TRY(ValidateBindingCanBeMultisampled(entry.type, viewDimension));
-            }
+            bool canBeDynamic = false;
+            bool canBeMultisampled = false;
+            wgpu::ShaderStage allowedStages = kAllStages;
 
             switch (entry.type) {
-                case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::StorageBuffer:
+                    allowedStages &= ~wgpu::ShaderStage::Vertex;
+                    DAWN_FALLTHROUGH;
+                case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
+                    canBeDynamic = true;
                     break;
+
                 case wgpu::BindingType::SampledTexture:
-                    if (entry.hasDynamicOffset) {
-                        return DAWN_VALIDATION_ERROR("Sampled textures cannot be dynamic");
-                    }
+                    canBeMultisampled = true;
                     break;
+
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    allowedStages &= ~wgpu::ShaderStage::Vertex;
+                    DAWN_FALLTHROUGH;
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                    DAWN_TRY(ValidateStorageTextureFormat(device, entry.storageTextureFormat));
+                    DAWN_TRY(ValidateStorageTextureViewDimension(viewDimension));
+                    break;
+
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
-                    if (entry.hasDynamicOffset) {
-                        return DAWN_VALIDATION_ERROR("Samplers cannot be dynamic");
-                    }
                     break;
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    if (entry.hasDynamicOffset) {
-                        return DAWN_VALIDATION_ERROR("Storage textures cannot be dynamic");
-                    }
-                    break;
-                default:
-                    UNREACHABLE();
-                    break;
+            }
+
+            if (entry.multisampled) {
+                if (!canBeMultisampled) {
+                    return DAWN_VALIDATION_ERROR("Binding type cannot be multisampled.");
+                }
+                if (viewDimension != wgpu::TextureViewDimension::e2D) {
+                    return DAWN_VALIDATION_ERROR("Multisampled binding must be 2D.");
+                }
+            }
+
+            if (entry.hasDynamicOffset && !canBeDynamic) {
+                return DAWN_VALIDATION_ERROR("Binding type cannot be dynamic.");
+            }
+
+            if ((entry.visibility & allowedStages) != entry.visibility) {
+                return DAWN_VALIDATION_ERROR("Binding type cannot be used with this visibility.");
             }
 
             IncrementBindingCounts(&bindingCounts, entry);
