@@ -169,6 +169,11 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12InfoQueue> infoQueue;
         ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
 
+        // To avoid flooding the console, a storage-filter is also used to
+        // prevent messages from getting logged.
+        DAWN_TRY(CheckHRESULT(infoQueue->PushStorageFilter(&filter),
+                              "ID3D12InfoQueue::PushStorageFilter"));
+
         DAWN_TRY(CheckHRESULT(infoQueue->PushRetrievalFilter(&filter),
                               "ID3D12InfoQueue::PushRetrievalFilter"));
 
@@ -182,6 +187,7 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12InfoQueue> infoQueue;
         ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
         infoQueue->PopRetrievalFilter();
+        infoQueue->PopStorageFilter();
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {

@@ -187,6 +187,11 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     ParseArgs(argc, argv);
 
+    if (mEnableBackendValidation) {
+        mPlatformDebugLogger =
+            std::unique_ptr<utils::PlatformDebugLogger>(utils::CreatePlatformDebugLogger());
+    }
+
     // Create a temporary instance to select available and preferred adapters. This is done before
     // test instantiation so GetAvailableAdapterTestParamsForBackends can generate test
     // parameterizations all selected adapters. We drop the instance at the end of this function
