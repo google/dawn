@@ -326,7 +326,9 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         hr = dxgiKeyedMutex->AcquireSync(0, INFINITE);
         ASSERT_EQ(hr, S_OK);
 
-        const float colorRGBA[] = {clearColor.r, clearColor.g, clearColor.b, clearColor.a};
+        const float colorRGBA[] = {
+            static_cast<float>(clearColor.r), static_cast<float>(clearColor.g),
+            static_cast<float>(clearColor.b), static_cast<float>(clearColor.a)};
         mD3d11DeviceContext->ClearRenderTargetView(d3d11RTV.Get(), colorRGBA);
 
         hr = dxgiKeyedMutex->ReleaseSync(1);

@@ -193,17 +193,41 @@ namespace dawn_native {
         return true;
     }
 
-    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn_native::Color color) {
-        const std::array<int32_t, 4> outputValue = {
-            static_cast<int32_t>(color.r), static_cast<int32_t>(color.g),
-            static_cast<int32_t>(color.b), static_cast<int32_t>(color.a)};
+    // The below functions convert a dawn_native::Color (doubles) to floats, then to the desired
+    // data type. This intermediate conversion to float must be done to ensure all backends produce
+    // consistent results.
+
+    std::array<double, 4> ConvertToFloatToDoubleColor(dawn_native::Color color) {
+        const std::array<double, 4> outputValue = {
+            static_cast<double>(static_cast<float>(color.r)),
+            static_cast<double>(static_cast<float>(color.g)),
+            static_cast<double>(static_cast<float>(color.b)),
+            static_cast<double>(static_cast<float>(color.a))};
         return outputValue;
     }
 
-    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn_native::Color color) {
-        const std::array<uint32_t, 4> outputValue = {
-            static_cast<uint32_t>(color.r), static_cast<uint32_t>(color.g),
-            static_cast<uint32_t>(color.b), static_cast<uint32_t>(color.a)};
+    std::array<float, 4> ConvertToFloatColor(dawn_native::Color color) {
+        const std::array<float, 4> outputValue = {
+            static_cast<float>(color.r), static_cast<float>(color.g), static_cast<float>(color.b),
+            static_cast<float>(color.a)};
         return outputValue;
     }
+    std::array<int32_t, 4> ConvertToFloatToSignedIntegerColor(dawn_native::Color color) {
+        const std::array<int32_t, 4> outputValue = {
+            static_cast<int32_t>(static_cast<float>(color.r)),
+            static_cast<int32_t>(static_cast<float>(color.g)),
+            static_cast<int32_t>(static_cast<float>(color.b)),
+            static_cast<int32_t>(static_cast<float>(color.a))};
+        return outputValue;
+    }
+
+    std::array<uint32_t, 4> ConvertToFloatToUnsignedIntegerColor(dawn_native::Color color) {
+        const std::array<uint32_t, 4> outputValue = {
+            static_cast<uint32_t>(static_cast<float>(color.r)),
+            static_cast<uint32_t>(static_cast<float>(color.g)),
+            static_cast<uint32_t>(static_cast<float>(color.b)),
+            static_cast<uint32_t>(static_cast<float>(color.a))};
+        return outputValue;
+    }
+
 }  // namespace dawn_native

@@ -236,6 +236,35 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
     }
 }
 
+// This test verifies that input double values are being rounded to floats internally when
+// clearing.
+TEST_P(RenderPassLoadOpTests, LoadOpClearLargeIntegerValueRounding) {
+    // Intel GPUs fail when we attempt to clear to a value that exceeds 2147483647 on a RGBA32Uint
+    // texture.
+    // Bug: dawn:530
+    DAWN_SKIP_TEST_IF(IsIntel() && IsD3D12());
+
+    // RGBA32Uint
+    {
+        constexpr wgpu::Color kClearColor = {4194966911.0, 3555555555.0, 2555555555.0,
+                                             1555555555.0};
+        constexpr std::array<uint32_t, 4> kExpectedPixelValue = {4194966784, 3555555584, 2555555584,
+                                                                 1555555584};
+        TestIntegerClearColor<uint32_t>(wgpu::TextureFormat::RGBA32Uint, kClearColor,
+                                        kExpectedPixelValue);
+    }
+
+    // RGBA32Sint
+    {
+        constexpr wgpu::Color kClearColor = {2147483447.0, -2147483447.0, 1000000555.0,
+                                             -1000000555.0};
+        constexpr std::array<int32_t, 4> kExpectedPixelValue = {2147483392, -2147483392, 1000000576,
+                                                                -1000000576};
+        TestIntegerClearColor<int32_t>(wgpu::TextureFormat::RGBA32Sint, kClearColor,
+                                       kExpectedPixelValue);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
                       D3D12Backend(),
                       MetalBackend(),

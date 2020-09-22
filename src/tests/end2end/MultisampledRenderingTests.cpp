@@ -126,7 +126,10 @@ class MultisampledRenderingTest : public DawnTest {
                                  const wgpu::RenderPassDescriptor& renderPass,
                                  const wgpu::RenderPipeline& pipeline,
                                  const wgpu::Color& color) {
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &color.r, sizeof(color));
+        const float uniformData[4] = {static_cast<float>(color.r), static_cast<float>(color.g),
+                                      static_cast<float>(color.b), static_cast<float>(color.a)};
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, uniformData,
+                                sizeof(float) * 4);
     }
 
     utils::ComboRenderPassDescriptor CreateComboRenderPassDescriptorForTest(
@@ -249,12 +252,12 @@ class MultisampledRenderingTest : public DawnTest {
         return pipeline;
     }
 
-    RGBA8 ExpectedMSAAColor(const wgpu::Color color, const float msaaCoverage) {
+    RGBA8 ExpectedMSAAColor(const wgpu::Color color, const double msaaCoverage) {
         RGBA8 result;
-        result.r = static_cast<uint8_t>(std::min(255.0f, 256 * color.r * msaaCoverage));
-        result.g = static_cast<uint8_t>(std::min(255.0f, 256 * color.g * msaaCoverage));
-        result.b = static_cast<uint8_t>(std::min(255.0f, 256 * color.b * msaaCoverage));
-        result.a = static_cast<uint8_t>(std::min(255.0f, 256 * color.a * msaaCoverage));
+        result.r = static_cast<uint8_t>(std::min(255.0, 256 * color.r * msaaCoverage));
+        result.g = static_cast<uint8_t>(std::min(255.0, 256 * color.g * msaaCoverage));
+        result.b = static_cast<uint8_t>(std::min(255.0, 256 * color.b * msaaCoverage));
+        result.a = static_cast<uint8_t>(std::min(255.0, 256 * color.a * msaaCoverage));
         return result;
     }
 };
@@ -272,8 +275,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
         utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
             {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
             kTestDepth);
-
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+        std::array<float, 4> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a};
+        constexpr uint32_t kSize = sizeof(kUniformData);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
@@ -409,9 +413,14 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
             {mMultisampledColorView, multisampledColorView2}, {mResolveView, resolveView2},
             wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-        std::array<wgpu::Color, 2> kUniformData = {kRed, kGreen};
+        std::array<float, 8> kUniformData = {
+            static_cast<float>(kRed.r),   static_cast<float>(kRed.g),
+            static_cast<float>(kRed.b),   static_cast<float>(kRed.a),
+            static_cast<float>(kGreen.r), static_cast<float>(kGreen.g),
+            static_cast<float>(kGreen.b), static_cast<float>(kGreen.a)};
         constexpr uint32_t kSize = sizeof(kUniformData);
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kUniformData[0].r, kSize);
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
@@ -487,7 +496,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
             {mMultisampledColorView}, {resolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
             kTestDepth);
         wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
-
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
     }
 
@@ -644,9 +652,10 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMas
             {mMultisampledColorView, multisampledColorView2}, {mResolveView, resolveView2},
             wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-        std::array<wgpu::Color, 2> kUniformData = {kRed, kGreen};
+        std::array<float, 8> kUniformData = {kRed.r,   kRed.g,   kRed.b,   kRed.a,     // color1
+                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a};  // color2
         constexpr uint32_t kSize = sizeof(kUniformData);
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kUniformData[0].r, kSize);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
@@ -799,9 +808,10 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
             {mMultisampledColorView, multisampledColorView2}, {mResolveView, resolveView2},
             wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-        std::array<wgpu::Color, 2> kUniformData = {kRed, kGreen};
+        std::array<float, 8> kUniformData = {kRed.r,   kRed.g,   kRed.b,   kRed.a,     // color1
+                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a};  // color2
         constexpr uint32_t kSize = sizeof(kUniformData);
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kUniformData[0].r, kSize);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
@@ -888,9 +898,13 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
                 {mMultisampledColorView, multisampledColorView2}, {mResolveView, resolveView2},
                 wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-            std::array<wgpu::Color, 2> kUniformData = {kRed, kGreen};
+            std::array<float, 8> kUniformData = {
+                static_cast<float>(kRed.r),   static_cast<float>(kRed.g),
+                static_cast<float>(kRed.b),   static_cast<float>(kRed.a),
+                static_cast<float>(kGreen.r), static_cast<float>(kGreen.g),
+                static_cast<float>(kGreen.b), static_cast<float>(kGreen.a)};
             constexpr uint32_t kSize = sizeof(kUniformData);
-            EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kUniformData[0].r,
+            EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(),
                                     kSize);
         }
 

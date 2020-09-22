@@ -937,14 +937,16 @@ namespace dawn_native { namespace opengl {
 
                     const Format& attachmentFormat = attachmentInfo->view->GetFormat();
                     if (attachmentFormat.HasComponentType(Format::Type::Float)) {
-                        gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo->clearColor.r);
+                        const std::array<float, 4> appliedClearColor =
+                            ConvertToFloatColor(attachmentInfo->clearColor);
+                        gl.ClearBufferfv(GL_COLOR, i, appliedClearColor.data());
                     } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
                         const std::array<uint32_t, 4> appliedClearColor =
-                            ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
+                            ConvertToFloatToUnsignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
                     } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
                         const std::array<int32_t, 4> appliedClearColor =
-                            ConvertToSignedIntegerColor(attachmentInfo->clearColor);
+                            ConvertToFloatToSignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
                     } else {
                         UNREACHABLE();
@@ -1180,7 +1182,8 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    gl.BlendColor(cmd->color.r, cmd->color.g, cmd->color.b, cmd->color.a);
+                    const std::array<float, 4> blendColor = ConvertToFloatColor(cmd->color);
+                    gl.BlendColor(blendColor[0], blendColor[1], blendColor[2], blendColor[3]);
                     break;
                 }
 
