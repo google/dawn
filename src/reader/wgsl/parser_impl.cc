@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/builtin_decoration.h"
@@ -2790,7 +2790,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     return paren;
   }
 
-  if (t.IsCast() || t.IsAs()) {
+  if (t.IsCast() || t.IsBitcast()) {
     auto src = t;
 
     next();  // Consume the peek
@@ -2827,8 +2827,8 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
       return std::make_unique<ast::CastExpression>(source, type,
                                                    std::move(params));
     } else {
-      return std::make_unique<ast::AsExpression>(source, type,
-                                                 std::move(params));
+      return std::make_unique<ast::BitcastExpression>(source, type,
+                                                      std::move(params));
     }
 
   } else if (t.IsIdentifier()) {

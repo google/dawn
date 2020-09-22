@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
@@ -239,76 +239,76 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidExpression) {
   EXPECT_EQ(p->error(), "1:11: unable to parse expression");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As) {
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto* p = parser("as<f32>(1)");
+  auto* p = parser("bitcast<f32>(1)");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsAs());
+  ASSERT_TRUE(e->IsBitcast());
 
-  auto* c = e->AsAs();
+  auto* c = e->AsBitcast();
   ASSERT_EQ(c->type(), f32_type);
 
   ASSERT_TRUE(c->expr()->IsConstructor());
   ASSERT_TRUE(c->expr()->AsConstructor()->IsScalarConstructor());
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_MissingGreaterThan) {
-  auto* p = parser("as<f32(1)");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {
+  auto* p = parser("bitcast<f32(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:7: missing > for as expression");
+  EXPECT_EQ(p->error(), "1:12: missing > for bitcast expression");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_MissingType) {
-  auto* p = parser("as<>(1)");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
+  auto* p = parser("bitcast<>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:4: missing type for as expression");
+  EXPECT_EQ(p->error(), "1:9: missing type for bitcast expression");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_InvalidType) {
-  auto* p = parser("as<invalid>(1)");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
+  auto* p = parser("bitcast<invalid>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:4: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown type alias 'invalid'");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_MissingLeftParen) {
-  auto* p = parser("as<f32>1)");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {
+  auto* p = parser("bitcast<f32>1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: expected (");
+  EXPECT_EQ(p->error(), "1:13: expected (");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_MissingRightParen) {
-  auto* p = parser("as<f32>(1");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
+  auto* p = parser("bitcast<f32>(1");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: expected )");
+  EXPECT_EQ(p->error(), "1:15: expected )");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_MissingExpression) {
-  auto* p = parser("as<f32>()");
+TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingExpression) {
+  auto* p = parser("bitcast<f32>()");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:14: unable to parse expression");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_As_InvalidExpression) {
-  auto* p = parser("as<f32>(if (a) {})");
+TEST_F(ParserImplTest, PrimaryExpression_bitcast_InvalidExpression) {
+  auto* p = parser("bitcast<f32>(if (a) {})");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:14: unable to parse expression");
 }
 
 }  // namespace

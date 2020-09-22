@@ -40,14 +40,14 @@ set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
-  ast/as_expression.cc
-  ast/as_expression.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
   ast/binary_expression.cc
   ast/binary_expression.h
   ast/binding_decoration.cc
   ast/binding_decoration.h
+  ast/bitcast_expression.cc
+  ast/bitcast_expression.h
   ast/block_statement.cc
   ast/block_statement.h
   ast/bool_literal.h
@@ -296,9 +296,9 @@ endif()
 
 set(TINT_TEST_SRCS
   ast/array_accessor_expression_test.cc
-  ast/as_expression_test.cc
   ast/assignment_statement_test.cc
   ast/binding_decoration_test.cc
+  ast/bitcast_expression_test.cc
   ast/block_statement_test.cc
   ast/bool_literal_test.cc
   ast/break_statement_test.cc
@@ -484,9 +484,9 @@ if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/spirv/binary_writer_test.cc
     writer/spirv/builder_accessor_expression_test.cc
-    writer/spirv/builder_as_expression_test.cc
     writer/spirv/builder_assign_test.cc
     writer/spirv/builder_binary_expression_test.cc
+    writer/spirv/builder_bitcast_expression_test.cc
     writer/spirv/builder_block_test.cc
     writer/spirv/builder_call_test.cc
     writer/spirv/builder_cast_expression_test.cc
@@ -519,9 +519,9 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_test.cc
     writer/wgsl/generator_impl_alias_type_test.cc
     writer/wgsl/generator_impl_array_accessor_test.cc
-    writer/wgsl/generator_impl_as_test.cc
     writer/wgsl/generator_impl_assign_test.cc
     writer/wgsl/generator_impl_binary_test.cc
+    writer/wgsl/generator_impl_bitcast_test.cc
     writer/wgsl/generator_impl_block_test.cc
     writer/wgsl/generator_impl_break_test.cc
     writer/wgsl/generator_impl_call_test.cc
@@ -549,9 +549,9 @@ if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/msl/generator_impl_alias_type_test.cc
     writer/msl/generator_impl_array_accessor_test.cc
-    writer/msl/generator_impl_as_test.cc
     writer/msl/generator_impl_assign_test.cc
     writer/msl/generator_impl_binary_test.cc
+    writer/msl/generator_impl_bitcast_test.cc
     writer/msl/generator_impl_block_test.cc
     writer/msl/generator_impl_break_test.cc
     writer/msl/generator_impl_call_test.cc
@@ -583,9 +583,9 @@ if (${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/hlsl/generator_impl_alias_type_test.cc
     writer/hlsl/generator_impl_array_accessor_test.cc
-    writer/hlsl/generator_impl_as_test.cc
     writer/hlsl/generator_impl_assign_test.cc
     writer/hlsl/generator_impl_binary_test.cc
+    writer/hlsl/generator_impl_bitcast_test.cc
     writer/hlsl/generator_impl_block_test.cc
     writer/hlsl/generator_impl_break_test.cc
     writer/hlsl/generator_impl_call_test.cc

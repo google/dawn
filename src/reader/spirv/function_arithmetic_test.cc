@@ -96,7 +96,7 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_int_v2uint_10_20") {
-    return R"(As<__vec_2__i32>{
+    return R"(Bitcast<__vec_2__i32>{
           TypeConstructor{
             __vec_2__u32
             ScalarConstructor{10}
@@ -170,7 +170,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
     {
       UnaryOp{
         negation
-        As<__i32>{
+        Bitcast<__i32>{
           ScalarConstructor{10}
         }
       }
@@ -197,7 +197,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         UnaryOp{
           negation
           ScalarConstructor{30}
@@ -226,10 +226,10 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         UnaryOp{
           negation
-          As<__i32>{
+          Bitcast<__i32>{
             ScalarConstructor{10}
           }
         }
@@ -290,7 +290,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
     {
       UnaryOp{
         negation
-        As<__vec_2__i32>{
+        Bitcast<__vec_2__i32>{
           TypeConstructor{
             __vec_2__u32
             ScalarConstructor{10}
@@ -321,7 +321,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         UnaryOp{
           negation
           TypeConstructor{
@@ -354,10 +354,10 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         UnaryOp{
           negation
-          As<__vec_2__i32>{
+          Bitcast<__vec_2__i32>{
             TypeConstructor{
               __vec_2__u32
               ScalarConstructor{10}
@@ -654,12 +654,12 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning int, second arg uint
         BinaryData{"int", "int_30", "OpSDiv", "uint_10", "__i32",
                    "ScalarConstructor{30}", "divide",
-                   R"(As<__i32>{
+                   R"(Bitcast<__i32>{
           ScalarConstructor{10}
         })"},
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSDiv", "int_30", "__i32",
-                   R"(As<__i32>{
+                   R"(Bitcast<__i32>{
           ScalarConstructor{10}
         })",
                    "divide", "ScalarConstructor{30}"},
@@ -696,7 +696,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         Binary{
           ScalarConstructor{30}
           divide
@@ -731,7 +731,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         Binary{
           TypeConstructor{
             __vec_2__i32
@@ -798,12 +798,12 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning int, second arg uint
         BinaryData{"int", "int_30", "OpSMod", "uint_10", "__i32",
                    "ScalarConstructor{30}", "modulo",
-                   R"(As<__i32>{
+                   R"(Bitcast<__i32>{
           ScalarConstructor{10}
         })"},
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSMod", "int_30", "__i32",
-                   R"(As<__i32>{
+                   R"(Bitcast<__i32>{
           ScalarConstructor{10}
         })",
                    "modulo", "ScalarConstructor{30}"},
@@ -840,7 +840,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         Binary{
           ScalarConstructor{30}
           modulo
@@ -875,7 +875,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         Binary{
           TypeConstructor{
             __vec_2__i32

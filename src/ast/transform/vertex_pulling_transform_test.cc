@@ -185,7 +185,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
       }
       Assignment{
         Identifier{var_a}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
@@ -266,7 +266,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
       }
       Assignment{
         Identifier{var_a}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
@@ -347,7 +347,7 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
       }
       Assignment{
         Identifier{var_a}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
@@ -480,7 +480,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
       }
       Assignment{
         Identifier{var_a}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
@@ -508,7 +508,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
       }
       Assignment{
         Identifier{var_b}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_1}
@@ -599,7 +599,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
       }
       Assignment{
         Identifier{var_a}
-        As<__f32>{
+        Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
               Identifier{tint_pulling_vertex_buffer_0}
@@ -629,7 +629,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
         Identifier{var_b}
         TypeConstructor{
           __vec_4__f32
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -646,7 +646,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -663,7 +663,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -680,7 +680,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -805,7 +805,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         Identifier{var_a}
         TypeConstructor{
           __vec_2__f32
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -822,7 +822,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_0}
@@ -857,7 +857,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         Identifier{var_b}
         TypeConstructor{
           __vec_3__f32
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_1}
@@ -874,7 +874,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_1}
@@ -891,7 +891,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_1}
@@ -926,7 +926,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         Identifier{var_c}
         TypeConstructor{
           __vec_4__f32
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_2}
@@ -943,7 +943,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_2}
@@ -960,7 +960,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_2}
@@ -977,7 +977,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
               }
             }
           }
-          As<__f32>{
+          Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
                 Identifier{tint_pulling_vertex_buffer_2}

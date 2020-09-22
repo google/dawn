@@ -20,9 +20,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -611,14 +611,14 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   EXPECT_TRUE(ptr->type()->IsF32());
 }
 
-TEST_F(TypeDeterminerTest, Expr_As) {
+TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   ast::type::F32Type f32;
-  ast::AsExpression as(&f32,
-                       std::make_unique<ast::IdentifierExpression>("name"));
+  ast::BitcastExpression bitcast(
+      &f32, std::make_unique<ast::IdentifierExpression>("name"));
 
-  EXPECT_TRUE(td()->DetermineResultType(&as));
-  ASSERT_NE(as.result_type(), nullptr);
-  EXPECT_TRUE(as.result_type()->IsF32());
+  EXPECT_TRUE(td()->DetermineResultType(&bitcast));
+  ASSERT_NE(bitcast.result_type(), nullptr);
+  EXPECT_TRUE(bitcast.result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call) {

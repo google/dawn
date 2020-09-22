@@ -27,8 +27,8 @@ namespace tint {
 namespace ast {
 
 class ArrayAccessorExpression;
-class AsExpression;
 class BinaryExpression;
+class BitcastExpression;
 class CallExpression;
 class CastExpression;
 class ConstructorExpression;
@@ -117,8 +117,8 @@ class TypeDeterminer {
   void set_entry_points(const std::string& fn_name, const std::string& ep_name);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
-  bool DetermineAs(ast::AsExpression* expr);
   bool DetermineBinary(ast::BinaryExpression* expr);
+  bool DetermineBitcast(ast::BitcastExpression* expr);
   bool DetermineCall(ast::CallExpression* expr);
   bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);

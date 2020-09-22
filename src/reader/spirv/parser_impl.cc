@@ -34,9 +34,9 @@
 #include "source/opt/type_manager.h"
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/ast/as_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
@@ -1302,14 +1302,14 @@ TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
     auto* unsigned_ty = unsigned_type_for_[type];
     if (unsigned_ty != nullptr) {
       // Conversion is required.
-      return {unsigned_ty, std::make_unique<ast::AsExpression>(
+      return {unsigned_ty, std::make_unique<ast::BitcastExpression>(
                                unsigned_ty, std::move(expr.expr))};
     }
   } else if (requires_signed) {
     auto* signed_ty = signed_type_for_[type];
     if (signed_ty != nullptr) {
       // Conversion is required.
-      return {signed_ty, std::make_unique<ast::AsExpression>(
+      return {signed_ty, std::make_unique<ast::BitcastExpression>(
                              signed_ty, std::move(expr.expr))};
     }
   }
@@ -1373,8 +1373,8 @@ TypedExpression ParserImpl::RectifyForcedResultType(
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }
-  return {expr.type,
-          std::make_unique<ast::AsExpression>(expr.type, std::move(expr.expr))};
+  return {expr.type, std::make_unique<ast::BitcastExpression>(
+                         expr.type, std::move(expr.expr))};
 }
 
 bool ParserImpl::EmitFunctions() {

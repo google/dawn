@@ -18,10 +18,10 @@
 #include <limits>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -177,11 +177,11 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
   }
-  if (expr->IsAs()) {
-    return EmitAs(expr->AsAs());
-  }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsBitcast()) {
+    return EmitBitcast(expr->AsBitcast());
   }
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());
@@ -230,8 +230,8 @@ bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
   return EmitExpression(expr->member());
 }
 
-bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
-  out_ << "as<";
+bool GeneratorImpl::EmitBitcast(ast::BitcastExpression* expr) {
+  out_ << "bitcast<";
   if (!EmitType(expr->type())) {
     return false;
   }

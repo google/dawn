@@ -20,10 +20,10 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
@@ -456,11 +456,11 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return GenerateAccessorExpression(expr->AsArrayAccessor());
   }
-  if (expr->IsAs()) {
-    return GenerateAsExpression(expr->AsAs());
-  }
   if (expr->IsBinary()) {
     return GenerateBinaryExpression(expr->AsBinary());
+  }
+  if (expr->IsBitcast()) {
+    return GenerateBitcastExpression(expr->AsBitcast());
   }
   if (expr->IsCall()) {
     return GenerateCallExpression(expr->AsCall());
@@ -1696,24 +1696,24 @@ uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
   return sampled_image.to_i();
 }
 
-uint32_t Builder::GenerateAsExpression(ast::AsExpression* as) {
+uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
-  auto result_type_id = GenerateTypeIfNeeded(as->result_type());
+  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
   if (result_type_id == 0) {
     return 0;
   }
 
-  auto val_id = GenerateExpression(as->expr());
+  auto val_id = GenerateExpression(expr->expr());
   if (val_id == 0) {
     return 0;
   }
-  val_id = GenerateLoadIfNeeded(as->expr()->result_type(), val_id);
+  val_id = GenerateLoadIfNeeded(expr->expr()->result_type(), val_id);
 
   // Bitcast does not allow same types, just emit a CopyObject
-  auto* to_type = as->result_type()->UnwrapPtrIfNeeded();
-  auto* from_type = as->expr()->result_type()->UnwrapPtrIfNeeded();
+  auto* to_type = expr->result_type()->UnwrapPtrIfNeeded();
+  auto* from_type = expr->expr()->result_type()->UnwrapPtrIfNeeded();
   if (to_type->type_name() == from_type->type_name()) {
     push_function_inst(spv::Op::OpCopyObject, {Operand::Int(result_type_id),
                                                result, Operand::Int(val_id)});

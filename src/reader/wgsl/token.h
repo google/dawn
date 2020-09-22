@@ -118,10 +118,10 @@ class Token {
 
     /// A 'array'
     kArray,
-    /// A 'as'
-    kAs,
     /// A 'binding'
     kBinding,
+    /// A 'bitcast'
+    kBitcast,
     /// A 'bool'
     kBool,
     /// A 'block'
@@ -495,10 +495,10 @@ class Token {
 
   /// @returns true if token is a 'array'
   bool IsArray() const { return type_ == Type::kArray; }
-  /// @returns true if token is a 'as'
-  bool IsAs() const { return type_ == Type::kAs; }
   /// @returns true if token is a 'binding'
   bool IsBinding() const { return type_ == Type::kBinding; }
+  /// @returns true if token is a 'bitcast'
+  bool IsBitcast() const { return type_ == Type::kBitcast; }
   /// @returns true if token is a 'block'
   bool IsBlock() const { return type_ == Type::kBlock; }
   /// @returns true if token is a 'bool'

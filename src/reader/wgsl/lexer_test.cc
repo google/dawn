@@ -413,8 +413,8 @@ INSTANTIATE_TEST_SUITE_P(
     KeywordTest,
     testing::Values(
         TokenData{"array", Token::Type::kArray},
-        TokenData{"as", Token::Type::kAs},
         TokenData{"binding", Token::Type::kBinding},
+        TokenData{"bitcast", Token::Type::kBitcast},
         TokenData{"block", Token::Type::kBlock},
         TokenData{"bool", Token::Type::kBool},
         TokenData{"break", Token::Type::kBreak},

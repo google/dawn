@@ -15,29 +15,31 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/as_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/type/f32_type.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace msl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = testing::Test;
 
-TEST_F(WgslGeneratorImplTest, EmitExpression_As) {
+TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
   ast::type::F32Type f32;
   auto id = std::make_unique<ast::IdentifierExpression>("id");
-  ast::AsExpression as(&f32, std::move(id));
+  ast::BitcastExpression bitcast(&f32, std::move(id));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&as)) << g.error();
-  EXPECT_EQ(g.result(), "as<f32>(id)");
+  ast::Module m;
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.EmitExpression(&bitcast)) << g.error();
+  EXPECT_EQ(g.result(), "as_type<float>(id)");
 }
 
 }  // namespace
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint

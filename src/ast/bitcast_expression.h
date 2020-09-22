@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_AS_EXPRESSION_H_
-#define SRC_AST_AS_EXPRESSION_H_
+#ifndef SRC_AST_BITCAST_EXPRESSION_H_
+#define SRC_AST_BITCAST_EXPRESSION_H_
 
 #include <memory>
 #include <utility>
@@ -25,25 +25,25 @@
 namespace tint {
 namespace ast {
 
-/// An as expression
-class AsExpression : public Expression {
+/// A bitcast expression
+class BitcastExpression : public Expression {
  public:
   /// Constructor
-  AsExpression();
+  BitcastExpression();
   /// Constructor
   /// @param type the type
   /// @param expr the expr
-  AsExpression(type::Type* type, std::unique_ptr<Expression> expr);
+  BitcastExpression(type::Type* type, std::unique_ptr<Expression> expr);
   /// Constructor
-  /// @param source the as expression source
+  /// @param source the bitcast expression source
   /// @param type the type
   /// @param expr the expr
-  AsExpression(const Source& source,
-               type::Type* type,
-               std::unique_ptr<Expression> expr);
+  BitcastExpression(const Source& source,
+                    type::Type* type,
+                    std::unique_ptr<Expression> expr);
   /// Move constructor
-  AsExpression(AsExpression&&);
-  ~AsExpression() override;
+  BitcastExpression(BitcastExpression&&);
+  ~BitcastExpression() override;
 
   /// Sets the type
   /// @param type the type
@@ -57,8 +57,8 @@ class AsExpression : public Expression {
   /// @returns the expression
   Expression* expr() const { return expr_.get(); }
 
-  /// @returns true if this is an as expression
-  bool IsAs() const override;
+  /// @returns true if this is a bitcast expression
+  bool IsBitcast() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -69,7 +69,7 @@ class AsExpression : public Expression {
   void to_str(std::ostream& out, size_t indent) const override;
 
  private:
-  AsExpression(const AsExpression&) = delete;
+  BitcastExpression(const BitcastExpression&) = delete;
 
   type::Type* type_ = nullptr;
   std::unique_ptr<Expression> expr_;
@@ -78,4 +78,4 @@ class AsExpression : public Expression {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_AS_EXPRESSION_H_
+#endif  // SRC_AST_BITCAST_EXPRESSION_H_

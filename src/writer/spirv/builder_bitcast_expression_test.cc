@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/as_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -31,22 +31,22 @@ namespace {
 
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, As) {
+TEST_F(BuilderTest, Bitcast) {
   ast::type::U32Type u32;
   ast::type::F32Type f32;
 
-  ast::AsExpression as(&u32,
-                       std::make_unique<ast::ScalarConstructorExpression>(
-                           std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  ast::BitcastExpression bitcast(
+      &u32, std::make_unique<ast::ScalarConstructorExpression>(
+                std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
 
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
-  ASSERT_TRUE(td.DetermineResultType(&as)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateAsExpression(&as), 1u);
+  EXPECT_EQ(b.GenerateBitcastExpression(&bitcast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %3 = OpTypeFloat 32
@@ -57,21 +57,21 @@ TEST_F(BuilderTest, As) {
 )");
 }
 
-TEST_F(BuilderTest, As_DuplicateType) {
+TEST_F(BuilderTest, Bitcast_DuplicateType) {
   ast::type::F32Type f32;
 
-  ast::AsExpression as(&f32,
-                       std::make_unique<ast::ScalarConstructorExpression>(
-                           std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  ast::BitcastExpression bitcast(
+      &f32, std::make_unique<ast::ScalarConstructorExpression>(
+                std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
 
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
-  ASSERT_TRUE(td.DetermineResultType(&as)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateAsExpression(&as), 1u);
+  EXPECT_EQ(b.GenerateBitcastExpression(&bitcast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 2.4000001

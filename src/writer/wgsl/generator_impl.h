@@ -62,10 +62,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
   bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
-  /// Handles generating an as expression
-  /// @param expr the as expression
-  /// @returns true if the as was emitted
-  bool EmitAs(ast::AsExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -74,6 +70,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles generating a bitcast expression
+  /// @param expr the bitcast expression
+  /// @returns true if the bitcast was emitted
+  bool EmitBitcast(ast::BitcastExpression* expr);
   /// Handles a block statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

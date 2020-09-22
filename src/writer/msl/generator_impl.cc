@@ -15,9 +15,9 @@
 #include "src/writer/msl/generator_impl.h"
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -265,7 +265,7 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
+bool GeneratorImpl::EmitBitcast(ast::BitcastExpression* expr) {
   out_ << "as_type<";
   if (!EmitType(expr->type(), "")) {
     return false;
@@ -973,11 +973,11 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
   }
-  if (expr->IsAs()) {
-    return EmitAs(expr->AsAs());
-  }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsBitcast()) {
+    return EmitBitcast(expr->AsBitcast());
   }
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());

@@ -28,9 +28,9 @@
 #include "source/opt/module.h"
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
@@ -2719,7 +2719,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   if (opcode == SpvOpBitcast) {
-    return {ast_type, std::make_unique<ast::AsExpression>(
+    return {ast_type, std::make_unique<ast::BitcastExpression>(
                           ast_type, MakeOperand(inst, 0).expr)};
   }
 
@@ -3469,7 +3469,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
   if (requested_type == expr_type) {
     return result;
   }
-  return {requested_type, std::make_unique<ast::AsExpression>(
+  return {requested_type, std::make_unique<ast::BitcastExpression>(
                               requested_type, std::move(result.expr))};
 }
 

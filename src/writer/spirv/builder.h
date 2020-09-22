@@ -265,14 +265,14 @@ class Builder {
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateLiteralIfNeeded(ast::Literal* lit);
-  /// Generates an as expression
-  /// @param expr the expression to generate
-  /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateAsExpression(ast::AsExpression* expr);
   /// Generates a binary expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateBinaryExpression(ast::BinaryExpression* expr);
+  /// Generates a bitcast expression
+  /// @param expr the expression to generate
+  /// @returns the expression ID on success or 0 otherwise
+  uint32_t GenerateBitcastExpression(ast::BitcastExpression* expr);
   /// Generates a short circuting binary expression
   /// @param expr the expression to generate
   /// @returns teh expression ID on success or 0 otherwise

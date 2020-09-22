@@ -471,10 +471,10 @@ Token Lexer::try_punctuation() {
 Token Lexer::check_keyword(const Source& source, const std::string& str) {
   if (str == "array")
     return {Token::Type::kArray, source, "array"};
-  if (str == "as")
-    return {Token::Type::kAs, source, "as"};
   if (str == "binding")
     return {Token::Type::kBinding, source, "binding"};
+  if (str == "bitcast")
+    return {Token::Type::kBitcast, source, "bitcast"};
   if (str == "block")
     return {Token::Type::kBlock, source, "block"};
   if (str == "bool")

@@ -14,9 +14,9 @@
 
 #include <memory>
 
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/else_statement.h"
@@ -295,7 +295,7 @@ bool a = (_tint_tmp_0);
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, As_WithLogical) {
+TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   // as<i32>(a && (b || c))
   ast::type::I32Type i32;
 
@@ -303,7 +303,7 @@ TEST_F(HlslGeneratorImplTest_Binary, As_WithLogical) {
   auto b = std::make_unique<ast::IdentifierExpression>("b");
   auto c = std::make_unique<ast::IdentifierExpression>("c");
 
-  ast::AsExpression expr(
+  ast::BitcastExpression expr(
       &i32, std::make_unique<ast::BinaryExpression>(
                 ast::BinaryOp::kLogicalAnd, std::move(a),
                 std::make_unique<ast::BinaryExpression>(

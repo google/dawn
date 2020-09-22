@@ -73,12 +73,6 @@ class GeneratorImpl {
   bool EmitArrayAccessor(std::ostream& pre,
                          std::ostream& out,
                          ast::ArrayAccessorExpression* expr);
-  /// Handles generating an as expression
-  /// @param pre the preamble for the expression stream
-  /// @param out the output of the expression stream
-  /// @param expr the as expression
-  /// @returns true if the as was emitted
-  bool EmitAs(std::ostream& pre, std::ostream& out, ast::AsExpression* expr);
   /// Handles an assignment statement
   /// @param out the output stream
   /// @param stmt the statement to emit
@@ -92,6 +86,14 @@ class GeneratorImpl {
   bool EmitBinary(std::ostream& pre,
                   std::ostream& out,
                   ast::BinaryExpression* expr);
+  /// Handles generating a bitcast expression
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the as expression
+  /// @returns true if the bitcast was emitted
+  bool EmitBitcast(std::ostream& pre,
+                   std::ostream& out,
+                   ast::BitcastExpression* expr);
   /// Handles a block statement
   /// @param out the output stream
   /// @param stmt the statement to emit

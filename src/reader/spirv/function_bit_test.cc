@@ -91,7 +91,7 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_int_v2uint_10_20") {
-    return R"(As<__vec_2__i32>{
+    return R"(Bitcast<__vec_2__i32>{
           TypeConstructor{
             __vec_2__u32
             ScalarConstructor{10}
@@ -421,7 +421,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
     none
     __i32
     {
-      As<__i32>{
+      Bitcast<__i32>{
         UnaryOp{
           not
           ScalarConstructor{10}
@@ -450,7 +450,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         UnaryOp{
           not
           ScalarConstructor{30}
@@ -537,7 +537,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
     none
     __vec_2__i32
     {
-      As<__vec_2__i32>{
+      Bitcast<__vec_2__i32>{
         UnaryOp{
           not
           TypeConstructor{
@@ -570,7 +570,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         UnaryOp{
           not
           TypeConstructor{

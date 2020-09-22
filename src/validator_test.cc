@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"

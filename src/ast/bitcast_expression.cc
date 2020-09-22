@@ -12,37 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/as_expression.h"
+#include "src/ast/bitcast_expression.h"
 
 namespace tint {
 namespace ast {
 
-AsExpression::AsExpression() : Expression() {}
+BitcastExpression::BitcastExpression() : Expression() {}
 
-AsExpression::AsExpression(type::Type* type, std::unique_ptr<Expression> expr)
+BitcastExpression::BitcastExpression(type::Type* type,
+                                     std::unique_ptr<Expression> expr)
     : Expression(), type_(type), expr_(std::move(expr)) {}
 
-AsExpression::AsExpression(const Source& source,
-                           type::Type* type,
-                           std::unique_ptr<Expression> expr)
+BitcastExpression::BitcastExpression(const Source& source,
+                                     type::Type* type,
+                                     std::unique_ptr<Expression> expr)
     : Expression(source), type_(type), expr_(std::move(expr)) {}
 
-AsExpression::AsExpression(AsExpression&&) = default;
-AsExpression::~AsExpression() = default;
+BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
+BitcastExpression::~BitcastExpression() = default;
 
-bool AsExpression::IsAs() const {
+bool BitcastExpression::IsBitcast() const {
   return true;
 }
 
-bool AsExpression::IsValid() const {
+bool BitcastExpression::IsValid() const {
   if (expr_ == nullptr || !expr_->IsValid())
     return false;
   return type_ != nullptr;
 }
 
-void AsExpression::to_str(std::ostream& out, size_t indent) const {
+void BitcastExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "As<" << type_->type_name() << ">{" << std::endl;
+  out << "Bitcast<" << type_->type_name() << ">{" << std::endl;
   expr_->to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;

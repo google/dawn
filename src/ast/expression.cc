@@ -17,8 +17,8 @@
 #include <assert.h>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
@@ -45,7 +45,7 @@ bool Expression::IsArrayAccessor() const {
   return false;
 }
 
-bool Expression::IsAs() const {
+bool Expression::IsBitcast() const {
   return false;
 }
 
@@ -81,9 +81,9 @@ const ArrayAccessorExpression* Expression::AsArrayAccessor() const {
   return static_cast<const ArrayAccessorExpression*>(this);
 }
 
-const AsExpression* Expression::AsAs() const {
-  assert(IsAs());
-  return static_cast<const AsExpression*>(this);
+const BitcastExpression* Expression::AsBitcast() const {
+  assert(IsBitcast());
+  return static_cast<const BitcastExpression*>(this);
 }
 
 const BinaryExpression* Expression::AsBinary() const {
@@ -126,9 +126,9 @@ ArrayAccessorExpression* Expression::AsArrayAccessor() {
   return static_cast<ArrayAccessorExpression*>(this);
 }
 
-AsExpression* Expression::AsAs() {
-  assert(IsAs());
-  return static_cast<AsExpression*>(this);
+BitcastExpression* Expression::AsBitcast() {
+  assert(IsBitcast());
+  return static_cast<BitcastExpression*>(this);
 }
 
 BinaryExpression* Expression::AsBinary() {

@@ -15,9 +15,9 @@
 #include "src/ast/transform/vertex_pulling_transform.h"
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/expression.h"
 #include "src/ast/member_accessor_expression.h"
@@ -361,16 +361,16 @@ std::unique_ptr<Expression> VertexPullingTransform::AccessI32(
     uint32_t buffer,
     std::unique_ptr<Expression> pos) {
   // as<T> reinterprets bits
-  return std::make_unique<AsExpression>(GetI32Type(),
-                                        AccessU32(buffer, std::move(pos)));
+  return std::make_unique<BitcastExpression>(GetI32Type(),
+                                             AccessU32(buffer, std::move(pos)));
 }
 
 std::unique_ptr<Expression> VertexPullingTransform::AccessF32(
     uint32_t buffer,
     std::unique_ptr<Expression> pos) {
   // as<T> reinterprets bits
-  return std::make_unique<AsExpression>(GetF32Type(),
-                                        AccessU32(buffer, std::move(pos)));
+  return std::make_unique<BitcastExpression>(GetF32Type(),
+                                             AccessU32(buffer, std::move(pos)));
 }
 
 std::unique_ptr<Expression> VertexPullingTransform::AccessPrimitive(

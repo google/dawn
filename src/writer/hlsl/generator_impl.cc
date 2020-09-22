@@ -17,9 +17,9 @@
 #include <sstream>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
@@ -238,12 +238,12 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& pre,
   return true;
 }
 
-bool GeneratorImpl::EmitAs(std::ostream& pre,
-                           std::ostream& out,
-                           ast::AsExpression* expr) {
+bool GeneratorImpl::EmitBitcast(std::ostream& pre,
+                                std::ostream& out,
+                                ast::BitcastExpression* expr) {
   if (!expr->type()->IsF32() && !expr->type()->IsI32() &&
       !expr->type()->IsU32()) {
-    error_ = "Unable to do as cast to type " + expr->type()->type_name();
+    error_ = "Unable to do bitcast to type " + expr->type()->type_name();
     return false;
   }
 
@@ -856,14 +856,14 @@ bool GeneratorImpl::EmitDiscard(std::ostream& out, ast::DiscardStatement*) {
 bool GeneratorImpl::EmitExpression(std::ostream& pre,
                                    std::ostream& out,
                                    ast::Expression* expr) {
-  if (expr->IsAs()) {
-    return EmitAs(pre, out, expr->AsAs());
-  }
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(pre, out, expr->AsArrayAccessor());
   }
   if (expr->IsBinary()) {
     return EmitBinary(pre, out, expr->AsBinary());
+  }
+  if (expr->IsBitcast()) {
+    return EmitBitcast(pre, out, expr->AsBitcast());
   }
   if (expr->IsCall()) {
     return EmitCall(pre, out, expr->AsCall());

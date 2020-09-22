@@ -92,17 +92,17 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_uint_10") {
-    return R"(As<__i32>{
+    return R"(Bitcast<__i32>{
           ScalarConstructor{10}
         })";
   }
   if (assembly == "cast_uint_20") {
-    return R"(As<__i32>{
+    return R"(Bitcast<__i32>{
           ScalarConstructor{20}
         })";
   }
   if (assembly == "cast_v2uint_10_20") {
-    return R"(As<__vec_2__i32>{
+    return R"(Bitcast<__vec_2__i32>{
           TypeConstructor{
             __vec_2__u32
             ScalarConstructor{10}
@@ -118,7 +118,7 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_v2uint_20_10") {
-    return R"(As<__vec_2__i32>{
+    return R"(Bitcast<__vec_2__i32>{
           TypeConstructor{
             __vec_2__u32
             ScalarConstructor{20}
@@ -127,12 +127,12 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_int_30") {
-    return R"(As<__u32>{
+    return R"(Bitcast<__u32>{
           ScalarConstructor{30}
         })";
   }
   if (assembly == "cast_int_40") {
-    return R"(As<__u32>{
+    return R"(Bitcast<__u32>{
           ScalarConstructor{40}
         })";
   }
@@ -144,7 +144,7 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_v2int_30_40") {
-    return R"(As<__vec_2__u32>{
+    return R"(Bitcast<__vec_2__u32>{
           TypeConstructor{
             __vec_2__i32
             ScalarConstructor{30}
@@ -160,7 +160,7 @@ std::string AstFor(std::string assembly) {
         })";
   }
   if (assembly == "cast_v2int_40_30") {
-    return R"(As<__vec_2__u32>{
+    return R"(Bitcast<__vec_2__u32>{
           TypeConstructor{
             __vec_2__i32
             ScalarConstructor{40}

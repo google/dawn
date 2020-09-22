@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
@@ -296,11 +296,11 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return DetermineArrayAccessor(expr->AsArrayAccessor());
   }
-  if (expr->IsAs()) {
-    return DetermineAs(expr->AsAs());
-  }
   if (expr->IsBinary()) {
     return DetermineBinary(expr->AsBinary());
+  }
+  if (expr->IsBitcast()) {
+    return DetermineBitcast(expr->AsBitcast());
   }
   if (expr->IsCall()) {
     return DetermineCall(expr->AsCall());
@@ -362,7 +362,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
   return true;
 }
 
-bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
+bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
   if (!DetermineResultType(expr->expr())) {
     return false;
   }

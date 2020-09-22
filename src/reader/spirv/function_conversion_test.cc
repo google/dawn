@@ -88,7 +88,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         ScalarConstructor{50.000000}
       }
     }
@@ -114,7 +114,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
     none
     __vec_2__f32
     {
-      As<__vec_2__f32>{
+      Bitcast<__vec_2__f32>{
         TypeConstructor{
           __vec_2__u32
           ScalarConstructor{10}
@@ -270,7 +270,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
     __f32
     {
       Cast<__f32>(
-        As<__i32>{
+        Bitcast<__i32>{
           Identifier{x_30}
         }
       )
@@ -324,7 +324,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
     __vec_2__f32
     {
       Cast<__vec_2__f32>(
-        As<__vec_2__i32>{
+        Bitcast<__vec_2__i32>{
           Identifier{x_30}
         }
       )
@@ -385,7 +385,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
     __f32
     {
       Cast<__f32>(
-        As<__u32>{
+        Bitcast<__u32>{
           Identifier{x_30}
         }
       )
@@ -439,7 +439,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
     __vec_2__f32
     {
       Cast<__vec_2__f32>(
-        As<__vec_2__u32>{
+        Bitcast<__vec_2__u32>{
           Identifier{x_30}
         }
       )
@@ -552,7 +552,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
     none
     __u32
     {
-      As<__u32>{
+      Bitcast<__u32>{
         Cast<__i32>(
           Identifier{x_30}
         )
@@ -606,7 +606,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
     none
     __vec_2__u32
     {
-      As<__vec_2__u32>{
+      Bitcast<__vec_2__u32>{
         Cast<__vec_2__i32>(
           Identifier{x_30}
         )
@@ -668,7 +668,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
     none
     __i32
     {
-      As<__i32>{
+      Bitcast<__i32>{
         Cast<__u32>(
           Identifier{x_30}
         )
@@ -722,7 +722,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
     none
     __vec_2__i32
     {
-      As<__vec_2__i32>{
+      Bitcast<__vec_2__i32>{
         Cast<__vec_2__u32>(
           Identifier{x_30}
         )
