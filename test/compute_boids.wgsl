@@ -68,7 +68,7 @@ type Particles = [[block]] struct {
 [[stage(compute)]]
 fn comp_main() -> void {
   var index : u32 = gl_GlobalInvocationID.x;
-  if (index >= 5) {
+  if (index >= 5u) {
     return;
   }
 
@@ -83,9 +83,9 @@ fn comp_main() -> void {
 
   var pos : vec2<f32>;
   var vel : vec2<f32>;
-  var i : i32 = 0;
+  var i : u32 = 0u;
   loop {
-    if (i >= 5) {
+    if (i >= 5u) {
       break;
     }
     if (i == index) {
@@ -108,7 +108,7 @@ fn comp_main() -> void {
     }
 
     continuing {
-      i = i + 1;
+      i = i + 1u;
     }
   }
   if (cMassCount > 0) {
