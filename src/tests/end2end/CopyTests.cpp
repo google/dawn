@@ -88,6 +88,7 @@ class CopyTests_T2B : public CopyTests {
     void DoTest(const TextureSpec& textureSpec,
                 const BufferSpec& bufferSpec,
                 const wgpu::Extent3D& copySize) {
+        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kTextureFormat);
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -121,13 +122,10 @@ class CopyTests_T2B : public CopyTests {
         // Prepopulating the buffer with empty data ensures that there is not random data in the
         // expectation and helps ensure that the padding due to the bytes per row is not modified
         // by the copy.
-        // TODO(jiawei.shao@intel.com): remove the initialization of the buffer after we support
-        // buffer lazy-initialization.
-        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kTextureFormat);
-        const std::vector<RGBA8> emptyData(bufferSpec.size / bytesPerTexel, RGBA8());
-        wgpu::Buffer buffer =
-            utils::CreateBufferFromData(device, emptyData.data(), bufferSpec.size,
-                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = bufferSpec.size;
+        bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
         {
             wgpu::TextureCopyView textureCopyView =
@@ -141,8 +139,11 @@ class CopyTests_T2B : public CopyTests {
         queue.Submit(1, &commands);
 
         uint64_t bufferOffset = bufferSpec.offset;
-        const uint32_t texelCountInCopyRegion =
-            bufferSpec.bytesPerRow / bytesPerTexel * (copySize.height - 1) + copySize.width;
+
+        const wgpu::Extent3D copySizePerSlice = {copySize.width, copySize.height, 1};
+        // Texels in single slice.
+        const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(
+            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, copySizePerSlice, kTextureFormat);
         const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depth;
         std::vector<RGBA8> expected(texelCountInCopyRegion);
         for (uint32_t slice = textureSpec.copyOrigin.z; slice < maxArrayLayer; ++slice) {
@@ -298,6 +299,7 @@ class CopyTests_T2T : public CopyTests {
             utils::CreateTextureCopyView(srcTexture, srcSpec.level, {0, 0, srcSpec.copyOrigin.z});
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyLayout.mipSize);
 
+        const wgpu::Extent3D copySizePerSlice = {copySize.width, copySize.height, 1};
         // Perform the texture to texture copy
         wgpu::TextureCopyView srcTextureCopyView =
             utils::CreateTextureCopyView(srcTexture, srcSpec.level, srcSpec.copyOrigin);
@@ -308,8 +310,10 @@ class CopyTests_T2T : public CopyTests {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        const uint32_t texelCountInCopyRegion =
-            copyLayout.texelBlocksPerRow * (copySize.height - 1) + copySize.width;
+        // Texels in single slice.
+        const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(
+            copyLayout.bytesPerRow, copyLayout.bytesPerImage / copyLayout.bytesPerRow,
+            copySizePerSlice, kTextureFormat);
         std::vector<RGBA8> expected(texelCountInCopyRegion);
         for (uint32_t slice = 0; slice < copySize.depth; ++slice) {
             std::fill(expected.begin(), expected.end(), RGBA8());
@@ -393,6 +397,21 @@ TEST_P(CopyTests_T2B, FullTextureAligned) {
     textureSpec.level = 0;
 
     DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, kHeight, 1});
+}
+
+// Test noop copies
+TEST_P(CopyTests_T2B, ZeroSizedCopy) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {0, kHeight, 1});
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, 0, 1});
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, kHeight, 0});
 }
 
 // Test that copying an entire texture without 256-byte aligned dimensions works
@@ -830,6 +849,21 @@ TEST_P(CopyTests_B2T, FullTextureAligned) {
     DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, kHeight, 1});
 }
 
+// Test noop copies.
+TEST_P(CopyTests_B2T, ZeroSizedCopy) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {0, kHeight, 1});
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, 0, 1});
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight), {kWidth, kHeight, 0});
+}
+
 // Test that copying an entire texture without 256-byte aligned dimensions works
 TEST_P(CopyTests_B2T, FullTextureUnaligned) {
     constexpr uint32_t kWidth = 259;
@@ -1242,6 +1276,20 @@ TEST_P(CopyTests_T2T, Texture) {
     textureSpec.level = 0;
     textureSpec.textureSize = {kWidth, kHeight, 1};
     DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+}
+
+// Test noop copies.
+TEST_P(CopyTests_T2T, ZeroSizedCopy) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    DoTest(textureSpec, textureSpec, {0, kHeight, 1});
+    DoTest(textureSpec, textureSpec, {kWidth, 0, 1});
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 0});
 }
 
 TEST_P(CopyTests_T2T, TextureRegion) {

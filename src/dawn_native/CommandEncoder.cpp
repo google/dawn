@@ -654,19 +654,22 @@ namespace dawn_native {
                     Align(copySize->width * blockInfo.blockByteSize, kTextureBytesPerRowAlignment);
             }
 
-            // Record the copy command.
-            CopyBufferToTextureCmd* copy =
-                allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
-            copy->source.buffer = source->buffer;
-            copy->source.offset = source->layout.offset;
-            copy->source.bytesPerRow = bytesPerRow;
-            copy->source.rowsPerImage = defaultedRowsPerImage;
-            copy->destination.texture = destination->texture;
-            copy->destination.origin = destination->origin;
-            copy->destination.mipLevel = destination->mipLevel;
-            copy->destination.aspect =
-                ConvertAspect(destination->texture->GetFormat(), destination->aspect);
-            copy->copySize = *copySize;
+            // Skip noop copies.
+            if (copySize->width != 0 && copySize->height != 0 && copySize->depth != 0) {
+                // Record the copy command.
+                CopyBufferToTextureCmd* copy =
+                    allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
+                copy->source.buffer = source->buffer;
+                copy->source.offset = source->layout.offset;
+                copy->source.bytesPerRow = bytesPerRow;
+                copy->source.rowsPerImage = defaultedRowsPerImage;
+                copy->destination.texture = destination->texture;
+                copy->destination.origin = destination->origin;
+                copy->destination.mipLevel = destination->mipLevel;
+                copy->destination.aspect =
+                    ConvertAspect(destination->texture->GetFormat(), destination->aspect);
+                copy->copySize = *copySize;
+            }
 
             return {};
         });
@@ -713,18 +716,21 @@ namespace dawn_native {
                     Align(copySize->width * blockInfo.blockByteSize, kTextureBytesPerRowAlignment);
             }
 
-            // Record the copy command.
-            CopyTextureToBufferCmd* copy =
-                allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
-            copy->source.texture = source->texture;
-            copy->source.origin = source->origin;
-            copy->source.mipLevel = source->mipLevel;
-            copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
-            copy->destination.buffer = destination->buffer;
-            copy->destination.offset = destination->layout.offset;
-            copy->destination.bytesPerRow = bytesPerRow;
-            copy->destination.rowsPerImage = defaultedRowsPerImage;
-            copy->copySize = *copySize;
+            // Skip noop copies.
+            if (copySize->width != 0 && copySize->height != 0 && copySize->depth != 0) {
+                // Record the copy command.
+                CopyTextureToBufferCmd* copy =
+                    allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
+                copy->source.texture = source->texture;
+                copy->source.origin = source->origin;
+                copy->source.mipLevel = source->mipLevel;
+                copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
+                copy->destination.buffer = destination->buffer;
+                copy->destination.offset = destination->layout.offset;
+                copy->destination.bytesPerRow = bytesPerRow;
+                copy->destination.rowsPerImage = defaultedRowsPerImage;
+                copy->copySize = *copySize;
+            }
 
             return {};
         });
@@ -754,18 +760,21 @@ namespace dawn_native {
                 mTopLevelTextures.insert(destination->texture);
             }
 
-            CopyTextureToTextureCmd* copy =
-                allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
-            copy->source.texture = source->texture;
-            copy->source.origin = source->origin;
-            copy->source.mipLevel = source->mipLevel;
-            copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
-            copy->destination.texture = destination->texture;
-            copy->destination.origin = destination->origin;
-            copy->destination.mipLevel = destination->mipLevel;
-            copy->destination.aspect =
-                ConvertAspect(destination->texture->GetFormat(), destination->aspect);
-            copy->copySize = *copySize;
+            // Skip noop copies.
+            if (copySize->width != 0 && copySize->height != 0 && copySize->depth != 0) {
+                CopyTextureToTextureCmd* copy =
+                    allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
+                copy->source.texture = source->texture;
+                copy->source.origin = source->origin;
+                copy->source.mipLevel = source->mipLevel;
+                copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
+                copy->destination.texture = destination->texture;
+                copy->destination.origin = destination->origin;
+                copy->destination.mipLevel = destination->mipLevel;
+                copy->destination.aspect =
+                    ConvertAspect(destination->texture->GetFormat(), destination->aspect);
+                copy->copySize = *copySize;
+            }
 
             return {};
         });

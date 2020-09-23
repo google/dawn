@@ -87,6 +87,14 @@ namespace utils {
         }
     }
 
+    uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
+                                       uint64_t rowsPerImage,
+                                       wgpu::Extent3D copyExtent,
+                                       wgpu::TextureFormat textureFormat) {
+        return RequiredBytesInCopy(bytesPerRow, rowsPerImage, copyExtent, textureFormat) /
+               utils::GetTexelBlockSizeInBytes(textureFormat);
+    }
+
     void UnalignDynamicUploader(wgpu::Device device) {
         std::vector<uint8_t> data = {1};
 
