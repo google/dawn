@@ -1010,7 +1010,7 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
       op = spv::Op::OpSNegate;
     }
   } else if (expr->op() == ast::UnaryOp::kNot) {
-    op = spv::Op::OpNot;
+    op = spv::Op::OpLogicalNot;
   }
   if (op == spv::Op::OpNop) {
     error_ = "invalid unary op type";

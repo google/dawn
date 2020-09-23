@@ -15,10 +15,12 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/unary_op_expression.h"
@@ -85,11 +87,12 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Not) {
-  ast::type::I32Type i32;
+  ast::type::BoolType bool_type;
 
   ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNot, std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::SintLiteral>(&i32, 1)));
+      ast::UnaryOp::kNot,
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::BoolLiteral>(&bool_type, false)));
 
   Context ctx;
   ast::Module mod;
@@ -100,11 +103,11 @@ TEST_F(BuilderTest, UnaryOp_Not) {
   Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 1u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
-%3 = OpConstant %2 1
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%3 = OpConstantFalse %2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%1 = OpNot %2 %3
+            R"(%1 = OpLogicalNot %2 %3
 )");
 }
 
