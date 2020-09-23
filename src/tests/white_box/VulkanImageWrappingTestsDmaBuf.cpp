@@ -151,8 +151,8 @@ namespace dawn_native { namespace vulkan {
             // assertion failure
             void IgnoreSignalSemaphore(wgpu::Texture wrappedTexture) {
                 dawn_native::vulkan::ExternalImageExportInfoDmaBuf exportInfo;
-                dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(), VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
-                for (int handle : info.semaphoreHandles) {
+                dawn_native::vulkan::ExportVulkanImage(wrappedTexture.Get(), VK_IMAGE_LAYOUT_GENERAL, &exportInfo);
+                for (int handle : exportInfo.semaphoreHandles) {
                     ASSERT_NE(handle, -1);
                     close(handle);
                 }
