@@ -83,11 +83,7 @@ fn comp_main() -> void {
 
   var pos : vec2<f32>;
   var vel : vec2<f32>;
-  var i : u32 = 0u;
-  loop {
-    if (i >= 5u) {
-      break;
-    }
+  for(var i : u32 = 0u; i < 5u; i = i + 1) {
     if (i == index) {
       continue;
     }
@@ -105,10 +101,6 @@ fn comp_main() -> void {
     if (distance(pos, vPos) < params.rule3Distance) {
       cVel = cVel + vel;
       cVelCount = cVelCount + 1;
-    }
-
-    continuing {
-      i = i + 1u;
     }
   }
   if (cMassCount > 0) {
