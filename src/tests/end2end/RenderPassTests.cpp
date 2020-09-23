@@ -45,7 +45,7 @@ class RenderPassTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cColorStates[0].format = kFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);
@@ -145,7 +145,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cColorStates[0].format = kFormat;
 
         wgpu::RenderPipeline pipelineWithNoFragmentOutput =

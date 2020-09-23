@@ -69,6 +69,7 @@ class MultisampledSamplingTest : public DawnTest {
                     gl_FragDepth = 0.7;
                 })");
 
+            desc.cVertexState.indexFormat = wgpu::IndexFormat::Uint32;
             desc.cVertexState.vertexBufferCount = 1;
             desc.cVertexState.cVertexBuffers[0].attributeCount = 1;
             desc.cVertexState.cVertexBuffers[0].arrayStride = 2 * sizeof(float);

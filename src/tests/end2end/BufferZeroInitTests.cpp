@@ -223,7 +223,6 @@ class BufferZeroInitTest : public DawnTest {
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
         descriptor.cVertexState.vertexBufferCount = vertexBufferCount;
-        descriptor.cVertexState.indexFormat = wgpu::IndexFormat::Uint16;
         descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
         descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
         descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;

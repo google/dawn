@@ -21,7 +21,7 @@ namespace utils {
     ComboVertexStateDescriptor::ComboVertexStateDescriptor() {
         wgpu::VertexStateDescriptor* descriptor = this;
 
-        descriptor->indexFormat = wgpu::IndexFormat::Uint32;
+        descriptor->indexFormat = wgpu::IndexFormat::Undefined;
         descriptor->vertexBufferCount = 0;
 
         // Fill the default values for vertexBuffers and vertexAttributes in buffers.

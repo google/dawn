@@ -536,7 +536,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     utils::ComboRenderPipelineDescriptor rpDesc(device);
     rpDesc.vertexStage.module = vsModule;
     rpDesc.cFragmentStage.module = fsModule;
-    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
     rpDesc.cVertexState.vertexBufferCount = 1;
     rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
     rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
@@ -658,7 +658,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     utils::ComboRenderPipelineDescriptor rpDesc(device);
     rpDesc.vertexStage.module = vsModule;
     rpDesc.cFragmentStage.module = fsModule;
-    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
     rpDesc.cVertexState.vertexBufferCount = 1;
     rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
     rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;

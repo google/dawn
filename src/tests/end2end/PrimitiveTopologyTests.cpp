@@ -190,7 +190,13 @@ class PrimitiveTopologyTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
+
         descriptor.primitiveTopology = primitiveTopology;
+        if (primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip ||
+            primitiveTopology == wgpu::PrimitiveTopology::LineStrip) {
+            descriptor.cVertexState.indexFormat = wgpu::IndexFormat::Uint32;
+        }
+
         descriptor.cVertexState.vertexBufferCount = 1;
         descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
         descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;

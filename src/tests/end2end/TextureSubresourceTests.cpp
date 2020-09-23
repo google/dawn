@@ -69,7 +69,7 @@ class TextureSubresourceTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cColorStates[0].format = kFormat;
 
         wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
@@ -110,7 +110,7 @@ class TextureSubresourceTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cColorStates[0].format = kFormat;
 
         wgpu::SamplerDescriptor samplerDescriptor = {};
