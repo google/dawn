@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/transform/vertex_pulling_transform.h"
+#include "src/transform/vertex_pulling_transform.h"
 
 #include "gtest/gtest.h"
 #include "src/ast/decorated_variable.h"
@@ -27,7 +27,6 @@
 #include "src/validator.h"
 
 namespace tint {
-namespace ast {
 namespace transform {
 namespace {
 
@@ -40,9 +39,9 @@ class VertexPullingTransformHelper {
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    auto func = std::make_unique<Function>(
-        "main", VariableList{},
-        ctx_.type_mgr().Get(std::make_unique<type::VoidType>()));
+    auto func = std::make_unique<ast::Function>(
+        "main", ast::VariableList{},
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
     func->add_decoration(
         std::make_unique<ast::StageDecoration>(ast::PipelineStage ::kVertex));
     mod()->AddFunction(std::move(func));
@@ -52,7 +51,7 @@ class VertexPullingTransformHelper {
   void InitTransform(VertexStateDescriptor vertex_state) {
     EXPECT_TRUE(mod_->IsValid());
 
-    tint::TypeDeterminer td(&ctx_, mod_.get());
+    TypeDeterminer td(&ctx_, mod_.get());
     EXPECT_TRUE(td.Determine());
 
     transform_->SetVertexState(
@@ -63,12 +62,12 @@ class VertexPullingTransformHelper {
   // Inserts a variable which will be converted to vertex pulling
   void AddVertexInputVariable(uint32_t location,
                               std::string name,
-                              type::Type* type) {
-    auto var = std::make_unique<DecoratedVariable>(
-        std::make_unique<Variable>(name, StorageClass::kInput, type));
+                              ast::type::Type* type) {
+    auto var = std::make_unique<ast::DecoratedVariable>(
+        std::make_unique<ast::Variable>(name, ast::StorageClass::kInput, type));
 
-    VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<LocationDecoration>(location));
+    ast::VariableDecorationList decorations;
+    decorations.push_back(std::make_unique<ast::LocationDecoration>(location));
 
     var->set_decorations(std::move(decorations));
     mod_->AddGlobalVariable(std::move(var));
@@ -108,9 +107,9 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
-  auto func = std::make_unique<Function>(
-      "main", VariableList{},
-      ctx()->type_mgr().Get(std::make_unique<type::VoidType>()));
+  auto func = std::make_unique<ast::Function>(
+      "main", ast::VariableList{},
+      ctx()->type_mgr().Get(std::make_unique<ast::type::VoidType>()));
   func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
   mod()->AddFunction(std::move(func));
@@ -129,7 +128,7 @@ TEST_F(VertexPullingTransformTest, BasicModule) {
 TEST_F(VertexPullingTransformTest, OneAttribute) {
   InitBasicModule();
 
-  type::F32Type f32;
+  ast::type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
@@ -209,7 +208,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
 TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   InitBasicModule();
 
-  type::F32Type f32;
+  ast::type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform(
@@ -290,7 +289,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
 TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
   InitBasicModule();
 
-  type::F32Type f32;
+  ast::type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
@@ -372,32 +371,32 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
 TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   InitBasicModule();
 
-  type::F32Type f32;
+  ast::type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
   AddVertexInputVariable(1, "var_b", &f32);
 
-  type::I32Type i32;
+  ast::type::I32Type i32;
   {
-    auto vertex_index_var =
-        std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-            "custom_vertex_index", StorageClass::kInput, &i32));
+    auto vertex_index_var = std::make_unique<ast::DecoratedVariable>(
+        std::make_unique<ast::Variable>("custom_vertex_index",
+                                        ast::StorageClass::kInput, &i32));
 
-    VariableDecorationList decorations;
+    ast::VariableDecorationList decorations;
     decorations.push_back(
-        std::make_unique<BuiltinDecoration>(Builtin::kVertexIdx));
+        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx));
 
     vertex_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(vertex_index_var));
   }
 
   {
-    auto instance_index_var =
-        std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-            "custom_instance_index", StorageClass::kInput, &i32));
+    auto instance_index_var = std::make_unique<ast::DecoratedVariable>(
+        std::make_unique<ast::Variable>("custom_instance_index",
+                                        ast::StorageClass::kInput, &i32));
 
-    VariableDecorationList decorations;
+    ast::VariableDecorationList decorations;
     decorations.push_back(
-        std::make_unique<BuiltinDecoration>(Builtin::kInstanceIdx));
+        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx));
 
     instance_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(instance_index_var));
@@ -532,10 +531,10 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
 TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
   InitBasicModule();
 
-  type::F32Type f32;
+  ast::type::F32Type f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
-  type::ArrayType vec4_f32{&f32, 4u};
+  ast::type::ArrayType vec4_f32{&f32, 4u};
   AddVertexInputVariable(1, "var_b", &vec4_f32);
 
   InitTransform(
@@ -709,14 +708,14 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
 TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   InitBasicModule();
 
-  type::F32Type f32;
-  type::ArrayType vec2_f32{&f32, 2u};
+  ast::type::F32Type f32;
+  ast::type::ArrayType vec2_f32{&f32, 2u};
   AddVertexInputVariable(0, "var_a", &vec2_f32);
 
-  type::ArrayType vec3_f32{&f32, 3u};
+  ast::type::ArrayType vec3_f32{&f32, 3u};
   AddVertexInputVariable(1, "var_b", &vec3_f32);
 
-  type::ArrayType vec4_f32{&f32, 4u};
+  ast::type::ArrayType vec4_f32{&f32, 4u};
   AddVertexInputVariable(2, "var_c", &vec4_f32);
 
   InitTransform(
@@ -1005,5 +1004,4 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
 
 }  // namespace
 }  // namespace transform
-}  // namespace ast
 }  // namespace tint

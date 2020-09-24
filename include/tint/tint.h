@@ -21,12 +21,11 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/context.h"
 #include "src/reader/reader.h"
+#include "src/transform/vertex_pulling_transform.h"
 #include "src/type_determiner.h"
 #include "src/type_manager.h"
 #include "src/validator.h"
 #include "src/writer/writer.h"
-
-#include "src/ast/transform/vertex_pulling_transform.h"
 
 #if TINT_BUILD_SPV_READER
 #include "src/reader/spirv/parser.h"

@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/transform/vertex_pulling_transform.h"
+#include "src/transform/vertex_pulling_transform.h"
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/decorated_variable.h"
-#include "src/ast/expression.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
@@ -36,22 +34,21 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/context.h"
 
 namespace tint {
-namespace ast {
 namespace transform {
 
 namespace {
-// TODO(idanr): What to do if these names are already used?
+
 static const char kVertexBufferNamePrefix[] = "tint_pulling_vertex_buffer_";
 static const char kStructBufferName[] = "data";
 static const char kPullingPosVarName[] = "tint_pulling_pos";
 static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
 static const char kDefaultInstanceIndexName[] = "tint_pulling_instance_index";
+
 }  // namespace
 
-VertexPullingTransform::VertexPullingTransform(Context* ctx, Module* mod)
+VertexPullingTransform::VertexPullingTransform(Context* ctx, ast::Module* mod)
     : ctx_(ctx), mod_(mod) {}
 
 VertexPullingTransform::~VertexPullingTransform() = default;
@@ -78,7 +75,7 @@ bool VertexPullingTransform::Run() {
 
   // Find entry point
   auto* func = mod_->FindFunctionByNameAndStage(entry_point_name_,
-                                                PipelineStage::kVertex);
+                                                ast::PipelineStage::kVertex);
   if (func == nullptr) {
     SetError("Vertex stage entry point not found");
     return false;
@@ -125,12 +122,13 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
 
   // Look for an existing vertex index builtin
   for (auto& v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != StorageClass::kInput) {
+    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
     for (auto& d : v->AsDecorated()->decorations()) {
-      if (d->IsBuiltin() && d->AsBuiltin()->value() == Builtin::kVertexIdx) {
+      if (d->IsBuiltin() &&
+          d->AsBuiltin()->value() == ast::Builtin::kVertexIdx) {
         vertex_index_name_ = v->name();
         return;
       }
@@ -140,12 +138,13 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
   // We didn't find a vertex index builtin, so create one
   vertex_index_name_ = kDefaultVertexIndexName;
 
-  auto var = std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-      vertex_index_name_, StorageClass::kInput, GetI32Type()));
+  auto var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          vertex_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
-  VariableDecorationList decorations;
+  ast::VariableDecorationList decorations;
   decorations.push_back(
-      std::make_unique<BuiltinDecoration>(Builtin::kVertexIdx));
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx));
 
   var->set_decorations(std::move(decorations));
   mod_->AddGlobalVariable(std::move(var));
@@ -166,12 +165,13 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
 
   // Look for an existing instance index builtin
   for (auto& v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != StorageClass::kInput) {
+    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
     for (auto& d : v->AsDecorated()->decorations()) {
-      if (d->IsBuiltin() && d->AsBuiltin()->value() == Builtin::kInstanceIdx) {
+      if (d->IsBuiltin() &&
+          d->AsBuiltin()->value() == ast::Builtin::kInstanceIdx) {
         instance_index_name_ = v->name();
         return;
       }
@@ -181,12 +181,13 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
   // We didn't find an instance index builtin, so create one
   instance_index_name_ = kDefaultInstanceIndexName;
 
-  auto var = std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-      instance_index_name_, StorageClass::kInput, GetI32Type()));
+  auto var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          instance_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
-  VariableDecorationList decorations;
+  ast::VariableDecorationList decorations;
   decorations.push_back(
-      std::make_unique<BuiltinDecoration>(Builtin::kInstanceIdx));
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx));
 
   var->set_decorations(std::move(decorations));
   mod_->AddGlobalVariable(std::move(var));
@@ -194,7 +195,7 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
 
 void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
   for (auto& v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != StorageClass::kInput) {
+    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
@@ -207,8 +208,8 @@ void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
       // This is where the replacement happens. Expressions use identifier
       // strings instead of pointers, so we don't need to update any other place
       // in the AST.
-      v = std::make_unique<Variable>(v->name(), StorageClass::kPrivate,
-                                     v->type());
+      v = std::make_unique<ast::Variable>(
+          v->name(), ast::StorageClass::kPrivate, v->type());
       location_to_var_[location] = v.get();
       break;
     }
@@ -218,45 +219,51 @@ void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
 void VertexPullingTransform::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
-  auto internal_array = std::make_unique<type::ArrayType>(GetU32Type());
+  auto internal_array = std::make_unique<ast::type::ArrayType>(GetU32Type());
   internal_array->set_array_stride(4u);
   auto* internal_array_type = ctx_->type_mgr().Get(std::move(internal_array));
 
   // Creating the struct type
-  StructMemberList members;
-  StructMemberDecorationList member_dec;
-  member_dec.push_back(std::make_unique<StructMemberOffsetDecoration>(0u));
-  members.push_back(std::make_unique<StructMember>(
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList member_dec;
+  member_dec.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0u));
+
+  members.push_back(std::make_unique<ast::StructMember>(
       kStructBufferName, internal_array_type, std::move(member_dec)));
-  auto* struct_type = ctx_->type_mgr().Get(std::make_unique<type::StructType>(
-      std::make_unique<Struct>(StructDecoration::kBlock, std::move(members))));
+
+  auto* struct_type = ctx_->type_mgr().Get(
+      std::make_unique<ast::type::StructType>(std::make_unique<ast::Struct>(
+          ast::StructDecoration::kBlock, std::move(members))));
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     // The decorated variable with struct type
-    auto var = std::make_unique<DecoratedVariable>(std::make_unique<Variable>(
-        GetVertexBufferName(i), StorageClass::kStorageBuffer, struct_type));
+    auto var = std::make_unique<ast::DecoratedVariable>(
+        std::make_unique<ast::Variable>(GetVertexBufferName(i),
+                                        ast::StorageClass::kStorageBuffer,
+                                        struct_type));
 
     // Add decorations
-    VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<BindingDecoration>(i));
-    decorations.push_back(std::make_unique<SetDecoration>(pulling_set_));
+    ast::VariableDecorationList decorations;
+    decorations.push_back(std::make_unique<ast::BindingDecoration>(i));
+    decorations.push_back(std::make_unique<ast::SetDecoration>(pulling_set_));
     var->set_decorations(std::move(decorations));
 
     mod_->AddGlobalVariable(std::move(var));
   }
 }
 
-void VertexPullingTransform::AddVertexPullingPreamble(Function* vertex_func) {
+void VertexPullingTransform::AddVertexPullingPreamble(
+    ast::Function* vertex_func) {
   // Assign by looking at the vertex descriptor to find attributes with matching
   // location.
 
   // A block statement allowing us to use append instead of insert
-  auto block = std::make_unique<BlockStatement>();
+  auto block = std::make_unique<ast::BlockStatement>();
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto pos_declaration =
-      std::make_unique<VariableDeclStatement>(std::make_unique<Variable>(
-          kPullingPosVarName, StorageClass::kFunction, GetI32Type()));
+  auto pos_declaration = std::make_unique<ast::VariableDeclStatement>(
+      std::make_unique<ast::Variable>(
+          kPullingPosVarName, ast::StorageClass::kFunction, GetI32Type()));
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression
@@ -276,26 +283,26 @@ void VertexPullingTransform::AddVertexPullingPreamble(Function* vertex_func) {
       auto* v = it->second;
 
       // Identifier to index by
-      auto index_identifier = std::make_unique<IdentifierExpression>(
+      auto index_identifier = std::make_unique<ast::IdentifierExpression>(
           buffer_layout.step_mode == InputStepMode::kVertex
               ? vertex_index_name_
               : instance_index_name_);
 
       // An expression for the start of the read in the buffer in bytes
-      auto pos_value = std::make_unique<BinaryExpression>(
-          BinaryOp::kAdd,
-          std::make_unique<BinaryExpression>(
-              BinaryOp::kMultiply, std::move(index_identifier),
+      auto pos_value = std::make_unique<ast::BinaryExpression>(
+          ast::BinaryOp::kAdd,
+          std::make_unique<ast::BinaryExpression>(
+              ast::BinaryOp::kMultiply, std::move(index_identifier),
               GenUint(static_cast<uint32_t>(buffer_layout.array_stride))),
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 
       // Update position of the read
-      auto set_pos_expr = std::make_unique<AssignmentStatement>(
+      auto set_pos_expr = std::make_unique<ast::AssignmentStatement>(
           CreatePullingPositionIdent(), std::move(pos_value));
       block->append(std::move(set_pos_expr));
 
-      block->append(std::make_unique<AssignmentStatement>(
-          std::make_unique<IdentifierExpression>(v->name()),
+      block->append(std::make_unique<ast::AssignmentStatement>(
+          std::make_unique<ast::IdentifierExpression>(v->name()),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
@@ -303,17 +310,18 @@ void VertexPullingTransform::AddVertexPullingPreamble(Function* vertex_func) {
   vertex_func->body()->insert(0, std::move(block));
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::GenUint(uint32_t value) {
-  return std::make_unique<ScalarConstructorExpression>(
-      std::make_unique<UintLiteral>(GetU32Type(), value));
+std::unique_ptr<ast::Expression> VertexPullingTransform::GenUint(
+    uint32_t value) {
+  return std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(GetU32Type(), value));
 }
 
-std::unique_ptr<Expression>
+std::unique_ptr<ast::Expression>
 VertexPullingTransform::CreatePullingPositionIdent() {
-  return std::make_unique<IdentifierExpression>(kPullingPosVarName);
+  return std::make_unique<ast::IdentifierExpression>(kPullingPosVarName);
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessByFormat(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessByFormat(
     uint32_t buffer,
     VertexFormat format) {
   // TODO(idanr): this doesn't account for the format of the attribute in the
@@ -341,41 +349,42 @@ std::unique_ptr<Expression> VertexPullingTransform::AccessByFormat(
   }
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessU32(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessU32(
     uint32_t buffer,
-    std::unique_ptr<Expression> pos) {
+    std::unique_ptr<ast::Expression> pos) {
   // Here we divide by 4, since the buffer is uint32 not uint8. The input buffer
   // has byte offsets for each attribute, and we will convert it to u32 indexes
   // by dividing. Then, that element is going to be read, and if needed,
   // unpacked into an appropriate variable. All reads should end up here as a
   // base case.
-  return std::make_unique<ArrayAccessorExpression>(
-      std::make_unique<MemberAccessorExpression>(
-          std::make_unique<IdentifierExpression>(GetVertexBufferName(buffer)),
-          std::make_unique<IdentifierExpression>(kStructBufferName)),
-      std::make_unique<BinaryExpression>(BinaryOp::kDivide, std::move(pos),
-                                         GenUint(4)));
+  return std::make_unique<ast::ArrayAccessorExpression>(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>(
+              GetVertexBufferName(buffer)),
+          std::make_unique<ast::IdentifierExpression>(kStructBufferName)),
+      std::make_unique<ast::BinaryExpression>(ast::BinaryOp::kDivide,
+                                              std::move(pos), GenUint(4)));
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessI32(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessI32(
     uint32_t buffer,
-    std::unique_ptr<Expression> pos) {
+    std::unique_ptr<ast::Expression> pos) {
   // as<T> reinterprets bits
-  return std::make_unique<BitcastExpression>(GetI32Type(),
-                                             AccessU32(buffer, std::move(pos)));
+  return std::make_unique<ast::BitcastExpression>(
+      GetI32Type(), AccessU32(buffer, std::move(pos)));
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessF32(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessF32(
     uint32_t buffer,
-    std::unique_ptr<Expression> pos) {
+    std::unique_ptr<ast::Expression> pos) {
   // as<T> reinterprets bits
-  return std::make_unique<BitcastExpression>(GetF32Type(),
-                                             AccessU32(buffer, std::move(pos)));
+  return std::make_unique<ast::BitcastExpression>(
+      GetF32Type(), AccessU32(buffer, std::move(pos)));
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessPrimitive(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessPrimitive(
     uint32_t buffer,
-    std::unique_ptr<Expression> pos,
+    std::unique_ptr<ast::Expression> pos,
     VertexFormat format) {
   // This function uses a position expression to read, rather than using the
   // position variable. This allows us to read from offset positions relative to
@@ -393,41 +402,42 @@ std::unique_ptr<Expression> VertexPullingTransform::AccessPrimitive(
   }
 }
 
-std::unique_ptr<Expression> VertexPullingTransform::AccessVec(
+std::unique_ptr<ast::Expression> VertexPullingTransform::AccessVec(
     uint32_t buffer,
     uint32_t element_stride,
-    type::Type* base_type,
+    ast::type::Type* base_type,
     VertexFormat base_format,
     uint32_t count) {
-  ExpressionList expr_list;
+  ast::ExpressionList expr_list;
   for (uint32_t i = 0; i < count; ++i) {
     // Offset read position by element_stride for each component
-    auto cur_pos = std::make_unique<BinaryExpression>(
-        BinaryOp::kAdd, CreatePullingPositionIdent(),
+    auto cur_pos = std::make_unique<ast::BinaryExpression>(
+        ast::BinaryOp::kAdd, CreatePullingPositionIdent(),
         GenUint(element_stride * i));
     expr_list.push_back(
         AccessPrimitive(buffer, std::move(cur_pos), base_format));
   }
 
-  return std::make_unique<TypeConstructorExpression>(
+  return std::make_unique<ast::TypeConstructorExpression>(
       ctx_->type_mgr().Get(
-          std::make_unique<type::VectorType>(base_type, count)),
+          std::make_unique<ast::type::VectorType>(base_type, count)),
       std::move(expr_list));
 }
 
-type::Type* VertexPullingTransform::GetU32Type() {
-  return ctx_->type_mgr().Get(std::make_unique<type::U32Type>());
+ast::type::Type* VertexPullingTransform::GetU32Type() {
+  return ctx_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
 }
 
-type::Type* VertexPullingTransform::GetI32Type() {
-  return ctx_->type_mgr().Get(std::make_unique<type::I32Type>());
+ast::type::Type* VertexPullingTransform::GetI32Type() {
+  return ctx_->type_mgr().Get(std::make_unique<ast::type::I32Type>());
 }
 
-type::Type* VertexPullingTransform::GetF32Type() {
-  return ctx_->type_mgr().Get(std::make_unique<type::F32Type>());
+ast::type::Type* VertexPullingTransform::GetF32Type() {
+  return ctx_->type_mgr().Get(std::make_unique<ast::type::F32Type>());
 }
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;
+
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
     uint64_t in_array_stride,
     InputStepMode in_step_mode,
@@ -435,21 +445,25 @@ VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
     : array_stride(std::move(in_array_stride)),
       step_mode(std::move(in_step_mode)),
       attributes(std::move(in_attributes)) {}
+
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
     const VertexBufferLayoutDescriptor& other)
     : array_stride(other.array_stride),
       step_mode(other.step_mode),
       attributes(other.attributes) {}
+
 VertexBufferLayoutDescriptor::~VertexBufferLayoutDescriptor() = default;
 
 VertexStateDescriptor::VertexStateDescriptor() = default;
+
 VertexStateDescriptor::VertexStateDescriptor(
     std::vector<VertexBufferLayoutDescriptor> in_vertex_buffers)
     : vertex_buffers(std::move(in_vertex_buffers)) {}
+
 VertexStateDescriptor::VertexStateDescriptor(const VertexStateDescriptor& other)
     : vertex_buffers(other.vertex_buffers) {}
+
 VertexStateDescriptor::~VertexStateDescriptor() = default;
 
 }  // namespace transform
-}  // namespace ast
 }  // namespace tint

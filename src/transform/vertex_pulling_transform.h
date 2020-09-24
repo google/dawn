@@ -12,8 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
-#define SRC_AST_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
+#ifndef SRC_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
+#define SRC_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
+
+#include "src/ast/expression.h"
+#include "src/ast/function.h"
+#include "src/ast/module.h"
+#include "src/ast/statement.h"
+#include "src/ast/variable.h"
+#include "src/context.h"
 
 #include <memory>
 #include <string>
@@ -21,22 +28,6 @@
 #include <vector>
 
 namespace tint {
-
-class Context;
-
-namespace ast {
-
-class EntryPoint;
-class Expression;
-class Function;
-class Module;
-class Statement;
-class Variable;
-
-namespace type {
-class Type;
-}  // namespace type
-
 namespace transform {
 
 /// Describes the format of data in a vertex buffer
@@ -102,6 +93,7 @@ struct VertexBufferLayoutDescriptor {
   /// Copy constructor
   /// @param other the struct to copy
   VertexBufferLayoutDescriptor(const VertexBufferLayoutDescriptor& other);
+
   ~VertexBufferLayoutDescriptor();
 
   /// The array stride used in the in buffer
@@ -124,6 +116,7 @@ struct VertexStateDescriptor {
   /// Copy constructor
   /// @param other the struct to copy
   VertexStateDescriptor(const VertexStateDescriptor& other);
+
   ~VertexStateDescriptor();
 
   /// The vertex buffers
@@ -154,7 +147,7 @@ class VertexPullingTransform {
   /// Constructor
   /// @param ctx the tint context
   /// @param mod the module to convert to vertex pulling
-  VertexPullingTransform(Context* ctx, Module* mod);
+  VertexPullingTransform(Context* ctx, ast::Module* mod);
   ~VertexPullingTransform();
 
   /// Sets the vertex state descriptor, containing info about attributes
@@ -196,49 +189,53 @@ class VertexPullingTransform {
   void AddVertexStorageBuffers();
 
   /// Adds assignment to the variables from the buffers
-  void AddVertexPullingPreamble(Function* vertex_func);
+  void AddVertexPullingPreamble(ast::Function* vertex_func);
 
   /// Generates an expression holding a constant uint
   /// @param value uint value
-  std::unique_ptr<Expression> GenUint(uint32_t value);
+  std::unique_ptr<ast::Expression> GenUint(uint32_t value);
 
   /// Generates an expression to read the shader value |kPullingPosVarName|
-  std::unique_ptr<Expression> CreatePullingPositionIdent();
+  std::unique_ptr<ast::Expression> CreatePullingPositionIdent();
 
   /// Generates an expression reading from a buffer a specific format.
   /// This reads the value wherever |kPullingPosVarName| points to at the time
   /// of the read.
   /// @param buffer the index of the vertex buffer
   /// @param format the format to read
-  std::unique_ptr<Expression> AccessByFormat(uint32_t buffer,
-                                             VertexFormat format);
+  std::unique_ptr<ast::Expression> AccessByFormat(uint32_t buffer,
+                                                  VertexFormat format);
 
   /// Generates an expression reading a uint32 from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<Expression> AccessU32(uint32_t buffer,
-                                        std::unique_ptr<Expression> pos);
+  std::unique_ptr<ast::Expression> AccessU32(
+      uint32_t buffer,
+      std::unique_ptr<ast::Expression> pos);
 
   /// Generates an expression reading an int32 from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<Expression> AccessI32(uint32_t buffer,
-                                        std::unique_ptr<Expression> pos);
+  std::unique_ptr<ast::Expression> AccessI32(
+      uint32_t buffer,
+      std::unique_ptr<ast::Expression> pos);
 
   /// Generates an expression reading a float from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<Expression> AccessF32(uint32_t buffer,
-                                        std::unique_ptr<Expression> pos);
+  std::unique_ptr<ast::Expression> AccessF32(
+      uint32_t buffer,
+      std::unique_ptr<ast::Expression> pos);
 
   /// Generates an expression reading a basic type (u32, i32, f32) from a vertex
   /// buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
   /// @param format the underlying vertex format
-  std::unique_ptr<Expression> AccessPrimitive(uint32_t buffer,
-                                              std::unique_ptr<Expression> pos,
-                                              VertexFormat format);
+  std::unique_ptr<ast::Expression> AccessPrimitive(
+      uint32_t buffer,
+      std::unique_ptr<ast::Expression> pos,
+      VertexFormat format);
 
   /// Generates an expression reading a vec2/3/4 from a vertex buffer.
   /// This reads the value wherever |kPullingPosVarName| points to at the time
@@ -248,19 +245,19 @@ class VertexPullingTransform {
   /// @param base_type underlying AST type
   /// @param base_format underlying vertex format
   /// @param count how many elements the vector has
-  std::unique_ptr<Expression> AccessVec(uint32_t buffer,
-                                        uint32_t element_stride,
-                                        type::Type* base_type,
-                                        VertexFormat base_format,
-                                        uint32_t count);
+  std::unique_ptr<ast::Expression> AccessVec(uint32_t buffer,
+                                             uint32_t element_stride,
+                                             ast::type::Type* base_type,
+                                             VertexFormat base_format,
+                                             uint32_t count);
 
   // Used to grab corresponding types from the type manager
-  type::Type* GetU32Type();
-  type::Type* GetI32Type();
-  type::Type* GetF32Type();
+  ast::type::Type* GetU32Type();
+  ast::type::Type* GetI32Type();
+  ast::type::Type* GetF32Type();
 
   Context* ctx_ = nullptr;
-  Module* mod_ = nullptr;
+  ast::Module* mod_ = nullptr;
   std::string entry_point_name_;
   std::string error_;
 
@@ -270,12 +267,11 @@ class VertexPullingTransform {
   // Default to 4 as it is past the limits of user-accessible sets
   uint32_t pulling_set_ = 4u;
 
-  std::unordered_map<uint32_t, Variable*> location_to_var_;
+  std::unordered_map<uint32_t, ast::Variable*> location_to_var_;
   std::unique_ptr<VertexStateDescriptor> vertex_state_;
 };
 
 }  // namespace transform
-}  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
+#endif  // SRC_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_

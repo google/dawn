@@ -136,8 +136,6 @@ set(TINT_LIB_SRCS
   ast/struct_member_offset_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
-  ast/transform/vertex_pulling_transform.cc
-  ast/transform/vertex_pulling_transform.h
   ast/type_constructor_expression.h
   ast/type_constructor_expression.cc
   ast/type/alias_type.cc
@@ -196,6 +194,8 @@ set(TINT_LIB_SRCS
   reader/reader.h
   scope_stack.h
   source.h
+  transform/vertex_pulling_transform.cc
+  transform/vertex_pulling_transform.h
   type_determiner.cc
   type_determiner.h
   type_manager.cc
@@ -333,7 +333,6 @@ set(TINT_TEST_SRCS
   ast/struct_member_offset_decoration_test.cc
   ast/struct_test.cc
   ast/switch_statement_test.cc
-  ast/transform/vertex_pulling_transform_test.cc
   ast/type/alias_type_test.cc
   ast/type/array_type_test.cc
   ast/type/bool_type_test.cc
@@ -356,6 +355,7 @@ set(TINT_TEST_SRCS
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
   scope_stack_test.cc
+  transform/vertex_pulling_transform_test.cc
   type_determiner_test.cc
   type_manager_test.cc
   validator_control_block_test.cc
