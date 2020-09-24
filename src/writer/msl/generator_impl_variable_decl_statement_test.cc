@@ -18,8 +18,15 @@
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_decoration.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_decoration.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
@@ -44,7 +51,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  EXPECT_EQ(g.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
@@ -60,7 +67,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  const float a;\n");
+  EXPECT_EQ(g.result(), "  const float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
@@ -77,13 +84,27 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a[5];\n");
+  EXPECT_EQ(g.result(), "  float a[5] = {0.0f};\n");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "a", &f32, ast::StructMemberDecorationList{}));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+
+  auto var = std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &s);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -92,7 +113,44 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  EXPECT_EQ(g.result(), R"(  struct {
+    float a;
+    float b;
+  } a = {};
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec);
+
+  ast::VariableDeclStatement stmt(std::move(var));
+
+  ast::Module m;
+  GeneratorImpl g(&m);
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
+  EXPECT_EQ(g.result(), "  float2 a = 0.0f;\n");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 2, 3);
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat);
+
+  ast::VariableDeclStatement stmt(std::move(var));
+
+  ast::Module m;
+  GeneratorImpl g(&m);
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
+  EXPECT_EQ(g.result(), "  float3x2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
@@ -107,7 +165,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a;\n");
+  EXPECT_EQ(g.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {

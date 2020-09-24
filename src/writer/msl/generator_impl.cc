@@ -819,6 +819,16 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     out_ << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(type->AsVector()->type());
+  } else if (type->IsMatrix()) {
+    return EmitZeroValue(type->AsMatrix()->type());
+  } else if (type->IsArray()) {
+    out_ << "{";
+    if (!EmitZeroValue(type->AsArray()->type())) {
+      return false;
+    }
+    out_ << "}";
+  } else if (type->IsStruct()) {
+    out_ << "{}";
   } else {
     error_ = "Invalid type for zero emission: " + type->type_name();
     return false;
@@ -1805,10 +1815,19 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
     out_ << " " << var->name();
   }
 
-  if (!skip_constructor && var->constructor() != nullptr) {
+  if (!skip_constructor) {
     out_ << " = ";
-    if (!EmitExpression(var->constructor())) {
-      return false;
+    if (var->constructor() != nullptr) {
+      if (!EmitExpression(var->constructor())) {
+        return false;
+      }
+    } else if (var->storage_class() == ast::StorageClass::kPrivate ||
+               var->storage_class() == ast::StorageClass::kFunction ||
+               var->storage_class() == ast::StorageClass::kNone ||
+               var->storage_class() == ast::StorageClass::kOutput) {
+      if (!EmitZeroValue(var->type())) {
+        return false;
+      }
     }
   }
   out_ << ";" << std::endl;
