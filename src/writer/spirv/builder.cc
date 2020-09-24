@@ -1097,8 +1097,6 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   if (result_type->IsVector()) {
     result_type = result_type->AsVector()->type();
-  } else if (result_type->IsArray()) {
-    result_type = result_type->AsArray()->type();
   }
 
   for (const auto& e : values) {
@@ -1115,10 +1113,12 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
     auto* value_type = e->result_type()->UnwrapPtrIfNeeded();
     // If the result and value types are the same we can just use the object.
-    // If the result is a matrix then we should have validated that the value
-    // type is a correctly sized vector so we can just use it directly.
-    if (result_type == value_type || result_type->IsMatrix()) {
+    // If the result is not a vector then we should have validated that the
+    // value type is a correctly sized vector so we can just use it directly.
+    if (result_type == value_type || result_type->IsMatrix() ||
+        result_type->IsArray() || result_type->IsStruct()) {
       out << "_" << id;
+
       ops.push_back(Operand::Int(id));
       continue;
     }

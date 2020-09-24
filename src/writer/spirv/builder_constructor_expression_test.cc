@@ -1610,12 +1610,89 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Array_5_F32) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
+  ast::type::F32Type f32;
+  ast::type::ArrayType ary(&f32, 5);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::TypeConstructorExpression cast(&ary, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 5
+%1 = OpTypeArray %2 %4
+%5 = OpConstant %2 2
+%6 = OpConstantComposite %1 %5 %5 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Array_5_Vec3) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::ArrayType ary(&vec, 2);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+
+  ast::TypeConstructorExpression cast(&ary, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 2
+%1 = OpTypeArray %2 %5
+%6 = OpConstant %3 2
+%7 = OpConstantComposite %2 %6 %6 %6
+%8 = OpConstantComposite %1 %7 %7
+)");
 }
 
 TEST_F(BuilderTest, DISABLED_Constructor_Type_Struct) {
