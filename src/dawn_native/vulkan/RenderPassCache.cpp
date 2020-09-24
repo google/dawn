@@ -29,8 +29,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_ATTACHMENT_LOAD_OP_LOAD;
                 case wgpu::LoadOp::Clear:
                     return VK_ATTACHMENT_LOAD_OP_CLEAR;
-                default:
-                    UNREACHABLE();
             }
         }
     }  // anonymous namespace

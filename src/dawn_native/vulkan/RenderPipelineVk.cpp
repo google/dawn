@@ -33,8 +33,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_VERTEX_INPUT_RATE_VERTEX;
                 case wgpu::InputStepMode::Instance:
                     return VK_VERTEX_INPUT_RATE_INSTANCE;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -100,8 +98,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_FORMAT_R32G32B32_SINT;
                 case wgpu::VertexFormat::Int4:
                     return VK_FORMAT_R32G32B32A32_SINT;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -117,8 +113,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -133,8 +127,6 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::PrimitiveTopology::LineStrip:
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return true;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -144,8 +136,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_FRONT_FACE_COUNTER_CLOCKWISE;
                 case wgpu::FrontFace::CW:
                     return VK_FRONT_FACE_CLOCKWISE;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -157,8 +147,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_CULL_MODE_FRONT_BIT;
                 case wgpu::CullMode::Back:
                     return VK_CULL_MODE_BACK_BIT;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -190,8 +178,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_BLEND_FACTOR_CONSTANT_COLOR;
                 case wgpu::BlendFactor::OneMinusBlendColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -207,8 +193,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_BLEND_OP_MIN;
                 case wgpu::BlendOperation::Max:
                     return VK_BLEND_OP_MAX;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -269,8 +253,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_STENCIL_OP_INCREMENT_AND_WRAP;
                 case wgpu::StencilOperation::DecrementWrap:
                     return VK_STENCIL_OP_DECREMENT_AND_WRAP;
-                default:
-                    UNREACHABLE();
             }
         }
 

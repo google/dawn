@@ -40,9 +40,9 @@ namespace dawn_native { namespace opengl {
                         }
                     }
 
-                default:
+                case wgpu::TextureDimension::e1D:
+                case wgpu::TextureDimension::e3D:
                     UNREACHABLE();
-                    return GL_TEXTURE_2D;
             }
         }
 
@@ -62,9 +62,11 @@ namespace dawn_native { namespace opengl {
                     return GL_TEXTURE_CUBE_MAP;
                 case wgpu::TextureViewDimension::CubeArray:
                     return GL_TEXTURE_CUBE_MAP_ARRAY;
-                default:
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e3D:
+                case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
-                    return GL_TEXTURE_2D;
             }
         }
 
@@ -141,7 +143,9 @@ namespace dawn_native { namespace opengl {
                     }
                 }
                 break;
-            default:
+
+            case wgpu::TextureDimension::e1D:
+            case wgpu::TextureDimension::e3D:
                 UNREACHABLE();
         }
 
@@ -279,7 +283,8 @@ namespace dawn_native { namespace opengl {
                             }
                             break;
 
-                        default:
+                        case wgpu::TextureDimension::e1D:
+                        case wgpu::TextureDimension::e3D:
                             UNREACHABLE();
                     }
                 }
@@ -386,7 +391,8 @@ namespace dawn_native { namespace opengl {
                         }
                         break;
 
-                    default:
+                    case wgpu::TextureDimension::e1D:
+                    case wgpu::TextureDimension::e3D:
                         UNREACHABLE();
                 }
             }

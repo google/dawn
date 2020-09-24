@@ -30,8 +30,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR;
                 case wgpu::LoadOp::Load:
                     return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -41,8 +39,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
                 case wgpu::StoreOp::Store:
                     return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE;
-                default:
-                    UNREACHABLE();
             }
         }
 

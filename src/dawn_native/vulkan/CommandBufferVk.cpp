@@ -44,7 +44,7 @@ namespace dawn_native { namespace vulkan {
                     return VK_INDEX_TYPE_UINT16;
                 case wgpu::IndexFormat::Uint32:
                     return VK_INDEX_TYPE_UINT32;
-                default:
+                case wgpu::IndexFormat::Undefined:
                     UNREACHABLE();
             }
         }
@@ -820,10 +820,8 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                default: {
-                    UNREACHABLE();
+                default:
                     break;
-                }
             }
         }
 
@@ -946,10 +944,8 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                default: {
+                default:
                     UNREACHABLE();
-                    break;
-                }
             }
         }
 

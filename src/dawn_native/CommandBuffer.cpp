@@ -121,10 +121,6 @@ namespace dawn_native {
                 case wgpu::StoreOp::Clear:
                     view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
                     break;
-
-                default:
-                    UNREACHABLE();
-                    break;
             }
         }
 

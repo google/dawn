@@ -37,8 +37,6 @@ namespace dawn_native { namespace opengl {
                     return GL_FRAGMENT_SHADER;
                 case SingleShaderStage::Compute:
                     return GL_COMPUTE_SHADER;
-                default:
-                    UNREACHABLE();
             }
         }
 

@@ -35,8 +35,6 @@ namespace dawn_native { namespace opengl {
                     return GL_TRIANGLES;
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return GL_TRIANGLE_STRIP;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -86,8 +84,6 @@ namespace dawn_native { namespace opengl {
                     return alpha ? GL_CONSTANT_ALPHA : GL_CONSTANT_COLOR;
                 case wgpu::BlendFactor::OneMinusBlendColor:
                     return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -103,8 +99,6 @@ namespace dawn_native { namespace opengl {
                     return GL_MIN;
                 case wgpu::BlendOperation::Max:
                     return GL_MAX;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -149,8 +143,6 @@ namespace dawn_native { namespace opengl {
                     return GL_INCR_WRAP;
                 case wgpu::StencilOperation::DecrementWrap:
                     return GL_DECR_WRAP;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -249,8 +241,6 @@ namespace dawn_native { namespace opengl {
                     case wgpu::InputStepMode::Instance:
                         gl.VertexAttribDivisor(glAttrib, 1);
                         break;
-                    default:
-                        UNREACHABLE();
                 }
             }
         }

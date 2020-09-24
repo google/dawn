@@ -65,7 +65,9 @@ namespace dawn_native {
                 return BackendType::OpenGL;
             case wgpu::BackendType::Vulkan:
                 return BackendType::Vulkan;
-            default:
+
+            case wgpu::BackendType::D3D11:
+            case wgpu::BackendType::OpenGLES:
                 UNREACHABLE();
         }
     }
@@ -80,8 +82,6 @@ namespace dawn_native {
                 return DeviceType::CPU;
             case wgpu::AdapterType::Unknown:
                 return DeviceType::Unknown;
-            default:
-                UNREACHABLE();
         }
     }
 

@@ -57,17 +57,14 @@ namespace dawn_native {
           private:
             bool IsCPUWritableAtCreation() const override {
                 UNREACHABLE();
-                return false;
             }
 
             MaybeError MapAtCreationImpl() override {
                 UNREACHABLE();
-                return {};
             }
 
             MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
                 UNREACHABLE();
-                return {};
             }
             void* GetMappedPointerImpl() override {
                 return mFakeMappedData.get();
@@ -212,8 +209,6 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
             case BufferState::Unmapped:
                 return {};
-            default:
-                UNREACHABLE();
         }
     }
 
@@ -480,9 +475,6 @@ namespace dawn_native {
             case BufferState::Unmapped:
             case BufferState::Destroyed:
                 return false;
-
-            default:
-                UNREACHABLE();
         }
     }
 
@@ -503,8 +495,6 @@ namespace dawn_native {
                 return {};
             case BufferState::Destroyed:
                 return DAWN_VALIDATION_ERROR("Buffer is destroyed");
-            default:
-                UNREACHABLE();
         }
     }
 

@@ -36,7 +36,8 @@ namespace dawn_native { namespace opengl {
                 return GL_EQUAL;
             case wgpu::CompareFunction::Always:
                 return GL_ALWAYS;
-            default:
+
+            case wgpu::CompareFunction::Undefined:
                 UNREACHABLE();
         }
     }
@@ -45,6 +46,7 @@ namespace dawn_native { namespace opengl {
         switch (depthStencilFormat) {
             case wgpu::TextureFormat::Depth24PlusStencil8:
                 return 0xFF;
+
             default:
                 UNREACHABLE();
         }

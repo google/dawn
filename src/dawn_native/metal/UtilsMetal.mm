@@ -37,7 +37,8 @@ namespace dawn_native { namespace metal {
                 return MTLCompareFunctionEqual;
             case wgpu::CompareFunction::Always:
                 return MTLCompareFunctionAlways;
-            default:
+
+            case wgpu::CompareFunction::Undefined:
                 UNREACHABLE();
         }
     }

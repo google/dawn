@@ -32,8 +32,8 @@ namespace dawn_native { namespace opengl {
         MaybeError Execute();
 
       private:
-        void ExecuteComputePass();
-        void ExecuteRenderPass(BeginRenderPassCmd* renderPass);
+        MaybeError ExecuteComputePass();
+        MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass);
     };
 
 }}  // namespace dawn_native::opengl

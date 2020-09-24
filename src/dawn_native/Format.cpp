@@ -32,8 +32,6 @@ namespace dawn_native {
             case wgpu::TextureComponentType::Sint:
             case wgpu::TextureComponentType::Uint:
                 break;
-            default:
-                UNREACHABLE();
         }
         // Check that Type correctly mirrors TextureComponentType except for "Other".
         static_assert(static_cast<Type>(wgpu::TextureComponentType::Float) == Type::Float, "");
@@ -49,7 +47,8 @@ namespace dawn_native {
             case Type::Sint:
             case Type::Uint:
                 break;
-            default:
+
+            case Type::Other:
                 UNREACHABLE();
         }
         // Check that Type correctly mirrors TextureComponentType except for "Other".
@@ -105,10 +104,6 @@ namespace dawn_native {
                         break;
                 }
                 break;
-
-            default:
-                UNREACHABLE();
-                break;
         }
     }
 
@@ -136,9 +131,9 @@ namespace dawn_native {
                         break;
                 }
                 break;
-            default:
+
+            case Aspect::None:
                 UNREACHABLE();
-                break;
         }
     }
 

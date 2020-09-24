@@ -27,6 +27,7 @@ namespace dawn_native { namespace vulkan {
         static Queue* Create(Device* device);
 
       private:
+        Queue(Device* device);
         ~Queue() override;
         using QueueBase::QueueBase;
 

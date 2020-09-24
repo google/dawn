@@ -45,7 +45,10 @@ namespace dawn_native { namespace vulkan {
                     return VK_IMAGE_VIEW_TYPE_CUBE;
                 case wgpu::TextureViewDimension::CubeArray:
                     return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
-                default:
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e3D:
+                case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
         }
@@ -135,7 +138,8 @@ namespace dawn_native { namespace vulkan {
                     }
                 case kPresentTextureUsage:
                     return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-                default:
+
+                case wgpu::TextureUsage::None:
                     UNREACHABLE();
             }
         }
@@ -237,9 +241,9 @@ namespace dawn_native { namespace vulkan {
                     info->arrayLayers = size.depth;
                     break;
 
-                default:
+                case wgpu::TextureDimension::e1D:
+                case wgpu::TextureDimension::e3D:
                     UNREACHABLE();
-                    break;
             }
         }
 
@@ -369,7 +373,7 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return VK_FORMAT_BC7_SRGB_BLOCK;
 
-            default:
+            case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
     }
@@ -714,9 +718,6 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureAspect::StencilOnly:
                 ASSERT(GetFormat().aspects & Aspect::Stencil);
                 return VulkanAspectMask(Aspect::Stencil);
-            default:
-                UNREACHABLE();
-                return 0;
         }
     }
 
@@ -1057,7 +1058,8 @@ namespace dawn_native { namespace vulkan {
                             clearColorValue.uint32[2] = uClearColor;
                             clearColorValue.uint32[3] = uClearColor;
                             break;
-                        default:
+
+                        case Format::Type::Other:
                             UNREACHABLE();
                     }
                     device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),

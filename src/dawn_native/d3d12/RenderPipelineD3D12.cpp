@@ -91,8 +91,6 @@ namespace dawn_native { namespace d3d12 {
                     return DXGI_FORMAT_R32G32B32_SINT;
                 case wgpu::VertexFormat::Int4:
                     return DXGI_FORMAT_R32G32B32A32_SINT;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -102,8 +100,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
                 case wgpu::InputStepMode::Instance:
                     return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -119,8 +115,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -135,8 +129,6 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::PrimitiveTopology::TriangleList:
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -148,8 +140,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_CULL_MODE_FRONT;
                 case wgpu::CullMode::Back:
                     return D3D12_CULL_MODE_BACK;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -181,8 +171,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_BLEND_BLEND_FACTOR;
                 case wgpu::BlendFactor::OneMinusBlendColor:
                     return D3D12_BLEND_INV_BLEND_FACTOR;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -198,8 +186,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_BLEND_OP_MIN;
                 case wgpu::BlendOperation::Max:
                     return D3D12_BLEND_OP_MAX;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -252,8 +238,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_STENCIL_OP_INCR;
                 case wgpu::StencilOperation::DecrementWrap:
                     return D3D12_STENCIL_OP_DECR;
-                default:
-                    UNREACHABLE();
             }
         }
 

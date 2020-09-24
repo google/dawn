@@ -95,7 +95,6 @@ namespace dawn_native {
                     break;
 
                 case wgpu::ErrorType::NoError:
-                default:
                     UNREACHABLE();
                     return;
             }

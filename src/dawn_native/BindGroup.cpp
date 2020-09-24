@@ -159,6 +159,7 @@ namespace dawn_native {
                     break;
                 default:
                     UNREACHABLE();
+                    break;
             }
 
             return {};

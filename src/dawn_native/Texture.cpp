@@ -47,9 +47,11 @@ namespace dawn_native {
                 case wgpu::TextureViewDimension::Cube:
                 case wgpu::TextureViewDimension::CubeArray:
                     return textureDimension == wgpu::TextureDimension::e2D;
-                default:
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e3D:
+                case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
-                    return false;
             }
         }
 
@@ -66,9 +68,11 @@ namespace dawn_native {
                     return textureViewArrayLayer == 6u;
                 case wgpu::TextureViewDimension::CubeArray:
                     return textureViewArrayLayer % 6 == 0;
-                default:
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e3D:
+                case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
-                    return false;
             }
         }
 
@@ -82,9 +86,11 @@ namespace dawn_native {
                 case wgpu::TextureViewDimension::e2D:
                 case wgpu::TextureViewDimension::e2DArray:
                     return true;
-                default:
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::e3D:
+                case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
-                    return false;
             }
         }
 
@@ -316,9 +322,6 @@ namespace dawn_native {
                 case wgpu::TextureDimension::e3D:
                     desc.dimension = wgpu::TextureViewDimension::e3D;
                     break;
-
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -361,9 +364,6 @@ namespace dawn_native {
             case wgpu::TextureAspect::StencilOnly:
                 ASSERT(format.aspects & Aspect::Stencil);
                 return Aspect::Stencil;
-            default:
-                UNREACHABLE();
-                break;
         }
     }
 

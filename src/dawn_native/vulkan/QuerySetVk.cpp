@@ -30,8 +30,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_QUERY_TYPE_PIPELINE_STATISTICS;
                 case wgpu::QueryType::Timestamp:
                     return VK_QUERY_TYPE_TIMESTAMP;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -57,9 +55,6 @@ namespace dawn_native { namespace vulkan {
                     case wgpu::PipelineStatisticName::VertexShaderInvocations:
                         pipelineStatistics |=
                             VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT;
-                        break;
-                    default:
-                        UNREACHABLE();
                         break;
                 }
             }

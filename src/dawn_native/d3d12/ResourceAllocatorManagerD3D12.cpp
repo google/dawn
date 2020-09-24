@@ -51,7 +51,7 @@ namespace dawn_native { namespace d3d12 {
                 case Upload_OnlyBuffers:
                 case Upload_AllBuffersAndTextures:
                     return D3D12_HEAP_TYPE_UPLOAD;
-                default:
+                case EnumCount:
                     UNREACHABLE();
             }
         }
@@ -70,7 +70,7 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES;
                 case Default_OnlyRenderableOrDepthTextures:
                     return D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
-                default:
+                case EnumCount:
                     UNREACHABLE();
             }
         }

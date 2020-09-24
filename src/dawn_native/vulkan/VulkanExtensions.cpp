@@ -113,9 +113,8 @@ namespace dawn_native { namespace vulkan {
                     hasDependencies = HasDep(InstanceExt::Surface);
                     break;
 
-                default:
+                case InstanceExt::EnumCount:
                     UNREACHABLE();
-                    break;
             }
 
             trimmedSet.Set(ext, hasDependencies && advertisedExts.Has(ext));
@@ -297,9 +296,8 @@ namespace dawn_native { namespace vulkan {
                     hasDependencies = icdVersion >= VulkanVersion_1_1;
                     break;
 
-                default:
+                case DeviceExt::EnumCount:
                     UNREACHABLE();
-                    break;
             }
 
             trimmedSet.Set(ext, hasDependencies && advertisedExts.Has(ext));

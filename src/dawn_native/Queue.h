@@ -25,8 +25,6 @@ namespace dawn_native {
 
     class QueueBase : public ObjectBase {
       public:
-        QueueBase(DeviceBase* device);
-
         static QueueBase* MakeError(DeviceBase* device);
 
         // Dawn API
@@ -40,9 +38,11 @@ namespace dawn_native {
                           const TextureDataLayout* dataLayout,
                           const Extent3D* writeSize);
 
-      private:
+      protected:
+        QueueBase(DeviceBase* device);
         QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
+      private:
         MaybeError WriteBufferInternal(BufferBase* buffer,
                                        uint64_t bufferOffset,
                                        const void* data,
@@ -53,7 +53,8 @@ namespace dawn_native {
                                         const TextureDataLayout* dataLayout,
                                         const Extent3D* writeSize);
 
-        virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands);
+        virtual MaybeError SubmitImpl(uint32_t commandCount,
+                                      CommandBufferBase* const* commands) = 0;
         virtual MaybeError WriteBufferImpl(BufferBase* buffer,
                                            uint64_t bufferOffset,
                                            const void* data,

@@ -40,7 +40,8 @@ namespace dawn_native { namespace vulkan {
                 return VK_COMPARE_OP_NOT_EQUAL;
             case wgpu::CompareFunction::Always:
                 return VK_COMPARE_OP_ALWAYS;
-            default:
+
+            case wgpu::CompareFunction::Undefined:
                 UNREACHABLE();
         }
     }
@@ -59,9 +60,8 @@ namespace dawn_native { namespace vulkan {
                 case Aspect::Stencil:
                     flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
                     break;
-                default:
+                case Aspect::None:
                     UNREACHABLE();
-                    break;
             }
         }
         return flags;
@@ -133,9 +133,9 @@ namespace dawn_native { namespace vulkan {
                 break;
             }
 
-            default:
+            case wgpu::TextureDimension::e1D:
+            case wgpu::TextureDimension::e3D:
                 UNREACHABLE();
-                break;
         }
 
         return region;

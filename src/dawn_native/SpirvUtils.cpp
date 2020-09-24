@@ -24,8 +24,6 @@ namespace dawn_native {
                 return spv::ExecutionModelFragment;
             case SingleShaderStage::Compute:
                 return spv::ExecutionModelGLCompute;
-            default:
-                UNREACHABLE();
         }
     }
 
@@ -62,7 +60,6 @@ namespace dawn_native {
                 }
             default:
                 UNREACHABLE();
-                return wgpu::TextureViewDimension::Undefined;
         }
     }
 
@@ -147,7 +144,6 @@ namespace dawn_native {
                 return Format::Type::Uint;
             default:
                 UNREACHABLE();
-                return Format::Type::Other;
         }
     }
 

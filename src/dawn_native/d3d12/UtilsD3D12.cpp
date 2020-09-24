@@ -60,7 +60,8 @@ namespace dawn_native { namespace d3d12 {
                 return D3D12_COMPARISON_FUNC_NOT_EQUAL;
             case wgpu::CompareFunction::Always:
                 return D3D12_COMPARISON_FUNC_ALWAYS;
-            default:
+
+            case wgpu::CompareFunction::Undefined:
                 UNREACHABLE();
         }
     }

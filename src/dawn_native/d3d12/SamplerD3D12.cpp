@@ -28,8 +28,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
                 case wgpu::AddressMode::ClampToEdge:
                     return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-                default:
-                    UNREACHABLE();
             }
         }
     }  // namespace
@@ -44,9 +42,6 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::FilterMode::Linear:
                 minFilter = D3D12_FILTER_TYPE_LINEAR;
                 break;
-            default:
-                UNREACHABLE();
-                break;
         }
 
         D3D12_FILTER_TYPE magFilter;
@@ -57,9 +52,6 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::FilterMode::Linear:
                 magFilter = D3D12_FILTER_TYPE_LINEAR;
                 break;
-            default:
-                UNREACHABLE();
-                break;
         }
 
         D3D12_FILTER_TYPE mipmapFilter;
@@ -69,9 +61,6 @@ namespace dawn_native { namespace d3d12 {
                 break;
             case wgpu::FilterMode::Linear:
                 mipmapFilter = D3D12_FILTER_TYPE_LINEAR;
-                break;
-            default:
-                UNREACHABLE();
                 break;
         }
 

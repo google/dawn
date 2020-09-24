@@ -119,7 +119,21 @@ namespace dawn_native {
 
             return uploadHandle;
         }
+
+        class ErrorQueue : public QueueBase {
+          public:
+            ErrorQueue(DeviceBase* device) : QueueBase(device, ObjectBase::kError) {
+            }
+
+          private:
+            MaybeError SubmitImpl(uint32_t commandCount,
+                                  CommandBufferBase* const* commands) override {
+                UNREACHABLE();
+            }
+        };
+
     }  // namespace
+
     // QueueBase
 
     QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
@@ -130,12 +144,7 @@ namespace dawn_native {
 
     // static
     QueueBase* QueueBase::MakeError(DeviceBase* device) {
-        return new QueueBase(device, ObjectBase::kError);
-    }
-
-    MaybeError QueueBase::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-        UNREACHABLE();
-        return {};
+        return new ErrorQueue(device);
     }
 
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {

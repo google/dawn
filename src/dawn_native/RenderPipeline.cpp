@@ -205,7 +205,7 @@ namespace dawn_native {
                 return sizeof(uint16_t);
             case wgpu::IndexFormat::Uint32:
                 return sizeof(uint32_t);
-            default:
+            case wgpu::IndexFormat::Undefined:
                 UNREACHABLE();
         }
     }
@@ -246,8 +246,6 @@ namespace dawn_native {
             case wgpu::VertexFormat::UInt:
             case wgpu::VertexFormat::Int:
                 return 1;
-            default:
-                UNREACHABLE();
         }
     }
 
@@ -287,8 +285,6 @@ namespace dawn_native {
             case wgpu::VertexFormat::Int3:
             case wgpu::VertexFormat::Int4:
                 return sizeof(int32_t);
-            default:
-                UNREACHABLE();
         }
     }
 

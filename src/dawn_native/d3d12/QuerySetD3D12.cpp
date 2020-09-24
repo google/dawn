@@ -28,8 +28,6 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
                 case wgpu::QueryType::Timestamp:
                     return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
-                default:
-                    UNREACHABLE();
             }
         }
     }  // anonymous namespace

@@ -42,7 +42,7 @@ namespace dawn_native { namespace opengl {
                     return GL_UNSIGNED_SHORT;
                 case wgpu::IndexFormat::Uint32:
                     return GL_UNSIGNED_INT;
-                default:
+                case wgpu::IndexFormat::Undefined:
                     UNREACHABLE();
             }
         }
@@ -87,8 +87,6 @@ namespace dawn_native { namespace opengl {
                 case wgpu::VertexFormat::Int3:
                 case wgpu::VertexFormat::Int4:
                     return GL_INT;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -328,9 +326,9 @@ namespace dawn_native { namespace opengl {
                                 case wgpu::BindingType::WriteonlyStorageTexture:
                                     access = GL_WRITE_ONLY;
                                     break;
+
                                 default:
                                     UNREACHABLE();
-                                    break;
                             }
 
                             // OpenGL ES only supports either binding a layer or the entire texture
@@ -466,7 +464,7 @@ namespace dawn_native { namespace opengl {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
                     TransitionForPass(passResourceUsages[nextPassNumber]);
-                    ExecuteComputePass();
+                    DAWN_TRY(ExecuteComputePass());
 
                     nextPassNumber++;
                     break;
@@ -477,7 +475,7 @@ namespace dawn_native { namespace opengl {
                     TransitionForPass(passResourceUsages[nextPassNumber]);
 
                     LazyClearRenderPassAttachments(cmd);
-                    ExecuteRenderPass(cmd);
+                    DAWN_TRY(ExecuteRenderPass(cmd));
 
                     nextPassNumber++;
                     break;
@@ -581,7 +579,8 @@ namespace dawn_native { namespace opengl {
                                 }
                                 break;
 
-                            default:
+                            case wgpu::TextureDimension::e1D:
+                            case wgpu::TextureDimension::e3D:
                                 UNREACHABLE();
                         }
                     }
@@ -649,9 +648,9 @@ namespace dawn_native { namespace opengl {
                             glFormat = GL_STENCIL_INDEX;
                             glType = GL_UNSIGNED_BYTE;
                             break;
-                        default:
+
+                        case Aspect::None:
                             UNREACHABLE();
-                            break;
                     }
 
                     uint8_t* offset =
@@ -680,7 +679,8 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        default:
+                        case wgpu::TextureDimension::e1D:
+                        case wgpu::TextureDimension::e3D:
                             UNREACHABLE();
                     }
 
@@ -730,9 +730,7 @@ namespace dawn_native { namespace opengl {
                 }
 
                 case Command::WriteTimestamp: {
-                    // WriteTimestamp is not supported on OpenGL
-                    UNREACHABLE();
-                    break;
+                    return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
                 }
 
                 case Command::InsertDebugMarker:
@@ -744,17 +742,15 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
-                default: {
+                default:
                     UNREACHABLE();
-                    break;
-                }
             }
         }
 
         return {};
     }
 
-    void CommandBuffer::ExecuteComputePass() {
+    MaybeError CommandBuffer::ExecuteComputePass() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         ComputePipeline* lastPipeline = nullptr;
         BindGroupTracker bindGroupTracker = {};
@@ -764,7 +760,7 @@ namespace dawn_native { namespace opengl {
             switch (type) {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
-                    return;
+                    return {};
                 }
 
                 case Command::Dispatch: {
@@ -821,15 +817,11 @@ namespace dawn_native { namespace opengl {
                 }
 
                 case Command::WriteTimestamp: {
-                    // WriteTimestamp is not supported on OpenGL
-                    UNREACHABLE();
-                    break;
+                    return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
                 }
 
-                default: {
+                default:
                     UNREACHABLE();
-                    break;
-                }
             }
         }
 
@@ -837,7 +829,7 @@ namespace dawn_native { namespace opengl {
         UNREACHABLE();
     }
 
-    void CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
+    MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         GLuint fbo = 0;
 
@@ -1159,7 +1151,7 @@ namespace dawn_native { namespace opengl {
                         ResolveMultisampledRenderTargets(gl, renderPass);
                     }
                     gl.DeleteFramebuffers(1, &fbo);
-                    return;
+                    return {};
                 }
 
                 case Command::SetStencilReference: {
@@ -1202,11 +1194,8 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
-                case Command::WriteTimestamp: {
-                    // WriteTimestamp is not supported on OpenGL
-                    UNREACHABLE();
-                    break;
-                }
+                case Command::WriteTimestamp:
+                    return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
 
                 default: {
                     DoRenderBundleCommand(&mCommands, type);

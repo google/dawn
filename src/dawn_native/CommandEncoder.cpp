@@ -127,8 +127,6 @@ namespace dawn_native {
                 case wgpu::TextureAspect::StencilOnly:
                     ASSERT(format.aspects & Aspect::Stencil);
                     break;
-                default:
-                    UNREACHABLE();
             }
 
             if (depthSelected) {
@@ -141,9 +139,9 @@ namespace dawn_native {
                         break;
                     case wgpu::TextureFormat::Depth32Float:
                         break;
+
                     default:
                         UNREACHABLE();
-                        break;
                 }
             }
 

@@ -30,8 +30,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
                 case wgpu::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -41,8 +39,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_FILTER_LINEAR;
                 case wgpu::FilterMode::Nearest:
                     return VK_FILTER_NEAREST;
-                default:
-                    UNREACHABLE();
             }
         }
 
@@ -52,8 +48,6 @@ namespace dawn_native { namespace vulkan {
                     return VK_SAMPLER_MIPMAP_MODE_LINEAR;
                 case wgpu::FilterMode::Nearest:
                     return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-                default:
-                    UNREACHABLE();
             }
         }
     }  // anonymous namespace
