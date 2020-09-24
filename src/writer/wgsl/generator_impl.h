@@ -98,10 +98,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(ast::CaseStatement* stmt);
-  /// Handles generating a cast expression
-  /// @param expr the cast expression
-  /// @returns true if the cast was emitted
-  bool EmitCast(ast::CastExpression* expr);
   /// Handles generating a scalar constructor
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted

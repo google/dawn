@@ -30,7 +30,6 @@ class ArrayAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
-class CastExpression;
 class ConstructorExpression;
 class Function;
 class IdentifierExpression;
@@ -120,7 +119,6 @@ class TypeDeterminer {
   bool DetermineBinary(ast::BinaryExpression* expr);
   bool DetermineBitcast(ast::BitcastExpression* expr);
   bool DetermineCall(ast::CallExpression* expr);
-  bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineIntrinsic(ast::IdentifierExpression* name,

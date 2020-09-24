@@ -20,7 +20,6 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/call_expression.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
@@ -96,11 +95,6 @@ const CallExpression* Expression::AsCall() const {
   return static_cast<const CallExpression*>(this);
 }
 
-const CastExpression* Expression::AsCast() const {
-  assert(IsCast());
-  return static_cast<const CastExpression*>(this);
-}
-
 const ConstructorExpression* Expression::AsConstructor() const {
   assert(IsConstructor());
   return static_cast<const ConstructorExpression*>(this);
@@ -139,11 +133,6 @@ BinaryExpression* Expression::AsBinary() {
 CallExpression* Expression::AsCall() {
   assert(IsCall());
   return static_cast<CallExpression*>(this);
-}
-
-CastExpression* Expression::AsCast() {
-  assert(IsCast());
-  return static_cast<CastExpression*>(this);
 }
 
 ConstructorExpression* Expression::AsConstructor() {

@@ -29,7 +29,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
@@ -186,9 +185,6 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());
   }
-  if (expr->IsCast()) {
-    return EmitCast(expr->AsCast());
-  }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
@@ -266,21 +262,6 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
   out_ << ")";
 
-  return true;
-}
-
-bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
-  out_ << "cast<";
-  if (!EmitType(expr->type())) {
-    return false;
-  }
-
-  out_ << ">(";
-  if (!EmitExpression(expr->expr())) {
-    return false;
-  }
-
-  out_ << ")";
   return true;
 }
 

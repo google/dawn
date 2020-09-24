@@ -30,7 +30,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -464,9 +463,6 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   }
   if (expr->IsCall()) {
     return GenerateCallExpression(expr->AsCall());
-  }
-  if (expr->IsCast()) {
-    return GenerateCastExpression(expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return GenerateConstructorExpression(expr->AsConstructor(), false);
@@ -1054,24 +1050,12 @@ uint32_t Builder::GenerateConstructorExpression(
 uint32_t Builder::GenerateTypeConstructorExpression(
     ast::TypeConstructorExpression* init,
     bool is_global_init) {
-  auto type_id = GenerateTypeIfNeeded(init->type());
-  if (type_id == 0) {
-    return 0;
-  }
+  auto& values = init->values();
 
   // Generate the zero initializer if there are no values provided.
-  if (init->values().empty()) {
+  if (values.empty()) {
     ast::NullLiteral nl(init->type()->UnwrapPtrIfNeeded());
     return GenerateLiteralIfNeeded(&nl);
-  }
-
-  auto* result_type = init->type()->UnwrapPtrIfNeeded();
-  if (result_type->IsVector()) {
-    result_type = result_type->AsVector()->type();
-  } else if (result_type->IsArray()) {
-    result_type = result_type->AsArray()->type();
-  } else if (result_type->IsMatrix()) {
-    result_type = result_type->AsMatrix()->type();
   }
 
   std::ostringstream out;
@@ -1079,7 +1063,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   OperandList ops;
   bool constructor_is_const = true;
-  for (const auto& e : init->values()) {
+  for (const auto& e : values) {
     if (!e->IsConstructor()) {
       if (is_global_init) {
         error_ = "constructor must be a constant expression";
@@ -1089,9 +1073,37 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     }
   }
 
+  auto* result_type = init->type()->UnwrapAliasPtrAlias();
+
+  bool can_cast_or_copy = result_type->is_scalar();
+  if (result_type->IsVector() && result_type->AsVector()->type()->is_scalar()) {
+    auto* value_type = values[0]->result_type()->UnwrapAliasPtrAlias();
+    can_cast_or_copy =
+        (value_type->IsVector() &&
+         value_type->AsVector()->type()->is_scalar() &&
+         result_type->AsVector()->size() == value_type->AsVector()->size());
+  }
+  if (can_cast_or_copy) {
+    return GenerateCastOrCopy(result_type, values[0].get());
+  }
+
+  auto type_id = GenerateTypeIfNeeded(init->type());
+  if (type_id == 0) {
+    return 0;
+  }
+
   bool result_is_constant_composite = constructor_is_const;
   bool result_is_spec_composite = false;
-  for (const auto& e : init->values()) {
+
+  if (result_type->IsVector()) {
+    result_type = result_type->AsVector()->type();
+  } else if (result_type->IsArray()) {
+    result_type = result_type->AsArray()->type();
+  } else if (result_type->IsMatrix()) {
+    result_type = result_type->AsMatrix()->type();
+  }
+
+  for (const auto& e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
       id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
@@ -1104,54 +1116,54 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     }
 
     auto* value_type = e->result_type()->UnwrapPtrIfNeeded();
+    if (result_type == value_type) {
+      out << "_" << id;
+      ops.push_back(Operand::Int(id));
+      continue;
+    }
+
+    // Both scalars, but not the same type so we need to generate a conversion
+    // of the value.
+    if (value_type->is_scalar() && result_type->is_scalar()) {
+      id = GenerateCastOrCopy(result_type, values[0].get());
+      out << "_" << id;
+      ops.push_back(Operand::Int(id));
+      continue;
+    }
 
     // When handling vectors as the values there a few cases to take into
     // consideration:
     //  1. Module scoped vec3<f32>(vec2<f32>(1, 2), 3)  -> OpSpecConstantOp
-    //  2. Function scoped vec3<f32>(vec2<f32>(1, 2), 3) -> OpCompositeExtract
+    //  2. Function scoped vec3<f32>(vec2<f32>(1, 2), 3) ->  OpCompositeExtract
     //  3. Either array<vec3<f32>, 1>(vec3<f32>(1, 2, 3))  -> use the ID.
+    //       -> handled above
+    //
+    // For cases 1 and 2, if the type is different we also may need to insert
+    // a type cast.
     if (value_type->IsVector()) {
       auto* vec = value_type->AsVector();
       auto* vec_type = vec->type();
 
-      // If the value we want is the same as what we have, use it directly.
-      // This maps to case 3.
-      if (result_type == value_type) {
-        out << "_" << id;
-        ops.push_back(Operand::Int(id));
-      } else if (!is_global_init) {
-        // A non-global initializer. Case 2.
-        auto value_type_id = GenerateTypeIfNeeded(vec_type);
-        if (value_type_id == 0) {
-          return 0;
-        }
+      auto value_type_id = GenerateTypeIfNeeded(vec_type);
+      if (value_type_id == 0) {
+        return 0;
+      }
 
-        for (uint32_t i = 0; i < vec->size(); ++i) {
-          auto extract = result_op();
-          auto extract_id = extract.to_i();
+      for (uint32_t i = 0; i < vec->size(); ++i) {
+        auto extract = result_op();
+        auto extract_id = extract.to_i();
 
+        if (!is_global_init) {
+          // A non-global initializer. Case 2.
           push_function_inst(spv::Op::OpCompositeExtract,
                              {Operand::Int(value_type_id), extract,
                               Operand::Int(id), Operand::Int(i)});
 
-          out << "_" << extract_id;
-          ops.push_back(Operand::Int(extract_id));
-
           // We no longer have a constant composite, but have to do a
           // composite construction as these calls are inside a function.
           result_is_constant_composite = false;
-        }
-      } else {
-        // A global initializer, must use OpSpecConstantOp. Case 1.
-        auto value_type_id = GenerateTypeIfNeeded(vec_type);
-        if (value_type_id == 0) {
-          return 0;
-        }
-
-        for (uint32_t i = 0; i < vec->size(); ++i) {
-          auto extract = result_op();
-          auto extract_id = extract.to_i();
-
+        } else {
+          // A global initializer, must use OpSpecConstantOp. Case 1.
           auto idx_id = GenerateU32Literal(i);
           if (idx_id == 0) {
             return 0;
@@ -1161,15 +1173,15 @@ uint32_t Builder::GenerateTypeConstructorExpression(
                      Operand::Int(SpvOpCompositeExtract), Operand::Int(id),
                      Operand::Int(idx_id)});
 
-          out << "_" << extract_id;
-          ops.push_back(Operand::Int(extract_id));
-
           result_is_spec_composite = true;
         }
+
+        out << "_" << extract_id;
+        ops.push_back(Operand::Int(extract_id));
       }
     } else {
-      out << "_" << id;
-      ops.push_back(Operand::Int(id));
+      error_ = "Unhandled type cast value type";
+      return 0;
     }
   }
 
@@ -1192,7 +1204,67 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   } else {
     push_function_inst(spv::Op::OpCompositeConstruct, ops);
   }
+
   return result.to_i();
+}
+
+uint32_t Builder::GenerateCastOrCopy(ast::type::Type* to_type,
+                                     ast::Expression* from_expr) {
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto result_type_id = GenerateTypeIfNeeded(to_type);
+  if (result_type_id == 0) {
+    return 0;
+  }
+
+  auto val_id = GenerateExpression(from_expr);
+  if (val_id == 0) {
+    return 0;
+  }
+  val_id = GenerateLoadIfNeeded(from_expr->result_type(), val_id);
+
+  auto* from_type = from_expr->result_type()->UnwrapPtrIfNeeded();
+
+  spv::Op op = spv::Op::OpNop;
+  if ((from_type->IsI32() && to_type->IsF32()) ||
+      (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
+    op = spv::Op::OpConvertSToF;
+  } else if ((from_type->IsU32() && to_type->IsF32()) ||
+             (from_type->is_unsigned_integer_vector() &&
+              to_type->is_float_vector())) {
+    op = spv::Op::OpConvertUToF;
+  } else if ((from_type->IsF32() && to_type->IsI32()) ||
+             (from_type->is_float_vector() &&
+              to_type->is_signed_integer_vector())) {
+    op = spv::Op::OpConvertFToS;
+  } else if ((from_type->IsF32() && to_type->IsU32()) ||
+             (from_type->is_float_vector() &&
+              to_type->is_unsigned_integer_vector())) {
+    op = spv::Op::OpConvertFToU;
+  } else if ((from_type->IsBool() && to_type->IsBool()) ||
+             (from_type->IsU32() && to_type->IsU32()) ||
+             (from_type->IsI32() && to_type->IsI32()) ||
+             (from_type->IsF32() && to_type->IsF32())) {
+    op = spv::Op::OpCopyObject;
+  } else if ((from_type->IsI32() && to_type->IsU32()) ||
+             (from_type->IsU32() && to_type->IsI32()) ||
+             (from_type->is_signed_integer_vector() &&
+              to_type->is_unsigned_integer_vector()) ||
+             (from_type->is_unsigned_integer_vector() &&
+              to_type->is_integer_scalar_or_vector())) {
+    op = spv::Op::OpBitcast;
+  }
+  if (op == spv::Op::OpNop) {
+    error_ = "unable to determine conversion type for cast, from: " +
+             from_type->type_name() + " to: " + to_type->type_name();
+    return 0;
+  }
+
+  push_function_inst(
+      op, {Operand::Int(result_type_id), result, Operand::Int(val_id)});
+
+  return result_id;
 }
 
 uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
@@ -1722,70 +1794,6 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
 
   push_function_inst(spv::Op::OpBitcast, {Operand::Int(result_type_id), result,
                                           Operand::Int(val_id)});
-
-  return result_id;
-}
-
-uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
-  auto result = result_op();
-  auto result_id = result.to_i();
-
-  auto result_type_id = GenerateTypeIfNeeded(cast->result_type());
-  if (result_type_id == 0) {
-    return 0;
-  }
-
-  auto val_id = GenerateExpression(cast->expr());
-  if (val_id == 0) {
-    return 0;
-  }
-  val_id = GenerateLoadIfNeeded(cast->expr()->result_type(), val_id);
-
-  auto* to_type = cast->result_type()->UnwrapPtrIfNeeded();
-  auto* from_type = cast->expr()->result_type()->UnwrapPtrIfNeeded();
-
-  spv::Op op = spv::Op::OpNop;
-  if ((from_type->IsI32() && to_type->IsF32()) ||
-      (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
-    op = spv::Op::OpConvertSToF;
-  } else if ((from_type->IsU32() && to_type->IsF32()) ||
-             (from_type->is_unsigned_integer_vector() &&
-              to_type->is_float_vector())) {
-    op = spv::Op::OpConvertUToF;
-  } else if ((from_type->IsF32() && to_type->IsI32()) ||
-             (from_type->is_float_vector() &&
-              to_type->is_signed_integer_vector())) {
-    op = spv::Op::OpConvertFToS;
-  } else if ((from_type->IsF32() && to_type->IsU32()) ||
-             (from_type->is_float_vector() &&
-              to_type->is_unsigned_integer_vector())) {
-    op = spv::Op::OpConvertFToU;
-  } else if ((from_type->IsU32() && to_type->IsU32()) ||
-             (from_type->IsI32() && to_type->IsI32()) ||
-             (from_type->IsF32() && to_type->IsF32()) ||
-             (from_type->is_unsigned_integer_vector() &&
-              to_type->is_unsigned_integer_vector()) ||
-             (from_type->is_signed_integer_vector() &&
-              to_type->is_signed_integer_vector()) ||
-             (from_type->is_float_vector() && to_type->is_float_vector())) {
-    op = spv::Op::OpCopyObject;
-  } else if ((from_type->IsI32() && to_type->IsU32()) ||
-             (from_type->IsU32() && to_type->IsI32()) ||
-             (from_type->is_signed_integer_vector() &&
-              to_type->is_unsigned_integer_vector()) ||
-             (from_type->is_unsigned_integer_vector() &&
-              to_type->is_integer_scalar_or_vector())) {
-    op = spv::Op::OpBitcast;
-  }
-
-  if (op == spv::Op::OpNop) {
-    error_ = "unable to determine conversion type for cast, from: " +
-             from_type->type_name() + " to: " + to_type->type_name();
-    return 0;
-  }
-
-  push_function_inst(
-      op, {Operand::Int(result_type_id), result, Operand::Int(val_id)});
 
   return result_id;
 }

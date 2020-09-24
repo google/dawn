@@ -26,7 +26,6 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
@@ -2767,8 +2766,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
 //   | type_decl PAREN_LEFT argument_expression_list* PAREN_RIGHT
 //   | const_literal
 //   | paren_rhs_stmt
-//   | CAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
-//   | AS LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
+//   | BITCAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
 std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   auto t = peek();
   auto source = t.source();
@@ -2790,14 +2788,14 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     return paren;
   }
 
-  if (t.IsCast() || t.IsBitcast()) {
+  if (t.IsBitcast()) {
     auto src = t;
 
     next();  // Consume the peek
 
     t = next();
     if (!t.IsLessThan()) {
-      set_error(t, "missing < for " + src.to_name() + " expression");
+      set_error(t, "missing < for bitcast expression");
       return nullptr;
     }
 
@@ -2805,13 +2803,13 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     if (has_error())
       return nullptr;
     if (type == nullptr) {
-      set_error(peek(), "missing type for " + src.to_name() + " expression");
+      set_error(peek(), "missing type for bitcast expression");
       return nullptr;
     }
 
     t = next();
     if (!t.IsGreaterThan()) {
-      set_error(t, "missing > for " + src.to_name() + " expression");
+      set_error(t, "missing > for bitcast expression");
       return nullptr;
     }
 
@@ -2823,14 +2821,8 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
       return nullptr;
     }
 
-    if (src.IsCast()) {
-      return std::make_unique<ast::CastExpression>(source, type,
-                                                   std::move(params));
-    } else {
-      return std::make_unique<ast::BitcastExpression>(source, type,
-                                                      std::move(params));
-    }
-
+    return std::make_unique<ast::BitcastExpression>(source, type,
+                                                    std::move(params));
   } else if (t.IsIdentifier()) {
     next();  // Consume the peek
 

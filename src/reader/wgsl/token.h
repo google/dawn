@@ -132,8 +132,6 @@ class Token {
     kBuiltin,
     /// A 'case'
     kCase,
-    /// A 'cast'
-    kCast,
     /// A 'compute'
     kCompute,
     /// A 'const'
@@ -509,8 +507,6 @@ class Token {
   bool IsBuiltin() const { return type_ == Type::kBuiltin; }
   /// @returns true if token is a 'case'
   bool IsCase() const { return type_ == Type::kCase; }
-  /// @returns true if token is a 'cast'
-  bool IsCast() const { return type_ == Type::kCast; }
   /// @returns true if token is a 'sampler_comparison'
   bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
   /// @returns true if token is a 'compute'

@@ -28,7 +28,6 @@ class ArrayAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
-class CastExpression;
 class IdentifierExpression;
 class ConstructorExpression;
 class MemberAccessorExpression;
@@ -70,8 +69,6 @@ class Expression : public Node {
   const BitcastExpression* AsBitcast() const;
   /// @returns the expression as a call
   const CallExpression* AsCall() const;
-  /// @returns the expression as a cast
-  const CastExpression* AsCast() const;
   /// @returns the expression as an identifier
   const IdentifierExpression* AsIdentifier() const;
   /// @returns the expression as an constructor
@@ -89,8 +86,6 @@ class Expression : public Node {
   BitcastExpression* AsBitcast();
   /// @returns the expression as a call
   CallExpression* AsCall();
-  /// @returns the expression as a cast
-  CastExpression* AsCast();
   /// @returns the expression as an identifier
   IdentifierExpression* AsIdentifier();
   /// @returns the expression as an constructor

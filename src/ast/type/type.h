@@ -90,6 +90,8 @@ class Type {
   /// @returns the unwrapped type
   Type* UnwrapAliasPtrAlias();
 
+  /// @returns true if this type is a scalar
+  bool is_scalar();
   /// @returns true if this type is a float scalar
   bool is_float_scalar();
   /// @returns true if this type is a float matrix

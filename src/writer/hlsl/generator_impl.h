@@ -128,14 +128,6 @@ class GeneratorImpl {
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(std::ostream& out, ast::CaseStatement* stmt);
-  /// Handles generating a cast expression
-  /// @param pre the preamble for the expression stream
-  /// @param out the output of the expression stream
-  /// @param expr the cast expression
-  /// @returns true if the cast was emitted
-  bool EmitCast(std::ostream& pre,
-                std::ostream& out,
-                ast::CastExpression* expr);
   /// Handles generating constructor expressions
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream

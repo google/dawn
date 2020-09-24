@@ -420,7 +420,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"break", Token::Type::kBreak},
         TokenData{"builtin", Token::Type::kBuiltin},
         TokenData{"case", Token::Type::kCase},
-        TokenData{"cast", Token::Type::kCast},
         TokenData{"compute", Token::Type::kCompute},
         TokenData{"const", Token::Type::kConst},
         TokenData{"continue", Token::Type::kContinue},

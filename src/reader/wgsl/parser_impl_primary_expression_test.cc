@@ -16,7 +16,6 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -170,73 +169,19 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto* p = parser("cast<f32>(1)");
+  auto* p = parser("f32(1)");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsCast());
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
 
-  auto* c = e->AsCast();
+  auto* c = e->AsConstructor()->AsTypeConstructor();
   ASSERT_EQ(c->type(), f32_type);
+  ASSERT_EQ(c->values().size(), 1u);
 
-  ASSERT_TRUE(c->expr()->IsConstructor());
-  ASSERT_TRUE(c->expr()->AsConstructor()->IsScalarConstructor());
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingGreaterThan) {
-  auto* p = parser("cast<f32(1)");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: missing > for cast expression");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingType) {
-  auto* p = parser("cast<>(1)");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing type for cast expression");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidType) {
-  auto* p = parser("cast<invalid>(1)");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: unknown type alias 'invalid'");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingLeftParen) {
-  auto* p = parser("cast<f32>1)");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: expected (");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingRightParen) {
-  auto* p = parser("cast<f32>(1");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: expected )");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingExpression) {
-  auto* p = parser("cast<f32>()");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: unable to parse expression");
-}
-
-TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidExpression) {
-  auto* p = parser("cast<f32>(if (a) {})");
-  auto e = p->primary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: unable to parse expression");
+  ASSERT_TRUE(c->values()[0]->IsConstructor());
+  ASSERT_TRUE(c->values()[0]->AsConstructor()->IsScalarConstructor());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {

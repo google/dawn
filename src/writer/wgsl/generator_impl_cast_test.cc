@@ -15,9 +15,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -29,12 +29,15 @@ using WgslGeneratorImplTest = testing::Test;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::type::F32Type f32;
-  auto id = std::make_unique<ast::IdentifierExpression>("id");
-  ast::CastExpression cast(&f32, std::move(id));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+
+  ast::TypeConstructorExpression cast(&f32, std::move(params));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitExpression(&cast)) << g.error();
-  EXPECT_EQ(g.result(), "cast<f32>(id)");
+  EXPECT_EQ(g.result(), "f32(id)");
 }
 
 }  // namespace

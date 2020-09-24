@@ -121,8 +121,6 @@ std::string Token::TypeToName(Type type) {
       return "builtin";
     case Token::Type::kCase:
       return "case";
-    case Token::Type::kCast:
-      return "cast";
     case Token::Type::kCompute:
       return "compute";
     case Token::Type::kConst:

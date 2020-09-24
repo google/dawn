@@ -24,7 +24,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"

@@ -36,7 +36,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
@@ -3463,8 +3462,11 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
     return {};
   }
 
-  TypedExpression result(expr_type, std::make_unique<ast::CastExpression>(
-                                        expr_type, std::move(arg_expr.expr)));
+  ast::ExpressionList params;
+  params.push_back(std::move(arg_expr.expr));
+  TypedExpression result(expr_type,
+                         std::make_unique<ast::TypeConstructorExpression>(
+                             expr_type, std::move(params)));
 
   if (requested_type == expr_type) {
     return result;

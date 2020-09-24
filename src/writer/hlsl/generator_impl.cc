@@ -24,7 +24,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
@@ -724,21 +723,6 @@ bool GeneratorImpl::EmitBuiltinName(std::ostream&,
   return true;
 }
 
-bool GeneratorImpl::EmitCast(std::ostream& pre,
-                             std::ostream& out,
-                             ast::CastExpression* expr) {
-  if (!EmitType(out, expr->type(), "")) {
-    return false;
-  }
-
-  out << "(";
-  if (!EmitExpression(pre, out, expr->expr())) {
-    return false;
-  }
-  out << ")";
-  return true;
-}
-
 bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
   make_indent(out);
 
@@ -867,9 +851,6 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
   }
   if (expr->IsCall()) {
     return EmitCall(pre, out, expr->AsCall());
-  }
-  if (expr->IsCast()) {
-    return EmitCast(pre, out, expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return EmitConstructor(pre, out, expr->AsConstructor());

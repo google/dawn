@@ -485,8 +485,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kBuiltin, source, "builtin"};
   if (str == "case")
     return {Token::Type::kCase, source, "case"};
-  if (str == "cast")
-    return {Token::Type::kCast, source, "cast"};
   if (str == "compute")
     return {Token::Type::kCompute, source, "compute"};
   if (str == "const")

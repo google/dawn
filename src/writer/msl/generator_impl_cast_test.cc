@@ -15,11 +15,11 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -31,8 +31,11 @@ using MslGeneratorImplTest = testing::Test;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
   ast::type::F32Type f32;
-  auto id = std::make_unique<ast::IdentifierExpression>("id");
-  ast::CastExpression cast(&f32, std::move(id));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+
+  ast::TypeConstructorExpression cast(&f32, std::move(params));
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -44,8 +47,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
-  auto id = std::make_unique<ast::IdentifierExpression>("id");
-  ast::CastExpression cast(&vec3, std::move(id));
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+
+  ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
   ast::Module m;
   GeneratorImpl g(&m);

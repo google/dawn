@@ -64,8 +64,6 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
-  ast/cast_expression.cc
-  ast/cast_expression.h
   ast/constructor_expression.cc
   ast/constructor_expression.h
   ast/continue_statement.cc
@@ -306,7 +304,6 @@ set(TINT_TEST_SRCS
   ast/call_expression_test.cc
   ast/call_statement_test.cc
   ast/case_statement_test.cc
-  ast/cast_expression_test.cc
   ast/continue_statement_test.cc
   ast/discard_statement_test.cc
   ast/decorated_variable_test.cc
@@ -489,7 +486,6 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_bitcast_expression_test.cc
     writer/spirv/builder_block_test.cc
     writer/spirv/builder_call_test.cc
-    writer/spirv/builder_cast_expression_test.cc
     writer/spirv/builder_constructor_expression_test.cc
     writer/spirv/builder_discard_test.cc
     writer/spirv/builder_format_conversion_test.cc

@@ -29,7 +29,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
@@ -686,8 +685,11 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
   ast::type::F32Type f32;
-  ast::CastExpression cast(&f32,
-                           std::make_unique<ast::IdentifierExpression>("name"));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("name"));
+
+  ast::TypeConstructorExpression cast(&f32, std::move(params));
 
   EXPECT_TRUE(td()->DetermineResultType(&cast));
   ASSERT_NE(cast.result_type(), nullptr);

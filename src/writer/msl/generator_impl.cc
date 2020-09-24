@@ -24,7 +24,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -744,19 +743,6 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
-  if (!EmitType(expr->type(), "")) {
-    return false;
-  }
-
-  out_ << "(";
-  if (!EmitExpression(expr->expr())) {
-    return false;
-  }
-  out_ << ")";
-  return true;
-}
-
 bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
   if (expr->IsScalarConstructor()) {
     return EmitScalarConstructor(expr->AsScalarConstructor());
@@ -991,9 +977,6 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());
-  }
-  if (expr->IsCast()) {
-    return EmitCast(expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return EmitConstructor(expr->AsConstructor());

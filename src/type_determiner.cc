@@ -26,7 +26,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
@@ -304,9 +303,6 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsCall()) {
     return DetermineCall(expr->AsCall());
-  }
-  if (expr->IsCast()) {
-    return DetermineCast(expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
@@ -734,15 +730,6 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return true;
   }
   expr->func()->set_result_type(result_types[0]);
-  return true;
-}
-
-bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
-  if (!DetermineResultType(expr->expr())) {
-    return false;
-  }
-
-  expr->set_result_type(expr->type());
   return true;
 }
 

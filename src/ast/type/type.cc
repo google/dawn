@@ -109,6 +109,10 @@ bool Type::IsVoid() const {
   return false;
 }
 
+bool Type::is_scalar() {
+  return is_float_scalar() || is_integer_scalar() || IsBool();
+}
+
 bool Type::is_float_scalar() {
   return IsF32();
 }
