@@ -1097,85 +1097,517 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat2x2_With_Vec2_Vec2) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::MatrixType mat(&f32, 2, 2);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 2
+%1 = OpTypeMatrix %2 2
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4
+%6 = OpConstantComposite %1 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::MatrixType mat(&f32, 2, 3);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 2
+%1 = OpTypeMatrix %2 3
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::MatrixType mat(&f32, 2, 4);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec4_params;
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec4_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 2
+%1 = OpTypeMatrix %2 4
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat2x3_With_Vec3_Vec3) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%1 = OpTypeMatrix %2 2
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%1 = OpTypeMatrix %2 3
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::MatrixType mat(&f32, 3, 4);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec4_params;
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec4_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%1 = OpTypeMatrix %2 4
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat2x4_With_Vec4_Vec4) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 4);
+  ast::type::MatrixType mat(&f32, 4, 2);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 4
+%1 = OpTypeMatrix %2 2
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
-  FAIL();
+TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 4);
+  ast::type::MatrixType mat(&f32, 4, 3);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 4
+%1 = OpTypeMatrix %2 3
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5
+)");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
-  FAIL();
-}
+TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 4);
+  ast::type::MatrixType mat(&f32, 4, 4);
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat2x2_With_Vec2_Vec2) {
-  FAIL();
-}
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat3x2_With_Vec2_Vec2_Vec2) {
-  FAIL();
-}
+  ast::ExpressionList vec2_params;
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
-  FAIL();
-}
+  ast::ExpressionList vec3_params;
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat2x3_With_Vec3_Vec3) {
-  FAIL();
-}
+  ast::ExpressionList vec4_params;
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat3x3_With_Vec3_Vec3_Vec3) {
-  FAIL();
-}
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec2_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec3_params)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec4_params)));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
-  FAIL();
-}
+  ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat2x4_With_Vec4_Vec4) {
-  FAIL();
-}
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat3x4_With_Vec4_Vec4_Vec4) {
-  FAIL();
-}
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
-TEST_F(BuilderTest,
-       DISABLED_Constructor_Type_ModuleScope_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
-  FAIL();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 4
+%1 = OpTypeMatrix %2 4
+%4 = OpConstant %3 2
+%5 = OpConstantComposite %2 %4 %4 %4 %4
+%6 = OpConstantComposite %1 %5 %5 %5 %5
+)");
 }
 
 TEST_F(BuilderTest, DISABLED_Constructor_Type_Array_5_F32) {
@@ -1183,10 +1615,6 @@ TEST_F(BuilderTest, DISABLED_Constructor_Type_Array_5_F32) {
 }
 
 TEST_F(BuilderTest, DISABLED_Constructor_Type_Array_5_Vec3) {
-  FAIL();
-}
-
-TEST_F(BuilderTest, DISABLED_Constructor_Type_ModuleScope_Array_5_Vec3) {
   FAIL();
 }
 
