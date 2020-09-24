@@ -1428,10 +1428,10 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     op = spv::Op::OpBitwiseOr;
   } else if (expr->IsShiftLeft()) {
     op = spv::Op::OpShiftLeftLogical;
+  } else if (expr->IsShiftRight() && lhs_type->is_signed_scalar_or_vector()) {
+    // A shift right with a signed LHS is an arithmetic shift.
+    op = spv::Op::OpShiftRightArithmetic;
   } else if (expr->IsShiftRight()) {
-    // TODO(dsinclair): This depends on the type of the LHS if it's a
-    // OpShiftRightLogical or OpShiftRightArithmetic
-    // http://crbug.com/tint/84
     op = spv::Op::OpShiftRightLogical;
   } else if (expr->IsSubtract()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFSub : spv::Op::OpISub;

@@ -135,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
                     BinaryData{ast::BinaryOp::kShiftLeft, "OpShiftLeftLogical"},
                     BinaryData{ast::BinaryOp::kShiftRight,
-                               "OpShiftRightLogical"},
+                               "OpShiftRightArithmetic"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
                     BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
 
