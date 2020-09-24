@@ -1695,12 +1695,56 @@ TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_Struct) {
-  FAIL();
-}
+TEST_F(BuilderTest, Constructor_Type_Struct) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
 
-TEST_F(BuilderTest, DISABLED_Constructor_Type_ModuleScope_Struct_With_Vec2) {
-  FAIL();
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  ast::ExpressionList vec_vals;
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_vals)));
+
+  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateExpression(&t), 6u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeVector %2 3
+%1 = OpTypeStruct %2 %3
+%4 = OpConstant %2 2
+%5 = OpConstantComposite %3 %4 %4 %4
+%6 = OpConstantComposite %1 %4 %5
+)");
 }
 
 TEST_F(BuilderTest, Constructor_Type_ZeroInit_F32) {
