@@ -31,6 +31,7 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::BindingType::WriteonlyStorageTexture:
                     return BindGroupLayout::DescriptorType::UAV;
                 case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::MultisampledTexture:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                 case wgpu::BindingType::ReadonlyStorageTexture:
                     return BindGroupLayout::DescriptorType::SRV;
@@ -115,6 +116,7 @@ namespace dawn_native { namespace d3d12 {
                         mBindingOffsets[bindingIndex] = baseRegister++;
                         break;
                     case wgpu::BindingType::SampledTexture:
+                    case wgpu::BindingType::MultisampledTexture:
                     case wgpu::BindingType::Sampler:
                     case wgpu::BindingType::ComparisonSampler:
                     case wgpu::BindingType::ReadonlyStorageTexture:

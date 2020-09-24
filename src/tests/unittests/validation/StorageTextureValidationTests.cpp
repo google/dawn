@@ -789,15 +789,8 @@ TEST_F(StorageTextureValidationTests, MultisampledStorageTexture) {
     for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
         std::string computeShader =
             CreateComputeShaderWithStorageTexture(bindingType, "rgba8", "", "image2DMS");
-        wgpu::ShaderModule csModule = utils::CreateShaderModule(
-            device, utils::SingleShaderStage::Compute, computeShader.c_str());
-
-        wgpu::ComputePipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.computeStage.module = csModule;
-        descriptor.computeStage.entryPoint = "main";
-
-        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Compute,
+                                                      computeShader.c_str()));
     }
 }
 

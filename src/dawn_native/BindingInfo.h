@@ -56,7 +56,6 @@ namespace dawn_native {
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
         wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
         bool hasDynamicOffset = false;
-        bool multisampled = false;
         uint64_t minBufferBindingSize = 0;
     };
 

@@ -57,6 +57,7 @@ namespace dawn_native { namespace vulkan {
             case wgpu::BindingType::ComparisonSampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
             case wgpu::BindingType::SampledTexture:
+            case wgpu::BindingType::MultisampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case wgpu::BindingType::StorageBuffer:
             case wgpu::BindingType::ReadonlyStorageBuffer:
@@ -67,8 +68,6 @@ namespace dawn_native { namespace vulkan {
             case wgpu::BindingType::ReadonlyStorageTexture:
             case wgpu::BindingType::WriteonlyStorageTexture:
                 return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            default:
-                UNREACHABLE();
         }
     }
 

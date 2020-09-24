@@ -81,15 +81,31 @@ namespace dawn_native {
                 viewDimension = entry.viewDimension;
             }
 
+            // Fixup multisampled=true to use MultisampledTexture instead.
+            // TODO(dawn:527): Remove once the deprecation of multisampled is done.
+            wgpu::BindingType type = entry.type;
+            if (entry.multisampled) {
+                if (type == wgpu::BindingType::MultisampledTexture) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Cannot use multisampled = true and MultisampledTexture at the same time.");
+                } else if (type == wgpu::BindingType::SampledTexture) {
+                    device->EmitDeprecationWarning(
+                        "BGLEntry::multisampled is deprecated, use "
+                        "wgpu::BindingType::MultisampledTexture instead.");
+                    type = wgpu::BindingType::MultisampledTexture;
+                } else {
+                    return DAWN_VALIDATION_ERROR("Binding type cannot be multisampled");
+                }
+            }
+
             if (bindingsSet.count(bindingNumber) != 0) {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
             bool canBeDynamic = false;
-            bool canBeMultisampled = false;
             wgpu::ShaderStage allowedStages = kAllStages;
 
-            switch (entry.type) {
+            switch (type) {
                 case wgpu::BindingType::StorageBuffer:
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                     DAWN_FALLTHROUGH;
@@ -99,7 +115,12 @@ namespace dawn_native {
                     break;
 
                 case wgpu::BindingType::SampledTexture:
-                    canBeMultisampled = true;
+                    break;
+
+                case wgpu::BindingType::MultisampledTexture:
+                    if (viewDimension != wgpu::TextureViewDimension::e2D) {
+                        return DAWN_VALIDATION_ERROR("Multisampled binding must be 2D.");
+                    }
                     break;
 
                 case wgpu::BindingType::WriteonlyStorageTexture:
@@ -113,15 +134,6 @@ namespace dawn_native {
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
                     break;
-            }
-
-            if (entry.multisampled) {
-                if (!canBeMultisampled) {
-                    return DAWN_VALIDATION_ERROR("Binding type cannot be multisampled.");
-                }
-                if (viewDimension != wgpu::TextureViewDimension::e2D) {
-                    return DAWN_VALIDATION_ERROR("Multisampled binding must be 2D.");
-                }
             }
 
             if (entry.hasDynamicOffset && !canBeDynamic) {
@@ -145,14 +157,13 @@ namespace dawn_native {
     namespace {
 
         void HashCombineBindingInfo(size_t* hash, const BindingInfo& info) {
-            HashCombine(hash, info.hasDynamicOffset, info.multisampled, info.visibility, info.type,
+            HashCombine(hash, info.hasDynamicOffset, info.visibility, info.type,
                         info.textureComponentType, info.viewDimension, info.storageTextureFormat,
                         info.minBufferBindingSize);
         }
 
         bool operator!=(const BindingInfo& a, const BindingInfo& b) {
             return a.hasDynamicOffset != b.hasDynamicOffset ||          //
-                   a.multisampled != b.multisampled ||                  //
                    a.visibility != b.visibility ||                      //
                    a.type != b.type ||                                  //
                    a.textureComponentType != b.textureComponentType ||  //
@@ -168,13 +179,11 @@ namespace dawn_native {
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                     return true;
                 case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::MultisampledTexture:
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
-                    return false;
-                default:
-                    UNREACHABLE();
                     return false;
             }
         }
@@ -210,9 +219,6 @@ namespace dawn_native {
             }
             if (a.visibility != b.visibility) {
                 return a.visibility < b.visibility;
-            }
-            if (a.multisampled != b.multisampled) {
-                return a.multisampled < b.multisampled;
             }
             if (a.viewDimension != b.viewDimension) {
                 return a.viewDimension < b.viewDimension;
@@ -256,6 +262,17 @@ namespace dawn_native {
         : CachedObject(device), mBindingInfo(BindingIndex(descriptor->entryCount)) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
             descriptor->entries, descriptor->entries + descriptor->entryCount);
+
+        // Fixup multisampled=true to use MultisampledTexture instead.
+        // TODO(dawn:527): Remove once multisampled=true deprecation is finished.
+        for (BindGroupLayoutEntry& entry : sortedBindings) {
+            if (entry.multisampled) {
+                ASSERT(entry.type == wgpu::BindingType::SampledTexture);
+                entry.multisampled = false;
+                entry.type = wgpu::BindingType::MultisampledTexture;
+            }
+        }
+
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
 
         for (BindingIndex i{0}; i < mBindingInfo.size(); ++i) {
@@ -274,7 +291,6 @@ namespace dawn_native {
                 mBindingInfo[i].viewDimension = binding.viewDimension;
             }
 
-            mBindingInfo[i].multisampled = binding.multisampled;
             mBindingInfo[i].hasDynamicOffset = binding.hasDynamicOffset;
 
             if (IsBufferBinding(binding.type)) {

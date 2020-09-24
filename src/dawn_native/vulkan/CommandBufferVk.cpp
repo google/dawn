@@ -193,7 +193,8 @@ namespace dawn_native { namespace vulkan {
                                 break;
                             }
 
-                            case wgpu::BindingType::SampledTexture: {
+                            case wgpu::BindingType::SampledTexture:
+                            case wgpu::BindingType::MultisampledTexture: {
                                 TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
                                 ToBackend(view->GetTexture())
@@ -206,10 +207,6 @@ namespace dawn_native { namespace vulkan {
                             case wgpu::BindingType::Sampler:
                             case wgpu::BindingType::ComparisonSampler:
                                 // Don't require barriers.
-                                break;
-
-                            default:
-                                UNREACHABLE();
                                 break;
                         }
                     }

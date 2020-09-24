@@ -418,7 +418,8 @@ namespace dawn_native {
                 }
 
                 switch (layoutInfo.type) {
-                    case wgpu::BindingType::SampledTexture: {
+                    case wgpu::BindingType::SampledTexture:
+                    case wgpu::BindingType::MultisampledTexture: {
                         if (layoutInfo.textureComponentType != shaderInfo.textureComponentType) {
                             return DAWN_VALIDATION_ERROR(
                                 "The textureComponentType of the bind group layout entry is "
@@ -469,10 +470,6 @@ namespace dawn_native {
                     case wgpu::BindingType::Sampler:
                     case wgpu::BindingType::ComparisonSampler:
                         break;
-
-                    default:
-                        UNREACHABLE();
-                        return DAWN_VALIDATION_ERROR("Unsupported binding type");
                 }
             }
 
@@ -550,12 +547,15 @@ namespace dawn_native {
                             spirv_cross::SPIRType::BaseType textureComponentType =
                                 compiler.get_type(imageType.type).basetype;
 
-                            info->multisampled = imageType.ms;
                             info->viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                             info->textureComponentType =
                                 SpirvBaseTypeToFormatType(textureComponentType);
-                            info->type = bindingType;
+                            if (imageType.ms) {
+                                info->type = wgpu::BindingType::MultisampledTexture;
+                            } else {
+                                info->type = wgpu::BindingType::SampledTexture;
+                            }
                             break;
                         }
                         case wgpu::BindingType::StorageBuffer: {
@@ -595,7 +595,10 @@ namespace dawn_native {
                                 return DAWN_VALIDATION_ERROR(
                                     "The storage texture format is not supported");
                             }
-                            info->multisampled = imageType.ms;
+                            if (imageType.ms) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Multisampled storage texture aren't supported");
+                            }
                             info->storageTextureFormat = storageTextureFormat;
                             info->viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);

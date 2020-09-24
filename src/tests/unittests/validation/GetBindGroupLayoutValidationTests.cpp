@@ -223,6 +223,16 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     }
 
     {
+        binding.type = wgpu::BindingType::MultisampledTexture;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform texture2DMS tex;
+
+        void main() {})");
+        EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
+    }
+
+    {
         binding.type = wgpu::BindingType::Sampler;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         #version 450

@@ -94,6 +94,7 @@ namespace dawn_native {
         MaybeError ValidateTextureBinding(const DeviceBase* device,
                                           const BindGroupEntry& entry,
                                           wgpu::TextureUsage requiredUsage,
+                                          bool multisampled,
                                           const BindingInfo& bindingInfo) {
             if (entry.textureView == nullptr || entry.sampler != nullptr ||
                 entry.buffer != nullptr) {
@@ -107,7 +108,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("texture binding usage mismatch");
             }
 
-            if (texture->IsMultisampledTexture() != bindingInfo.multisampled) {
+            if (texture->IsMultisampledTexture() != multisampled) {
                 return DAWN_VALIDATION_ERROR("texture multisampling mismatch");
             }
 
@@ -212,7 +213,11 @@ namespace dawn_native {
                     break;
                 case wgpu::BindingType::SampledTexture:
                     DAWN_TRY(ValidateTextureBinding(device, entry, wgpu::TextureUsage::Sampled,
-                                                    bindingInfo));
+                                                    false, bindingInfo));
+                    break;
+                case wgpu::BindingType::MultisampledTexture:
+                    DAWN_TRY(ValidateTextureBinding(device, entry, wgpu::TextureUsage::Sampled,
+                                                    true, bindingInfo));
                     break;
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
@@ -221,7 +226,7 @@ namespace dawn_native {
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
                     DAWN_TRY(ValidateTextureBinding(device, entry, wgpu::TextureUsage::Storage,
-                                                    bindingInfo));
+                                                    false, bindingInfo));
                     break;
             }
         }
@@ -360,6 +365,8 @@ namespace dawn_native {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
         ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::SampledTexture ||
+               mLayout->GetBindingInfo(bindingIndex).type ==
+                   wgpu::BindingType::MultisampledTexture ||
                mLayout->GetBindingInfo(bindingIndex).type ==
                    wgpu::BindingType::ReadonlyStorageTexture ||
                mLayout->GetBindingInfo(bindingIndex).type ==

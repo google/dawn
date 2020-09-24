@@ -49,6 +49,7 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                     return D3D12_ROOT_PARAMETER_TYPE_SRV;
                 case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::MultisampledTexture:
                 case wgpu::BindingType::Sampler:
                 case wgpu::BindingType::ComparisonSampler:
                 case wgpu::BindingType::ReadonlyStorageTexture:

@@ -269,8 +269,9 @@ namespace dawn_native { namespace d3d12 {
                                 }
                                 break;
                             }
-                            case wgpu::BindingType::SampledTexture: {
-                                TextureViewBase* view =
+                            case wgpu::BindingType::SampledTexture:
+                            case wgpu::BindingType::MultisampledTexture: {
+                                    TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
                                 ToBackend(view->GetTexture())
                                     ->TransitionUsageAndGetResourceBarrier(
@@ -293,10 +294,6 @@ namespace dawn_native { namespace d3d12 {
                             case wgpu::BindingType::Sampler:
                             case wgpu::BindingType::ComparisonSampler:
                                 // Don't require barriers.
-                                break;
-
-                            default:
-                                UNREACHABLE();
                                 break;
                         }
                     }
@@ -386,6 +383,7 @@ namespace dawn_native { namespace d3d12 {
                             }
                             break;
                         case wgpu::BindingType::SampledTexture:
+                        case wgpu::BindingType::MultisampledTexture:
                         case wgpu::BindingType::Sampler:
                         case wgpu::BindingType::ComparisonSampler:
                         case wgpu::BindingType::ReadonlyStorageTexture:

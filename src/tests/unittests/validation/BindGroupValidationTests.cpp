@@ -381,6 +381,47 @@ TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 255, 256}}));
 }
 
+// Tests constraints on the texture for MultisampledTexture bindings
+TEST_F(BindGroupValidationTest, MultisampledTexture) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::MultisampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+
+    wgpu::BindGroupEntry binding;
+    binding.binding = 0;
+    binding.sampler = nullptr;
+    binding.textureView = nullptr;
+    binding.buffer = nullptr;
+    binding.offset = 0;
+    binding.size = 0;
+
+    wgpu::BindGroupDescriptor descriptor;
+    descriptor.layout = layout;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
+
+    // Not setting anything fails
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+
+    // Control case: setting a multisampled 2D texture works
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.sampleCount = 4;
+    textureDesc.usage = wgpu::TextureUsage::Sampled;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {1, 1, 1};
+    wgpu::Texture msTexture = device.CreateTexture(&textureDesc);
+
+    binding.textureView = msTexture.CreateView();
+    device.CreateBindGroup(&descriptor);
+    binding.textureView = nullptr;
+
+    // Error case: setting a single sampled 2D texture is an error.
+    binding.textureView = mSampledTextureView;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.textureView = nullptr;
+}
+
 // Tests constraints to be sure the buffer binding fits in the buffer
 TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
@@ -827,15 +868,15 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
     // Multisampled 2D texture works.
     utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::e2D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e2D},
                 });
 
     // Multisampled 2D (defaulted) texture works.
     utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::Undefined},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::Undefined},
                 });
 
     // Multisampled 2D storage texture is invalid.
@@ -855,29 +896,29 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
     // Multisampled cube texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::Cube},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::Cube},
                 }));
 
     // Multisampled cube array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::CubeArray},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::CubeArray},
                 }));
 
     // Multisampled 3D texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::e3D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e3D},
                 }));
 
     // Multisampled 1D texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                     true, wgpu::TextureViewDimension::e1D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e1D},
                 }));
 }
 

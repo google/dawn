@@ -297,7 +297,8 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        case wgpu::BindingType::SampledTexture: {
+                        case wgpu::BindingType::SampledTexture:
+                        case wgpu::BindingType::MultisampledTexture: {
                             TextureView* view =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
                             GLuint handle = view->GetHandle();

@@ -461,6 +461,7 @@ namespace dawn_native { namespace metal {
                         }
 
                         case wgpu::BindingType::SampledTexture:
+                        case wgpu::BindingType::MultisampledTexture:
                         case wgpu::BindingType::ReadonlyStorageTexture:
                         case wgpu::BindingType::WriteonlyStorageTexture: {
                             auto textureView =

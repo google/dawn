@@ -45,6 +45,7 @@ namespace dawn_native {
                 break;
 
             case wgpu::BindingType::SampledTexture:
+            case wgpu::BindingType::MultisampledTexture:
                 perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
                 break;
 

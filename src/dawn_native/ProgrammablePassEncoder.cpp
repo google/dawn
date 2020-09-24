@@ -47,7 +47,8 @@ namespace dawn_native {
                         break;
                     }
 
-                    case wgpu::BindingType::SampledTexture: {
+                    case wgpu::BindingType::SampledTexture:
+                    case wgpu::BindingType::MultisampledTexture: {
                         TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
                         usageTracker->TextureViewUsedAs(view, wgpu::TextureUsage::Sampled);
                         break;

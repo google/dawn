@@ -84,7 +84,8 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                case wgpu::BindingType::SampledTexture: {
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::MultisampledTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
@@ -107,8 +108,6 @@ namespace dawn_native { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;
                 }
-                default:
-                    UNREACHABLE();
             }
 
             numWrites++;

@@ -89,7 +89,6 @@ namespace dawn_native {
                 modifiedEntry->binding == mergedEntry.binding &&                    //
                 modifiedEntry->type == mergedEntry.type &&                          //
                 modifiedEntry->hasDynamicOffset == mergedEntry.hasDynamicOffset &&  //
-                modifiedEntry->multisampled == mergedEntry.multisampled &&          //
                 modifiedEntry->viewDimension == mergedEntry.viewDimension &&        //
                 modifiedEntry->textureComponentType == mergedEntry.textureComponentType;
 
@@ -117,7 +116,6 @@ namespace dawn_native {
             BindGroupLayoutEntry entry = {};
             entry.type = shaderBinding.type;
             entry.hasDynamicOffset = false;
-            entry.multisampled = shaderBinding.multisampled;
             entry.viewDimension = shaderBinding.viewDimension;
             entry.textureComponentType =
                 Format::FormatTypeToTextureComponentType(shaderBinding.textureComponentType);
