@@ -145,7 +145,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
-    tint_pulling_vertex_index
+    _tint_pulling_vertex_index
     in
     __i32
   }
@@ -154,7 +154,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
       BindingDecoration{0}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -165,16 +165,16 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{4}
           }
@@ -187,11 +187,11 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_0}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_0}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -226,7 +226,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
     Decorations{
       BuiltinDecoration{instance_idx}
     }
-    tint_pulling_instance_index
+    _tint_pulling_instance_index
     in
     __i32
   }
@@ -235,7 +235,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
       BindingDecoration{0}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -246,16 +246,16 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_instance_index}
+            Identifier{_tint_pulling_instance_index}
             multiply
             ScalarConstructor{4}
           }
@@ -268,11 +268,11 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_0}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_0}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -307,7 +307,7 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
-    tint_pulling_vertex_index
+    _tint_pulling_vertex_index
     in
     __i32
   }
@@ -316,7 +316,7 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
       BindingDecoration{0}
       SetDecoration{5}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -327,16 +327,16 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{4}
           }
@@ -349,11 +349,11 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_0}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_0}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -440,7 +440,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
       BindingDecoration{0}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -449,7 +449,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
       BindingDecoration{1}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_1
+    _tint_pulling_vertex_buffer_1
     storage_buffer
     __struct_
   }
@@ -460,13 +460,13 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
             Identifier{custom_vertex_index}
@@ -482,11 +482,11 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_0}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_0}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -494,7 +494,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
             Identifier{custom_instance_index}
@@ -510,11 +510,11 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_1}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_1}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -559,7 +559,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
-    tint_pulling_vertex_index
+    _tint_pulling_vertex_index
     in
     __i32
   }
@@ -568,7 +568,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
       BindingDecoration{0}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -579,16 +579,16 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{16}
           }
@@ -601,11 +601,11 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
         Bitcast<__f32>{
           ArrayAccessor{
             MemberAccessor{
-              Identifier{tint_pulling_vertex_buffer_0}
-              Identifier{data}
+              Identifier{_tint_pulling_vertex_buffer_0}
+              Identifier{_tint_vertex_data}
             }
             Binary{
-              Identifier{tint_pulling_pos}
+              Identifier{_tint_pulling_pos}
               divide
               ScalarConstructor{4}
             }
@@ -613,10 +613,10 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{16}
           }
@@ -631,12 +631,12 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{0}
                 }
@@ -648,12 +648,12 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{4}
                 }
@@ -665,12 +665,12 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{8}
                 }
@@ -682,12 +682,12 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{12}
                 }
@@ -745,7 +745,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
-    tint_pulling_vertex_index
+    _tint_pulling_vertex_index
     in
     __i32
   }
@@ -754,7 +754,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
       BindingDecoration{0}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_0
+    _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_
   }
@@ -763,7 +763,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
       BindingDecoration{1}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_1
+    _tint_pulling_vertex_buffer_1
     storage_buffer
     __struct_
   }
@@ -772,7 +772,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
       BindingDecoration{2}
       SetDecoration{4}
     }
-    tint_pulling_vertex_buffer_2
+    _tint_pulling_vertex_buffer_2
     storage_buffer
     __struct_
   }
@@ -783,16 +783,16 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
     Block{
       VariableDeclStatement{
         Variable{
-          tint_pulling_pos
+          _tint_pulling_pos
           function
           __i32
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{8}
           }
@@ -807,12 +807,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{0}
                 }
@@ -824,12 +824,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_0}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_0}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{4}
                 }
@@ -841,10 +841,10 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{12}
           }
@@ -859,12 +859,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_1}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_1}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{0}
                 }
@@ -876,12 +876,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_1}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_1}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{4}
                 }
@@ -893,12 +893,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_1}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_1}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{8}
                 }
@@ -910,10 +910,10 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         }
       }
       Assignment{
-        Identifier{tint_pulling_pos}
+        Identifier{_tint_pulling_pos}
         Binary{
           Binary{
-            Identifier{tint_pulling_vertex_index}
+            Identifier{_tint_pulling_vertex_index}
             multiply
             ScalarConstructor{16}
           }
@@ -928,12 +928,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_2}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_2}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{0}
                 }
@@ -945,12 +945,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_2}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_2}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{4}
                 }
@@ -962,12 +962,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_2}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_2}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{8}
                 }
@@ -979,12 +979,12 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
           Bitcast<__f32>{
             ArrayAccessor{
               MemberAccessor{
-                Identifier{tint_pulling_vertex_buffer_2}
-                Identifier{data}
+                Identifier{_tint_pulling_vertex_buffer_2}
+                Identifier{_tint_vertex_data}
               }
               Binary{
                 Binary{
-                  Identifier{tint_pulling_pos}
+                  Identifier{_tint_pulling_pos}
                   add
                   ScalarConstructor{12}
                 }

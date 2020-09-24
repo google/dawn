@@ -40,11 +40,11 @@ namespace transform {
 
 namespace {
 
-static const char kVertexBufferNamePrefix[] = "tint_pulling_vertex_buffer_";
-static const char kStructBufferName[] = "data";
-static const char kPullingPosVarName[] = "tint_pulling_pos";
-static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
-static const char kDefaultInstanceIndexName[] = "tint_pulling_instance_index";
+static const char kVertexBufferNamePrefix[] = "_tint_pulling_vertex_buffer_";
+static const char kStructBufferName[] = "_tint_vertex_data";
+static const char kPullingPosVarName[] = "_tint_pulling_pos";
+static const char kDefaultVertexIndexName[] = "_tint_pulling_vertex_index";
+static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 
 }  // namespace
 
