@@ -587,7 +587,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
           error_ = "Textures not implemented yet";
           return false;
         }
-        if (!EmitBuiltinName(pre, out, expr)) {
+        name = generate_builtin_name(expr);
+        if (name.empty()) {
           return false;
         }
       }
@@ -662,9 +663,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   return true;
 }
 
-bool GeneratorImpl::EmitBuiltinName(std::ostream&,
-                                    std::ostream& out,
-                                    ast::CallExpression* expr) {
+std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
+  std::string out;
   auto* ident = expr->func()->AsIdentifier();
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
@@ -701,26 +701,26 @@ bool GeneratorImpl::EmitBuiltinName(std::ostream&,
     case ast::Intrinsic::kMax:
     case ast::Intrinsic::kMin:
     case ast::Intrinsic::kClamp:
-      out << ident->name();
+      out = ident->name();
       break;
     case ast::Intrinsic::kFaceForward:
-      out << "faceforward";
+      out = "faceforward";
       break;
     case ast::Intrinsic::kFract:
-      out << "frac";
+      out = "frac";
       break;
     case ast::Intrinsic::kInverseSqrt:
-      out << "rsqrt";
+      out = "rsqrt";
       break;
     case ast::Intrinsic::kSmoothStep:
-      out << "smoothstep";
+      out = "smoothstep";
       break;
     default:
       error_ = "Unknown builtin method: " + ident->name();
-      return false;
+      return "";
   }
 
-  return true;
+  return out;
 }
 
 bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {

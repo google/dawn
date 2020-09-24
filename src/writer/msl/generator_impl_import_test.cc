@@ -70,8 +70,8 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
   GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitBuiltinName(ident_ptr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name);
+  ASSERT_EQ(g.generate_builtin_name(ident_ptr),
+            std::string("metal::") + param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_SingleParamTest,

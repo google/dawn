@@ -201,14 +201,6 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(std::ostream& out, ast::IfStatement* stmt);
-  /// Handles generating a builtin method name
-  /// @param pre the preamble for the expression stream
-  /// @param out the output of the expression stream
-  /// @param expr the expression
-  /// @returns true if the name was successfully emitted.
-  bool EmitBuiltinName(std::ostream& pre,
-                       std::ostream& out,
-                       ast::CallExpression* expr);
   /// Handles a literal
   /// @param out the output stream
   /// @param lit the literal to emit
@@ -325,6 +317,10 @@ class GeneratorImpl {
   /// @param intrinsic the intrinsic to convert to a name
   /// @returns the intrinsic name or blank on error
   std::string generate_intrinsic_name(ast::Intrinsic intrinsic);
+  /// Handles generating a builtin method name
+  /// @param expr the expression
+  /// @returns the name or "" if not valid
+  std::string generate_builtin_name(ast::CallExpression* expr);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error

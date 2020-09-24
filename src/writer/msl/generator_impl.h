@@ -147,10 +147,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
-  /// Handles generating a builtin name
-  /// @param ident the identifier to build the name from
-  /// @returns true if the name was successfully emitted.
-  bool EmitBuiltinName(ast::IdentifierExpression* ident);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
@@ -230,6 +226,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param intrinsic the intrinsic to convert to an method name
   /// @returns the intrinsic name or blank on error
   std::string generate_intrinsic_name(ast::Intrinsic intrinsic);
+  /// Handles generating a builtin name
+  /// @param ident the identifier to build the name from
+  /// @returns the name or "" if not valid
+  std::string generate_builtin_name(ast::IdentifierExpression* ident);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

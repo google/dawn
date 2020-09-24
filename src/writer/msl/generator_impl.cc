@@ -517,7 +517,8 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
           error_ = "Textures not implemented yet";
           return false;
         }
-        if (!EmitBuiltinName(ident)) {
+        name = generate_builtin_name(ident);
+        if (name.empty()) {
           return false;
         }
       }
@@ -622,8 +623,9 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitBuiltinName(ast::IdentifierExpression* ident) {
-  out_ << "metal::";
+std::string GeneratorImpl::generate_builtin_name(
+    ast::IdentifierExpression* ident) {
+  std::string out = "metal::";
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
     case ast::Intrinsic::kAsin:
@@ -657,46 +659,46 @@ bool GeneratorImpl::EmitBuiltinName(ast::IdentifierExpression* ident) {
     case ast::Intrinsic::kTrunc:
     case ast::Intrinsic::kSign:
     case ast::Intrinsic::kClamp:
-      out_ << ident->name();
+      out += ident->name();
       break;
     case ast::Intrinsic::kAbs:
       if (ident->result_type()->IsF32()) {
-        out_ << "fabs";
+        out += "fabs";
       } else if (ident->result_type()->IsU32() ||
                  ident->result_type()->IsI32()) {
-        out_ << "abs";
+        out += "abs";
       }
       break;
     case ast::Intrinsic::kMax:
       if (ident->result_type()->IsF32()) {
-        out_ << "fmax";
+        out += "fmax";
       } else if (ident->result_type()->IsU32() ||
                  ident->result_type()->IsI32()) {
-        out_ << "max";
+        out += "max";
       }
       break;
     case ast::Intrinsic::kMin:
       if (ident->result_type()->IsF32()) {
-        out_ << "fmin";
+        out += "fmin";
       } else if (ident->result_type()->IsU32() ||
                  ident->result_type()->IsI32()) {
-        out_ << "min";
+        out += "min";
       }
       break;
     case ast::Intrinsic::kFaceForward:
-      out_ << "faceforward";
+      out += "faceforward";
       break;
     case ast::Intrinsic::kSmoothStep:
-      out_ << "smoothstep";
+      out += "smoothstep";
       break;
     case ast::Intrinsic::kInverseSqrt:
-      out_ << "rsqrt";
+      out += "rsqrt";
       break;
     default:
       error_ = "Unknown import method: " + ident->name();
-      return false;
+      return "";
   }
-  return true;
+  return out;
 }
 
 bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
