@@ -36,6 +36,7 @@ namespace dawn_native {
         SkipValidation,
         VulkanUseD32S8,
         MetalDisableSamplerCompare,
+        MetalUseSharedModeForCounterSampleBuffer,
         DisableBaseVertex,
         DisableBaseInstance,
         UseD3D12SmallShaderVisibleHeapForTesting,

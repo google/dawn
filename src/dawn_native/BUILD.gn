@@ -388,6 +388,8 @@ source_set("dawn_native_sources") {
       "metal/Forward.h",
       "metal/PipelineLayoutMTL.h",
       "metal/PipelineLayoutMTL.mm",
+      "metal/QuerySetMTL.h",
+      "metal/QuerySetMTL.mm",
       "metal/QueueMTL.h",
       "metal/QueueMTL.mm",
       "metal/RenderPipelineMTL.h",

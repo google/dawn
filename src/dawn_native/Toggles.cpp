@@ -104,6 +104,13 @@ namespace dawn_native {
                "Disables the use of sampler compare on Metal. This is unsupported before A9 "
                "processors.",
                "https://crbug.com/dawn/342"}},
+             {Toggle::MetalUseSharedModeForCounterSampleBuffer,
+              {"metal_use_shared_mode_for_counter_sample_buffer",
+               "The query set on Metal need to create MTLCounterSampleBuffer which storage mode "
+               "must be either MTLStorageModeShared or MTLStorageModePrivate. But the private mode "
+               "does not work properly on Intel platforms. The workaround is use shared mode "
+               "instead.",
+               "https://crbug.com/dawn/434"}},
              {Toggle::DisableBaseVertex,
               {"disable_base_vertex",
                "Disables the use of non-zero base vertex which is unsupported on some platforms.",
