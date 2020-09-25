@@ -50,8 +50,6 @@ class Expression : public Node {
   virtual bool IsBitcast() const;
   /// @returns true if this is a call expression
   virtual bool IsCall() const;
-  /// @returns true if this is a cast expression
-  virtual bool IsCast() const;
   /// @returns true if this is an identifier expression
   virtual bool IsIdentifier() const;
   /// @returns true if this is an constructor expression

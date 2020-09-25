@@ -52,10 +52,6 @@ bool Expression::IsCall() const {
   return false;
 }
 
-bool Expression::IsCast() const {
-  return false;
-}
-
 bool Expression::IsIdentifier() const {
   return false;
 }
