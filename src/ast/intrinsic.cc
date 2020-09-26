@@ -227,8 +227,8 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
 namespace intrinsic {
 
 bool IsCoarseDerivative(ast::Intrinsic i) {
-  return i == Intrinsic::kDpdxCoarse ||
-         i == Intrinsic::kDpdyCoarse | i == Intrinsic::kFwidthCoarse;
+  return i == Intrinsic::kDpdxCoarse || i == Intrinsic::kDpdyCoarse ||
+         i == Intrinsic::kFwidthCoarse;
 }
 
 bool IsFineDerivative(ast::Intrinsic i) {
