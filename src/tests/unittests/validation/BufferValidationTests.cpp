@@ -317,7 +317,8 @@ TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResult) {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
             .Times(1);
         buf.Unmap();
 
@@ -328,7 +329,8 @@ TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResult) {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
             .Times(1);
         buf.Unmap();
 
@@ -344,7 +346,8 @@ TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResultAndMapAgain) {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, this + 0))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, this + 0))
             .Times(1);
         buf.Unmap();
 
@@ -357,7 +360,8 @@ TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResultAndMapAgain) {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, this + 0))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, this + 0))
             .Times(1);
         buf.Unmap();
 
@@ -374,7 +378,8 @@ TEST_F(BufferValidationTest, MapAsync_DestroyBeforeResult) {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
             .Times(1);
         buf.Destroy();
 
@@ -385,7 +390,8 @@ TEST_F(BufferValidationTest, MapAsync_DestroyBeforeResult) {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
-        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+        EXPECT_CALL(*mockBufferMapAsyncCallback,
+                    Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
             .Times(1);
         buf.Destroy();
 

@@ -137,8 +137,10 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
-    // Destroy before the client gets the success, so the callback is called with unknown.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    // Destroy before the client gets the success, so the callback is called with
+    // DestroyedBeforeCallback.
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
     wgpuBufferRelease(buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer));
 
@@ -146,8 +148,8 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
     FlushServer();
 }
 
-// Check the map read callback is called with UNKNOWN when the map request would have worked, but
-// Unmap was called
+// Check the map read callback is called with "UnmappedBeforeCallback" when the map request would
+// have worked, but Unmap was called
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
@@ -161,7 +163,8 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
     FlushClient();
 
     // Oh no! We are calling Unmap too early!
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+        .Times(1);
     wgpuBufferUnmap(buffer);
 
     // The callback shouldn't get called, even when the request succeeded on the server side
@@ -304,8 +307,8 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
     EXPECT_EQ(nullptr, wgpuBufferGetMappedRange(buffer, 0, kBufferSize));
 }
 
-// Check that the map write callback is called with UNKNOWN when the buffer is destroyed before the
-// request is finished
+// Check that the map write callback is called with "DestroyedBeforeCallback" when the buffer is
+// destroyed before the request is finished
 TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
@@ -317,8 +320,10 @@ TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
-    // Destroy before the client gets the success, so the callback is called with unknown.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    // Destroy before the client gets the success, so the callback is called with
+    // DestroyedBeforeCallback.
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
     wgpuBufferRelease(buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer));
 
@@ -326,8 +331,8 @@ TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
     FlushServer();
 }
 
-// Check the map read callback is called with UNKNOWN when the map request would have worked, but
-// Unmap was called
+// Check the map read callback is called with "UnmappedBeforeCallback" when the map request would
+// have worked, but Unmap was called
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
@@ -341,7 +346,8 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
     FlushClient();
 
     // Oh no! We are calling Unmap too early!
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
+        .Times(1);
     wgpuBufferUnmap(buffer);
 
     // The callback shouldn't get called, even when the request succeeded on the server side

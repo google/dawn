@@ -240,7 +240,9 @@
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
             {"value": 2, "name": "unknown"},
-            {"value": 3, "name": "device lost"}
+            {"value": 3, "name": "device lost"},
+            {"value": 4, "name": "destroyed before callback"},
+            {"value": 5, "name": "unmapped before callback"}
         ]
     },
     "buffer usage": {

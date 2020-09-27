@@ -102,8 +102,8 @@ namespace dawn_wire { namespace client {
 
     Buffer::~Buffer() {
         // Callbacks need to be fired in all cases, as they can handle freeing resources
-        // so we call them with "Unknown" status.
-        ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
+        // so we call them with "DestroyedBeforeCallback" status.
+        ClearMapRequests(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     }
 
     void Buffer::ClearMapRequests(WGPUBufferMapAsyncStatus status) {
@@ -326,7 +326,7 @@ namespace dawn_wire { namespace client {
         mMappedData = nullptr;
         mMapOffset = 0;
         mMapSize = 0;
-        ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
+        ClearMapRequests(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
 
         BufferUnmapCmd cmd;
         cmd.self = ToAPI(this);
@@ -338,7 +338,7 @@ namespace dawn_wire { namespace client {
         mWriteHandle = nullptr;
         mReadHandle = nullptr;
         mMappedData = nullptr;
-        ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
+        ClearMapRequests(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 
         BufferDestroyCmd cmd;
         cmd.self = ToAPI(this);

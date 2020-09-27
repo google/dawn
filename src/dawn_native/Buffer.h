@@ -79,8 +79,6 @@ namespace dawn_native {
 
         void DestroyInternal();
 
-        bool IsMapped() const;
-
         MaybeError MapAtCreationInternal();
 
       private:
@@ -104,6 +102,7 @@ namespace dawn_native {
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
         bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
+        void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
 
         uint64_t mSize = 0;
         wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;

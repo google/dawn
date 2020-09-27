@@ -450,7 +450,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure
 
     // The server received a fatal failure and the client callback was never returned.
     // It is called when the wire is destructed.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
 
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
 }
@@ -680,7 +681,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailu
 
     // The server hit a fatal failure and never returned the callback. The client callback is
     // called when the wire is destructed.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
+        .Times(1);
 
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 }
