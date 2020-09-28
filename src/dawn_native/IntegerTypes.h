@@ -43,6 +43,17 @@ namespace dawn_native {
     constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
         VertexAttributeLocation(kMaxVertexAttributes);
 
+    // Serials are 64bit integers that are incremented by one each time to produce unique values.
+    // Some serials (like queue serials) are compared numerically to know which one is before
+    // another, while some serials are only checked for equality. We call serials only checked
+    // for equality IDs.
+
+    // Buffer mapping requests are stored outside of the buffer while they are being processed and
+    // cannot be invalidated. Instead they are associated with an ID, and when a map request is
+    // finished, the mapping callback is fired only if its ID matches the ID if the last request
+    // that was sent.
+    using MapRequestID = TypedInteger<struct MapRequestIDT, uint64_t>;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

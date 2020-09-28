@@ -16,7 +16,9 @@
 #define DAWNNATIVE_MAPREQUESTTRACKER_H_
 
 #include "common/SerialQueue.h"
-#include "dawn_native/Device.h"
+#include "dawn_native/Buffer.h"
+#include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 
 namespace dawn_native {
 
@@ -25,7 +27,7 @@ namespace dawn_native {
         MapRequestTracker(DeviceBase* device);
         ~MapRequestTracker();
 
-        void Track(BufferBase* buffer, uint32_t mapSerial);
+        void Track(BufferBase* buffer, MapRequestID mapID);
         void Tick(Serial finishedSerial);
 
       private:
@@ -33,7 +35,7 @@ namespace dawn_native {
 
         struct Request {
             Ref<BufferBase> buffer;
-            uint32_t mapSerial;
+            MapRequestID id;
         };
         SerialQueue<Serial, Request> mInflightRequests;
     };

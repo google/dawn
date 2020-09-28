@@ -17,6 +17,7 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -52,7 +53,7 @@ namespace dawn_native {
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation();
-        void OnMapCommandSerialFinished(uint32_t mapSerial);
+        void OnMapRequestCompleted(MapRequestID mapID);
 
         MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -91,7 +92,7 @@ namespace dawn_native {
         virtual bool IsCPUWritableAtCreation() const = 0;
         MaybeError CopyFromStagingBuffer();
         void* GetMappedRangeInternal(bool writable, size_t offset, size_t size);
-        void CallMapCallback(uint32_t serial, WGPUBufferMapAsyncStatus status);
+        void CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
         MaybeError ValidateMap(wgpu::BufferUsage requiredUsage,
                                WGPUBufferMapAsyncStatus* status) const;
@@ -113,7 +114,7 @@ namespace dawn_native {
 
         WGPUBufferMapCallback mMapCallback = nullptr;
         void* mMapUserdata = 0;
-        uint32_t mMapSerial = 0;
+        MapRequestID mLastMapID = MapRequestID(0);
         wgpu::MapMode mMapMode = wgpu::MapMode::None;
         size_t mMapOffset = 0;
         size_t mMapSize = 0;
