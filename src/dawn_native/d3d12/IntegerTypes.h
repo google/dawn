@@ -26,6 +26,9 @@ namespace dawn_native { namespace d3d12 {
     // BindGroup allocations.
     using HeapVersionID = TypedInteger<struct HeapVersionIDT, uint64_t>;
 
+    // The monotonically increasing serial for external D3D12 mutexes imported in Dawn.
+    using ExternalMutexSerial = TypedInteger<struct ExternalMutexSerialT, uint64_t>;
+
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_INTEGERTYPES_H_

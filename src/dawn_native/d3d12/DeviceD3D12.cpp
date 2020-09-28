@@ -407,7 +407,7 @@ namespace dawn_native { namespace d3d12 {
 
     Ref<TextureBase> Device::WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                               HANDLE sharedHandle,
-                                              uint64_t acquireMutexKey,
+                                              ExternalMutexSerial acquireMutexKey,
                                               bool isSwapChainTexture) {
         Ref<TextureBase> dawnTexture;
         if (ConsumedError(Texture::Create(this, descriptor, sharedHandle, acquireMutexKey,

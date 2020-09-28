@@ -389,7 +389,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
                                                     const ExternalImageDescriptor* descriptor,
                                                     HANDLE sharedHandle,
-                                                    uint64_t acquireMutexKey,
+                                                    ExternalMutexSerial acquireMutexKey,
                                                     bool isSwapChainTexture) {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
@@ -405,7 +405,7 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                     HANDLE sharedHandle,
-                                                    uint64_t acquireMutexKey,
+                                                    ExternalMutexSerial acquireMutexKey,
                                                     bool isSwapChainTexture) {
         Device* dawnDevice = ToBackend(GetDevice());
         DAWN_TRY(ValidateTextureDescriptor(dawnDevice, descriptor));
@@ -422,7 +422,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(dxgiKeyedMutex,
                         dawnDevice->CreateKeyedMutexForTexture(d3d12Resource.Get()));
 
-        DAWN_TRY(CheckHRESULT(dxgiKeyedMutex->AcquireSync(acquireMutexKey, INFINITE),
+        DAWN_TRY(CheckHRESULT(dxgiKeyedMutex->AcquireSync(uint64_t(acquireMutexKey), INFINITE),
                               "D3D12 acquiring shared mutex"));
 
         mAcquireMutexKey = acquireMutexKey;
@@ -529,7 +529,7 @@ namespace dawn_native { namespace d3d12 {
         device->DeallocateMemory(mResourceAllocation);
 
         if (mDxgiKeyedMutex != nullptr) {
-            mDxgiKeyedMutex->ReleaseSync(mAcquireMutexKey + 1);
+            mDxgiKeyedMutex->ReleaseSync(uint64_t(mAcquireMutexKey) + 1);
             device->ReleaseKeyedMutexForTexture(std::move(mDxgiKeyedMutex));
         }
     }

@@ -20,6 +20,7 @@
 
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/PassResourceUsage.h"
+#include "dawn_native/d3d12/IntegerTypes.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -40,7 +41,7 @@ namespace dawn_native { namespace d3d12 {
         static ResultOrError<Ref<TextureBase>> Create(Device* device,
                                                       const ExternalImageDescriptor* descriptor,
                                                       HANDLE sharedHandle,
-                                                      uint64_t acquireMutexKey,
+                                                      ExternalMutexSerial acquireMutexKey,
                                                       bool isSwapChainTexture);
         Texture(Device* device,
                 const TextureDescriptor* descriptor,
@@ -85,7 +86,7 @@ namespace dawn_native { namespace d3d12 {
         MaybeError InitializeAsInternalTexture();
         MaybeError InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                HANDLE sharedHandle,
-                                               uint64_t acquireMutexKey,
+                                               ExternalMutexSerial acquireMutexKey,
                                                bool isSwapChainTexture);
 
         // Dawn API
@@ -118,7 +119,7 @@ namespace dawn_native { namespace d3d12 {
         ResourceHeapAllocation mResourceAllocation;
         bool mSwapChainTexture = false;
 
-        Serial mAcquireMutexKey = 0;
+        ExternalMutexSerial mAcquireMutexKey = ExternalMutexSerial(0);
         ComPtr<IDXGIKeyedMutex> mDxgiKeyedMutex;
     };
 

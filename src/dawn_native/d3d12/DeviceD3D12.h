@@ -130,7 +130,7 @@ namespace dawn_native { namespace d3d12 {
 
         Ref<TextureBase> WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                           HANDLE sharedHandle,
-                                          uint64_t acquireMutexKey,
+                                          ExternalMutexSerial acquireMutexKey,
                                           bool isSwapChainTexture);
         ResultOrError<ComPtr<IDXGIKeyedMutex>> CreateKeyedMutexForTexture(
             ID3D12Resource* d3d12Resource);
