@@ -19,7 +19,7 @@ namespace dawn_native { namespace d3d12 {
     GPUDescriptorHeapAllocation::GPUDescriptorHeapAllocation(
         D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
         Serial lastUsageSerial,
-        Serial heapSerial)
+        HeapVersionID heapSerial)
         : mBaseDescriptor(baseDescriptor),
           mLastUsageSerial(lastUsageSerial),
           mHeapSerial(heapSerial) {
@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
         return mLastUsageSerial;
     }
 
-    Serial GPUDescriptorHeapAllocation::GetHeapSerial() const {
+    HeapVersionID GPUDescriptorHeapAllocation::GetHeapSerial() const {
         return mHeapSerial;
     }
 }}  // namespace dawn_native::d3d12

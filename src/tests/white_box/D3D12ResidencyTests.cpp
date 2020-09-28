@@ -367,7 +367,8 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
         d3dDevice->GetViewShaderVisibleDescriptorAllocator();
     const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
-    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+    const dawn_native::d3d12::HeapVersionID heapSerial =
+        allocator->GetShaderVisibleHeapSerialForTesting();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -392,7 +393,8 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     queue.Submit(1, &commands);
 
     // Check the heap serial to ensure the heap has switched.
-    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + 1);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(),
+              heapSerial + dawn_native::d3d12::HeapVersionID(1));
 
     // Check that currrently bound ShaderVisibleHeap is locked resident.
     EXPECT_TRUE(allocator->IsShaderVisibleHeapLockedResidentForTesting());

@@ -209,7 +209,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    Serial ShaderVisibleDescriptorAllocator::GetShaderVisibleHeapSerialForTesting() const {
+    HeapVersionID ShaderVisibleDescriptorAllocator::GetShaderVisibleHeapSerialForTesting() const {
         return mHeapSerial;
     }
 
