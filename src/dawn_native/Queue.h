@@ -17,6 +17,7 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -65,7 +66,7 @@ namespace dawn_native {
                                             const Extent3D& writeSize);
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
-        MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue) const;
+        MaybeError ValidateSignal(const Fence* fence, FenceAPISerial signalValue) const;
         MaybeError ValidateCreateFence(const FenceDescriptor* descriptor) const;
         MaybeError ValidateWriteBuffer(const BufferBase* buffer,
                                        uint64_t bufferOffset,

@@ -54,6 +54,9 @@ namespace dawn_native {
     // that was sent.
     using MapRequestID = TypedInteger<struct MapRequestIDT, uint64_t>;
 
+    // The type for the WebGPU API fence serial values.
+    using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

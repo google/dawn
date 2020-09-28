@@ -60,12 +60,14 @@ namespace dawn_native {
         if (IsError()) {
             return 0;
         }
-        return mCompletedValue;
+        return uint64_t(mCompletedValue);
     }
 
-    void Fence::OnCompletion(uint64_t value,
+    void Fence::OnCompletion(uint64_t apiValue,
                              wgpu::FenceOnCompletionCallback callback,
                              void* userdata) {
+        FenceAPISerial value(apiValue);
+
         WGPUFenceCompletionStatus status;
         if (GetDevice()->ConsumedError(ValidateOnCompletion(value, &status))) {
             callback(status, userdata);
@@ -84,7 +86,7 @@ namespace dawn_native {
         mRequests.Enqueue(std::move(request), value);
     }
 
-    uint64_t Fence::GetSignaledValue() const {
+    FenceAPISerial Fence::GetSignaledValue() const {
         ASSERT(!IsError());
         return mSignalValue;
     }
@@ -94,13 +96,13 @@ namespace dawn_native {
         return mQueue.Get();
     }
 
-    void Fence::SetSignaledValue(uint64_t signalValue) {
+    void Fence::SetSignaledValue(FenceAPISerial signalValue) {
         ASSERT(!IsError());
         ASSERT(signalValue > mSignalValue);
         mSignalValue = signalValue;
     }
 
-    void Fence::SetCompletedValue(uint64_t completedValue) {
+    void Fence::SetCompletedValue(FenceAPISerial completedValue) {
         ASSERT(!IsError());
         ASSERT(completedValue <= mSignalValue);
         ASSERT(completedValue > mCompletedValue);
@@ -116,7 +118,7 @@ namespace dawn_native {
         mRequests.ClearUpTo(mCompletedValue);
     }
 
-    MaybeError Fence::ValidateOnCompletion(uint64_t value,
+    MaybeError Fence::ValidateOnCompletion(FenceAPISerial value,
                                            WGPUFenceCompletionStatus* status) const {
         *status = WGPUFenceCompletionStatus_DeviceLost;
         DAWN_TRY(GetDevice()->ValidateIsAlive());

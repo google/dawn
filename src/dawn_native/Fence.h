@@ -18,6 +18,7 @@
 #include "common/SerialMap.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -34,7 +35,7 @@ namespace dawn_native {
 
         static Fence* MakeError(DeviceBase* device);
 
-        uint64_t GetSignaledValue() const;
+        FenceAPISerial GetSignaledValue() const;
         const QueueBase* GetQueue() const;
 
         // Dawn API
@@ -44,24 +45,25 @@ namespace dawn_native {
       protected:
         friend class QueueBase;
         friend class FenceSignalTracker;
-        void SetSignaledValue(uint64_t signalValue);
-        void SetCompletedValue(uint64_t completedValue);
+        void SetSignaledValue(FenceAPISerial signalValue);
+        void SetCompletedValue(FenceAPISerial completedValue);
 
       private:
         Fence(DeviceBase* device, ObjectBase::ErrorTag tag);
         ~Fence() override;
 
-        MaybeError ValidateOnCompletion(uint64_t value, WGPUFenceCompletionStatus* status) const;
+        MaybeError ValidateOnCompletion(FenceAPISerial value,
+                                        WGPUFenceCompletionStatus* status) const;
 
         struct OnCompletionData {
             wgpu::FenceOnCompletionCallback completionCallback = nullptr;
             void* userdata = nullptr;
         };
 
-        uint64_t mSignalValue;
-        uint64_t mCompletedValue;
+        FenceAPISerial mSignalValue;
+        FenceAPISerial mCompletedValue;
         Ref<QueueBase> mQueue;
-        SerialMap<Serial, OnCompletionData> mRequests;
+        SerialMap<FenceAPISerial, OnCompletionData> mRequests;
     };
 
 }  // namespace dawn_native
