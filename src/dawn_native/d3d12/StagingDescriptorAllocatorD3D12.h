@@ -77,7 +77,7 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
 
-        SerialQueue<CPUDescriptorHeapAllocation> mAllocationsToDelete;
+        SerialQueue<Serial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::d3d12

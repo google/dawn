@@ -27,6 +27,7 @@ struct SerialStorageTraits {};
 template <typename Derived>
 class SerialStorage {
   private:
+    using Serial = typename SerialStorageTraits<Derived>::Serial;
     using Value = typename SerialStorageTraits<Derived>::Value;
     using Storage = typename SerialStorageTraits<Derived>::Storage;
     using StorageIterator = typename SerialStorageTraits<Derived>::StorageIterator;
@@ -158,13 +159,13 @@ void SerialStorage<Derived>::ClearUpTo(Serial serial) {
 }
 
 template <typename Derived>
-Serial SerialStorage<Derived>::FirstSerial() const {
+typename SerialStorage<Derived>::Serial SerialStorage<Derived>::FirstSerial() const {
     DAWN_ASSERT(!Empty());
     return mStorage.begin()->first;
 }
 
 template <typename Derived>
-Serial SerialStorage<Derived>::LastSerial() const {
+typename SerialStorage<Derived>::Serial SerialStorage<Derived>::LastSerial() const {
     DAWN_ASSERT(!Empty());
     return mStorage.back().first;
 }

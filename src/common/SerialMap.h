@@ -20,54 +20,55 @@
 #include <map>
 #include <vector>
 
-template <typename T>
+template <typename Serial, typename Value>
 class SerialMap;
 
-template <typename T>
-struct SerialStorageTraits<SerialMap<T>> {
-    using Value = T;
-    using Storage = std::map<Serial, std::vector<T>>;
+template <typename SerialT, typename ValueT>
+struct SerialStorageTraits<SerialMap<SerialT, ValueT>> {
+    using Serial = SerialT;
+    using Value = ValueT;
+    using Storage = std::map<Serial, std::vector<Value>>;
     using StorageIterator = typename Storage::iterator;
     using ConstStorageIterator = typename Storage::const_iterator;
 };
 
-// SerialMap stores a map from Serial to T.
+// SerialMap stores a map from Serial to Value.
 // Unlike SerialQueue, items may be enqueued with Serials in any
 // arbitrary order. SerialMap provides useful iterators for iterating
-// through T items in order of increasing Serial.
-template <typename T>
-class SerialMap : public SerialStorage<SerialMap<T>> {
+// through Value items in order of increasing Serial.
+template <typename Serial, typename Value>
+class SerialMap : public SerialStorage<SerialMap<Serial, Value>> {
   public:
-    void Enqueue(const T& value, Serial serial);
-    void Enqueue(T&& value, Serial serial);
-    void Enqueue(const std::vector<T>& values, Serial serial);
-    void Enqueue(std::vector<T>&& values, Serial serial);
+    void Enqueue(const Value& value, Serial serial);
+    void Enqueue(Value&& value, Serial serial);
+    void Enqueue(const std::vector<Value>& values, Serial serial);
+    void Enqueue(std::vector<Value>&& values, Serial serial);
 };
 
 // SerialMap
 
-template <typename T>
-void SerialMap<T>::Enqueue(const T& value, Serial serial) {
+template <typename Serial, typename Value>
+void SerialMap<Serial, Value>::Enqueue(const Value& value, Serial serial) {
     this->mStorage[serial].emplace_back(value);
 }
 
-template <typename T>
-void SerialMap<T>::Enqueue(T&& value, Serial serial) {
+template <typename Serial, typename Value>
+void SerialMap<Serial, Value>::Enqueue(Value&& value, Serial serial) {
     this->mStorage[serial].emplace_back(value);
 }
 
-template <typename T>
-void SerialMap<T>::Enqueue(const std::vector<T>& values, Serial serial) {
+template <typename Serial, typename Value>
+void SerialMap<Serial, Value>::Enqueue(const std::vector<Value>& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
-    for (const T& value : values) {
+    for (const Value& value : values) {
         Enqueue(value, serial);
     }
 }
 
-template <typename T>
-void SerialMap<T>::Enqueue(std::vector<T>&& values, Serial serial) {
+template <typename Serial, typename Value>
+void SerialMap<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
-    for (const T& value : values) {
+    for (const Value& value : values) {
         Enqueue(value, serial);
     }
 }

@@ -196,7 +196,7 @@ namespace dawn_native { namespace d3d12 {
 
         CommandRecordingContext mPendingCommands;
 
-        SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
+        SerialQueue<Serial, ComPtr<IUnknown>> mUsedComObjectRefs;
 
         std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;

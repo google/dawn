@@ -161,7 +161,7 @@ namespace dawn_native { namespace vulkan {
         VkQueue mQueue = VK_NULL_HANDLE;
         uint32_t mComputeSubgroupSize = 0;
 
-        SerialQueue<Ref<BindGroupLayout>> mBindGroupLayoutsPendingDeallocation;
+        SerialQueue<Serial, Ref<BindGroupLayout>> mBindGroupLayoutsPendingDeallocation;
         std::unique_ptr<FencedDeleter> mDeleter;
         std::unique_ptr<ResourceMemoryAllocator> mResourceMemoryAllocator;
         std::unique_ptr<RenderPassCache> mRenderPassCache;
@@ -187,7 +187,7 @@ namespace dawn_native { namespace vulkan {
             VkCommandPool pool = VK_NULL_HANDLE;
             VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
         };
-        SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
+        SerialQueue<Serial, CommandPoolAndBuffer> mCommandsInFlight;
         // Command pools in the unused list haven't been reset yet.
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
         // There is always a valid recording context stored in mRecordingContext

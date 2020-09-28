@@ -39,7 +39,7 @@ namespace dawn_native {
 
       private:
         DeviceBase* mDevice;
-        SerialQueue<FenceInFlight> mFencesInFlight;
+        SerialQueue<Serial, FenceInFlight> mFencesInFlight;
     };
 
 }  // namespace dawn_native

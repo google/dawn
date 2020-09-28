@@ -61,7 +61,7 @@ namespace dawn_native {
         uint64_t mSignalValue;
         uint64_t mCompletedValue;
         Ref<QueueBase> mQueue;
-        SerialMap<OnCompletionData> mRequests;
+        SerialMap<Serial, OnCompletionData> mRequests;
     };
 
 }  // namespace dawn_native

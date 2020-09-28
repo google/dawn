@@ -35,7 +35,7 @@ namespace dawn_native {
             Ref<BufferBase> buffer;
             uint32_t mapSerial;
         };
-        SerialQueue<Request> mInflightRequests;
+        SerialQueue<Serial, Request> mInflightRequests;
     };
 
 }  // namespace dawn_native

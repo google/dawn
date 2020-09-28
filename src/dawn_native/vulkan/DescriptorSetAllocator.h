@@ -61,7 +61,7 @@ namespace dawn_native { namespace vulkan {
             PoolIndex poolIndex;
             SetIndex setIndex;
         };
-        SerialQueue<Deallocation> mPendingDeallocations;
+        SerialQueue<Serial, Deallocation> mPendingDeallocations;
         Serial mLastDeallocationSerial = 0;
     };
 

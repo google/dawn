@@ -15,8 +15,9 @@
 #include <gtest/gtest.h>
 
 #include "common/SerialMap.h"
+#include "common/TypedInteger.h"
 
-using TestSerialMap = SerialMap<int>;
+using TestSerialMap = SerialMap<uint64_t, int>;
 
 // A number of basic tests for SerialMap that are difficult to split from one another
 TEST(SerialMap, BasicTest) {
@@ -161,4 +162,22 @@ TEST(SerialMap, FirstSerial) {
     map.Clear();
     map.Enqueue(vector1, 6);
     EXPECT_EQ(map.FirstSerial(), 6u);
+}
+
+// Test basic functionality with type integers
+TEST(SerialMap, TypedInteger) {
+    using MySerial = TypedInteger<struct MySerialT, uint64_t>;
+    using MySerialMap = SerialMap<MySerial, int>;
+
+    MySerialMap map;
+    map.Enqueue(1, MySerial(0));
+    map.Enqueue(2, MySerial(0));
+
+    std::vector<int> expectedValues = {1, 2};
+    for (int value : map.IterateAll()) {
+        EXPECT_EQ(expectedValues.front(), value);
+        ASSERT_FALSE(expectedValues.empty());
+        expectedValues.erase(expectedValues.begin());
+    }
+    ASSERT_TRUE(expectedValues.empty());
 }

@@ -44,8 +44,8 @@ namespace dawn_native {
             uint64_t size;
         };
 
-        SerialQueue<Request> mInflightRequests;  // Queue of the recorded sub-alloc requests (e.g.
-                                                 // frame of resources).
+        SerialQueue<Serial, Request> mInflightRequests;  // Queue of the recorded sub-alloc requests
+                                                         // (e.g. frame of resources).
 
         uint64_t mUsedEndOffset = 0;    // Tail of used sub-alloc requests (in bytes).
         uint64_t mUsedStartOffset = 0;  // Head of used sub-alloc requests (in bytes).

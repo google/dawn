@@ -56,7 +56,7 @@ namespace dawn_native {
         ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize, Serial serial);
 
         std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
-        SerialQueue<std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
+        SerialQueue<Serial, std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
         DeviceBase* mDevice;
     };
 }  // namespace dawn_native

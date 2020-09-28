@@ -98,7 +98,7 @@ namespace dawn_native { namespace d3d12 {
         std::array<std::unique_ptr<PooledResourceMemoryAllocator>, ResourceHeapKind::EnumCount>
             mPooledHeapAllocators;
 
-        SerialQueue<ResourceHeapAllocation> mAllocationsToDelete;
+        SerialQueue<Serial, ResourceHeapAllocation> mAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::d3d12

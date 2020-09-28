@@ -15,8 +15,9 @@
 #include <gtest/gtest.h>
 
 #include "common/SerialQueue.h"
+#include "common/TypedInteger.h"
 
-using TestSerialQueue = SerialQueue<int>;
+using TestSerialQueue = SerialQueue<uint64_t, int>;
 
 // A number of basic tests for SerialQueue that are difficult to split from one another
 TEST(SerialQueue, BasicTest) {
@@ -153,4 +154,22 @@ TEST(SerialQueue, LastSerial) {
 
     queue.Enqueue({2}, 1);
     EXPECT_EQ(queue.LastSerial(), 1u);
+}
+
+// Test basic functionality with type integers
+TEST(SerialQueue, TypedInteger) {
+    using MySerial = TypedInteger<struct MySerialT, uint64_t>;
+    using MySerialQueue = SerialQueue<MySerial, int>;
+
+    MySerialQueue queue;
+    queue.Enqueue(1, MySerial(0));
+    queue.Enqueue(2, MySerial(0));
+
+    std::vector<int> expectedValues = {1, 2};
+    for (int value : queue.IterateAll()) {
+        EXPECT_EQ(expectedValues.front(), value);
+        ASSERT_FALSE(expectedValues.empty());
+        expectedValues.erase(expectedValues.begin());
+    }
+    ASSERT_TRUE(expectedValues.empty());
 }

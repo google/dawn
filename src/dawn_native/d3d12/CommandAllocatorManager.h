@@ -49,7 +49,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
         std::bitset<kMaxCommandAllocators> mFreeAllocators;
-        SerialQueue<IndexedCommandAllocator> mInFlightCommandAllocators;
+        SerialQueue<Serial, IndexedCommandAllocator> mInFlightCommandAllocators;
     };
 
 }}  // namespace dawn_native::d3d12

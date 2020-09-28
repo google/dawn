@@ -49,7 +49,7 @@ namespace dawn_native { namespace vulkan {
         class SingleTypeAllocator;
         std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
 
-        SerialQueue<ResourceMemoryAllocation> mSubAllocationsToDelete;
+        SerialQueue<Serial, ResourceMemoryAllocation> mSubAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::vulkan

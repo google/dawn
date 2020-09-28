@@ -34,7 +34,7 @@ namespace dawn_native {
 
       protected:
         DeviceBase* mDevice;
-        SerialQueue<Ref<ErrorScope>> mScopesInFlight;
+        SerialQueue<Serial, Ref<ErrorScope>> mScopesInFlight;
     };
 
 }  // namespace dawn_native

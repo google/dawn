@@ -19,65 +19,65 @@
 
 #include <vector>
 
-template <typename T>
+template <typename Serial, typename Value>
 class SerialQueue;
 
-template <typename T>
-struct SerialStorageTraits<SerialQueue<T>> {
-    using Value = T;
-    using SerialPair = std::pair<Serial, std::vector<T>>;
+template <typename SerialT, typename ValueT>
+struct SerialStorageTraits<SerialQueue<SerialT, ValueT>> {
+    using Serial = SerialT;
+    using Value = ValueT;
+    using SerialPair = std::pair<Serial, std::vector<Value>>;
     using Storage = std::vector<SerialPair>;
     using StorageIterator = typename Storage::iterator;
     using ConstStorageIterator = typename Storage::const_iterator;
 };
 
-// SerialQueue stores an associative list mapping a Serial to T.
+// SerialQueue stores an associative list mapping a Serial to Value.
 // It enforces that the Serials enqueued are strictly non-decreasing.
 // This makes it very efficient iterate or clear all items added up
 // to some Serial value because they are stored contiguously in memory.
-template <typename T>
-class SerialQueue : public SerialStorage<SerialQueue<T>> {
+template <typename Serial, typename Value>
+class SerialQueue : public SerialStorage<SerialQueue<Serial, Value>> {
   public:
-    using SerialPair = typename SerialStorageTraits<SerialQueue<T>>::SerialPair;
 
     // The serial must be given in (not strictly) increasing order.
-    void Enqueue(const T& value, Serial serial);
-    void Enqueue(T&& value, Serial serial);
-    void Enqueue(const std::vector<T>& values, Serial serial);
-    void Enqueue(std::vector<T>&& values, Serial serial);
+    void Enqueue(const Value& value, Serial serial);
+    void Enqueue(Value&& value, Serial serial);
+    void Enqueue(const std::vector<Value>& values, Serial serial);
+    void Enqueue(std::vector<Value>&& values, Serial serial);
 };
 
 // SerialQueue
 
-template <typename T>
-void SerialQueue<T>::Enqueue(const T& value, Serial serial) {
+template <typename Serial, typename Value>
+void SerialQueue<Serial, Value>::Enqueue(const Value& value, Serial serial) {
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
 
     if (this->Empty() || this->mStorage.back().first < serial) {
-        this->mStorage.emplace_back(serial, std::vector<T>{});
+        this->mStorage.emplace_back(serial, std::vector<Value>{});
     }
     this->mStorage.back().second.push_back(value);
 }
 
-template <typename T>
-void SerialQueue<T>::Enqueue(T&& value, Serial serial) {
+template <typename Serial, typename Value>
+void SerialQueue<Serial, Value>::Enqueue(Value&& value, Serial serial) {
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
 
     if (this->Empty() || this->mStorage.back().first < serial) {
-        this->mStorage.emplace_back(serial, std::vector<T>{});
+        this->mStorage.emplace_back(serial, std::vector<Value>{});
     }
     this->mStorage.back().second.push_back(std::move(value));
 }
 
-template <typename T>
-void SerialQueue<T>::Enqueue(const std::vector<T>& values, Serial serial) {
+template <typename Serial, typename Value>
+void SerialQueue<Serial, Value>::Enqueue(const std::vector<Value>& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
     this->mStorage.emplace_back(serial, values);
 }
 
-template <typename T>
-void SerialQueue<T>::Enqueue(std::vector<T>&& values, Serial serial) {
+template <typename Serial, typename Value>
+void SerialQueue<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial serial) {
     DAWN_ASSERT(values.size() > 0);
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
     this->mStorage.emplace_back(serial, values);
