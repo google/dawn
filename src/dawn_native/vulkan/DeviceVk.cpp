@@ -161,7 +161,7 @@ namespace dawn_native { namespace vulkan {
     MaybeError Device::TickImpl() {
         RecycleCompletedCommands();
 
-        Serial completedSerial = GetCompletedCommandSerial();
+        ExecutionSerial completedSerial = GetCompletedCommandSerial();
 
         for (Ref<BindGroupLayout>& bgl :
              mBindGroupLayoutsPendingDeallocation.IterateUpTo(completedSerial)) {
@@ -254,7 +254,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         IncrementLastSubmittedCommandSerial();
-        Serial lastSubmittedSerial = GetLastSubmittedCommandSerial();
+        ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
         mFencesInFlight.emplace(fence, lastSubmittedSerial);
 
         CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPool,
@@ -498,11 +498,11 @@ namespace dawn_native { namespace vulkan {
         return fence;
     }
 
-    Serial Device::CheckAndUpdateCompletedSerials() {
-        Serial fenceSerial = 0;
+    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+        ExecutionSerial fenceSerial(0);
         while (!mFencesInFlight.empty()) {
             VkFence fence = mFencesInFlight.front().first;
-            Serial tentativeSerial = mFencesInFlight.front().second;
+            ExecutionSerial tentativeSerial = mFencesInFlight.front().second;
             VkResult result = VkResult::WrapUnsafe(
                 INJECT_ERROR_OR_RUN(fn.GetFenceStatus(mVkDevice, fence), VK_ERROR_DEVICE_LOST));
             // TODO: Handle DeviceLost error.
@@ -824,7 +824,7 @@ namespace dawn_native { namespace vulkan {
         // Make sure all fences are complete by explicitly waiting on them all
         while (!mFencesInFlight.empty()) {
             VkFence fence = mFencesInFlight.front().first;
-            Serial fenceSerial = mFencesInFlight.front().second;
+            ExecutionSerial fenceSerial = mFencesInFlight.front().second;
             ASSERT(fenceSerial > GetCompletedCommandSerial());
 
             VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
@@ -919,7 +919,7 @@ namespace dawn_native { namespace vulkan {
         // force all operations to look as if they were completed, and delete all objects before
         // destroying the Deleter and vkDevice.
         ASSERT(mDeleter != nullptr);
-        mDeleter->Tick(std::numeric_limits<Serial>::max());
+        mDeleter->Tick(kMaxExecutionSerial);
         mDeleter = nullptr;
 
         // VkQueues are destroyed when the VkDevice is destroyed

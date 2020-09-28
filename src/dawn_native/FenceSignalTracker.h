@@ -36,11 +36,11 @@ namespace dawn_native {
 
         void UpdateFenceOnComplete(Fence* fence, FenceAPISerial value);
 
-        void Tick(Serial finishedSerial);
+        void Tick(ExecutionSerial finishedSerial);
 
       private:
         DeviceBase* mDevice;
-        SerialQueue<Serial, FenceInFlight> mFencesInFlight;
+        SerialQueue<ExecutionSerial, FenceInFlight> mFencesInFlight;
     };
 
 }  // namespace dawn_native

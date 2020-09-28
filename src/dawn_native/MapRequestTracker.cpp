@@ -35,7 +35,7 @@ namespace dawn_native {
         mDevice->AddFutureCallbackSerial(mDevice->GetPendingCommandSerial());
     }
 
-    void MapRequestTracker::Tick(Serial finishedSerial) {
+    void MapRequestTracker::Tick(ExecutionSerial finishedSerial) {
         for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
             request.buffer->OnMapRequestCompleted(request.id);
         }

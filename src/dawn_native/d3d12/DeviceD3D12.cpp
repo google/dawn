@@ -82,7 +82,7 @@ namespace dawn_native { namespace d3d12 {
         mCommandQueue.As(&mD3d12SharingContract);
 
         DAWN_TRY(
-            CheckHRESULT(mD3d12Device->CreateFence(GetLastSubmittedCommandSerial(),
+            CheckHRESULT(mD3d12Device->CreateFence(uint64_t(GetLastSubmittedCommandSerial()),
                                                    D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)),
                          "D3D12 create fence"));
 
@@ -219,7 +219,7 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError Device::TickImpl() {
         // Perform cleanup operations to free unused objects
-        Serial completedSerial = GetCompletedCommandSerial();
+        ExecutionSerial completedSerial = GetCompletedCommandSerial();
 
         mResourceAllocatorManager->Tick(completedSerial);
         DAWN_TRY(mCommandAllocatorManager->Tick(completedSerial));
@@ -239,14 +239,15 @@ namespace dawn_native { namespace d3d12 {
     MaybeError Device::NextSerial() {
         IncrementLastSubmittedCommandSerial();
 
-        return CheckHRESULT(mCommandQueue->Signal(mFence.Get(), GetLastSubmittedCommandSerial()),
-                            "D3D12 command queue signal fence");
+        return CheckHRESULT(
+            mCommandQueue->Signal(mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),
+            "D3D12 command queue signal fence");
     }
 
-    MaybeError Device::WaitForSerial(uint64_t serial) {
+    MaybeError Device::WaitForSerial(ExecutionSerial serial) {
         CheckPassedSerials();
         if (GetCompletedCommandSerial() < serial) {
-            DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(serial, mFenceEvent),
+            DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(uint64_t(serial), mFenceEvent),
                                   "D3D12 set event on completion"));
             WaitForSingleObject(mFenceEvent, INFINITE);
             CheckPassedSerials();
@@ -254,8 +255,8 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    Serial Device::CheckAndUpdateCompletedSerials() {
-        return mFence->GetCompletedValue();
+    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+        return ExecutionSerial(mFence->GetCompletedValue());
     }
 
     void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
@@ -576,7 +577,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         // We need to handle clearing up com object refs that were enqeued after TickImpl
-        mUsedComObjectRefs.ClearUpTo(std::numeric_limits<Serial>::max());
+        mUsedComObjectRefs.ClearUpTo(std::numeric_limits<ExecutionSerial>::max());
 
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(!mPendingCommands.IsOpen());

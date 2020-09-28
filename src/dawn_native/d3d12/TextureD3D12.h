@@ -15,10 +15,10 @@
 #ifndef DAWNNATIVE_D3D12_TEXTURED3D12_H_
 #define DAWNNATIVE_D3D12_TEXTURED3D12_H_
 
-#include "common/Serial.h"
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/DawnNative.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/d3d12/IntegerTypes.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
@@ -103,7 +103,7 @@ namespace dawn_native { namespace d3d12 {
         void TransitionSingleOrAllSubresources(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
                                                uint32_t index,
                                                D3D12_RESOURCE_STATES subresourceNewState,
-                                               const Serial pendingCommandSerial,
+                                               ExecutionSerial pendingCommandSerial,
                                                bool allSubresources);
         void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
 
@@ -111,7 +111,7 @@ namespace dawn_native { namespace d3d12 {
 
         struct StateAndDecay {
             D3D12_RESOURCE_STATES lastState;
-            Serial lastDecaySerial;
+            ExecutionSerial lastDecaySerial;
             bool isValidToDecay;
         };
         std::vector<StateAndDecay> mSubresourceStateAndDecay;

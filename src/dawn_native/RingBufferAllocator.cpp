@@ -32,7 +32,7 @@ namespace dawn_native {
     RingBufferAllocator::RingBufferAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {
     }
 
-    void RingBufferAllocator::Deallocate(Serial lastCompletedSerial) {
+    void RingBufferAllocator::Deallocate(ExecutionSerial lastCompletedSerial) {
         // Reclaim memory from previously recorded blocks.
         for (Request& request : mInflightRequests.IterateUpTo(lastCompletedSerial)) {
             mUsedStartOffset = request.endOffset;
@@ -62,7 +62,7 @@ namespace dawn_native {
     // queue, which identifies an existing (or new) frames-worth of resources. Internally, the
     // ring-buffer maintains offsets of 3 "memory" states: Free, Reclaimed, and Used. This is done
     // in FIFO order as older frames would free resources before newer ones.
-    uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, Serial serial) {
+    uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, ExecutionSerial serial) {
         // Check if the buffer is full by comparing the used size.
         // If the buffer is not split where waste occurs (e.g. cannot fit new sub-alloc in front), a
         // subsequent sub-alloc could fail where the used size was previously adjusted to include

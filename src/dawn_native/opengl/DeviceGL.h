@@ -105,11 +105,11 @@ namespace dawn_native { namespace opengl {
             const TextureViewDescriptor* descriptor) override;
 
         void InitTogglesFromDriver();
-        Serial CheckAndUpdateCompletedSerials() override;
+        ExecutionSerial CheckAndUpdateCompletedSerials() override;
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
-        std::queue<std::pair<GLsync, Serial>> mFencesInFlight;
+        std::queue<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
 
         GLFormatTable mFormatTable;
     };

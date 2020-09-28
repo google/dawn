@@ -489,7 +489,7 @@ namespace dawn_native { namespace d3d12 {
         : TextureBase(device, descriptor, state),
           mSubresourceStateAndDecay(
               GetSubresourceCount(),
-              {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, UINT64_MAX, false}) {
+              {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}) {
     }
 
     Texture::Texture(Device* device,
@@ -607,7 +607,7 @@ namespace dawn_native { namespace d3d12 {
     void Texture::TransitionSingleOrAllSubresources(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
                                                     uint32_t index,
                                                     D3D12_RESOURCE_STATES newState,
-                                                    const Serial pendingCommandSerial,
+                                                    ExecutionSerial pendingCommandSerial,
                                                     bool allSubresources) {
         StateAndDecay* state = &mSubresourceStateAndDecay[index];
         // Reuse the subresource(s) directly and avoid transition when it isn't needed, and
@@ -702,7 +702,8 @@ namespace dawn_native { namespace d3d12 {
         const SubresourceRange& range) {
         HandleTransitionSpecialCases(commandContext);
 
-        const Serial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+        const ExecutionSerial pendingCommandSerial =
+            ToBackend(GetDevice())->GetPendingCommandSerial();
 
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
@@ -751,7 +752,8 @@ namespace dawn_native { namespace d3d12 {
 
         HandleTransitionSpecialCases(commandContext);
 
-        const Serial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+        const ExecutionSerial pendingCommandSerial =
+            ToBackend(GetDevice())->GetPendingCommandSerial();
         uint32_t subresourceCount = GetSubresourceCount();
         ASSERT(textureUsages.subresourceUsages.size() == subresourceCount);
         // This transitions assume it is a 2D texture

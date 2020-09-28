@@ -83,7 +83,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void CommandRecordingContext::TrackHeapUsage(Heap* heap, Serial serial) {
+    void CommandRecordingContext::TrackHeapUsage(Heap* heap, ExecutionSerial serial) {
         // Before tracking the heap, check the last serial it was recorded on to ensure we aren't
         // tracking it more than once.
         if (heap->GetLastUsage() < serial) {

@@ -17,6 +17,7 @@
 
 #include "common/RefCounted.h"
 #include "common/SerialQueue.h"
+#include "dawn_native/IntegerTypes.h"
 
 namespace dawn_native {
 
@@ -30,11 +31,11 @@ namespace dawn_native {
 
         void TrackUntilLastSubmitComplete(ErrorScope* scope);
 
-        void Tick(Serial completedSerial);
+        void Tick(ExecutionSerial completedSerial);
 
       protected:
         DeviceBase* mDevice;
-        SerialQueue<Serial, Ref<ErrorScope>> mScopesInFlight;
+        SerialQueue<ExecutionSerial, Ref<ErrorScope>> mScopesInFlight;
     };
 
 }  // namespace dawn_native

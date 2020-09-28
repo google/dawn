@@ -29,7 +29,7 @@ namespace dawn_native {
     }
 
     ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocationSize,
-                                                                  Serial serial) {
+                                                                  ExecutionSerial serial) {
         // Disable further sub-allocation should the request be too large.
         if (allocationSize > kRingBufferSize) {
             std::unique_ptr<StagingBufferBase> stagingBuffer;
@@ -95,7 +95,7 @@ namespace dawn_native {
         return uploadHandle;
     }
 
-    void DynamicUploader::Deallocate(Serial lastCompletedSerial) {
+    void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial) {
         // Reclaim memory within the ring buffers by ticking (or removing requests no longer
         // in-flight).
         for (size_t i = 0; i < mRingBuffers.size(); ++i) {
@@ -113,7 +113,7 @@ namespace dawn_native {
     // TODO(dawn:512): Optimize this function so that it doesn't allocate additional memory
     // when it's not necessary.
     ResultOrError<UploadHandle> DynamicUploader::Allocate(uint64_t allocationSize,
-                                                          Serial serial,
+                                                          ExecutionSerial serial,
                                                           uint64_t offsetAlignment) {
         ASSERT(offsetAlignment > 0);
         UploadHandle uploadHandle;

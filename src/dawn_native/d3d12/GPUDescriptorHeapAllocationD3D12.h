@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_GPUDESCRIPTORHEAPALLOCATION_H_
 #define DAWNNATIVE_D3D12_GPUDESCRIPTORHEAPALLOCATION_H_
 
-#include "common/Serial.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -26,16 +26,16 @@ namespace dawn_native { namespace d3d12 {
       public:
         GPUDescriptorHeapAllocation() = default;
         GPUDescriptorHeapAllocation(D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
-                                    Serial lastUsageSerial,
+                                    ExecutionSerial lastUsageSerial,
                                     HeapVersionID heapSerial);
 
         D3D12_GPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
-        Serial GetLastUsageSerial() const;
+        ExecutionSerial GetLastUsageSerial() const;
         HeapVersionID GetHeapSerial() const;
 
       private:
         D3D12_GPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
-        Serial mLastUsageSerial = 0;
+        ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
         HeapVersionID mHeapSerial = HeapVersionID(0);
     };
 

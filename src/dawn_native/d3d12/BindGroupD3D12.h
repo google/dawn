@@ -16,7 +16,6 @@
 #define DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 
 #include "common/PlacementAllocated.h"
-#include "common/Serial.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"

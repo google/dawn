@@ -326,15 +326,15 @@ namespace dawn_native {
         return mMapRequestTracker.get();
     }
 
-    Serial DeviceBase::GetCompletedCommandSerial() const {
+    ExecutionSerial DeviceBase::GetCompletedCommandSerial() const {
         return mCompletedSerial;
     }
 
-    Serial DeviceBase::GetLastSubmittedCommandSerial() const {
+    ExecutionSerial DeviceBase::GetLastSubmittedCommandSerial() const {
         return mLastSubmittedSerial;
     }
 
-    Serial DeviceBase::GetFutureCallbackSerial() const {
+    ExecutionSerial DeviceBase::GetFutureCallbackSerial() const {
         return mFutureCallbackSerial;
     }
 
@@ -343,28 +343,29 @@ namespace dawn_native {
     }
 
     void DeviceBase::AssumeCommandsComplete() {
-        Serial maxSerial = std::max(mLastSubmittedSerial + 1, mFutureCallbackSerial);
+        ExecutionSerial maxSerial = ExecutionSerial(
+            std::max(mLastSubmittedSerial + ExecutionSerial(1), mFutureCallbackSerial));
         mLastSubmittedSerial = maxSerial;
         mCompletedSerial = maxSerial;
     }
 
-    Serial DeviceBase::GetPendingCommandSerial() const {
-        return mLastSubmittedSerial + 1;
+    ExecutionSerial DeviceBase::GetPendingCommandSerial() const {
+        return mLastSubmittedSerial + ExecutionSerial(1);
     }
 
-    void DeviceBase::AddFutureCallbackSerial(Serial serial) {
+    void DeviceBase::AddFutureCallbackSerial(ExecutionSerial serial) {
         if (serial > mFutureCallbackSerial) {
             mFutureCallbackSerial = serial;
         }
     }
 
     void DeviceBase::CheckPassedSerials() {
-        Serial completedSerial = CheckAndUpdateCompletedSerials();
+        ExecutionSerial completedSerial = CheckAndUpdateCompletedSerials();
 
         ASSERT(completedSerial <= mLastSubmittedSerial);
         // completedSerial should not be less than mCompletedSerial unless it is 0.
         // It can be 0 when there's no fences to check.
-        ASSERT(completedSerial >= mCompletedSerial || completedSerial == 0);
+        ASSERT(completedSerial >= mCompletedSerial || completedSerial == ExecutionSerial(0));
 
         if (completedSerial > mCompletedSerial) {
             mCompletedSerial = completedSerial;

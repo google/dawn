@@ -17,6 +17,7 @@
 
 #include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
+#include "dawn_native/IntegerTypes.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -43,25 +44,25 @@ namespace dawn_native { namespace vulkan {
         void DeleteWhenUnused(VkSurfaceKHR surface);
         void DeleteWhenUnused(VkSwapchainKHR swapChain);
 
-        void Tick(Serial completedSerial);
+        void Tick(ExecutionSerial completedSerial);
 
       private:
         Device* mDevice = nullptr;
-        SerialQueue<Serial, VkBuffer> mBuffersToDelete;
-        SerialQueue<Serial, VkDescriptorPool> mDescriptorPoolsToDelete;
-        SerialQueue<Serial, VkDeviceMemory> mMemoriesToDelete;
-        SerialQueue<Serial, VkFramebuffer> mFramebuffersToDelete;
-        SerialQueue<Serial, VkImage> mImagesToDelete;
-        SerialQueue<Serial, VkImageView> mImageViewsToDelete;
-        SerialQueue<Serial, VkPipeline> mPipelinesToDelete;
-        SerialQueue<Serial, VkPipelineLayout> mPipelineLayoutsToDelete;
-        SerialQueue<Serial, VkQueryPool> mQueryPoolsToDelete;
-        SerialQueue<Serial, VkRenderPass> mRenderPassesToDelete;
-        SerialQueue<Serial, VkSampler> mSamplersToDelete;
-        SerialQueue<Serial, VkSemaphore> mSemaphoresToDelete;
-        SerialQueue<Serial, VkShaderModule> mShaderModulesToDelete;
-        SerialQueue<Serial, VkSurfaceKHR> mSurfacesToDelete;
-        SerialQueue<Serial, VkSwapchainKHR> mSwapChainsToDelete;
+        SerialQueue<ExecutionSerial, VkBuffer> mBuffersToDelete;
+        SerialQueue<ExecutionSerial, VkDescriptorPool> mDescriptorPoolsToDelete;
+        SerialQueue<ExecutionSerial, VkDeviceMemory> mMemoriesToDelete;
+        SerialQueue<ExecutionSerial, VkFramebuffer> mFramebuffersToDelete;
+        SerialQueue<ExecutionSerial, VkImage> mImagesToDelete;
+        SerialQueue<ExecutionSerial, VkImageView> mImageViewsToDelete;
+        SerialQueue<ExecutionSerial, VkPipeline> mPipelinesToDelete;
+        SerialQueue<ExecutionSerial, VkPipelineLayout> mPipelineLayoutsToDelete;
+        SerialQueue<ExecutionSerial, VkQueryPool> mQueryPoolsToDelete;
+        SerialQueue<ExecutionSerial, VkRenderPass> mRenderPassesToDelete;
+        SerialQueue<ExecutionSerial, VkSampler> mSamplersToDelete;
+        SerialQueue<ExecutionSerial, VkSemaphore> mSemaphoresToDelete;
+        SerialQueue<ExecutionSerial, VkShaderModule> mShaderModulesToDelete;
+        SerialQueue<ExecutionSerial, VkSurfaceKHR> mSurfacesToDelete;
+        SerialQueue<ExecutionSerial, VkSwapchainKHR> mSwapChainsToDelete;
     };
 
 }}  // namespace dawn_native::vulkan

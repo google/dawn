@@ -140,7 +140,7 @@ namespace dawn_native { namespace d3d12 {
         return allocation;
     }
 
-    void StagingDescriptorAllocator::Tick(Serial completedSerial) {
+    void StagingDescriptorAllocator::Tick(ExecutionSerial completedSerial) {
         for (CPUDescriptorHeapAllocation& allocation :
              mAllocationsToDelete.IterateUpTo(completedSerial)) {
             Deallocate(&allocation);

@@ -17,7 +17,6 @@
 
 #include "dawn_native/Buffer.h"
 
-#include "common/Serial.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -72,7 +71,7 @@ namespace dawn_native { namespace d3d12 {
         ResourceHeapAllocation mResourceAllocation;
         bool mFixedResourceState = false;
         wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
-        Serial mLastUsedSerial = UINT64_MAX;
+        ExecutionSerial mLastUsedSerial = std::numeric_limits<ExecutionSerial>::max();
 
         D3D12_RANGE mWrittenMappedRange = {0, 0};
         void* mMappedData = nullptr;

@@ -219,7 +219,7 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_OUT_OF_MEMORY_ERROR("Allocation failed");
     }
 
-    void ResourceAllocatorManager::Tick(Serial completedSerial) {
+    void ResourceAllocatorManager::Tick(ExecutionSerial completedSerial) {
         for (ResourceHeapAllocation& allocation :
              mAllocationsToDelete.IterateUpTo(completedSerial)) {
             if (allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated) {

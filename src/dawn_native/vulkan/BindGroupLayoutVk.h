@@ -17,7 +17,6 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
-#include "common/Serial.h"
 #include "common/SlabAllocator.h"
 #include "common/vulkan_platform.h"
 
@@ -57,7 +56,7 @@ namespace dawn_native { namespace vulkan {
                                                     const BindGroupDescriptor* descriptor);
         void DeallocateBindGroup(BindGroup* bindGroup,
                                  DescriptorSetAllocation* descriptorSetAllocation);
-        void FinishDeallocation(Serial completedSerial);
+        void FinishDeallocation(ExecutionSerial completedSerial);
 
       private:
         ~BindGroupLayout() override;

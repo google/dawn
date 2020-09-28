@@ -17,6 +17,7 @@
 
 #include "common/SerialQueue.h"
 #include "dawn_native/BuddyMemoryAllocator.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PooledResourceMemoryAllocator.h"
 #include "dawn_native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
@@ -66,7 +67,7 @@ namespace dawn_native { namespace d3d12 {
 
         void DeallocateMemory(ResourceHeapAllocation& allocation);
 
-        void Tick(Serial lastCompletedSerial);
+        void Tick(ExecutionSerial lastCompletedSerial);
 
         void DestroyPool();
 
@@ -98,7 +99,7 @@ namespace dawn_native { namespace d3d12 {
         std::array<std::unique_ptr<PooledResourceMemoryAllocator>, ResourceHeapKind::EnumCount>
             mPooledHeapAllocators;
 
-        SerialQueue<Serial, ResourceHeapAllocation> mAllocationsToDelete;
+        SerialQueue<ExecutionSerial, ResourceHeapAllocation> mAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::d3d12

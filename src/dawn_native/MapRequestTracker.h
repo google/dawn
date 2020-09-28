@@ -28,7 +28,7 @@ namespace dawn_native {
         ~MapRequestTracker();
 
         void Track(BufferBase* buffer, MapRequestID mapID);
-        void Tick(Serial finishedSerial);
+        void Tick(ExecutionSerial finishedSerial);
 
       private:
         DeviceBase* mDevice;
@@ -37,7 +37,7 @@ namespace dawn_native {
             Ref<BufferBase> buffer;
             MapRequestID id;
         };
-        SerialQueue<Serial, Request> mInflightRequests;
+        SerialQueue<ExecutionSerial, Request> mInflightRequests;
     };
 
 }  // namespace dawn_native

@@ -16,8 +16,8 @@
 #define DAWNNATIVE_D3D12_PAGEABLED3D12_H_
 
 #include "common/LinkedList.h"
-#include "common/Serial.h"
 #include "dawn_native/D3D12Backend.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -36,14 +36,14 @@ namespace dawn_native { namespace d3d12 {
         // We set mLastRecordingSerial to denote the serial this pageable was last recorded to be
         // used. We must check this serial against the current serial when recording usages to
         // ensure we do not process residency for this pageable multiple times.
-        Serial GetLastUsage() const;
-        void SetLastUsage(Serial serial);
+        ExecutionSerial GetLastUsage() const;
+        void SetLastUsage(ExecutionSerial serial);
 
         // The residency manager must know the last serial that any portion of the pageable was
         // submitted to be used so that we can ensure this pageable stays resident in memory at
         // least until that serial has completed.
-        uint64_t GetLastSubmission() const;
-        void SetLastSubmission(Serial serial);
+        ExecutionSerial GetLastSubmission() const;
+        void SetLastSubmission(ExecutionSerial serial);
 
         MemorySegment GetMemorySegment() const;
 
@@ -63,14 +63,14 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         // mLastUsage denotes the last time this pageable was recorded for use.
-        Serial mLastUsage = 0;
+        ExecutionSerial mLastUsage = ExecutionSerial(0);
         // mLastSubmission denotes the last time this pageable was submitted to the GPU. Note that
         // although this variable often contains the same value as mLastUsage, it can differ in some
         // situations. When some asynchronous APIs (like WriteBuffer) are called, mLastUsage is
         // updated upon the call, but the backend operation is deferred until the next submission
         // to the GPU. This makes mLastSubmission unique from mLastUsage, and allows us to
         // accurately identify when a pageable can be evicted.
-        Serial mLastSubmission = 0;
+        ExecutionSerial mLastSubmission = ExecutionSerial(0);
         MemorySegment mMemorySegment;
         uint32_t mResidencyLockRefCount = 0;
         uint64_t mSize = 0;

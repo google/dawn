@@ -198,7 +198,7 @@ namespace dawn_native { namespace vulkan {
         allocation->Invalidate();
     }
 
-    void ResourceMemoryAllocator::Tick(Serial completedSerial) {
+    void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
         for (const ResourceMemoryAllocation& allocation :
              mSubAllocationsToDelete.IterateUpTo(completedSerial)) {
             ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);

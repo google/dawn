@@ -102,7 +102,7 @@ namespace dawn_native { namespace vulkan {
         // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
         // host execution of the command and the end of the draw/dispatch.
         Device* device = ToBackend(mLayout->GetDevice());
-        const Serial serial = device->GetPendingCommandSerial();
+        const ExecutionSerial serial = device->GetPendingCommandSerial();
         mPendingDeallocations.Enqueue({allocationInfo->poolIndex, allocationInfo->setIndex},
                                       serial);
 
@@ -115,7 +115,7 @@ namespace dawn_native { namespace vulkan {
         *allocationInfo = {};
     }
 
-    void DescriptorSetAllocator::FinishDeallocation(Serial completedSerial) {
+    void DescriptorSetAllocator::FinishDeallocation(ExecutionSerial completedSerial) {
         for (const Deallocation& dealloc : mPendingDeallocations.IterateUpTo(completedSerial)) {
             ASSERT(dealloc.poolIndex < mDescriptorPools.size());
 

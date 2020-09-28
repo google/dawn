@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_DEVICE_H_
 #define DAWNNATIVE_DEVICE_H_
 
-#include "common/Serial.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Extensions.h"
@@ -89,10 +88,10 @@ namespace dawn_native {
             CommandEncoder* encoder,
             const CommandBufferDescriptor* descriptor) = 0;
 
-        Serial GetCompletedCommandSerial() const;
-        Serial GetLastSubmittedCommandSerial() const;
-        Serial GetFutureCallbackSerial() const;
-        Serial GetPendingCommandSerial() const;
+        ExecutionSerial GetCompletedCommandSerial() const;
+        ExecutionSerial GetLastSubmittedCommandSerial() const;
+        ExecutionSerial GetFutureCallbackSerial() const;
+        ExecutionSerial GetPendingCommandSerial() const;
         virtual MaybeError TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
@@ -226,7 +225,7 @@ namespace dawn_native {
         size_t GetDeprecationWarningCountForTesting();
         void EmitDeprecationWarning(const char* warning);
         void LoseForTesting();
-        void AddFutureCallbackSerial(Serial serial);
+        void AddFutureCallbackSerial(ExecutionSerial serial);
 
         virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
         virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
@@ -313,7 +312,7 @@ namespace dawn_native {
 
         // Each backend should implement to check their passed fences if there are any and return a
         // completed serial. Return 0 should indicate no fences to check.
-        virtual Serial CheckAndUpdateCompletedSerials() = 0;
+        virtual ExecutionSerial CheckAndUpdateCompletedSerials() = 0;
         // During shut down of device, some operations might have been started since the last submit
         // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
         // make all commands look completed.
@@ -326,9 +325,9 @@ namespace dawn_native {
         // stale serials.
         // mFutureCallbackSerial tracks the largest serial we need to tick to for the callbacks to
         // fire
-        Serial mCompletedSerial = 0;
-        Serial mLastSubmittedSerial = 0;
-        Serial mFutureCallbackSerial = 0;
+        ExecutionSerial mCompletedSerial = ExecutionSerial(0);
+        ExecutionSerial mLastSubmittedSerial = ExecutionSerial(0);
+        ExecutionSerial mFutureCallbackSerial = ExecutionSerial(0);
 
         // ShutDownImpl is used to clean up and release resources used by device, does not wait for
         // GPU or check errors.

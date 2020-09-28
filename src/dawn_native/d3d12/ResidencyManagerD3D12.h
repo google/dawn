@@ -16,7 +16,6 @@
 #define DAWNNATIVE_D3D12_RESIDENCYMANAGERD3D12_H_
 
 #include "common/LinkedList.h"
-#include "common/Serial.h"
 #include "dawn_native/D3D12Backend.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/dawn_platform.h"

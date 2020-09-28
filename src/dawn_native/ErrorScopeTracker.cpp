@@ -28,11 +28,10 @@ namespace dawn_native {
         // The tracker is destroyed when the Device is destroyed. We need to
         // call Destroy on all in-flight error scopes so they resolve their callbacks
         // with UNKNOWN.
-        constexpr Serial maxSerial = std::numeric_limits<Serial>::max();
-        for (Ref<ErrorScope>& scope : mScopesInFlight.IterateUpTo(maxSerial)) {
+        for (Ref<ErrorScope>& scope : mScopesInFlight.IterateUpTo(kMaxExecutionSerial)) {
             scope->UnlinkForShutdown();
         }
-        Tick(maxSerial);
+        Tick(kMaxExecutionSerial);
     }
 
     void ErrorScopeTracker::TrackUntilLastSubmitComplete(ErrorScope* scope) {
@@ -40,7 +39,7 @@ namespace dawn_native {
         mDevice->AddFutureCallbackSerial(mDevice->GetPendingCommandSerial());
     }
 
-    void ErrorScopeTracker::Tick(Serial completedSerial) {
+    void ErrorScopeTracker::Tick(ExecutionSerial completedSerial) {
         mScopesInFlight.ClearUpTo(completedSerial);
     }
 

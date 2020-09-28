@@ -16,6 +16,7 @@
 #define DAWNNATIVE_RINGBUFFERALLOCATOR_H_
 
 #include "common/SerialQueue.h"
+#include "dawn_native/IntegerTypes.h"
 
 #include <limits>
 #include <memory>
@@ -29,8 +30,8 @@ namespace dawn_native {
         RingBufferAllocator(uint64_t maxSize);
         ~RingBufferAllocator() = default;
 
-        uint64_t Allocate(uint64_t allocationSize, Serial serial);
-        void Deallocate(Serial lastCompletedSerial);
+        uint64_t Allocate(uint64_t allocationSize, ExecutionSerial serial);
+        void Deallocate(ExecutionSerial lastCompletedSerial);
 
         uint64_t GetSize() const;
         bool Empty() const;
@@ -44,8 +45,9 @@ namespace dawn_native {
             uint64_t size;
         };
 
-        SerialQueue<Serial, Request> mInflightRequests;  // Queue of the recorded sub-alloc requests
-                                                         // (e.g. frame of resources).
+        SerialQueue<ExecutionSerial, Request>
+            mInflightRequests;  // Queue of the recorded sub-alloc requests
+                                // (e.g. frame of resources).
 
         uint64_t mUsedEndOffset = 0;    // Tail of used sub-alloc requests (in bytes).
         uint64_t mUsedStartOffset = 0;  // Head of used sub-alloc requests (in bytes).

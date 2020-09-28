@@ -174,7 +174,7 @@ namespace dawn_native { namespace vulkan {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
-    void BindGroupLayout::FinishDeallocation(Serial completedSerial) {
+    void BindGroupLayout::FinishDeallocation(ExecutionSerial completedSerial) {
         mDescriptorSetAllocator->FinishDeallocation(completedSerial);
     }
 

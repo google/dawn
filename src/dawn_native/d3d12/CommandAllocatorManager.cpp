@@ -30,7 +30,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAllocator() {
         // If there are no free allocators, get the oldest serial in flight and wait on it
         if (mFreeAllocators.none()) {
-            const uint64_t firstSerial = mInFlightCommandAllocators.FirstSerial();
+            const ExecutionSerial firstSerial = mInFlightCommandAllocators.FirstSerial();
             DAWN_TRY(device->WaitForSerial(firstSerial));
             DAWN_TRY(Tick(firstSerial));
         }
@@ -59,7 +59,7 @@ namespace dawn_native { namespace d3d12 {
         return mCommandAllocators[firstFreeIndex].Get();
     }
 
-    MaybeError CommandAllocatorManager::Tick(uint64_t lastCompletedSerial) {
+    MaybeError CommandAllocatorManager::Tick(ExecutionSerial lastCompletedSerial) {
         // Reset all command allocators that are no longer in flight
         for (auto it : mInFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
             DAWN_TRY(CheckHRESULT(it.commandAllocator->Reset(), "D3D12 reset command allocator"));

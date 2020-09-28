@@ -86,7 +86,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Set the initial serial of buffers to 0 so that we don't wait on them when they are first
         // used
-        mBufferSerials.resize(kFrameCount, 0);
+        mBufferSerials.resize(kFrameCount, ExecutionSerial(0));
 
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }

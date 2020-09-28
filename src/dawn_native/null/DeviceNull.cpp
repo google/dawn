@@ -219,7 +219,7 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    Serial Device::CheckAndUpdateCompletedSerials() {
+    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
         return GetLastSubmittedCommandSerial();
     }
 

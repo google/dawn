@@ -34,19 +34,19 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12Pageable.Get();
     }
 
-    Serial Pageable::GetLastUsage() const {
+    ExecutionSerial Pageable::GetLastUsage() const {
         return mLastUsage;
     }
 
-    void Pageable::SetLastUsage(Serial serial) {
+    void Pageable::SetLastUsage(ExecutionSerial serial) {
         mLastUsage = serial;
     }
 
-    uint64_t Pageable::GetLastSubmission() const {
+    ExecutionSerial Pageable::GetLastSubmission() const {
         return mLastSubmission;
     }
 
-    void Pageable::SetLastSubmission(Serial serial) {
+    void Pageable::SetLastSubmission(ExecutionSerial serial) {
         mLastSubmission = serial;
     }
 

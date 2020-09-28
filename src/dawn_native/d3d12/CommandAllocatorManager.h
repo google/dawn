@@ -19,6 +19,7 @@
 
 #include "common/SerialQueue.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/IntegerTypes.h"
 
 #include <bitset>
 
@@ -33,7 +34,7 @@ namespace dawn_native { namespace d3d12 {
         // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
         // otherwise its commands may be reset before execution has completed on the GPU
         ResultOrError<ID3D12CommandAllocator*> ReserveCommandAllocator();
-        MaybeError Tick(uint64_t lastCompletedSerial);
+        MaybeError Tick(ExecutionSerial lastCompletedSerial);
 
       private:
         Device* device;
@@ -49,7 +50,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
         std::bitset<kMaxCommandAllocators> mFreeAllocators;
-        SerialQueue<Serial, IndexedCommandAllocator> mInFlightCommandAllocators;
+        SerialQueue<ExecutionSerial, IndexedCommandAllocator> mInFlightCommandAllocators;
     };
 
 }}  // namespace dawn_native::d3d12

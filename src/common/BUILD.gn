@@ -172,7 +172,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "RefCounted.h",
       "Result.cpp",
       "Result.h",
-      "Serial.h",
       "SerialMap.h",
       "SerialQueue.h",
       "SerialStorage.h",

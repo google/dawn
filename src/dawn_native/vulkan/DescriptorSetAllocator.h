@@ -18,6 +18,7 @@
 #include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/vulkan/DescriptorSetAllocation.h"
 
 #include <map>
@@ -38,7 +39,7 @@ namespace dawn_native { namespace vulkan {
 
         ResultOrError<DescriptorSetAllocation> Allocate();
         void Deallocate(DescriptorSetAllocation* allocationInfo);
-        void FinishDeallocation(Serial completedSerial);
+        void FinishDeallocation(ExecutionSerial completedSerial);
 
       private:
         MaybeError AllocateDescriptorPool();
@@ -61,8 +62,8 @@ namespace dawn_native { namespace vulkan {
             PoolIndex poolIndex;
             SetIndex setIndex;
         };
-        SerialQueue<Serial, Deallocation> mPendingDeallocations;
-        Serial mLastDeallocationSerial = 0;
+        SerialQueue<ExecutionSerial, Deallocation> mPendingDeallocations;
+        ExecutionSerial mLastDeallocationSerial = ExecutionSerial(0);
     };
 
 }}  // namespace dawn_native::vulkan

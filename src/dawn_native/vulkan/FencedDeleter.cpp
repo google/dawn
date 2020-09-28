@@ -99,7 +99,7 @@ namespace dawn_native { namespace vulkan {
         mSwapChainsToDelete.Enqueue(swapChain, mDevice->GetPendingCommandSerial());
     }
 
-    void FencedDeleter::Tick(Serial completedSerial) {
+    void FencedDeleter::Tick(ExecutionSerial completedSerial) {
         VkDevice vkDevice = mDevice->GetVkDevice();
         VkInstance instance = mDevice->GetVkInstance();
 

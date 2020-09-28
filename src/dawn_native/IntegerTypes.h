@@ -57,6 +57,13 @@ namespace dawn_native {
     // The type for the WebGPU API fence serial values.
     using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
 
+    // A serial used to watch the progression of GPU execution on a queue, each time operations
+    // that need to be followed individually are scheduled for execution on a queue, the serial
+    // is incremented by one. This way to know if something is done executing, we just need to
+    // compare its serial with the currently completed serial.
+    using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
+    constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

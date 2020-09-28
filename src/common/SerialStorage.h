@@ -16,7 +16,6 @@
 #define COMMON_SERIALSTORAGE_H_
 
 #include "common/Assert.h"
-#include "common/Serial.h"
 
 #include <cstdint>
 #include <utility>

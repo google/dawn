@@ -174,16 +174,16 @@ namespace dawn_native { namespace metal {
         return new TextureView(texture, descriptor);
     }
 
-    Serial Device::CheckAndUpdateCompletedSerials() {
-        if (GetCompletedCommandSerial() > mCompletedSerial) {
+    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+        uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
+        if (frontendCompletedSerial > mCompletedSerial) {
             // sometimes we increase the serials, in which case the completed serial in
             // the device base will surpass the completed serial we have in the metal backend, so we
             // must update ours when we see that the completed serial from device base has
             // increased.
-            mCompletedSerial = GetCompletedCommandSerial();
+            mCompletedSerial = frontendCompletedSerial;
         }
-        static_assert(std::is_same<Serial, uint64_t>::value, "");
-        return mCompletedSerial.load();
+        return ExecutionSerial(mCompletedSerial.load());
     }
 
     MaybeError Device::TickImpl() {
@@ -241,17 +241,17 @@ namespace dawn_native { namespace metal {
 
         // Update the completed serial once the completed handler is fired. Make a local copy of
         // mLastSubmittedSerial so it is captured by value.
-        Serial pendingSerial = GetLastSubmittedCommandSerial();
+        ExecutionSerial pendingSerial = GetLastSubmittedCommandSerial();
         // this ObjC block runs on a different thread
         [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
             TRACE_EVENT_ASYNC_END0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                                   pendingSerial);
-            ASSERT(pendingSerial > mCompletedSerial.load());
-            this->mCompletedSerial = pendingSerial;
+                                   uint64_t(pendingSerial));
+            ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
+            this->mCompletedSerial = uint64_t(pendingSerial);
         }];
 
         TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                                 pendingSerial);
+                                 uint64_t(pendingSerial));
         [pendingCommands commit];
         [pendingCommands release];
     }

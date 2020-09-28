@@ -35,7 +35,6 @@ target_sources(dawn_common PRIVATE
     "RefCounted.h"
     "Result.cpp"
     "Result.h"
-    "Serial.h"
     "SerialMap.h"
     "SerialQueue.h"
     "SerialStorage.h"

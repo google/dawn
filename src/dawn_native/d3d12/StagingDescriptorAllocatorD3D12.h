@@ -52,7 +52,7 @@ namespace dawn_native { namespace d3d12 {
 
         uint32_t GetSizeIncrement() const;
 
-        void Tick(Serial completedSerial);
+        void Tick(ExecutionSerial completedSerial);
 
       private:
         using Index = uint16_t;
@@ -77,7 +77,7 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
 
-        SerialQueue<Serial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
+        SerialQueue<ExecutionSerial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::d3d12

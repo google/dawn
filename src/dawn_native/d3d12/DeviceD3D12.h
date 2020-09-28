@@ -80,7 +80,7 @@ namespace dawn_native { namespace d3d12 {
         const D3D12DeviceInfo& GetDeviceInfo() const;
 
         MaybeError NextSerial();
-        MaybeError WaitForSerial(Serial serial);
+        MaybeError WaitForSerial(ExecutionSerial serial);
 
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
@@ -180,7 +180,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
-        Serial CheckAndUpdateCompletedSerials() override;
+        ExecutionSerial CheckAndUpdateCompletedSerials() override;
 
         ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
         ComPtr<ID3D12CommandQueue> mCommandQueue;
@@ -196,7 +196,7 @@ namespace dawn_native { namespace d3d12 {
 
         CommandRecordingContext mPendingCommands;
 
-        SerialQueue<Serial, ComPtr<IUnknown>> mUsedComObjectRefs;
+        SerialQueue<ExecutionSerial, ComPtr<IUnknown>> mUsedComObjectRefs;
 
         std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;

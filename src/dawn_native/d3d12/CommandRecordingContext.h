@@ -37,7 +37,7 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError ExecuteCommandList(Device* device);
 
-        void TrackHeapUsage(Heap* heap, Serial serial);
+        void TrackHeapUsage(Heap* heap, ExecutionSerial serial);
 
       private:
         ComPtr<ID3D12GraphicsCommandList> mD3d12CommandList;

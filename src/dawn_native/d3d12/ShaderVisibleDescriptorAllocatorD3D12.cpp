@@ -94,7 +94,7 @@ namespace dawn_native { namespace d3d12 {
 
     bool ShaderVisibleDescriptorAllocator::AllocateGPUDescriptors(
         uint32_t descriptorCount,
-        Serial pendingSerial,
+        ExecutionSerial pendingSerial,
         D3D12_CPU_DESCRIPTOR_HANDLE* baseCPUDescriptor,
         GPUDescriptorHeapAllocation* allocation) {
         ASSERT(mHeap != nullptr);
@@ -128,7 +128,7 @@ namespace dawn_native { namespace d3d12 {
         return mHeap->GetD3D12DescriptorHeap();
     }
 
-    void ShaderVisibleDescriptorAllocator::Tick(uint64_t completedSerial) {
+    void ShaderVisibleDescriptorAllocator::Tick(ExecutionSerial completedSerial) {
         mAllocator.Deallocate(completedSerial);
     }
 

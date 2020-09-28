@@ -148,7 +148,7 @@ namespace dawn_native { namespace null {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
-        Serial CheckAndUpdateCompletedSerials() override;
+        ExecutionSerial CheckAndUpdateCompletedSerials() override;
 
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;

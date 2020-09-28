@@ -240,7 +240,8 @@ namespace dawn_native { namespace d3d12 {
         // occur. When that buffer is used again, the previously recorded serial must be compared to
         // the last completed serial to determine if the buffer has implicity decayed to the common
         // state.
-        const Serial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
+        const ExecutionSerial pendingCommandSerial =
+            ToBackend(GetDevice())->GetPendingCommandSerial();
         if (pendingCommandSerial > mLastUsedSerial) {
             lastState = D3D12_RESOURCE_STATE_COMMON;
             mLastUsedSerial = pendingCommandSerial;

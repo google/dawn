@@ -17,7 +17,6 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "common/Serial.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/metal/CommandRecordingContext.h"
@@ -107,7 +106,7 @@ namespace dawn_native { namespace metal {
         void InitTogglesFromDriver();
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
-        Serial CheckAndUpdateCompletedSerials() override;
+        ExecutionSerial CheckAndUpdateCompletedSerials() override;
 
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;

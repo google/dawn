@@ -34,7 +34,7 @@ namespace dawn_native {
         mDevice->AddFutureCallbackSerial(mDevice->GetPendingCommandSerial());
     }
 
-    void FenceSignalTracker::Tick(Serial finishedSerial) {
+    void FenceSignalTracker::Tick(ExecutionSerial finishedSerial) {
         for (auto& fenceInFlight : mFencesInFlight.IterateUpTo(finishedSerial)) {
             fenceInFlight.fence->SetCompletedValue(fenceInFlight.value);
         }
