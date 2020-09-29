@@ -355,7 +355,7 @@ void Builder::GenerateLabel(uint32_t id) {
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
   ast::type::U32Type u32;
   ast::SintLiteral lit(&u32, val);
-  return GenerateLiteralIfNeeded(&lit);
+  return GenerateLiteralIfNeeded(nullptr, &lit);
 }
 
 bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
@@ -465,7 +465,7 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
     return GenerateCallExpression(expr->AsCall());
   }
   if (expr->IsConstructor()) {
-    return GenerateConstructorExpression(expr->AsConstructor(), false);
+    return GenerateConstructorExpression(nullptr, expr->AsConstructor(), false);
   }
   if (expr->IsIdentifier()) {
     return GenerateIdentifierExpression(expr->AsIdentifier());
@@ -611,7 +611,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
   ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
-  auto null_id = GenerateLiteralIfNeeded(&nl);
+  auto null_id = GenerateLiteralIfNeeded(var, &nl);
   if (null_id == 0) {
     return 0;
   }
@@ -642,8 +642,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       return false;
     }
 
-    init_id = GenerateConstructorExpression(var->constructor()->AsConstructor(),
-                                            true);
+    init_id = GenerateConstructorExpression(
+        var, var->constructor()->AsConstructor(), true);
     if (init_id == 0) {
       return false;
     }
@@ -689,7 +689,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         var->storage_class() == ast::StorageClass::kNone ||
         var->storage_class() == ast::StorageClass::kOutput) {
       ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
-      init_id = GenerateLiteralIfNeeded(&nl);
+      init_id = GenerateLiteralIfNeeded(var, &nl);
       if (init_id == 0) {
         return 0;
       }
@@ -718,6 +718,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
             spv::Op::OpDecorate,
             {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
              Operand::Int(deco->AsSet()->value())});
+      } else if (deco->IsConstantId()) {
+        // Spec constants are handled elsewhere
       } else {
         error_ = "unknown decoration";
         return false;
@@ -1033,10 +1035,11 @@ void Builder::GenerateGLSLstd450Import() {
 }
 
 uint32_t Builder::GenerateConstructorExpression(
+    ast::Variable* var,
     ast::ConstructorExpression* expr,
     bool is_global_init) {
   if (expr->IsScalarConstructor()) {
-    return GenerateLiteralIfNeeded(expr->AsScalarConstructor()->literal());
+    return GenerateLiteralIfNeeded(var, expr->AsScalarConstructor()->literal());
   }
   if (expr->IsTypeConstructor()) {
     return GenerateTypeConstructorExpression(expr->AsTypeConstructor(),
@@ -1055,7 +1058,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
     ast::NullLiteral nl(init->type()->UnwrapPtrIfNeeded());
-    return GenerateLiteralIfNeeded(&nl);
+    return GenerateLiteralIfNeeded(nullptr, &nl);
   }
 
   std::ostringstream out;
@@ -1102,7 +1105,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   for (const auto& e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
-      id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
+      id = GenerateConstructorExpression(nullptr, e->AsConstructor(),
+                                         is_global_init);
     } else {
       id = GenerateExpression(e.get());
       id = GenerateLoadIfNeeded(e->result_type(), id);
@@ -1268,12 +1272,21 @@ uint32_t Builder::GenerateCastOrCopy(ast::type::Type* to_type,
   return result_id;
 }
 
-uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
+uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
+                                          ast::Literal* lit) {
   auto type_id = GenerateTypeIfNeeded(lit->type());
   if (type_id == 0) {
     return 0;
   }
+
   auto name = lit->name();
+  bool is_spec_constant = false;
+  if (var && var->IsDecorated() &&
+      var->AsDecorated()->HasConstantIdDecoration()) {
+    name = "__spec" + name;
+    is_spec_constant = true;
+  }
+
   auto val = const_to_id_.find(name);
   if (val != const_to_id_.end()) {
     return val->second;
@@ -1282,21 +1295,34 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
   auto result = result_op();
   auto result_id = result.to_i();
 
+  if (is_spec_constant) {
+    push_annot(spv::Op::OpDecorate,
+               {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
+                Operand::Int(var->AsDecorated()->constant_id())});
+  }
+
   if (lit->IsBool()) {
     if (lit->AsBool()->IsTrue()) {
-      push_type(spv::Op::OpConstantTrue, {Operand::Int(type_id), result});
+      push_type(is_spec_constant ? spv::Op::OpSpecConstantTrue
+                                 : spv::Op::OpConstantTrue,
+                {Operand::Int(type_id), result});
     } else {
-      push_type(spv::Op::OpConstantFalse, {Operand::Int(type_id), result});
+      push_type(is_spec_constant ? spv::Op::OpSpecConstantFalse
+                                 : spv::Op::OpConstantFalse,
+                {Operand::Int(type_id), result});
     }
   } else if (lit->IsSint()) {
-    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
-                                    Operand::Int(lit->AsSint()->value())});
+    push_type(
+        is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+        {Operand::Int(type_id), result, Operand::Int(lit->AsSint()->value())});
   } else if (lit->IsUint()) {
-    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
-                                    Operand::Int(lit->AsUint()->value())});
+    push_type(
+        is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+        {Operand::Int(type_id), result, Operand::Int(lit->AsUint()->value())});
   } else if (lit->IsFloat()) {
-    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
-                                    Operand::Float(lit->AsFloat()->value())});
+    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+              {Operand::Int(type_id), result,
+               Operand::Float(lit->AsFloat()->value())});
   } else if (lit->IsNull()) {
     push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
   } else {
@@ -1730,7 +1756,8 @@ uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
     ast::type::F32Type f32;
     ast::FloatLiteral float_0(&f32, 0.0);
-    spirv_params.push_back(Operand::Int(GenerateLiteralIfNeeded(&float_0)));
+    spirv_params.push_back(
+        Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0)));
   }
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + ident->name();

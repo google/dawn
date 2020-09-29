@@ -249,10 +249,12 @@ class Builder {
   /// Generates an import instruction
   void GenerateGLSLstd450Import();
   /// Generates a constructor expression
+  /// @param var the variable generated for, nullptr if no variable associated.
   /// @param expr the expression to generate
   /// @param is_global_init set true if this is a global variable constructor
   /// @returns the ID of the expression or 0 on failure.
-  uint32_t GenerateConstructorExpression(ast::ConstructorExpression* expr,
+  uint32_t GenerateConstructorExpression(ast::Variable* var,
+                                         ast::ConstructorExpression* expr,
                                          bool is_global_init);
   /// Generates a type constructor expression
   /// @param init the expression to generate
@@ -262,9 +264,10 @@ class Builder {
       ast::TypeConstructorExpression* init,
       bool is_global_init);
   /// Generates a literal constant if needed
+  /// @param var the variable generated for, nullptr if no variable associated.
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
-  uint32_t GenerateLiteralIfNeeded(ast::Literal* lit);
+  uint32_t GenerateLiteralIfNeeded(ast::Variable* var, ast::Literal* lit);
   /// Generates a binary expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise

@@ -56,7 +56,7 @@ TEST_F(BuilderTest, Constructor_Const) {
 
   ast::Module mod;
   Builder b(&mod);
-  EXPECT_EQ(b.GenerateConstructorExpression(&c, true), 2u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -84,7 +84,7 @@ TEST_F(BuilderTest, Constructor_Type) {
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
   Builder b(&mod);
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -190,7 +190,7 @@ TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
 
   ast::Module mod;
   Builder b(&mod);
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 0u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
 }
@@ -765,7 +765,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -807,7 +807,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -851,7 +851,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -895,7 +895,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -939,7 +939,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -987,7 +987,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -1033,7 +1033,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -1079,7 +1079,7 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
 
   Builder b(&mod);
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(&cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4

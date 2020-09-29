@@ -16,14 +16,18 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bool_literal.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -356,6 +360,58 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 %2 = OpTypePointer Output %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Output %4
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
+  ast::type::BoolType bool_type;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200));
+
+  ast::DecoratedVariable v(std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kNone, &bool_type));
+  v.set_decorations(std::move(decos));
+  v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 1200
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpSpecConstantTrue %1
+%4 = OpTypePointer Private %1
+%3 = OpVariable %4 Private %2
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
+  ast::type::F32Type f32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+
+  ast::DecoratedVariable v(
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
+  v.set_decorations(std::move(decos));
+  v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpSpecConstant %1 2
+%4 = OpTypePointer Private %1
+%3 = OpVariable %4 Private %2
 )");
 }
 
