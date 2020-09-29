@@ -49,6 +49,12 @@ class DecoratedVariable : public Variable {
   bool HasLocationDecoration() const;
   /// @returns true if the deocrations include a BuiltinDecoration
   bool HasBuiltinDecoration() const;
+  /// @returns true if the decorations include a ConstantIdDecoration
+  bool HasConstantIdDecoration() const;
+
+  /// @returns the constant_id value for the variable. Assumes that
+  /// |HasConstantIdDecoration| has been called first.
+  uint32_t constant_id() const;
 
   /// @returns true if this is a decorated variable
   bool IsDecorated() const override;

@@ -16,7 +16,10 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/builtin_decoration.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -52,6 +55,44 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
   EXPECT_EQ(dv.type(), &t);
   EXPECT_EQ(dv.line(), 27u);
   EXPECT_EQ(dv.column(), 4u);
+}
+
+TEST_F(DecoratedVariableTest, NoDecorations) {
+  type::I32Type t;
+  auto var = std::make_unique<Variable>("my_var", StorageClass::kFunction, &t);
+  DecoratedVariable dv(std::move(var));
+  EXPECT_FALSE(dv.HasLocationDecoration());
+  EXPECT_FALSE(dv.HasBuiltinDecoration());
+  EXPECT_FALSE(dv.HasConstantIdDecoration());
+}
+
+TEST_F(DecoratedVariableTest, WithDecorations) {
+  type::F32Type t;
+  auto var = std::make_unique<Variable>("my_var", StorageClass::kFunction, &t);
+  DecoratedVariable dv(std::move(var));
+
+  VariableDecorationList decos;
+  decos.push_back(std::make_unique<LocationDecoration>(1));
+  decos.push_back(std::make_unique<BuiltinDecoration>(ast::Builtin::kPosition));
+  decos.push_back(std::make_unique<ConstantIdDecoration>(1200));
+
+  dv.set_decorations(std::move(decos));
+
+  EXPECT_TRUE(dv.HasLocationDecoration());
+  EXPECT_TRUE(dv.HasBuiltinDecoration());
+  EXPECT_TRUE(dv.HasConstantIdDecoration());
+}
+
+TEST_F(DecoratedVariableTest, ConstantId) {
+  type::F32Type t;
+  auto var = std::make_unique<Variable>("my_var", StorageClass::kFunction, &t);
+  DecoratedVariable dv(std::move(var));
+
+  VariableDecorationList decos;
+  decos.push_back(std::make_unique<ConstantIdDecoration>(1200));
+  dv.set_decorations(std::move(decos));
+
+  EXPECT_EQ(dv.constant_id(), 1200u);
 }
 
 TEST_F(DecoratedVariableTest, IsValid) {

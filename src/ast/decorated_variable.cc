@@ -14,6 +14,10 @@
 
 #include "src/ast/decorated_variable.h"
 
+#include <cassert>
+
+#include "src/ast/constant_id_decoration.h"
+
 namespace tint {
 namespace ast {
 
@@ -42,6 +46,25 @@ bool DecoratedVariable::HasBuiltinDecoration() const {
     }
   }
   return false;
+}
+
+bool DecoratedVariable::HasConstantIdDecoration() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsConstantId()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+uint32_t DecoratedVariable::constant_id() const {
+  assert(HasConstantIdDecoration());
+  for (const auto& deco : decorations_) {
+    if (deco->IsConstantId()) {
+      return deco->AsConstantId()->value();
+    }
+  }
+  return 0;
 }
 
 bool DecoratedVariable::IsDecorated() const {
