@@ -920,9 +920,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     // Tests a larger image is preserved when importing
-    // TODO(http://crbug.com/dawn/206): This fails on AMD
     TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
-        DAWN_SKIP_TEST_IF(UsesWire() || IsAMD());
+        DAWN_SKIP_TEST_IF(UsesWire());
 
         close(defaultFd);
 
