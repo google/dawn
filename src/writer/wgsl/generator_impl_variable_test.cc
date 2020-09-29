@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
@@ -77,6 +78,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));
   decos.push_back(std::make_unique<ast::SetDecoration>(1));
   decos.push_back(std::make_unique<ast::LocationDecoration>(2));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(42));
 
   ast::DecoratedVariable dv;
   dv.set_name("a");
@@ -87,7 +89,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ASSERT_TRUE(g.EmitVariable(&dv)) << g.error();
   EXPECT_EQ(
       g.result(),
-      R"([[builtin(position), binding(0), set(1), location(2)]] var a : f32;
+      R"([[builtin(position), binding(0), set(1), location(2), constant_id(42)]] var a : f32;
 )");
 }
 

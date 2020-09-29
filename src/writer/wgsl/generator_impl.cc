@@ -29,6 +29,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
@@ -724,6 +725,8 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
       out_ << "location(" << deco->AsLocation()->value() << ")";
     } else if (deco->IsBuiltin()) {
       out_ << "builtin(" << deco->AsBuiltin()->value() << ")";
+    } else if (deco->IsConstantId()) {
+      out_ << "constant_id(" << deco->AsConstantId()->value() << ")";
     } else {
       error_ = "unknown variable decoration";
       return false;
