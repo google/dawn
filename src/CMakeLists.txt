@@ -196,6 +196,8 @@ set(TINT_LIB_SRCS
   source.h
   transform/bound_array_accessors_transform.cc
   transform/bound_array_accessors_transform.h
+  transform/transformer.cc
+  transform/transformer.h
   transform/vertex_pulling_transform.cc
   transform/vertex_pulling_transform.h
   type_determiner.cc

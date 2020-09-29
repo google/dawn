@@ -375,6 +375,8 @@ source_set("libtint_core_src") {
     "src/source.h",
     "src/transform/bound_array_accessors_transform.cc",
     "src/transform/bound_array_accessors_transform.h",
+    "src/transform/transformer.cc",
+    "src/transform/transformer.h",
     "src/transform/vertex_pulling_transform.cc",
     "src/transform/vertex_pulling_transform.h",
     "src/type_determiner.cc",

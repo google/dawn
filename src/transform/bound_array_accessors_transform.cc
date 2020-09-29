@@ -45,7 +45,7 @@ namespace transform {
 
 BoundArrayAccessorsTransform::BoundArrayAccessorsTransform(Context* ctx,
                                                            ast::Module* mod)
-    : ctx_(ctx), mod_(mod) {}
+    : Transformer(ctx, mod) {}
 
 BoundArrayAccessorsTransform::~BoundArrayAccessorsTransform() = default;
 

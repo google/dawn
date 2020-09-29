@@ -48,7 +48,7 @@ static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 }  // namespace
 
 VertexPullingTransform::VertexPullingTransform(Context* ctx, ast::Module* mod)
-    : ctx_(ctx), mod_(mod) {}
+    : Transformer(ctx, mod) {}
 
 VertexPullingTransform::~VertexPullingTransform() = default;
 
@@ -68,7 +68,7 @@ void VertexPullingTransform::SetPullingBufferBindingSet(uint32_t number) {
 bool VertexPullingTransform::Run() {
   // Check SetVertexState was called
   if (vertex_state_ == nullptr) {
-    SetError("SetVertexState not called");
+    error_ = "SetVertexState not called";
     return false;
   }
 
@@ -76,7 +76,7 @@ bool VertexPullingTransform::Run() {
   auto* func = mod_->FindFunctionByNameAndStage(entry_point_name_,
                                                 ast::PipelineStage::kVertex);
   if (func == nullptr) {
-    SetError("Vertex stage entry point not found");
+    error_ = "Vertex stage entry point not found";
     return false;
   }
 
@@ -96,10 +96,6 @@ bool VertexPullingTransform::Run() {
   AddVertexPullingPreamble(vertex_func);
 
   return true;
-}
-
-void VertexPullingTransform::SetError(const std::string& error) {
-  error_ = error;
 }
 
 std::string VertexPullingTransform::GetVertexBufferName(uint32_t index) {

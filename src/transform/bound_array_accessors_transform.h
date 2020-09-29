@@ -21,6 +21,7 @@
 #include "src/ast/statement.h"
 #include "src/context.h"
 #include "src/scope_stack.h"
+#include "src/transform/transformer.h"
 
 #include <string>
 
@@ -31,19 +32,16 @@ namespace transform {
 /// the bounds of the array. Any access before the start of the array will clamp
 /// to zero and any access past the end of the array will clamp to
 /// (array length - 1).
-class BoundArrayAccessorsTransform {
+class BoundArrayAccessorsTransform : public Transformer {
  public:
   /// Constructor
   /// @param ctx the Tint context object
   /// @param mod the module transform
   explicit BoundArrayAccessorsTransform(Context* ctx, ast::Module* mod);
-  ~BoundArrayAccessorsTransform();
+  ~BoundArrayAccessorsTransform() override;
 
   /// @returns true if the transformation was successful
-  bool Run();
-
-  /// @returns error messages
-  const std::string& error() { return error_; }
+  bool Run() override;
 
  private:
   bool ProcessStatement(ast::Statement* stmt);
@@ -52,9 +50,6 @@ class BoundArrayAccessorsTransform {
   bool ProcessAccessExpression(ast::ArrayAccessorExpression* expr,
                                uint32_t size);
 
-  Context* ctx_ = nullptr;
-  ast::Module* mod_ = nullptr;
-  std::string error_;
   ScopeStack<ast::Variable*> scope_stack_;
 };
 

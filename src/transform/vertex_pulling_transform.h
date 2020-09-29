@@ -21,6 +21,7 @@
 #include "src/ast/statement.h"
 #include "src/ast/variable.h"
 #include "src/context.h"
+#include "src/transform/transformer.h"
 
 #include <memory>
 #include <string>
@@ -142,13 +143,13 @@ struct VertexStateDescriptor {
 /// To be clear, there won't be types such as f16 or u8 anywhere in WGSL code,
 /// but these are types that the data may arrive as. We need to convert these
 /// smaller types into the base types such as f32 and u32 for the shader to use.
-class VertexPullingTransform {
+class VertexPullingTransform : public Transformer {
  public:
   /// Constructor
   /// @param ctx the tint context
   /// @param mod the module to convert to vertex pulling
   VertexPullingTransform(Context* ctx, ast::Module* mod);
-  ~VertexPullingTransform();
+  ~VertexPullingTransform() override;
 
   /// Sets the vertex state descriptor, containing info about attributes
   /// @param vertex_state the vertex state descriptor
@@ -164,14 +165,9 @@ class VertexPullingTransform {
   void SetPullingBufferBindingSet(uint32_t number);
 
   /// @returns true if the transformation was successful
-  bool Run();
-
-  /// @returns error messages
-  const std::string& GetError() { return error_; }
+  bool Run() override;
 
  private:
-  void SetError(const std::string& error);
-
   /// Generate the vertex buffer binding name
   /// @param index index to append to buffer name
   std::string GetVertexBufferName(uint32_t index);
@@ -256,10 +252,7 @@ class VertexPullingTransform {
   ast::type::Type* GetI32Type();
   ast::type::Type* GetF32Type();
 
-  Context* ctx_ = nullptr;
-  ast::Module* mod_ = nullptr;
   std::string entry_point_name_;
-  std::string error_;
 
   std::string vertex_index_name_;
   std::string instance_index_name_;

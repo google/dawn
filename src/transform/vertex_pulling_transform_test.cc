@@ -88,13 +88,13 @@ class VertexPullingTransformTest : public VertexPullingTransformHelper,
 
 TEST_F(VertexPullingTransformTest, Error_NoVertexState) {
   EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->GetError(), "SetVertexState not called");
+  EXPECT_EQ(transform()->error(), "SetVertexState not called");
 }
 
 TEST_F(VertexPullingTransformTest, Error_NoEntryPoint) {
   transform()->SetVertexState(std::make_unique<VertexStateDescriptor>());
   EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->GetError(), "Vertex stage entry point not found");
+  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
@@ -103,7 +103,7 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
   transform()->SetEntryPoint("_");
 
   EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->GetError(), "Vertex stage entry point not found");
+  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
@@ -116,7 +116,7 @@ TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
 
   InitTransform({});
   EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->GetError(), "Vertex stage entry point not found");
+  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, BasicModule) {
