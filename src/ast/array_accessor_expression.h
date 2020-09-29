@@ -60,6 +60,9 @@ class ArrayAccessorExpression : public Expression {
   }
   /// @returns the index expression
   Expression* idx_expr() const { return idx_expr_.get(); }
+  /// Removes the index expression from the array accessor
+  /// @returns the unique pointer to the index expression
+  std::unique_ptr<Expression> take_idx_expr() { return std::move(idx_expr_); }
 
   /// @returns true if this is an array accessor expression
   bool IsArrayAccessor() const override;

@@ -37,7 +37,6 @@
 
 namespace tint {
 namespace transform {
-
 namespace {
 
 static const char kVertexBufferNamePrefix[] = "_tint_pulling_vertex_buffer_";

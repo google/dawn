@@ -71,6 +71,8 @@ class ElseStatement : public Statement {
   }
   /// @returns the else body
   const BlockStatement* body() const { return body_.get(); }
+  /// @returns the else body
+  BlockStatement* body() { return body_.get(); }
 
   /// @returns true if this is a else statement
   bool IsElse() const override;

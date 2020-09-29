@@ -62,6 +62,8 @@ class IfStatement : public Statement {
   }
   /// @returns the if body
   const BlockStatement* body() const { return body_.get(); }
+  /// @returns the if body
+  BlockStatement* body() { return body_.get(); }
 
   /// Sets the else statements
   /// @param else_statements the else statements to set
@@ -70,6 +72,9 @@ class IfStatement : public Statement {
   }
   /// @returns the else statements
   const ElseStatementList& else_statements() const { return else_statements_; }
+  /// @returns the else statements
+  ElseStatementList& else_statements() { return else_statements_; }
+
   /// @returns true if there are else statements
   bool has_else_statements() const { return !else_statements_.empty(); }
 

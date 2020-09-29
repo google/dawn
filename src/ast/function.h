@@ -163,7 +163,9 @@ class Function : public Node {
     body_ = std::move(body);
   }
   /// @returns the function body
-  BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_.get(); }
+  /// @returns the function body
+  BlockStatement* body() { return body_.get(); }
 
   /// @returns true if the name and type are both present
   bool IsValid() const override;

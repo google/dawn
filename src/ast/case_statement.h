@@ -72,6 +72,8 @@ class CaseStatement : public Statement {
   }
   /// @returns the case body
   const BlockStatement* body() const { return body_.get(); }
+  /// @returns the case body
+  BlockStatement* body() { return body_.get(); }
 
   /// @returns true if this is a case statement
   bool IsCase() const override;

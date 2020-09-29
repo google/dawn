@@ -194,6 +194,8 @@ set(TINT_LIB_SRCS
   reader/reader.h
   scope_stack.h
   source.h
+  transform/bound_array_accessors_transform.cc
+  transform/bound_array_accessors_transform.h
   transform/vertex_pulling_transform.cc
   transform/vertex_pulling_transform.h
   type_determiner.cc
@@ -355,6 +357,7 @@ set(TINT_TEST_SRCS
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
   scope_stack_test.cc
+  transform/bound_array_accessors_transform_test.cc
   transform/vertex_pulling_transform_test.cc
   type_determiner_test.cc
   type_manager_test.cc
