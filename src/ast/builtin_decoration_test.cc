@@ -31,6 +31,7 @@ TEST_F(BuiltinDecorationTest, Is) {
   BuiltinDecoration d{Builtin::kFragDepth};
   EXPECT_FALSE(d.IsBinding());
   EXPECT_TRUE(d.IsBuiltin());
+  EXPECT_FALSE(d.IsConstantId());
   EXPECT_FALSE(d.IsLocation());
   EXPECT_FALSE(d.IsSet());
 }

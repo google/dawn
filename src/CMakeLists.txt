@@ -64,6 +64,8 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
+  ast/constant_id_decoration.cc
+  ast/constant_id_decoration.h
   ast/constructor_expression.cc
   ast/constructor_expression.h
   ast/continue_statement.cc
@@ -304,6 +306,7 @@ set(TINT_TEST_SRCS
   ast/call_expression_test.cc
   ast/call_statement_test.cc
   ast/case_statement_test.cc
+  ast/constant_id_decoration_test.cc
   ast/continue_statement_test.cc
   ast/discard_statement_test.cc
   ast/decorated_variable_test.cc

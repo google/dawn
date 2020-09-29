@@ -12,38 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/set_decoration.h"
-
-#include "gtest/gtest.h"
+#include "src/ast/constant_id_decoration.h"
 
 namespace tint {
 namespace ast {
-namespace {
 
-using SetDecorationTest = testing::Test;
+ConstantIdDecoration::ConstantIdDecoration(uint32_t val) : value_(val) {}
 
-TEST_F(SetDecorationTest, Creation) {
-  SetDecoration d{2};
-  EXPECT_EQ(2u, d.value());
+ConstantIdDecoration::~ConstantIdDecoration() = default;
+
+bool ConstantIdDecoration::IsConstantId() const {
+  return true;
 }
 
-TEST_F(SetDecorationTest, Is) {
-  SetDecoration d{2};
-  EXPECT_FALSE(d.IsBinding());
-  EXPECT_FALSE(d.IsBuiltin());
-  EXPECT_FALSE(d.IsConstantId());
-  EXPECT_FALSE(d.IsLocation());
-  EXPECT_TRUE(d.IsSet());
+void ConstantIdDecoration::to_str(std::ostream& out) const {
+  out << "ConstantIdDecoration{" << value_ << "}" << std::endl;
 }
 
-TEST_F(SetDecorationTest, ToStr) {
-  SetDecoration d{2};
-  std::ostringstream out;
-  d.to_str(out);
-  EXPECT_EQ(out.str(), R"(SetDecoration{2}
-)");
-}
-
-}  // namespace
 }  // namespace ast
 }  // namespace tint

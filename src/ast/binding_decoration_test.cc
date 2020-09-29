@@ -31,6 +31,7 @@ TEST_F(BindingDecorationTest, Is) {
   BindingDecoration d{2};
   EXPECT_TRUE(d.IsBinding());
   EXPECT_FALSE(d.IsBuiltin());
+  EXPECT_FALSE(d.IsConstantId());
   EXPECT_FALSE(d.IsLocation());
   EXPECT_FALSE(d.IsSet());
 }

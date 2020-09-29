@@ -33,6 +33,7 @@ TEST_F(LocationDecorationTest, Is) {
   LocationDecoration d{2};
   EXPECT_FALSE(d.IsBinding());
   EXPECT_FALSE(d.IsBuiltin());
+  EXPECT_FALSE(d.IsConstantId());
   EXPECT_TRUE(d.IsLocation());
   EXPECT_FALSE(d.IsSet());
 }
