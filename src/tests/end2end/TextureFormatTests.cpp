@@ -365,8 +365,9 @@ class TextureFormatTest : public DawnTest {
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
-        std::vector<T> textureData = {0, 1, maxValue, minValue};
-        std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, -1.0f};
+        std::vector<T> textureData = {0, 1, -1, maxValue, minValue, T(minValue + 1), 0, 0};
+        std::vector<float> uncompressedData = {
+            0.0f, 1.0f / maxValue, -1.0f / maxValue, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f};
 
         DoFloatFormatSamplingTest(formatInfo, textureData, uncompressedData, 0.0001f / maxValue);
         // Snorm formats aren't renderable because they are not guaranteed renderable in Vulkan
