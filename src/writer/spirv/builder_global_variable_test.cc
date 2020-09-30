@@ -29,6 +29,8 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
@@ -389,6 +391,30 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
+  ast::type::BoolType bool_type;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200));
+
+  ast::DecoratedVariable v(std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kNone, &bool_type));
+  v.set_decorations(std::move(decos));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 1200
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+%2 = OpTypePointer Private %3
+%4 = OpSpecConstantFalse %3
+%1 = OpVariable %2 Private %4
+)");
+}
+
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   ast::type::F32Type f32;
 
@@ -412,6 +438,78 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 %2 = OpSpecConstant %1 2
 %4 = OpTypePointer Private %1
 %3 = OpVariable %4 Private %2
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
+  ast::type::F32Type f32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+
+  ast::DecoratedVariable v(
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
+  v.set_decorations(std::move(decos));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Private %3
+%4 = OpSpecConstant %3 0
+%1 = OpVariable %2 Private %4
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
+  ast::type::I32Type i32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+
+  ast::DecoratedVariable v(
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32));
+  v.set_decorations(std::move(decos));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%4 = OpSpecConstant %3 0
+%1 = OpVariable %2 Private %4
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
+  ast::type::U32Type u32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+
+  ast::DecoratedVariable v(
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &u32));
+  v.set_decorations(std::move(decos));
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
+%2 = OpTypePointer Private %3
+%4 = OpSpecConstant %3 0
+%1 = OpVariable %2 Private %4
 )");
 }
 

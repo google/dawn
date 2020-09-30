@@ -683,12 +683,39 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
   } else if (!var->type()->IsTexture() && !var->type()->IsSampler()) {
-    // If we don't have a constructor and we're an Output or Private variable
-    // then WGSL requires an initializer.
-    if (var->storage_class() == ast::StorageClass::kPrivate ||
-        var->storage_class() == ast::StorageClass::kNone ||
-        var->storage_class() == ast::StorageClass::kOutput) {
-      ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
+    // Certain cases require us to generate a constructor value.
+    //
+    // 1- ConstantId's must be attached to the OpConstant, if we have a
+    //    variable with a constant_id that doesn't have a constructor we make
+    //    one
+    // 2- If we don't have a constructor and we're an Output or Private variable
+    //    then WGSL requires an initializer.
+    auto* type = var->type()->UnwrapPtrIfNeeded();
+    if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
+      if (type->IsF32()) {
+        ast::FloatLiteral l(type, 0.0f);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (type->IsU32()) {
+        ast::UintLiteral l(type, 0);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (type->IsI32()) {
+        ast::SintLiteral l(type, 0);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (type->IsBool()) {
+        ast::BoolLiteral l(type, false);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else {
+        error_ = "invalid type for constant_id, must be scalar";
+        return false;
+      }
+      if (init_id == 0) {
+        return 0;
+      }
+      ops.push_back(Operand::Int(init_id));
+    } else if (var->storage_class() == ast::StorageClass::kPrivate ||
+               var->storage_class() == ast::StorageClass::kNone ||
+               var->storage_class() == ast::StorageClass::kOutput) {
+      ast::NullLiteral nl(type);
       init_id = GenerateLiteralIfNeeded(var, &nl);
       if (init_id == 0) {
         return 0;
