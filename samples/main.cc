@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -50,6 +51,8 @@ struct Options {
   bool emit_single_entry_point = false;
   tint::ast::PipelineStage stage;
   std::string ep_name;
+
+  std::vector<std::string> transforms;
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -67,6 +70,9 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   -ep <compute|fragment|vertex> <name>  -- Output single entry point
   --output-file <name>      -- Output file name.  Use "-" for standard output
   -o <name>                 -- Output file name.  Use "-" for standard output
+  --transform <name list>   -- Runs transformers, name list is comma separated
+                               Available transforms:
+                                bound_array_accessors
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   -h                        -- This help text)";
@@ -156,6 +162,18 @@ tint::ast::PipelineStage convert_to_pipeline_stage(const std::string& name) {
   return tint::ast::PipelineStage::kNone;
 }
 
+std::vector<std::string> split_transform_names(std::string list) {
+  std::vector<std::string> res;
+
+  std::stringstream str(list);
+  while (str.good()) {
+    std::string substr;
+    getline(str, substr, ',');
+    res.push_back(substr);
+  }
+  return res;
+}
+
 bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   for (size_t i = 1; i < args.size(); ++i) {
     const std::string& arg = args[i];
@@ -197,6 +215,13 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 
     } else if (arg == "-h" || arg == "--help") {
       opts->show_help = true;
+    } else if (arg == "--transform") {
+      ++i;
+      if (i >= args.size()) {
+        std::cerr << "Missing value for " << arg << std::endl;
+        return false;
+      }
+      opts->transforms = split_transform_names(args[i]);
     } else if (arg == "--parse-only") {
       opts->parse_only = true;
     } else if (arg == "--dump-ast") {
@@ -471,6 +496,26 @@ int main(int argc, const char** argv) {
   tint::Validator v;
   if (!v.Validate(&mod)) {
     std::cerr << "Validation: " << v.error() << std::endl;
+    return 1;
+  }
+
+  tint::transform::Manager transform_manager;
+  for (const auto& name : options.transforms) {
+    // TODO(dsinclair): The vertex pulling transform requires setup code to
+    // be run that needs user input. Should we find a way to support that here
+    // maybe through a provided file?
+
+    if (name == "bound_array_accessors") {
+      transform_manager.append(
+          std::make_unique<tint::transform::BoundArrayAccessorsTransform>(
+              &ctx, &mod));
+    } else {
+      std::cerr << "Unknown transform name: " << name << std::endl;
+      return 1;
+    }
+  }
+  if (!transform_manager.Run()) {
+    std::cerr << "Transformer: " << transform_manager.error() << std::endl;
     return 1;
   }
 

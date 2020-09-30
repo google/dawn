@@ -21,6 +21,8 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/context.h"
 #include "src/reader/reader.h"
+#include "src/transform/bound_array_accessors_transform.h"
+#include "src/transform/manager.h"
 #include "src/transform/vertex_pulling_transform.h"
 #include "src/type_determiner.h"
 #include "src/type_manager.h"
