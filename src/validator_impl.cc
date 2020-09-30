@@ -250,7 +250,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   auto* cond_type = s->condition()->result_type()->UnwrapAliasPtrAlias();
   if (!(cond_type->IsI32() || cond_type->IsU32())) {
     set_error(s->condition()->source(),
-              "v-switch01: switch statement selector expression must be of a "
+              "v-0025: switch statement selector expression must be of a "
               "scalar integer type");
     return false;
   }
@@ -270,7 +270,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
       auto* selector_ptr = selector.get();
       if (cond_type != selector_ptr->type()) {
         set_error(case_stmt.get()->source(),
-                  "v-switch03: the case selector values must have the same "
+                  "v-0026: the case selector values must have the same "
                   "type as the selector expression.");
         return false;
       }
@@ -282,11 +282,10 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
         auto v_str = selector_ptr->type()->IsU32()
                          ? selector_ptr->AsUint()->to_str()
                          : selector_ptr->AsSint()->to_str();
-        set_error(
-            case_stmt.get()->source(),
-            "v-switch04: a literal value must not appear more than once in "
-            "the case selectors for a switch statement: '" +
-                v_str + "'");
+        set_error(case_stmt.get()->source(),
+                  "v-0027: a literal value must not appear more than once in "
+                  "the case selectors for a switch statement: '" +
+                      v_str + "'");
         return false;
       }
       selector_set.emplace(v);
@@ -303,7 +302,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   auto* last_stmt_of_last_clause = last_clause->AsCase()->body()->last();
   if (last_stmt_of_last_clause && last_stmt_of_last_clause->IsFallthrough()) {
     set_error(last_stmt_of_last_clause->source(),
-              "v-switch05: a fallthrough statement must not appear as "
+              "v-0028: a fallthrough statement must not appear as "
               "the last statement in last clause of a switch");
     return false;
   }
