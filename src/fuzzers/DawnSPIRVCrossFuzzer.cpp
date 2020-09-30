@@ -20,6 +20,9 @@
 #include <vector>
 
 #include <spirv-tools/libspirv.hpp>
+#ifdef DAWN_ENABLE_WGSL
+#    include <tint/tint.h>
+#endif  // DAWN_ENABLE_WGSL
 
 #include "DawnSPIRVCrossFuzzer.h"
 
@@ -31,7 +34,7 @@ namespace {
     // Handler to trap signals, so that it doesn't crash the fuzzer when running
     // the code under test. The code being fuzzed uses abort() to report errors
     // like bad input instead of returning an error code.
-    [[noreturn]] static void sigabrt_trap(int sig) {
+    [[noreturn]] static void sigabrt_trap(int) {
         std::longjmp(jump_buffer, 1);
     }
 
@@ -68,18 +71,47 @@ namespace DawnSPIRVCrossFuzzer {
         const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
         std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
 
+        // Using Tint SPIRV->SPIRV to normalize inputs if supported.
+#ifdef DAWN_ENABLE_WGSL
+        tint::Context context;
+        tint::reader::spirv::Parser parser(&context, input);
+
+        if (!parser.Parse()) {
+            return 0;
+        }
+
+        tint::ast::Module module = parser.module();
+        if (!module.IsValid()) {
+            return 0;
+        }
+
+        tint::TypeDeterminer type_determiner(&context, &module);
+        if (!type_determiner.Determine()) {
+            return 0;
+        }
+
+        tint::writer::spirv::Generator generator(std::move(module));
+        if (!generator.Generate()) {
+            return 0;
+        }
+
+        std::vector<uint32_t> spirv = generator.result();
+#else
+        std::vector<uint32_t> spirv = std::move(input);
+#endif
+
         spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
         spirvTools.SetMessageConsumer(
             [](spv_message_level_t, const char*, const spv_position_t&, const char*) {});
 
-        // Dawn is responsible to validating input before it goes into
+        // Dawn is responsible to validating inputs before they go to
         // SPIRV-Cross.
-        if (!spirvTools.Validate(input.data(), input.size())) {
+        if (!spirvTools.Validate(spirv.data(), spirv.size())) {
             return 0;
         }
 
-        if (input.size() != 0) {
-            task(input);
+        if (spirv.size() != 0) {
+            task(spirv);
         }
 
         return 0;

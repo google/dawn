@@ -17,8 +17,7 @@ tint_spirv_tools_dir = "//third_party/SPIRV-Tools"
 tint_googletest_dir = "//third_party/googletest"
 tint_spirv_headers_dir = "//third_party/spirv-headers"
 
-# Only need the WGSL->SPIR-V transformation
-tint_build_spv_reader = false
+tint_build_spv_reader = true
 tint_build_spv_writer = true
 tint_build_wgsl_reader = true
 tint_build_wgsl_writer = false
