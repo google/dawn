@@ -292,6 +292,26 @@ namespace dawn_native {
                     std::isnan(colorAttachment.clearColor.a)) {
                     return DAWN_VALIDATION_ERROR("Color clear value cannot contain NaN");
                 }
+
+                if (attachment->GetFormat().HasComponentType(Format::Type::Uint) &&
+                    (colorAttachment.clearColor.r < 0 || colorAttachment.clearColor.g < 0 ||
+                     colorAttachment.clearColor.b < 0 || colorAttachment.clearColor.a < 0)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Clear values less than zero are invalid for unsigned integer formats.");
+                }
+
+                constexpr double k2ToThe24 = 16777216.0;
+
+                if ((attachment->GetFormat().HasComponentType(Format::Type::Uint) ||
+                     attachment->GetFormat().HasComponentType(Format::Type::Sint)) &&
+                    (std::abs(colorAttachment.clearColor.r) > k2ToThe24 ||
+                     std::abs(colorAttachment.clearColor.g) > k2ToThe24 ||
+                     std::abs(colorAttachment.clearColor.b) > k2ToThe24 ||
+                     std::abs(colorAttachment.clearColor.a) > k2ToThe24)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Clear values with an absolute value of more than 16777216.0 (2^24) "
+                        "are invalid for integer formats.");
+                }
             }
 
             DAWN_TRY(ValidateOrSetColorAttachmentSampleCount(attachment, sampleCount));

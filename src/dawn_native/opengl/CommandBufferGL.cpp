@@ -935,11 +935,11 @@ namespace dawn_native { namespace opengl {
                         gl.ClearBufferfv(GL_COLOR, i, appliedClearColor.data());
                     } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
                         const std::array<uint32_t, 4> appliedClearColor =
-                            ConvertToFloatToUnsignedIntegerColor(attachmentInfo->clearColor);
+                            ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
                     } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
                         const std::array<int32_t, 4> appliedClearColor =
-                            ConvertToFloatToSignedIntegerColor(attachmentInfo->clearColor);
+                            ConvertToSignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
                     } else {
                         UNREACHABLE();

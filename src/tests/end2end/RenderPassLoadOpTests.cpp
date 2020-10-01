@@ -238,28 +238,37 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
 
 // This test verifies that input double values are being rounded to floats internally when
 // clearing.
-TEST_P(RenderPassLoadOpTests, LoadOpClearLargeIntegerValueRounding) {
-    // Intel GPUs fail when we attempt to clear to a value that exceeds 2147483647 on a RGBA32Uint
-    // texture.
-    // Bug: dawn:530
-    DAWN_SKIP_TEST_IF(IsIntel() && IsD3D12());
+TEST_P(RenderPassLoadOpTests, LoadOpClear2ToThe24IntegerFormats) {
+    constexpr double k2ToThe24Double = 16777216.0;
+    constexpr uint32_t k2ToThe24Uint = static_cast<uint32_t>(k2ToThe24Double);
 
     // RGBA32Uint
     {
-        constexpr wgpu::Color kClearColor = {4194966911.0, 3555555555.0, 2555555555.0,
-                                             1555555555.0};
-        constexpr std::array<uint32_t, 4> kExpectedPixelValue = {4194966784, 3555555584, 2555555584,
-                                                                 1555555584};
+        constexpr wgpu::Color kClearColor = {k2ToThe24Double, k2ToThe24Double, k2ToThe24Double,
+                                             k2ToThe24Double};
+        constexpr std::array<uint32_t, 4> kExpectedPixelValue = {k2ToThe24Uint, k2ToThe24Uint,
+                                                                 k2ToThe24Uint, k2ToThe24Uint};
         TestIntegerClearColor<uint32_t>(wgpu::TextureFormat::RGBA32Uint, kClearColor,
                                         kExpectedPixelValue);
     }
 
-    // RGBA32Sint
+    constexpr int32_t k2ToThe24Sint = static_cast<int32_t>(k2ToThe24Double);
+    // RGBA32Sint For +2^24
     {
-        constexpr wgpu::Color kClearColor = {2147483447.0, -2147483447.0, 1000000555.0,
-                                             -1000000555.0};
-        constexpr std::array<int32_t, 4> kExpectedPixelValue = {2147483392, -2147483392, 1000000576,
-                                                                -1000000576};
+        constexpr wgpu::Color kClearColor = {k2ToThe24Double, k2ToThe24Double, k2ToThe24Double,
+                                             k2ToThe24Double};
+        constexpr std::array<int32_t, 4> kExpectedPixelValue = {k2ToThe24Sint, k2ToThe24Sint,
+                                                                k2ToThe24Sint, k2ToThe24Sint};
+        TestIntegerClearColor<int32_t>(wgpu::TextureFormat::RGBA32Sint, kClearColor,
+                                       kExpectedPixelValue);
+    }
+
+    // RGBA32Sint For -2^24
+    {
+        constexpr wgpu::Color kClearColor = {-k2ToThe24Double, -k2ToThe24Double, -k2ToThe24Double,
+                                             -k2ToThe24Double};
+        constexpr std::array<int32_t, 4> kExpectedPixelValue = {-k2ToThe24Sint, -k2ToThe24Sint,
+                                                                -k2ToThe24Sint, -k2ToThe24Sint};
         TestIntegerClearColor<int32_t>(wgpu::TextureFormat::RGBA32Sint, kClearColor,
                                        kExpectedPixelValue);
     }

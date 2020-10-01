@@ -317,13 +317,13 @@ namespace dawn_native { namespace vulkan {
                         }
                     } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
                         const std::array<uint32_t, 4> appliedClearColor =
-                            ConvertToFloatToUnsignedIntegerColor(attachmentInfo.clearColor);
+                            ConvertToUnsignedIntegerColor(attachmentInfo.clearColor);
                         for (uint32_t i = 0; i < 4; ++i) {
                             clearValues[attachmentCount].color.uint32[i] = appliedClearColor[i];
                         }
                     } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
                         const std::array<int32_t, 4> appliedClearColor =
-                            ConvertToFloatToSignedIntegerColor(attachmentInfo.clearColor);
+                            ConvertToSignedIntegerColor(attachmentInfo.clearColor);
                         for (uint32_t i = 0; i < 4; ++i) {
                             clearValues[attachmentCount].color.int32[i] = appliedClearColor[i];
                         }

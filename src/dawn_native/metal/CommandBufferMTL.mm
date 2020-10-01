@@ -62,14 +62,12 @@ namespace dawn_native { namespace metal {
                 auto& attachmentInfo = renderPass->colorAttachments[attachment];
 
                 switch (attachmentInfo.loadOp) {
-                    case wgpu::LoadOp::Clear: {
+                    case wgpu::LoadOp::Clear:
                         descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
-                        const std::array<double, 4> clearColor =
-                            ConvertToFloatToDoubleColor(attachmentInfo.clearColor);
                         descriptor.colorAttachments[i].clearColor = MTLClearColorMake(
-                            clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+                            attachmentInfo.clearColor.r, attachmentInfo.clearColor.g,
+                            attachmentInfo.clearColor.b, attachmentInfo.clearColor.a);
                         break;
-                    }
 
                     case wgpu::LoadOp::Load:
                         descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
@@ -1240,12 +1238,10 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBlendColor: {
                     SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
-                    const std::array<double, 4> blendColor =
-                        ConvertToFloatToDoubleColor(cmd->color);
-                    [encoder setBlendColorRed:blendColor[0]
-                                        green:blendColor[1]
-                                         blue:blendColor[2]
-                                        alpha:blendColor[3]];
+                    [encoder setBlendColorRed:cmd->color.r
+                                        green:cmd->color.g
+                                         blue:cmd->color.b
+                                        alpha:cmd->color.a];
                     break;
                 }
 
