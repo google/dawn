@@ -453,14 +453,14 @@ class TextureViewRenderingTest : public DawnTest {
                                            uint32_t layerCount,
                                            uint32_t levelCount,
                                            uint32_t textureViewBaseLayer,
-                                           uint32_t textureViewBaseLevel) {
+                                           uint32_t textureViewBaseLevel,
+                                           uint32_t textureWidthLevel0,
+                                           uint32_t textureHeightLevel0) {
         ASSERT(dimension == wgpu::TextureViewDimension::e2D ||
                dimension == wgpu::TextureViewDimension::e2DArray);
         ASSERT_LT(textureViewBaseLayer, layerCount);
         ASSERT_LT(textureViewBaseLevel, levelCount);
 
-        const uint32_t textureWidthLevel0 = 1 << levelCount;
-        const uint32_t textureHeightLevel0 = 1 << levelCount;
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0,
@@ -511,8 +511,8 @@ class TextureViewRenderingTest : public DawnTest {
         queue.Submit(1, &commands);
 
         // Check if the right pixels (Green) have been written into the right part of the texture.
-        uint32_t textureViewWidth = textureWidthLevel0 >> textureViewBaseLevel;
-        uint32_t textureViewHeight = textureHeightLevel0 >> textureViewBaseLevel;
+        uint32_t textureViewWidth = std::max(1u, textureWidthLevel0 >> textureViewBaseLevel);
+        uint32_t textureViewHeight = std::max(1u, textureHeightLevel0 >> textureViewBaseLevel);
         uint32_t bytesPerRow =
             Align(kBytesPerTexel * textureWidthLevel0, kTextureBytesPerRowAlignment);
         uint32_t expectedDataSize =
@@ -534,14 +534,43 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALevelOf2DTextureAsColorAttachme
     {
         constexpr uint32_t kBaseLevel = 0;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 
     // Rendering into the last level
     {
         constexpr uint32_t kBaseLevel = kMipLevels - 1;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
+    }
+}
+
+// Test rendering into a 2D texture view created on a mipmap level of a rectangular 2D texture.
+TEST_P(TextureViewRenderingTest, Texture2DViewOnALevelOfRectangular2DTextureAsColorAttachment) {
+    constexpr uint32_t kLayers = 1;
+    constexpr uint32_t kMipLevels = 4;
+    constexpr uint32_t kBaseLayer = 0;
+
+    // Rendering into the first level
+    {
+        constexpr uint32_t kBaseLevel = 0;
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels,
+                                          1 << (kMipLevels - 2));
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel, 1 << (kMipLevels - 2),
+                                          1 << kMipLevels);
+    }
+
+    // Rendering into the last level
+    {
+        constexpr uint32_t kBaseLevel = kMipLevels - 1;
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels,
+                                          1 << (kMipLevels - 2));
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel, 1 << (kMipLevels - 2),
+                                          1 << kMipLevels);
     }
 }
 
@@ -555,14 +584,14 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALayerOf2DArrayTextureAsColorAtt
     {
         constexpr uint32_t kBaseLayer = 0;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 
     // Rendering into the last layer
     {
         constexpr uint32_t kBaseLayer = kLayers - 1;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 }
 
@@ -576,14 +605,14 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALevelOf2DTextureAsColorAtt
     {
         constexpr uint32_t kBaseLevel = 0;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 
     // Rendering into the last level
     {
         constexpr uint32_t kBaseLevel = kMipLevels - 1;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 }
 
@@ -597,14 +626,14 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
     {
         constexpr uint32_t kBaseLayer = 0;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 
     // Rendering into the last layer
     {
         constexpr uint32_t kBaseLayer = kLayers - 1;
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
-                                          kBaseLayer, kBaseLevel);
+                                          kBaseLayer, kBaseLevel, 1 << kMipLevels, 1 << kMipLevels);
     }
 }
 

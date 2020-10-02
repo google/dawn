@@ -186,16 +186,15 @@ namespace dawn_native {
         MaybeError ValidateOrSetAttachmentSize(const TextureViewBase* attachment,
                                                uint32_t* width,
                                                uint32_t* height) {
-            const Extent3D& textureSize = attachment->GetTexture()->GetSize();
-            const uint32_t attachmentWidth = textureSize.width >> attachment->GetBaseMipLevel();
-            const uint32_t attachmentHeight = textureSize.height >> attachment->GetBaseMipLevel();
+            const Extent3D& attachmentSize =
+                attachment->GetTexture()->GetMipLevelVirtualSize(attachment->GetBaseMipLevel());
 
             if (*width == 0) {
                 DAWN_ASSERT(*height == 0);
-                *width = attachmentWidth;
-                *height = attachmentHeight;
+                *width = attachmentSize.width;
+                *height = attachmentSize.height;
                 DAWN_ASSERT(*width != 0 && *height != 0);
-            } else if (*width != attachmentWidth || *height != attachmentHeight) {
+            } else if (*width != attachmentSize.width || *height != attachmentSize.height) {
                 return DAWN_VALIDATION_ERROR("Attachment size mismatch");
             }
 
