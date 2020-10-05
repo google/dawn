@@ -26,7 +26,7 @@ namespace dawn_wire {
     }
 
     // static
-    DawnProcTable WireClient::GetProcs() {
+    const DawnProcTable& WireClient::GetProcs() {
         return client::GetProcs();
     }
 

@@ -29,8 +29,7 @@ using namespace dawn_wire;
 class WireMultipleDeviceTests : public testing::Test {
   protected:
     void SetUp() override {
-        DawnProcTable procs = dawn_wire::WireClient::GetProcs();
-        dawnProcSetProcs(&procs);
+        dawnProcSetProcs(&dawn_wire::client::GetProcs());
     }
 
     void TearDown() override {

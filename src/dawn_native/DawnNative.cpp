@@ -22,9 +22,9 @@
 
 namespace dawn_native {
 
-    DawnProcTable GetProcsAutogen();
+    const DawnProcTable& GetProcsAutogen();
 
-    DawnProcTable GetProcs() {
+    const DawnProcTable& GetProcs() {
         return GetProcsAutogen();
     }
 

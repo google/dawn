@@ -68,7 +68,7 @@ namespace dawn_wire { namespace client {
         bool mIsDisconnected = false;
     };
 
-    DawnProcTable GetProcs();
+    const DawnProcTable& GetProcs();
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
