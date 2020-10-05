@@ -41,7 +41,6 @@ class InspectorHelper {
     mod()->AddFunction(std::move(func));
   }
 
-  Context* ctx() { return &ctx_; }
   ast::Module* mod() { return mod_.get(); }
   Inspector* inspector() { return inspector_.get(); }
 
