@@ -188,8 +188,10 @@ set(TINT_LIB_SRCS
   ast/variable_decl_statement.h
   ast/workgroup_decoration.cc
   ast/workgroup_decoration.h
-  context.h
   context.cc
+  context.h
+  inspector.cc
+  inspector.h
   reader/reader.cc
   reader/reader.h
   scope_stack.h
@@ -360,6 +362,7 @@ set(TINT_TEST_SRCS
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
+  inspector_test.cc
   scope_stack_test.cc
   transform/bound_array_accessors_transform_test.cc
   transform/vertex_pulling_transform_test.cc
