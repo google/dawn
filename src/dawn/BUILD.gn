@@ -87,10 +87,7 @@ source_set("dawncpp") {
 
 dawn_json_generator("dawn_proc_gen") {
   target = "dawn_proc"
-  outputs = [
-    "src/dawn/dawn_proc.c",
-    "src/dawn/dawn_thread_dispatch_proc.cpp",
-  ]
+  outputs = [ "src/dawn/dawn_proc.c" ]
 }
 
 dawn_component("dawn_proc") {
@@ -99,8 +96,5 @@ dawn_component("dawn_proc") {
   public_deps = [ ":dawn_headers" ]
   deps = [ ":dawn_proc_gen" ]
   sources = get_target_outputs(":dawn_proc_gen")
-  sources += [
-    "${dawn_root}/src/include/dawn/dawn_proc.h",
-    "${dawn_root}/src/include/dawn/dawn_thread_dispatch_proc.h",
-  ]
+  sources += [ "${dawn_root}/src/include/dawn/dawn_proc.h" ]
 }

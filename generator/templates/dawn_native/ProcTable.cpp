@@ -135,17 +135,16 @@ namespace dawn_native {
         return result;
     }
 
-    static DawnProcTable gProcTable = {
-        NativeGetProcAddress,
-        NativeCreateInstance,
+    DawnProcTable GetProcsAutogen() {
+        DawnProcTable table;
+        table.getProcAddress = NativeGetProcAddress;
+        table.createInstance = NativeCreateInstance;
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
-                Native{{as_MethodSuffix(type.name, method.name)}},
+                table.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
             {% endfor %}
         {% endfor %}
-    };
-
-    const DawnProcTable& GetProcsAutogen() {
-        return gProcTable;
+        return table;
     }
+
 }

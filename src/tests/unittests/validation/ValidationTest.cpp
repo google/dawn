@@ -40,7 +40,8 @@ ValidationTest::ValidationTest() {
 
     ASSERT(foundNullAdapter);
 
-    dawnProcSetProcs(&dawn_native::GetProcs());
+    DawnProcTable procs = dawn_native::GetProcs();
+    dawnProcSetProcs(&procs);
 
     device = CreateDeviceFromAdapter(adapter, std::vector<const char*>());
 }
