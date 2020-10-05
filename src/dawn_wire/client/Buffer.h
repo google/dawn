@@ -32,7 +32,6 @@ namespace dawn_wire { namespace client {
         static WGPUBuffer CreateError(Device* device);
 
         ~Buffer();
-        void ClearMapRequests(WGPUBufferMapAsyncStatus status);
 
         bool OnMapAsyncCallback(uint32_t requestSerial,
                                 uint32_t status,
@@ -62,6 +61,12 @@ namespace dawn_wire { namespace client {
             void* userdata = nullptr;
             size_t offset = 0;
             size_t size = 0;
+
+            // When the buffer is destroyed or unmapped too early, the unmappedBeforeX status takes
+            // precedence over the success value returned from the server. However Error statuses
+            // from the server take precedence over the client-side status.
+            WGPUBufferMapAsyncStatus clientStatus = WGPUBufferMapAsyncStatus_Success;
+
             // TODO(enga): Use a tagged pointer to save space.
             std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
             std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;

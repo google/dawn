@@ -103,13 +103,9 @@ namespace dawn_wire { namespace client {
     Buffer::~Buffer() {
         // Callbacks need to be fired in all cases, as they can handle freeing resources
         // so we call them with "DestroyedBeforeCallback" status.
-        ClearMapRequests(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
-    }
-
-    void Buffer::ClearMapRequests(WGPUBufferMapAsyncStatus status) {
         for (auto& it : mRequests) {
             if (it.second.callback) {
-                it.second.callback(status, it.second.userdata);
+                it.second.callback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, it.second.userdata);
             }
         }
         mRequests.clear();
@@ -200,10 +196,9 @@ namespace dawn_wire { namespace client {
                                     uint32_t status,
                                     uint64_t readInitialDataInfoLength,
                                     const uint8_t* readInitialDataInfo) {
-        // The requests can have been deleted via an Unmap so this isn't an error.
         auto requestIt = mRequests.find(requestSerial);
         if (requestIt == mRequests.end()) {
-            return true;
+            return false;
         }
 
         auto request = std::move(requestIt->second);
@@ -221,6 +216,11 @@ namespace dawn_wire { namespace client {
         bool isRead = request.readHandle != nullptr;
         bool isWrite = request.writeHandle != nullptr;
         ASSERT(isRead != isWrite);
+
+        // Take into account the client-side status of the request if the server says it is a success.
+        if (status == WGPUBufferMapAsyncStatus_Success) {
+            status = request.clientStatus;
+        }
 
         size_t mappedDataLength = 0;
         const void* mappedData = nullptr;
@@ -326,7 +326,13 @@ namespace dawn_wire { namespace client {
         mMappedData = nullptr;
         mMapOffset = 0;
         mMapSize = 0;
-        ClearMapRequests(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
+
+        // Tag all mapping requests still in flight as unmapped before callback.
+        for (auto& it : mRequests) {
+            if (it.second.clientStatus == WGPUBufferMapAsyncStatus_Success) {
+                it.second.clientStatus = WGPUBufferMapAsyncStatus_UnmappedBeforeCallback;
+            }
+        }
 
         BufferUnmapCmd cmd;
         cmd.self = ToAPI(this);
@@ -334,11 +340,17 @@ namespace dawn_wire { namespace client {
     }
 
     void Buffer::Destroy() {
-        // Cancel or remove all mappings
+        // Remove the current mapping.
         mWriteHandle = nullptr;
         mReadHandle = nullptr;
         mMappedData = nullptr;
-        ClearMapRequests(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+
+        // Tag all mapping requests still in flight as destroyed before callback.
+        for (auto& it : mRequests) {
+            if (it.second.clientStatus == WGPUBufferMapAsyncStatus_Success) {
+                it.second.clientStatus = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
+            }
+        }
 
         BufferDestroyCmd cmd;
         cmd.self = ToAPI(this);
