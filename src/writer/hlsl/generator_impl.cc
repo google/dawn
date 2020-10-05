@@ -473,17 +473,11 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
   if (intrinsic == ast::Intrinsic::kAll) {
     return "all";
   }
+  if (intrinsic == ast::Intrinsic::kCountOneBits) {
+    return "countbits";
+  }
   if (intrinsic == ast::Intrinsic::kDot) {
     return "dot";
-  }
-  if (intrinsic == ast::Intrinsic::kIsFinite) {
-    return "isfinite";
-  }
-  if (intrinsic == ast::Intrinsic::kIsInf) {
-    return "isinf";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNan) {
-    return "isnan";
   }
   if (intrinsic == ast::Intrinsic::kDpdy) {
     return "ddy";
@@ -507,6 +501,18 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
       intrinsic == ast::Intrinsic::kFwidthFine ||
       intrinsic == ast::Intrinsic::kFwidthCoarse) {
     return "fwidth";
+  }
+  if (intrinsic == ast::Intrinsic::kIsFinite) {
+    return "isfinite";
+  }
+  if (intrinsic == ast::Intrinsic::kIsInf) {
+    return "isinf";
+  }
+  if (intrinsic == ast::Intrinsic::kIsNan) {
+    return "isnan";
+  }
+  if (intrinsic == ast::Intrinsic::kReverseBits) {
+    return "reversebits";
   }
   return "";
 }

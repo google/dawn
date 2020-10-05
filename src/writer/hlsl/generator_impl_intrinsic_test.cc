@@ -46,6 +46,7 @@ INSTANTIATE_TEST_SUITE_P(
     HlslIntrinsicTest,
     testing::Values(IntrinsicData{ast::Intrinsic::kAny, "any"},
                     IntrinsicData{ast::Intrinsic::kAll, "all"},
+                    IntrinsicData{ast::Intrinsic::kCountOneBits, "countbits"},
                     IntrinsicData{ast::Intrinsic::kDot, "dot"},
                     IntrinsicData{ast::Intrinsic::kDpdx, "ddx"},
                     IntrinsicData{ast::Intrinsic::kDpdxCoarse, "ddx_coarse"},
@@ -58,7 +59,9 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{ast::Intrinsic::kFwidthFine, "fwidth"},
                     IntrinsicData{ast::Intrinsic::kIsFinite, "isfinite"},
                     IntrinsicData{ast::Intrinsic::kIsInf, "isinf"},
-                    IntrinsicData{ast::Intrinsic::kIsNan, "isnan"}));
+                    IntrinsicData{ast::Intrinsic::kIsNan, "isnan"},
+                    IntrinsicData{ast::Intrinsic::kReverseBits,
+                                  "reversebits"}));
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_IsNormal) {
   FAIL();

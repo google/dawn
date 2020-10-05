@@ -413,23 +413,11 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
   if (intrinsic == ast::Intrinsic::kAll) {
     return "all";
   }
+  if (intrinsic == ast::Intrinsic::kCountOneBits) {
+    return "popcount";
+  }
   if (intrinsic == ast::Intrinsic::kDot) {
     return "dot";
-  }
-  if (intrinsic == ast::Intrinsic::kIsFinite) {
-    return "isfinite";
-  }
-  if (intrinsic == ast::Intrinsic::kIsInf) {
-    return "isinf";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNan) {
-    return "isnan";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNormal) {
-    return "isnormal";
-  }
-  if (intrinsic == ast::Intrinsic::kSelect) {
-    return "select";
   }
   if (intrinsic == ast::Intrinsic::kDpdy ||
       intrinsic == ast::Intrinsic::kDpdyFine ||
@@ -445,6 +433,24 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
       intrinsic == ast::Intrinsic::kFwidthFine ||
       intrinsic == ast::Intrinsic::kFwidthCoarse) {
     return "fwidth";
+  }
+  if (intrinsic == ast::Intrinsic::kIsFinite) {
+    return "isfinite";
+  }
+  if (intrinsic == ast::Intrinsic::kIsInf) {
+    return "isinf";
+  }
+  if (intrinsic == ast::Intrinsic::kIsNan) {
+    return "isnan";
+  }
+  if (intrinsic == ast::Intrinsic::kIsNormal) {
+    return "isnormal";
+  }
+  if (intrinsic == ast::Intrinsic::kReverseBits) {
+    return "reverse_bits";
+  }
+  if (intrinsic == ast::Intrinsic::kSelect) {
+    return "select";
   }
   return "";
 }

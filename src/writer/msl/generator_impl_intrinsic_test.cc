@@ -50,6 +50,7 @@ INSTANTIATE_TEST_SUITE_P(
     MslIntrinsicTest,
     testing::Values(IntrinsicData{ast::Intrinsic::kAny, "any"},
                     IntrinsicData{ast::Intrinsic::kAll, "all"},
+                    IntrinsicData{ast::Intrinsic::kCountOneBits, "popcount"},
                     IntrinsicData{ast::Intrinsic::kDot, "dot"},
                     IntrinsicData{ast::Intrinsic::kDpdx, "dfdx"},
                     IntrinsicData{ast::Intrinsic::kDpdxCoarse, "dfdx"},
@@ -64,6 +65,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{ast::Intrinsic::kIsInf, "isinf"},
                     IntrinsicData{ast::Intrinsic::kIsNan, "isnan"},
                     IntrinsicData{ast::Intrinsic::kIsNormal, "isnormal"},
+                    IntrinsicData{ast::Intrinsic::kReverseBits, "reverse_bits"},
                     IntrinsicData{ast::Intrinsic::kSelect, "select"}));
 
 TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
