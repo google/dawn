@@ -46,6 +46,8 @@ std::ostream& operator<<(std::ostream& out, StorageAccess access) {
   return out;
 }
 
+// Note, these names match the names in the WGSL spec. This behaviour is used
+// in the WGSL writer to emit the texture format names.
 std::ostream& operator<<(std::ostream& out, ImageFormat format) {
   switch (format) {
     case ImageFormat::kNone:
@@ -106,7 +108,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
       out << "rgba8unorm";
       break;
     case ImageFormat::kRgba8UnormSrgb:
-      out << "rgba8unorm-srgb";
+      out << "rgba8unorm_srgb";
       break;
     case ImageFormat::kRgba8Snorm:
       out << "rgba8snorm";
@@ -121,7 +123,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
       out << "bgra8unorm";
       break;
     case ImageFormat::kBgra8UnormSrgb:
-      out << "rbgra8unorm-srgb";
+      out << "bgra8unorm_srgb";
       break;
     case ImageFormat::kRgb10A2Unorm:
       out << "rgb10a2unorm";

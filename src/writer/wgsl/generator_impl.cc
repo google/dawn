@@ -379,114 +379,11 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
 bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
   switch (fmt) {
-    case ast::type::ImageFormat::kBgra8Unorm:
-      out_ << "bgra8unorm";
-      break;
-    case ast::type::ImageFormat::kBgra8UnormSrgb:
-      out_ << "bgra8unorm_srgb";
-      break;
-    case ast::type::ImageFormat::kR16Float:
-      out_ << "r16float";
-      break;
-    case ast::type::ImageFormat::kR16Sint:
-      out_ << "r16sint";
-      break;
-    case ast::type::ImageFormat::kR16Uint:
-      out_ << "r16uint";
-      break;
-    case ast::type::ImageFormat::kR32Float:
-      out_ << "r32float";
-      break;
-    case ast::type::ImageFormat::kR32Sint:
-      out_ << "r32sint";
-      break;
-    case ast::type::ImageFormat::kR32Uint:
-      out_ << "r32uint";
-      break;
-    case ast::type::ImageFormat::kR8Sint:
-      out_ << "r8sint";
-      break;
-    case ast::type::ImageFormat::kR8Snorm:
-      out_ << "r8snorm";
-      break;
-    case ast::type::ImageFormat::kR8Uint:
-      out_ << "r8uint";
-      break;
-    case ast::type::ImageFormat::kR8Unorm:
-      out_ << "r8unorm";
-      break;
-    case ast::type::ImageFormat::kRg11B10Float:
-      out_ << "rg11b10float";
-      break;
-    case ast::type::ImageFormat::kRg16Float:
-      out_ << "rg16float";
-      break;
-    case ast::type::ImageFormat::kRg16Sint:
-      out_ << "rg16sint";
-      break;
-    case ast::type::ImageFormat::kRg16Uint:
-      out_ << "rg16uint";
-      break;
-    case ast::type::ImageFormat::kRg32Float:
-      out_ << "rg32float";
-      break;
-    case ast::type::ImageFormat::kRg32Sint:
-      out_ << "rg32sint";
-      break;
-    case ast::type::ImageFormat::kRg32Uint:
-      out_ << "rg32uint";
-      break;
-    case ast::type::ImageFormat::kRg8Sint:
-      out_ << "rg8sint";
-      break;
-    case ast::type::ImageFormat::kRg8Snorm:
-      out_ << "rg8snorm";
-      break;
-    case ast::type::ImageFormat::kRg8Uint:
-      out_ << "rg8uint";
-      break;
-    case ast::type::ImageFormat::kRg8Unorm:
-      out_ << "rg8unorm";
-      break;
-    case ast::type::ImageFormat::kRgb10A2Unorm:
-      out_ << "rgb10a2unorm";
-      break;
-    case ast::type::ImageFormat::kRgba16Float:
-      out_ << "rgba16float";
-      break;
-    case ast::type::ImageFormat::kRgba16Sint:
-      out_ << "rgba16sint";
-      break;
-    case ast::type::ImageFormat::kRgba16Uint:
-      out_ << "rgba16uint";
-      break;
-    case ast::type::ImageFormat::kRgba32Float:
-      out_ << "rgba32float";
-      break;
-    case ast::type::ImageFormat::kRgba32Sint:
-      out_ << "rgba32sint";
-      break;
-    case ast::type::ImageFormat::kRgba32Uint:
-      out_ << "rgba32uint";
-      break;
-    case ast::type::ImageFormat::kRgba8Sint:
-      out_ << "rgba8sint";
-      break;
-    case ast::type::ImageFormat::kRgba8Snorm:
-      out_ << "rgba8snorm";
-      break;
-    case ast::type::ImageFormat::kRgba8Uint:
-      out_ << "rgba8uint";
-      break;
-    case ast::type::ImageFormat::kRgba8Unorm:
-      out_ << "rgba8unorm";
-      break;
-    case ast::type::ImageFormat::kRgba8UnormSrgb:
-      out_ << "rgba8unorm_srgb";
-      break;
-    default:
+    case ast::type::ImageFormat::kNone:
       error_ = "unknown image format";
       return false;
+    default:
+      out_ << fmt;
   }
   return true;
 }
