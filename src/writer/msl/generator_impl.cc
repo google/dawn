@@ -1829,7 +1829,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   make_indent();
 
-  if (var->IsDecorated()) {
+  if (var->IsDecorated() && !var->AsDecorated()->HasConstantIdDecoration()) {
     error_ = "Decorated const values not valid";
     return false;
   }
@@ -1846,7 +1846,10 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << var->name();
   }
 
-  if (var->constructor() != nullptr) {
+  if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
+    out_ << " [[function_constant(" << var->AsDecorated()->constant_id()
+         << ")]]";
+  } else if (var->constructor() != nullptr) {
     out_ << " = ";
     if (!EmitExpression(var->constructor())) {
       return false;

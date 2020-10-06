@@ -16,6 +16,8 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/ast/constant_id_decoration.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -56,6 +58,25 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   EXPECT_EQ(
       g.result(),
       "constant float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
+  ast::type::F32Type f32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+
+  auto var = std::make_unique<ast::DecoratedVariable>(
+      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+  var->set_decorations(std::move(decos));
+  var->set_is_const(true);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::Module m;
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.EmitProgramConstVariable(var.get())) << g.error();
+  EXPECT_EQ(g.result(), "constant float pos [[function_constant(23)]];\n");
 }
 
 }  // namespace

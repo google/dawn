@@ -141,6 +141,8 @@ class Variable : public Node {
 
   /// @returns the expression as a decorated variable
   DecoratedVariable* AsDecorated();
+  /// @returns the expression as a decorated variable
+  const DecoratedVariable* AsDecorated() const;
 
   /// @returns true if the name and path are both present
   bool IsValid() const override;

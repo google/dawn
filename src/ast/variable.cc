@@ -41,6 +41,11 @@ DecoratedVariable* Variable::AsDecorated() {
   return static_cast<DecoratedVariable*>(this);
 }
 
+const DecoratedVariable* Variable::AsDecorated() const {
+  assert(IsDecorated());
+  return static_cast<const DecoratedVariable*>(this);
+}
+
 bool Variable::IsDecorated() const {
   return false;
 }
