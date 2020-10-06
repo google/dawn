@@ -168,6 +168,7 @@ test("dawn_unittests") {
     "unittests/MathTests.cpp",
     "unittests/ObjectBaseTests.cpp",
     "unittests/PerStageTests.cpp",
+    "unittests/PerThreadProcTests.cpp",
     "unittests/PlacementAllocatedTests.cpp",
     "unittests/RefCountedTests.cpp",
     "unittests/ResultTests.cpp",

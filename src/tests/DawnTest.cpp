@@ -744,12 +744,9 @@ void DawnTestBase::SetUp() {
         clientDesc.serializer = mC2sBuf.get();
 
         mWireClient.reset(new dawn_wire::WireClient(clientDesc));
-        WGPUDevice clientDevice = mWireClient->GetDevice();
-        DawnProcTable clientProcs = dawn_wire::WireClient::GetProcs();
+        cDevice = mWireClient->GetDevice();
+        procs = dawn_wire::client::GetProcs();
         mS2cBuf->SetHandler(mWireClient.get());
-
-        procs = clientProcs;
-        cDevice = clientDevice;
     } else {
         procs = backendProcs;
         cDevice = backendDevice;

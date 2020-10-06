@@ -66,8 +66,7 @@ void WireTest::SetUp() {
     mS2cBuf->SetHandler(mWireClient.get());
 
     device = mWireClient->GetDevice();
-    DawnProcTable clientProcs = dawn_wire::WireClient::GetProcs();
-    dawnProcSetProcs(&clientProcs);
+    dawnProcSetProcs(&dawn_wire::client::GetProcs());
 
     apiDevice = mockDevice;
 

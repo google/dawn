@@ -72,7 +72,7 @@ namespace {
                     mWireClient = std::make_unique<dawn_wire::WireClient>(clientDesc);
 
                     mDevice = wgpu::Device::Acquire(mWireClient->GetDevice());
-                    mProcs = dawn_wire::WireClient::GetProcs();
+                    mProcs = dawn_wire::client::GetProcs();
                     break;
                 }
 

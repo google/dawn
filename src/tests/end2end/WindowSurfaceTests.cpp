@@ -50,8 +50,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
         });
         DAWN_SKIP_TEST_IF(!glfwInit());
 
-        DawnProcTable procs = dawn_native::GetProcs();
-        dawnProcSetProcs(&procs);
+        dawnProcSetProcs(&dawn_native::GetProcs());
 
         mInstance = wgpu::CreateInstance();
     }

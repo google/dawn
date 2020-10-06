@@ -17,6 +17,7 @@
 
 #include "dawn/webgpu.h"
 
+// Note: Often allocated as a static global. Do not add a complex constructor.
 typedef struct DawnProcTable {
     WGPUProcGetProcAddress getProcAddress;
     WGPUProcCreateInstance createInstance;
