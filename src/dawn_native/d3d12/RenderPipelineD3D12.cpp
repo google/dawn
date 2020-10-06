@@ -346,10 +346,9 @@ namespace dawn_native { namespace d3d12 {
         descriptorD3D12.RasterizerState.CullMode = D3D12CullMode(GetCullMode());
         descriptorD3D12.RasterizerState.FrontCounterClockwise =
             (GetFrontFace() == wgpu::FrontFace::CCW) ? TRUE : FALSE;
-        descriptorD3D12.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-        descriptorD3D12.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-        descriptorD3D12.RasterizerState.SlopeScaledDepthBias =
-            D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+        descriptorD3D12.RasterizerState.DepthBias = GetDepthBias();
+        descriptorD3D12.RasterizerState.DepthBiasClamp = GetDepthBiasClamp();
+        descriptorD3D12.RasterizerState.SlopeScaledDepthBias = GetDepthBiasSlopeScale();
         descriptorD3D12.RasterizerState.DepthClipEnable = TRUE;
         descriptorD3D12.RasterizerState.MultisampleEnable = (GetSampleCount() > 1) ? TRUE : FALSE;
         descriptorD3D12.RasterizerState.AntialiasedLineEnable = FALSE;

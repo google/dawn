@@ -275,6 +275,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/CullingTests.cpp",
     "end2end/DebugMarkerTests.cpp",
     "end2end/DeprecatedAPITests.cpp",
+    "end2end/DepthBiasTests.cpp",
     "end2end/DepthSamplingTests.cpp",
     "end2end/DepthStencilCopyTests.cpp",
     "end2end/DepthStencilStateTests.cpp",

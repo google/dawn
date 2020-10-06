@@ -379,10 +379,10 @@ namespace dawn_native { namespace vulkan {
         rasterization.polygonMode = VK_POLYGON_MODE_FILL;
         rasterization.cullMode = VulkanCullMode(GetCullMode());
         rasterization.frontFace = VulkanFrontFace(GetFrontFace());
-        rasterization.depthBiasEnable = VK_FALSE;
-        rasterization.depthBiasConstantFactor = 0.0f;
-        rasterization.depthBiasClamp = 0.0f;
-        rasterization.depthBiasSlopeFactor = 0.0f;
+        rasterization.depthBiasEnable = IsDepthBiasEnabled();
+        rasterization.depthBiasConstantFactor = GetDepthBias();
+        rasterization.depthBiasClamp = GetDepthBiasClamp();
+        rasterization.depthBiasSlopeFactor = GetDepthBiasSlopeScale();
         rasterization.lineWidth = 1.0f;
 
         VkPipelineMultisampleStateCreateInfo multisample;
@@ -432,12 +432,11 @@ namespace dawn_native { namespace vulkan {
         colorBlend.blendConstants[2] = 0.0f;
         colorBlend.blendConstants[3] = 0.0f;
 
-        // Tag all state as dynamic but stencil masks.
+        // Tag all state as dynamic but stencil masks and depth bias.
         VkDynamicState dynamicStates[] = {
-            VK_DYNAMIC_STATE_VIEWPORT,          VK_DYNAMIC_STATE_SCISSOR,
-            VK_DYNAMIC_STATE_LINE_WIDTH,        VK_DYNAMIC_STATE_DEPTH_BIAS,
-            VK_DYNAMIC_STATE_BLEND_CONSTANTS,   VK_DYNAMIC_STATE_DEPTH_BOUNDS,
-            VK_DYNAMIC_STATE_STENCIL_REFERENCE,
+            VK_DYNAMIC_STATE_VIEWPORT,     VK_DYNAMIC_STATE_SCISSOR,
+            VK_DYNAMIC_STATE_LINE_WIDTH,   VK_DYNAMIC_STATE_BLEND_CONSTANTS,
+            VK_DYNAMIC_STATE_DEPTH_BOUNDS, VK_DYNAMIC_STATE_STENCIL_REFERENCE,
         };
         VkPipelineDynamicStateCreateInfo dynamic;
         dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

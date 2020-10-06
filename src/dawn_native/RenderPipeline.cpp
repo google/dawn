@@ -540,6 +540,26 @@ namespace dawn_native {
         return mRasterizationState.frontFace;
     }
 
+    bool RenderPipelineBase::IsDepthBiasEnabled() const {
+        ASSERT(!IsError());
+        return mRasterizationState.depthBias != 0 || mRasterizationState.depthBiasSlopeScale != 0;
+    }
+
+    int32_t RenderPipelineBase::GetDepthBias() const {
+        ASSERT(!IsError());
+        return mRasterizationState.depthBias;
+    }
+
+    float RenderPipelineBase::GetDepthBiasSlopeScale() const {
+        ASSERT(!IsError());
+        return mRasterizationState.depthBiasSlopeScale;
+    }
+
+    float RenderPipelineBase::GetDepthBiasClamp() const {
+        ASSERT(!IsError());
+        return mRasterizationState.depthBiasClamp;
+    }
+
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
     RenderPipelineBase::GetColorAttachmentsMask() const {
         ASSERT(!IsError());

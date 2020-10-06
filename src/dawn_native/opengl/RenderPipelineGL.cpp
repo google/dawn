@@ -264,6 +264,19 @@ namespace dawn_native { namespace opengl {
             gl.Disable(GL_SAMPLE_ALPHA_TO_COVERAGE);
         }
 
+        if (IsDepthBiasEnabled()) {
+            gl.Enable(GL_POLYGON_OFFSET_FILL);
+            float depthBias = GetDepthBias();
+            float slopeScale = GetDepthBiasSlopeScale();
+            if (gl.PolygonOffsetClamp != nullptr) {
+                gl.PolygonOffsetClamp(slopeScale, depthBias, GetDepthBiasClamp());
+            } else {
+                gl.PolygonOffset(slopeScale, depthBias);
+            }
+        } else {
+            gl.Disable(GL_POLYGON_OFFSET_FILL);
+        }
+
         for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ApplyColorState(gl, attachmentSlot, GetColorStateDescriptor(attachmentSlot));
         }

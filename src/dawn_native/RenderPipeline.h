@@ -76,6 +76,10 @@ namespace dawn_native {
         wgpu::PrimitiveTopology GetPrimitiveTopology() const;
         wgpu::CullMode GetCullMode() const;
         wgpu::FrontFace GetFrontFace() const;
+        bool IsDepthBiasEnabled() const;
+        int32_t GetDepthBias() const;
+        float GetDepthBiasSlopeScale() const;
+        float GetDepthBiasClamp() const;
 
         ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
         bool HasDepthStencilAttachment() const;
