@@ -311,6 +311,8 @@ uint32_t Builder::total_size() const {
 
   size += size_of(capabilities_);
   size += size_of(preamble_);
+  size += size_of(entry_points_);
+  size += size_of(execution_modes_);
   size += size_of(debug_);
   size += size_of(annotations_);
   size += size_of(types_);
@@ -326,6 +328,12 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
     cb(inst);
   }
   for (const auto& inst : preamble_) {
+    cb(inst);
+  }
+  for (const auto& inst : entry_points_) {
+    cb(inst);
+  }
+  for (const auto& inst : execution_modes_) {
     cb(inst);
   }
   for (const auto& inst : debug_) {
@@ -427,7 +435,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
 
     operands.push_back(Operand::Int(var_id));
   }
-  push_preamble(spv::Op::OpEntryPoint, operands);
+  push_entry_point(spv::Op::OpEntryPoint, operands);
 
   return true;
 }
@@ -435,7 +443,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
 bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
   // WGSL fragment shader origin is upper left
   if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
-    push_preamble(
+    push_execution_mode(
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
   } else if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
@@ -443,9 +451,10 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
     uint32_t y = 0;
     uint32_t z = 0;
     std::tie(x, y, z) = func->workgroup_size();
-    push_preamble(spv::Op::OpExecutionMode,
-                  {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
-                   Operand::Int(x), Operand::Int(y), Operand::Int(z)});
+    push_execution_mode(
+        spv::Op::OpExecutionMode,
+        {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
+         Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
   return true;

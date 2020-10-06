@@ -103,6 +103,22 @@ class Builder {
   }
   /// @returns the preamble
   const InstructionList& preamble() const { return preamble_; }
+  /// Adds an instruction to the entry points
+  /// @param op the op to set
+  /// @param operands the operands for the instruction
+  void push_entry_point(spv::Op op, const OperandList& operands) {
+    entry_points_.push_back(Instruction{op, operands});
+  }
+  /// @returns the entry points
+  const InstructionList& entry_points() const { return entry_points_; }
+  /// Adds an instruction to the execution modes
+  /// @param op the op to set
+  /// @param operands the operands for the instruction
+  void push_execution_mode(spv::Op op, const OperandList& operands) {
+    execution_modes_.push_back(Instruction{op, operands});
+  }
+  /// @returns the execution modes
+  const InstructionList& execution_modes() const { return execution_modes_; }
   /// Adds an instruction to the debug
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -426,6 +442,8 @@ class Builder {
   uint32_t current_label_id_ = 0;
   InstructionList capabilities_;
   InstructionList preamble_;
+  InstructionList entry_points_;
+  InstructionList execution_modes_;
   InstructionList debug_;
   InstructionList types_;
   InstructionList annotations_;

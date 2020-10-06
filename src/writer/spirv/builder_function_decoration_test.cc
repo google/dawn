@@ -48,7 +48,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.preamble()), R"(OpEntryPoint Vertex %3 "main"
+  EXPECT_EQ(DumpInstructions(b.entry_points()), R"(OpEntryPoint Vertex %3 "main"
 )");
 }
 
@@ -73,7 +73,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  auto preamble = b.preamble();
+  auto preamble = b.entry_points();
   ASSERT_TRUE(preamble.size() >= 1u);
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
@@ -131,7 +131,7 @@ OpName %11 "main"
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-  EXPECT_EQ(DumpInstructions(b.preamble()),
+  EXPECT_EQ(DumpInstructions(b.entry_points()),
             R"(OpEntryPoint Vertex %11 "main"
 )");
 }
@@ -200,7 +200,7 @@ OpName %11 "main"
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-  EXPECT_EQ(DumpInstructions(b.preamble()),
+  EXPECT_EQ(DumpInstructions(b.entry_points()),
             R"(OpEntryPoint Vertex %11 "main" %4 %1
 )");
 }
@@ -215,7 +215,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.preamble()),
+  EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 OriginUpperLeft
 )");
 }
@@ -230,7 +230,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.preamble()),
+  EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 1 1 1
 )");
 }
@@ -246,8 +246,41 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.preamble()),
+  EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 2 4 6
+)");
+}
+
+TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
+  ast::type::VoidType void_type;
+
+  ast::Function func1("main1", {}, &void_type);
+  func1.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+
+  ast::Function func2("main2", {}, &void_type);
+  func2.add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(&func2)) << b.error();
+  EXPECT_EQ(DumpBuilder(b),
+            R"(OpEntryPoint Fragment %3 "main1"
+OpEntryPoint Fragment %5 "main2"
+OpExecutionMode %3 OriginUpperLeft
+OpExecutionMode %5 OriginUpperLeft
+OpName %3 "main1"
+OpName %5 "main2"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpFunctionEnd
+%5 = OpFunction %2 None %1
+%6 = OpLabel
+OpFunctionEnd
 )");
 }
 
