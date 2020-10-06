@@ -136,7 +136,6 @@ function(tint_default_compile_options TARGET)
       -std=c++14
       -fno-exceptions
       -fno-rtti
-      -fvisibility=hidden
       -Wall
       -Werror
       -Wextra

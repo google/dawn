@@ -376,6 +376,10 @@ set(TINT_TEST_SRCS
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
+if (${COMPILER_IS_LIKE_GNU})
+  target_compile_options(libtint PRIVATE -fvisibility=hidden)
+endif()
+
 set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
 
 if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
