@@ -47,77 +47,77 @@ namespace dawn_native {
         }
 
 #ifdef DAWN_ENABLE_WGSL
-        tint::ast::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
+        tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
             switch (format) {
                 case wgpu::VertexFormat::UChar2:
-                    return tint::ast::transform::VertexFormat::kVec2U8;
+                    return tint::transform::VertexFormat::kVec2U8;
                 case wgpu::VertexFormat::UChar4:
-                    return tint::ast::transform::VertexFormat::kVec4U8;
+                    return tint::transform::VertexFormat::kVec4U8;
                 case wgpu::VertexFormat::Char2:
-                    return tint::ast::transform::VertexFormat::kVec2I8;
+                    return tint::transform::VertexFormat::kVec2I8;
                 case wgpu::VertexFormat::Char4:
-                    return tint::ast::transform::VertexFormat::kVec4I8;
+                    return tint::transform::VertexFormat::kVec4I8;
                 case wgpu::VertexFormat::UChar2Norm:
-                    return tint::ast::transform::VertexFormat::kVec2U8Norm;
+                    return tint::transform::VertexFormat::kVec2U8Norm;
                 case wgpu::VertexFormat::UChar4Norm:
-                    return tint::ast::transform::VertexFormat::kVec4U8Norm;
+                    return tint::transform::VertexFormat::kVec4U8Norm;
                 case wgpu::VertexFormat::Char2Norm:
-                    return tint::ast::transform::VertexFormat::kVec2I8Norm;
+                    return tint::transform::VertexFormat::kVec2I8Norm;
                 case wgpu::VertexFormat::Char4Norm:
-                    return tint::ast::transform::VertexFormat::kVec4I8Norm;
+                    return tint::transform::VertexFormat::kVec4I8Norm;
                 case wgpu::VertexFormat::UShort2:
-                    return tint::ast::transform::VertexFormat::kVec2U16;
+                    return tint::transform::VertexFormat::kVec2U16;
                 case wgpu::VertexFormat::UShort4:
-                    return tint::ast::transform::VertexFormat::kVec4U16;
+                    return tint::transform::VertexFormat::kVec4U16;
                 case wgpu::VertexFormat::Short2:
-                    return tint::ast::transform::VertexFormat::kVec2I16;
+                    return tint::transform::VertexFormat::kVec2I16;
                 case wgpu::VertexFormat::Short4:
-                    return tint::ast::transform::VertexFormat::kVec4I16;
+                    return tint::transform::VertexFormat::kVec4I16;
                 case wgpu::VertexFormat::UShort2Norm:
-                    return tint::ast::transform::VertexFormat::kVec2U16Norm;
+                    return tint::transform::VertexFormat::kVec2U16Norm;
                 case wgpu::VertexFormat::UShort4Norm:
-                    return tint::ast::transform::VertexFormat::kVec4U16Norm;
+                    return tint::transform::VertexFormat::kVec4U16Norm;
                 case wgpu::VertexFormat::Short2Norm:
-                    return tint::ast::transform::VertexFormat::kVec2I16Norm;
+                    return tint::transform::VertexFormat::kVec2I16Norm;
                 case wgpu::VertexFormat::Short4Norm:
-                    return tint::ast::transform::VertexFormat::kVec4I16Norm;
+                    return tint::transform::VertexFormat::kVec4I16Norm;
                 case wgpu::VertexFormat::Half2:
-                    return tint::ast::transform::VertexFormat::kVec2F16;
+                    return tint::transform::VertexFormat::kVec2F16;
                 case wgpu::VertexFormat::Half4:
-                    return tint::ast::transform::VertexFormat::kVec4F16;
+                    return tint::transform::VertexFormat::kVec4F16;
                 case wgpu::VertexFormat::Float:
-                    return tint::ast::transform::VertexFormat::kF32;
+                    return tint::transform::VertexFormat::kF32;
                 case wgpu::VertexFormat::Float2:
-                    return tint::ast::transform::VertexFormat::kVec2F32;
+                    return tint::transform::VertexFormat::kVec2F32;
                 case wgpu::VertexFormat::Float3:
-                    return tint::ast::transform::VertexFormat::kVec3F32;
+                    return tint::transform::VertexFormat::kVec3F32;
                 case wgpu::VertexFormat::Float4:
-                    return tint::ast::transform::VertexFormat::kVec4F32;
+                    return tint::transform::VertexFormat::kVec4F32;
                 case wgpu::VertexFormat::UInt:
-                    return tint::ast::transform::VertexFormat::kU32;
+                    return tint::transform::VertexFormat::kU32;
                 case wgpu::VertexFormat::UInt2:
-                    return tint::ast::transform::VertexFormat::kVec2U32;
+                    return tint::transform::VertexFormat::kVec2U32;
                 case wgpu::VertexFormat::UInt3:
-                    return tint::ast::transform::VertexFormat::kVec3U32;
+                    return tint::transform::VertexFormat::kVec3U32;
                 case wgpu::VertexFormat::UInt4:
-                    return tint::ast::transform::VertexFormat::kVec4U32;
+                    return tint::transform::VertexFormat::kVec4U32;
                 case wgpu::VertexFormat::Int:
-                    return tint::ast::transform::VertexFormat::kI32;
+                    return tint::transform::VertexFormat::kI32;
                 case wgpu::VertexFormat::Int2:
-                    return tint::ast::transform::VertexFormat::kVec2I32;
+                    return tint::transform::VertexFormat::kVec2I32;
                 case wgpu::VertexFormat::Int3:
-                    return tint::ast::transform::VertexFormat::kVec3I32;
+                    return tint::transform::VertexFormat::kVec3I32;
                 case wgpu::VertexFormat::Int4:
-                    return tint::ast::transform::VertexFormat::kVec4I32;
+                    return tint::transform::VertexFormat::kVec4I32;
             }
         }
 
-        tint::ast::transform::InputStepMode ToTintInputStepMode(wgpu::InputStepMode mode) {
+        tint::transform::InputStepMode ToTintInputStepMode(wgpu::InputStepMode mode) {
             switch (mode) {
                 case wgpu::InputStepMode::Vertex:
-                    return tint::ast::transform::InputStepMode::kVertex;
+                    return tint::transform::InputStepMode::kVertex;
                 case wgpu::InputStepMode::Instance:
-                    return tint::ast::transform::InputStepMode::kInstance;
+                    return tint::transform::InputStepMode::kInstance;
             }
         }
 #endif
@@ -252,17 +252,17 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::ast::transform::VertexPullingTransform transform(&context, &module);
-            auto state = std::make_unique<tint::ast::transform::VertexStateDescriptor>();
+            tint::transform::VertexPullingTransform transform(&context, &module);
+            auto state = std::make_unique<tint::transform::VertexStateDescriptor>();
             for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
                 auto& vertexBuffer = vertexState.vertexBuffers[i];
-                tint::ast::transform::VertexBufferLayoutDescriptor layout;
+                tint::transform::VertexBufferLayoutDescriptor layout;
                 layout.array_stride = vertexBuffer.arrayStride;
                 layout.step_mode = ToTintInputStepMode(vertexBuffer.stepMode);
 
                 for (uint32_t j = 0; j < vertexBuffer.attributeCount; ++j) {
                     auto& attribute = vertexBuffer.attributes[j];
-                    tint::ast::transform::VertexAttributeDescriptor attr;
+                    tint::transform::VertexAttributeDescriptor attr;
                     attr.format = ToTintVertexFormat(attribute.format);
                     attr.offset = attribute.offset;
                     attr.shader_location = attribute.shaderLocation;
@@ -277,7 +277,7 @@ namespace dawn_native {
             transform.SetPullingBufferBindingSet(pullingBufferBindingSet);
 
             if (!transform.Run()) {
-                errorStream << "Vertex pulling transform: " << transform.GetError();
+                errorStream << "Vertex pulling transform: " << transform.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 

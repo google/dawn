@@ -596,19 +596,19 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin position]] var<out> position : vec4<f32>;
+        [[builtin(position)]] var<out> position : vec4<f32>;
+        [[stage(vertex)]]
         fn vertex_main() -> void {
             position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
-        entry_point vertex = vertex_main;
 
-        [[location 0]] var<out> color : vec4<f32>;
+        [[location(0)]] var<out> color : vec4<f32>;
+        [[stage(fragment)]]
         fn fragment_main() -> void {
             color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             return;
         }
-        entry_point fragment = fragment_main;
     )");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -650,21 +650,20 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin position]] var<out> position : vec4<f32>;
-        [[location 0]] var<in> attrib0 : vec4<f32>;
-        [[location 1]] var<in> attrib1 : vec4<f32>;
+        [[builtin(position)]] var<out> position : vec4<f32>;
+        [[location(0)]] var<in> attrib0 : vec4<f32>;
+        [[location(1)]] var<in> attrib1 : vec4<f32>;
 
+        [[stage(vertex)]]
         fn vertex0() -> void {
             position = attrib0;
             return;
         }
+        [[stage(vertex)]]
         fn vertex1() -> void {
             position = attrib1;
             return;
         }
-
-        entry_point vertex = vertex0;
-        entry_point vertex = vertex1;
     )");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -697,24 +696,25 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 }
 
 // Test that fragment output validation is for the correct entryPoint
-TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
+//
+// TODO(crbug.com/tint/263): Re-enable once an issue is fixed with Tint.
+TEST_F(RenderPipelineValidationTest, DISABLED_FragmentOutputCorrectEntryPoint) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[location 0]] var<out> colorFloat : vec4<f32>;
-        [[location 0]] var<out> colorUint : vec4<u32>;
+        [[location(0)]] var<out> colorFloat : vec4<f32>;
+        [[location(0)]] var<out> colorUint : vec4<u32>;
 
+        [[stage(fragment)]]
         fn fragmentFloat() -> void {
             colorFloat = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             return;
         }
+        [[stage(fragment)]]
         fn fragmentUint() -> void {
             colorUint = vec4<u32>(0, 0, 0, 0);
             return;
         }
-
-        entry_point fragment = fragmentFloat;
-        entry_point fragment = fragmentUint;
     )");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -751,7 +751,7 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
         };
         [[binding 0, set 0]] var<uniform> var0 : Uniforms;
         [[binding 1, set 0]] var<uniform> var1 : Uniforms;
-        [[builtin position]] var<out> position : vec4<f32>;
+        [[builtin(position)]] var<out> position : vec4<f32>;
 
         fn vertex0() -> void {
             position = var0.data;
