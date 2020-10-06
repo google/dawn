@@ -31,9 +31,11 @@ struct EntryPoint {
   std::string name;
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
-  /// Elements of the workgroup size tuple
+  /// The workgroup x size
   uint32_t workgroup_size_x;
+  /// The workgroup y size
   uint32_t workgroup_size_y;
+  /// The workgroup z size
   uint32_t workgroup_size_z;
 
   /// @returns the size of the workgroup in {x,y,z} format
