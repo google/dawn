@@ -50,6 +50,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param module the module to generate from
   /// @param stage the pipeline stage
   /// @param name the entry point name
+  /// @returns true on successful generation; false otherwise
   bool GenerateEntryPoint(const ast::Module& module,
                           ast::PipelineStage stage,
                           const std::string& name);

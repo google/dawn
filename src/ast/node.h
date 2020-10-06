@@ -45,7 +45,9 @@ class Node {
   /// Writes a representation of the node to the output stream
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
+  //! @cond Doxygen_Suppress
   virtual void to_str(std::ostream& out, size_t indent) const = 0;
+  //! @endcond
 
   /// Convenience wrapper around the |to_str| method.
   /// @returns the node as a string

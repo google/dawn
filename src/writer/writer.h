@@ -32,7 +32,9 @@ class Writer {
   const std::string& error() const { return error_; }
 
   /// Resets the generator
+  //! @cond Doxygen_Suppress
   virtual void Reset() = 0;
+  //! @endcond
 
   /// Converts the module into the desired format
   /// @returns true on success; false on failure

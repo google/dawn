@@ -42,7 +42,9 @@ class FunctionDecoration {
 
   /// Outputs the function decoration to the given stream
   /// @param out the stream to output too
+  //! @cond Doxygen_Suppress
   virtual void to_str(std::ostream& out) const = 0;
+  //! @endcond
 
  protected:
   FunctionDecoration();
