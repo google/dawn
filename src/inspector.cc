@@ -27,7 +27,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
   for (const auto& func : module_.functions()) {
     if (func->IsEntryPoint()) {
-      result.push_back({func->name(), func->pipeline_stage()});
+      uint32_t x, y, z;
+      std::tie(x, y, z) = func->workgroup_size();
+      result.push_back({func->name(), func->pipeline_stage(), x, y, z});
     }
   }
 

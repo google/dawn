@@ -25,11 +25,22 @@
 namespace tint {
 namespace inspector {
 
+/// Container of reflection data for an entry point in the shader.
 struct EntryPoint {
   /// The entry point name
   std::string name;
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
+  /// Elements of the workgroup size tuple
+  uint32_t workgroup_size_x;
+  uint32_t workgroup_size_y;
+  uint32_t workgroup_size_z;
+
+  /// @returns the size of the workgroup in {x,y,z} format
+  std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {
+    return std::tuple<uint32_t, uint32_t, uint32_t>(
+        workgroup_size_x, workgroup_size_y, workgroup_size_z);
+  }
 };
 
 /// Extracts information from a module

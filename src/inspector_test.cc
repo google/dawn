@@ -19,6 +19,7 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/context.h"
 
 namespace tint {
@@ -38,7 +39,13 @@ class InspectorHelper {
     if (stage != ast::PipelineStage::kNone) {
       func->add_decoration(std::make_unique<ast::StageDecoration>(stage));
     }
+    last_function_ = func.get();
     mod()->AddFunction(std::move(func));
+  }
+
+  void AddWorkGroupSizeToLastFunction(uint32_t x, uint32_t y, uint32_t z) {
+    last_function_->add_decoration(
+        std::make_unique<ast::WorkgroupDecoration>(x, y, z));
   }
 
   ast::Module* mod() { return mod_.get(); }
@@ -48,6 +55,7 @@ class InspectorHelper {
   Context ctx_;
   std::unique_ptr<ast::Module> mod_;
   std::unique_ptr<Inspector> inspector_;
+  ast::Function* last_function_;
 };
 
 class InspectorTest : public InspectorHelper, public testing::Test {};
@@ -108,6 +116,34 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
   EXPECT_EQ("bar", result[1].name);
   EXPECT_EQ(ast::PipelineStage::kCompute, result[1].stage);
+}
+
+TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
+  AddFunction("foo", ast::PipelineStage::kVertex);
+
+  auto result = inspector()->GetEntryPoints();
+  ASSERT_FALSE(inspector()->has_error());
+
+  ASSERT_EQ(1u, result.size());
+  uint32_t x, y, z;
+  std::tie(x, y, z) = result[0].workgroup_size();
+  EXPECT_EQ(1u, x);
+  EXPECT_EQ(1u, y);
+  EXPECT_EQ(1u, z);
+}
+
+TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
+  AddFunction("foo", ast::PipelineStage::kCompute);
+  AddWorkGroupSizeToLastFunction(8u, 2u, 1u);
+  auto result = inspector()->GetEntryPoints();
+  ASSERT_FALSE(inspector()->has_error());
+
+  ASSERT_EQ(1u, result.size());
+  uint32_t x, y, z;
+  std::tie(x, y, z) = result[0].workgroup_size();
+  EXPECT_EQ(8u, x);
+  EXPECT_EQ(2u, y);
+  EXPECT_EQ(1u, z);
 }
 
 }  // namespace
