@@ -171,6 +171,43 @@ TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
 )");
 }
 
+TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
+  ast::type::I32Type i32;
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 2);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateExpression(&t), 7u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%1 = OpTypeVector %2 2
+%3 = OpTypeInt 32 1
+%4 = OpConstant %3 1
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%5 = OpBitcast %2 %4
+%6 = OpBitcast %2 %4
+%7 = OpCompositeConstruct %1 %5 %6
+)");
+}
+
 TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
@@ -188,7 +225,11 @@ TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
   Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 0u);
   EXPECT_TRUE(b.has_error());

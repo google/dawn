@@ -1100,6 +1100,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   std::ostringstream out;
   out << "__const";
 
+  auto* result_type = init->type()->UnwrapAliasPtrAlias();
+
   OperandList ops;
   bool constructor_is_const = true;
   for (const auto& e : values) {
@@ -1109,10 +1111,18 @@ uint32_t Builder::GenerateTypeConstructorExpression(
         return 0;
       }
       constructor_is_const = false;
+      break;
+    } else if (result_type->IsVector()) {
+      // Even if we have constructor parameters if the types are different then
+      // the constructor is not const as we'll generate OpBitcast or
+      // OpCopyObject instructions.
+      auto* subtype = result_type->AsVector()->type()->UnwrapAliasPtrAlias();
+      if (subtype != e->result_type()->UnwrapAliasPtrAlias()) {
+        constructor_is_const = false;
+        break;
+      }
     }
   }
-
-  auto* result_type = init->type()->UnwrapAliasPtrAlias();
 
   bool can_cast_or_copy = result_type->is_scalar();
   if (result_type->IsVector() && result_type->AsVector()->type()->is_scalar()) {
