@@ -23,6 +23,6 @@ if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
 
   if (NOT TARGET SPIRV-Tools)
     set(SPIRV_SKIP_TESTS ON CACHE BOOL ON)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools EXCLUDE_FROM_ALL)
   endif()
 endif()
