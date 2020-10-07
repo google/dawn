@@ -25,19 +25,21 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     DAWN_SKIP_TEST_IF(IsVulkan());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin position]] var<out> Position : vec4<f32>;
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+
+        [[stage(vertex)]]
         fn vertex_main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
-        entry_point vertex = vertex_main;
 
-        [[location 0]] var<out> outColor : vec4<f32>;
+        [[location(0)]] var<out> outColor : vec4<f32>;
+
+        [[stage(fragment)]]
         fn fragment_main() -> void {
           outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
           return;
         }
-        entry_point fragment = fragment_main;
     )");
 
     // Create a point pipeline from the module.
@@ -71,19 +73,21 @@ TEST_P(EntryPointTests, FragAndVertexSameModuleSameName) {
     DAWN_SKIP_TEST_IF(IsVulkan());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin position]] var<out> Position : vec4<f32>;
-        fn vertex_main() -> void {
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+
+        [[stage(vertex)]]
+        fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
-        entry_point vertex as "main" = vertex_main;
 
-        [[location 0]] var<out> outColor : vec4<f32>;
-        fn fragment_main() -> void {
+        [[location(0)]] var<out> outColor : vec4<f32>;
+
+        [[stage(fragment)]]
+        fn main() -> void {
           outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
           return;
         }
-        entry_point fragment as "main" = fragment_main;
     )");
 
     // Create a point pipeline from the module.
@@ -118,20 +122,21 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         type Data = [[block]] struct {
-            [[offset 0]] data : u32;
+            [[offset(0)]] data : u32;
         };
-        [[binding 0, set 0]] var<storage_buffer> data : Data;
+        [[binding(0), set(0)]] var<storage_buffer> data : Data;
 
+        [[stage(compute)]]
         fn write1() -> void {
             data.data = 1u;
             return;
         }
+
+        [[stage(compute)]]
         fn write42() -> void {
             data.data = 42u;
             return;
         }
-        entry_point compute = write1;
-        entry_point compute = write42;
     )");
 
     // Create both pipelines from the module.
