@@ -696,9 +696,7 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 }
 
 // Test that fragment output validation is for the correct entryPoint
-//
-// TODO(crbug.com/tint/263): Re-enable once an issue is fixed with Tint.
-TEST_F(RenderPipelineValidationTest, DISABLED_FragmentOutputCorrectEntryPoint) {
+TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
