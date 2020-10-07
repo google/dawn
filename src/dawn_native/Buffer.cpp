@@ -403,8 +403,8 @@ namespace dawn_native {
         *status = WGPUBufferMapAsyncStatus_Error;
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (offset % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("offset must be a multiple of 4");
+        if (offset % 8 != 0) {
+            return DAWN_VALIDATION_ERROR("offset must be a multiple of 8");
         }
 
         if (size % 4 != 0) {
@@ -448,6 +448,10 @@ namespace dawn_native {
     }
 
     bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) const {
+        if (offset % 8 != 0 || size % 4 != 0) {
+            return false;
+        }
+
         if (size > mMapSize || offset < mMapOffset) {
             return false;
         }

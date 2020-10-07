@@ -171,24 +171,24 @@ TEST_F(BufferValidationTest, MapAsync_ErrorBuffer) {
 
 // Test map async with an invalid offset and size alignment.
 TEST_F(BufferValidationTest, MapAsync_OffsetSizeAlignment) {
-    // Control case, both aligned to 4 is ok.
+    // Control case, offset aligned to 8 and size to 4 is valid
     {
-        wgpu::Buffer buffer = CreateMapReadBuffer(8);
-        buffer.MapAsync(wgpu::MapMode::Read, 4, 4, nullptr, nullptr);
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Read, 8, 4, nullptr, nullptr);
     }
     {
-        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
-        buffer.MapAsync(wgpu::MapMode::Write, 4, 4, nullptr, nullptr);
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Write, 8, 4, nullptr, nullptr);
     }
 
-    // Error case, offset aligned to 2 is an error.
+    // Error case, offset aligned to 4 is an error.
     {
-        wgpu::Buffer buffer = CreateMapReadBuffer(8);
-        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 2, 4);
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 4, 4);
     }
     {
-        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
-        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 2, 4);
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 4, 4);
     }
 
     // Error case, size aligned to 2 is an error.
@@ -212,8 +212,8 @@ TEST_F(BufferValidationTest, MapAsync_OffsetSizeOOB) {
 
     // Valid case: range in the middle of the buffer is ok.
     {
-        wgpu::Buffer buffer = CreateMapReadBuffer(12);
-        buffer.MapAsync(wgpu::MapMode::Read, 4, 4, nullptr, nullptr);
+        wgpu::Buffer buffer = CreateMapReadBuffer(16);
+        buffer.MapAsync(wgpu::MapMode::Read, 8, 4, nullptr, nullptr);
     }
 
     // Valid case: empty range at the end of the buffer is ok.
@@ -224,8 +224,8 @@ TEST_F(BufferValidationTest, MapAsync_OffsetSizeOOB) {
 
     // Error case, offset is larger than the buffer size (even if size is 0).
     {
-        wgpu::Buffer buffer = CreateMapReadBuffer(8);
-        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 12, 0);
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 16, 0);
     }
 
     // Error case, offset + size is larger than the buffer
@@ -237,8 +237,8 @@ TEST_F(BufferValidationTest, MapAsync_OffsetSizeOOB) {
     // Error case, offset + size is larger than the buffer, overflow case.
     {
         wgpu::Buffer buffer = CreateMapReadBuffer(12);
-        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 4,
-                            std::numeric_limits<size_t>::max() & ~size_t(3));
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 8,
+                            std::numeric_limits<size_t>::max() & ~size_t(7));
     }
 }
 
@@ -831,9 +831,9 @@ TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
 
     // Valid case: range in the middle is ok.
     {
-        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
-        buffer.MapAsync(wgpu::MapMode::Write, 0, 12, nullptr, nullptr);
-        EXPECT_NE(buffer.GetMappedRange(4, 4), nullptr);
+        wgpu::Buffer buffer = CreateMapWriteBuffer(16);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 16, nullptr, nullptr);
+        EXPECT_NE(buffer.GetMappedRange(8, 4), nullptr);
     }
 
     // Error case: offset is larger than the mapped range (even with size = 0)
@@ -841,6 +841,7 @@ TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
         wgpu::Buffer buffer = CreateMapWriteBuffer(8);
         buffer.MapAsync(wgpu::MapMode::Write, 0, 8, nullptr, nullptr);
         EXPECT_EQ(buffer.GetMappedRange(9, 0), nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(16, 0), nullptr);
     }
 
     // Error case: offset + size is larger than the mapped range
@@ -848,6 +849,7 @@ TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
         wgpu::Buffer buffer = CreateMapWriteBuffer(12);
         buffer.MapAsync(wgpu::MapMode::Write, 0, 12, nullptr, nullptr);
         EXPECT_EQ(buffer.GetMappedRange(8, 5), nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(8, 8), nullptr);
     }
 
     // Error case: offset + size is larger than the mapped range, overflow case
@@ -860,7 +862,8 @@ TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
     // Error case: offset is before the start of the range
     {
         wgpu::Buffer buffer = CreateMapWriteBuffer(12);
-        buffer.MapAsync(wgpu::MapMode::Write, 4, 4, nullptr, nullptr);
-        EXPECT_EQ(buffer.GetMappedRange(3, 4), nullptr);
+        buffer.MapAsync(wgpu::MapMode::Write, 8, 4, nullptr, nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(7, 4), nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(0, 4), nullptr);
     }
 }

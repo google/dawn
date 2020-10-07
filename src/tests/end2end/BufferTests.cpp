@@ -84,13 +84,13 @@ TEST_P(BufferMappingTests, MapRead_ZeroSized) {
 
 // Test map-reading with a non-zero offset
 TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
-    wgpu::Buffer buffer = CreateMapReadBuffer(8);
+    wgpu::Buffer buffer = CreateMapReadBuffer(12);
 
-    uint32_t myData[2] = {0x01020304, 0x05060708};
+    uint32_t myData[3] = {0x01020304, 0x05060708, 0x090A0B0C};
     queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 4, 4);
-    ASSERT_EQ(myData[1], *static_cast<const uint32_t*>(buffer.GetConstMappedRange(4)));
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 8, 4);
+    ASSERT_EQ(myData[2], *static_cast<const uint32_t*>(buffer.GetConstMappedRange(8)));
     buffer.Unmap();
 }
 
@@ -133,23 +133,27 @@ TEST_P(BufferMappingTests, MapRead_Large) {
         0, memcmp(buffer.GetConstMappedRange(8, kByteSize - 8), myData.data() + 2, kByteSize - 8));
     buffer.Unmap();
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 12, kByteSize - 12);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 16, kByteSize - 16);
+    // Size is too big.
     EXPECT_EQ(nullptr, buffer.GetConstMappedRange(16, kByteSize - 12));
+    // Offset defaults to 0 which is less than 16
     EXPECT_EQ(nullptr, buffer.GetConstMappedRange());
+    // Offset less than 8 is less than 16
     EXPECT_EQ(nullptr, buffer.GetConstMappedRange(8));
-    EXPECT_EQ(0, memcmp(buffer.GetConstMappedRange(12), myData.data() + 3, kByteSize - 12));
-    EXPECT_EQ(0, memcmp(buffer.GetConstMappedRange(20), myData.data() + 5, kByteSize - 20));
-    EXPECT_EQ(0, memcmp(buffer.GetConstMappedRange(20, kByteSize - 24), myData.data() + 5,
-                        kByteSize - 44));
+
+    // Test a couple values.
+    EXPECT_EQ(0, memcmp(buffer.GetConstMappedRange(16), myData.data() + 4, kByteSize - 16));
+    EXPECT_EQ(0, memcmp(buffer.GetConstMappedRange(24), myData.data() + 6, kByteSize - 24));
+
     buffer.Unmap();
 }
 
 // Test that GetConstMappedRange works inside map-read callback
 TEST_P(BufferMappingTests, MapRead_InCallback) {
-    constexpr size_t kBufferSize = 8;
+    constexpr size_t kBufferSize = 12;
     wgpu::Buffer buffer = CreateMapReadBuffer(kBufferSize);
 
-    uint32_t myData[2] = {0x01020304, 0x05060708};
+    uint32_t myData[3] = {0x01020304, 0x05060708, 0x090A0B0C};
     constexpr size_t kSize = sizeof(myData);
     queue.WriteBuffer(buffer, 0, &myData, kSize);
 
@@ -170,8 +174,8 @@ TEST_P(BufferMappingTests, MapRead_InCallback) {
                 CheckMapping(user->buffer.GetConstMappedRange(), user->expected, kSize);
                 CheckMapping(user->buffer.GetConstMappedRange(0, kSize), user->expected, kSize);
 
-                CheckMapping(user->buffer.GetConstMappedRange(4, 4),
-                             static_cast<const uint32_t*>(user->expected) + 1, sizeof(uint32_t));
+                CheckMapping(user->buffer.GetConstMappedRange(8, 4),
+                             static_cast<const uint32_t*>(user->expected) + 2, sizeof(uint32_t));
 
                 user->buffer.Unmap();
             }
@@ -224,14 +228,14 @@ TEST_P(BufferMappingTests, MapWrite_ZeroSized) {
 
 // Test map-writing with a non-zero offset.
 TEST_P(BufferMappingTests, MapWrite_NonZeroOffset) {
-    wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+    wgpu::Buffer buffer = CreateMapWriteBuffer(12);
 
     uint32_t myData = 2934875;
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 4, 4);
-    memcpy(buffer.GetMappedRange(4), &myData, sizeof(myData));
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 8, 4);
+    memcpy(buffer.GetMappedRange(8), &myData, sizeof(myData));
     buffer.Unmap();
 
-    EXPECT_BUFFER_U32_EQ(myData, buffer, 4);
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 8);
 }
 
 // Map, write and unmap twice. Test that both of these two iterations work.
@@ -264,15 +268,14 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
         myData.push_back(i);
     }
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 12, kByteSize - 20);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 16, kByteSize - 20);
     EXPECT_EQ(nullptr, buffer.GetMappedRange());
     EXPECT_EQ(nullptr, buffer.GetMappedRange(0));
     EXPECT_EQ(nullptr, buffer.GetMappedRange(8));
     EXPECT_EQ(nullptr, buffer.GetMappedRange(16, kByteSize - 8));
-    EXPECT_EQ(nullptr, buffer.GetMappedRange(16, kByteSize - 20));
-    memcpy(buffer.GetMappedRange(12), myData.data(), kByteSize - 20);
+    memcpy(buffer.GetMappedRange(16), myData.data(), kByteSize - 20);
     buffer.Unmap();
-    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 12, kDataSize - 5);
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 16, kDataSize - 5);
 }
 
 // Stress test mapping many buffers.
@@ -329,7 +332,7 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     // Map the buffer but do not wait on the result yet.
     bool done = false;
     buffer.MapAsync(
-        wgpu::MapMode::Read, 4, 4,
+        wgpu::MapMode::Read, 8, 4,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
             *static_cast<bool*>(userdata) = true;
@@ -338,14 +341,14 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
 
     // Call MapAsync another time, it is an error because the buffer is already being mapped so
     // mMapOffset is not updated.
-    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 8, 4, nullptr, nullptr));
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr));
 
     while (!done) {
         WaitABit();
     }
 
     // mMapOffset has not been updated so it should still be 4, which is data[1]
-    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(4), &data[1], sizeof(uint32_t)));
+    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(8), &data[2], sizeof(uint32_t)));
 }
 
 // Test that Get(Const)MappedRange work inside map-write callback.

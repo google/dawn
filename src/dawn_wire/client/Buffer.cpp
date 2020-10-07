@@ -366,6 +366,10 @@ namespace dawn_wire { namespace client {
     }
 
     bool Buffer::CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const {
+        if (offset % 8 != 0 || size % 4 != 0) {
+            return false;
+        }
+
         if (size > mMapSize || offset < mMapOffset) {
             return false;
         }

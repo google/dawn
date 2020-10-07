@@ -707,7 +707,7 @@ TEST_P(BufferZeroInitTest, MapAsync_Read) {
     {
         wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
 
-        constexpr uint64_t kOffset = 4u;
+        constexpr uint64_t kOffset = 8u;
         constexpr uint64_t kSize = 8u;
         EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
 
@@ -753,7 +753,7 @@ TEST_P(BufferZeroInitTest, MapAsync_Write) {
     {
         wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
 
-        constexpr uint64_t kOffset = 4u;
+        constexpr uint64_t kOffset = 8u;
         constexpr uint64_t kSize = 8u;
         EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
         buffer.Unmap();
