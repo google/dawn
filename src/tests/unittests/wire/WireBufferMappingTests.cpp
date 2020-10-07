@@ -630,3 +630,47 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
 
     FlushClient();
 }
+
+// Check that trying to create a buffer of size MAX_SIZE_T is an error handling in the client and
+// never gets to the server-side.
+TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
+    size_t kOOMSize = std::numeric_limits<size_t>::max();
+    WGPUBuffer apiBuffer = api.GetNewBuffer();
+
+    // Check for CreateBufferMapped.
+    {
+        WGPUBufferDescriptor descriptor = {};
+        descriptor.usage = WGPUBufferUsage_CopySrc;
+        descriptor.size = kOOMSize;
+        descriptor.mappedAtCreation = true;
+
+        wgpuDeviceCreateBuffer(device, &descriptor);
+        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
+        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
+        FlushClient();
+    }
+
+    // Check for MapRead usage.
+    {
+        WGPUBufferDescriptor descriptor = {};
+        descriptor.usage = WGPUBufferUsage_MapRead;
+        descriptor.size = kOOMSize;
+
+        wgpuDeviceCreateBuffer(device, &descriptor);
+        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
+        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
+        FlushClient();
+    }
+
+    // Check for MapWrite usage.
+    {
+        WGPUBufferDescriptor descriptor = {};
+        descriptor.usage = WGPUBufferUsage_MapWrite;
+        descriptor.size = kOOMSize;
+
+        wgpuDeviceCreateBuffer(device, &descriptor);
+        EXPECT_CALL(api, DeviceInjectError(apiDevice, WGPUErrorType_OutOfMemory, _));
+        EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice)).WillOnce(Return(apiBuffer));
+        FlushClient();
+    }
+}

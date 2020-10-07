@@ -26,7 +26,7 @@ namespace dawn_wire { namespace client {
         bool mappable =
             (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
             descriptor->mappedAtCreation;
-        if (mappable && descriptor->size > std::numeric_limits<size_t>::max()) {
+        if (mappable && descriptor->size >= std::numeric_limits<size_t>::max()) {
             device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for map usage");
             return device_->CreateErrorBuffer();
         }
