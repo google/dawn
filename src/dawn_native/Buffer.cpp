@@ -492,10 +492,7 @@ namespace dawn_native {
                 // even if it did not have a mappable usage.
                 return {};
             case BufferState::Unmapped:
-                if ((mUsage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) == 0) {
-                    return DAWN_VALIDATION_ERROR("Buffer does not have map usage");
-                }
-                return {};
+                return DAWN_VALIDATION_ERROR("Buffer is unmapped");
             case BufferState::Destroyed:
                 return DAWN_VALIDATION_ERROR("Buffer is destroyed");
         }

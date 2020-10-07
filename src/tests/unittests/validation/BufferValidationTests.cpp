@@ -604,21 +604,21 @@ TEST_F(BufferValidationTest, UnmapWithoutMapUsage) {
 TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
-        // Buffer starts unmapped. Unmap should succeed.
-        buf.Unmap();
+        // Buffer starts unmapped. Unmap should fail.
+        ASSERT_DEVICE_ERROR(buf.Unmap());
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
         buf.Unmap();
-        // Unmapping twice should succeed
-        buf.Unmap();
+        // Unmapping a second time should fail.
+        ASSERT_DEVICE_ERROR(buf.Unmap());
     }
     {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
-        // Buffer starts unmapped. Unmap should succeed.
-        buf.Unmap();
+        // Buffer starts unmapped. Unmap should fail.
+        ASSERT_DEVICE_ERROR(buf.Unmap());
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
-        // Unmapping twice should succeed
         buf.Unmap();
-        buf.Unmap();
+        // Unmapping a second time should fail.
+        ASSERT_DEVICE_ERROR(buf.Unmap());
     }
 }
 
