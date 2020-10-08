@@ -5,7 +5,6 @@
                    | SPIR-V |                   | WGSL |
                    +----|---+                   +---|--+
                         |                           |
-                        |                           |
               +---------|---------------------------|--------+
               |         |          Reader           |        |
               |         |                           |        |
@@ -14,26 +13,25 @@
               | +--------------+             +-------------+ |
               +-----------------------|----------------------+
                                       |
-                                      |
                                    +--|--+      +---------+
                                    | AST |------| IsValid |
                                    +--|--+      +---------+
-                                      |
                                       |
                              +--------|--------+
                              | Type Determiner |
                              +--------|--------+
                                       |
-                                      |
                                 +-----|-----+
                                 | Validator |
                                 +-----|-----+
                                       |
+                                +-----|-----+
+                                | Inspector |
+                                +-----|-----+
                                       |
                                +------|-----+
                                | Transforms |
                                +------|-----+
-                                      |
                                       |
 +-------------------------------------|------------------------------------+
 |                                  Writer                                  |
@@ -42,8 +40,6 @@
 | | SPIRV-Writer |    | WGSL-Writer |    | HLSL-Writer |    | MSL-Writer | |
 | +-------|------+    +------|------+    +------|------+    +------|-----+ |
 +---------|------------------|------------------|------------------|-------+
-          |                  |                  |                  |
-          |                  |                  |                  |
           |                  |                  |                  |
      +----|---+          +---|--+           +---|--+            +--|--+
      | SPIR-V |          | WGSL |           | HLSL |            | MSL |
@@ -76,6 +72,12 @@ determination but is invalid.)
 
 After the validation step the AST should be a known valid WGSL program.
 
+## Inspector
+
+The inspectors job is to go through the AST and pull out various pieces of
+information. The information may be used to pass information into the downstream
+compilers (things like specialization constants) or may be used to pass into
+transforms to update the AST before generating the resulting code.
 
 ## Transforms
 
