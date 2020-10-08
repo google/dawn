@@ -305,8 +305,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
@@ -363,15 +362,15 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   inner_members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(inner_members)));
+  ast::type::StructType inner_struct(
+      std::make_unique<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(std::make_unique<ast::StructMember>(
       "inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(outer_members)));
+  ast::type::StructType s_type(
+      std::make_unique<ast::Struct>(std::move(outer_members)));
   s_type.set_name("my_struct");
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
@@ -431,8 +430,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   inner_members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(inner_members)));
+  ast::type::StructType inner_struct(
+      std::make_unique<ast::Struct>(std::move(inner_members)));
 
   ast::type::AliasType alias("Inner", &inner_struct);
 
@@ -440,8 +439,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   outer_members.push_back(
       std::make_unique<ast::StructMember>("inner", &alias, std::move(decos)));
 
-  ast::type::StructType s_type(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(outer_members)));
+  ast::type::StructType s_type(
+      std::make_unique<ast::Struct>(std::move(outer_members)));
   s_type.set_name("my_struct");
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
@@ -501,15 +500,15 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   inner_members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(inner_members)));
+  ast::type::StructType inner_struct(
+      std::make_unique<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(std::make_unique<ast::StructMember>(
       "inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(outer_members)));
+  ast::type::StructType s_type(
+      std::make_unique<ast::Struct>(std::move(outer_members)));
   s_type.set_name("my_struct");
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
@@ -576,15 +575,15 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   inner_members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(inner_members)));
+  ast::type::StructType inner_struct(
+      std::make_unique<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(std::make_unique<ast::StructMember>(
       "inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(std::make_unique<ast::Struct>(
-      ast::StructDecoration::kNone, std::move(outer_members)));
+  ast::type::StructType s_type(
+      std::make_unique<ast::Struct>(std::move(outer_members)));
   s_type.set_name("my_struct");
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
@@ -863,15 +862,13 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   ast::StructMemberList members;
   members.push_back(
       std::make_unique<ast::StructMember>("baz", &vec3, std::move(decos)));
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType c_type(std::move(s));
   c_type.set_name("C");
 
   members.push_back(
       std::make_unique<ast::StructMember>("bar", &c_type, std::move(decos)));
-  s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                    std::move(members));
+  s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType b_type(std::move(s));
   b_type.set_name("B");
 
@@ -879,8 +876,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   members.push_back(std::make_unique<ast::StructMember>("foo", &b_ary_type,
                                                         std::move(decos)));
-  s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                    std::move(members));
+  s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType a_type(std::move(s));
   a_type.set_name("A");
 

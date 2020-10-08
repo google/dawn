@@ -226,9 +226,12 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   members.push_back(std::make_unique<ast::StructMember>(
       kStructBufferName, internal_array_type, std::move(member_dec)));
 
-  auto* struct_type = ctx_->type_mgr().Get(
-      std::make_unique<ast::type::StructType>(std::make_unique<ast::Struct>(
-          ast::StructDecoration::kBlock, std::move(members))));
+  ast::StructDecorationList decos;
+  decos.push_back(ast::StructDecoration::kBlock);
+
+  auto* struct_type =
+      ctx_->type_mgr().Get(std::make_unique<ast::type::StructType>(
+          std::make_unique<ast::Struct>(std::move(decos), std::move(members))));
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     // The decorated variable with struct type

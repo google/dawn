@@ -269,8 +269,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 

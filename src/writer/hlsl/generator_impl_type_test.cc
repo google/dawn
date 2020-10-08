@@ -261,9 +261,11 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = std::make_unique<ast::Struct>();
-  str->set_members(std::move(members));
-  str->set_decoration(ast::StructDecoration::kBlock);
+  ast::StructDecorationList decos;
+  decos.push_back(ast::StructDecoration::kBlock);
+
+  auto str =
+      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 
   ast::type::StructType s(std::move(str));
 

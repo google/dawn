@@ -155,9 +155,11 @@ class ParserImpl {
   /// Parses a `struct_decl` grammar element
   /// @returns the struct type or nullptr on error
   std::unique_ptr<ast::type::StructType> struct_decl();
-  /// Parses a `struct_decoration_decl` grammar element
-  /// @returns the struct decoration or StructDecoraton::kNone
-  ast::StructDecoration struct_decoration_decl();
+  /// Parses a `struct_decoration_decl` grammar element, appending newly
+  /// parsed decorations to the end of |decos|.
+  /// @param decos list to store the parsed decorations
+  /// @returns the true on successful parse; false otherwise
+  bool struct_decoration_decl(ast::StructDecorationList& decos);
   /// Parses a `struct_decoration` grammar element
   /// @param t the current token
   /// @returns the struct decoration or StructDecoraton::kNone if none matched
@@ -177,7 +179,8 @@ class ParserImpl {
   /// Parses a `function_decl` grammar element
   /// @returns the parsed function, nullptr otherwise
   std::unique_ptr<ast::Function> function_decl();
-  /// Parses a `function_decoration_decl` grammar element
+  /// Parses a `function_decoration_decl` grammar element, appending newly
+  /// parsed decorations to the end of |decos|.
   /// @param decos list to store the parsed decorations
   /// @returns true on successful parse; false otherwise
   bool function_decoration_decl(ast::FunctionDecorationList& decos);

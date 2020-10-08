@@ -2384,14 +2384,9 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
   OperandList ops;
   ops.push_back(result);
 
-  if (impl->decoration() == ast::StructDecoration::kBlock) {
+  if (impl->IsBlockDecorated()) {
     push_annot(spv::Op::OpDecorate,
                {Operand::Int(struct_id), Operand::Int(SpvDecorationBlock)});
-  } else {
-    if (impl->decoration() != ast::StructDecoration::kNone) {
-      error_ = "unknown struct decoration";
-      return false;
-    }
   }
 
   auto& members = impl->members();

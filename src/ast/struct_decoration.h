@@ -25,6 +25,9 @@ enum class StructDecoration { kNone = -1, kBlock };
 
 std::ostream& operator<<(std::ostream& out, StructDecoration stage);
 
+/// List of struct decorations
+using StructDecorationList = std::vector<StructDecoration>;
+
 }  // namespace ast
 }  // namespace tint
 

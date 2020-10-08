@@ -806,7 +806,8 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   }
   RTArr -> __array__u32_stride_4
   S -> __struct_S
-  [[block]] Struct{
+  Struct{
+    [[block]]
     StructMember{[[ offset 0 ]] field0: __u32}
     StructMember{[[ offset 4 ]] field1: __alias_RTArr__array__u32_stride_4}
   })"));

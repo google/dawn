@@ -32,15 +32,22 @@ class Struct : public Node {
   /// Create a new empty struct statement
   Struct();
   /// Create a new struct statement
-  /// @param decoration The struct decorations
   /// @param members The struct members
-  Struct(StructDecoration decoration, StructMemberList members);
+  explicit Struct(StructMemberList members);
+  /// Create a new struct statement
+  /// @param decorations The struct decorations
+  /// @param members The struct members
+  Struct(StructDecorationList decorations, StructMemberList members);
   /// Create a new struct statement
   /// @param source The input source for the import statement
-  /// @param decoration The struct decorations
+  /// @param members The struct members
+  Struct(const Source& source, StructMemberList members);
+  /// Create a new struct statement
+  /// @param source The input source for the import statement
+  /// @param decorations The struct decorations
   /// @param members The struct members
   Struct(const Source& source,
-         StructDecoration decoration,
+         StructDecorationList decorations,
          StructMemberList members);
   /// Move constructor
   Struct(Struct&&);
@@ -48,10 +55,12 @@ class Struct : public Node {
   ~Struct() override;
 
   /// Sets the struct decoration
-  /// @param deco the decoration to set
-  void set_decoration(StructDecoration deco) { decoration_ = deco; }
-  /// @returns the struct decoration
-  StructDecoration decoration() const { return decoration_; }
+  /// @param decos the list of decorations to set
+  void set_decorations(StructDecorationList decos) {
+    decorations_ = std::move(decos);
+  }
+  /// @returns the struct decorations
+  const StructDecorationList& decorations() const { return decorations_; }
 
   /// Sets the struct members
   /// @param members the members to set
@@ -64,6 +73,9 @@ class Struct : public Node {
   /// @returns the struct member or nullptr if not found
   StructMember* get_member(const std::string& name) const;
 
+  /// @returns true if the struct is block decorated
+  bool IsBlockDecorated() const;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 
@@ -75,7 +87,7 @@ class Struct : public Node {
  private:
   Struct(const Struct&) = delete;
 
-  StructDecoration decoration_ = StructDecoration::kNone;
+  StructDecorationList decorations_;
   StructMemberList members_;
 };
 

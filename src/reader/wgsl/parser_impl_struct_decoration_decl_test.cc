@@ -23,14 +23,17 @@ namespace {
 
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   auto* p = parser("[[block]]");
-  auto d = p->struct_decoration_decl();
+  ast::StructDecorationList decos;
+  ASSERT_TRUE(p->struct_decoration_decl(decos));
   ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(d, ast::StructDecoration::kBlock);
+  EXPECT_EQ(decos.size(), 1u);
+  EXPECT_EQ(decos[0], ast::StructDecoration::kBlock);
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
   auto* p = parser("[[block");
-  p->struct_decoration_decl();
+  ast::StructDecorationList decos;
+  ASSERT_FALSE(p->struct_decoration_decl(decos));
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: missing ]] for struct decoration");
 }
@@ -38,8 +41,10 @@ TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
 // Note, this isn't an error because it could be an array decoration
 TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
   auto* p = parser("[[invalid]]");
-  p->struct_decoration_decl();
+  ast::StructDecorationList decos;
+  ASSERT_TRUE(p->struct_decoration_decl(decos));
   ASSERT_FALSE(p->has_error());
+  EXPECT_TRUE(decos.empty());
 }
 
 }  // namespace

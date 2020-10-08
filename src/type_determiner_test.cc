@@ -1022,8 +1022,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   members.push_back(std::make_unique<ast::StructMember>("second_member", &f32,
                                                         std::move(decos)));
 
-  auto strct = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                             std::move(members));
+  auto strct = std::make_unique<ast::Struct>(std::move(members));
 
   ast::type::StructType st(std::move(strct));
 
@@ -1058,8 +1057,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   members.push_back(std::make_unique<ast::StructMember>("second_member", &f32,
                                                         std::move(decos)));
 
-  auto strct = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                             std::move(members));
+  auto strct = std::make_unique<ast::Struct>(std::move(members));
 
   auto st = std::make_unique<ast::type::StructType>(std::move(strct));
   ast::type::AliasType alias("alias", st.get());
@@ -1164,8 +1162,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   b_members.push_back(
       std::make_unique<ast::StructMember>("foo", &vec4, std::move(decos)));
 
-  auto strctB = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                              std::move(b_members));
+  auto strctB = std::make_unique<ast::Struct>(std::move(b_members));
   ast::type::StructType stB(std::move(strctB));
   stB.set_name("B");
 
@@ -1175,8 +1172,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   a_members.push_back(
       std::make_unique<ast::StructMember>("mem", &vecB, std::move(decos)));
 
-  auto strctA = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                              std::move(a_members));
+  auto strctA = std::make_unique<ast::Struct>(std::move(a_members));
 
   ast::type::StructType stA(std::move(strctA));
   stA.set_name("A");

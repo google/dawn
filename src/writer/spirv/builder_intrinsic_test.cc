@@ -2732,8 +2732,7 @@ TEST_F(BuilderTest, Call_ArrayLength) {
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
@@ -2792,8 +2791,7 @@ TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
@@ -2854,8 +2852,7 @@ TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 

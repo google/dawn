@@ -42,9 +42,7 @@ class StructType : public Type {
   const std::string& name() const { return name_; }
 
   /// @returns true if the struct has a block decoration
-  bool IsBlockDecorated() const {
-    return struct_->decoration() == StructDecoration::kBlock;
-  }
+  bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }
 
   /// @returns true if the type is a struct type
   bool IsStruct() const override;

@@ -582,7 +582,8 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
   EXPECT_TRUE(type->IsStruct());
   std::stringstream ss;
   type->AsStruct()->impl()->to_str(ss, 0);
-  EXPECT_THAT(ss.str(), Eq(R"([[block]] Struct{
+  EXPECT_THAT(ss.str(), Eq(R"(Struct{
+  [[block]]
   StructMember{field0: __u32}
 }
 )"));

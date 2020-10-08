@@ -1445,14 +1445,21 @@ ast::StorageClass ParserImpl::storage_class() {
 }
 
 // struct_decl
-//   : struct_decoration_decl? STRUCT struct_body_decl
+//   : struct_decoration_decl* STRUCT struct_body_decl
 std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   auto t = peek();
   auto source = t.source();
 
-  auto deco = struct_decoration_decl();
-  if (has_error())
-    return nullptr;
+  ast::StructDecorationList decos;
+  for (;;) {
+    size_t s = decos.size();
+    if (!struct_decoration_decl(decos)) {
+      return nullptr;
+    }
+    if (decos.size() == s) {
+      break;
+    }
+  }
 
   t = next();
   if (!t.IsStruct()) {
@@ -1466,22 +1473,25 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   }
 
   return std::make_unique<ast::type::StructType>(
-      std::make_unique<ast::Struct>(source, deco, std::move(body)));
+      std::make_unique<ast::Struct>(source, std::move(decos), std::move(body)));
 }
 
 // struct_decoration_decl
 //  : ATTR_LEFT struct_decoration ATTR_RIGHT
-ast::StructDecoration ParserImpl::struct_decoration_decl() {
+bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
   auto t = peek();
-  if (!t.IsAttrLeft())
-    return ast::StructDecoration::kNone;
+  if (!t.IsAttrLeft()) {
+    return true;
+  }
 
   auto deco = struct_decoration(peek(1));
-  if (has_error())
-    return ast::StructDecoration::kNone;
-  if (deco == ast::StructDecoration::kNone) {
-    return deco;
+  if (has_error()) {
+    return false;
   }
+  if (deco == ast::StructDecoration::kNone) {
+    return true;
+  }
+  decos.push_back(deco);
 
   next();  // Consume the peek of [[
   next();  // Consume the peek from the struct_decoration
@@ -1489,10 +1499,10 @@ ast::StructDecoration ParserImpl::struct_decoration_decl() {
   t = next();
   if (!t.IsAttrRight()) {
     set_error(t, "missing ]] for struct decoration");
-    return ast::StructDecoration::kNone;
+    return false;
   }
 
-  return deco;
+  return true;
 }
 
 // struct_decoration

@@ -789,13 +789,13 @@ ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
-  auto ast_struct_decoration = ast::StructDecoration::kNone;
+  ast::StructDecorationList ast_struct_decorations;
   if (struct_decorations.size() == 1) {
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
-      ast_struct_decoration = ast::StructDecoration::kBlock;
+      ast_struct_decorations.push_back(ast::StructDecoration::kBlock);
     } else if (decoration == SpvDecorationBufferBlock) {
-      ast_struct_decoration = ast::StructDecoration::kBlock;
+      ast_struct_decorations.push_back(ast::StructDecoration::kBlock);
       remap_buffer_block_type_.insert(type_id);
     } else {
       Fail() << "struct with ID " << type_id
@@ -859,8 +859,8 @@ ast::type::Type* ParserImpl::ConvertType(
   }
 
   // Now make the struct.
-  auto ast_struct = std::make_unique<ast::Struct>(ast_struct_decoration,
-                                                  std::move(ast_members));
+  auto ast_struct = std::make_unique<ast::Struct>(
+      std::move(ast_struct_decorations), std::move(ast_members));
   // The struct type will be assigned a name during EmitAliasTypes.
   auto ast_struct_type =
       std::make_unique<ast::type::StructType>(std::move(ast_struct));

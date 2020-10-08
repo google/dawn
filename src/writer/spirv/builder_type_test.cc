@@ -328,8 +328,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   members.push_back(
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
@@ -355,7 +354,10 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   members.push_back(
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kBlock,
+  ast::StructDecorationList struct_decos;
+  struct_decos.push_back(ast::StructDecoration::kBlock);
+
+  auto s = std::make_unique<ast::Struct>(std::move(struct_decos),
                                          std::move(members));
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
@@ -390,8 +392,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
 
   ast::Module mod;
@@ -429,8 +430,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
   members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
                                                         std::move(empty_c)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
 
   ast::Module mod;
@@ -477,8 +477,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
                                                         std::move(c_decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
 
   ast::Module mod;
@@ -543,8 +542,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   members.push_back(std::make_unique<ast::StructMember>("c", &glsl_mat4x4,
                                                         std::move(c_decos)));
 
-  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
-                                         std::move(members));
+  auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type(std::move(s));
 
   ast::Module mod;

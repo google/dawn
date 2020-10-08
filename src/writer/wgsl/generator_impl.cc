@@ -437,8 +437,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     }
   } else if (type->IsStruct()) {
     auto* str = type->AsStruct()->impl();
-    if (str->decoration() != ast::StructDecoration::kNone) {
-      out_ << "[[" << str->decoration() << "]] ";
+    for (auto deco : str->decorations()) {
+      out_ << "[[" << deco << "]]" << std::endl;
     }
     out_ << "struct {" << std::endl;
 
