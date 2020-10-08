@@ -54,10 +54,21 @@ grammar in the naming of the parse methods.
 
 ## AST
 
-After generation the AST will run an `IsValid` method which verifies that the
-produced AST is structurally correct. This means that things like `if`
-statements have a condition and body attached.
+The Abstract Syntax Tree is a directed acyclic graph of nodes encoding
+the structure of the WGSL program.
 
+Many AST nodes have numeric parameters. For example, the ast::StrideDecoration
+node has numeric stride parameter, which is a count of the number of bytes from
+the start of one array element to the start of the next.  The AST node itself
+does not constrain the set of stride values that you can set, aside from storing
+it as an unsigned integer.
+
+After creating the AST for the whole WGSL program, Tint will run an `IsValid`
+method which verifies that the produced AST is structurally correct.  This
+means that things like `if` statements have a condition and body attached.
+
+A later phase of processing, Validation, will check properties such as whether
+array strides satisfy all the requirements in the WGSL specification.
 
 ## Type Determiner
 
