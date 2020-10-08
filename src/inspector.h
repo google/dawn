@@ -28,6 +28,12 @@ namespace inspector {
 
 /// Container of reflection data for an entry point in the shader.
 struct EntryPoint {
+  /// Constructors
+  EntryPoint();
+  EntryPoint(EntryPoint&);
+  EntryPoint(EntryPoint&&);
+  ~EntryPoint();
+
   /// The entry point name
   std::string name;
   /// The entry point stage
@@ -38,6 +44,10 @@ struct EntryPoint {
   uint32_t workgroup_size_y;
   /// The workgroup z size
   uint32_t workgroup_size_z;
+  /// List of the input variable accessed via this entry point.
+  std::vector<std::string> input_variables;
+  /// List of the output variable accessed via this entry point.
+  std::vector<std::string> output_variables;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

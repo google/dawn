@@ -14,10 +14,17 @@
 
 #include "src/inspector.h"
 
+#include <algorithm>
+
 #include "src/ast/function.h"
 
 namespace tint {
 namespace inspector {
+
+EntryPoint::EntryPoint() = default;
+EntryPoint::EntryPoint(EntryPoint&) = default;
+EntryPoint::EntryPoint(EntryPoint&&) = default;
+EntryPoint::~EntryPoint() = default;
 
 Inspector::Inspector(const ast::Module& module) : module_(module) {}
 
@@ -25,11 +32,23 @@ Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
+
   for (const auto& func : module_.functions()) {
     if (func->IsEntryPoint()) {
-      uint32_t x, y, z;
-      std::tie(x, y, z) = func->workgroup_size();
-      result.push_back({func->name(), func->pipeline_stage(), x, y, z});
+      EntryPoint entry_point;
+      entry_point.name = func->name();
+      entry_point.stage = func->pipeline_stage();
+      std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
+               entry_point.workgroup_size_z) = func->workgroup_size();
+
+      for (auto* var : func->referenced_module_variables()) {
+        if (var->storage_class() == ast::StorageClass::kInput) {
+          entry_point.input_variables.push_back(var->name());
+        } else {
+          entry_point.output_variables.push_back(var->name());
+        }
+      }
+      result.push_back(std::move(entry_point));
     }
   }
 

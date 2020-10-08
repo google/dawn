@@ -113,6 +113,8 @@ class Function : public Node {
   /// is not already included.
   /// @param var the module variable to add
   void add_referenced_module_variable(Variable* var);
+  /// Note: If this function calls other functions, the return will also include
+  /// all of the referenced variables from the callees.
   /// @returns the referenced module variables
   const std::vector<Variable*>& referenced_module_variables() const {
     return referenced_module_vars_;
