@@ -15,6 +15,7 @@
 #include "src/ast/type/array_type.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
 
@@ -75,8 +76,11 @@ TEST_F(ArrayTypeTest, TypeName_RuntimeArray) {
 
 TEST_F(ArrayTypeTest, TypeName_WithStride) {
   I32Type i32;
+  ArrayDecorationList decos;
+  decos.push_back(std::make_unique<StrideDecoration>(16));
+
   ArrayType arr{&i32, 3};
-  arr.set_array_stride(16);
+  arr.set_decorations(std::move(decos));
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 

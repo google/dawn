@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "src/ast/array_decoration.h"
 #include "src/ast/type/type.h"
 
 namespace tint {
@@ -45,13 +46,18 @@ class ArrayType : public Type {
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }
 
-  /// Sets the array stride
-  /// @param stride the stride to set
-  void set_array_stride(uint32_t stride) { array_stride_ = stride; }
+  /// Sets the array decorations
+  /// @param decos the decorations to set
+  void set_decorations(ast::ArrayDecorationList decos) {
+    decos_ = std::move(decos);
+  }
+  /// @returns the array decorations
+  const ArrayDecorationList& decorations() const { return decos_; }
+
   /// @returns the array stride or 0 if none set.
-  uint32_t array_stride() const { return array_stride_; }
+  uint32_t array_stride() const;
   /// @returns true if the array has a stride set
-  bool has_array_stride() const { return array_stride_ != 0; }
+  bool has_array_stride() const;
 
   /// @returns the array type
   Type* type() const { return subtype_; }
@@ -64,7 +70,7 @@ class ArrayType : public Type {
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 0;
-  uint32_t array_stride_ = 0;
+  ast::ArrayDecorationList decos_;
 };
 
 }  // namespace type

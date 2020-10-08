@@ -24,6 +24,7 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -525,7 +526,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
-  ary.set_array_stride(4);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -573,7 +576,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
-  ary.set_array_stride(4);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -684,7 +689,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
-  ary.set_array_stride(4);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -937,7 +944,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -1010,7 +1019,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -1086,7 +1097,9 @@ TEST_F(
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -1161,7 +1174,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -1237,7 +1252,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -1329,7 +1346,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   data.set_name("Data");
 
   ast::type::ArrayType ary(&data, 4);
-  ary.set_array_stride(32);
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  ary.set_decorations(std::move(decos));
 
   deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(

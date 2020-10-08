@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -60,14 +61,31 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(g.result(), "array<bool, 4>");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Array_WithStride) {
+TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   ast::type::BoolType b;
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(16u));
+
   ast::type::ArrayType a(&b, 4);
-  a.set_array_stride(16);
+  a.set_decorations(std::move(decos));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&a)) << g.error();
   EXPECT_EQ(g.result(), "[[stride(16)]] array<bool, 4>");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
+  ast::type::BoolType b;
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(16u));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32u));
+
+  ast::type::ArrayType a(&b, 4);
+  a.set_decorations(std::move(decos));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&a)) << g.error();
+  EXPECT_EQ(g.result(), "[[stride(16)]] [[stride(32)]] array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {

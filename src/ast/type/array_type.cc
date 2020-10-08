@@ -14,6 +14,8 @@
 
 #include "src/ast/type/array_type.h"
 
+#include "src/ast/stride_decoration.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -31,6 +33,24 @@ bool ArrayType::IsArray() const {
   return true;
 }
 
+uint32_t ArrayType::array_stride() const {
+  for (const auto& deco : decos_) {
+    if (deco->IsStride()) {
+      return deco->AsStride()->stride();
+    }
+  }
+  return 0;
+}
+
+bool ArrayType::has_array_stride() const {
+  for (const auto& deco : decos_) {
+    if (deco->IsStride()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::string ArrayType::type_name() const {
   assert(subtype_);
 
@@ -38,7 +58,7 @@ std::string ArrayType::type_name() const {
   if (!IsRuntimeArray())
     type_name += "_" + std::to_string(size_);
   if (has_array_stride())
-    type_name += "_stride_" + std::to_string(array_stride_);
+    type_name += "_stride_" + std::to_string(array_stride());
 
   return type_name;
 }

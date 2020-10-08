@@ -21,6 +21,7 @@
 #include "src/ast/decorated_variable.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -215,7 +216,10 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
   auto internal_array = std::make_unique<ast::type::ArrayType>(GetU32Type());
-  internal_array->set_array_stride(4u);
+  ast::ArrayDecorationList ary_decos;
+  ary_decos.push_back(std::make_unique<ast::StrideDecoration>(4u));
+  internal_array->set_decorations(std::move(ary_decos));
+
   auto* internal_array_type = ctx_->type_mgr().Get(std::move(internal_array));
 
   // Creating the struct type

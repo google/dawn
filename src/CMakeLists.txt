@@ -40,6 +40,8 @@ set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
+  ast/array_decoration.cc
+  ast/array_decoration.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
   ast/binary_expression.cc
@@ -124,10 +126,12 @@ set(TINT_LIB_SRCS
   ast/statement.h
   ast/storage_class.cc
   ast/storage_class.h
-  ast/struct_decoration.cc
-  ast/struct_decoration.h
+  ast/stride_decoration.cc
+  ast/stride_decoration.h
   ast/struct.cc
   ast/struct.h
+  ast/struct_decoration.cc
+  ast/struct_decoration.h
   ast/struct_member.cc
   ast/struct_member.h
   ast/struct_member_decoration.cc
@@ -337,6 +341,7 @@ set(TINT_TEST_SRCS
   ast/set_decoration_test.cc
   ast/sint_literal_test.cc
   ast/stage_decoration_test.cc
+  ast/stride_decoration_test.cc
   ast/struct_member_test.cc
   ast/struct_member_offset_decoration_test.cc
   ast/struct_test.cc

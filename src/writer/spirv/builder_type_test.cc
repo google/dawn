@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -128,8 +129,12 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
   ast::type::I32Type i32;
+
+  ast::ArrayDecorationList decos;
+  decos.push_back(std::make_unique<ast::StrideDecoration>(16u));
+
   ast::type::ArrayType ary(&i32, 4);
-  ary.set_array_stride(16u);
+  ary.set_decorations(std::move(decos));
 
   ast::Module mod;
   Builder b(&mod);

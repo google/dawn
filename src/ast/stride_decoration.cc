@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_STRUCT_DECORATION_H_
-#define SRC_AST_STRUCT_DECORATION_H_
-
-#include <ostream>
-#include <vector>
+#include "src/ast/stride_decoration.h"
 
 namespace tint {
 namespace ast {
 
-/// The struct decorations
-enum class StructDecoration { kNone = -1, kBlock };
+StrideDecoration::StrideDecoration(uint32_t stride) : stride_(stride) {}
 
-std::ostream& operator<<(std::ostream& out, StructDecoration stage);
+bool StrideDecoration::IsStride() const {
+  return true;
+}
 
-/// List of struct decorations
-using StructDecorationList = std::vector<StructDecoration>;
+StrideDecoration::~StrideDecoration() = default;
+
+std::string StrideDecoration::to_str() const {
+  return "stride " + std::to_string(stride_);
+}
 
 }  // namespace ast
 }  // namespace tint
-
-#endif  // SRC_AST_STRUCT_DECORATION_H_

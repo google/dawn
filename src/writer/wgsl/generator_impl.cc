@@ -46,6 +46,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/statement.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -395,8 +396,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 
-    if (ary->has_array_stride()) {
-      out_ << "[[stride(" << ary->array_stride() << ")]] ";
+    for (const auto& deco : ary->decorations()) {
+      if (deco->IsStride()) {
+        out_ << "[[stride(" << deco->AsStride()->stride() << ")]] ";
+      }
     }
 
     out_ << "array<";

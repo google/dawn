@@ -45,6 +45,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -772,7 +773,9 @@ bool ParserImpl::ApplyArrayDecorations(
         return Fail() << "invalid array type ID " << type_id
                       << ": multiple ArrayStride decorations";
       }
-      ast_type->set_array_stride(stride);
+      ast::ArrayDecorationList decos;
+      decos.push_back(std::make_unique<ast::StrideDecoration>(stride));
+      ast_type->set_decorations(std::move(decos));
     } else {
       return Fail() << "invalid array type ID " << type_id
                     << ": unknown decoration "

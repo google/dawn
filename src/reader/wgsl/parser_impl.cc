@@ -41,6 +41,7 @@
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/alias_type.h"
@@ -1105,9 +1106,9 @@ ast::type::AliasType* ParserImpl::type_alias() {
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl GREATER_THAN
-//   | array_decoration_list? ARRAY LESS_THAN type_decl COMMA
+//   | array_decoration_list* ARRAY LESS_THAN type_decl COMMA
 //          INT_LITERAL GREATER_THAN
-//   | array_decoration_list? ARRAY LESS_THAN type_decl
+//   | array_decoration_list* ARRAY LESS_THAN type_decl
 //          GREATER_THAN
 //   | MAT2x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x3 LESS_THAN type_decl GREATER_THAN
@@ -1153,19 +1154,28 @@ ast::type::Type* ParserImpl::type_decl() {
     return type_decl_pointer(t);
   }
 
-  auto deco = array_decoration_list();
+  ast::ArrayDecorationList decos;
+  for (;;) {
+    size_t s = decos.size();
+    if (!array_decoration_list(decos)) {
+      return nullptr;
+    }
+    if (decos.size() == s) {
+      break;
+    }
+  }
   if (has_error()) {
     return nullptr;
   }
-  if (deco != 0) {
+  if (!decos.empty()) {
     t = peek();
   }
-  if (deco != 0 && !t.IsArray()) {
+  if (!decos.empty() && !t.IsArray()) {
     set_error(t, "found array decoration but no array");
     return nullptr;
   }
   if (t.IsArray()) {
-    return type_decl_array(t, deco);
+    return type_decl_array(t, std::move(decos));
   }
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
@@ -1258,7 +1268,8 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
       std::make_unique<ast::type::VectorType>(subtype, count));
 }
 
-ast::type::Type* ParserImpl::type_decl_array(Token t, uint32_t stride) {
+ast::type::Type* ParserImpl::type_decl_array(Token t,
+                                             ast::ArrayDecorationList decos) {
   next();  // Consume the peek
 
   t = next();
@@ -1296,9 +1307,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t, uint32_t stride) {
   }
 
   auto ty = std::make_unique<ast::type::ArrayType>(subtype, size);
-  if (stride != 0) {
-    ty->set_array_stride(stride);
-  }
+  ty->set_decorations(std::move(decos));
   return ctx_.type_mgr().Get(std::move(ty));
 }
 
@@ -1309,48 +1318,62 @@ ast::type::Type* ParserImpl::type_decl_array(Token t, uint32_t stride) {
 //
 // As there is currently only one decoration I'm combining these for now.
 // we can split apart later if needed.
-uint32_t ParserImpl::array_decoration_list() {
+bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
   auto t = peek();
   if (!t.IsAttrLeft()) {
-    return 0;
+    return true;
   }
   t = peek(1);
   if (!t.IsStride()) {
-    return 0;
+    return true;
   }
 
   next();  // consume the peek of [[
-  next();  // consume the peek of stride
 
-  t = next();
-  if (!t.IsParenLeft()) {
-    set_error(t, "missing ( for stride attribute");
-    return 0;
-  }
+  for (;;) {
+    t = next();
+    if (!t.IsStride()) {
+      set_error(t, "unknown array decoration");
+      return false;
+    }
 
-  t = next();
-  if (!t.IsSintLiteral()) {
-    set_error(t, "missing value for stride decoration");
-    return 0;
-  }
-  if (t.to_i32() < 0) {
-    set_error(t, "invalid stride value: " + t.to_str());
-    return 0;
-  }
-  uint32_t stride = static_cast<uint32_t>(t.to_i32());
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for stride attribute");
+      return false;
+    }
 
-  t = next();
-  if (!t.IsParenRight()) {
-    set_error(t, "missing ) for stride attribute");
-    return 0;
+    t = next();
+    if (!t.IsSintLiteral()) {
+      set_error(t, "missing value for stride decoration");
+      return false;
+    }
+    if (t.to_i32() < 0) {
+      set_error(t, "invalid stride value: " + t.to_str());
+      return false;
+    }
+    uint32_t stride = static_cast<uint32_t>(t.to_i32());
+    decos.push_back(std::make_unique<ast::StrideDecoration>(stride));
+
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for stride attribute");
+      return false;
+    }
+
+    t = peek();
+    if (!t.IsComma()) {
+      break;
+    }
+    next();  // Consume the peek
   }
 
   t = next();
   if (!t.IsAttrRight()) {
     set_error(t, "missing ]] for array decoration");
-    return 0;
+    return false;
   }
-  return stride;
+  return true;
 }
 
 ast::type::Type* ParserImpl::type_decl_matrix(Token t) {

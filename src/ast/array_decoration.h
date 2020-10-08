@@ -12,24 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_STRUCT_DECORATION_H_
-#define SRC_AST_STRUCT_DECORATION_H_
+#ifndef SRC_AST_ARRAY_DECORATION_H_
+#define SRC_AST_ARRAY_DECORATION_H_
 
-#include <ostream>
+#include <memory>
+#include <string>
 #include <vector>
 
 namespace tint {
 namespace ast {
 
-/// The struct decorations
-enum class StructDecoration { kNone = -1, kBlock };
+class StrideDecoration;
 
-std::ostream& operator<<(std::ostream& out, StructDecoration stage);
+/// A decoration attached to an array
+class ArrayDecoration {
+ public:
+  virtual ~ArrayDecoration();
 
-/// List of struct decorations
-using StructDecorationList = std::vector<StructDecoration>;
+  /// @returns true if this is a stride decoration
+  virtual bool IsStride() const;
+
+  /// @returns the decoration as a stride decoration
+  StrideDecoration* AsStride();
+
+  /// @returns the decoration as a string
+  virtual std::string to_str() const = 0;
+
+ protected:
+  ArrayDecoration();
+};
+
+/// A list of unique array decorations
+using ArrayDecorationList = std::vector<std::unique_ptr<ArrayDecoration>>;
 
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_STRUCT_DECORATION_H_
+#endif  // SRC_AST_ARRAY_DECORATION_H_

@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/ast/array_decoration.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
 #include "src/ast/call_statement.h"
@@ -172,8 +173,8 @@ class ParserImpl {
   std::unique_ptr<ast::StructMember> struct_member();
   /// Parses a `struct_member_decoration_decl` grammar element, appending newly
   /// parsed decorations to the end of |decos|.
-  /// @params decos the decoration list
-  /// @returns the list of decorations
+  /// @param decos the decoration list
+  /// @returns true if parsing was successful.
   bool struct_member_decoration_decl(ast::StructMemberDecorationList& decos);
   /// Parses a `struct_member_decoration` grammar element
   /// @returns the decoration or nullptr if none found
@@ -395,8 +396,8 @@ class ParserImpl {
  private:
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);
-  ast::type::Type* type_decl_array(Token t, uint32_t stride);
-  uint32_t array_decoration_list();
+  ast::type::Type* type_decl_array(Token t, ast::ArrayDecorationList decos);
+  bool array_decoration_list(ast::ArrayDecorationList& decos);
   ast::type::Type* type_decl_matrix(Token t);
 
   std::unique_ptr<ast::ConstructorExpression> const_expr_internal(

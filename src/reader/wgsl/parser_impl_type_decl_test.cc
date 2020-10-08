@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -421,6 +422,44 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   ASSERT_TRUE(a->type()->IsF32());
   ASSERT_TRUE(a->has_array_stride());
   EXPECT_EQ(a->array_stride(), 16u);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
+  auto* p = parser("[[stride(16), stride(32)]] array<f32>");
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t->IsArray());
+
+  auto* a = t->AsArray();
+  ASSERT_TRUE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->IsF32());
+
+  auto& decos = a->decorations();
+  ASSERT_EQ(decos.size(), 2u);
+  EXPECT_TRUE(decos[0]->IsStride());
+  EXPECT_EQ(decos[0]->AsStride()->stride(), 16u);
+  EXPECT_TRUE(decos[1]->IsStride());
+  EXPECT_EQ(decos[1]->AsStride()->stride(), 32u);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
+  auto* p = parser("[[stride(16)]] [[stride(32)]] array<f32>");
+  auto* t = p->type_decl();
+  ASSERT_NE(t, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t->IsArray());
+
+  auto* a = t->AsArray();
+  ASSERT_TRUE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->IsF32());
+
+  auto& decos = a->decorations();
+  ASSERT_EQ(decos.size(), 2u);
+  EXPECT_TRUE(decos[0]->IsStride());
+  EXPECT_EQ(decos[0]->AsStride()->stride(), 16u);
+  EXPECT_TRUE(decos[1]->IsStride());
+  EXPECT_EQ(decos[1]->AsStride()->stride(), 32u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
