@@ -25,7 +25,7 @@ struct SerialStorageTraits {};
 
 template <typename Derived>
 class SerialStorage {
-  private:
+  protected:
     using Serial = typename SerialStorageTraits<Derived>::Serial;
     using Value = typename SerialStorageTraits<Derived>::Value;
     using Storage = typename SerialStorageTraits<Derived>::Storage;
