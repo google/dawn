@@ -2053,7 +2053,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
                                              const ast::Variable* var) {
   make_indent(out);
 
-  if (var->IsDecorated()) {
+  if (var->IsDecorated() && !var->AsDecorated()->HasConstantIdDecoration()) {
     error_ = "Decorated const values not valid";
     return false;
   }
@@ -2064,8 +2064,6 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
 
   std::ostringstream constructor_out;
   if (var->constructor() != nullptr) {
-    constructor_out << " = ";
-
     std::ostringstream pre;
     if (!EmitExpression(pre, constructor_out, var->constructor())) {
       return false;
@@ -2073,14 +2071,40 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     out << pre.str();
   }
 
-  out << "static const ";
-  if (!EmitType(out, var->type(), var->name())) {
-    return false;
+  if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
+    auto const_id = var->AsDecorated()->constant_id();
+
+    out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
+
+    if (var->constructor() != nullptr) {
+      out << "#define WGSL_SPEC_CONSTANT_" << const_id << " "
+          << constructor_out.str() << std::endl;
+    } else {
+      out << "#error spec constant required for constant id " << const_id
+          << std::endl;
+    }
+    out << "#endif" << std::endl;
+    out << "static const ";
+    if (!EmitType(out, var->type(), var->name())) {
+      return false;
+    }
+    out << " " << var->name() << " = WGSL_SPEC_CONSTANT_" << const_id << ";"
+        << std::endl;
+    out << "#undef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
+  } else {
+    out << "static const ";
+    if (!EmitType(out, var->type(), var->name())) {
+      return false;
+    }
+    if (!var->type()->IsArray()) {
+      out << " " << var->name();
+    }
+
+    if (var->constructor() != nullptr) {
+      out << " = " << constructor_out.str();
+    }
+    out << ";" << std::endl;
   }
-  if (!var->type()->IsArray()) {
-    out << " " << var->name();
-  }
-  out << constructor_out.str() << ";" << std::endl;
 
   return true;
 }

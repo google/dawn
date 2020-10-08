@@ -15,6 +15,8 @@
 #include <memory>
 #include <vector>
 
+#include "src/ast/constant_id_decoration.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -54,6 +56,50 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   EXPECT_EQ(
       result(),
       "static const float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
+}
+
+TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
+  ast::type::F32Type f32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+
+  auto var = std::make_unique<ast::DecoratedVariable>(
+      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+  var->set_decorations(std::move(decos));
+  var->set_is_const(true);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
+      << gen().error();
+  EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
+#define WGSL_SPEC_CONSTANT_23 3.00000000f
+#endif
+static const float pos = WGSL_SPEC_CONSTANT_23;
+#undef WGSL_SPEC_CONSTANT_23
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
+  ast::type::F32Type f32;
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+
+  auto var = std::make_unique<ast::DecoratedVariable>(
+      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+  var->set_decorations(std::move(decos));
+  var->set_is_const(true);
+
+  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
+      << gen().error();
+  EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
+#error spec constant required for constant id 23
+#endif
+static const float pos = WGSL_SPEC_CONSTANT_23;
+#undef WGSL_SPEC_CONSTANT_23
+)");
 }
 
 }  // namespace
