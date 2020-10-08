@@ -783,8 +783,11 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   }
   idx_id = GenerateLoadIfNeeded(expr->idx_expr()->result_type(), idx_id);
 
-  // If the source is a pointer we access chain into it.
-  if (info->source_type->IsPointer()) {
+  // If the source is a pointer we access chain into it. We also access chain
+  // into an array of non-scalar types.
+  if (info->source_type->IsPointer() ||
+      (info->source_type->IsArray() &&
+       !info->source_type->AsArray()->type()->is_scalar())) {
     info->access_chain_indices.push_back(idx_id);
     info->source_type = expr->result_type();
     return true;
@@ -966,6 +969,37 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
     return 0;
   }
   info.source_type = source->result_type();
+
+  // If our initial access in into an array, and that array is not a pointer,
+  // then we need to load that array into a variable in order to be access
+  // chain into the array
+  if (accessors[0]->IsArrayAccessor()) {
+    auto* ary_res_type =
+        accessors[0]->AsArrayAccessor()->array()->result_type();
+    if (!ary_res_type->IsPointer()) {
+      ast::type::PointerType ptr(ary_res_type, ast::StorageClass::kFunction);
+      auto result_type_id = GenerateTypeIfNeeded(&ptr);
+      if (result_type_id == 0) {
+        return 0;
+      }
+
+      auto ary_result = result_op();
+
+      ast::NullLiteral nl(ary_res_type);
+      auto init = GenerateLiteralIfNeeded(nullptr, &nl);
+
+      // If we're access chaining into an array then we must be in a function
+      push_function_var(
+          {Operand::Int(result_type_id), ary_result,
+           Operand::Int(ConvertStorageClass(ast::StorageClass::kFunction)),
+           Operand::Int(init)});
+
+      push_function_inst(spv::Op::OpStore,
+                         {ary_result, Operand::Int(info.source_id)});
+
+      info.source_id = ary_result.to_i();
+    }
+  }
 
   std::vector<uint32_t> access_chain_indices;
   for (auto* accessor : accessors) {

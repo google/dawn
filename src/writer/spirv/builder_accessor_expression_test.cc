@@ -28,7 +28,10 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_constructor_expression.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -938,6 +941,90 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
             R"(%19 = OpAccessChain %18 %1 %15 %16 %17 %16 %16
 %21 = OpLoad %8 %19
 %22 = OpVectorShuffle %20 %21 %21 1 0
+)");
+}
+
+TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
+  // const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+  //   vec2<f32>(0.0, 0.5),
+  //   vec2<f32>(-0.5, -0.5),
+  //   vec2<f32>(0.5, -0.5));
+  // pos[1]
+
+  ast::type::F32Type f32;
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&f32, 2);
+  ast::type::ArrayType arr(&vec, 3);
+
+  ast::ExpressionList ary_params;
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.0)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.5)));
+  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
+  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 0.5)));
+  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
+  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_params)));
+
+  ast::Variable var("pos", ast::StorageClass::kPrivate, &arr);
+  var.set_is_const(true);
+  var.set_constructor(std::make_unique<ast::TypeConstructorExpression>(
+      &arr, std::move(ary_params)));
+
+  ast::ArrayAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("pos"),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::UintLiteral>(&u32, 1)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 18u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 2
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 3
+%1 = OpTypeArray %2 %5
+%6 = OpConstant %3 0
+%7 = OpConstant %3 0.5
+%8 = OpConstantComposite %2 %6 %7
+%9 = OpConstant %3 -0.5
+%10 = OpConstantComposite %2 %9 %9
+%11 = OpConstantComposite %2 %7 %9
+%12 = OpConstantComposite %1 %8 %10 %11
+%13 = OpTypePointer Function %1
+%15 = OpConstantNull %1
+%16 = OpConstant %4 1
+%17 = OpTypePointer Function %2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%14 = OpVariable %13 Function %15
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %14 %12
+%18 = OpAccessChain %17 %14 %16
 )");
 }
 

@@ -352,6 +352,13 @@ bool TypeDeterminer::DetermineArrayAccessor(
   if (res->IsPointer()) {
     ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
         ret, res->AsPointer()->storage_class()));
+  } else if (parent_type->IsArray() &&
+             !parent_type->AsArray()->type()->is_scalar()) {
+    // If we extract a non-scalar from an array then we also get a pointer. We
+    // will generate a Function storage class variable to store this
+    // into.
+    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+        ret, ast::StorageClass::kFunction));
   }
   expr->set_result_type(ret);
 

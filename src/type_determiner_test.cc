@@ -528,7 +528,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  EXPECT_TRUE(acc.result_type()->IsF32());
+  EXPECT_TRUE(acc.result_type()->IsF32()) << acc.result_type()->type_name();
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
