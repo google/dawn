@@ -2494,6 +2494,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"acos", ast::Intrinsic::kAcos},
         IntrinsicData{"all", ast::Intrinsic::kAll},
         IntrinsicData{"any", ast::Intrinsic::kAny},
+        IntrinsicData{"arrayLength", ast::Intrinsic::kArrayLength},
         IntrinsicData{"asin", ast::Intrinsic::kAsin},
         IntrinsicData{"atan", ast::Intrinsic::kAtan},
         IntrinsicData{"atan2", ast::Intrinsic::kAtan2},

@@ -31,6 +31,9 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
     case Intrinsic::kAny:
       out << "any";
       break;
+    case Intrinsic::kArrayLength:
+      out << "arrayLength";
+      break;
     case Intrinsic::kAsin:
       out << "asin";
       break;

@@ -520,6 +520,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
     return true;
   }
+  if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
+    expr->func()->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>()));
+    return true;
+  }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
       set_error(expr->source(),
@@ -638,6 +643,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
   }
   if (data == nullptr) {
+    error_ = "unable to find intrinsic " + ident->name();
     return false;
   }
 
@@ -788,6 +794,8 @@ void TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kAll);
   } else if (ident->name() == "any") {
     ident->set_intrinsic(ast::Intrinsic::kAny);
+  } else if (ident->name() == "arrayLength") {
+    ident->set_intrinsic(ast::Intrinsic::kArrayLength);
   } else if (ident->name() == "asin") {
     ident->set_intrinsic(ast::Intrinsic::kAsin);
   } else if (ident->name() == "atan") {

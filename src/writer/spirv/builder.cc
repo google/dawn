@@ -1670,6 +1670,37 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     op = spv::Op::OpAny;
   } else if (intrinsic == ast::Intrinsic::kAll) {
     op = spv::Op::OpAll;
+  } else if (intrinsic == ast::Intrinsic::kArrayLength) {
+    if (call->params().empty()) {
+      error_ = "missing param for runtime array length";
+      return 0;
+    } else if (!call->params()[0]->IsMemberAccessor()) {
+      if (call->params()[0]->result_type()->IsPointer()) {
+        error_ = "pointer accessors not supported yet";
+      } else {
+        error_ = "invalid accessor for runtime array length";
+      }
+      return 0;
+    }
+    auto* accessor = call->params()[0]->AsMemberAccessor();
+    auto struct_id = GenerateExpression(accessor->structure());
+    if (struct_id == 0) {
+      return 0;
+    }
+    params.push_back(Operand::Int(struct_id));
+
+    auto* type = accessor->structure()->result_type()->UnwrapAliasPtrAlias();
+    if (!type->IsStruct()) {
+      error_ =
+          "invalid type (" + type->type_name() + ") for runtime array length";
+      return 0;
+    }
+    // Runtime array must be the last member in the structure
+    params.push_back(
+        Operand::Int(uint32_t(type->AsStruct()->impl()->members().size() - 1)));
+
+    push_function_inst(spv::Op::OpArrayLength, params);
+    return result_id;
   } else if (intrinsic == ast::Intrinsic::kCountOneBits) {
     op = spv::Op::OpBitCount;
   } else if (intrinsic == ast::Intrinsic::kDot) {

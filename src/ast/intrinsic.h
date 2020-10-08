@@ -28,6 +28,7 @@ enum class Intrinsic {
   kAcos,
   kAll,
   kAny,
+  kArrayLength,
   kAsin,
   kAtan,
   kAtan2,

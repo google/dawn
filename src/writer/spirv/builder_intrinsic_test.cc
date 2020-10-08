@@ -18,16 +18,22 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
@@ -2713,6 +2719,181 @@ OpName %5 "var"
 %13 = OpLoad %7 %5
 %11 = OpExtInst %9 %12 Determinant %13
 OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call_ArrayLength) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::type::ArrayType ary(&f32);
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
+                                             &s_type);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("b"),
+      std::make_unique<ast::IdentifierExpression>("a")));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("arrayLength"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%9 = OpTypeFloat 32
+%8 = OpTypeRuntimeArray %9
+%7 = OpTypeStruct %8
+%6 = OpTypePointer Private %7
+%10 = OpConstantNull %7
+%5 = OpVariable %6 Private %10
+%12 = OpTypeInt 32 0
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%11 = OpArrayLength %12 %5 0
+)");
+}
+
+TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::type::ArrayType ary(&f32);
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
+                                             &s_type);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("b"),
+      std::make_unique<ast::IdentifierExpression>("a")));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("arrayLength"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeFloat 32
+%9 = OpTypeRuntimeArray %8
+%7 = OpTypeStruct %8 %9
+%6 = OpTypePointer Private %7
+%10 = OpConstantNull %7
+%5 = OpVariable %6 Private %10
+%12 = OpTypeInt 32 0
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%11 = OpArrayLength %12 %5 1
+)");
+}
+
+// TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
+TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::type::ArrayType ary(&f32);
+  ast::type::PointerType ptr(&ary, ast::StorageClass::kStorageBuffer);
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("z", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
+                                             &s_type);
+
+  auto ptr_var = std::make_unique<ast::Variable>(
+      "ptr_var", ast::StorageClass::kPrivate, &ptr);
+  ptr_var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::IdentifierExpression>("b"),
+      std::make_unique<ast::IdentifierExpression>("a")));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("ptr_var"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("arrayLength"),
+      std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(ptr_var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"( ... )");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%11 = OpArrayLength %12 %5 1
 )");
 }
 
