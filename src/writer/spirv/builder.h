@@ -95,14 +95,30 @@ class Builder {
   void push_capability(uint32_t cap);
   /// @returns the capabilities
   const InstructionList& capabilities() const { return capabilities_; }
-  /// Adds an instruction to the preamble
+  /// Adds an instruction to the extensions
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_preamble(spv::Op op, const OperandList& operands) {
-    preamble_.push_back(Instruction{op, operands});
+  void push_extension(spv::Op op, const OperandList& operands) {
+    extensions_.push_back(Instruction{op, operands});
   }
-  /// @returns the preamble
-  const InstructionList& preamble() const { return preamble_; }
+  /// @returns the extensions
+  const InstructionList& extensions() const { return extensions_; }
+  /// Adds an instruction to the ext import
+  /// @param op the op to set
+  /// @param operands the operands for the instruction
+  void push_ext_import(spv::Op op, const OperandList& operands) {
+    ext_imports_.push_back(Instruction{op, operands});
+  }
+  /// @returns the ext imports
+  const InstructionList& ext_imports() const { return ext_imports_; }
+  /// Adds an instruction to the memory model
+  /// @param op the op to set
+  /// @param operands the operands for the instruction
+  void push_memory_model(spv::Op op, const OperandList& operands) {
+    memory_model_.push_back(Instruction{op, operands});
+  }
+  /// @returns the memory model
+  const InstructionList& memory_model() const { return memory_model_; }
   /// Adds an instruction to the entry points
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -441,7 +457,9 @@ class Builder {
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;
   InstructionList capabilities_;
-  InstructionList preamble_;
+  InstructionList extensions_;
+  InstructionList ext_imports_;
+  InstructionList memory_model_;
   InstructionList entry_points_;
   InstructionList execution_modes_;
   InstructionList debug_;

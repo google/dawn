@@ -279,12 +279,12 @@ bool Builder::Build() {
 
   // TODO(dneto): Stop using the Vulkan memory model. crbug.com/tint/63
   push_capability(SpvCapabilityVulkanMemoryModel);
-  push_preamble(spv::Op::OpExtension,
-                {Operand::String("SPV_KHR_vulkan_memory_model")});
+  push_extension(spv::Op::OpExtension,
+                 {Operand::String("SPV_KHR_vulkan_memory_model")});
 
-  push_preamble(spv::Op::OpMemoryModel,
-                {Operand::Int(SpvAddressingModelLogical),
-                 Operand::Int(SpvMemoryModelVulkanKHR)});
+  push_memory_model(spv::Op::OpMemoryModel,
+                    {Operand::Int(SpvAddressingModelLogical),
+                     Operand::Int(SpvMemoryModelVulkanKHR)});
 
   for (const auto& var : mod_->global_variables()) {
     if (!GenerateGlobalVariable(var.get())) {
@@ -310,7 +310,9 @@ uint32_t Builder::total_size() const {
   uint32_t size = 5;
 
   size += size_of(capabilities_);
-  size += size_of(preamble_);
+  size += size_of(extensions_);
+  size += size_of(ext_imports_);
+  size += size_of(memory_model_);
   size += size_of(entry_points_);
   size += size_of(execution_modes_);
   size += size_of(debug_);
@@ -327,7 +329,13 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& inst : capabilities_) {
     cb(inst);
   }
-  for (const auto& inst : preamble_) {
+  for (const auto& inst : extensions_) {
+    cb(inst);
+  }
+  for (const auto& inst : ext_imports_) {
+    cb(inst);
+  }
+  for (const auto& inst : memory_model_) {
     cb(inst);
   }
   for (const auto& inst : entry_points_) {
@@ -1064,8 +1072,8 @@ void Builder::GenerateGLSLstd450Import() {
   auto result = result_op();
   auto id = result.to_i();
 
-  push_preamble(spv::Op::OpExtInstImport,
-                {result, Operand::String(kGLSLstd450)});
+  push_ext_import(spv::Op::OpExtInstImport,
+                  {result, Operand::String(kGLSLstd450)});
 
   import_name_to_id_[kGLSLstd450] = id;
 }
