@@ -45,6 +45,7 @@ struct Options {
 
   bool parse_only = false;
   bool dump_ast = false;
+  bool dawn_validation = false;
 
   Format format = Format::kNone;
 
@@ -75,6 +76,8 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                 bound_array_accessors
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
+  --dawn-validation         -- SPIRV outputs are validated with the same flags
+                               as Dawn does. Has no effect on non-SPIRV outputs.
   -h                        -- This help text)";
 
 #pragma clang diagnostic push
@@ -226,6 +229,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->parse_only = true;
     } else if (arg == "--dump-ast") {
       opts->dump_ast = true;
+    } else if (arg == "--dawn-validation") {
+      opts->dawn_validation = true;
     } else if (!arg.empty()) {
       if (arg[0] == '-') {
         std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -563,6 +568,22 @@ int main(int argc, const char** argv) {
   }
 
 #if TINT_BUILD_SPV_WRITER
+  bool dawn_validation_failed = false;
+  if (options.dawn_validation) {
+    // Use Vulkan 1.1, since this is what Tint, internally, uses.
+    spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+    tools.SetMessageConsumer([](spv_message_level_t, const char*,
+                                const spv_position_t& pos, const char* msg) {
+      std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
+                << std::endl;
+    });
+    auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
+    if (!tools.Validate(w->result().data(), w->result().size(),
+                        spvtools::ValidatorOptions())) {
+      dawn_validation_failed = true;
+    }
+  }
+
   if (options.format == Format::kSpvAsm) {
     auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
@@ -575,6 +596,9 @@ int main(int argc, const char** argv) {
     if (!WriteFile(options.output_file, "wb", w->result())) {
       return 1;
     }
+  }
+  if (dawn_validation_failed) {
+    return 1;
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
