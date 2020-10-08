@@ -129,9 +129,11 @@ class ParserImpl {
   /// Parses a `global_constant_decl` grammar element
   /// @returns the const object or nullptr
   std::unique_ptr<ast::Variable> global_constant_decl();
-  /// Parses a `variable_decoration_list` grammar element
-  /// @returns the parsed variable decorations
-  ast::VariableDecorationList variable_decoration_list();
+  /// Parses a `variable_decoration_list` grammar element, appending newly
+  /// parsed decorations to the end of |decos|.
+  /// @param decos list to store the parsed decorations
+  /// @returns the true on successful parse; false otherwise
+  bool variable_decoration_list(ast::VariableDecorationList& decos);
   /// Parses a `variable_decoration` grammar element
   /// @returns the variable decoration or nullptr if an error is encountered
   std::unique_ptr<ast::VariableDecoration> variable_decoration();

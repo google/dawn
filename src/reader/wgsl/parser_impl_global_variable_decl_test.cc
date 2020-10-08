@@ -77,6 +77,29 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   ASSERT_TRUE(decos[1]->IsSet());
 }
 
+TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
+  auto* p = parser("[[binding(2)]] [[set(1)]] var<out> a : f32");
+  auto e = p->global_variable_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsDecorated());
+
+  EXPECT_EQ(e->name(), "a");
+  ASSERT_NE(e->type(), nullptr);
+  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
+
+  ASSERT_EQ(e->constructor(), nullptr);
+
+  ASSERT_TRUE(e->IsDecorated());
+  auto* v = e->AsDecorated();
+
+  auto& decos = v->decorations();
+  ASSERT_EQ(decos.size(), 2u);
+  ASSERT_TRUE(decos[0]->IsBinding());
+  ASSERT_TRUE(decos[1]->IsSet());
+}
+
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
   auto* p = parser("[[binding()]] var<out> a : f32");
   auto e = p->global_variable_decl();

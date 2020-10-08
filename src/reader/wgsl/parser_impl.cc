@@ -268,10 +268,19 @@ void ParserImpl::global_decl() {
 }
 
 // global_variable_decl
-//  : variable_decoration_list variable_decl
-//  | variable_decoration_list variable_decl EQUAL const_expr
+//  : variable_decoration_list* variable_decl
+//  | variable_decoration_list* variable_decl EQUAL const_expr
 std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
-  auto decos = variable_decoration_list();
+  ast::VariableDecorationList decos;
+  for (;;) {
+    auto s = decos.size();
+    if (!variable_decoration_list(decos)) {
+      return nullptr;
+    }
+    if (s == decos.size()) {
+      break;
+    }
+  }
   if (has_error())
     return nullptr;
 
@@ -353,33 +362,33 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
 
 // variable_decoration_list
 //  : ATTR_LEFT (variable_decoration COMMA)* variable_decoration ATTR_RIGHT
-ast::VariableDecorationList ParserImpl::variable_decoration_list() {
-  ast::VariableDecorationList decos;
-
+bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
   auto t = peek();
-  if (!t.IsAttrLeft())
-    return decos;
+  if (!t.IsAttrLeft()) {
+    return true;
+  }
 
   // Check the empty list before verifying the contents
   t = peek(1);
   if (t.IsAttrRight()) {
     set_error(t, "empty variable decoration list");
-    return {};
+    return false;
   }
 
   // Make sure we're looking at variable decorations not some other kind
   if (!IsVariableDecoration(peek(1))) {
-    return decos;
+    return true;
   }
 
   next();  // consume the peek
 
   auto deco = variable_decoration();
-  if (has_error())
-    return {};
+  if (has_error()) {
+    return false;
+  }
   if (deco == nullptr) {
     set_error(peek(), "missing variable decoration for decoration list");
-    return {};
+    return false;
   }
   for (;;) {
     decos.push_back(std::move(deco));
@@ -391,11 +400,12 @@ ast::VariableDecorationList ParserImpl::variable_decoration_list() {
     next();  // consume the peek
 
     deco = variable_decoration();
-    if (has_error())
-      return {};
+    if (has_error()) {
+      return false;
+    }
     if (deco == nullptr) {
       set_error(peek(), "missing variable decoration after comma");
-      return {};
+      return false;
     }
   }
 
@@ -404,14 +414,14 @@ ast::VariableDecorationList ParserImpl::variable_decoration_list() {
     deco = variable_decoration();
     if (deco != nullptr) {
       set_error(t, "missing comma in variable decoration list");
-      return {};
+      return false;
     }
     set_error(t, "missing ]] for variable decoration");
-    return {};
+    return false;
   }
   next();  // consume the peek
 
-  return decos;
+  return true;
 }
 
 // variable_decoration
