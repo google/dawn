@@ -170,9 +170,11 @@ class ParserImpl {
   /// Parses a `struct_member` grammar element
   /// @returns the struct member or nullptr
   std::unique_ptr<ast::StructMember> struct_member();
-  /// Parses a `struct_member_decoration_decl` grammar element
+  /// Parses a `struct_member_decoration_decl` grammar element, appending newly
+  /// parsed decorations to the end of |decos|.
+  /// @params decos the decoration list
   /// @returns the list of decorations
-  ast::StructMemberDecorationList struct_member_decoration_decl();
+  bool struct_member_decoration_decl(ast::StructMemberDecorationList& decos);
   /// Parses a `struct_member_decoration` grammar element
   /// @returns the decoration or nullptr if none found
   std::unique_ptr<ast::StructMemberDecoration> struct_member_decoration();

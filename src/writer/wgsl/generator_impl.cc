@@ -444,24 +444,14 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
     increment_indent();
     for (const auto& mem : str->members()) {
-      make_indent();
-      if (!mem->decorations().empty()) {
-        out_ << "[[";
-        bool first = true;
-        for (const auto& deco : mem->decorations()) {
-          if (!first) {
-            out_ << ", ";
-          }
+      for (const auto& deco : mem->decorations()) {
+        make_indent();
 
-          first = false;
-          // TODO(dsinclair): Split this out when we have more then one
-          assert(deco->IsOffset());
-
-          out_ << "offset(" << deco->AsOffset()->offset() << ")";
-        }
-        out_ << "]] ";
+        // TODO(dsinclair): Split this out when we have more then one
+        assert(deco->IsOffset());
+        out_ << "[[offset(" << deco->AsOffset()->offset() << ")]]" << std::endl;
       }
-
+      make_indent();
       out_ << mem->name() << " : ";
       if (!EmitType(mem->type())) {
         return false;

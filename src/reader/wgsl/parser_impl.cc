@@ -1557,12 +1557,21 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
 }
 
 // struct_member
-//   : struct_member_decoration_decl variable_ident_decl SEMICOLON
+//   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
 std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
   auto t = peek();
   auto source = t.source();
 
-  auto decos = struct_member_decoration_decl();
+  ast::StructMemberDecorationList decos;
+  for (;;) {
+    size_t s = decos.size();
+    if (!struct_member_decoration_decl(decos)) {
+      return nullptr;
+    }
+    if (decos.size() == s) {
+      break;
+    }
+  }
   if (has_error())
     return nullptr;
 
@@ -1590,21 +1599,21 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
 //   :
 //   | ATTR_LEFT (struct_member_decoration COMMA)*
 //                struct_member_decoration ATTR_RIGHT
-ast::StructMemberDecorationList ParserImpl::struct_member_decoration_decl() {
+bool ParserImpl::struct_member_decoration_decl(
+    ast::StructMemberDecorationList& decos) {
   auto t = peek();
-  if (!t.IsAttrLeft())
-    return {};
+  if (!t.IsAttrLeft()) {
+    return true;
+  }
 
   next();  // Consume the peek
 
   t = peek();
   if (t.IsAttrRight()) {
     set_error(t, "empty struct member decoration found");
-    return {};
+    return false;
   }
 
-  ast::StructMemberDecorationList decos;
-  bool found_offset = false;
   for (;;) {
     auto deco = struct_member_decoration();
     if (has_error())
@@ -1612,13 +1621,6 @@ ast::StructMemberDecorationList ParserImpl::struct_member_decoration_decl() {
     if (deco == nullptr)
       break;
 
-    if (deco->IsOffset()) {
-      if (found_offset) {
-        set_error(peek(), "duplicate offset decoration found");
-        return {};
-      }
-      found_offset = true;
-    }
     decos.push_back(std::move(deco));
 
     t = next();
@@ -1628,9 +1630,9 @@ ast::StructMemberDecorationList ParserImpl::struct_member_decoration_decl() {
 
   if (!t.IsAttrRight()) {
     set_error(t, "missing ]] for struct member decoration");
-    return {};
+    return false;
   }
-  return decos;
+  return true;
 }
 
 // struct_member_decoration

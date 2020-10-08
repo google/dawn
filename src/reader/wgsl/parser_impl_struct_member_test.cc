@@ -52,6 +52,24 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
 }
 
+TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
+  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
+
+  auto* p = parser(R"([[offset(2)]]
+[[offset(4)]] a : i32;)");
+  auto m = p->struct_member();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_NE(m, nullptr);
+
+  EXPECT_EQ(m->name(), "a");
+  EXPECT_EQ(m->type(), i32);
+  EXPECT_EQ(m->decorations().size(), 2u);
+  EXPECT_TRUE(m->decorations()[0]->IsOffset());
+  EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
+  EXPECT_TRUE(m->decorations()[1]->IsOffset());
+  EXPECT_EQ(m->decorations()[1]->AsOffset()->offset(), 4u);
+}
+
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
   auto* p = parser("[[offset(nan)]] a : i32;");
   auto m = p->struct_member();

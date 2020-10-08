@@ -143,7 +143,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   ASSERT_TRUE(g.EmitType(&s)) << g.error();
   EXPECT_EQ(g.result(), R"(struct {
   a : i32;
-  [[offset(4)]] b : f32;
+  [[offset(4)]]
+  b : f32;
 })");
 }
 
@@ -173,7 +174,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   EXPECT_EQ(g.result(), R"([[block]]
 struct {
   a : i32;
-  [[offset(4)]] b : f32;
+  [[offset(4)]]
+  b : f32;
 })");
 }
 
