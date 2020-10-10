@@ -74,6 +74,10 @@ TEST_F(ComputeIndirectValidationTest, IndirectOffsetBounds) {
     // In bounds, bigger buffer, positive offset
     TestIndirectOffset(utils::Expectation::Success, {1, 2, 3, 4, 5, 6}, 3 * sizeof(uint32_t));
 
+    // In bounds, non-multiple of 4 offsets
+    TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4}, 1);
+    TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4}, 2);
+
     // Out of bounds, buffer too small
     TestIndirectOffset(utils::Expectation::Failure, {1, 2}, 0);
     // Out of bounds, index too big

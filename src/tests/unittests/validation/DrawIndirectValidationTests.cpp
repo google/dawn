@@ -107,6 +107,10 @@ TEST_F(DrawIndirectValidationTest, DrawIndirectOffsetBounds) {
     TestIndirectOffsetDraw(utils::Expectation::Success, {1, 2, 3, 4, 5, 6, 7, 8},
                            4 * sizeof(uint32_t));
 
+    // In bounds, non-multiple of 4 offsets
+    TestIndirectOffsetDraw(utils::Expectation::Failure, {1, 2, 3, 4, 5}, 1);
+    TestIndirectOffsetDraw(utils::Expectation::Failure, {1, 2, 3, 4, 5}, 2);
+
     // Out of bounds, buffer too small
     TestIndirectOffsetDraw(utils::Expectation::Failure, {1, 2, 3}, 0);
     // Out of bounds, index too big
@@ -127,6 +131,10 @@ TEST_F(DrawIndirectValidationTest, DrawIndexedIndirectOffsetBounds) {
     // In bounds, bigger buffer, positive offset
     TestIndirectOffsetDrawIndexed(utils::Expectation::Success, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
                                   5 * sizeof(uint32_t));
+
+    // In bounds, non-multiple of 4 offsets
+    TestIndirectOffsetDrawIndexed(utils::Expectation::Failure, {1, 2, 3, 4, 5, 6}, 1);
+    TestIndirectOffsetDrawIndexed(utils::Expectation::Failure, {1, 2, 3, 4, 5, 6}, 2);
 
     // Out of bounds, buffer too small
     TestIndirectOffsetDrawIndexed(utils::Expectation::Failure, {1, 2, 3, 4}, 0);

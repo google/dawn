@@ -70,6 +70,10 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
 
+            if (indirectOffset % 4 != 0) {
+                return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
+            }
+
             if (indirectOffset >= indirectBuffer->GetSize() ||
                 indirectOffset + kDispatchIndirectSize > indirectBuffer->GetSize()) {
                 return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
