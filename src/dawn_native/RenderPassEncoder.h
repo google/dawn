@@ -27,7 +27,9 @@ namespace dawn_native {
         RenderPassEncoder(DeviceBase* device,
                           CommandEncoder* commandEncoder,
                           EncodingContext* encodingContext,
-                          PassResourceUsageTracker usageTracker);
+                          PassResourceUsageTracker usageTracker,
+                          uint32_t renderTargetWidth,
+                          uint32_t renderTargetHeight);
 
         static RenderPassEncoder* MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,
@@ -58,6 +60,9 @@ namespace dawn_native {
         // For render and compute passes, the encoding context is borrowed from the command encoder.
         // Keep a reference to the encoder to make sure the context isn't freed.
         Ref<CommandEncoder> mCommandEncoder;
+
+        uint32_t mRenderTargetWidth;
+        uint32_t mRenderTargetHeight;
     };
 
 }  // namespace dawn_native

@@ -1176,6 +1176,16 @@ namespace dawn_native { namespace vulkan {
                     viewport.minDepth = cmd->minDepth;
                     viewport.maxDepth = cmd->maxDepth;
 
+                    // Vulkan disallows width = 0, but VK_KHR_maintenance1 which we require allows
+                    // height = 0 so use that to do an empty viewport.
+                    if (viewport.width == 0) {
+                        viewport.height = 0;
+
+                        // Set the viewport x range to a range that's always valid.
+                        viewport.x = 0;
+                        viewport.width = 1;
+                    }
+
                     device->fn.CmdSetViewport(commands, 0, 1, &viewport);
                     break;
                 }

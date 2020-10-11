@@ -35,8 +35,13 @@ namespace dawn_native {
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
-                                         PassResourceUsageTracker usageTracker)
-        : RenderEncoderBase(device, encodingContext), mCommandEncoder(commandEncoder) {
+                                         PassResourceUsageTracker usageTracker,
+                                         uint32_t renderTargetWidth,
+                                         uint32_t renderTargetHeight)
+        : RenderEncoderBase(device, encodingContext),
+          mCommandEncoder(commandEncoder),
+          mRenderTargetWidth(renderTargetWidth),
+          mRenderTargetHeight(renderTargetHeight) {
         mUsageTracker = std::move(usageTracker);
     }
 
@@ -94,15 +99,19 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("NaN is not allowed.");
             }
 
-            // TODO(yunchao.he@intel.com): there are more restrictions for x, y, width and height in
-            // Vulkan, and height can be a negative value in Vulkan 1.1. Revisit this part later
-            // (say, for WebGPU v1).
-            if (width <= 0 || height <= 0) {
-                return DAWN_VALIDATION_ERROR("Width and height must be greater than 0.");
+            if (x < 0 || y < 0 || width < 0 || height < 0) {
+                return DAWN_VALIDATION_ERROR("X, Y, width and height must be non-negative.");
             }
 
-            if (minDepth < 0 || minDepth > 1 || maxDepth < 0 || maxDepth > 1) {
-                return DAWN_VALIDATION_ERROR("minDepth and maxDepth must be in [0, 1].");
+            if (x + width > mRenderTargetWidth || y + height > mRenderTargetHeight) {
+                return DAWN_VALIDATION_ERROR(
+                    "The viewport must be contained in the render targets");
+            }
+
+            // Check for depths being in [0, 1] and min <= max in 3 checks instead of 5.
+            if (minDepth < 0 || minDepth > maxDepth || maxDepth > 1) {
+                return DAWN_VALIDATION_ERROR(
+                    "minDepth and maxDepth must be in [0, 1] and minDepth <= maxDepth.");
             }
 
             SetViewportCmd* cmd = allocator->Allocate<SetViewportCmd>(Command::SetViewport);

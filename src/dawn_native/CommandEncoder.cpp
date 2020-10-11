@@ -515,10 +515,11 @@ namespace dawn_native {
         DeviceBase* device = GetDevice();
 
         PassResourceUsageTracker usageTracker(PassType::Render);
+
+        uint32_t width = 0;
+        uint32_t height = 0;
         bool success =
             mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-                uint32_t width = 0;
-                uint32_t height = 0;
                 uint32_t sampleCount = 0;
 
                 DAWN_TRY(ValidateRenderPassDescriptor(device, descriptor, &width, &height,
@@ -579,8 +580,8 @@ namespace dawn_native {
             });
 
         if (success) {
-            RenderPassEncoder* passEncoder =
-                new RenderPassEncoder(device, this, &mEncodingContext, std::move(usageTracker));
+            RenderPassEncoder* passEncoder = new RenderPassEncoder(
+                device, this, &mEncodingContext, std::move(usageTracker), width, height);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
