@@ -778,8 +778,7 @@ namespace dawn_native { namespace d3d12 {
                         copy->destination.bytesPerRow, copy->destination.rowsPerImage);
 
                     const uint64_t bytesPerSlice =
-                        copy->destination.bytesPerRow *
-                        (copy->destination.rowsPerImage / blockInfo.blockHeight);
+                        copy->destination.bytesPerRow * copy->destination.rowsPerImage;
 
                     // copySplits.copies2D[1] is always calculated for the second copy slice with
                     // extra "bytesPerSlice" copy offset compared with the first copy slice. So

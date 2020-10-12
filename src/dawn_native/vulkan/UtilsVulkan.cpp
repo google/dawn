@@ -112,7 +112,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(dataLayout.bytesPerRow % blockInfo.blockByteSize == 0);
         region.bufferRowLength =
             dataLayout.bytesPerRow / blockInfo.blockByteSize * blockInfo.blockWidth;
-        region.bufferImageHeight = dataLayout.rowsPerImage;
+        region.bufferImageHeight = dataLayout.rowsPerImage * blockInfo.blockHeight;
 
         region.imageSubresource.aspectMask = VulkanAspectMask(textureCopy.aspect);
         region.imageSubresource.mipLevel = textureCopy.mipLevel;

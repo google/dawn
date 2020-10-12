@@ -374,12 +374,15 @@ namespace dawn_native {
                                                        const Extent3D& copySize,
                                                        uint32_t bytesPerRow,
                                                        uint32_t rowsPerImage) {
+        ASSERT(copySize.height % blockInfo.blockHeight == 0);
+        uint32_t heightInBlocks = copySize.height / blockInfo.blockHeight;
+
         // Default value for rowsPerImage
         if (rowsPerImage == 0) {
-            rowsPerImage = copySize.height;
+            rowsPerImage = heightInBlocks;
         }
 
-        ASSERT(rowsPerImage >= copySize.height);
+        ASSERT(rowsPerImage >= heightInBlocks);
         if (copySize.height > 1 || copySize.depth > 1) {
             ASSERT(bytesPerRow >= copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize);
         }
@@ -391,13 +394,12 @@ namespace dawn_native {
         ASSERT(copySize.height >= 1);
         ASSERT(copySize.depth >= 1);
 
-        uint32_t texelBlockRowsPerImage = rowsPerImage / blockInfo.blockHeight;
         // bytesPerImage won't overflow since we're multiplying two uint32_t numbers
-        uint64_t bytesPerImage = uint64_t(texelBlockRowsPerImage) * bytesPerRow;
+        uint64_t bytesPerImage = uint64_t(rowsPerImage) * bytesPerRow;
         // Provided that copySize.height > 1: bytesInLastSlice won't overflow since it's at most
         // bytesPerImage. Otherwise the result is a multiplication of two uint32_t numbers.
         uint64_t bytesInLastSlice =
-            uint64_t(bytesPerRow) * (copySize.height / blockInfo.blockHeight - 1) +
+            uint64_t(bytesPerRow) * (heightInBlocks - 1) +
             (uint64_t(copySize.width) / blockInfo.blockWidth * blockInfo.blockByteSize);
 
         // This error cannot be thrown for copySize.depth = 1.
@@ -428,11 +430,6 @@ namespace dawn_native {
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent) {
         // Validation for the texel block alignments:
-        if (layout.rowsPerImage % blockInfo.blockHeight != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "rowsPerImage must be a multiple of compressed texture format block height");
-        }
-
         if (layout.offset % blockInfo.blockByteSize != 0) {
             return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
         }
@@ -448,9 +445,13 @@ namespace dawn_native {
         // TODO(tommek@google.com): to match the spec there should be another condition here
         // on rowsPerImage >= copyExtent.height if copyExtent.depth > 1.
 
+        ASSERT(copyExtent.height % blockInfo.blockHeight == 0);
+        uint32_t heightInBlocks = copyExtent.height / blockInfo.blockHeight;
+
         // Validation for the copy being in-bounds:
-        if (layout.rowsPerImage != 0 && layout.rowsPerImage < copyExtent.height) {
-            return DAWN_VALIDATION_ERROR("rowsPerImage must not be less than the copy height.");
+        if (layout.rowsPerImage != 0 && layout.rowsPerImage < heightInBlocks) {
+            return DAWN_VALIDATION_ERROR(
+                "rowsPerImage must not be less than the copy height in blocks.");
         }
 
         // We compute required bytes in copy after validating texel block alignments

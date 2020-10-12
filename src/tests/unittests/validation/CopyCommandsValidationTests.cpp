@@ -1833,27 +1833,31 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, BytesPerRow) {
     }
 }
 
-// Tests to verify that rowsPerImage must be a multiple of the compressed texture block height in
-// buffer-to-texture or texture-to-buffer copies with compressed texture formats.
-TEST_F(CopyCommandTest_CompressedTextureFormats, ImageHeight) {
+// rowsPerImage must be >= heightInBlocks.
+TEST_F(CopyCommandTest_CompressedTextureFormats, RowsPerImage) {
     wgpu::Buffer buffer =
-        CreateBuffer(512, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+        CreateBuffer(1024, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
     for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
         wgpu::Texture texture = Create2DTexture(bcFormat);
 
         // Valid usages of rowsPerImage in B2T and T2B copies with compressed texture formats.
         {
-            constexpr uint32_t kValidImageHeight = 8;
-            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, kValidImageHeight,
-                             texture, 0, {0, 0, 0}, {4, 4, 1});
+            constexpr uint32_t kValidRowsPerImage = 5;
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, kValidRowsPerImage,
+                             texture, 0, {0, 0, 0}, {4, 16, 1});
+        }
+        {
+            constexpr uint32_t kValidRowsPerImage = 4;
+            TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, kValidRowsPerImage,
+                             texture, 0, {0, 0, 0}, {4, 16, 1});
         }
 
-        // Failures on invalid rowsPerImage.
+        // rowsPerImage is smaller than height.
         {
-            constexpr uint32_t kInvalidImageHeight = 3;
-            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, kInvalidImageHeight,
-                             texture, 0, {0, 0, 0}, {4, 4, 1});
+            constexpr uint32_t kInvalidRowsPerImage = 3;
+            TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, kInvalidRowsPerImage,
+                             texture, 0, {0, 0, 0}, {4, 20, 1});
         }
     }
 }
@@ -1996,31 +2000,15 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, CopyToMultipleArrayLayers) {
             12, 16, 1, 20, bcFormat, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
         // Copy to all array layers
-        TestBothTBCopiesExactBufferSize(256, 16, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
 
         // Copy to the highest array layer
-        TestBothTBCopiesExactBufferSize(256, 16, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
 
         // Copy to array layers in the middle
-        TestBothTBCopiesExactBufferSize(256, 16, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
 
         // Copy touching the texture corners with a non-packed rowsPerImage
-        TestBothTBCopiesExactBufferSize(256, 24, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
-
-        // rowsPerImage needs to be a multiple of blockHeight
-        {
-            wgpu::Buffer source =
-                CreateBuffer(8192, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
-            TestBothTBCopies(utils::Expectation::Failure, source, 0, 256, 6, texture, 0, {0, 0, 0},
-                             {4, 4, 1});
-        }
-
-        // rowsPerImage must be a multiple of blockHeight even with an empty copy
-        {
-            wgpu::Buffer source =
-                CreateBuffer(0, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
-            TestBothTBCopies(utils::Expectation::Failure, source, 0, 256, 2, texture, 0, {0, 0, 0},
-                             {0, 0, 0});
-        }
+        TestBothTBCopiesExactBufferSize(256, 6, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
     }
 }

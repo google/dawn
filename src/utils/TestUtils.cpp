@@ -79,8 +79,7 @@ namespace utils {
             uint32_t blockWidth = utils::GetTextureFormatBlockWidth(textureFormat);
             uint32_t blockHeight = utils::GetTextureFormatBlockHeight(textureFormat);
 
-            uint64_t texelBlockRowsPerImage = rowsPerImage / blockHeight;
-            uint64_t bytesPerImage = bytesPerRow * texelBlockRowsPerImage;
+            uint64_t bytesPerImage = bytesPerRow * rowsPerImage;
             uint64_t bytesInLastSlice = bytesPerRow * (copyExtent.height / blockHeight - 1) +
                                         (copyExtent.width / blockWidth * blockSize);
             return bytesPerImage * (copyExtent.depth - 1) + bytesInLastSlice;

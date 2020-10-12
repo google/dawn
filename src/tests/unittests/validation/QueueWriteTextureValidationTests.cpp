@@ -619,28 +619,28 @@ namespace {
         }
     }
 
-    // Tests to verify that rowsPerImage must be a multiple of the compressed texture block height
+    // rowsPerImage must be >= heightInBlocks.
     TEST_F(WriteTextureTest_CompressedTextureFormats, RowsPerImage) {
         for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
             wgpu::Texture texture = Create2DTexture(bcFormat);
 
             // Valid usages of rowsPerImage in WriteTexture with compressed texture formats.
             {
-                constexpr uint32_t kValidRowsPerImage = 8;
-                TestWriteTexture(512, 0, 256, kValidRowsPerImage, texture, 0, {0, 0, 0}, {4, 4, 1});
+                constexpr uint32_t kValidRowsPerImage = 5;
+                TestWriteTexture(1024, 0, 256, kValidRowsPerImage, texture, 0, {0, 0, 0},
+                                 {4, 16, 1});
             }
-
-            // 4 is the exact limit for rowsPerImage here.
             {
                 constexpr uint32_t kValidRowsPerImage = 4;
-                TestWriteTexture(512, 0, 256, kValidRowsPerImage, texture, 0, {0, 0, 0}, {4, 4, 1});
+                TestWriteTexture(1024, 0, 256, kValidRowsPerImage, texture, 0, {0, 0, 0},
+                                 {4, 16, 1});
             }
 
             // Failure on invalid rowsPerImage.
             {
-                constexpr uint32_t kInvalidRowsPerImage = 2;
-                ASSERT_DEVICE_ERROR(TestWriteTexture(512, 0, 256, kInvalidRowsPerImage, texture, 0,
-                                                     {0, 0, 0}, {4, 4, 1}));
+                constexpr uint32_t kInvalidRowsPerImage = 3;
+                ASSERT_DEVICE_ERROR(TestWriteTexture(1024, 0, 256, kInvalidRowsPerImage, texture, 0,
+                                                     {0, 0, 0}, {4, 16, 1}));
             }
         }
     }
@@ -731,23 +731,16 @@ namespace {
                 wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
             // Write to all array layers
-            TestWriteTextureExactDataSize(256, 16, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
+            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
 
             // Write to the highest array layer
-            TestWriteTextureExactDataSize(256, 16, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
+            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
 
             // Write to array layers in the middle
-            TestWriteTextureExactDataSize(256, 16, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
+            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
 
             // Write touching the texture corners with a non-packed rowsPerImage
-            TestWriteTextureExactDataSize(256, 24, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
-
-            // rowsPerImage needs to be a multiple of blockHeight
-            ASSERT_DEVICE_ERROR(
-                TestWriteTexture(8192, 0, 256, 6, texture, 0, {0, 0, 0}, {4, 4, 1}));
-
-            // rowsPerImage must be a multiple of blockHeight even with an empty write
-            ASSERT_DEVICE_ERROR(TestWriteTexture(0, 0, 256, 2, texture, 0, {0, 0, 0}, {0, 0, 0}));
+            TestWriteTextureExactDataSize(256, 6, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
         }
     }
 

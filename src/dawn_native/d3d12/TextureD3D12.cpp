@@ -970,7 +970,7 @@ namespace dawn_native { namespace d3d12 {
                     // compute d3d12 texture copy locations for texture and buffer
                     Extent3D copySize = GetMipLevelVirtualSize(level);
 
-                    uint32_t rowsPerImage = GetHeight();
+                    uint32_t rowsPerImage = GetHeight() / blockInfo.blockHeight;
                     Texture2DCopySplit copySplit = ComputeTextureCopySplit(
                         {0, 0, 0}, copySize, blockInfo, uploadHandle.startOffset, bytesPerRow,
                         rowsPerImage);

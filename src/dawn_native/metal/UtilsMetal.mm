@@ -73,8 +73,7 @@ namespace dawn_native { namespace metal {
 
         // We work around this limitation by detecting when Metal would complain and copy the
         // last image and row separately using tight sourceBytesPerRow or sourceBytesPerImage.
-        uint32_t dataRowsPerImage = rowsPerImage / blockInfo.blockHeight;
-        uint32_t bytesPerImage = bytesPerRow * dataRowsPerImage;
+        uint32_t bytesPerImage = bytesPerRow * rowsPerImage;
 
         // Metal validation layer requires that if the texture's pixel format is a compressed
         // format, the sourceSize must be a multiple of the pixel format's block size or be

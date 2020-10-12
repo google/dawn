@@ -166,22 +166,23 @@ namespace dawn_native {
             return false;
         }
 
-        if (copy->destination.rowsPerImage > copy->copySize.height) {
-            return false;
-        }
-
         const TextureBase* texture = copy->source.texture.Get();
         const TexelBlockInfo& blockInfo =
             texture->GetFormat().GetTexelBlockInfo(copy->source.aspect);
+        const uint64_t heightInBlocks = copy->copySize.height / blockInfo.blockHeight;
+
+        if (copy->destination.rowsPerImage > heightInBlocks) {
+            return false;
+        }
+
         const uint64_t copyTextureDataSizePerRow =
             copy->copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize;
         if (copy->destination.bytesPerRow > copyTextureDataSizePerRow) {
             return false;
         }
 
-        const uint64_t overwrittenRangeSize = copyTextureDataSizePerRow *
-                                              (copy->copySize.height / blockInfo.blockHeight) *
-                                              copy->copySize.depth;
+        const uint64_t overwrittenRangeSize =
+            copyTextureDataSizePerRow * heightInBlocks * copy->copySize.depth;
         if (copy->destination.buffer->GetSize() > overwrittenRangeSize) {
             return false;
         }

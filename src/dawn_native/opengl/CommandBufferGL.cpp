@@ -534,7 +534,8 @@ namespace dawn_native { namespace opengl {
                     const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(dst.aspect);
                     gl.PixelStorei(GL_UNPACK_ROW_LENGTH, src.bytesPerRow / blockInfo.blockByteSize *
                                                              blockInfo.blockWidth);
-                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.rowsPerImage);
+                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
+                                   src.rowsPerImage * blockInfo.blockHeight);
 
                     if (formatInfo.isCompressed) {
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.blockByteSize);
@@ -626,7 +627,7 @@ namespace dawn_native { namespace opengl {
                     const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(src.aspect);
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage);
+                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage * blockInfo.blockHeight);
                     gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.blockByteSize);
 
                     GLenum glAttachment;

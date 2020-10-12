@@ -59,11 +59,11 @@ class CompressedTextureBCFormatTest : public DawnTest {
             rowPitchInBytes = copyWidthInBlock *
                               utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
-        uint32_t copyRowsPerImageInBlock = copyConfig.rowsPerImage / kBCBlockHeightInTexels;
-        if (copyRowsPerImageInBlock == 0) {
-            copyRowsPerImageInBlock = copyHeightInBlock;
+        uint32_t copyRowsPerImage = copyConfig.rowsPerImage;
+        if (copyRowsPerImage == 0) {
+            copyRowsPerImage = copyHeightInBlock;
         }
-        uint32_t copyBytesPerImage = rowPitchInBytes * copyRowsPerImageInBlock;
+        uint32_t copyBytesPerImage = rowPitchInBytes * copyRowsPerImage;
         uint32_t uploadBufferSize =
             copyConfig.bufferOffset + copyBytesPerImage * copyConfig.copyExtent3D.depth;
 
@@ -960,7 +960,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     config.textureDescriptor.size = {8, 8, 1};
     config.copyExtent3D = config.textureDescriptor.size;
 
-    config.rowsPerImage = config.textureDescriptor.size.height * 2;
+    config.rowsPerImage = config.textureDescriptor.size.height * 2 / kBCBlockHeightInTexels;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
@@ -1003,7 +1003,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 
     config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
 
-    config.rowsPerImage = kCopyHeightAtLevel * 2;
+    config.rowsPerImage = kCopyHeightAtLevel * 2 / kBCBlockHeightInTexels;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
@@ -1149,7 +1149,7 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
     config.copyOrigin3D = {4, 8, 0};
     config.copyExtent3D = {12, 16, 1};
     config.bytesPerRowAlignment = 511;
-    config.rowsPerImage = 20;
+    config.rowsPerImage = 5;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
@@ -1170,7 +1170,7 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
     config.copyOrigin3D = {4, 8, 3};
     config.copyExtent3D = {12, 16, 6};
     config.bytesPerRowAlignment = 511;
-    config.rowsPerImage = 20;
+    config.rowsPerImage = 5;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;

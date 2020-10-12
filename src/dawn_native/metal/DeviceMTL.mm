@@ -301,8 +301,8 @@ namespace dawn_native { namespace metal {
         uint32_t blockSize = blockInfo.blockByteSize;
         uint32_t blockWidth = blockInfo.blockWidth;
         uint32_t blockHeight = blockInfo.blockHeight;
-        ASSERT(dataLayout.rowsPerImage == (copySizePixels.height));
-        ASSERT(dataLayout.bytesPerRow == (copySizePixels.width) / blockWidth * blockSize);
+        ASSERT(dataLayout.rowsPerImage == copySizePixels.height / blockHeight);
+        ASSERT(dataLayout.bytesPerRow == copySizePixels.width / blockWidth * blockSize);
 
         EnsureDestinationTextureInitialized(texture, *dst, copySizePixels);
 
@@ -314,8 +314,7 @@ namespace dawn_native { namespace metal {
             texture->ClampToMipLevelVirtualSize(dst->mipLevel, dst->origin, copySizePixels);
         const uint32_t copyBaseLayer = dst->origin.z;
         const uint32_t copyLayerCount = copySizePixels.depth;
-        const uint64_t bytesPerImage =
-            dataLayout.rowsPerImage * dataLayout.bytesPerRow / blockHeight;
+        const uint64_t bytesPerImage = dataLayout.rowsPerImage * dataLayout.bytesPerRow;
 
         MTLBlitOption blitOption = ComputeMTLBlitOption(texture->GetFormat(), dst->aspect);
 

@@ -438,13 +438,13 @@ namespace dawn_native { namespace vulkan {
         dawn_native::Format format = srcCopy.texture->GetFormat();
         const TexelBlockInfo& blockInfo = format.GetTexelBlockInfo(srcCopy.aspect);
         ASSERT(copySize.width % blockInfo.blockWidth == 0);
+        uint32_t widthInBlocks = copySize.width / blockInfo.blockWidth;
         ASSERT(copySize.height % blockInfo.blockHeight == 0);
+        uint32_t heightInBlocks = copySize.height / blockInfo.blockHeight;
 
         // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
         // because it isn't a hard constraint in Vulkan.
-        uint64_t tempBufferSize =
-            (copySize.width / blockInfo.blockWidth * copySize.height / blockInfo.blockHeight) *
-            blockInfo.blockByteSize;
+        uint64_t tempBufferSize = widthInBlocks * heightInBlocks * blockInfo.blockByteSize;
         BufferDescriptor tempBufferDescriptor;
         tempBufferDescriptor.size = tempBufferSize;
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -454,7 +454,7 @@ namespace dawn_native { namespace vulkan {
 
         BufferCopy tempBufferCopy;
         tempBufferCopy.buffer = tempBuffer.Get();
-        tempBufferCopy.rowsPerImage = copySize.height;
+        tempBufferCopy.rowsPerImage = heightInBlocks;
         tempBufferCopy.offset = 0;
         tempBufferCopy.bytesPerRow =
             copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize;
