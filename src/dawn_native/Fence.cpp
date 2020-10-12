@@ -23,6 +23,20 @@
 
 namespace dawn_native {
 
+    struct FenceInFlight : QueueBase::TaskInFlight {
+        FenceInFlight(Ref<Fence> fence, FenceAPISerial value)
+            : fence(std::move(fence)), value(value) {
+        }
+        void Finish() override {
+            fence->SetCompletedValue(value);
+        }
+        ~FenceInFlight() override = default;
+
+      private:
+        Ref<Fence> fence;
+        FenceAPISerial value;
+    };
+
     MaybeError ValidateFenceDescriptor(const FenceDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -116,6 +130,15 @@ namespace dawn_native {
             }
         }
         mRequests.ClearUpTo(mCompletedValue);
+    }
+
+    void Fence::UpdateFenceOnComplete(Fence* fence, FenceAPISerial value) {
+        std::unique_ptr<FenceInFlight> fenceInFlight =
+            std::make_unique<FenceInFlight>(fence, value);
+
+        // TODO: use GetLastSubmittedCommandSerial in the future for perforamnce
+        GetDevice()->GetDefaultQueue()->TrackTask(std::move(fenceInFlight),
+                                                  GetDevice()->GetPendingCommandSerial());
     }
 
     MaybeError Fence::ValidateOnCompletion(FenceAPISerial value,

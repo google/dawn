@@ -28,9 +28,7 @@
 #include "dawn_native/ErrorScope.h"
 #include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
-#include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/Instance.h"
-#include "dawn_native/MapRequestTracker.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
@@ -103,8 +101,6 @@ namespace dawn_native {
 
         mCaches = std::make_unique<DeviceBase::Caches>();
         mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
-        mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
-        mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
 
@@ -152,8 +148,7 @@ namespace dawn_native {
             // freed by backends in the ShutDownImpl() call. Still tick the ones that might have
             // pending callbacks.
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
-            mFenceSignalTracker->Tick(GetCompletedCommandSerial());
-            mMapRequestTracker->Tick(GetCompletedCommandSerial());
+            GetDefaultQueue()->Tick(GetCompletedCommandSerial());
             // call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
             IgnoreErrors(TickImpl());
@@ -167,9 +162,7 @@ namespace dawn_native {
             mCurrentErrorScope->UnlinkForShutdown();
         }
         mErrorScopeTracker = nullptr;
-        mFenceSignalTracker = nullptr;
         mDynamicUploader = nullptr;
-        mMapRequestTracker = nullptr;
 
         mEmptyBindGroupLayout = nullptr;
 
@@ -316,14 +309,6 @@ namespace dawn_native {
 
     ErrorScopeTracker* DeviceBase::GetErrorScopeTracker() const {
         return mErrorScopeTracker.get();
-    }
-
-    FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
-        return mFenceSignalTracker.get();
-    }
-
-    MapRequestTracker* DeviceBase::GetMapRequestTracker() const {
-        return mMapRequestTracker.get();
     }
 
     ExecutionSerial DeviceBase::GetCompletedCommandSerial() const {
@@ -755,8 +740,7 @@ namespace dawn_native {
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
             mErrorScopeTracker->Tick(mCompletedSerial);
-            mFenceSignalTracker->Tick(mCompletedSerial);
-            mMapRequestTracker->Tick(mCompletedSerial);
+            GetDefaultQueue()->Tick(mCompletedSerial);
         }
     }
 

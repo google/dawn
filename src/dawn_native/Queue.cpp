@@ -24,7 +24,6 @@
 #include "dawn_native/ErrorScope.h"
 #include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
-#include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Texture.h"
 #include "dawn_platform/DawnPlatform.h"
@@ -34,6 +33,7 @@
 
 namespace dawn_native {
     namespace {
+
         void CopyTextureData(uint8_t* dstPointer,
                              const uint8_t* srcPointer,
                              uint32_t depth,
@@ -136,10 +136,17 @@ namespace dawn_native {
 
     // QueueBase
 
+    QueueBase::TaskInFlight::~TaskInFlight() {
+    }
+
     QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
     }
 
     QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    }
+
+    QueueBase::~QueueBase() {
+        ASSERT(mTasksInFlight.Empty());
     }
 
     // static
@@ -165,9 +172,21 @@ namespace dawn_native {
         ASSERT(!IsError());
 
         fence->SetSignaledValue(signalValue);
-        device->GetFenceSignalTracker()->UpdateFenceOnComplete(fence, signalValue);
+        fence->UpdateFenceOnComplete(fence, signalValue);
         device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
             device->GetCurrentErrorScope());
+    }
+
+    void QueueBase::TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial) {
+        mTasksInFlight.Enqueue(std::move(task), serial);
+        GetDevice()->AddFutureCallbackSerial(serial);
+    }
+
+    void QueueBase::Tick(ExecutionSerial finishedSerial) {
+        for (auto& task : mTasksInFlight.IterateUpTo(finishedSerial)) {
+            task->Finish();
+        }
+        mTasksInFlight.ClearUpTo(finishedSerial);
     }
 
     Fence* QueueBase::CreateFence(const FenceDescriptor* descriptor) {

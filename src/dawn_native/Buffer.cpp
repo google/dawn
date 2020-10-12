@@ -19,7 +19,6 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
-#include "dawn_native/MapRequestTracker.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
@@ -30,6 +29,19 @@
 namespace dawn_native {
 
     namespace {
+        struct MapRequestTask : QueueBase::TaskInFlight {
+            MapRequestTask(Ref<BufferBase> buffer, MapRequestID id)
+                : buffer(std::move(buffer)), id(id) {
+            }
+            void Finish() override {
+                buffer->OnMapRequestCompleted(id);
+            }
+            ~MapRequestTask() override = default;
+
+          private:
+            Ref<BufferBase> buffer;
+            MapRequestID id;
+        };
 
         class ErrorBuffer final : public BufferBase {
           public:
@@ -261,9 +273,10 @@ namespace dawn_native {
             CallMapCallback(mLastMapID, WGPUBufferMapAsyncStatus_DeviceLost);
             return;
         }
-
-        MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
-        tracker->Track(this, mLastMapID);
+        std::unique_ptr<MapRequestTask> request =
+            std::make_unique<MapRequestTask>(this, mLastMapID);
+        GetDevice()->GetDefaultQueue()->TrackTask(std::move(request),
+                                                  GetDevice()->GetPendingCommandSerial());
     }
 
     void* BufferBase::GetMappedRange(size_t offset, size_t size) {

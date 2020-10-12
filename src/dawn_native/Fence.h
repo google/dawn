@@ -44,9 +44,10 @@ namespace dawn_native {
 
       protected:
         friend class QueueBase;
-        friend class FenceSignalTracker;
+        friend struct FenceInFlight;
         void SetSignaledValue(FenceAPISerial signalValue);
         void SetCompletedValue(FenceAPISerial completedValue);
+        void UpdateFenceOnComplete(Fence* fence, FenceAPISerial value);
 
       private:
         Fence(DeviceBase* device, ObjectBase::ErrorTag tag);

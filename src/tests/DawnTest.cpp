@@ -901,6 +901,17 @@ void DawnTestBase::FlushWire() {
     }
 }
 
+void DawnTestBase::WaitForAllOperations() {
+    wgpu::Queue queue = device.GetDefaultQueue();
+    wgpu::Fence fence = queue.CreateFence();
+
+    // Force the currently submitted operations to completed.
+    queue.Signal(fence, 1);
+    while (fence.GetCompletedValue() < 1) {
+        WaitABit();
+    }
+}
+
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(uint64_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?

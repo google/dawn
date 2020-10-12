@@ -313,6 +313,7 @@ class DawnTestBase {
 
     void WaitABit();
     void FlushWire();
+    void WaitForAllOperations();
 
     bool SupportsExtensions(const std::vector<const char*>& extensions);
 

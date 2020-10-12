@@ -46,10 +46,6 @@ class FenceValidationTest : public ValidationTest {
         fence.OnCompletion(value, ToMockFenceOnCompletionCallback, expectation);
     }
 
-    void Flush() {
-        device.Tick();
-    }
-
     wgpu::Queue queue;
 
   private:
@@ -127,7 +123,7 @@ TEST_F(FenceValidationTest, OnCompletionLargerThanSignaled) {
         .Times(1);
     fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, nullptr);
 
-    Flush();
+    WaitForAllOperations(device);
 }
 
 TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
@@ -142,7 +138,7 @@ TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
             EXPECT_EQ(fence.GetCompletedValue(), 3u);
         }));
 
-    Flush();
+    WaitForAllOperations(device);
 }
 
 TEST_F(FenceValidationTest, GetCompletedValueAfterCallback) {
@@ -155,7 +151,7 @@ TEST_F(FenceValidationTest, GetCompletedValueAfterCallback) {
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, nullptr))
         .Times(1);
 
-    Flush();
+    WaitForAllOperations(device);
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
 
@@ -178,12 +174,12 @@ TEST_F(FenceValidationTest, SignalSuccess) {
 
     // Success
     queue.Signal(fence, 2);
-    Flush();
+    WaitForAllOperations(device);
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
 
     // Success increasing fence value by more than 1
     queue.Signal(fence, 6);
-    Flush();
+    WaitForAllOperations(device);
     EXPECT_EQ(fence.GetCompletedValue(), 6u);
 }
 
@@ -211,11 +207,11 @@ TEST_F(FenceValidationTest, DISABLED_SignalWrongQueueDoesNotUpdateValue) {
     ASSERT_DEVICE_ERROR(queue2.Signal(fence, 2));
 
     // Fence value should be unchanged.
-    Flush();
+    WaitForAllOperations(device);
     EXPECT_EQ(fence.GetCompletedValue(), 1u);
 
     // Signaling with 2 on the correct queue should succeed
     queue.Signal(fence, 2);
-    Flush();
+    WaitForAllOperations(device);
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
