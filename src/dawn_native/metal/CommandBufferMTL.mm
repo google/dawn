@@ -23,6 +23,7 @@
 #include "dawn_native/metal/ComputePipelineMTL.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
+#include "dawn_native/metal/QuerySetMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
 #include "dawn_native/metal/SamplerMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
@@ -736,11 +737,39 @@ namespace dawn_native { namespace metal {
                 }
 
                 case Command::ResolveQuerySet: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                    Buffer* destination = ToBackend(cmd->destination.Get());
+
+                    destination->EnsureDataInitializedAsDestination(
+                        commandContext, cmd->destinationOffset, cmd->queryCount * sizeof(uint64_t));
+
+                    if (@available(macos 10.15, iOS 14.0, *)) {
+                        [commandContext->EnsureBlit()
+                              resolveCounters:querySet->GetCounterSampleBuffer()
+                                      inRange:NSMakeRange(cmd->firstQuery,
+                                                          cmd->firstQuery + cmd->queryCount)
+                            destinationBuffer:destination->GetMTLBuffer()
+                            destinationOffset:NSUInteger(cmd->destinationOffset)];
+                    } else {
+                        UNREACHABLE();
+                    }
+                    break;
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+
+                    if (@available(macos 10.15, iOS 14.0, *)) {
+                        [commandContext->EnsureBlit()
+                            sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                     atSampleIndex:NSUInteger(cmd->queryIndex)
+                                       withBarrier:YES];
+                    } else {
+                        UNREACHABLE();
+                    }
+                    break;
                 }
 
                 case Command::InsertDebugMarker: {
@@ -872,7 +901,17 @@ namespace dawn_native { namespace metal {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+
+                    if (@available(macos 10.15, iOS 14.0, *)) {
+                        [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                          atSampleIndex:NSUInteger(cmd->queryIndex)
+                                            withBarrier:YES];
+                    } else {
+                        UNREACHABLE();
+                    }
+                    break;
                 }
 
                 default: {
@@ -1263,7 +1302,17 @@ namespace dawn_native { namespace metal {
                 }
 
                 case Command::WriteTimestamp: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+
+                    if (@available(macos 10.15, iOS 14.0, *)) {
+                        [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                                          atSampleIndex:NSUInteger(cmd->queryIndex)
+                                            withBarrier:YES];
+                    } else {
+                        UNREACHABLE();
+                    }
+                    break;
                 }
 
                 default: {

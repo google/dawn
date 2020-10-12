@@ -1120,7 +1120,7 @@ TEST_P(BufferZeroInitTest, SetIndexBuffer) {
     }
 }
 
-// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DrawIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
     // Bind the whole buffer as an indirect buffer.
@@ -1136,7 +1136,7 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
     }
 }
 
-// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DrawIndexedIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
     // Bind the whole buffer as an indirect buffer.
@@ -1152,7 +1152,7 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
     }
 }
 
-// Test the buffer will be lazily intialized correctly when its first use is an indirect buffer for
+// Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DispatchIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
     // Bind the whole buffer as an indirect buffer.
@@ -1168,13 +1168,14 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
     }
 }
 
-// Test the buffer will be lazily intialized correctly when its first use is in resolveQuerySet
+// Test the buffer will be lazily initialized correctly when its first use is in resolveQuerySet
 TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Timestamp query is not supported on OpenGL
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
-    // TODO(hao.x.li@intel.com): Remove it after timestamp query is implementated on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
+    // TODO(hao.x.li@intel.com): Crash occurs if we only call WriteTimestamp in a command encoder
+    // without any copy commands on Metal on AMD GPU. See https://crbug.com/dawn/545.
+    DAWN_SKIP_TEST_IF(IsMetal() && IsAMD());
 
     // Skip if timestamp extension is not supported on device
     DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));

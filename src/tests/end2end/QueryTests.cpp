@@ -141,8 +141,9 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
-    // TODO(hao.x.li@intel.com): Waiting for timestamp query implementation on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
+    // TODO(hao.x.li@intel.com): Crash occurs if we only call WriteTimestamp in a command encoder
+    // without any copy commands on Metal on AMD GPU. See https://crbug.com/dawn/545.
+    DAWN_SKIP_TEST_IF(IsMetal() && IsAMD());
 
     constexpr uint32_t kQueryCount = 2;
 
@@ -161,9 +162,6 @@ TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
 
 // Test calling timestamp query from render pass encoder
 TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
-    // TODO(hao.x.li@intel.com): Waiting for timestamp query implementation on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
-
     constexpr uint32_t kQueryCount = 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -184,9 +182,6 @@ TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
 
 // Test calling timestamp query from compute pass encoder
 TEST_P(TimestampQueryTests, TimestampOnComputePass) {
-    // TODO(hao.x.li@intel.com): Waiting for timestamp query implementation on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
-
     constexpr uint32_t kQueryCount = 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -206,11 +201,14 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
-    // TODO(hao.x.li@intel.com): Failed on old Intel Vulkan driver on Windows, need investigation.
+    // TODO(hao.x.li@intel.com): Fail to resolve query to buffer with offset on Windows Vulkan and
+    // Metal on Intel platforms, need investigation.
     DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
+    DAWN_SKIP_TEST_IF(IsIntel() && IsMetal());
 
-    // TODO(hao.x.li@intel.com): Waiting for timestamp query implementation on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
+    // TODO(hao.x.li@intel.com): Crash occurs if we only call WriteTimestamp in a command encoder
+    // without any copy commands on Metal on AMD GPU. See https://crbug.com/dawn/545.
+    DAWN_SKIP_TEST_IF(IsMetal() && IsAMD());
 
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kZero = 0;
