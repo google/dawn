@@ -131,8 +131,10 @@ namespace dawn_native {
                                            uint32_t width,
                                            uint32_t height) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (width == 0 || height == 0) {
-                return DAWN_VALIDATION_ERROR("Width and height must be greater than 0.");
+            if (width > mRenderTargetWidth || height > mRenderTargetHeight ||
+                x > mRenderTargetWidth - width || y > mRenderTargetHeight - height) {
+                return DAWN_VALIDATION_ERROR(
+                    "The scissor rect must be contained in the render targets");
             }
 
             SetScissorRectCmd* cmd =

@@ -70,29 +70,6 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 99);
 }
 
-// Test setting the scissor to something larger than the attachments.
-TEST_P(ScissorTest, LargerThanAttachment) {
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.SetPipeline(pipeline);
-        pass.SetScissorRect(0, 0, 200, 200);
-        pass.Draw(6);
-        pass.EndPass();
-    }
-
-    wgpu::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
-
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 99);
-}
-
 // Test setting a partial scissor (not empty, not full attachment)
 TEST_P(ScissorTest, PartialRect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
@@ -123,6 +100,29 @@ TEST_P(ScissorTest, PartialRect) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, kX + kW - 1, kY + kH - 1);
 }
 
+// Test setting an empty scissor
+TEST_P(ScissorTest, EmptyRect) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
+    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetScissorRect(1, 1, 0, 0);
+        pass.Draw(6);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Test that no pixel was written.
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 1);
+}
 // Test that the scissor setting doesn't get inherited between renderpasses
 TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);

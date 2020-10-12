@@ -139,6 +139,9 @@ namespace dawn_native { namespace d3d12 {
             // https://crbug.com/dawn/422
             D3D12_MESSAGE_ID_EXECUTECOMMANDLISTS_GPU_WRITTEN_READBACK_RESOURCE_MAPPED,
 
+            // WebGPU allows empty scissors without empty viewports.
+            D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE,
+
             //
             // Temporary IDs: list of warnings that should be fixed or promoted
             //

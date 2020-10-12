@@ -133,64 +133,74 @@ TEST_F(SetViewportTest, MinDepthEqualOrGreaterThanMaxDepth) {
     TestViewportCall(false, 0.0, 0.0, 1.0, 1.0, 0.8, 0.5);
 }
 
-class SetScissorRectTest : public ValidationTest {};
+class SetScissorTest : public ValidationTest {
+  protected:
+    void TestScissorCall(bool success,
+                          uint32_t x,
+                          uint32_t y,
+                          uint32_t width,
+                          uint32_t height) {
+        utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, kWidth, kHeight);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetScissorRect(x, y, width, height);
+        pass.EndPass();
+
+        if (success) {
+            encoder.Finish();
+        } else {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    static constexpr uint32_t kWidth = 5;
+    static constexpr uint32_t kHeight = 3;
+};
 
 // Test to check basic use of SetScissor
-TEST_F(SetScissorRectTest, Success) {
-    DummyRenderPass renderPass(device);
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetScissorRect(0, 0, 1, 1);
-        pass.EndPass();
-    }
-    encoder.Finish();
+TEST_F(SetScissorTest, Success) {
+    TestScissorCall(true, 0, 0, kWidth, kHeight);
+    TestScissorCall(true, 0, 0, 1, 1);
 }
 
-// Test to check that an empty scissor is not allowed
-TEST_F(SetScissorRectTest, EmptyScissor) {
-    DummyRenderPass renderPass(device);
+// Test to check that an empty scissor is allowed
+TEST_F(SetScissorTest, EmptyScissor) {
+    // Scissor width is 0
+    TestScissorCall(true, 0, 0, 0, kHeight);
 
-    // Width of scissor rect is zero.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetScissorRect(0, 0, 0, 1);
-        pass.EndPass();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
+    // Scissor height is 0
+    TestScissorCall(true, 0, 0, kWidth, 0);
 
-    // Height of scissor rect is zero.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetScissorRect(0, 0, 1, 0);
-        pass.EndPass();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
-
-    // Both width and height of scissor rect are zero.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetScissorRect(0, 0, 0, 0);
-        pass.EndPass();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
-    }
+    // Both scissor width and height are 0
+    TestScissorCall(true, 0, 0, 0, 0);
 }
 
-// Test to check that a scissor larger than the framebuffer is allowed
-TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
-    DummyRenderPass renderPass(device);
+// Test to check that various scissors contained in the framebuffer is allowed
+TEST_F(SetScissorTest, ScissorContainedInFramebuffer) {
+    // Width and height are set to the render target size.
+    TestScissorCall(true, 0, 0, kWidth, kHeight);
 
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetScissorRect(0, 0, renderPass.width + 1, renderPass.height + 1);
-        pass.EndPass();
-    }
-    encoder.Finish();
+    // Width/height at the limit with 0 x/y is valid.
+    TestScissorCall(true, kWidth, 0,  0, kHeight);
+    TestScissorCall(true, 0, kHeight,  kWidth, 0);
+}
+
+// Test to check that a scissor larger than the framebuffer is disallowed
+TEST_F(SetScissorTest, ScissorLargerThanFramebuffer) {
+    // Width/height is larger than the rendertarget's width/height.
+    TestScissorCall(false, 0, 0, kWidth + 1, kHeight);
+    TestScissorCall(false, 0, 0, kWidth, kHeight + 1);
+
+    // x + width is larger than the rendertarget's width.
+    TestScissorCall(false, 2, 0, kWidth - 1, kHeight);
+    TestScissorCall(false, kWidth, 0, 1, kHeight);
+    TestScissorCall(false, std::numeric_limits<uint32_t>::max(), 0, kWidth, kHeight);
+
+    // x + height is larger than the rendertarget's height.
+    TestScissorCall(false, 0, 2, kWidth , kHeight - 1);
+    TestScissorCall(false, 0, kHeight, kWidth, 1);
+    TestScissorCall(false, 0, std::numeric_limits<uint32_t>::max(), kWidth, kHeight);
 }
 
 class SetBlendColorTest : public ValidationTest {};
