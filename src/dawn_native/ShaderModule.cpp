@@ -122,7 +122,7 @@ namespace dawn_native {
         }
 #endif
 
-        MaybeError ValidateSpirv(DeviceBase*, const uint32_t* code, uint32_t codeSize) {
+        MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
             spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
             std::ostringstream errorStream;
@@ -225,6 +225,9 @@ namespace dawn_native {
             }
 
             std::vector<uint32_t> spirv = generator.result();
+
+            DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
+
             return std::move(spirv);
         }
 
@@ -717,7 +720,7 @@ namespace dawn_native {
             case wgpu::SType::ShaderModuleSPIRVDescriptor: {
                 const auto* spirvDesc =
                     static_cast<const ShaderModuleSPIRVDescriptor*>(chainedDescriptor);
-                DAWN_TRY(ValidateSpirv(device, spirvDesc->code, spirvDesc->codeSize));
+                DAWN_TRY(ValidateSpirv(spirvDesc->code, spirvDesc->codeSize));
                 break;
             }
 
