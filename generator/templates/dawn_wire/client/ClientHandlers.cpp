@@ -53,10 +53,20 @@ namespace dawn_wire { namespace client {
         }
     {% endfor %}
 
-    const volatile char* Client::HandleCommands(const volatile char* commands, size_t size) {
-        while (size >= sizeof(ReturnWireCmd)) {
-            ReturnWireCmd cmdId = *reinterpret_cast<const volatile ReturnWireCmd*>(commands);
+    const volatile char* Client::HandleCommandsImpl(const volatile char* commands, size_t size) {
+        while (size >= sizeof(CmdHeader) + sizeof(ReturnWireCmd)) {
+            // Start by chunked command handling, if it is done, then it means the whole buffer
+            // was consumed by it, so we return a pointer to the end of the commands.
+            switch (HandleChunkedCommands(commands, size)) {
+                case ChunkedCommandsResult::Consumed:
+                    return commands + size;
+                case ChunkedCommandsResult::Error:
+                    return nullptr;
+                case ChunkedCommandsResult::Passthrough:
+                    break;
+            }
 
+            ReturnWireCmd cmdId = *reinterpret_cast<const volatile ReturnWireCmd*>(commands + sizeof(CmdHeader));
             bool success = false;
             switch (cmdId) {
                 {% for command in cmd_records["return command"] %}

@@ -71,20 +71,19 @@ namespace dawn_wire { namespace client {
         cmd.handleCreateInfoLength = writeHandleCreateInfoLength;
         cmd.handleCreateInfo = nullptr;
 
-        char* writeHandleSpace = wireClient->SerializeCommand(cmd, writeHandleCreateInfoLength);
+        wireClient->SerializeCommand(cmd, writeHandleCreateInfoLength, [&](char* cmdSpace) {
+            if (descriptor->mappedAtCreation) {
+                // Serialize the WriteHandle into the space after the command.
+                writeHandle->SerializeCreate(cmdSpace);
 
-        if (descriptor->mappedAtCreation) {
-            // Serialize the WriteHandle into the space after the command.
-            writeHandle->SerializeCreate(writeHandleSpace);
-
-            // Set the buffer state for the mapping at creation. The buffer now owns the write
-            // handle..
-            buffer->mWriteHandle = std::move(writeHandle);
-            buffer->mMappedData = writeData;
-            buffer->mMapOffset = 0;
-            buffer->mMapSize = buffer->mSize;
-        }
-
+                // Set the buffer state for the mapping at creation. The buffer now owns the write
+                // handle..
+                buffer->mWriteHandle = std::move(writeHandle);
+                buffer->mMappedData = writeData;
+                buffer->mMapOffset = 0;
+                buffer->mMapSize = buffer->mSize;
+            }
+        });
         return ToAPI(buffer);
     }
 
@@ -176,15 +175,15 @@ namespace dawn_wire { namespace client {
         // Step 3a. Fill the handle create info in the command.
         if (isReadMode) {
             cmd.handleCreateInfoLength = request.readHandle->SerializeCreateSize();
-            char* handleCreateInfoSpace =
-                device->GetClient()->SerializeCommand(cmd, cmd.handleCreateInfoLength);
-            request.readHandle->SerializeCreate(handleCreateInfoSpace);
+            device->GetClient()->SerializeCommand(
+                cmd, cmd.handleCreateInfoLength,
+                [&](char* cmdSpace) { request.readHandle->SerializeCreate(cmdSpace); });
         } else {
             ASSERT(isWriteMode);
             cmd.handleCreateInfoLength = request.writeHandle->SerializeCreateSize();
-            char* handleCreateInfoSpace =
-                device->GetClient()->SerializeCommand(cmd, cmd.handleCreateInfoLength);
-            request.writeHandle->SerializeCreate(handleCreateInfoSpace);
+            device->GetClient()->SerializeCommand(
+                cmd, cmd.handleCreateInfoLength,
+                [&](char* cmdSpace) { request.writeHandle->SerializeCreate(cmdSpace); });
         }
 
         // Step 4. Register this request so that we can retrieve it from its serial when the server
@@ -311,12 +310,11 @@ namespace dawn_wire { namespace client {
             cmd.writeFlushInfoLength = writeFlushInfoLength;
             cmd.writeFlushInfo = nullptr;
 
-            char* writeHandleSpace =
-                device->GetClient()->SerializeCommand(cmd, writeFlushInfoLength);
-
-            // Serialize flush metadata into the space after the command.
-            // This closes the handle for writing.
-            mWriteHandle->SerializeFlush(writeHandleSpace);
+            device->GetClient()->SerializeCommand(cmd, writeFlushInfoLength, [&](char* cmdSpace) {
+                // Serialize flush metadata into the space after the command.
+                // This closes the handle for writing.
+                mWriteHandle->SerializeFlush(cmdSpace);
+            });
             mWriteHandle = nullptr;
 
         } else if (mReadHandle) {

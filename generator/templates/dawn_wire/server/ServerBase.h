@@ -16,6 +16,7 @@
 #define DAWNWIRE_SERVER_SERVERBASE_H_
 
 #include "dawn/dawn_proc_table.h"
+#include "dawn_wire/ChunkedCommandHandler.h"
 #include "dawn_wire/Wire.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/WireDeserializeAllocator.h"
@@ -23,7 +24,7 @@
 
 namespace dawn_wire { namespace server {
 
-    class ServerBase : public ObjectIdResolver {
+    class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
         ServerBase() = default;
         virtual ~ServerBase() = default;

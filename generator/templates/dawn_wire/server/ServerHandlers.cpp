@@ -89,12 +89,22 @@ namespace dawn_wire { namespace server {
         }
     {% endfor %}
 
-    const volatile char* Server::HandleCommands(const volatile char* commands, size_t size) {
+    const volatile char* Server::HandleCommandsImpl(const volatile char* commands, size_t size) {
         mProcs.deviceTick(DeviceObjects().Get(1)->handle);
 
-        while (size >= sizeof(WireCmd)) {
-            WireCmd cmdId = *reinterpret_cast<const volatile WireCmd*>(commands);
+        while (size >= sizeof(CmdHeader) + sizeof(WireCmd)) {
+            // Start by chunked command handling, if it is done, then it means the whole buffer
+            // was consumed by it, so we return a pointer to the end of the commands.
+            switch (HandleChunkedCommands(commands, size)) {
+                case ChunkedCommandsResult::Consumed:
+                    return commands + size;
+                case ChunkedCommandsResult::Error:
+                    return nullptr;
+                case ChunkedCommandsResult::Passthrough:
+                    break;
+            }
 
+            WireCmd cmdId = *reinterpret_cast<const volatile WireCmd*>(commands + sizeof(CmdHeader));
             bool success = false;
             switch (cmdId) {
                 {% for command in cmd_records["command"] %}

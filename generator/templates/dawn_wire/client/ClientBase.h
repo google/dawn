@@ -15,13 +15,14 @@
 #ifndef DAWNWIRE_CLIENT_CLIENTBASE_AUTOGEN_H_
 #define DAWNWIRE_CLIENT_CLIENTBASE_AUTOGEN_H_
 
+#include "dawn_wire/ChunkedCommandHandler.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ApiObjects.h"
 #include "dawn_wire/client/ObjectAllocator.h"
 
 namespace dawn_wire { namespace client {
 
-    class ClientBase : public ObjectIdProvider {
+    class ClientBase : public ChunkedCommandHandler, public ObjectIdProvider {
       public:
         ClientBase() {
         }

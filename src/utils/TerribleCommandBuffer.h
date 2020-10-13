@@ -15,8 +15,6 @@
 #ifndef UTILS_TERRIBLE_COMMAND_BUFFER_H_
 #define UTILS_TERRIBLE_COMMAND_BUFFER_H_
 
-#include <vector>
-
 #include "dawn_wire/Wire.h"
 
 namespace utils {
@@ -28,17 +26,15 @@ namespace utils {
 
         void SetHandler(dawn_wire::CommandHandler* handler);
 
+        size_t GetMaximumAllocationSize() const override;
+
         void* GetCmdSpace(size_t size) override;
         bool Flush() override;
 
       private:
         dawn_wire::CommandHandler* mHandler = nullptr;
         size_t mOffset = 0;
-        // Cannot have commands in mBuffer and mLargeBuffer
-        // at the same time to ensure commands order.
         char mBuffer[1000000];
-        std::vector<char> mLargeBuffer;
-        size_t mLargeBufferCmdSize = 0;
     };
 
 }  // namespace utils

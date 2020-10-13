@@ -16,6 +16,7 @@
 #define DAWNWIRE_WIRE_H_
 
 #include <cstdint>
+#include <limits>
 
 #include "dawn/webgpu.h"
 #include "dawn_wire/dawn_wire_export.h"
@@ -25,8 +26,18 @@ namespace dawn_wire {
     class DAWN_WIRE_EXPORT CommandSerializer {
       public:
         virtual ~CommandSerializer() = default;
+
+        // Get space for serializing commands.
+        // GetCmdSpace will never be called with a value larger than
+        // what GetMaximumAllocationSize returns. Return nullptr to indicate
+        // a fatal error.
         virtual void* GetCmdSpace(size_t size) = 0;
         virtual bool Flush() = 0;
+
+        // TODO(enga): Make pure virtual after updating Chromium.
+        virtual size_t GetMaximumAllocationSize() const {
+            return std::numeric_limits<size_t>::max();
+        }
     };
 
     class DAWN_WIRE_EXPORT CommandHandler {

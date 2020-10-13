@@ -99,11 +99,12 @@ namespace {
 {% macro write_record_serialization_helpers(record, name, members, is_cmd=False, is_return_command=False) %}
     {% set Return = "Return" if is_return_command else "" %}
     {% set Cmd = "Cmd" if is_cmd else "" %}
+    {% set Inherits = " : CmdHeader" if is_cmd else "" %}
 
     //* Structure for the wire format of each of the records. Members that are values
     //* are embedded directly in the structure. Other members are assumed to be in the
     //* memory directly following the structure in the buffer.
-    struct {{Return}}{{name}}Transfer {
+    struct {{Return}}{{name}}Transfer{{Inherits}} {
         static_assert({{[is_cmd, record.extensible, record.chained].count(True)}} <= 1,
                       "Record must be at most one of is_cmd, extensible, and chained.");
         {% if is_cmd %}
@@ -129,6 +130,11 @@ namespace {
             bool has_{{as_varName(member.name)}};
         {% endfor %}
     };
+
+    {% if is_cmd %}
+        static_assert(offsetof({{Return}}{{name}}Transfer, commandSize) == 0, "");
+        static_assert(offsetof({{Return}}{{name}}Transfer, commandId) == sizeof(CmdHeader), "");
+    {% endif %}
 
     {% if record.chained %}
         static_assert(offsetof({{Return}}{{name}}Transfer, chain) == 0, "");
@@ -379,12 +385,13 @@ namespace {
         return size;
     }
 
-    void {{Cmd}}::Serialize(char* buffer
+    void {{Cmd}}::Serialize(size_t commandSize, char* buffer
         {%- if not is_return -%}
             , const ObjectIdProvider& objectIdProvider
         {%- endif -%}
     ) const {
         auto transfer = reinterpret_cast<{{Name}}Transfer*>(buffer);
+        transfer->commandSize = commandSize;
         buffer += sizeof({{Name}}Transfer);
 
         {{Name}}Serialize(*this, transfer, &buffer

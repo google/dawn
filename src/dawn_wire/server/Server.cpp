@@ -39,10 +39,6 @@ namespace dawn_wire { namespace server {
         DestroyAllObjects(mProcs);
     }
 
-    char* Server::GetCmdSpace(size_t size) {
-        return static_cast<char*>(mSerializer->GetCmdSpace(size));
-    }
-
     bool Server::InjectTexture(WGPUTexture texture, uint32_t id, uint32_t generation) {
         ObjectData<WGPUTexture>* data = TextureObjects().Allocate(id);
         if (data == nullptr) {

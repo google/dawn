@@ -92,6 +92,10 @@ namespace dawn_wire {
         {% endfor %}
     };
 
+    struct CmdHeader {
+        uint64_t commandSize;
+    };
+
 {% macro write_command_struct(command, is_return_command) %}
     {% set Return = "Return" if is_return_command else "" %}
     {% set Cmd = command.name.CamelCase() + "Cmd" %}
@@ -101,7 +105,7 @@ namespace dawn_wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        void Serialize(char* serializeBuffer
+        void Serialize(size_t commandSize, char* serializeBuffer
             {%- if not is_return_command -%}
                 , const ObjectIdProvider& objectIdProvider
             {%- endif -%}

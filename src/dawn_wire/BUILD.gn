@@ -58,6 +58,10 @@ dawn_component("dawn_wire") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
   sources = get_target_outputs(":dawn_wire_gen")
   sources += [
+    "ChunkedCommandHandler.cpp",
+    "ChunkedCommandHandler.h",
+    "ChunkedCommandSerializer.cpp",
+    "ChunkedCommandSerializer.h",
     "WireClient.cpp",
     "WireDeserializeAllocator.cpp",
     "WireDeserializeAllocator.h",

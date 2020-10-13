@@ -18,6 +18,7 @@
 #include <dawn/webgpu.h>
 #include <dawn_wire/Wire.h>
 
+#include "dawn_wire/ChunkedCommandSerializer.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/WireDeserializeAllocator.h"
@@ -31,7 +32,11 @@ namespace dawn_wire { namespace client {
     class Client : public ClientBase {
       public:
         Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService);
-        ~Client();
+        ~Client() override;
+
+        // ChunkedCommandHandler implementation
+        const volatile char* HandleCommandsImpl(const volatile char* commands,
+                                                size_t size) override;
 
         WGPUDevice GetDevice();
 
@@ -39,16 +44,26 @@ namespace dawn_wire { namespace client {
             return mMemoryTransferService;
         }
 
-        const volatile char* HandleCommands(const volatile char* commands, size_t size);
         ReservedTexture ReserveTexture(WGPUDevice device);
 
         template <typename Cmd>
-        char* SerializeCommand(const Cmd& cmd, size_t extraSize = 0) {
-            size_t requiredSize = cmd.GetRequiredSize();
-            // TODO(cwallez@chromium.org): Check for overflows and allocation success?
-            char* allocatedBuffer = GetCmdSpace(requiredSize + extraSize);
-            cmd.Serialize(allocatedBuffer, *this);
-            return allocatedBuffer + requiredSize;
+        void SerializeCommand(const Cmd& cmd) {
+            // TODO(enga): Swap out the serializer with a no-op one on disconnect.
+            if (mDisconnected) {
+                return;
+            }
+            mSerializer.SerializeCommand(cmd, *this);
+        }
+
+        template <typename Cmd, typename ExtraSizeSerializeFn>
+        void SerializeCommand(const Cmd& cmd,
+                              size_t extraSize,
+                              ExtraSizeSerializeFn&& SerializeExtraSize) {
+            // TODO(enga): Swap out the serializer with a no-op one on disconnect.
+            if (mDisconnected) {
+                return;
+            }
+            mSerializer.SerializeCommand(cmd, *this, extraSize, SerializeExtraSize);
         }
 
         void Disconnect();
@@ -56,16 +71,12 @@ namespace dawn_wire { namespace client {
       private:
 #include "dawn_wire/client/ClientPrototypes_autogen.inc"
 
-        char* GetCmdSpace(size_t size);
-
         Device* mDevice = nullptr;
-        CommandSerializer* mSerializer = nullptr;
+        ChunkedCommandSerializer mSerializer;
         WireDeserializeAllocator mAllocator;
         MemoryTransferService* mMemoryTransferService = nullptr;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
-
-        std::vector<char> mDummyCmdSpace;
-        bool mIsDisconnected = false;
+        bool mDisconnected = false;
     };
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();

@@ -331,6 +331,16 @@ TEST_P(QueueWriteTextureTests, VaryingTextureSize) {
     }
 }
 
+// Test uploading a large amount of data with writeTexture.
+TEST_P(QueueWriteTextureTests, LargeWriteTexture) {
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {2048, 2048, 2};
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+
+    DoTest(textureSpec, MinimumDataSpec(textureSpec.textureSize), textureSpec.textureSize);
+}
+
 // Test writing a pixel with an offset.
 TEST_P(QueueWriteTextureTests, VaryingTextureOffset) {
     constexpr uint32_t kWidth = 259;

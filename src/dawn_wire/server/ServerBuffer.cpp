@@ -238,26 +238,26 @@ namespace dawn_wire { namespace server {
                 data->readHandle->SerializeInitialDataSize(readData, data->size);
         }
 
-        char* readHandleSpace = SerializeCommand(cmd, cmd.readInitialDataInfoLength);
-
-        if (isSuccess) {
-            if (isRead) {
-                // Serialize the initialization message into the space after the command.
-                data->readHandle->SerializeInitialData(readData, data->size, readHandleSpace);
-                // The in-flight map request returned successfully.
-                // Move the ReadHandle so it is owned by the buffer.
-                bufferData->readHandle = std::move(data->readHandle);
-            } else {
-                // The in-flight map request returned successfully.
-                // Move the WriteHandle so it is owned by the buffer.
-                bufferData->writeHandle = std::move(data->writeHandle);
-                bufferData->mapWriteState = BufferMapWriteState::Mapped;
-                // Set the target of the WriteHandle to the mapped buffer data.
-                bufferData->writeHandle->SetTarget(
-                    mProcs.bufferGetMappedRange(data->bufferObj, data->offset, data->size),
-                    data->size);
+        SerializeCommand(cmd, cmd.readInitialDataInfoLength, [&](char* cmdSpace) {
+            if (isSuccess) {
+                if (isRead) {
+                    // Serialize the initialization message into the space after the command.
+                    data->readHandle->SerializeInitialData(readData, data->size, cmdSpace);
+                    // The in-flight map request returned successfully.
+                    // Move the ReadHandle so it is owned by the buffer.
+                    bufferData->readHandle = std::move(data->readHandle);
+                } else {
+                    // The in-flight map request returned successfully.
+                    // Move the WriteHandle so it is owned by the buffer.
+                    bufferData->writeHandle = std::move(data->writeHandle);
+                    bufferData->mapWriteState = BufferMapWriteState::Mapped;
+                    // Set the target of the WriteHandle to the mapped buffer data.
+                    bufferData->writeHandle->SetTarget(
+                        mProcs.bufferGetMappedRange(data->bufferObj, data->offset, data->size),
+                        data->size);
+                }
             }
-        }
+        });
     }
 
 }}  // namespace dawn_wire::server
