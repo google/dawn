@@ -30,7 +30,9 @@ namespace inspector {
 struct EntryPoint {
   /// Constructors
   EntryPoint();
+  /// Copy Constructor
   EntryPoint(EntryPoint&);
+  /// Move Constructor
   EntryPoint(EntryPoint&&);
   ~EntryPoint();
 
