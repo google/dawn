@@ -112,6 +112,9 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Bad_Name) {
 }
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
   params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
@@ -122,6 +125,13 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   Context ctx;
   ast::Module m;
   TypeDeterminer td(&ctx, &m);
+
+  ast::Variable v1("param1", ast::StorageClass::kFunction, &vec);
+  ast::Variable v2("param2", ast::StorageClass::kFunction, &vec);
+
+  td.RegisterVariableForTesting(&v1);
+  td.RegisterVariableForTesting(&v2);
+
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
   GeneratorImpl g(&m);

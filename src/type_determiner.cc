@@ -369,7 +369,6 @@ bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
   if (!DetermineResultType(expr->expr())) {
     return false;
   }
-
   expr->set_result_type(expr->type());
   return true;
 }
@@ -787,12 +786,15 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
-  SetIntrinsicIfNeeded(expr);
-
+  if (!SetIntrinsicIfNeeded(expr)) {
+    set_error(expr->source(),
+              "v-0006: identifier must be declared before use: " + name);
+    return false;
+  }
   return true;
 }
 
-void TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
+bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
   if (ident->name() == "abs") {
     ident->set_intrinsic(ast::Intrinsic::kAbs);
   } else if (ident->name() == "acos") {
@@ -927,7 +929,10 @@ void TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleLevel);
   } else if (ident->name() == "trunc") {
     ident->set_intrinsic(ast::Intrinsic::kTrunc);
+  } else {
+    return false;
   }
+  return true;
 }
 
 bool TypeDeterminer::DetermineMemberAccessor(

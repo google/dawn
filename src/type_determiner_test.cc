@@ -400,7 +400,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   ast::type::F32Type f32;
   ast::ExpressionList call_params;
   auto call_expr = std::make_unique<ast::CallExpression>(
-      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "func"),
       std::move(call_params));
   ast::VariableList params0;
   auto func_main =
@@ -419,7 +419,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 
   EXPECT_FALSE(td()->Determine()) << td()->error();
   EXPECT_EQ(td()->error(),
-            "12:34: v-0005: function must be declared before use: 'func'");
+            "12:34: v-0006: identifier must be declared before use: func");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
@@ -615,6 +615,9 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   ast::BitcastExpression bitcast(
       &f32, std::make_unique<ast::IdentifierExpression>("name"));
 
+  ast::Variable v("name", ast::StorageClass::kPrivate, &f32);
+  td()->RegisterVariableForTesting(&v);
+
   EXPECT_TRUE(td()->DetermineResultType(&bitcast));
   ASSERT_NE(bitcast.result_type(), nullptr);
   EXPECT_TRUE(bitcast.result_type()->IsF32());
@@ -688,8 +691,10 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("name"));
-
   ast::TypeConstructorExpression cast(&f32, std::move(params));
+
+  ast::Variable v("name", ast::StorageClass::kPrivate, &f32);
+  td()->RegisterVariableForTesting(&v);
 
   EXPECT_TRUE(td()->DetermineResultType(&cast));
   ASSERT_NE(cast.result_type(), nullptr);
@@ -852,6 +857,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   EXPECT_TRUE(ident.result_type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
+  ast::IdentifierExpression a("a");
+  EXPECT_FALSE(td()->DetermineResultType(&a));
+}
+
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   ast::type::F32Type f32;
 
@@ -1005,8 +1015,11 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
 
   mod()->AddFunction(std::move(func));
 
+  ast::Variable v("var", ast::StorageClass::kFunction, &f32);
+  td()->RegisterVariableForTesting(&v);
+
   // Register the function
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   EXPECT_EQ(func_ptr->referenced_module_variables().size(), 0u);
 }
@@ -2478,7 +2491,7 @@ TEST_P(IntrinsicDataTest, Lookup) {
   auto param = GetParam();
 
   ast::IdentifierExpression ident(param.name);
-  td()->SetIntrinsicIfNeeded(&ident);
+  EXPECT_TRUE(td()->SetIntrinsicIfNeeded(&ident));
   EXPECT_EQ(ident.intrinsic(), param.intrinsic);
   EXPECT_TRUE(ident.IsIntrinsic());
 }
@@ -2558,7 +2571,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(TypeDeterminerTest, IntrinsicNotSetIfNotMatched) {
   ast::IdentifierExpression ident("not_intrinsic");
-  td()->SetIntrinsicIfNeeded(&ident);
+  EXPECT_FALSE(td()->SetIntrinsicIfNeeded(&ident));
   EXPECT_EQ(ident.intrinsic(), ast::Intrinsic::kNone);
   EXPECT_FALSE(ident.IsIntrinsic());
 }
@@ -4725,6 +4738,17 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   mod()->AddFunction(std::move(func_a));
   mod()->AddFunction(std::move(ep_1));
   mod()->AddFunction(std::move(ep_2));
+
+  mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+      "first", ast::StorageClass::kPrivate, &f32));
+  mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+      "second", ast::StorageClass::kPrivate, &f32));
+  mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+      "call_a", ast::StorageClass::kPrivate, &f32));
+  mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+      "call_b", ast::StorageClass::kPrivate, &f32));
+  mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+      "call_c", ast::StorageClass::kPrivate, &f32));
 
   // Register the functions and calculate the callers
   ASSERT_TRUE(td()->Determine()) << td()->error();

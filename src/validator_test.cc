@@ -87,9 +87,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   auto assign = std::make_unique<ast::AssignmentStatement>(
       Source{12, 34}, std::move(lhs), std::move(rhs));
 
-  EXPECT_TRUE(td()->DetermineResultType(assign.get())) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatement(assign.get()));
-  EXPECT_EQ(v()->error(), "12:34: v-0006: 'b' is not declared");
+  EXPECT_FALSE(td()->DetermineResultType(assign.get()));
+  EXPECT_EQ(td()->error(),
+            "12:34: v-0006: identifier must be declared before use: b");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -106,9 +106,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   body->append(std::make_unique<ast::AssignmentStatement>(
       Source{12, 34}, std::move(lhs), std::move(rhs)));
 
-  EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(body.get()));
-  EXPECT_EQ(v()->error(), "12:34: v-0006: 'b' is not declared");
+  EXPECT_FALSE(td()->DetermineStatements(body.get()));
+  EXPECT_EQ(td()->error(),
+            "12:34: v-0006: identifier must be declared before use: b");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {

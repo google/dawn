@@ -2465,6 +2465,14 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
+
+  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
+  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
+  ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
+  td.RegisterVariableForTesting(&var_a);
+  td.RegisterVariableForTesting(&var_b);
+  td.RegisterVariableForTesting(&var_c);
+
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
   Builder b(&mod);
@@ -2614,6 +2622,14 @@ TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
+
+  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
+  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
+  ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
+  td.RegisterVariableForTesting(&var_a);
+  td.RegisterVariableForTesting(&var_b);
+  td.RegisterVariableForTesting(&var_c);
+
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
   Builder b(&mod);
@@ -2821,6 +2837,12 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
+
+  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
+  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
+  td.RegisterVariableForTesting(&var_a);
+  td.RegisterVariableForTesting(&var_b);
+
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
   Builder b(&mod);

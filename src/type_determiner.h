@@ -108,7 +108,8 @@ class TypeDeterminer {
 
   /// Sets the intrinsic data information for the identifier if needed
   /// @param ident the identifier expression
-  void SetIntrinsicIfNeeded(ast::IdentifierExpression* ident);
+  /// @returns true if an intrinsic was set
+  bool SetIntrinsicIfNeeded(ast::IdentifierExpression* ident);
 
  private:
   void set_error(const Source& src, const std::string& msg);
