@@ -178,7 +178,6 @@ OpStore %1 %13
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec(&vec3, 3);
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -187,35 +186,11 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
-  auto first =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
-
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  auto second =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
-
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
-  auto third =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
-
-  vals.push_back(std::move(first));
-  vals.push_back(std::move(second));
-  vals.push_back(std::move(third));
 
   auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  ast::Variable v("var", ast::StorageClass::kOutput, &vec);
+  ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
   ast::AssignmentStatement assign(
       std::make_unique<ast::IdentifierExpression>("var"), std::move(init));
@@ -234,21 +209,17 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
-%4 = OpTypeVector %5 3
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Output %3
-%6 = OpConstantNull %3
-%1 = OpVariable %2 Output %6
-%7 = OpConstant %5 1
-%8 = OpConstant %5 2
-%9 = OpConstant %5 3
-%10 = OpConstantComposite %4 %7 %8 %9
-%11 = OpConstantComposite %4 %9 %8 %7
-%12 = OpConstantComposite %4 %8 %7 %9
-%13 = OpConstantComposite %3 %10 %11 %12
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Output %5
+%6 = OpConstant %4 1
+%7 = OpConstant %4 2
+%8 = OpConstant %4 3
+%9 = OpConstantComposite %3 %6 %7 %8
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %13
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %9
 )");
 }
 

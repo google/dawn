@@ -1128,6 +1128,64 @@ uint32_t Builder::GenerateConstructorExpression(
   return 0;
 }
 
+bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
+  if (!expr->IsConstructor()) {
+    return false;
+  }
+  if (expr->AsConstructor()->IsScalarConstructor()) {
+    return true;
+  }
+
+  auto* tc = expr->AsConstructor()->AsTypeConstructor();
+  auto* result_type = tc->type()->UnwrapAliasPtrAlias();
+  for (size_t i = 0; i < tc->values().size(); ++i) {
+    auto* e = tc->values()[i].get();
+
+    if (!e->IsConstructor()) {
+      if (is_global_init) {
+        error_ = "constructor must be a constant expression";
+        return false;
+      }
+      return false;
+    }
+    if (!is_constructor_const(e, is_global_init)) {
+      return false;
+    }
+    if (has_error()) {
+      return false;
+    }
+
+    if (result_type->IsVector() && !e->AsConstructor()->IsScalarConstructor()) {
+      return false;
+    }
+
+    // This should all be handled by |is_constructor_const| call above
+    if (!e->AsConstructor()->IsScalarConstructor()) {
+      continue;
+    }
+
+    auto* sc = e->AsConstructor()->AsScalarConstructor();
+    ast::type::Type* subtype = result_type->UnwrapAliasPtrAlias();
+    if (subtype->IsVector()) {
+      subtype = subtype->AsVector()->type()->UnwrapAliasPtrAlias();
+    } else if (subtype->IsMatrix()) {
+      subtype = subtype->AsMatrix()->type()->UnwrapAliasPtrAlias();
+    } else if (subtype->IsArray()) {
+      subtype = subtype->AsArray()->type()->UnwrapAliasPtrAlias();
+    } else if (subtype->IsStruct()) {
+      subtype = subtype->AsStruct()
+                    ->impl()
+                    ->members()[i]
+                    ->type()
+                    ->UnwrapAliasPtrAlias();
+    }
+    if (subtype != sc->result_type()->UnwrapAliasPtrAlias()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 uint32_t Builder::GenerateTypeConstructorExpression(
     ast::TypeConstructorExpression* init,
     bool is_global_init) {
@@ -1143,30 +1201,13 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   out << "__const";
 
   auto* result_type = init->type()->UnwrapAliasPtrAlias();
-
-  OperandList ops;
-  bool constructor_is_const = true;
-  for (const auto& e : values) {
-    if (!e->IsConstructor()) {
-      if (is_global_init) {
-        error_ = "constructor must be a constant expression";
-        return 0;
-      }
-      constructor_is_const = false;
-      break;
-    } else if (result_type->IsVector()) {
-      // Even if we have constructor parameters if the types are different then
-      // the constructor is not const as we'll generate OpBitcast or
-      // OpCopyObject instructions.
-      auto* subtype = result_type->AsVector()->type()->UnwrapAliasPtrAlias();
-      if (subtype != e->result_type()->UnwrapAliasPtrAlias()) {
-        constructor_is_const = false;
-        break;
-      }
-    }
+  bool constructor_is_const = is_constructor_const(init, is_global_init);
+  if (has_error()) {
+    return 0;
   }
 
   bool can_cast_or_copy = result_type->is_scalar();
+
   if (result_type->IsVector() && result_type->AsVector()->type()->is_scalar()) {
     auto* value_type = values[0]->result_type()->UnwrapAliasPtrAlias();
     can_cast_or_copy =
@@ -1190,6 +1231,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     result_type = result_type->AsVector()->type();
   }
 
+  OperandList ops;
   for (const auto& e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {

@@ -95,6 +95,49 @@ TEST_F(BuilderTest, Constructor_Type) {
 )");
 }
 
+TEST_F(BuilderTest, Constructor_Type_WithCasts) {
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&f32, 2);
+
+  ast::ExpressionList type_vals;
+  type_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(type_vals)));
+
+  type_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(type_vals)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateExpression(&t), 7u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%4 = OpTypeInt 32 1
+%5 = OpConstant %4 1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%3 = OpConvertSToF %2 %5
+%6 = OpConvertSToF %2 %5
+%7 = OpCompositeConstruct %1 %3 %6
+)");
+}
+
 TEST_F(BuilderTest, Constructor_Type_WithAlias) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
@@ -2382,6 +2425,407 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
             R"(%9 = OpLoad %3 %1
 %6 = OpConvertUToF %7 %9
 )");
+}
+
+TEST_F(BuilderTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
+  // vec3<f32>(1.0, 2.0, 3.0)  -> true
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  ast::TypeConstructorExpression t(&vec, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
+  // vec3<f32>(a, b, c)  -> false -- ERROR
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("a"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("b"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
+  ast::TypeConstructorExpression t(&vec, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_TRUE(b.has_error());
+  EXPECT_EQ(b.error(), "constructor must be a constant expression");
+}
+
+TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
+  // array<vec3<f32>, 2>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
+  //   -> true
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::ArrayType ary(&vec, 2);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  auto first =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  auto second =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+
+  ast::ExpressionList ary_params;
+  ary_params.push_back(std::move(first));
+  ary_params.push_back(std::move(second));
+  ast::TypeConstructorExpression t(&ary, std::move(ary_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest,
+       IsConstructorConst_GlobalVectorWithMatchingTypeConstructors) {
+  // vec3<f32>(f32(1.0), f32(2.0))  -> false
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+
+  ast::ExpressionList vec_params;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_GlobalWithTypeCastConstructor) {
+  // vec3<f32>(f32(1), f32(2)) -> false
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vec_params;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_VectorWithAllConstConstructors) {
+  // vec3<f32>(1.0, 2.0, 3.0)  -> true
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  ast::TypeConstructorExpression t(&vec, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
+  // vec3<f32>(a, b, c)  -> false
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("a"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("b"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
+  ast::TypeConstructorExpression t(&vec, std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
+  // array<vec3<f32>, 2>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
+  //   -> true
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+  ast::type::ArrayType ary(&vec, 2);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  auto first =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  auto second =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+
+  ast::ExpressionList ary_params;
+  ary_params.push_back(std::move(first));
+  ary_params.push_back(std::move(second));
+  ast::TypeConstructorExpression t(&ary, std::move(ary_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_VectorWith_TypeCastConstConstructors) {
+  // vec2<f32>(f32(1.0), f32(2.0))  -> false
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&f32, 2);
+
+  ast::ExpressionList vec_params;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_WithTypeCastConstructor) {
+  // vec3<f32>(f32(1), f32(2)) -> false
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vec_params;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &f32, std::move(params)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_BitCastScalars) {
+  ast::type::I32Type i32;
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 2);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_Struct) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  ast::ExpressionList vec_vals;
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_vals)));
+
+  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
+}
+
+TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  ast::ExpressionList vec_vals;
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(std::make_unique<ast::IdentifierExpression>("a"));
+  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vec_vals)));
+
+  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.has_error());
 }
 
 }  // namespace

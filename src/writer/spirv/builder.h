@@ -437,6 +437,12 @@ class Builder {
   SpvImageFormat convert_image_format_to_spv(
       const ast::type::ImageFormat format);
 
+  /// Determines if the given type constructor is created from constant values
+  /// @param expr the expression to check
+  /// @param is_global_init if this is a global initializer
+  /// @returns true if the constructor is constant
+  bool is_constructor_const(ast::Expression* expr, bool is_global_init);
+
  private:
   /// @returns an Operand with a new result ID in it. Increments the next_id_
   /// automatically.
