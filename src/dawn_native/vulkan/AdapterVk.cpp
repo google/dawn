@@ -45,6 +45,16 @@ namespace dawn_native { namespace vulkan {
                 "viewport flipY");
         }
 
+        if (mDeviceInfo.HasExt(DeviceExt::DriverProperties)) {
+            mDriverDescription = mDeviceInfo.driverProperties.driverName;
+            if (mDeviceInfo.driverProperties.driverInfo[0] != '\0') {
+                mDriverDescription += std::string(": ") + mDeviceInfo.driverProperties.driverInfo;
+            }
+        } else {
+            mDriverDescription =
+                "Vulkan driver version: " + std::to_string(mDeviceInfo.properties.driverVersion);
+        }
+
         InitializeSupportedExtensions();
 
         mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;

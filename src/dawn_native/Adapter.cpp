@@ -30,6 +30,10 @@ namespace dawn_native {
         return mAdapterType;
     }
 
+    const std::string& AdapterBase::GetDriverDescription() const {
+        return mDriverDescription;
+    }
+
     const PCIInfo& AdapterBase::GetPCIInfo() const {
         return mPCIInfo;
     }

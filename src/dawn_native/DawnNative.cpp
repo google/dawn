@@ -48,6 +48,7 @@ namespace dawn_native {
     void Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
         properties->backendType = mImpl->GetBackendType();
         properties->adapterType = mImpl->GetAdapterType();
+        properties->driverDescription = mImpl->GetDriverDescription().c_str();
         properties->deviceID = mImpl->GetPCIInfo().deviceId;
         properties->vendorID = mImpl->GetPCIInfo().vendorId;
         properties->name = mImpl->GetPCIInfo().name.c_str();

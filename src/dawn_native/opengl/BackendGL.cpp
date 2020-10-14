@@ -170,6 +170,9 @@ namespace dawn_native { namespace opengl {
             const char* vendor = reinterpret_cast<const char*>(mFunctions.GetString(GL_VENDOR));
             mPCIInfo.vendorId = GetVendorIdFromVendors(vendor);
 
+            mDriverDescription = std::string("OpenGL version ") +
+                                 reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION));
+
             InitializeSupportedExtensions();
 
             return {};

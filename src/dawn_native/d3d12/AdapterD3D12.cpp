@@ -22,6 +22,7 @@
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
 #include <locale>
+#include <sstream>
 
 namespace dawn_native { namespace d3d12 {
 
@@ -89,9 +90,25 @@ namespace dawn_native { namespace d3d12 {
                                                : wgpu::AdapterType::DiscreteGPU;
         }
 
+        // Get the adapter's name as a UTF8 string.
         std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(
             "Error converting");
         mPCIInfo.name = converter.to_bytes(adapterDesc.Description);
+
+        // Convert the adapter's D3D12 driver version to a readable string like "24.21.13.9793".
+        LARGE_INTEGER umdVersion;
+        if (mHardwareAdapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
+            DXGI_ERROR_UNSUPPORTED) {
+            uint64_t encodedVersion = umdVersion.QuadPart;
+
+            std::ostringstream o;
+            o << "D3D12 driver version ";
+            o << ((encodedVersion >> 48) & 0xFFFF) << ".";
+            o << ((encodedVersion >> 32) & 0xFFFF) << ".";
+            o << ((encodedVersion >> 16) & 0xFFFF) << ".";
+            o << (encodedVersion & 0xFFFF);
+            mDriverDescription = o.str();
+        }
 
         InitializeSupportedExtensions();
 

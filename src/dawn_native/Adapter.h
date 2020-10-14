@@ -34,6 +34,7 @@ namespace dawn_native {
 
         wgpu::BackendType GetBackendType() const;
         wgpu::AdapterType GetAdapterType() const;
+        const std::string& GetDriverDescription() const;
         const PCIInfo& GetPCIInfo() const;
         InstanceBase* GetInstance() const;
 
@@ -47,6 +48,7 @@ namespace dawn_native {
       protected:
         PCIInfo mPCIInfo = {};
         wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
+        std::string mDriverDescription;
         ExtensionsSet mSupportedExtensions;
 
       private:

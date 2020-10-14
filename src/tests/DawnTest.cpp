@@ -434,7 +434,8 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
         // Preparing for outputting hex numbers
         log << std::showbase << std::hex << std::setfill('0') << std::setw(4)
 
-            << " - \"" << properties.adapterName << "\"\n"
+            << " - \"" << properties.adapterName << "\" - \"" << properties.driverDescription
+            << "\"\n"
             << "   type: " << AdapterTypeName(properties.adapterType)
             << ", backend: " << ParamName(properties.backendType) << "\n"
             << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()

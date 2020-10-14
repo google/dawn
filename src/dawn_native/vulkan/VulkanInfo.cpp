@@ -280,6 +280,11 @@ namespace dawn_native { namespace vulkan {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT);
         }
 
+        if (info.extensions.Has(DeviceExt::DriverProperties)) {
+            propertiesChain.Add(&info.driverProperties,
+                                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES);
+        }
+
         // If we have DeviceExt::GetPhysicalDeviceProperties2, use features2 and properties2 so
         // that features no covered by VkPhysicalDevice{Features,Properties} can be queried.
         //

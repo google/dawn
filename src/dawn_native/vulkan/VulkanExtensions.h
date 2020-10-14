@@ -87,6 +87,7 @@ namespace dawn_native { namespace vulkan {
         SamplerYCbCrConversion,
 
         // Promoted to 1.2
+        DriverProperties,
         ImageFormatList,
         ShaderFloat16Int8,
 
