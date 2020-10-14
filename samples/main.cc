@@ -569,13 +569,16 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   bool dawn_validation_failed = false;
+  std::ostringstream stream;
+
   if (options.dawn_validation) {
     // Use Vulkan 1.1, since this is what Tint, internally, uses.
     spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
-    tools.SetMessageConsumer([](spv_message_level_t, const char*,
-                                const spv_position_t& pos, const char* msg) {
-      std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
-                << std::endl;
+    tools.SetMessageConsumer([&stream](spv_message_level_t, const char*,
+                                       const spv_position_t& pos,
+                                       const char* msg) {
+      stream << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
+             << std::endl;
     });
     auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     if (!tools.Validate(w->result().data(), w->result().size(),
@@ -598,6 +601,8 @@ int main(int argc, const char** argv) {
     }
   }
   if (dawn_validation_failed) {
+    std::cerr << std::endl << std::endl << "Validation Failure:" << std::endl;
+    std::cerr << stream.str();
     return 1;
   }
 #endif  // TINT_BUILD_SPV_WRITER
