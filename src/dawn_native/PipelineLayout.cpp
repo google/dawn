@@ -117,8 +117,7 @@ namespace dawn_native {
             entry.type = shaderBinding.type;
             entry.hasDynamicOffset = false;
             entry.viewDimension = shaderBinding.viewDimension;
-            entry.textureComponentType =
-                Format::FormatTypeToTextureComponentType(shaderBinding.textureComponentType);
+            entry.textureComponentType = shaderBinding.textureComponentType;
             entry.storageTextureFormat = shaderBinding.storageTextureFormat;
             entry.minBufferBindingSize = shaderBinding.minBufferBindingSize;
             return entry;

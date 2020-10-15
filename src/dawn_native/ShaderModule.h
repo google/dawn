@@ -52,8 +52,6 @@ namespace dawn_native {
     // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
     // ShaderModuleBase.
     struct EntryPointMetadata {
-        EntryPointMetadata();
-
         // Per-binding shader metadata contains some SPIRV specific information in addition to
         // most of the frontend per-binding information.
         struct ShaderBindingInfo : BindingInfo {
@@ -76,11 +74,10 @@ namespace dawn_native {
         // The set of vertex attributes this entryPoint uses.
         std::bitset<kMaxVertexAttributes> usedVertexAttributes;
 
-        // An array to record the basic types (float, int and uint) of the fragment shader outputs
-        // or Format::Type::Other means the fragment shader output is unused.
-        using FragmentOutputBaseTypes =
-            ityp::array<ColorAttachmentIndex, Format::Type, kMaxColorAttachments>;
-        FragmentOutputBaseTypes fragmentOutputFormatBaseTypes;
+        // An array to record the basic types (float, int and uint) of the fragment shader outputs.
+        ityp::array<ColorAttachmentIndex, wgpu::TextureComponentType, kMaxColorAttachments>
+            fragmentOutputFormatBaseTypes;
+        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
 
         // The local workgroup size declared for a compute entry point (or 0s otehrwise).
         Origin3D localWorkgroupSize;

@@ -280,8 +280,7 @@ namespace dawn_native {
             mBindingInfo[i].binding = BindingNumber(binding.binding);
             mBindingInfo[i].type = binding.type;
             mBindingInfo[i].visibility = binding.visibility;
-            mBindingInfo[i].textureComponentType =
-                Format::TextureComponentTypeToFormatType(binding.textureComponentType);
+            mBindingInfo[i].textureComponentType = binding.textureComponentType;
             mBindingInfo[i].storageTextureFormat = binding.storageTextureFormat;
             mBindingInfo[i].minBufferBindingSize = binding.minBufferBindingSize;
 

@@ -369,15 +369,14 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        const EntryPointMetadata::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
-            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputFormatBaseTypes;
+        const auto& fragmentOutputsWritten =
+            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputsWritten;
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
             const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
-            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Type::Other;
             ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
-                             isDeclaredInFragmentShader);
+                             fragmentOutputsWritten[i]);
         }
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());

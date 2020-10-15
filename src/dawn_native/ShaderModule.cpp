@@ -553,7 +553,7 @@ namespace dawn_native {
                             info->viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                             info->textureComponentType =
-                                SpirvBaseTypeToFormatType(textureComponentType);
+                                SpirvBaseTypeToTextureComponentType(textureComponentType);
                             if (imageType.ms) {
                                 info->type = wgpu::BindingType::MultisampledTexture;
                             } else {
@@ -682,12 +682,9 @@ namespace dawn_native {
 
                     spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
                         compiler.get_type(fragmentOutput.base_type_id).basetype;
-                    Format::Type formatType =
-                        SpirvBaseTypeToFormatType(shaderFragmentOutputBaseType);
-                    if (formatType == Format::Type::Other) {
-                        return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
-                    }
-                    metadata->fragmentOutputFormatBaseTypes[attachment] = formatType;
+                    metadata->fragmentOutputFormatBaseTypes[attachment] =
+                        SpirvBaseTypeToTextureComponentType(shaderFragmentOutputBaseType);
+                    metadata->fragmentOutputsWritten.set(attachment);
                 }
             }
 
@@ -769,12 +766,6 @@ namespace dawn_native {
         }
 
         return {};
-    }
-
-    // EntryPointMetadata
-
-    EntryPointMetadata::EntryPointMetadata() {
-        fragmentOutputFormatBaseTypes.fill(Format::Type::Other);
     }
 
     // ShaderModuleBase

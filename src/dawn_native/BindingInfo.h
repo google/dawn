@@ -52,7 +52,7 @@ namespace dawn_native {
         BindingNumber binding;
         wgpu::ShaderStage visibility;
         wgpu::BindingType type;
-        Format::Type textureComponentType = Format::Type::Float;
+        wgpu::TextureComponentType textureComponentType = wgpu::TextureComponentType::Float;
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
         wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
         bool hasDynamicOffset = false;

@@ -144,7 +144,8 @@ namespace dawn_native {
 
         MaybeError ValidateColorStateDescriptor(const DeviceBase* device,
                                                 const ColorStateDescriptor& descriptor,
-                                                Format::Type fragmentOutputBaseType) {
+                                                bool fragmentWritten,
+                                                wgpu::TextureComponentType fragmentOutputBaseType) {
             if (descriptor.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
@@ -161,8 +162,8 @@ namespace dawn_native {
             if (!format->IsColor() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
-            if (fragmentOutputBaseType != Format::Type::Other &&
-                fragmentOutputBaseType != format->type) {
+            if (fragmentWritten &&
+                fragmentOutputBaseType != Format::FormatTypeToTextureComponentType(format->type)) {
                 return DAWN_VALIDATION_ERROR(
                     "Color format must match the fragment stage output type");
             }
@@ -356,6 +357,7 @@ namespace dawn_native {
              i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorStateCount)); ++i) {
             DAWN_TRY(ValidateColorStateDescriptor(
                 device, descriptor->colorStates[static_cast<uint8_t>(i)],
+                fragmentMetadata.fragmentOutputsWritten[i],
                 fragmentMetadata.fragmentOutputFormatBaseTypes[i]));
         }
 

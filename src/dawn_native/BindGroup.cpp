@@ -114,7 +114,9 @@ namespace dawn_native {
 
             switch (requiredUsage) {
                 case wgpu::TextureUsage::Sampled: {
-                    if (!texture->GetFormat().HasComponentType(bindingInfo.textureComponentType)) {
+                    if (!texture->GetFormat().HasComponentType(
+                            Format::TextureComponentTypeToFormatType(
+                                bindingInfo.textureComponentType))) {
                         return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
                     }
                     break;

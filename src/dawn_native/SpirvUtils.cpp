@@ -134,14 +134,15 @@ namespace dawn_native {
         }
     }
 
-    Format::Type SpirvBaseTypeToFormatType(spirv_cross::SPIRType::BaseType spirvBaseType) {
+    wgpu::TextureComponentType SpirvBaseTypeToTextureComponentType(
+        spirv_cross::SPIRType::BaseType spirvBaseType) {
         switch (spirvBaseType) {
             case spirv_cross::SPIRType::Float:
-                return Format::Type::Float;
+                return wgpu::TextureComponentType::Float;
             case spirv_cross::SPIRType::Int:
-                return Format::Type::Sint;
+                return wgpu::TextureComponentType::Sint;
             case spirv_cross::SPIRType::UInt:
-                return Format::Type::Uint;
+                return wgpu::TextureComponentType::Uint;
             default:
                 UNREACHABLE();
         }

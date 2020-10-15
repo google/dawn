@@ -193,9 +193,8 @@ namespace dawn_native { namespace opengl {
                     GLuint textureIndex = indices[combined.textureLocation.group][bindingIndex];
                     mUnitsForTextures[textureIndex].push_back(textureUnit);
 
-                    Format::Type componentType =
-                        bgl->GetBindingInfo(bindingIndex).textureComponentType;
-                    shouldUseFiltering = componentType == Format::Type::Float;
+                    shouldUseFiltering = bgl->GetBindingInfo(bindingIndex).textureComponentType ==
+                                         wgpu::TextureComponentType::Float;
                 }
                 {
                     const BindGroupLayoutBase* bgl =
