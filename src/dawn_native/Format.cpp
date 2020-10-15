@@ -92,7 +92,7 @@ namespace dawn_native {
         ASSERT(HasOneBit(aspect));
         ASSERT(aspects & aspect);
 
-        // The stencil aspect is the only aspect that's not the first aspect. Since it is alwaus the
+        // The stencil aspect is the only aspect that's not the first aspect. Since it is always the
         // same aspect information, special case it to return a constant AspectInfo.
         if (aspect == Aspect::Stencil) {
             return kStencil8AspectInfo;
