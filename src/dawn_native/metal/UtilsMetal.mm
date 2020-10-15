@@ -54,7 +54,7 @@ namespace dawn_native { namespace metal {
                                                          Aspect aspect) {
         TextureBufferCopySplit copy;
         const Format textureFormat = texture->GetFormat();
-        const TexelBlockInfo& blockInfo = textureFormat.GetTexelBlockInfo(aspect);
+        const TexelBlockInfo& blockInfo = textureFormat.GetAspectInfo(aspect).block;
 
         // When copying textures from/to an unpacked buffer, the Metal validation layer doesn't
         // compute the correct range when checking if the buffer is big enough to contain the
@@ -115,7 +115,7 @@ namespace dawn_native { namespace metal {
         }
 
         // Doing all the copy in last image except the last row.
-        uint32_t copyBlockRowCount = copyExtent.height / blockInfo.blockHeight;
+        uint32_t copyBlockRowCount = copyExtent.height / blockInfo.height;
         if (copyBlockRowCount > 1) {
             copy.copies[copy.count].bufferOffset = currentOffset;
             copy.copies[copy.count].bytesPerRow = bytesPerRow;
@@ -123,10 +123,10 @@ namespace dawn_native { namespace metal {
             copy.copies[copy.count].textureOrigin = {origin.x, origin.y,
                                                      origin.z + copyExtent.depth - 1};
 
-            ASSERT(copyExtent.height - blockInfo.blockHeight <
+            ASSERT(copyExtent.height - blockInfo.height <
                    texture->GetMipLevelVirtualSize(mipLevel).height);
             copy.copies[copy.count].copyExtent = {clampedCopyExtent.width,
-                                                  copyExtent.height - blockInfo.blockHeight, 1};
+                                                  copyExtent.height - blockInfo.height, 1};
 
             ++copy.count;
 
@@ -136,18 +136,17 @@ namespace dawn_native { namespace metal {
 
         // Doing the last row copy with the exact number of bytes in last row.
         // Workaround this issue in a way just like the copy to a 1D texture.
-        uint32_t lastRowDataSize =
-            (copyExtent.width / blockInfo.blockWidth) * blockInfo.blockByteSize;
+        uint32_t lastRowDataSize = (copyExtent.width / blockInfo.width) * blockInfo.byteSize;
         uint32_t lastRowCopyExtentHeight =
-            blockInfo.blockHeight + clampedCopyExtent.height - copyExtent.height;
-        ASSERT(lastRowCopyExtentHeight <= blockInfo.blockHeight);
+            blockInfo.height + clampedCopyExtent.height - copyExtent.height;
+        ASSERT(lastRowCopyExtentHeight <= blockInfo.height);
 
         copy.copies[copy.count].bufferOffset = currentOffset;
         copy.copies[copy.count].bytesPerRow = lastRowDataSize;
         copy.copies[copy.count].bytesPerImage = lastRowDataSize;
-        copy.copies[copy.count].textureOrigin = {
-            origin.x, origin.y + copyExtent.height - blockInfo.blockHeight,
-            origin.z + copyExtent.depth - 1};
+        copy.copies[copy.count].textureOrigin = {origin.x,
+                                                 origin.y + copyExtent.height - blockInfo.height,
+                                                 origin.z + copyExtent.depth - 1};
         copy.copies[copy.count].copyExtent = {clampedCopyExtent.width, lastRowCopyExtentHeight, 1};
         ++copy.count;
 

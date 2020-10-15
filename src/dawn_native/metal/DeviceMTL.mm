@@ -297,12 +297,10 @@ namespace dawn_native { namespace metal {
 
         // This function assumes data is perfectly aligned. Otherwise, it might be necessary
         // to split copying to several stages: see ComputeTextureBufferCopySplit.
-        const TexelBlockInfo& blockInfo = texture->GetFormat().GetTexelBlockInfo(dst->aspect);
-        uint32_t blockSize = blockInfo.blockByteSize;
-        uint32_t blockWidth = blockInfo.blockWidth;
-        uint32_t blockHeight = blockInfo.blockHeight;
-        ASSERT(dataLayout.rowsPerImage == copySizePixels.height / blockHeight);
-        ASSERT(dataLayout.bytesPerRow == copySizePixels.width / blockWidth * blockSize);
+        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(dst->aspect).block;
+        ASSERT(dataLayout.rowsPerImage == copySizePixels.height / blockInfo.height);
+        ASSERT(dataLayout.bytesPerRow ==
+               copySizePixels.width / blockInfo.width * blockInfo.byteSize);
 
         EnsureDestinationTextureInitialized(texture, *dst, copySizePixels);
 

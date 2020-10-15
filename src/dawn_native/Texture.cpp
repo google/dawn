@@ -165,11 +165,14 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Texture has too many mip levels");
             }
 
-            const TexelBlockInfo& blockInfo = format->GetTexelBlockInfo(wgpu::TextureAspect::All);
-            if (format->isCompressed && (descriptor->size.width % blockInfo.blockWidth != 0 ||
-                                         descriptor->size.height % blockInfo.blockHeight != 0)) {
-                return DAWN_VALIDATION_ERROR(
-                    "The size of the texture is incompatible with the texture format");
+            if (format->isCompressed) {
+                const TexelBlockInfo& blockInfo =
+                    format->GetAspectInfo(wgpu::TextureAspect::All).block;
+                if (descriptor->size.width % blockInfo.width != 0 ||
+                    descriptor->size.height % blockInfo.height != 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The size of the texture is incompatible with the texture format");
+                }
             }
 
             if (descriptor->dimension == wgpu::TextureDimension::e2D &&
@@ -558,11 +561,10 @@ namespace dawn_native {
         // 4 at non-zero mipmap levels.
         if (mFormat.isCompressed) {
             // TODO(jiawei.shao@intel.com): check if there are any overflows.
-            const TexelBlockInfo& blockInfo = mFormat.GetTexelBlockInfo(wgpu::TextureAspect::All);
-            uint32_t blockWidth = blockInfo.blockWidth;
-            uint32_t blockHeight = blockInfo.blockHeight;
-            extent.width = (extent.width + blockWidth - 1) / blockWidth * blockWidth;
-            extent.height = (extent.height + blockHeight - 1) / blockHeight * blockHeight;
+            const TexelBlockInfo& blockInfo = mFormat.GetAspectInfo(wgpu::TextureAspect::All).block;
+            extent.width = (extent.width + blockInfo.width - 1) / blockInfo.width * blockInfo.width;
+            extent.height =
+                (extent.height + blockInfo.height - 1) / blockInfo.height * blockInfo.height;
         }
 
         return extent;

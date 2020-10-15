@@ -168,15 +168,15 @@ namespace dawn_native {
 
         const TextureBase* texture = copy->source.texture.Get();
         const TexelBlockInfo& blockInfo =
-            texture->GetFormat().GetTexelBlockInfo(copy->source.aspect);
-        const uint64_t heightInBlocks = copy->copySize.height / blockInfo.blockHeight;
+            texture->GetFormat().GetAspectInfo(copy->source.aspect).block;
+        const uint64_t heightInBlocks = copy->copySize.height / blockInfo.height;
 
         if (copy->destination.rowsPerImage > heightInBlocks) {
             return false;
         }
 
         const uint64_t copyTextureDataSizePerRow =
-            copy->copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize;
+            copy->copySize.width / blockInfo.width * blockInfo.byteSize;
         if (copy->destination.bytesPerRow > copyTextureDataSizePerRow) {
             return false;
         }

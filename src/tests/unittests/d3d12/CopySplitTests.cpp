@@ -291,9 +291,9 @@ class CopySplitTest : public testing::Test {
         ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
                textureSpec.height % textureSpec.blockHeight == 0);
         dawn_native::TexelBlockInfo blockInfo = {};
-        blockInfo.blockWidth = textureSpec.blockWidth;
-        blockInfo.blockHeight = textureSpec.blockHeight;
-        blockInfo.blockByteSize = textureSpec.texelBlockSizeInBytes;
+        blockInfo.width = textureSpec.blockWidth;
+        blockInfo.height = textureSpec.blockHeight;
+        blockInfo.byteSize = textureSpec.texelBlockSizeInBytes;
         Texture2DCopySplit copySplit = ComputeTextureCopySplit(
             {textureSpec.x, textureSpec.y, textureSpec.z},
             {textureSpec.width, textureSpec.height, textureSpec.depth}, blockInfo,

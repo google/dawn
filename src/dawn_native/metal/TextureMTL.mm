@@ -491,16 +491,16 @@ namespace dawn_native { namespace metal {
             // Compute the buffer size big enough to fill the largest mip.
             Extent3D largestMipSize = GetMipLevelVirtualSize(range.baseMipLevel);
             const TexelBlockInfo& blockInfo =
-                GetFormat().GetTexelBlockInfo(wgpu::TextureAspect::All);
+                GetFormat().GetAspectInfo(wgpu::TextureAspect::All).block;
 
             // Metal validation layers: sourceBytesPerRow must be at least 64.
-            uint32_t largestMipBytesPerRow = std::max(
-                (largestMipSize.width / blockInfo.blockWidth) * blockInfo.blockByteSize, 64u);
+            uint32_t largestMipBytesPerRow =
+                std::max((largestMipSize.width / blockInfo.width) * blockInfo.byteSize, 64u);
 
             // Metal validation layers: sourceBytesPerImage must be at least 512.
             uint64_t largestMipBytesPerImage =
                 std::max(static_cast<uint64_t>(largestMipBytesPerRow) *
-                             (largestMipSize.height / blockInfo.blockHeight),
+                             (largestMipSize.height / blockInfo.height),
                          512llu);
 
             // TODO(enga): Multiply by largestMipSize.depth and do a larger 3D copy to clear a whole
@@ -515,7 +515,7 @@ namespace dawn_native { namespace metal {
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
                             uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
-                                               blockInfo.blockByteSize));
+                                               blockInfo.byteSize));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             id<MTLBlitCommandEncoder> encoder = commandContext->EnsureBlit();

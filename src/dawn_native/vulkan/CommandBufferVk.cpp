@@ -436,15 +436,15 @@ namespace dawn_native { namespace vulkan {
         ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
         ASSERT(srcCopy.aspect == dstCopy.aspect);
         dawn_native::Format format = srcCopy.texture->GetFormat();
-        const TexelBlockInfo& blockInfo = format.GetTexelBlockInfo(srcCopy.aspect);
-        ASSERT(copySize.width % blockInfo.blockWidth == 0);
-        uint32_t widthInBlocks = copySize.width / blockInfo.blockWidth;
-        ASSERT(copySize.height % blockInfo.blockHeight == 0);
-        uint32_t heightInBlocks = copySize.height / blockInfo.blockHeight;
+        const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
+        ASSERT(copySize.width % blockInfo.width == 0);
+        uint32_t widthInBlocks = copySize.width / blockInfo.width;
+        ASSERT(copySize.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copySize.height / blockInfo.height;
 
         // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
         // because it isn't a hard constraint in Vulkan.
-        uint64_t tempBufferSize = widthInBlocks * heightInBlocks * blockInfo.blockByteSize;
+        uint64_t tempBufferSize = widthInBlocks * heightInBlocks * blockInfo.byteSize;
         BufferDescriptor tempBufferDescriptor;
         tempBufferDescriptor.size = tempBufferSize;
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -456,8 +456,7 @@ namespace dawn_native { namespace vulkan {
         tempBufferCopy.buffer = tempBuffer.Get();
         tempBufferCopy.rowsPerImage = heightInBlocks;
         tempBufferCopy.offset = 0;
-        tempBufferCopy.bytesPerRow =
-            copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize;
+        tempBufferCopy.bytesPerRow = copySize.width / blockInfo.width * blockInfo.byteSize;
 
         VkCommandBuffer commands = recordingContext->commandBuffer;
         VkImage srcImage = ToBackend(srcCopy.texture)->GetHandle();

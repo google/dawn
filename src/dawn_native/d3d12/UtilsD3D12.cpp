@@ -185,7 +185,7 @@ namespace dawn_native { namespace d3d12 {
                                           Aspect aspect) {
         ASSERT(HasOneBit(aspect));
         // See comments in ComputeTextureCopySplits() for more details.
-        const TexelBlockInfo& blockInfo = texture->GetFormat().GetTexelBlockInfo(aspect);
+        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
         const TextureCopySplits copySplits = ComputeTextureCopySplits(
             textureCopy.origin, copySize, blockInfo, offsetBytes, bytesPerRow, rowsPerImage);
 

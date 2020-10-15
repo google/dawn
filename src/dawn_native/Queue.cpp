@@ -88,11 +88,11 @@ namespace dawn_native {
             uint64_t optimalOffsetAlignment =
                 device->GetOptimalBufferToTextureCopyOffsetAlignment();
             ASSERT(IsPowerOfTwo(optimalOffsetAlignment));
-            ASSERT(IsPowerOfTwo(blockInfo.blockByteSize));
+            ASSERT(IsPowerOfTwo(blockInfo.byteSize));
             // We need the offset to be aligned to both optimalOffsetAlignment and blockByteSize,
             // since both of them are powers of two, we only need to align to the max value.
             uint64_t offsetAlignment =
-                std::max(optimalOffsetAlignment, uint64_t(blockInfo.blockByteSize));
+                std::max(optimalOffsetAlignment, uint64_t(blockInfo.byteSize));
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
@@ -106,7 +106,7 @@ namespace dawn_native {
 
             uint32_t dataRowsPerImage = dataLayout.rowsPerImage;
             if (dataRowsPerImage == 0) {
-                dataRowsPerImage = writeSizePixel.height / blockInfo.blockHeight;
+                dataRowsPerImage = writeSizePixel.height / blockInfo.height;
             }
 
             ASSERT(dataRowsPerImage >= alignedRowsPerImage);
@@ -266,16 +266,15 @@ namespace dawn_native {
                                            const TextureDataLayout& dataLayout,
                                            const Extent3D& writeSizePixel) {
         const TexelBlockInfo& blockInfo =
-            destination.texture->GetFormat().GetTexelBlockInfo(destination.aspect);
+            destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
 
         // We are only copying the part of the data that will appear in the texture.
         // Note that validating texture copy range ensures that writeSizePixel->width and
         // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
-        ASSERT(writeSizePixel.width % blockInfo.blockWidth == 0);
-        ASSERT(writeSizePixel.height % blockInfo.blockHeight == 0);
-        uint32_t alignedBytesPerRow =
-            writeSizePixel.width / blockInfo.blockWidth * blockInfo.blockByteSize;
-        uint32_t alignedRowsPerImage = writeSizePixel.height / blockInfo.blockHeight;
+        ASSERT(writeSizePixel.width % blockInfo.width == 0);
+        ASSERT(writeSizePixel.height % blockInfo.height == 0);
+        uint32_t alignedBytesPerRow = writeSizePixel.width / blockInfo.width * blockInfo.byteSize;
+        uint32_t alignedRowsPerImage = writeSizePixel.height / blockInfo.height;
 
         uint32_t optimalBytesPerRowAlignment = GetDevice()->GetOptimalBytesPerRowAlignment();
         uint32_t optimallyAlignedBytesPerRow =
@@ -418,7 +417,8 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureCopyRange(*destination, *writeSize));
         DAWN_TRY(ValidateLinearTextureData(
             *dataLayout, dataSize,
-            destination->texture->GetFormat().GetTexelBlockInfo(destination->aspect), *writeSize));
+            destination->texture->GetFormat().GetAspectInfo(destination->aspect).block,
+            *writeSize));
 
         DAWN_TRY(destination->texture->ValidateCanUseInSubmitNow());
 

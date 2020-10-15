@@ -18,9 +18,8 @@
 #include "dawn_native/dawn_platform.h"
 
 #include "common/ityp_bitset.h"
-#include "dawn_native/Error.h"
-
 #include "dawn_native/EnumClassBitmasks.h"
+#include "dawn_native/Error.h"
 
 #include <array>
 
@@ -30,9 +29,13 @@ namespace dawn_native {
     class DeviceBase;
 
     struct TexelBlockInfo {
-        uint32_t blockByteSize;
-        uint32_t blockWidth;
-        uint32_t blockHeight;
+        uint32_t byteSize;
+        uint32_t width;
+        uint32_t height;
+    };
+
+    struct AspectInfo {
+        TexelBlockInfo block;
     };
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
@@ -69,15 +72,17 @@ namespace dawn_native {
         bool HasDepthOrStencil() const;
         bool HasComponentType(Type componentType) const;
 
-        TexelBlockInfo GetTexelBlockInfo(wgpu::TextureAspect aspect) const;
-        TexelBlockInfo GetTexelBlockInfo(Aspect aspect) const;
+        const AspectInfo& GetAspectInfo(wgpu::TextureAspect aspect) const;
+        const AspectInfo& GetAspectInfo(Aspect aspect) const;
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)
         size_t GetIndex() const;
 
       private:
-        TexelBlockInfo blockInfo;
+        // The most common aspect: the color aspect for color texture, the depth aspect for
+        // depth[-stencil] textures.
+        AspectInfo firstAspect;
 
         friend FormatTable BuildFormatTable(const DeviceBase* device);
     };

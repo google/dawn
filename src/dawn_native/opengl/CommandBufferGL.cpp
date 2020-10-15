@@ -531,22 +531,21 @@ namespace dawn_native { namespace opengl {
                     gl.BindTexture(target, texture->GetHandle());
 
                     const Format& formatInfo = texture->GetFormat();
-                    const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(dst.aspect);
-                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH, src.bytesPerRow / blockInfo.blockByteSize *
-                                                             blockInfo.blockWidth);
-                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
-                                   src.rowsPerImage * blockInfo.blockHeight);
+                    const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(dst.aspect).block;
+                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                                   src.bytesPerRow / blockInfo.byteSize * blockInfo.width);
+                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.rowsPerImage * blockInfo.height);
 
                     if (formatInfo.isCompressed) {
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.blockByteSize);
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, blockInfo.blockWidth);
-                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, blockInfo.blockHeight);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.byteSize);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, blockInfo.width);
+                        gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, blockInfo.height);
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
 
                         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                        uint64_t copyDataSize = (copySize.width / blockInfo.blockWidth) *
-                                                (copySize.height / blockInfo.blockHeight) *
-                                                blockInfo.blockByteSize * copySize.depth;
+                        uint64_t copyDataSize = (copySize.width / blockInfo.width) *
+                                                (copySize.height / blockInfo.height) *
+                                                blockInfo.byteSize * copySize.depth;
                         Extent3D copyExtent = ComputeTextureCopyExtent(dst, copySize);
 
                         if (texture->GetArrayLayers() > 1) {
@@ -624,11 +623,11 @@ namespace dawn_native { namespace opengl {
                     gl.GenFramebuffers(1, &readFBO);
                     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
 
-                    const TexelBlockInfo& blockInfo = formatInfo.GetTexelBlockInfo(src.aspect);
+                    const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage * blockInfo.blockHeight);
-                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.blockByteSize);
+                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage * blockInfo.height);
+                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.byteSize);
 
                     GLenum glAttachment;
                     GLenum glFormat;

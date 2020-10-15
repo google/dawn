@@ -374,8 +374,8 @@ namespace dawn_native {
                                                        const Extent3D& copySize,
                                                        uint32_t bytesPerRow,
                                                        uint32_t rowsPerImage) {
-        ASSERT(copySize.height % blockInfo.blockHeight == 0);
-        uint32_t heightInBlocks = copySize.height / blockInfo.blockHeight;
+        ASSERT(copySize.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copySize.height / blockInfo.height;
 
         // Default value for rowsPerImage
         if (rowsPerImage == 0) {
@@ -384,7 +384,7 @@ namespace dawn_native {
 
         ASSERT(rowsPerImage >= heightInBlocks);
         if (copySize.height > 1 || copySize.depth > 1) {
-            ASSERT(bytesPerRow >= copySize.width / blockInfo.blockWidth * blockInfo.blockByteSize);
+            ASSERT(bytesPerRow >= copySize.width / blockInfo.width * blockInfo.byteSize);
         }
 
         if (copySize.width == 0 || copySize.height == 0 || copySize.depth == 0) {
@@ -400,7 +400,7 @@ namespace dawn_native {
         // bytesPerImage. Otherwise the result is a multiplication of two uint32_t numbers.
         uint64_t bytesInLastSlice =
             uint64_t(bytesPerRow) * (heightInBlocks - 1) +
-            (uint64_t(copySize.width) / blockInfo.blockWidth * blockInfo.blockByteSize);
+            (uint64_t(copySize.width) / blockInfo.width * blockInfo.byteSize);
 
         // This error cannot be thrown for copySize.depth = 1.
         // For copySize.depth > 1 we know that:
@@ -430,14 +430,13 @@ namespace dawn_native {
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent) {
         // Validation for the texel block alignments:
-        if (layout.offset % blockInfo.blockByteSize != 0) {
+        if (layout.offset % blockInfo.byteSize != 0) {
             return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
         }
 
         // Validation for other members in layout:
         if ((copyExtent.height > 1 || copyExtent.depth > 1) &&
-            layout.bytesPerRow <
-                copyExtent.width / blockInfo.blockWidth * blockInfo.blockByteSize) {
+            layout.bytesPerRow < copyExtent.width / blockInfo.width * blockInfo.byteSize) {
             return DAWN_VALIDATION_ERROR(
                 "bytesPerRow must not be less than the number of bytes per row");
         }
@@ -445,8 +444,8 @@ namespace dawn_native {
         // TODO(tommek@google.com): to match the spec there should be another condition here
         // on rowsPerImage >= copyExtent.height if copyExtent.depth > 1.
 
-        ASSERT(copyExtent.height % blockInfo.blockHeight == 0);
-        uint32_t heightInBlocks = copyExtent.height / blockInfo.blockHeight;
+        ASSERT(copyExtent.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
 
         // Validation for the copy being in-bounds:
         if (layout.rowsPerImage != 0 && layout.rowsPerImage < heightInBlocks) {
@@ -551,24 +550,26 @@ namespace dawn_native {
         }
 
         // Validation for the texel block alignments:
-        const TexelBlockInfo& blockInfo =
-            textureCopy.texture->GetFormat().GetTexelBlockInfo(textureCopy.aspect);
-        if (textureCopy.origin.x % blockInfo.blockWidth != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "Offset.x must be a multiple of compressed texture format block width");
-        }
-        if (textureCopy.origin.y % blockInfo.blockHeight != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "Offset.y must be a multiple of compressed texture format block height");
-        }
-        if (copySize.width % blockInfo.blockWidth != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "copySize.width must be a multiple of compressed texture format block width");
-        }
+        const Format& format = textureCopy.texture->GetFormat();
+        if (format.isCompressed) {
+            const TexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
+            if (textureCopy.origin.x % blockInfo.width != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "Offset.x must be a multiple of compressed texture format block width");
+            }
+            if (textureCopy.origin.y % blockInfo.height != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "Offset.y must be a multiple of compressed texture format block height");
+            }
+            if (copySize.width % blockInfo.width != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "copySize.width must be a multiple of compressed texture format block width");
+            }
 
-        if (copySize.height % blockInfo.blockHeight != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "copySize.height must be a multiple of compressed texture format block height");
+            if (copySize.height % blockInfo.height != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "copySize.height must be a multiple of compressed texture format block height");
+            }
         }
 
         return {};

@@ -770,7 +770,7 @@ namespace dawn_native { namespace d3d12 {
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
                     const TexelBlockInfo& blockInfo =
-                        texture->GetFormat().GetTexelBlockInfo(copy->source.aspect);
+                        texture->GetFormat().GetAspectInfo(copy->source.aspect).block;
 
                     // See comments around ComputeTextureCopySplits() for more details.
                     const TextureCopySplits copySplits = ComputeTextureCopySplits(

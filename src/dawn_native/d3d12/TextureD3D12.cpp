@@ -947,12 +947,11 @@ namespace dawn_native { namespace d3d12 {
             TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST, range);
 
             for (Aspect aspect : IterateEnumMask(range.aspects)) {
-                const TexelBlockInfo& blockInfo = GetFormat().GetTexelBlockInfo(aspect);
+                const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
-                uint32_t bytesPerRow =
-                    Align((GetWidth() / blockInfo.blockWidth) * blockInfo.blockByteSize,
-                          kTextureBytesPerRowAlignment);
-                uint64_t bufferSize64 = bytesPerRow * (GetHeight() / blockInfo.blockHeight);
+                uint32_t bytesPerRow = Align((GetWidth() / blockInfo.width) * blockInfo.byteSize,
+                                             kTextureBytesPerRowAlignment);
+                uint64_t bufferSize64 = bytesPerRow * (GetHeight() / blockInfo.height);
                 if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                     return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
                 }
@@ -962,7 +961,7 @@ namespace dawn_native { namespace d3d12 {
                 UploadHandle uploadHandle;
                 DAWN_TRY_ASSIGN(uploadHandle,
                                 uploader->Allocate(bufferSize, device->GetPendingCommandSerial(),
-                                                   blockInfo.blockByteSize));
+                                                   blockInfo.byteSize));
                 memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
                 for (uint32_t level = range.baseMipLevel;
@@ -970,7 +969,7 @@ namespace dawn_native { namespace d3d12 {
                     // compute d3d12 texture copy locations for texture and buffer
                     Extent3D copySize = GetMipLevelVirtualSize(level);
 
-                    uint32_t rowsPerImage = GetHeight() / blockInfo.blockHeight;
+                    uint32_t rowsPerImage = GetHeight() / blockInfo.height;
                     Texture2DCopySplit copySplit = ComputeTextureCopySplit(
                         {0, 0, 0}, copySize, blockInfo, uploadHandle.startOffset, bytesPerRow,
                         rowsPerImage);

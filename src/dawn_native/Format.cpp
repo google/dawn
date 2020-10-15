@@ -22,6 +22,12 @@
 
 namespace dawn_native {
 
+    namespace {
+
+        static const AspectInfo kStencil8AspectInfo = {{1, 1, 1}};
+
+    }
+
     // Format
 
     // static
@@ -78,62 +84,20 @@ namespace dawn_native {
         return componentType == type;
     }
 
-    TexelBlockInfo Format::GetTexelBlockInfo(wgpu::TextureAspect aspect) const {
-        switch (aspect) {
-            case wgpu::TextureAspect::All:
-                return blockInfo;
-
-            case wgpu::TextureAspect::DepthOnly:
-                ASSERT(HasDepth());
-                switch (format) {
-                    case wgpu::TextureFormat::Depth32Float:
-                        return blockInfo;
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-                break;
-
-            case wgpu::TextureAspect::StencilOnly:
-                ASSERT(HasStencil());
-                switch (format) {
-                    case wgpu::TextureFormat::Depth24PlusStencil8:
-                        return {1, 1, 1};
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-                break;
-        }
+    const AspectInfo& Format::GetAspectInfo(wgpu::TextureAspect aspect) const {
+        return GetAspectInfo(ConvertAspect(*this, aspect));
     }
 
-    TexelBlockInfo Format::GetTexelBlockInfo(Aspect aspect) const {
+    const AspectInfo& Format::GetAspectInfo(Aspect aspect) const {
         ASSERT(HasOneBit(aspect));
         ASSERT(aspects & aspect);
-        switch (aspect) {
-            case Aspect::Color:
-                ASSERT(aspects == aspect);
-                return blockInfo;
-            case Aspect::Depth:
-                switch (format) {
-                    case wgpu::TextureFormat::Depth32Float:
-                        return blockInfo;
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-            case Aspect::Stencil:
-                switch (format) {
-                    case wgpu::TextureFormat::Depth24PlusStencil8:
-                        return {1, 1, 1};
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-                break;
 
-            case Aspect::None:
-                UNREACHABLE();
+        // The stencil aspect is the only aspect that's not the first aspect. Since it is alwaus the
+        // same aspect information, special case it to return a constant AspectInfo.
+        if (aspect == Aspect::Stencil) {
+            return kStencil8AspectInfo;
+        } else {
+            return firstAspect;
         }
     }
 
@@ -182,9 +146,9 @@ namespace dawn_native {
             internalFormat.supportsStorageUsage = supportsStorageUsage;
             internalFormat.aspects = Aspect::Color;
             internalFormat.type = type;
-            internalFormat.blockInfo.blockByteSize = byteSize;
-            internalFormat.blockInfo.blockWidth = 1;
-            internalFormat.blockInfo.blockHeight = 1;
+            internalFormat.firstAspect.block.byteSize = byteSize;
+            internalFormat.firstAspect.block.width = 1;
+            internalFormat.firstAspect.block.height = 1;
             AddFormat(internalFormat);
         };
 
@@ -198,9 +162,9 @@ namespace dawn_native {
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = aspects;
             internalFormat.type = Type::Other;
-            internalFormat.blockInfo.blockByteSize = byteSize;
-            internalFormat.blockInfo.blockWidth = 1;
-            internalFormat.blockInfo.blockHeight = 1;
+            internalFormat.firstAspect.block.byteSize = byteSize;
+            internalFormat.firstAspect.block.width = 1;
+            internalFormat.firstAspect.block.height = 1;
             AddFormat(internalFormat);
         };
 
@@ -214,9 +178,9 @@ namespace dawn_native {
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Depth;
             internalFormat.type = type;
-            internalFormat.blockInfo.blockByteSize = byteSize;
-            internalFormat.blockInfo.blockWidth = 1;
-            internalFormat.blockInfo.blockHeight = 1;
+            internalFormat.firstAspect.block.byteSize = byteSize;
+            internalFormat.firstAspect.block.width = 1;
+            internalFormat.firstAspect.block.height = 1;
             AddFormat(internalFormat);
         };
 
@@ -230,9 +194,9 @@ namespace dawn_native {
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Color;
             internalFormat.type = Type::Float;
-            internalFormat.blockInfo.blockByteSize = byteSize;
-            internalFormat.blockInfo.blockWidth = width;
-            internalFormat.blockInfo.blockHeight = height;
+            internalFormat.firstAspect.block.byteSize = byteSize;
+            internalFormat.firstAspect.block.width = width;
+            internalFormat.firstAspect.block.height = height;
             AddFormat(internalFormat);
         };
 
