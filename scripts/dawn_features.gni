@@ -16,6 +16,14 @@ import("//build_overrides/build.gni")
 
 if (build_with_chromium) {
   import("//build/config/sanitizers/sanitizers.gni")
+  import("//build/config/ui.gni")
+
+  dawn_use_x11 = use_x11
+} else {
+  declare_args() {
+    # Whether Dawn should enable X11 support.
+    dawn_use_x11 = is_linux && !is_chromeos
+  }
 }
 
 declare_args() {
@@ -65,9 +73,6 @@ declare_args() {
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =
       is_debug || (build_with_chromium && use_fuzzing_engine)
-
-  # Whether Dawn should enable X11 support.
-  dawn_use_x11 = is_linux && !is_chromeos
 
   # Enable support WGSL for shaders.
   # Turned off for Skia, because Tint is currently not part of its DEPS.
