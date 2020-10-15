@@ -136,6 +136,11 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -157,11 +162,6 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -222,6 +222,11 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -243,11 +248,6 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -308,6 +308,11 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -329,11 +334,6 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -424,6 +424,11 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -467,11 +472,6 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
     _tint_pulling_vertex_buffer_1
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -565,6 +565,11 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -591,11 +596,6 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -751,6 +751,11 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   EXPECT_TRUE(transform()->Run());
 
   EXPECT_EQ(R"(Module{
+  TintVertexData -> __struct_TintVertexData
+  Struct{
+    [[block]]
+    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
+  }
   Variable{
     var_a
     private
@@ -800,11 +805,6 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
     _tint_pulling_vertex_buffer_2
     storage_buffer
     __alias_TintVertexData__struct_TintVertexData
-  }
-  TintVertexData -> __struct_TintVertexData
-  Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Function main -> __void
   StageDecoration{vertex}

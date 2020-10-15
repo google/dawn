@@ -74,9 +74,6 @@ std::string Module::to_str() const {
 
   out << "Module{" << std::endl;
   const auto indent = 2;
-  for (const auto& var : global_variables_) {
-    var->to_str(out, indent);
-  }
   for (auto* const alias : alias_types_) {
     for (size_t i = 0; i < indent; ++i) {
       out << " ";
@@ -85,6 +82,9 @@ std::string Module::to_str() const {
     if (alias->type()->IsStruct()) {
       alias->type()->AsStruct()->impl()->to_str(out, indent);
     }
+  }
+  for (const auto& var : global_variables_) {
+    var->to_str(out, indent);
   }
   for (const auto& func : functions_) {
     func->to_str(out, indent);

@@ -1305,17 +1305,17 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    myvar
-    storage_buffer
-    __alias_S__struct_S
-  }
   S -> __struct_S
   Struct{
     [[block]]
     StructMember{field0: __u32}
     StructMember{field1: __f32}
     StructMember{field2: __array__u32_2}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
   }
 })")) << module_str;
 }
@@ -1333,17 +1333,17 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    myvar
-    storage_buffer
-    __alias_S__struct_S
-  }
   S -> __struct_S
   Struct{
     [[block]]
     StructMember{field0: __u32}
     StructMember{field1: __f32}
     StructMember{field2: __array__u32_2}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
   }
 })")) << module_str;
 }
@@ -1365,15 +1365,15 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    myvar
-    storage_buffer
-    __alias_S__struct_S
-  }
   S -> __struct_S
   Struct{
     [[block]]
     StructMember{field0: __mat_2_3__f32}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
   }
 })")) << module_str;
 }
@@ -1395,15 +1395,15 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    myvar
-    storage_buffer
-    __alias_S__struct_S
-  }
   S -> __struct_S
   Struct{
     [[block]]
     StructMember{field0: __mat_2_3__f32}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
   }
 })")) << module_str;
 }
