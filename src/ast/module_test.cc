@@ -19,7 +19,9 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/function.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/variable.h"
 
 namespace tint {
@@ -96,6 +98,26 @@ TEST_F(ModuleTest, IsValid_Alias) {
 TEST_F(ModuleTest, IsValid_Null_Alias) {
   Module m;
   m.AddAliasType(nullptr);
+  EXPECT_FALSE(m.IsValid());
+}
+
+TEST_F(ModuleTest, IsValid_Struct) {
+  type::F32Type f32;
+  type::StructType st("name", {});
+  type::AliasType alias("name", &st);
+
+  Module m;
+  m.AddAliasType(&alias);
+  EXPECT_TRUE(m.IsValid());
+}
+
+TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
+  type::F32Type f32;
+  type::StructType st("", {});
+  type::AliasType alias("name", &st);
+
+  Module m;
+  m.AddAliasType(&alias);
   EXPECT_FALSE(m.IsValid());
 }
 

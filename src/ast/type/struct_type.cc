@@ -20,8 +20,8 @@ namespace tint {
 namespace ast {
 namespace type {
 
-StructType::StructType(std::unique_ptr<Struct> impl)
-    : struct_(std::move(impl)) {}
+StructType::StructType(const std::string& name, std::unique_ptr<Struct> impl)
+    : name_(name), struct_(std::move(impl)) {}
 
 StructType::StructType(StructType&&) = default;
 

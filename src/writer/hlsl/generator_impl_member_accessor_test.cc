@@ -58,8 +58,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto strct = std::make_unique<ast::Struct>();
   strct->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(strct));
-  s.set_name("Str");
+  ast::type::StructType s("Str", std::move(strct));
 
   auto str_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("str", ast::StorageClass::kPrivate, &s));
@@ -105,8 +104,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -154,8 +152,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -206,8 +203,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto b_var =
       std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate, &mat);
@@ -270,8 +266,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -330,8 +325,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -386,8 +380,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -434,8 +427,7 @@ TEST_F(
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -486,8 +478,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -539,8 +530,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -589,8 +579,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -650,8 +639,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -702,8 +690,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -759,8 +746,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -815,8 +801,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -867,8 +852,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -940,8 +924,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -955,8 +938,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -1015,8 +997,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -1030,8 +1011,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -1093,8 +1073,7 @@ TEST_F(
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -1108,8 +1087,7 @@ TEST_F(
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -1170,8 +1148,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -1185,8 +1162,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -1248,8 +1224,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -1263,8 +1238,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -1342,8 +1316,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto data_str = std::make_unique<ast::Struct>();
   data_str->set_members(std::move(members));
 
-  ast::type::StructType data(std::move(data_str));
-  data.set_name("Data");
+  ast::type::StructType data("Data", std::move(data_str));
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
@@ -1357,8 +1330,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto pre_str = std::make_unique<ast::Struct>();
   pre_str->set_members(std::move(members));
 
-  ast::type::StructType pre_struct(std::move(pre_str));
-  pre_struct.set_name("Pre");
+  ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(

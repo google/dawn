@@ -1037,7 +1037,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   auto strct = std::make_unique<ast::Struct>(std::move(members));
 
-  ast::type::StructType st(std::move(strct));
+  ast::type::StructType st("S", std::move(strct));
 
   auto var = std::make_unique<ast::Variable>("my_struct",
                                              ast::StorageClass::kNone, &st);
@@ -1072,7 +1072,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto strct = std::make_unique<ast::Struct>(std::move(members));
 
-  auto st = std::make_unique<ast::type::StructType>(std::move(strct));
+  auto st = std::make_unique<ast::type::StructType>("alias", std::move(strct));
   ast::type::AliasType alias("alias", st.get());
 
   auto var = std::make_unique<ast::Variable>("my_struct",
@@ -1176,8 +1176,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
       std::make_unique<ast::StructMember>("foo", &vec4, std::move(decos)));
 
   auto strctB = std::make_unique<ast::Struct>(std::move(b_members));
-  ast::type::StructType stB(std::move(strctB));
-  stB.set_name("B");
+  ast::type::StructType stB("B", std::move(strctB));
 
   ast::type::VectorType vecB(&stB, 3);
 
@@ -1187,8 +1186,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
 
   auto strctA = std::make_unique<ast::Struct>(std::move(a_members));
 
-  ast::type::StructType stA(std::move(strctA));
-  stA.set_name("A");
+  ast::type::StructType stA("A", std::move(strctA));
 
   auto var =
       std::make_unique<ast::Variable>("c", ast::StorageClass::kNone, &stA);

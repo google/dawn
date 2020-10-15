@@ -56,6 +56,10 @@ bool Module::IsValid() const {
     if (alias == nullptr) {
       return false;
     }
+    if (alias->type()->IsStruct() &&
+        alias->type()->AsStruct()->name().empty()) {
+      return false;
+    }
   }
   for (const auto& func : functions_) {
     if (func == nullptr || !func->IsValid()) {

@@ -201,7 +201,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -231,7 +231,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto inner_str = std::make_unique<ast::Struct>();
   inner_str->set_members(std::move(members));
 
-  ast::type::StructType inner_s(std::move(inner_str));
+  ast::type::StructType inner_s("Inner", std::move(inner_str));
 
   decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
   members.push_back(
@@ -248,7 +248,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto outer_str = std::make_unique<ast::Struct>();
   outer_str->set_members(std::move(members));
 
-  ast::type::StructType outer_s(std::move(outer_str));
+  ast::type::StructType outer_s("Outer", std::move(outer_str));
 
   ast::Module m;
   GeneratorImpl g(&m);

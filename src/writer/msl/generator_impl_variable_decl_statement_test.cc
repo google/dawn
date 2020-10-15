@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   auto var = std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &s);
 

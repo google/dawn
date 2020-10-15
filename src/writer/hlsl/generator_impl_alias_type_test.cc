@@ -63,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("a", std::move(str));
   ast::type::AliasType alias("a", &s);
 
   ast::Module m;

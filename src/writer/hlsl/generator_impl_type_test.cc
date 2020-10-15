@@ -179,7 +179,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
   EXPECT_EQ(result(), R"(struct {
@@ -210,7 +210,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
   EXPECT_EQ(result(), R"(struct {
@@ -238,7 +238,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
   EXPECT_EQ(result(), R"(struct {
@@ -267,7 +267,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
   auto str =
       std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
   EXPECT_EQ(result(), R"(struct {

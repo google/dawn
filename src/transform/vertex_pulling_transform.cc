@@ -26,6 +26,7 @@
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -42,6 +43,7 @@ namespace {
 
 static const char kVertexBufferNamePrefix[] = "_tint_pulling_vertex_buffer_";
 static const char kStructBufferName[] = "_tint_vertex_data";
+static const char kStructName[] = "TintVertexData";
 static const char kPullingPosVarName[] = "_tint_pulling_pos";
 static const char kDefaultVertexIndexName[] = "_tint_pulling_vertex_index";
 static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
@@ -235,14 +237,16 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
 
   auto* struct_type =
       ctx_->type_mgr().Get(std::make_unique<ast::type::StructType>(
+          kStructName,
           std::make_unique<ast::Struct>(std::move(decos), std::move(members))));
+  auto* alias = ctx_->type_mgr().Get(
+      std::make_unique<ast::type::AliasType>(kStructName, struct_type));
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     // The decorated variable with struct type
     auto var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>(GetVertexBufferName(i),
-                                        ast::StorageClass::kStorageBuffer,
-                                        struct_type));
+        std::make_unique<ast::Variable>(
+            GetVertexBufferName(i), ast::StorageClass::kStorageBuffer, alias));
 
     // Add decorations
     ast::VariableDecorationList decorations;
@@ -252,6 +256,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
 
     mod_->AddGlobalVariable(std::move(var));
   }
+  mod_->AddAliasType(alias->AsAlias());
 }
 
 void VertexPullingTransform::AddVertexPullingPreamble(

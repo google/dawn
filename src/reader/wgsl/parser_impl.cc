@@ -1083,7 +1083,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
   if (has_error())
     return nullptr;
   if (type == nullptr) {
-    auto str = struct_decl();
+    auto str = struct_decl(name);
     if (has_error())
       return nullptr;
     if (str == nullptr) {
@@ -1091,7 +1091,6 @@ ast::type::AliasType* ParserImpl::type_alias() {
       return nullptr;
     }
 
-    str->set_name(name);
     type = ctx_.type_mgr().Get(std::move(str));
   }
   if (type == nullptr) {
@@ -1479,7 +1478,8 @@ ast::StorageClass ParserImpl::storage_class() {
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT struct_body_decl
-std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
+std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
+    const std::string& name) {
   auto t = peek();
   auto source = t.source();
 
@@ -1506,6 +1506,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   }
 
   return std::make_unique<ast::type::StructType>(
+      name,
       std::make_unique<ast::Struct>(source, std::move(decos), std::move(body)));
 }
 

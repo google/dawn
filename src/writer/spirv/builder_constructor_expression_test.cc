@@ -1791,8 +1791,7 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
       std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2002,8 +2001,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
@@ -2775,8 +2773,7 @@ TEST_F(BuilderTest, IsConstructorConst_Struct) {
       std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2816,8 +2813,7 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
       std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(

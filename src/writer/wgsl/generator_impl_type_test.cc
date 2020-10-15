@@ -155,7 +155,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&s)) << g.error();
@@ -185,7 +185,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   auto str =
       std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&s)) << g.error();

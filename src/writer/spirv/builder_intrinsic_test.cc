@@ -2733,8 +2733,7 @@ TEST_F(BuilderTest, Call_ArrayLength) {
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
                                              &s_type);
@@ -2792,8 +2791,7 @@ TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
                                              &s_type);
@@ -2853,8 +2851,7 @@ TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
       std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
                                              &s_type);

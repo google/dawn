@@ -311,7 +311,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   auto s = std::make_unique<ast::Struct>();
-  ast::type::StructType s_type(std::move(s));
+  ast::type::StructType s_type("S", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -320,7 +320,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   EXPECT_EQ(id, 1u);
 
   EXPECT_EQ(b.types().size(), 1u);
-  EXPECT_EQ(DumpInstructions(b.debug()), "");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+)");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
 )");
 }
@@ -334,8 +335,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -364,8 +364,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
 
   auto s = std::make_unique<ast::Struct>(std::move(struct_decos),
                                          std::move(members));
-  ast::type::StructType s_type(std::move(s));
-  s_type.set_name("my_struct");
+  ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -398,7 +397,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
+  ast::type::StructType s_type("S", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -409,7 +408,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2 %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
@@ -436,7 +436,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
                                                         std::move(empty_c)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
+  ast::type::StructType s_type("S", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -453,7 +453,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
 OpMemberName %1 2 "c"
 )");
@@ -483,7 +484,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
                                                         std::move(c_decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
+  ast::type::StructType s_type("S", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -500,7 +501,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
 OpMemberName %1 2 "c"
 )");
@@ -548,7 +550,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
                                                         std::move(c_decos)));
 
   auto s = std::make_unique<ast::Struct>(std::move(members));
-  ast::type::StructType s_type(std::move(s));
+  ast::type::StructType s_type("S", std::move(s));
 
   ast::Module mod;
   Builder b(&mod);
@@ -565,7 +567,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
 OpMemberName %1 2 "c"
 )");

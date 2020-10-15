@@ -208,7 +208,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -241,7 +241,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -271,7 +271,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ast::Module m;
   GeneratorImpl g(&m);
@@ -301,7 +301,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
   auto str =
       std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 
-  ast::type::StructType s(std::move(str));
+  ast::type::StructType s("S", std::move(str));
 
   ast::Module m;
   GeneratorImpl g(&m);

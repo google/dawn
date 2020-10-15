@@ -864,12 +864,11 @@ ast::type::Type* ParserImpl::ConvertType(
   // Now make the struct.
   auto ast_struct = std::make_unique<ast::Struct>(
       std::move(ast_struct_decorations), std::move(ast_members));
-  // The struct type will be assigned a name during EmitAliasTypes.
-  auto ast_struct_type =
-      std::make_unique<ast::type::StructType>(std::move(ast_struct));
-  // Set the struct name before registering it.
+
   namer_.SuggestSanitizedName(type_id, "S");
-  ast_struct_type->set_name(namer_.GetName(type_id));
+  auto ast_struct_type = std::make_unique<ast::type::StructType>(
+      namer_.GetName(type_id), std::move(ast_struct));
+
   auto* result = ctx_.type_mgr().Get(std::move(ast_struct_type));
   return result;
 }

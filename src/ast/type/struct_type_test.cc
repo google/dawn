@@ -29,13 +29,13 @@ using StructTypeTest = testing::Test;
 TEST_F(StructTypeTest, Creation) {
   auto impl = std::make_unique<Struct>();
   auto* ptr = impl.get();
-  StructType s{std::move(impl)};
+  StructType s{"S", std::move(impl)};
   EXPECT_EQ(s.impl(), ptr);
 }
 
 TEST_F(StructTypeTest, Is) {
   auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
+  StructType s{"S", std::move(impl)};
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());
@@ -52,8 +52,7 @@ TEST_F(StructTypeTest, Is) {
 
 TEST_F(StructTypeTest, TypeName) {
   auto impl = std::make_unique<Struct>();
-  StructType s{std::move(impl)};
-  s.set_name("my_struct");
+  StructType s{"my_struct", std::move(impl)};
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }
 

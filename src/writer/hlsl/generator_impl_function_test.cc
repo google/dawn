@@ -309,8 +309,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Uniforms");
+  ast::type::StructType s("Uniforms", std::move(str));
   auto alias = std::make_unique<ast::type::AliasType>("Uniforms", &s);
 
   auto coord_var =
@@ -384,8 +383,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -450,8 +448,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s(std::move(str));
-  s.set_name("Data");
+  ast::type::StructType s("Data", std::move(str));
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(

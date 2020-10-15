@@ -29,15 +29,13 @@ namespace type {
 class StructType : public Type {
  public:
   /// Constructor
+  /// @param name the name of the struct
   /// @param impl the struct data
-  explicit StructType(std::unique_ptr<Struct> impl);
+  StructType(const std::string& name, std::unique_ptr<Struct> impl);
   /// Move constructor
   StructType(StructType&&);
   ~StructType() override;
 
-  /// Sets the name of the struct
-  /// @param name the name to set
-  void set_name(const std::string& name) { name_ = name; }
   /// @returns the struct name
   const std::string& name() const { return name_; }
 
