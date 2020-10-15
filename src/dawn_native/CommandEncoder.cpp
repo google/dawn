@@ -275,7 +275,8 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(colorAttachment.attachment));
 
             const TextureViewBase* attachment = colorAttachment.attachment;
-            if (!attachment->GetFormat().IsColor() || !attachment->GetFormat().isRenderable) {
+            if (!(attachment->GetAspects() & Aspect::Color) ||
+                !attachment->GetFormat().isRenderable) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as color attachment is not color "
                     "renderable");
@@ -334,7 +335,7 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(depthStencilAttachment->attachment));
 
             const TextureViewBase* attachment = depthStencilAttachment->attachment;
-            if (!attachment->GetFormat().HasDepthOrStencil() ||
+            if ((attachment->GetAspects() & (Aspect::Depth | Aspect::Stencil)) == Aspect::None ||
                 !attachment->GetFormat().isRenderable) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as depth stencil attachment is not a "
@@ -346,8 +347,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateStoreOp(depthStencilAttachment->depthStoreOp));
             DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
 
-            if (attachment->GetAspect() == wgpu::TextureAspect::All &&
-                attachment->GetFormat().HasStencil() &&
+            if (attachment->GetAspects() == (Aspect::Depth | Aspect::Stencil) &&
                 depthStencilAttachment->depthReadOnly != depthStencilAttachment->stencilReadOnly) {
                 return DAWN_VALIDATION_ERROR(
                     "depthReadOnly and stencilReadOnly must be the same when texture aspect is "

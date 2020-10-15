@@ -613,13 +613,10 @@ namespace dawn_native {
     TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : ObjectBase(texture->GetDevice()),
           mTexture(texture),
-          mAspect(descriptor->aspect),
           mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mDimension(descriptor->dimension),
           mRange({descriptor->baseMipLevel, descriptor->mipLevelCount, descriptor->baseArrayLayer,
-                  descriptor->arrayLayerCount, ConvertAspect(mFormat, mAspect)}) {
-        // TODO(crbug.com/dawn/439): Current validation only allows texture views with aspect "all".
-        ASSERT(mAspect == wgpu::TextureAspect::All);
+                  descriptor->arrayLayerCount, ConvertAspect(mFormat, descriptor->aspect)}) {
     }
 
     TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -641,9 +638,9 @@ namespace dawn_native {
         return mTexture.Get();
     }
 
-    wgpu::TextureAspect TextureViewBase::GetAspect() const {
+    Aspect TextureViewBase::GetAspects() const {
         ASSERT(!IsError());
-        return mAspect;
+        return mRange.aspects;
     }
 
     const Format& TextureViewBase::GetFormat() const {

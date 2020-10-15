@@ -163,7 +163,7 @@ namespace dawn_native {
         const TextureBase* GetTexture() const;
         TextureBase* GetTexture();
 
-        wgpu::TextureAspect GetAspect() const;
+        Aspect GetAspects() const;
         const Format& GetFormat() const;
         wgpu::TextureViewDimension GetDimension() const;
         uint32_t GetBaseMipLevel() const;
@@ -177,7 +177,6 @@ namespace dawn_native {
 
         Ref<TextureBase> mTexture;
 
-        wgpu::TextureAspect mAspect;
         // TODO(cwallez@chromium.org): This should be deduplicated in the Device
         const Format& mFormat;
         wgpu::TextureViewDimension mDimension;
