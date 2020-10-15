@@ -179,7 +179,7 @@ namespace dawn_native {
 
     void QueueBase::TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial) {
         mTasksInFlight.Enqueue(std::move(task), serial);
-        GetDevice()->AddFutureCallbackSerial(serial);
+        GetDevice()->AddFutureSerial(serial);
     }
 
     void QueueBase::Tick(ExecutionSerial finishedSerial) {
@@ -233,6 +233,8 @@ namespace dawn_native {
         ASSERT(uploadHandle.mappedBuffer != nullptr);
 
         memcpy(uploadHandle.mappedBuffer, data, size);
+
+        device->AddFutureSerial(device->GetPendingCommandSerial());
 
         return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer, uploadHandle.startOffset,
                                                buffer, bufferOffset, size);
@@ -297,8 +299,12 @@ namespace dawn_native {
         textureCopy.origin = destination.origin;
         textureCopy.aspect = ConvertAspect(destination.texture->GetFormat(), destination.aspect);
 
-        return GetDevice()->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout,
-                                                     &textureCopy, writeSizePixel);
+        DeviceBase* device = GetDevice();
+
+        device->AddFutureSerial(device->GetPendingCommandSerial());
+
+        return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout,
+                                                &textureCopy, writeSizePixel);
     }
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
                                          CommandBufferBase* const* commands) const {

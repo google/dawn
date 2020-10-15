@@ -139,7 +139,7 @@ namespace dawn_native {
                 break;
         }
         ASSERT(mCompletedSerial == mLastSubmittedSerial);
-        ASSERT(mFutureCallbackSerial <= mCompletedSerial);
+        ASSERT(mFutureSerial <= mCompletedSerial);
 
         // Skip handling device facilities if they haven't even been created (or failed doing so)
         if (mState != State::BeingCreated) {
@@ -189,7 +189,7 @@ namespace dawn_native {
             IgnoreErrors(WaitForIdleForDestruction());
             IgnoreErrors(TickImpl());
             AssumeCommandsComplete();
-            ASSERT(mFutureCallbackSerial <= mCompletedSerial);
+            ASSERT(mFutureSerial <= mCompletedSerial);
             mState = State::Disconnected;
 
             // Now everything is as if the device was lost.
@@ -319,8 +319,8 @@ namespace dawn_native {
         return mLastSubmittedSerial;
     }
 
-    ExecutionSerial DeviceBase::GetFutureCallbackSerial() const {
-        return mFutureCallbackSerial;
+    ExecutionSerial DeviceBase::GetFutureSerial() const {
+        return mFutureSerial;
     }
 
     void DeviceBase::IncrementLastSubmittedCommandSerial() {
@@ -328,19 +328,27 @@ namespace dawn_native {
     }
 
     void DeviceBase::AssumeCommandsComplete() {
-        ExecutionSerial maxSerial = ExecutionSerial(
-            std::max(mLastSubmittedSerial + ExecutionSerial(1), mFutureCallbackSerial));
+        ExecutionSerial maxSerial =
+            ExecutionSerial(std::max(mLastSubmittedSerial + ExecutionSerial(1), mFutureSerial));
         mLastSubmittedSerial = maxSerial;
         mCompletedSerial = maxSerial;
+    }
+
+    bool DeviceBase::IsDeviceIdle() {
+        ExecutionSerial maxSerial = std::max(mLastSubmittedSerial, mFutureSerial);
+        if (mCompletedSerial == maxSerial) {
+            return true;
+        }
+        return false;
     }
 
     ExecutionSerial DeviceBase::GetPendingCommandSerial() const {
         return mLastSubmittedSerial + ExecutionSerial(1);
     }
 
-    void DeviceBase::AddFutureCallbackSerial(ExecutionSerial serial) {
-        if (serial > mFutureCallbackSerial) {
-            mFutureCallbackSerial = serial;
+    void DeviceBase::AddFutureSerial(ExecutionSerial serial) {
+        if (serial > mFutureSerial) {
+            mFutureSerial = serial;
         }
     }
 
@@ -713,18 +721,19 @@ namespace dawn_native {
 
     // Other Device API methods
 
-    void DeviceBase::Tick() {
+    // Returns true if future ticking is needed.
+    bool DeviceBase::Tick() {
         if (ConsumedError(ValidateIsAlive())) {
-            return;
+            return false;
         }
         // to avoid overly ticking, we only want to tick when:
         // 1. the last submitted serial has moved beyond the completed serial
         // 2. or the completed serial has not reached the future serial set by the trackers
-        if (mLastSubmittedSerial > mCompletedSerial || mCompletedSerial < mFutureCallbackSerial) {
+        if (mLastSubmittedSerial > mCompletedSerial || mCompletedSerial < mFutureSerial) {
             CheckPassedSerials();
 
             if (ConsumedError(TickImpl())) {
-                return;
+                return false;
             }
 
             // There is no GPU work in flight, we need to move the serials forward so that
@@ -742,6 +751,8 @@ namespace dawn_native {
             mErrorScopeTracker->Tick(mCompletedSerial);
             GetDefaultQueue()->Tick(mCompletedSerial);
         }
+
+        return !IsDeviceIdle();
     }
 
     void DeviceBase::Reference() {

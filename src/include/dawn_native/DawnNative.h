@@ -193,6 +193,8 @@ namespace dawn_native {
     // Backdoor to get the order of the ProcMap for testing
     DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
 
+    DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
+
     // ErrorInjector functions used for testing only. Defined in dawn_native/ErrorInjector.cpp
     DAWN_NATIVE_EXPORT void EnableErrorInjector();
     DAWN_NATIVE_EXPORT void DisableErrorInjector();

@@ -36,7 +36,7 @@ namespace dawn_native {
 
     void ErrorScopeTracker::TrackUntilLastSubmitComplete(ErrorScope* scope) {
         mScopesInFlight.Enqueue(scope, mDevice->GetLastSubmittedCommandSerial());
-        mDevice->AddFutureCallbackSerial(mDevice->GetPendingCommandSerial());
+        mDevice->AddFutureSerial(mDevice->GetPendingCommandSerial());
     }
 
     void ErrorScopeTracker::Tick(ExecutionSerial completedSerial) {
