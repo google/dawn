@@ -36,7 +36,7 @@ namespace dawn_native {
                                          const uint64_t maxBindingSize) {
             if (entry.buffer == nullptr || entry.sampler != nullptr ||
                 entry.textureView != nullptr) {
-                return DAWN_VALIDATION_ERROR("expected buffer binding");
+                return DAWN_VALIDATION_ERROR("Expected buffer binding");
             }
             DAWN_TRY(device->ValidateObject(entry.buffer));
 
@@ -98,32 +98,41 @@ namespace dawn_native {
                                           const BindingInfo& bindingInfo) {
             if (entry.textureView == nullptr || entry.sampler != nullptr ||
                 entry.buffer != nullptr) {
-                return DAWN_VALIDATION_ERROR("expected texture binding");
+                return DAWN_VALIDATION_ERROR("Expected texture binding");
             }
             DAWN_TRY(device->ValidateObject(entry.textureView));
 
-            TextureBase* texture = entry.textureView->GetTexture();
+            TextureViewBase* view = entry.textureView;
 
+            Aspect aspect = view->GetAspects();
+            if (!HasOneBit(aspect)) {
+                return DAWN_VALIDATION_ERROR("Texture view must select a single aspect");
+            }
+
+            TextureBase* texture = view->GetTexture();
             if (!(texture->GetUsage() & requiredUsage)) {
-                return DAWN_VALIDATION_ERROR("texture binding usage mismatch");
+                return DAWN_VALIDATION_ERROR("Texture binding usage mismatch");
             }
 
             if (texture->IsMultisampledTexture() != multisampled) {
-                return DAWN_VALIDATION_ERROR("texture multisampling mismatch");
+                return DAWN_VALIDATION_ERROR("Texture multisampling mismatch");
             }
 
             switch (requiredUsage) {
                 case wgpu::TextureUsage::Sampled: {
-                    if (!texture->GetFormat().HasComponentType(
-                            Format::TextureComponentTypeToFormatType(
-                                bindingInfo.textureComponentType))) {
-                        return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
+                    ComponentTypeBit supportedTypes =
+                        texture->GetFormat().GetAspectInfo(aspect).supportedComponentTypes;
+                    ComponentTypeBit requiredType =
+                        ToComponentTypeBit(bindingInfo.textureComponentType);
+
+                    if ((supportedTypes & requiredType) == 0) {
+                        return DAWN_VALIDATION_ERROR("Texture component type usage mismatch");
                     }
                     break;
                 }
                 case wgpu::TextureUsage::Storage: {
                     if (texture->GetFormat().format != bindingInfo.storageTextureFormat) {
-                        return DAWN_VALIDATION_ERROR("storage texture format mismatch");
+                        return DAWN_VALIDATION_ERROR("Storage texture format mismatch");
                     }
                     break;
                 }
@@ -133,7 +142,7 @@ namespace dawn_native {
             }
 
             if (entry.textureView->GetDimension() != bindingInfo.viewDimension) {
-                return DAWN_VALIDATION_ERROR("texture view dimension mismatch");
+                return DAWN_VALIDATION_ERROR("Texture view dimension mismatch");
             }
 
             return {};
@@ -144,7 +153,7 @@ namespace dawn_native {
                                           wgpu::BindingType bindingType) {
             if (entry.sampler == nullptr || entry.textureView != nullptr ||
                 entry.buffer != nullptr) {
-                return DAWN_VALIDATION_ERROR("expected sampler binding");
+                return DAWN_VALIDATION_ERROR("Expected sampler binding");
             }
             DAWN_TRY(device->ValidateObject(entry.sampler));
 

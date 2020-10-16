@@ -163,7 +163,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
             if (fragmentWritten &&
-                fragmentOutputBaseType != Format::FormatTypeToTextureComponentType(format->type)) {
+                fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
                 return DAWN_VALIDATION_ERROR(
                     "Color format must match the fragment stage output type");
             }

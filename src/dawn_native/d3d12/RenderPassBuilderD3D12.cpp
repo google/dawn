@@ -63,12 +63,12 @@ namespace dawn_native { namespace d3d12 {
 
             // RESOLVE_MODE_AVERAGE is only valid for non-integer formats.
             // TODO: Investigate and determine how integer format resolves should work in WebGPU.
-            switch (resolveDestination->GetFormat().type) {
-                case Format::Type::Sint:
-                case Format::Type::Uint:
+            switch (resolveDestination->GetFormat().GetAspectInfo(Aspect::Color).baseType) {
+                case wgpu::TextureComponentType::Sint:
+                case wgpu::TextureComponentType::Uint:
                     resolveParameters.ResolveMode = D3D12_RESOLVE_MODE_MAX;
                     break;
-                default:
+                case wgpu::TextureComponentType::Float:
                     resolveParameters.ResolveMode = D3D12_RESOLVE_MODE_AVERAGE;
                     break;
             }

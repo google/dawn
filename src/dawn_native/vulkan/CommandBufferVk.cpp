@@ -308,29 +308,33 @@ namespace dawn_native { namespace vulkan {
 
                     attachments[attachmentCount] = view->GetHandle();
 
-                    const Format& attachmentFormat = view->GetFormat();
-                    if (attachmentFormat.HasComponentType(Format::Type::Float)) {
-                        const std::array<float, 4> appliedClearColor =
-                            ConvertToFloatColor(attachmentInfo.clearColor);
-                        for (uint32_t i = 0; i < 4; ++i) {
-                            clearValues[attachmentCount].color.float32[i] = appliedClearColor[i];
+                    switch (view->GetFormat().GetAspectInfo(Aspect::Color).baseType) {
+                        case wgpu::TextureComponentType::Float: {
+                            const std::array<float, 4> appliedClearColor =
+                                ConvertToFloatColor(attachmentInfo.clearColor);
+                            for (uint32_t i = 0; i < 4; ++i) {
+                                clearValues[attachmentCount].color.float32[i] =
+                                    appliedClearColor[i];
+                            }
+                            break;
                         }
-                    } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
-                        const std::array<uint32_t, 4> appliedClearColor =
-                            ConvertToUnsignedIntegerColor(attachmentInfo.clearColor);
-                        for (uint32_t i = 0; i < 4; ++i) {
-                            clearValues[attachmentCount].color.uint32[i] = appliedClearColor[i];
+                        case wgpu::TextureComponentType::Uint: {
+                            const std::array<uint32_t, 4> appliedClearColor =
+                                ConvertToUnsignedIntegerColor(attachmentInfo.clearColor);
+                            for (uint32_t i = 0; i < 4; ++i) {
+                                clearValues[attachmentCount].color.uint32[i] = appliedClearColor[i];
+                            }
+                            break;
                         }
-                    } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
-                        const std::array<int32_t, 4> appliedClearColor =
-                            ConvertToSignedIntegerColor(attachmentInfo.clearColor);
-                        for (uint32_t i = 0; i < 4; ++i) {
-                            clearValues[attachmentCount].color.int32[i] = appliedClearColor[i];
+                        case wgpu::TextureComponentType::Sint: {
+                            const std::array<int32_t, 4> appliedClearColor =
+                                ConvertToSignedIntegerColor(attachmentInfo.clearColor);
+                            for (uint32_t i = 0; i < 4; ++i) {
+                                clearValues[attachmentCount].color.int32[i] = appliedClearColor[i];
+                            }
+                            break;
                         }
-                    } else {
-                        UNREACHABLE();
                     }
-
                     attachmentCount++;
                 }
 

@@ -28,6 +28,17 @@ namespace dawn_native {
     enum class Aspect : uint8_t;
     class DeviceBase;
 
+    // This mirrors wgpu::TextureComponentType as a bitmask instead.
+    enum class ComponentTypeBit : uint8_t {
+        None = 0x0,
+        Float = 0x1,
+        Sint = 0x2,
+        Uint = 0x4,
+    };
+
+    // Converts an wgpu::TextureComponentType to its bitmask representation.
+    ComponentTypeBit ToComponentTypeBit(wgpu::TextureComponentType type);
+
     struct TexelBlockInfo {
         uint32_t byteSize;
         uint32_t width;
@@ -36,6 +47,8 @@ namespace dawn_native {
 
     struct AspectInfo {
         TexelBlockInfo block;
+        wgpu::TextureComponentType baseType;
+        ComponentTypeBit supportedComponentTypes;
     };
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
@@ -47,30 +60,18 @@ namespace dawn_native {
 
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
     struct Format {
-        enum class Type {
-            Float,
-            Sint,
-            Uint,
-            Other,
-        };
-
         wgpu::TextureFormat format;
         bool isRenderable;
         bool isCompressed;
         // A format can be known but not supported because it is part of a disabled extension.
         bool isSupported;
         bool supportsStorageUsage;
-        Type type;
         Aspect aspects;
-
-        static Type TextureComponentTypeToFormatType(wgpu::TextureComponentType componentType);
-        static wgpu::TextureComponentType FormatTypeToTextureComponentType(Type type);
 
         bool IsColor() const;
         bool HasDepth() const;
         bool HasStencil() const;
         bool HasDepthOrStencil() const;
-        bool HasComponentType(Type componentType) const;
 
         const AspectInfo& GetAspectInfo(wgpu::TextureAspect aspect) const;
         const AspectInfo& GetAspectInfo(Aspect aspect) const;
@@ -95,5 +96,14 @@ namespace dawn_native {
     FormatTable BuildFormatTable(const DeviceBase* device);
 
 }  // namespace dawn_native
+
+namespace wgpu {
+
+    template <>
+    struct IsDawnBitmask<dawn_native::ComponentTypeBit> {
+        static constexpr bool enable = true;
+    };
+
+}  // namespace wgpu
 
 #endif  // DAWNNATIVE_FORMAT_H_

@@ -928,21 +928,27 @@ namespace dawn_native { namespace opengl {
                 if (attachmentInfo->loadOp == wgpu::LoadOp::Clear) {
                     gl.ColorMaski(i, true, true, true, true);
 
-                    const Format& attachmentFormat = attachmentInfo->view->GetFormat();
-                    if (attachmentFormat.HasComponentType(Format::Type::Float)) {
-                        const std::array<float, 4> appliedClearColor =
-                            ConvertToFloatColor(attachmentInfo->clearColor);
-                        gl.ClearBufferfv(GL_COLOR, i, appliedClearColor.data());
-                    } else if (attachmentFormat.HasComponentType(Format::Type::Uint)) {
-                        const std::array<uint32_t, 4> appliedClearColor =
-                            ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
-                        gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
-                    } else if (attachmentFormat.HasComponentType(Format::Type::Sint)) {
-                        const std::array<int32_t, 4> appliedClearColor =
-                            ConvertToSignedIntegerColor(attachmentInfo->clearColor);
-                        gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
-                    } else {
-                        UNREACHABLE();
+                    wgpu::TextureComponentType baseType =
+                        attachmentInfo->view->GetFormat().GetAspectInfo(Aspect::Color).baseType;
+                    switch (baseType) {
+                        case wgpu::TextureComponentType::Float: {
+                            const std::array<float, 4> appliedClearColor =
+                                ConvertToFloatColor(attachmentInfo->clearColor);
+                            gl.ClearBufferfv(GL_COLOR, i, appliedClearColor.data());
+                            break;
+                        }
+                        case wgpu::TextureComponentType::Uint: {
+                            const std::array<uint32_t, 4> appliedClearColor =
+                                ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
+                            gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
+                            break;
+                        }
+                        case wgpu::TextureComponentType::Sint: {
+                            const std::array<int32_t, 4> appliedClearColor =
+                                ConvertToSignedIntegerColor(attachmentInfo->clearColor);
+                            gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
+                            break;
+                        }
                     }
                 }
 

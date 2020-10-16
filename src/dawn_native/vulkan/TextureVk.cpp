@@ -1039,28 +1039,25 @@ namespace dawn_native { namespace vulkan {
                 } else {
                     ASSERT(aspects == Aspect::Color);
                     VkClearColorValue clearColorValue;
-                    switch (GetFormat().type) {
-                        case Format::Type::Float:
+                    switch (GetFormat().GetAspectInfo(Aspect::Color).baseType) {
+                        case wgpu::TextureComponentType::Float:
                             clearColorValue.float32[0] = fClearColor;
                             clearColorValue.float32[1] = fClearColor;
                             clearColorValue.float32[2] = fClearColor;
                             clearColorValue.float32[3] = fClearColor;
                             break;
-                        case Format::Type::Sint:
+                        case wgpu::TextureComponentType::Sint:
                             clearColorValue.int32[0] = sClearColor;
                             clearColorValue.int32[1] = sClearColor;
                             clearColorValue.int32[2] = sClearColor;
                             clearColorValue.int32[3] = sClearColor;
                             break;
-                        case Format::Type::Uint:
+                        case wgpu::TextureComponentType::Uint:
                             clearColorValue.uint32[0] = uClearColor;
                             clearColorValue.uint32[1] = uClearColor;
                             clearColorValue.uint32[2] = uClearColor;
                             clearColorValue.uint32[3] = uClearColor;
                             break;
-
-                        case Format::Type::Other:
-                            UNREACHABLE();
                     }
                     device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
                                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
