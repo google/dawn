@@ -19,27 +19,6 @@
 
 namespace dawn_wire { namespace client {
 
-    namespace {
-
-        class NoopCommandSerializer final : public CommandSerializer {
-          public:
-            ~NoopCommandSerializer() = default;
-
-            size_t GetMaximumAllocationSize() const final {
-                return 0;
-            }
-            void* GetCmdSpace(size_t size) final {
-                return nullptr;
-            }
-            bool Flush() final {
-                return false;
-            }
-        };
-
-        NoopCommandSerializer gNoopCommandSerializer;
-
-    }  // anonymous namespace
-
     Client::Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService)
         : ClientBase(), mSerializer(serializer), mMemoryTransferService(memoryTransferService) {
         if (mMemoryTransferService == nullptr) {
@@ -74,7 +53,11 @@ namespace dawn_wire { namespace client {
     }
 
     void Client::Disconnect() {
-        mSerializer = ChunkedCommandSerializer(&gNoopCommandSerializer);
+        if (mDisconnected) {
+            return;
+        }
+
+        mDisconnected = true;
         if (mDevice != nullptr) {
             mDevice->HandleDeviceLost("GPU connection lost");
         }
