@@ -334,6 +334,9 @@ namespace dawn_native { namespace vulkan {
                             }
                             break;
                         }
+
+                        case wgpu::TextureComponentType::DepthComparison:
+                            UNREACHABLE();
                     }
                     attachmentCount++;
                 }

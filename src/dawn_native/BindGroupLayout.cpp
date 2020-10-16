@@ -121,6 +121,10 @@ namespace dawn_native {
                     if (viewDimension != wgpu::TextureViewDimension::e2D) {
                         return DAWN_VALIDATION_ERROR("Multisampled binding must be 2D.");
                     }
+                    if (entry.textureComponentType == wgpu::TextureComponentType::DepthComparison) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Multisampled binding must not be DepthComparison.");
+                    }
                     break;
 
                 case wgpu::BindingType::WriteonlyStorageTexture:

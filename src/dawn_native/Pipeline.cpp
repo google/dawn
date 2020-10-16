@@ -22,7 +22,7 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateProgrammableStageDescriptor(const DeviceBase* device,
+    MaybeError ValidateProgrammableStageDescriptor(DeviceBase* device,
                                                    const ProgrammableStageDescriptor* descriptor,
                                                    const PipelineLayoutBase* layout,
                                                    SingleShaderStage stage) {
@@ -36,7 +36,7 @@ namespace dawn_native {
         if (layout != nullptr) {
             const EntryPointMetadata& metadata =
                 module->GetEntryPoint(descriptor->entryPoint, stage);
-            DAWN_TRY(ValidateCompatibilityWithPipelineLayout(metadata, layout));
+            DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, layout));
         }
         return {};
     }

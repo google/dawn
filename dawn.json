@@ -1549,7 +1549,8 @@
         "values": [
             {"value": 0, "name": "float"},
             {"value": 1, "name": "sint"},
-            {"value": 2, "name": "uint"}
+            {"value": 2, "name": "uint"},
+            {"value": 3, "name": "depth comparison"}
         ]
     },
     "texture copy view": {

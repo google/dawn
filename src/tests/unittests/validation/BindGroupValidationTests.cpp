@@ -345,6 +345,41 @@ TEST_F(BindGroupValidationTest, SamplingDepthTexture) {
     }
 }
 
+// Check that a texture must have a correct format for DepthComparison
+TEST_F(BindGroupValidationTest, TextureComponentTypeDepthComparison) {
+    wgpu::BindGroupLayout depthLayout = utils::MakeBindGroupLayout(
+        device,
+        {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0, false,
+          wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::DepthComparison}});
+
+    // Control case: setting a depth texture works.
+    wgpu::Texture depthTexture =
+        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::Depth32Float, 1);
+    utils::MakeBindGroup(device, depthLayout, {{0, depthTexture.CreateView()}});
+
+    // Error case: setting a Float typed texture view fails.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, depthLayout, {{0, mSampledTextureView}}));
+}
+
+// Check that a depth texture is allowed to be used for both TextureComponentType::Float and
+// ::DepthComparison
+TEST_F(BindGroupValidationTest, TextureComponentTypeForDepthTexture) {
+    wgpu::BindGroupLayout depthLayout = utils::MakeBindGroupLayout(
+        device,
+        {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0, false,
+          wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::DepthComparison}});
+
+    wgpu::BindGroupLayout floatLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+
+    wgpu::Texture depthTexture =
+        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::Depth32Float, 1);
+
+    utils::MakeBindGroup(device, depthLayout, {{0, depthTexture.CreateView()}});
+    utils::MakeBindGroup(device, floatLayout, {{0, depthTexture.CreateView()}});
+}
+
 // Check that a texture must have the correct dimension
 TEST_F(BindGroupValidationTest, TextureDimension) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
@@ -900,7 +935,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 }
 
 // Test that multisampled textures must be 2D sampled textures
-TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
+TEST_F(BindGroupLayoutValidationTest, MultisampledTextureViewDimension) {
     // Multisampled 2D texture works.
     utils::MakeBindGroupLayout(
         device, {
@@ -956,6 +991,45 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
                      0, false, wgpu::TextureViewDimension::e1D},
                 }));
+}
+
+// Test that multisampled textures cannot be DepthComparison
+TEST_F(BindGroupLayoutValidationTest, MultisampledTextureComponentType) {
+    // Multisampled float component type works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float},
+                });
+
+    // Multisampled float (defaulted) component type works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e2D},
+                });
+
+    // Multisampled uint component type works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Uint},
+                });
+
+    // Multisampled sint component type works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false,
+                     0, false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Sint},
+                });
+
+    // Multisampled depth comparison component typeworks.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device,
+        {
+            {0, wgpu::ShaderStage::Compute, wgpu::BindingType::MultisampledTexture, false, 0, false,
+             wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::DepthComparison},
+        }));
 }
 
 // Test that it is an error to pass multisampled=true for non-texture bindings

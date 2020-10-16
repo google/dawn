@@ -949,6 +949,9 @@ namespace dawn_native { namespace opengl {
                             gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
                             break;
                         }
+
+                        case wgpu::TextureComponentType::DepthComparison:
+                            UNREACHABLE();
                     }
                 }
 

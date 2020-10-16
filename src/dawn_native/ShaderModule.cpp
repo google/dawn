@@ -369,7 +369,8 @@ namespace dawn_native {
             return std::move(result);
         }
 
-        MaybeError ValidateCompatibilityWithBindGroupLayout(BindGroupIndex group,
+        MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
+                                                            BindGroupIndex group,
                                                             const EntryPointMetadata& entryPoint,
                                                             const BindGroupLayoutBase* layout) {
             const BindGroupLayoutBase::BindingMap& layoutBindings = layout->GetBindingMap();
@@ -424,10 +425,22 @@ namespace dawn_native {
                     case wgpu::BindingType::SampledTexture:
                     case wgpu::BindingType::MultisampledTexture: {
                         if (layoutInfo.textureComponentType != shaderInfo.textureComponentType) {
-                            return DAWN_VALIDATION_ERROR(
-                                "The textureComponentType of the bind group layout entry is "
-                                "different from " +
-                                GetShaderDeclarationString(group, bindingNumber));
+                            // TODO(dawn:527): Remove once the deprecation timeline is complete.
+                            if (layoutInfo.textureComponentType ==
+                                    wgpu::TextureComponentType::Float &&
+                                shaderInfo.textureComponentType ==
+                                    wgpu::TextureComponentType::DepthComparison) {
+                                device->EmitDeprecationWarning(
+                                    "Using depth texture in the shader with "
+                                    "TextureComponentType::Float is deprecated use "
+                                    "TextureComponentType::DepthComparison in the bind group "
+                                    "layout instead.");
+                            } else {
+                                return DAWN_VALIDATION_ERROR(
+                                    "The textureComponentType of the bind group layout entry is "
+                                    "different from " +
+                                    GetShaderDeclarationString(group, bindingNumber));
+                            }
                         }
 
                         if (layoutInfo.viewDimension != shaderInfo.viewDimension) {
@@ -554,10 +567,25 @@ namespace dawn_native {
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                             info->textureComponentType =
                                 SpirvBaseTypeToTextureComponentType(textureComponentType);
+
                             if (imageType.ms) {
                                 info->type = wgpu::BindingType::MultisampledTexture;
                             } else {
                                 info->type = wgpu::BindingType::SampledTexture;
+                            }
+
+                            if (imageType.depth) {
+                                if (imageType.ms) {
+                                    return DAWN_VALIDATION_ERROR(
+                                        "Multisampled depth textures aren't supported");
+                                }
+                                if (info->textureComponentType !=
+                                    wgpu::TextureComponentType::Float) {
+                                    return DAWN_VALIDATION_ERROR(
+                                        "Depth textures must have a float type");
+                                }
+                                info->textureComponentType =
+                                    wgpu::TextureComponentType::DepthComparison;
                             }
                             break;
                         }
@@ -600,7 +628,11 @@ namespace dawn_native {
                             }
                             if (imageType.ms) {
                                 return DAWN_VALIDATION_ERROR(
-                                    "Multisampled storage texture aren't supported");
+                                    "Multisampled storage textures aren't supported");
+                            }
+                            if (imageType.depth) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Depth storage textures aren't supported");
                             }
                             info->storageTextureFormat = storageTextureFormat;
                             info->viewDimension =
@@ -749,10 +781,11 @@ namespace dawn_native {
         return bufferSizes;
     }
 
-    MaybeError ValidateCompatibilityWithPipelineLayout(const EntryPointMetadata& entryPoint,
+    MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
+                                                       const EntryPointMetadata& entryPoint,
                                                        const PipelineLayoutBase* layout) {
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            DAWN_TRY(ValidateCompatibilityWithBindGroupLayout(group, entryPoint,
+            DAWN_TRY(ValidateCompatibilityWithBindGroupLayout(device, group, entryPoint,
                                                               layout->GetBindGroupLayout(group)));
         }
 

@@ -34,6 +34,7 @@ namespace dawn_native {
         Float = 0x1,
         Sint = 0x2,
         Uint = 0x4,
+        DepthComparison = 0x8,
     };
 
     // Converts an wgpu::TextureComponentType to its bitmask representation.

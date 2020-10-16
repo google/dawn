@@ -207,7 +207,8 @@ namespace dawn_native {
         for (const StageAndDescriptor& stage : stages) {
             const EntryPointMetadata& metadata =
                 stage.second->module->GetEntryPoint(stage.second->entryPoint, stage.first);
-            ASSERT(ValidateCompatibilityWithPipelineLayout(metadata, pipelineLayout).IsSuccess());
+            ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, pipelineLayout)
+                       .IsSuccess());
         }
 
         return pipelineLayout;

@@ -71,6 +71,9 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureComponentType::Float:
                     resolveParameters.ResolveMode = D3D12_RESOLVE_MODE_AVERAGE;
                     break;
+
+                case wgpu::TextureComponentType::DepthComparison:
+                    UNREACHABLE();
             }
 
             resolveParameters.SubresourceCount = 1;
