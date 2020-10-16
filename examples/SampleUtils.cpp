@@ -152,12 +152,9 @@ wgpu::Device CreateCppDawnDevice() {
             clientDesc.serializer = c2sBuf;
 
             wireClient = new dawn_wire::WireClient(clientDesc);
-            WGPUDevice clientDevice = wireClient->GetDevice();
-            DawnProcTable clientProcs = dawn_wire::WireClient::GetProcs();
+            cDevice = wireClient->GetDevice();
+            procs = dawn_wire::client::GetProcs();
             s2cBuf->SetHandler(wireClient);
-
-            procs = clientProcs;
-            cDevice = clientDevice;
         } break;
     }
 

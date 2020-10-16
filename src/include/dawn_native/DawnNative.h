@@ -215,10 +215,7 @@ namespace dawn_native {
       public:
         const ExternalImageType type;
         const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
-        union {
-            bool isInitialized;  // Whether the texture is initialized on import
-            bool isCleared;      // DEPRECATED: Sets whether the texture will be cleared before use
-        };
+        bool isInitialized;  // Whether the texture is initialized on import
 
       protected:
         ExternalImageDescriptor(ExternalImageType type);

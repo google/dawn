@@ -25,11 +25,6 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    // static
-    const DawnProcTable& WireClient::GetProcs() {
-        return client::GetProcs();
-    }
-
     WGPUDevice WireClient::GetDevice() const {
         return mImpl->GetDevice();
     }

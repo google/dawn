@@ -33,11 +33,7 @@ namespace dawn_wire {
         // a fatal error.
         virtual void* GetCmdSpace(size_t size) = 0;
         virtual bool Flush() = 0;
-
-        // TODO(enga): Make pure virtual after updating Chromium.
-        virtual size_t GetMaximumAllocationSize() const {
-            return std::numeric_limits<size_t>::max();
-        }
+        virtual size_t GetMaximumAllocationSize() const = 0;
     };
 
     class DAWN_WIRE_EXPORT CommandHandler {
