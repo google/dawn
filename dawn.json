@@ -719,9 +719,9 @@
     "extent 3D": {
         "category": "structure",
         "members": [
-            {"name": "width", "type": "uint32_t"},
-            {"name": "height", "type": "uint32_t"},
-            {"name": "depth", "type": "uint32_t"}
+            {"name": "width", "type": "uint32_t", "default": 1},
+            {"name": "height", "type": "uint32_t", "default": 1},
+            {"name": "depth", "type": "uint32_t", "default": 1}
         ]
     },
     "fence": {
