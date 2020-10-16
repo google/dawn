@@ -194,8 +194,12 @@ set(TINT_LIB_SRCS
   ast/workgroup_decoration.h
   context.cc
   context.h
-  inspector.cc
-  inspector.h
+  inspector/entry_point.cc
+  inspector/entry_point.h
+  inspector/inspector.cc
+  inspector/inspector.h
+  inspector/scalar.cc
+  inspector/scalar.h
   reader/reader.cc
   reader/reader.h
   scope_stack.h
@@ -367,7 +371,7 @@ set(TINT_TEST_SRCS
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
-  inspector_test.cc
+  inspector/inspector_test.cc
   scope_stack_test.cc
   transform/bound_array_accessors_transform_test.cc
   transform/vertex_pulling_transform_test.cc
