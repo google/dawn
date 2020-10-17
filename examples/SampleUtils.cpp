@@ -96,6 +96,7 @@ wgpu::Device CreateCppDawnDevice() {
 
     // Create the test window and discover adapters using it (esp. for OpenGL)
     utils::SetupGLFWWindowHintsForBackend(backendType);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
     window = glfwCreateWindow(640, 480, "Dawn window", nullptr, nullptr);
     if (!window) {
         return wgpu::Device();
