@@ -54,10 +54,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the largest alignment value
   uint32_t calculate_largest_alignment(ast::type::StructType* type);
 
-  /// Handles generating an alias
-  /// @param alias the alias to generate
-  /// @returns true if the alias was emitted
-  bool EmitAliasType(const ast::type::AliasType* alias);
+  /// Handles generating a constructed
+  /// @param ty the constructed type to generate
+  /// @returns true if the constructed type was emitted
+  bool EmitConstructedType(const ast::type::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -183,6 +183,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type, const std::string& name);
+  /// Handles generating a struct declaration
+  /// @param str the struct to generate
+  /// @returns true if the struct is emitted
+  bool EmitStructType(const ast::type::StructType* str);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

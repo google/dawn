@@ -134,7 +134,7 @@ TEST_F(StructTest, ToStr) {
 
   std::ostringstream out;
   s.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Struct{
+  EXPECT_EQ(out.str(), R"(Struct{
     [[block]]
     StructMember{a: __i32}
   }

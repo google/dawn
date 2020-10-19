@@ -800,8 +800,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   RTArr -> __array__u32_stride_4
-  S -> __struct_S
-  Struct{
+  S Struct{
     [[block]]
     StructMember{[[ offset 0 ]] field0: __u32}
     StructMember{[[ offset 4 ]] field1: __alias_RTArr__array__u32_stride_4}
@@ -809,7 +808,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   Variable{
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   })"));
 }
 

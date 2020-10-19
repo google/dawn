@@ -264,10 +264,10 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
   Variable{
     x_11
     none
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{false}
         ScalarConstructor{0}
         ScalarConstructor{0}

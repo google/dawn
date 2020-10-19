@@ -213,10 +213,35 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   ast::Module m;
   GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
-  EXPECT_EQ(g.result(), R"(struct {
+  EXPECT_EQ(g.result(), "S");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "a", &i32, ast::StructMemberDecorationList{}));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s("S", std::move(str));
+
+  ast::Module m;
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct S {
   int a;
   float b;
-})");
+};
+)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
@@ -245,15 +270,16 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
 
   ast::Module m;
   GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
-  EXPECT_EQ(g.result(), R"(struct {
+  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct S {
   int8_t pad_0[4];
   int a;
   int8_t pad_1[24];
   float b;
   int8_t pad_2[92];
   float c;
-})");
+};
+)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
@@ -275,11 +301,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
 
   ast::Module m;
   GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
-  EXPECT_EQ(g.result(), R"(struct {
+  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct S {
   int main_tint_0;
   float float_tint_0;
-})");
+};
+)");
 }
 
 // TODO(dsinclair): How to translate [[block]]

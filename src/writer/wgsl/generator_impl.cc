@@ -76,12 +76,12 @@ GeneratorImpl::GeneratorImpl() = default;
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(const ast::Module& module) {
-  for (auto* const alias : module.alias_types()) {
-    if (!EmitAliasType(alias)) {
+  for (auto* const ty : module.constructed_types()) {
+    if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module.alias_types().empty())
+  if (!module.constructed_types().empty())
     out_ << std::endl;
 
   for (const auto& var : module.global_variables()) {
@@ -112,13 +112,14 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
     return false;
   }
 
-  // TODO(dsinclair): We always emit aliases even if they aren't strictly needed
-  for (auto* const alias : module.alias_types()) {
-    if (!EmitAliasType(alias)) {
+  // TODO(dsinclair): We always emit constructed types even if they aren't
+  // strictly needed
+  for (auto* const ty : module.constructed_types()) {
+    if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module.alias_types().empty()) {
+  if (!module.constructed_types().empty()) {
     out_ << std::endl;
   }
 
@@ -163,13 +164,33 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
   return true;
 }
 
-bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
+bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
-  out_ << "type " << alias->name() << " = ";
-  if (!EmitType(alias->type())) {
+  if (ty->IsAlias()) {
+    auto* alias = ty->AsAlias();
+    // Emitting an alias to a struct where the names are the same means we can
+    // skip emitting the alias and just emit the struct. This will go away once
+    // the anonymous structs are removed from the type alias
+    if (alias->type()->IsStruct() &&
+        alias->type()->AsStruct()->name() == alias->name()) {
+      if (!EmitStructType(alias->type()->AsStruct())) {
+        return false;
+      }
+    } else {
+      out_ << "type " << alias->name() << " = ";
+      if (!EmitType(alias->type())) {
+        return false;
+      }
+      out_ << ";" << std::endl;
+    }
+  } else if (ty->IsStruct()) {
+    if (!EmitStructType(ty->AsStruct())) {
+      return false;
+    }
+  } else {
+    error_ = "unknown constructed type: " + ty->type_name();
     return false;
   }
-  out_ << ";" << std::endl;
 
   return true;
 }
@@ -391,8 +412,7 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
   if (type->IsAlias()) {
-    auto* alias = type->AsAlias();
-    out_ << alias->name();
+    out_ << type->AsAlias()->name();
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 
@@ -439,32 +459,9 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << "_comparison";
     }
   } else if (type->IsStruct()) {
-    auto* str = type->AsStruct()->impl();
-    for (auto deco : str->decorations()) {
-      out_ << "[[" << deco << "]]" << std::endl;
-    }
-    out_ << "struct {" << std::endl;
-
-    increment_indent();
-    for (const auto& mem : str->members()) {
-      for (const auto& deco : mem->decorations()) {
-        make_indent();
-
-        // TODO(dsinclair): Split this out when we have more then one
-        assert(deco->IsOffset());
-        out_ << "[[offset(" << deco->AsOffset()->offset() << ")]]" << std::endl;
-      }
-      make_indent();
-      out_ << mem->name() << " : ";
-      if (!EmitType(mem->type())) {
-        return false;
-      }
-      out_ << ";" << std::endl;
-    }
-    decrement_indent();
-    make_indent();
-
-    out_ << "}";
+    // The struct, as a type, is just the name. We should have already emitted
+    // the declaration through a call to |EmitStructType| earlier.
+    out_ << type->AsStruct()->name();
   } else if (type->IsTexture()) {
     auto* texture = type->AsTexture();
 
@@ -560,6 +557,36 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     return false;
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
+  auto* impl = str->impl();
+  for (auto deco : impl->decorations()) {
+    out_ << "[[" << deco << "]]" << std::endl;
+  }
+  out_ << "struct " << str->name() << " {" << std::endl;
+
+  increment_indent();
+  for (const auto& mem : impl->members()) {
+    for (const auto& deco : mem->decorations()) {
+      make_indent();
+
+      // TODO(dsinclair): Split this out when we have more then one
+      assert(deco->IsOffset());
+      out_ << "[[offset(" << deco->AsOffset()->offset() << ")]]" << std::endl;
+    }
+    make_indent();
+    out_ << mem->name() << " : ";
+    if (!EmitType(mem->type())) {
+      return false;
+    }
+    out_ << ";" << std::endl;
+  }
+  decrement_indent();
+  make_indent();
+
+  out_ << "};" << std::endl;
   return true;
 }
 

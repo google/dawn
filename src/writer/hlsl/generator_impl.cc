@@ -113,12 +113,12 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     register_global(global.get());
   }
 
-  for (auto* const alias : module_->alias_types()) {
-    if (!EmitAliasType(out, alias)) {
+  for (auto* const ty : module_->constructed_types()) {
+    if (!EmitConstructedType(out, ty)) {
       return false;
     }
   }
-  if (!module_->alias_types().empty()) {
+  if (!module_->constructed_types().empty()) {
     out << std::endl;
   }
 
@@ -196,21 +196,33 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   return name;
 }
 
-bool GeneratorImpl::EmitAliasType(std::ostream& out,
-                                  const ast::type::AliasType* alias) {
+bool GeneratorImpl::EmitConstructedType(std::ostream& out,
+                                        const ast::type::Type* ty) {
   make_indent(out);
 
-  if (alias->type()->IsStruct()) {
-    if (!EmitType(out, alias->type(), namer_.NameFor(alias->name()))) {
+  if (ty->IsAlias()) {
+    auto* alias = ty->AsAlias();
+    // This will go away once type_alias doesn't accept anonymous
+    // structs anymore
+    if (alias->type()->IsStruct() &&
+        alias->type()->AsStruct()->name() == alias->name()) {
+      if (!EmitStructType(out, alias->type()->AsStruct())) {
+        return false;
+      }
+    } else {
+      out << "typedef ";
+      if (!EmitType(out, alias->type(), "")) {
+        return false;
+      }
+      out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+    }
+  } else if (ty->IsStruct()) {
+    if (!EmitStructType(out, ty->AsStruct())) {
       return false;
     }
-    out << ";" << std::endl;
   } else {
-    out << "typedef ";
-    if (!EmitType(out, alias->type(), "")) {
-      return false;
-    }
-    out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+    error_ = "unknown constructed type: " + ty->type_name();
+    return false;
   }
 
   return true;
@@ -1942,36 +1954,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     error_ = "pointers not supported in HLSL";
     return false;
   } else if (type->IsStruct()) {
-    auto* str = type->AsStruct()->impl();
-    // TODO(dsinclair): Block decoration?
-    // if (str->decoration() != ast::StructDecoration::kNone) {
-    // }
-    out << "struct";
-    // If a name was provided for the struct emit it.
-    if (!name.empty()) {
-      out << " " << name;
-    }
-    out << " {" << std::endl;
-
-    increment_indent();
-    for (const auto& mem : str->members()) {
-      make_indent(out);
-      // TODO(dsinclair): Handle [[offset]] annotation on structs
-      // https://bugs.chromium.org/p/tint/issues/detail?id=184
-
-      if (!EmitType(out, mem->type(), mem->name())) {
-        return false;
-      }
-      // Array member name will be output with the type
-      if (!mem->type()->IsArray()) {
-        out << " " << namer_.NameFor(mem->name());
-      }
-      out << ";" << std::endl;
-    }
-    decrement_indent();
-    make_indent(out);
-
-    out << "}";
+    out << type->AsStruct()->name();
   } else if (type->IsU32()) {
     out << "uint";
   } else if (type->IsVector()) {
@@ -1987,6 +1970,36 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     error_ = "unknown type in EmitType";
     return false;
   }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitStructType(std::ostream& out,
+                                   const ast::type::StructType* str) {
+  // TODO(dsinclair): Block decoration?
+  // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
+  // }
+  out << "struct " << str->name() << " {" << std::endl;
+
+  increment_indent();
+  for (const auto& mem : str->impl()->members()) {
+    make_indent(out);
+    // TODO(dsinclair): Handle [[offset]] annotation on structs
+    // https://bugs.chromium.org/p/tint/issues/detail?id=184
+
+    if (!EmitType(out, mem->type(), mem->name())) {
+      return false;
+    }
+    // Array member name will be output with the type
+    if (!mem->type()->IsArray()) {
+      out << " " << namer_.NameFor(mem->name());
+    }
+    out << ";" << std::endl;
+  }
+  decrement_indent();
+  make_indent(out);
+
+  out << "};" << std::endl;
 
   return true;
 }

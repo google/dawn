@@ -159,11 +159,35 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct {
+  EXPECT_EQ(g.result(), "S");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "a", &i32, ast::StructMemberDecorationList{}));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s("S", std::move(str));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct S {
   a : i32;
   [[offset(4)]]
   b : f32;
-})");
+};
+)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
@@ -188,13 +212,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::type::StructType s("S", std::move(str));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&s)) << g.error();
+  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
   EXPECT_EQ(g.result(), R"([[block]]
-struct {
+struct S {
   a : i32;
   [[offset(4)]]
   b : f32;
-})");
+};
+)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {

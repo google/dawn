@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto* alias_type =
       tm()->Get(std::make_unique<ast::type::AliasType>("A", int_type));
 
-  p->register_alias("A", alias_type);
+  p->register_constructed("A", alias_type);
 
   auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:1: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:1: unknown constructed type 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Bool) {
@@ -248,7 +248,7 @@ TEST_P(VecBadType, Handles_Unknown_Type) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:6: unknown type alias 'unknown'");
+  ASSERT_EQ(p->error(), "1:6: unknown constructed type 'unknown'");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecBadType,
@@ -378,7 +378,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:15: unknown type alias 'unknown'");
+  ASSERT_EQ(p->error(), "1:15: unknown constructed type 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array) {
@@ -544,7 +544,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:7: unknown type alias 'unknown'");
+  ASSERT_EQ(p->error(), "1:7: unknown constructed type 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
@@ -746,7 +746,7 @@ TEST_P(MatrixBadType, Handles_Unknown_Type) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: unknown type alias 'unknown'");
+  ASSERT_EQ(p->error(), "1:8: unknown constructed type 'unknown'");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixBadType,

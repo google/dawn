@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   auto* p = parser("my_var : invalid");
   auto r = p->variable_ident_decl();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
+  ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
 }  // namespace

@@ -168,17 +168,17 @@ Token ParserImpl::peek() {
   return peek(0);
 }
 
-void ParserImpl::register_alias(const std::string& name,
-                                ast::type::Type* type) {
+void ParserImpl::register_constructed(const std::string& name,
+                                      ast::type::Type* type) {
   assert(type);
-  registered_aliases_[name] = type;
+  registered_constructs_[name] = type;
 }
 
-ast::type::Type* ParserImpl::get_alias(const std::string& name) {
-  if (registered_aliases_.find(name) == registered_aliases_.end()) {
+ast::type::Type* ParserImpl::get_constructed(const std::string& name) {
+  if (registered_constructs_.find(name) == registered_constructs_.end()) {
     return nullptr;
   }
-  return registered_aliases_[name];
+  return registered_constructs_[name];
 }
 
 bool ParserImpl::Parse() {
@@ -206,11 +206,13 @@ void ParserImpl::translation_unit() {
 //  | global_variable_decl SEMICLON
 //  | global_constant_decl SEMICOLON
 //  | type_alias SEMICOLON
+//  | struct_decl SEMICOLON
 //  | function_decl
 void ParserImpl::global_decl() {
   auto t = peek();
-  if (t.IsEof())
+  if (t.IsEof()) {
     return;
+  }
 
   if (t.IsSemicolon()) {
     next();  // consume the peek
@@ -218,8 +220,9 @@ void ParserImpl::global_decl() {
   }
 
   auto gv = global_variable_decl();
-  if (has_error())
+  if (has_error()) {
     return;
+  }
   if (gv != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
@@ -231,8 +234,9 @@ void ParserImpl::global_decl() {
   }
 
   auto gc = global_constant_decl();
-  if (has_error())
+  if (has_error()) {
     return;
+  }
   if (gc != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
@@ -244,21 +248,39 @@ void ParserImpl::global_decl() {
   }
 
   auto* ta = type_alias();
-  if (has_error())
+  if (has_error()) {
     return;
+  }
   if (ta != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
       set_error(t, "missing ';' for type alias");
       return;
     }
-    module_.AddAliasType(ta);
+    module_.AddConstructedType(ta);
+    return;
+  }
+
+  auto str = struct_decl("");
+  if (has_error()) {
+    return;
+  }
+  if (str != nullptr) {
+    t = next();
+    if (!t.IsSemicolon()) {
+      set_error(t, "missing ';' for struct declaration");
+      return;
+    }
+    auto* type = ctx_.type_mgr().Get(std::move(str));
+    register_constructed(type->AsStruct()->name(), type);
+    module_.AddConstructedType(type);
     return;
   }
 
   auto func = function_decl();
-  if (has_error())
+  if (has_error()) {
     return;
+  }
   if (func != nullptr) {
     module_.AddFunction(std::move(func));
     return;
@@ -1059,7 +1081,7 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
 //   | TYPE IDENT EQUAL struct_decl
-ast::type::AliasType* ParserImpl::type_alias() {
+ast::type::Type* ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return nullptr;
@@ -1092,6 +1114,8 @@ ast::type::AliasType* ParserImpl::type_alias() {
     }
 
     type = ctx_.type_mgr().Get(std::move(str));
+    register_constructed(name, type);
+    return type;
   }
   if (type == nullptr) {
     set_error(peek(), "invalid type for alias");
@@ -1100,7 +1124,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
 
   auto* alias =
       ctx_.type_mgr().Get(std::make_unique<ast::type::AliasType>(name, type));
-  register_alias(name, alias);
+  register_constructed(name, alias);
 
   return alias->AsAlias();
 }
@@ -1133,12 +1157,12 @@ ast::type::Type* ParserImpl::type_decl() {
   auto t = peek();
   if (t.IsIdentifier()) {
     next();  // Consume the peek
-    auto* alias = get_alias(t.to_str());
-    if (alias == nullptr) {
-      set_error(t, "unknown type alias '" + t.to_str() + "'");
+    auto* ty = get_constructed(t.to_str());
+    if (ty == nullptr) {
+      set_error(t, "unknown constructed type '" + t.to_str() + "'");
       return nullptr;
     }
-    return alias;
+    return ty;
   }
   if (t.IsBool()) {
     next();  // Consume the peek
@@ -1494,10 +1518,25 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
     }
   }
 
-  t = next();
-  if (!t.IsStruct()) {
+  t = peek();
+  if (!decos.empty() && !t.IsStruct()) {
     set_error(t, "missing struct declaration");
     return nullptr;
+  } else if (!t.IsStruct()) {
+    return nullptr;
+  }
+  next();  // Consume the peek
+
+  // If there is no name this is a global struct call. This check will go
+  // away when the type_alias struct entry is removed.
+  std::string str_name = name;
+  if (name.empty()) {
+    t = next();
+    if (!t.IsIdentifier()) {
+      set_error(t, "missing identifier for struct declaration");
+      return nullptr;
+    }
+    str_name = t.to_str();
   }
 
   auto body = struct_body_decl();
@@ -1506,7 +1545,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
   }
 
   return std::make_unique<ast::type::StructType>(
-      name,
+      str_name,
       std::make_unique<ast::Struct>(source, std::move(decos), std::move(body)));
 }
 

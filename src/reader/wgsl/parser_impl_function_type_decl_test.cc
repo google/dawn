@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {
   auto* e = p->function_type_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:6: unknown constructed type 'invalid'");
 }
 
 }  // namespace

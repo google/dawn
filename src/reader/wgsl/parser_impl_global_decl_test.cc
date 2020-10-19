@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/type/array_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -43,7 +45,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
   auto* p = parser("var<out> a : vec2<invalid>;");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:19: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:19: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
@@ -85,15 +87,48 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
-  ASSERT_EQ(m.alias_types().size(), 1u);
-  EXPECT_EQ(m.alias_types()[0]->name(), "A");
+  ASSERT_EQ(m.constructed_types().size(), 1u);
+  ASSERT_TRUE(m.constructed_types()[0]->IsAlias());
+  EXPECT_EQ(m.constructed_types()[0]->AsAlias()->name(), "A");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Struct) {
+  auto* p = parser("type A = struct { a : f32; };");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto m = p->module();
+  ASSERT_EQ(m.constructed_types().size(), 1u);
+  ASSERT_TRUE(m.constructed_types()[0]->IsStruct());
+  EXPECT_EQ(m.constructed_types()[0]->AsStruct()->name(), "A");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
+  auto* p = parser(R"(struct A {
+  a : f32;
+};
+type B = A;)");
+  p->global_decl();
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto m = p->module();
+  ASSERT_EQ(m.constructed_types().size(), 2u);
+  ASSERT_TRUE(m.constructed_types()[0]->IsStruct());
+  auto* str = m.constructed_types()[0]->AsStruct();
+  EXPECT_EQ(str->name(), "A");
+
+  ASSERT_TRUE(m.constructed_types()[1]->IsAlias());
+  auto* alias = m.constructed_types()[1]->AsAlias();
+  EXPECT_EQ(alias->name(), "B");
+  EXPECT_EQ(alias->type(), str);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
   auto* p = parser("type A = invalid;");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
@@ -128,6 +163,95 @@ TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
   p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
+  auto* p = parser("struct A { b: i32; c: f32;};");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error());
+
+  auto m = p->module();
+  ASSERT_EQ(m.constructed_types().size(), 1u);
+
+  auto* t = m.constructed_types()[0];
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsStruct());
+
+  auto* str = t->AsStruct();
+  EXPECT_EQ(str->name(), "A");
+  EXPECT_EQ(str->impl()->members().size(), 2u);
+}
+
+TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
+  auto* p =
+      parser("struct A { [[offset(0)]] data: [[stride(4)]] array<f32>; };");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error());
+
+  auto m = p->module();
+  ASSERT_EQ(m.constructed_types().size(), 1u);
+
+  auto* t = m.constructed_types()[0];
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsStruct());
+
+  auto* str = t->AsStruct();
+  EXPECT_EQ(str->name(), "A");
+  EXPECT_EQ(str->impl()->members().size(), 1u);
+  EXPECT_FALSE(str->IsBlockDecorated());
+
+  const auto* ty = str->impl()->members()[0]->type();
+  ASSERT_TRUE(ty->IsArray());
+  const auto* arr = ty->AsArray();
+  EXPECT_TRUE(arr->has_array_stride());
+  EXPECT_EQ(arr->array_stride(), 4u);
+}
+
+TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
+  auto* p = parser("[[block]] struct A { [[offset(0)]] data: f32; };");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error());
+
+  auto m = p->module();
+  ASSERT_EQ(m.constructed_types().size(), 1u);
+
+  auto* t = m.constructed_types()[0];
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsStruct());
+
+  auto* str = t->AsStruct();
+  EXPECT_EQ(str->name(), "A");
+  EXPECT_EQ(str->impl()->members().size(), 1u);
+  EXPECT_TRUE(str->IsBlockDecorated());
+}
+
+TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
+  auto* p = parser("[[block]] A {};");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:11: missing struct declaration");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {
+  auto* p = parser("[[block]] struct A {}");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:22: missing ';' for struct declaration");
+}
+
+// This was failing due to not finding the missing ;. https://crbug.com/tint/218
+TEST_F(ParserImplTest, TypeDecl_Struct_Empty) {
+  auto* p = parser("type str = struct {};");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto module = p->module();
+  ASSERT_EQ(module.constructed_types().size(), 1u);
+
+  ASSERT_TRUE(module.constructed_types()[0]->IsStruct());
+  auto* str = module.constructed_types()[0]->AsStruct();
+  EXPECT_EQ(str->name(), "str");
+  EXPECT_EQ(str->impl()->members().size(), 0u);
 }
 
 }  // namespace

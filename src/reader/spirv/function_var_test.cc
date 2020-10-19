@@ -563,10 +563,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
   Variable{
     x_200
     function
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{1}
         ScalarConstructor{1.500000}
         TypeConstructor{
@@ -602,10 +602,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
   Variable{
     x_200
     function
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{0}
         ScalarConstructor{0.000000}
         TypeConstructor{

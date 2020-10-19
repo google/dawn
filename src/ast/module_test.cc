@@ -91,13 +91,13 @@ TEST_F(ModuleTest, IsValid_Alias) {
   type::AliasType alias("alias", &f32);
 
   Module m;
-  m.AddAliasType(&alias);
+  m.AddConstructedType(&alias);
   EXPECT_TRUE(m.IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Null_Alias) {
   Module m;
-  m.AddAliasType(nullptr);
+  m.AddConstructedType(nullptr);
   EXPECT_FALSE(m.IsValid());
 }
 
@@ -107,7 +107,7 @@ TEST_F(ModuleTest, IsValid_Struct) {
   type::AliasType alias("name", &st);
 
   Module m;
-  m.AddAliasType(&alias);
+  m.AddConstructedType(&alias);
   EXPECT_TRUE(m.IsValid());
 }
 
@@ -117,7 +117,7 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
   type::AliasType alias("name", &st);
 
   Module m;
-  m.AddAliasType(&alias);
+  m.AddConstructedType(&alias);
   EXPECT_FALSE(m.IsValid());
 }
 

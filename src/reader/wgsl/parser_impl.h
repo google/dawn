@@ -110,14 +110,14 @@ class ParserImpl {
   /// @param msg the error message
   void set_error(const Token& t, const std::string& msg);
 
-  /// Registers a type alias into the parser
-  /// @param name the alias name
-  /// @param type the alias'd type
-  void register_alias(const std::string& name, ast::type::Type* type);
-  /// Retrieves an aliased type
-  /// @param name The alias name to lookup
-  /// @returns the alias type for |name| or nullptr if not found
-  ast::type::Type* get_alias(const std::string& name);
+  /// Registers a constructed type into the parser
+  /// @param name the constructed name
+  /// @param type the constructed type
+  void register_constructed(const std::string& name, ast::type::Type* type);
+  /// Retrieves a constructed type
+  /// @param name The name to lookup
+  /// @returns the constructed type for |name| or nullptr if not found
+  ast::type::Type* get_constructed(const std::string& name);
 
   /// Parses the `translation_unit` grammar element
   void translation_unit();
@@ -148,7 +148,7 @@ class ParserImpl {
   ast::StorageClass variable_storage_decoration();
   /// Parses a `type_alias` grammar element
   /// @returns the type alias or nullptr on error
-  ast::type::AliasType* type_alias();
+  ast::type::Type* type_alias();
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* type_decl();
@@ -410,7 +410,7 @@ class ParserImpl {
   std::string error_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
-  std::unordered_map<std::string, ast::type::Type*> registered_aliases_;
+  std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
 };
 

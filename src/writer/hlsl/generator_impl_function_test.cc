@@ -316,7 +316,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "uniforms", ast::StorageClass::kUniform, alias.get()));
 
-  mod()->AddAliasType(alias.get());
+  mod()->AddConstructedType(alias.get());
 
   ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));

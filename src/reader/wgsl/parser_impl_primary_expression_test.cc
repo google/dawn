@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {

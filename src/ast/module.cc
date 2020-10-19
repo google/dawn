@@ -52,12 +52,25 @@ bool Module::IsValid() const {
       return false;
     }
   }
-  for (auto* const alias : alias_types_) {
-    if (alias == nullptr) {
+  for (auto* const ty : constructed_types_) {
+    if (ty == nullptr) {
       return false;
     }
-    if (alias->type()->IsStruct() &&
-        alias->type()->AsStruct()->name().empty()) {
+    if (ty->IsAlias()) {
+      auto* alias = ty->AsAlias();
+      if (alias->type() == nullptr) {
+        return false;
+      }
+      if (alias->type()->IsStruct() &&
+          alias->type()->AsStruct()->name().empty()) {
+        return false;
+      }
+    } else if (ty->IsStruct()) {
+      auto* str = ty->AsStruct();
+      if (str->name().empty()) {
+        return false;
+      }
+    } else {
       return false;
     }
   }
@@ -74,13 +87,20 @@ std::string Module::to_str() const {
 
   out << "Module{" << std::endl;
   const auto indent = 2;
-  for (auto* const alias : alias_types_) {
+  for (auto* const ty : constructed_types_) {
     for (size_t i = 0; i < indent; ++i) {
       out << " ";
     }
-    out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
-    if (alias->type()->IsStruct()) {
-      alias->type()->AsStruct()->impl()->to_str(out, indent);
+    if (ty->IsAlias()) {
+      auto* alias = ty->AsAlias();
+      out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
+      if (alias->type()->IsStruct()) {
+        alias->type()->AsStruct()->impl()->to_str(out, indent);
+      }
+    } else if (ty->IsStruct()) {
+      auto* str = ty->AsStruct();
+      out << str->name() << " ";
+      str->impl()->to_str(out, indent);
     }
   }
   for (const auto& var : global_variables_) {

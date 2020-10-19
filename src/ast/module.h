@@ -46,12 +46,15 @@ class Module {
   /// @returns the global variables for the module
   VariableList& global_variables() { return global_variables_; }
 
-  /// Adds a type alias to the module
-  /// @param type the alias to add
-  void AddAliasType(type::AliasType* type) { alias_types_.push_back(type); }
-  /// @returns the alias types in the module
-  const std::vector<type::AliasType*>& alias_types() const {
-    return alias_types_;
+  /// Adds a constructed type to the module.
+  /// The type must be an alias or a struct.
+  /// @param type the constructed type to add
+  void AddConstructedType(type::Type* type) {
+    constructed_types_.push_back(type);
+  }
+  /// @returns the constructed types in the module
+  const std::vector<type::Type*>& constructed_types() const {
+    return constructed_types_;
   }
 
   /// Adds a function to the module
@@ -82,8 +85,8 @@ class Module {
   Module(const Module&) = delete;
 
   VariableList global_variables_;
-  // The alias types are owned by the type manager
-  std::vector<type::AliasType*> alias_types_;
+  // The constructed types are owned by the type manager
+  std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
 };
 

@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:11: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {

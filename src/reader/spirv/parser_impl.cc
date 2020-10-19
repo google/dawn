@@ -870,6 +870,8 @@ ast::type::Type* ParserImpl::ConvertType(
       namer_.GetName(type_id), std::move(ast_struct));
 
   auto* result = ctx_.type_mgr().Get(std::move(ast_struct_type));
+  id_to_type_[type_id] = result;
+  ast_module_.AddConstructedType(result);
   return result;
 }
 
@@ -934,11 +936,8 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
     return;
   }
 
-  // We only care about struct, arrays, and runtime arrays.
+  // We only care about arrays, and runtime arrays.
   switch (type->kind()) {
-    case spvtools::opt::analysis::Type::kStruct:
-      // The struct already got a name when the type was first registered.
-      break;
     case spvtools::opt::analysis::Type::kRuntimeArray:
       // Runtime arrays are always decorated with ArrayStride so always get a
       // type alias.
@@ -967,7 +966,7 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
                              ->AsAlias();
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
-  ast_module_.AddAliasType(ast_alias_type);
+  ast_module_.AddConstructedType(ast_alias_type);
 }
 
 bool ParserImpl::EmitModuleScopeVariables() {

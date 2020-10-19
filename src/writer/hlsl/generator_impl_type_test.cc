@@ -163,6 +163,32 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
   EXPECT_EQ(result(), "float*");
 }
 
+TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "a", &i32, ast::StructMemberDecorationList{}));
+
+  ast::StructMemberDecorationList b_deco;
+  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s("S", std::move(str));
+
+  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
+  EXPECT_EQ(result(), R"(struct S {
+  int a;
+  float b;
+};
+)");
+}
+
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
@@ -182,10 +208,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   ast::type::StructType s("S", std::move(str));
 
   ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
-  EXPECT_EQ(result(), R"(struct {
-  int a;
-  float b;
-})");
+  EXPECT_EQ(result(), "S");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
@@ -240,11 +263,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
-  EXPECT_EQ(result(), R"(struct {
+  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
+  EXPECT_EQ(result(), R"(struct S {
   int double_tint_0;
   float float_tint_0;
-})");
+};
+)");
 }
 
 // TODO(dsinclair): How to translate [[block]]
@@ -269,8 +293,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
-  EXPECT_EQ(result(), R"(struct {
+  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
+  EXPECT_EQ(result(), R"(struct S {
   int a;
   float b;
 })");

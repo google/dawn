@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
   auto e = p->global_constant_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {

@@ -404,7 +404,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   block->append(
       std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
-  mod()->AddAliasType(&my_int);
+  mod()->AddConstructedType(&my_int);
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block.get())) << v()->error();

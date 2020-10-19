@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, StructMember_InvalidVariable) {
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
-  EXPECT_EQ(p->error(), "1:19: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:19: unknown constructed type 'B'");
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {

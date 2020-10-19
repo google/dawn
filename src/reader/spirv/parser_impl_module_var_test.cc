@@ -1058,10 +1058,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{1}
         ScalarConstructor{1.500000}
         TypeConstructor{
@@ -1087,10 +1087,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{0}
         ScalarConstructor{0.000000}
         TypeConstructor{
@@ -1116,10 +1116,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __alias_S__struct_S
+    __struct_S
     {
       TypeConstructor{
-        __alias_S__struct_S
+        __struct_S
         ScalarConstructor{0}
         ScalarConstructor{0.000000}
         TypeConstructor{
@@ -1203,7 +1203,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
     }
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   })"))
       << module_str;
 }
@@ -1257,7 +1257,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
     }
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   })"))
       << module_str;
 }
@@ -1305,8 +1305,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S -> __struct_S
-  Struct{
+  S Struct{
     [[block]]
     StructMember{field0: __u32}
     StructMember{field1: __f32}
@@ -1315,7 +1314,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
   Variable{
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   }
 })")) << module_str;
 }
@@ -1333,8 +1332,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S -> __struct_S
-  Struct{
+  S Struct{
     [[block]]
     StructMember{field0: __u32}
     StructMember{field1: __f32}
@@ -1343,7 +1341,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
   Variable{
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   }
 })")) << module_str;
 }
@@ -1365,15 +1363,14 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S -> __struct_S
-  Struct{
+  S Struct{
     [[block]]
     StructMember{field0: __mat_2_3__f32}
   }
   Variable{
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   }
 })")) << module_str;
 }
@@ -1395,15 +1392,14 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S -> __struct_S
-  Struct{
+  S Struct{
     [[block]]
     StructMember{field0: __mat_2_3__f32}
   }
   Variable{
     myvar
     storage_buffer
-    __alias_S__struct_S
+    __struct_S
   }
 })")) << module_str;
 }

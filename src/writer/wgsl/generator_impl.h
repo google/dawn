@@ -23,8 +23,8 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/type/alias_type.h"
 #include "src/ast/type/storage_texture_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
@@ -55,10 +55,10 @@ class GeneratorImpl : public TextGenerator {
                           ast::PipelineStage stage,
                           const std::string& name);
 
-  /// Handles generating an alias
-  /// @param alias the alias to generate
-  /// @returns true if the alias was emitted
-  bool EmitAliasType(const ast::type::AliasType* alias);
+  /// Handles generating a constructed type
+  /// @param ty the constructed to generate
+  /// @returns true if the constructed was emitted
+  bool EmitConstructedType(const ast::type::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -167,6 +167,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type);
+  /// Handles generating a struct declaration
+  /// @param str the struct
+  /// @returns true if the struct is emitted
+  bool EmitStructType(const ast::type::StructType* str);
   /// Handles emitting an image format
   /// @param fmt the format to generate
   /// @returns true if the format is emitted

@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:14: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:14: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {

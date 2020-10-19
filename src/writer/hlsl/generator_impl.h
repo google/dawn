@@ -19,6 +19,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/hlsl/namer.h"
@@ -60,11 +61,11 @@ class GeneratorImpl {
   /// @returns true on successful generation; false otherwise
   bool Generate(std::ostream& out);
 
-  /// Handles generating an alias
+  /// Handles generating a constructed type
   /// @param out the output stream
-  /// @param alias the alias to generate
-  /// @returns true if the alias was emitted
-  bool EmitAliasType(std::ostream& out, const ast::type::AliasType* alias);
+  /// @param ty the constructed type to generate
+  /// @returns true if the constructed type was emitted
+  bool EmitConstructedType(std::ostream& out, const ast::type::Type* ty);
   /// Handles an array accessor expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -260,6 +261,11 @@ class GeneratorImpl {
   bool EmitType(std::ostream& out,
                 ast::type::Type* type,
                 const std::string& name);
+  /// Handles generating a structure declaration
+  /// @param out the output stream
+  /// @param ty the struct to generate
+  /// @returns true if the struct is emitted
+  bool EmitStructType(std::ostream& out, const ast::type::StructType* ty);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream

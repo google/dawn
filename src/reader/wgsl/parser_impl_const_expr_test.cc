@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:1: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:1: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, ConstExpr_Recursion) {

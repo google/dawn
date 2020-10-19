@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:20: unknown type alias 'abc'");
+  EXPECT_EQ(p->error(), "1:20: unknown constructed type 'abc'");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
@@ -140,7 +140,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:25: unknown type alias 'abc'");
+  EXPECT_EQ(p->error(), "1:25: unknown constructed type 'abc'");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {

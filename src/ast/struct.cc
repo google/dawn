@@ -70,7 +70,6 @@ bool Struct::IsValid() const {
 }
 
 void Struct::to_str(std::ostream& out, size_t indent) const {
-  make_indent(out, indent);
   out << "Struct{" << std::endl;
   for (auto deco : decorations_) {
     make_indent(out, indent + 2);

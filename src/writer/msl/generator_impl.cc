@@ -103,12 +103,12 @@ bool GeneratorImpl::Generate() {
     global_variables_.set(global->name(), global.get());
   }
 
-  for (auto* const alias : module_->alias_types()) {
-    if (!EmitAliasType(alias)) {
+  for (auto* const ty : module_->constructed_types()) {
+    if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module_->alias_types().empty()) {
+  if (!module_->constructed_types().empty()) {
     out_ << std::endl;
   }
 
@@ -239,13 +239,33 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
   return 0;
 }
 
-bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
+bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
-  out_ << "typedef ";
-  if (!EmitType(alias->type(), "")) {
+
+  if (ty->IsAlias()) {
+    auto* alias = ty->AsAlias();
+
+    // This will go away once type_alias does not accept anonymous structs
+    if (alias->type()->IsStruct() &&
+        alias->type()->AsStruct()->name() == alias->name()) {
+      if (!EmitStructType(alias->type()->AsStruct())) {
+        return false;
+      }
+    } else {
+      out_ << "typedef ";
+      if (!EmitType(alias->type(), "")) {
+        return false;
+      }
+      out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+    }
+  } else if (ty->IsStruct()) {
+    if (!EmitStructType(ty->AsStruct())) {
+      return false;
+    }
+  } else {
+    error_ = "unknown alias type: " + ty->type_name();
     return false;
   }
-  out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
 
   return true;
 }
@@ -1701,54 +1721,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     }
     out_ << "*";
   } else if (type->IsStruct()) {
-    auto* str = type->AsStruct()->impl();
-    // TODO(dsinclair): Block decoration?
-    // if (str->decoration() != ast::StructDecoration::kNone) {
-    // }
-    out_ << "struct {" << std::endl;
+    // The struct type emits as just the name. The declaration would be emitted
+    // as part of emitting the constructed types.
+    out_ << type->AsStruct()->name();
 
-    increment_indent();
-    uint32_t current_offset = 0;
-    uint32_t pad_count = 0;
-    for (const auto& mem : str->members()) {
-      make_indent();
-      for (const auto& deco : mem->decorations()) {
-        if (deco->IsOffset()) {
-          uint32_t offset = deco->AsOffset()->offset();
-          if (offset != current_offset) {
-            out_ << "int8_t pad_" << pad_count << "["
-                 << (offset - current_offset) << "];" << std::endl;
-            pad_count++;
-            make_indent();
-          }
-          current_offset = offset;
-        } else {
-          error_ = "unsupported member decoration: " + deco->to_str();
-          return false;
-        }
-      }
-
-      if (!EmitType(mem->type(), mem->name())) {
-        return false;
-      }
-      auto size = calculate_alignment_size(mem->type());
-      if (size == 0) {
-        error_ =
-            "unable to calculate byte size for: " + mem->type()->type_name();
-        return false;
-      }
-      current_offset += size;
-
-      // Array member name will be output with the type
-      if (!mem->type()->IsArray()) {
-        out_ << " " << namer_.NameFor(mem->name());
-      }
-      out_ << ";" << std::endl;
-    }
-    decrement_indent();
-    make_indent();
-
-    out_ << "}";
   } else if (type->IsU32()) {
     out_ << "uint";
   } else if (type->IsVector()) {
@@ -1764,6 +1740,56 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     return false;
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
+  // TODO(dsinclair): Block decoration?
+  // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
+  // }
+  out_ << "struct " << str->name() << " {" << std::endl;
+
+  increment_indent();
+  uint32_t current_offset = 0;
+  uint32_t pad_count = 0;
+  for (const auto& mem : str->impl()->members()) {
+    make_indent();
+    for (const auto& deco : mem->decorations()) {
+      if (deco->IsOffset()) {
+        uint32_t offset = deco->AsOffset()->offset();
+        if (offset != current_offset) {
+          out_ << "int8_t pad_" << pad_count << "[" << (offset - current_offset)
+               << "];" << std::endl;
+          pad_count++;
+          make_indent();
+        }
+        current_offset = offset;
+      } else {
+        error_ = "unsupported member decoration: " + deco->to_str();
+        return false;
+      }
+    }
+
+    if (!EmitType(mem->type(), mem->name())) {
+      return false;
+    }
+    auto size = calculate_alignment_size(mem->type());
+    if (size == 0) {
+      error_ = "unable to calculate byte size for: " + mem->type()->type_name();
+      return false;
+    }
+    current_offset += size;
+
+    // Array member name will be output with the type
+    if (!mem->type()->IsArray()) {
+      out_ << " " << namer_.NameFor(mem->name());
+    }
+    out_ << ";" << std::endl;
+  }
+  decrement_indent();
+  make_indent();
+
+  out_ << "};" << std::endl;
   return true;
 }
 

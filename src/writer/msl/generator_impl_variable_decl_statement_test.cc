@@ -113,10 +113,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(  struct {
-    float a;
-    float b;
-  } a = {};
+  EXPECT_EQ(g.result(), R"(  S a = {};
 )");
 }
 

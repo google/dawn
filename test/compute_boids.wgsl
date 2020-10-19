@@ -39,12 +39,12 @@ fn frag_main() -> void {
 }
 
 # compute shader
-type Particle = [[block]] struct {
+[[block]] struct Particle {
   [[offset(0)]] pos : vec2<f32>;
   [[offset(8)]] vel : vec2<f32>;
 };
 
-type SimParams = [[block]] struct {
+[[block]] struct SimParams {
   [[offset(0)]] deltaT : f32;
   [[offset(4)]] rule1Distance : f32;
   [[offset(8)]] rule2Distance : f32;
@@ -54,7 +54,7 @@ type SimParams = [[block]] struct {
   [[offset(24)]] rule3Scale : f32;
 };
 
-type Particles = [[block]] struct {
+[[block]] struct Particles {
   [[offset(0)]] particles : [[stride(16)]] array<Particle, 5>;
 };
 

@@ -33,20 +33,28 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->type()->IsI32());
-  ASSERT_EQ(t->type(), i32);
+  ASSERT_TRUE(t->IsAlias());
+  auto* alias = t->AsAlias();
+  ASSERT_TRUE(alias->type()->IsI32());
+  ASSERT_EQ(alias->type(), i32);
 }
 
-TEST_F(ParserImplTest, TypeDecl_ParsesStruct) {
-  auto* p = parser("type a = struct { b: i32; c: f32;}");
+TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
+  ast::type::StructType str("B", {});
+
+  auto* p = parser("type a = B");
+  p->register_constructed("B", &str);
+
   auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
-  EXPECT_EQ(t->name(), "a");
-  ASSERT_TRUE(t->type()->IsStruct());
+  ASSERT_TRUE(t->IsAlias());
+  auto* alias = t->AsAlias();
+  EXPECT_EQ(alias->name(), "a");
+  ASSERT_TRUE(alias->type()->IsStruct());
 
-  auto* s = t->type()->AsStruct();
-  EXPECT_EQ(s->impl()->members().size(), 2u);
+  auto* s = alias->type()->AsStruct();
+  EXPECT_EQ(s->name(), "B");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
@@ -78,7 +86,18 @@ TEST_F(ParserImplTest, TypeDecl_InvalidType) {
   auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:10: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:10: unknown constructed type 'B'");
+}
+
+TEST_F(ParserImplTest, TypeDecl_ParsesStruct) {
+  auto* p = parser("type a = struct { b: i32; c: f32;}");
+  auto* t = p->type_alias();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsStruct());
+  auto* str = t->AsStruct();
+  EXPECT_EQ(str->name(), "a");
+  EXPECT_EQ(str->impl()->members().size(), 2u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
@@ -97,35 +116,30 @@ TEST_F(ParserImplTest, TypeDecl_Struct_WithStride) {
   auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
-  EXPECT_EQ(t->name(), "a");
-  ASSERT_TRUE(t->type()->IsStruct());
+  ASSERT_TRUE(t->IsStruct());
+  auto* str = t->AsStruct();
+  EXPECT_EQ(str->name(), "a");
+  EXPECT_EQ(str->impl()->members().size(), 1u);
 
-  auto* s = t->type()->AsStruct();
-  EXPECT_EQ(s->impl()->members().size(), 1u);
-
-  const auto* ty = s->impl()->members()[0]->type();
+  const auto* ty = str->impl()->members()[0]->type();
   ASSERT_TRUE(ty->IsArray());
   const auto* arr = ty->AsArray();
   EXPECT_TRUE(arr->has_array_stride());
   EXPECT_EQ(arr->array_stride(), 4u);
 }
 
-// This was failing due to not finding the missing ;. https://crbug.com/tint/218
 TEST_F(ParserImplTest, TypeDecl_Struct_Empty) {
   auto* p = parser("type str = struct {};");
   p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto module = p->module();
-  ASSERT_EQ(module.alias_types().size(), 1u);
+  ASSERT_EQ(module.constructed_types().size(), 1u);
 
-  auto* t = module.alias_types()[0];
-  ASSERT_NE(t, nullptr);
-  EXPECT_EQ(t->name(), "str");
-
-  ASSERT_TRUE(t->type()->IsStruct());
-  auto* s = t->type()->AsStruct();
-  EXPECT_EQ(s->impl()->members().size(), 0u);
+  ASSERT_TRUE(module.constructed_types()[0]->IsStruct());
+  auto* str = module.constructed_types()[0]->AsStruct();
+  EXPECT_EQ(str->name(), "str");
+  EXPECT_EQ(str->impl()->members().size(), 0u);
 }
 
 }  // namespace
