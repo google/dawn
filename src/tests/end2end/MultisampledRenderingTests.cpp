@@ -922,6 +922,10 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
 
 // Test multisampled rendering with depth test works correctly with alphaToCoverage.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCoverage) {
+    // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
+    // algorithm.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
 
@@ -979,6 +983,10 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
 // Test using one multisampled color attachment with resolve target can render correctly
 // with alphaToCoverageEnabled and a sample mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSampleMask) {
+    // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
+    // algorithm.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
     // TODO(dawn:491): This doesn't work on Metal, because we're using both the shader-output
     // mask (emulting the sampleMask from RenderPipeline) and alpha-to-coverage at the same
     // time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
@@ -1020,6 +1028,10 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
 // Test using one multisampled color attachment with resolve target can render correctly
 // with alphaToCoverageEnabled and a rasterization mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRasterizationMask) {
+    // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
+    // algorithm.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
