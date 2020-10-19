@@ -22,6 +22,8 @@
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
+#include <algorithm>
+
 namespace dawn_native { namespace vulkan {
 
     // OldSwapChain
