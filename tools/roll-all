@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env bash
 # Copyright 2020 The Tint Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,54 +13,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Parse a DEPS file and rolls all of the dependencies.
-"""
-
-import os
-import re
-import subprocess
-import sys
-
-
-DEFAULT_DEPS_PATH = os.path.normpath(
-  os.path.join(os.path.dirname(__file__), os.pardir, 'DEPS'))
+# Defined to use origin/master instead of origin/main
+build=1
+buildtools=1
+clang=1
+cpplint=1
+googletest=1
+spirv_headers=1
+spirv_tools=1
+testing=1
 
 
-def parse_file_to_dict(path):
-  dictionary = {}
-  contents = open(path).read()
-  # Need to convert Var() to vars[], so that the DEPS is actually Python. Var()
-  # comes from Autoroller using gclient which has a slightly different DEPS
-  # format.
-  contents = re.sub(r"Var\((.*?)\)", r"vars[\1]", contents)
-  exec(contents, dictionary)
-  return dictionary
+# This script assumes it's parent directory is the repo root.
+repo_path=$(dirname "$0")/..
 
+cd "$repo_path"
 
-def roll_all_deps(deps_file_path):
-  deps_file_directory = os.path.dirname(deps_file_path)
-  deps_file = parse_file_to_dict(deps_file_path)
+if [[ $(git diff --stat) != '' ]]; then
+    echo "Working tree is dirty, commit changes before attempting to roll DEPS"
+    exit 1
+fi
 
-  dependencies = deps_file['deps'].copy()
+old_head=$(git rev-parse HEAD)
 
-  list_of_deps = ['roll-dep', '--ignore-dirty-tree']
-  for directory in sorted(deps_file['deps']):
-    # cpplint uses gh-pages as the main branch, not master which doesn't work
-    # with roll-dep
-    if directory == "third_party/cpplint":
-      continue
+for i in $(find third_party -type d -maxdepth 1 -depth 1); do
+  name=`echo "${i%%/}" | cut -f2 -d'/' | tr '-' '_'`
 
-    relative_directory = os.path.join(deps_file_directory, directory)
-    list_of_deps.append(relative_directory)
+  if [ "x${name}" == "xcpplint" ]; then
+    continue
+  fi
 
-  subprocess.check_call(list_of_deps)
+  trunk="origin/main"
+  if [ ! -z ${!name} ]; then
+    trunk="origin/master"
+  fi
 
+  roll-dep --ignore-dirty-tree --roll-to="${trunk}" "${i%%/}";
+done
 
-def main(argv):
-  deps_file_path = DEFAULT_DEPS_PATH
-
-  roll_all_deps(deps_file_path)
-
-
-if __name__ == '__main__':
-  exit(main(sys.argv[1:]))
+git rebase --interactive "${old_head}"
