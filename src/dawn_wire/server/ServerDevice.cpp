@@ -26,6 +26,16 @@ namespace dawn_wire { namespace server {
         server->OnDeviceLost(message);
     }
 
+    void Server::ForwardCreateReadyComputePipeline(WGPUCreateReadyPipelineStatus status,
+                                                   WGPUComputePipeline pipeline,
+                                                   const char* message,
+                                                   void* userdata) {
+        CreateReadyPipelineUserData* createReadyPipelineUserData =
+            static_cast<CreateReadyPipelineUserData*>(userdata);
+        createReadyPipelineUserData->server->OnCreateReadyComputePipelineCallback(
+            status, pipeline, message, createReadyPipelineUserData);
+    }
+
     void Server::OnUncapturedError(WGPUErrorType type, const char* message) {
         ReturnDeviceUncapturedErrorCallbackCmd cmd;
         cmd.type = type;
@@ -51,6 +61,48 @@ namespace dawn_wire { namespace server {
             delete userdata;
         }
         return success;
+    }
+
+    bool Server::DoDeviceCreateReadyComputePipeline(
+        WGPUDevice cDevice,
+        uint64_t requestSerial,
+        ObjectHandle pipelineObjectHandle,
+        const WGPUComputePipelineDescriptor* descriptor) {
+        auto* resultData = ComputePipelineObjects().Allocate(pipelineObjectHandle.id);
+        if (resultData == nullptr) {
+            return false;
+        }
+
+        resultData->generation = pipelineObjectHandle.generation;
+
+        std::unique_ptr<CreateReadyPipelineUserData> userdata =
+            std::make_unique<CreateReadyPipelineUserData>();
+        userdata->server = this;
+        userdata->requestSerial = requestSerial;
+        userdata->pipelineObjectID = pipelineObjectHandle.id;
+
+        mProcs.deviceCreateReadyComputePipeline(
+            cDevice, descriptor, ForwardCreateReadyComputePipeline, userdata.release());
+        return true;
+    }
+
+    void Server::OnCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus status,
+                                                      WGPUComputePipeline pipeline,
+                                                      const char* message,
+                                                      CreateReadyPipelineUserData* userdata) {
+        std::unique_ptr<CreateReadyPipelineUserData> data(userdata);
+        if (status != WGPUCreateReadyPipelineStatus_Success) {
+            ComputePipelineObjects().Free(data->pipelineObjectID);
+        } else {
+            ComputePipelineObjects().Get(data->pipelineObjectID)->handle = pipeline;
+        }
+
+        ReturnDeviceCreateReadyComputePipelineCallbackCmd cmd;
+        cmd.status = status;
+        cmd.requestSerial = data->requestSerial;
+        cmd.message = message;
+
+        SerializeCommand(cmd);
     }
 
     // static

@@ -23,6 +23,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/ComputePipeline.h"
+#include "dawn_native/CreateReadyPipelineTracker.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ErrorScope.h"
@@ -102,6 +103,7 @@ namespace dawn_native {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
+        mCreateReadyPipelineTracker = std::make_unique<CreateReadyPipelineTracker>(this);
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
 
         // Starting from now the backend can start doing reentrant calls so the device is marked as
@@ -149,6 +151,8 @@ namespace dawn_native {
             // pending callbacks.
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
             GetDefaultQueue()->Tick(GetCompletedCommandSerial());
+            mCreateReadyPipelineTracker->Tick(GetCompletedCommandSerial());
+
             // call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
             IgnoreErrors(TickImpl());
@@ -163,6 +167,7 @@ namespace dawn_native {
         }
         mErrorScopeTracker = nullptr;
         mDynamicUploader = nullptr;
+        mCreateReadyPipelineTracker = nullptr;
 
         mEmptyBindGroupLayout = nullptr;
 
@@ -619,6 +624,22 @@ namespace dawn_native {
 
         return result;
     }
+    void DeviceBase::CreateReadyComputePipeline(const ComputePipelineDescriptor* descriptor,
+                                                WGPUCreateReadyComputePipelineCallback callback,
+                                                void* userdata) {
+        ComputePipelineBase* result = nullptr;
+        MaybeError maybeError = CreateComputePipelineInternal(&result, descriptor);
+        if (maybeError.IsError()) {
+            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            callback(WGPUCreateReadyPipelineStatus_Error, nullptr, error->GetMessage().c_str(),
+                     userdata);
+            return;
+        }
+
+        std::unique_ptr<CreateReadyComputePipelineTask> request =
+            std::make_unique<CreateReadyComputePipelineTask>(result, callback, userdata);
+        mCreateReadyPipelineTracker->TrackTask(std::move(request), GetPendingCommandSerial());
+    }
     PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase* result = nullptr;
@@ -750,6 +771,7 @@ namespace dawn_native {
             mDynamicUploader->Deallocate(mCompletedSerial);
             mErrorScopeTracker->Tick(mCompletedSerial);
             GetDefaultQueue()->Tick(mCompletedSerial);
+            mCreateReadyPipelineTracker->Tick(mCompletedSerial);
         }
 
         return !IsDeviceIdle();

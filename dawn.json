@@ -501,6 +501,24 @@
             {"name": "compute stage", "type": "programmable stage descriptor"}
         ]
     },
+    "create ready compute pipeline callback": {
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "create ready pipeline status"},
+            {"name": "pipeline", "type": "compute pipeline"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
+    "create ready pipeline status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error"},
+            {"value": 2, "name": "device lost"},
+            {"value": 3, "name": "unknown"}
+        ]
+    },
     "cull mode": {
         "category": "enum",
         "values": [
@@ -550,6 +568,15 @@
                 "returns": "compute pipeline",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create ready compute pipeline",
+                "returns": "void",
+                "args": [
+                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
+                    {"name": "callback", "type": "create ready compute pipeline callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {

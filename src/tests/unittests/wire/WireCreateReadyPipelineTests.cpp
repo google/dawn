@@ -1,0 +1,127 @@
+// Copyright 2020 The Dawn Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "tests/unittests/wire/WireTest.h"
+
+using namespace testing;
+using namespace dawn_wire;
+
+namespace {
+
+    // Mock class to add expectations on the wire calling callbacks
+    class MockCreateReadyComputePipelineCallback {
+      public:
+        MOCK_METHOD(void,
+                    Call,
+                    (WGPUCreateReadyPipelineStatus status,
+                     WGPUComputePipeline pipeline,
+                     const char* message,
+                     void* userdata));
+    };
+
+    std::unique_ptr<StrictMock<MockCreateReadyComputePipelineCallback>>
+        mockCreateReadyComputePipelineCallback;
+    void ToMockCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus status,
+                                                  WGPUComputePipeline pipeline,
+                                                  const char* message,
+                                                  void* userdata) {
+        mockCreateReadyComputePipelineCallback->Call(status, pipeline, message, userdata);
+    }
+
+}  // anonymous namespace
+
+class WireCreateReadyPipelineTest : public WireTest {
+  public:
+    void SetUp() override {
+        WireTest::SetUp();
+
+        mockCreateReadyComputePipelineCallback =
+            std::make_unique<StrictMock<MockCreateReadyComputePipelineCallback>>();
+    }
+
+    void TearDown() override {
+        WireTest::TearDown();
+
+        // Delete mock so that expectations are checked
+        mockCreateReadyComputePipelineCallback = nullptr;
+    }
+
+    void FlushClient() {
+        WireTest::FlushClient();
+        Mock::VerifyAndClearExpectations(&mockCreateReadyComputePipelineCallback);
+    }
+
+    void FlushServer() {
+        WireTest::FlushServer();
+        Mock::VerifyAndClearExpectations(&mockCreateReadyComputePipelineCallback);
+    }
+};
+
+// Test when creating a compute pipeline with CreateReadyComputePipeline() successfully.
+TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineSuccess) {
+    WGPUShaderModuleDescriptor csDescriptor{};
+    WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
+    WGPUShaderModule apiCsModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
+
+    WGPUComputePipelineDescriptor descriptor{};
+    descriptor.computeStage.module = csModule;
+    descriptor.computeStage.entryPoint = "main";
+
+    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
+                                         ToMockCreateReadyComputePipelineCallback, this);
+
+    EXPECT_CALL(api, OnDeviceCreateReadyComputePipelineCallback(apiDevice, _, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallDeviceCreateReadyComputePipelineCallback(
+                apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
+                Call(WGPUCreateReadyPipelineStatus_Success, _, StrEq(""), this))
+        .Times(1);
+
+    FlushServer();
+}
+
+// Test when creating a compute pipeline with CreateReadyComputePipeline() results in an error.
+TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineError) {
+    WGPUShaderModuleDescriptor csDescriptor{};
+    WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
+    WGPUShaderModule apiCsModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
+
+    WGPUComputePipelineDescriptor descriptor{};
+    descriptor.computeStage.module = csModule;
+    descriptor.computeStage.entryPoint = "main";
+
+    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
+                                         ToMockCreateReadyComputePipelineCallback, this);
+
+    EXPECT_CALL(api, OnDeviceCreateReadyComputePipelineCallback(apiDevice, _, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallDeviceCreateReadyComputePipelineCallback(
+                apiDevice, WGPUCreateReadyPipelineStatus_Error, nullptr, "Some error message");
+        }));
+
+    FlushClient();
+
+    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
+                Call(WGPUCreateReadyPipelineStatus_Error, _, StrEq("Some error message"), this))
+        .Times(1);
+
+    FlushServer();
+}

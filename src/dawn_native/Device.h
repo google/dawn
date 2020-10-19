@@ -33,6 +33,7 @@ namespace dawn_native {
     class AttachmentState;
     class AttachmentStateBlueprint;
     class BindGroupLayoutBase;
+    class CreateReadyPipelineTracker;
     class DynamicUploader;
     class ErrorScope;
     class ErrorScopeTracker;
@@ -145,6 +146,9 @@ namespace dawn_native {
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
         QuerySetBase* CreateQuerySet(const QuerySetDescriptor* descriptor);
         QueueBase* CreateQueue();
+        void CreateReadyComputePipeline(const ComputePipelineDescriptor* descriptor,
+                                        WGPUCreateReadyComputePipelineCallback callback,
+                                        void* userdata);
         RenderBundleEncoder* CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
@@ -362,6 +366,7 @@ namespace dawn_native {
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
+        std::unique_ptr<CreateReadyPipelineTracker> mCreateReadyPipelineTracker;
         Ref<QueueBase> mDefaultQueue;
 
         struct DeprecationWarnings;

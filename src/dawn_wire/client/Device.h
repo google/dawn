@@ -17,6 +17,7 @@
 
 #include <dawn/webgpu.h>
 
+#include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ObjectBase.h"
 
 #include <map>
@@ -39,12 +40,18 @@ namespace dawn_wire { namespace client {
         bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
         WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
         WGPUBuffer CreateErrorBuffer();
+        void CreateReadyComputePipeline(WGPUComputePipelineDescriptor const* descriptor,
+                                        WGPUCreateReadyComputePipelineCallback callback,
+                                        void* userdata);
 
         void HandleError(WGPUErrorType errorType, const char* message);
         void HandleDeviceLost(const char* message);
         bool OnPopErrorScopeCallback(uint64_t requestSerial,
                                      WGPUErrorType type,
                                      const char* message);
+        bool OnCreateReadyComputePipelineCallback(uint64_t requestSerial,
+                                                  WGPUCreateReadyPipelineStatus status,
+                                                  const char* message);
 
         WGPUQueue GetDefaultQueue();
 
@@ -56,6 +63,14 @@ namespace dawn_wire { namespace client {
         std::map<uint64_t, ErrorScopeData> mErrorScopes;
         uint64_t mErrorScopeRequestSerial = 0;
         uint64_t mErrorScopeStackSize = 0;
+
+        struct CreateReadyComputePipelineRequest {
+            WGPUCreateReadyComputePipelineCallback callback = nullptr;
+            void* userdata = nullptr;
+            ObjectId pipelineObjectID;
+        };
+        std::map<uint64_t, CreateReadyComputePipelineRequest> mCreateReadyComputePipelineRequests;
+        uint64_t mCreateReadyComputePipelineRequestSerial = 0;
 
         Client* mClient = nullptr;
         WGPUErrorCallback mErrorCallback = nullptr;
