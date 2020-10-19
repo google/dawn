@@ -66,8 +66,8 @@ target_sources(dawn_native PRIVATE
     "ComputePassEncoder.h"
     "ComputePipeline.cpp"
     "ComputePipeline.h"
-    "CreateReadyPipelineTracker.cpp",
-    "CreateReadyPipelineTracker.h",
+    "CreateReadyPipelineTracker.cpp"
+    "CreateReadyPipelineTracker.h"
     "Device.cpp"
     "Device.h"
     "DynamicUploader.cpp"
@@ -280,6 +280,8 @@ if (DAWN_ENABLE_METAL)
         "metal/PipelineLayoutMTL.mm"
         "metal/QueueMTL.h"
         "metal/QueueMTL.mm"
+        "metal/QuerySetMTL.h"
+        "metal/QuerySetMTL.mm"
         "metal/RenderPipelineMTL.h"
         "metal/RenderPipelineMTL.mm"
         "metal/SamplerMTL.h"
