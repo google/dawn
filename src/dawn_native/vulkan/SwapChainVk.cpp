@@ -85,6 +85,11 @@ namespace dawn_native { namespace vulkan {
             const VulkanFunctions& fn = backend->GetFunctions();
             VkInstance instance = backend->GetVkInstance();
 
+            // May not be used in the platform-specific switches below.
+            DAWN_UNUSED(info);
+            DAWN_UNUSED(fn);
+            DAWN_UNUSED(instance);
+
             switch (surface->GetType()) {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
                 case Surface::Type::MetalLayer:
