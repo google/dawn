@@ -80,17 +80,17 @@ endif()
 
 # Header-only library for khrplatform.h
 add_library(dawn_khronos_platform INTERFACE)
-target_sources(dawn_khronos_platform INTERFACE "${DAWN_THIRD_PARTY_DIR}/khronos/KHR/khrplatform.h")
-target_include_directories(dawn_khronos_platform INTERFACE "${DAWN_THIRD_PARTY_DIR}/khronos")
+target_sources(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/KHR/khrplatform.h")
+target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos")
 
 # Header-only library for Vulkan headers
 add_library(dawn_vulkan_headers INTERFACE)
 target_sources(dawn_vulkan_headers INTERFACE
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vk_icd.h"
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vk_layer.h"
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vk_platform.h"
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vk_sdk_platform.h"
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vulkan.h"
-    "${DAWN_THIRD_PARTY_DIR}/khronos/vulkan/vulkan_core.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vk_icd.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vk_layer.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vk_platform.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vk_sdk_platform.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vulkan.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/khronos/vulkan/vulkan_core.h"
 )
-target_include_directories(dawn_vulkan_headers INTERFACE "${DAWN_THIRD_PARTY_DIR}/khronos")
+target_include_directories(dawn_vulkan_headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos")
