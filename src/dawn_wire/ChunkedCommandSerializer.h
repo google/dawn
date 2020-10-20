@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 namespace dawn_wire {
 
