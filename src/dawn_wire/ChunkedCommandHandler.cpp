@@ -14,6 +14,8 @@
 
 #include "dawn_wire/ChunkedCommandHandler.h"
 
+#include <algorithm>
+
 namespace dawn_wire {
 
     ChunkedCommandHandler::~ChunkedCommandHandler() = default;
