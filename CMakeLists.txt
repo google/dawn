@@ -18,12 +18,12 @@ cmake_minimum_required(VERSION 3.10)
 # becomes available.
 # When upgrading to CMake 3.12 we should add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake in
 # case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
-# override options in third_party dependencies.
+# override options in third_party dependencies. We can also add the HOMEPAGE_URL
+# entry to the project `HOMEPAGE_URL "https://dawn.googlesource.com/dawn"`
 
 project(
     Dawn
     DESCRIPTION "Dawn, a WebGPU implementation"
-    HOMEPAGE_URL "https://dawn.googlesource.com/dawn"
     LANGUAGES C CXX
 )
 
