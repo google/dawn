@@ -62,7 +62,7 @@ function(DawnGenerator)
         RESULT_VARIABLE RET
     )
     if (NOT RET EQUAL 0)
-        message(FATAL_ERROR "Dawn: Failed to get the dependencies for ${G_PRINT_NAME}.")
+        message(FATAL_ERROR "Dawn: Failed to get the dependencies for ${G_PRINT_NAME}. Base args are '${BASE_ARGS}'.")
     endif()
 
     # Ask CMake to re-run if any of the dependencies changed as it might modify the build graph.
@@ -77,7 +77,7 @@ function(DawnGenerator)
         RESULT_VARIABLE RET
     )
     if (NOT RET EQUAL 0)
-        message(FATAL_ERROR "Dawn: Failed to get the outputs for ${G_PRINT_NAME}.")
+        message(FATAL_ERROR "Dawn: Failed to get the outputs for ${G_PRINT_NAME}. Base args are '${BASE_ARGS}'.")
     endif()
 
     # Add the custom command that calls the generator.
