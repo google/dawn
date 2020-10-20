@@ -201,6 +201,10 @@ def _compute_python_dependencies(root_dir=None):
 
     paths = set()
     for path in module_paths:
+        # Builtin/namespaced modules may return None for the file path.
+        if not path:
+            continue
+
         path = os.path.abspath(path)
 
         if not path.startswith(root_dir):
