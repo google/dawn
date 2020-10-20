@@ -2307,6 +2307,12 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     }
   } else if (type->IsSampler()) {
     push_type(spv::Op::OpTypeSampler, {result});
+
+    // Register both of the sampler type names. In SPIR-V they're the same
+    // sampler type, so we need to match that when we do the dedup check.
+    type_name_to_id_["__sampler_sampler"] = id;
+    type_name_to_id_["__sampler_comparison"] = id;
+
   } else {
     error_ = "unable to convert type: " + type->type_name();
     return 0;

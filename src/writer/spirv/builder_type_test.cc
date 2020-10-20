@@ -1181,6 +1181,21 @@ TEST_F(BuilderTest_Type, ComparisonSampler) {
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
 }
 
+TEST_F(BuilderTest_Type, Dedup_Sampler_And_ComparisonSampler) {
+  ast::Module mod;
+  Builder b(&mod);
+
+  ast::type::SamplerType comp_sampler(
+      ast::type::SamplerKind::kComparisonSampler);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&comp_sampler), 1u);
+
+  ast::type::SamplerType sampler(ast::type::SamplerKind::kSampler);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
+
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
