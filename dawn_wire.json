@@ -45,6 +45,12 @@
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
+        "device create ready render pipeline": [
+            { "name": "device", "type": "device" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
+            { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
+        ],
         "device pop error scope": [
             { "name": "device", "type": "device" },
             { "name": "request serial", "type": "uint64_t" }
@@ -85,7 +91,12 @@
         "device create ready compute pipeline callback": [
             { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "create ready pipeline status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+        ],
+        "device create ready render pipeline callback": [
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "create ready pipeline status" },
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device uncaptured error callback": [
             { "name": "type", "type": "error type"},
@@ -121,6 +132,7 @@
             "BufferGetMappedRange",
             "DeviceCreateBuffer",
             "DeviceCreateReadyComputePipeline",
+            "DeviceCreateReadyRenderPipeline",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",

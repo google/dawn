@@ -99,6 +99,10 @@ namespace dawn_wire { namespace server {
                                                       WGPUComputePipeline pipeline,
                                                       const char* message,
                                                       void* userdata);
+        static void ForwardCreateReadyRenderPipeline(WGPUCreateReadyPipelineStatus status,
+                                                     WGPURenderPipeline pipeline,
+                                                     const char* message,
+                                                     void* userdata);
 
         // Error callbacks
         void OnUncapturedError(WGPUErrorType type, const char* message);
@@ -115,6 +119,10 @@ namespace dawn_wire { namespace server {
                                                   WGPUComputePipeline pipeline,
                                                   const char* message,
                                                   CreateReadyPipelineUserData* userdata);
+        void OnCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus status,
+                                                 WGPURenderPipeline pipeline,
+                                                 const char* message,
+                                                 CreateReadyPipelineUserData* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"
 

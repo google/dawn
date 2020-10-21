@@ -14,11 +14,13 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
     struct CreateReadyPipelineTask {
-        wgpu::ComputePipeline computePipeline;
+        wgpu::ComputePipeline computePipeline = nullptr;
+        wgpu::RenderPipeline renderPipeline = nullptr;
         bool isCompleted = false;
         std::string message;
     };
@@ -117,6 +119,133 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+
+    while (!task.isCompleted) {
+        WaitABit();
+    }
+
+    ASSERT_FALSE(task.message.empty());
+    ASSERT_EQ(nullptr, task.computePipeline.Get());
+}
+
+// Verify the basic use of CreateReadyRenderPipeline() works on all backends.
+TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
+    constexpr wgpu::TextureFormat kOutputAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    const char* vertexShader = R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+            gl_PointSize = 1.0f;
+        })";
+    const char* fragmentShader = R"(
+        #version 450
+        layout(location = 0) out vec4 o_color;
+        void main() {
+            o_color = vec4(0.f, 1.f, 0.f, 1.f);
+        })";
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    wgpu::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
+    wgpu::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    renderPipelineDescriptor.vertexStage.module = vsModule;
+    renderPipelineDescriptor.cFragmentStage.module = fsModule;
+    renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
+    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+
+    CreateReadyPipelineTask task;
+    device.CreateReadyRenderPipeline(
+        &renderPipelineDescriptor,
+        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
+
+            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = kOutputAttachmentFormat;
+    textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture outputTexture = device.CreateTexture(&textureDescriptor);
+
+    utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+
+        renderPassEncoder.SetPipeline(task.renderPipeline);
+        renderPassEncoder.Draw(1);
+        renderPassEncoder.EndPass();
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+}
+
+// Verify CreateReadyRenderPipeline() works as expected when there is any error that happens during
+// the creation of the render pipeline. The SPEC requires that during the call of
+// CreateReadyRenderPipeline() any error won't be forwarded to the error scope / unhandled error
+// callback.
+TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
+    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+
+    constexpr wgpu::TextureFormat kOutputAttachmentFormat = wgpu::TextureFormat::Depth32Float;
+
+    const char* vertexShader = R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+            gl_PointSize = 1.0f;
+        })";
+    const char* fragmentShader = R"(
+        #version 450
+        layout(location = 0) out vec4 o_color;
+        void main() {
+            o_color = vec4(0.f, 1.f, 0.f, 1.f);
+        })";
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    wgpu::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
+    wgpu::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    renderPipelineDescriptor.vertexStage.module = vsModule;
+    renderPipelineDescriptor.cFragmentStage.module = fsModule;
+    renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
+    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+
+    CreateReadyPipelineTask task;
+    device.CreateReadyRenderPipeline(
+        &renderPipelineDescriptor,
+        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
+
+            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
         },

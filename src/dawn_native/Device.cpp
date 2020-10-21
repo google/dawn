@@ -674,6 +674,22 @@ namespace dawn_native {
 
         return result;
     }
+    void DeviceBase::CreateReadyRenderPipeline(const RenderPipelineDescriptor* descriptor,
+                                               WGPUCreateReadyRenderPipelineCallback callback,
+                                               void* userdata) {
+        RenderPipelineBase* result = nullptr;
+        MaybeError maybeError = CreateRenderPipelineInternal(&result, descriptor);
+        if (maybeError.IsError()) {
+            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+            callback(WGPUCreateReadyPipelineStatus_Error, nullptr, error->GetMessage().c_str(),
+                     userdata);
+            return;
+        }
+
+        std::unique_ptr<CreateReadyRenderPipelineTask> request =
+            std::make_unique<CreateReadyRenderPipelineTask>(result, callback, userdata);
+        mCreateReadyPipelineTracker->TrackTask(std::move(request), GetPendingCommandSerial());
+    }
     RenderBundleEncoder* DeviceBase::CreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
         RenderBundleEncoder* result = nullptr;

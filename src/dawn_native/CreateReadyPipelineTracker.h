@@ -25,19 +25,41 @@ namespace dawn_native {
 
     class ComputePipelineBase;
     class DeviceBase;
+    class PipelineBase;
+    class RenderPipelineBase;
 
-    struct CreateReadyComputePipelineTask {
+    struct CreateReadyPipelineTaskBase {
+        CreateReadyPipelineTaskBase(void* userData);
+        virtual ~CreateReadyPipelineTaskBase();
+
+        virtual void Finish() = 0;
+
+      protected:
+        void* mUserData;
+    };
+
+    struct CreateReadyComputePipelineTask final : public CreateReadyPipelineTaskBase {
         CreateReadyComputePipelineTask(ComputePipelineBase* pipeline,
                                        WGPUCreateReadyComputePipelineCallback callback,
                                        void* userdata);
-        ~CreateReadyComputePipelineTask();
 
-        void Finish();
+        void Finish() final;
 
       private:
         ComputePipelineBase* mPipeline;
-        WGPUCreateReadyComputePipelineCallback mCallback;
-        void* mUserData;
+        WGPUCreateReadyComputePipelineCallback mCreateReadyComputePipelineCallback;
+    };
+
+    struct CreateReadyRenderPipelineTask final : public CreateReadyPipelineTaskBase {
+        CreateReadyRenderPipelineTask(RenderPipelineBase* pipeline,
+                                      WGPUCreateReadyRenderPipelineCallback callback,
+                                      void* userdata);
+
+        void Finish() final;
+
+      private:
+        RenderPipelineBase* mPipeline;
+        WGPUCreateReadyRenderPipelineCallback mCreateReadyRenderPipelineCallback;
     };
 
     class CreateReadyPipelineTracker {
@@ -45,14 +67,13 @@ namespace dawn_native {
         CreateReadyPipelineTracker(DeviceBase* device);
         ~CreateReadyPipelineTracker();
 
-        void TrackTask(std::unique_ptr<CreateReadyComputePipelineTask> task,
-                       ExecutionSerial serial);
+        void TrackTask(std::unique_ptr<CreateReadyPipelineTaskBase> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);
 
       private:
         DeviceBase* mDevice;
-        SerialQueue<ExecutionSerial, std::unique_ptr<CreateReadyComputePipelineTask>>
-            mCreateReadyComputePipelineTasksInFlight;
+        SerialQueue<ExecutionSerial, std::unique_ptr<CreateReadyPipelineTaskBase>>
+            mCreateReadyPipelineTasksInFlight;
     };
 
 }  // namespace dawn_native

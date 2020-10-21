@@ -519,6 +519,15 @@
             {"value": 3, "name": "unknown"}
         ]
     },
+    "create ready render pipeline callback": {
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "create ready pipeline status"},
+            {"name": "pipeline", "type": "render pipeline"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
     "cull mode": {
         "category": "enum",
         "values": [
@@ -591,6 +600,15 @@
                 "returns": "query set",
                 "args": [
                     {"name": "descriptor", "type": "query set descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create ready render pipeline",
+                "returns": "void",
+                "args": [
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
+                    {"name": "callback", "type": "create ready render pipeline callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {

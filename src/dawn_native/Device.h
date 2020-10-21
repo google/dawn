@@ -149,6 +149,9 @@ namespace dawn_native {
         void CreateReadyComputePipeline(const ComputePipelineDescriptor* descriptor,
                                         WGPUCreateReadyComputePipelineCallback callback,
                                         void* userdata);
+        void CreateReadyRenderPipeline(const RenderPipelineDescriptor* descriptor,
+                                       WGPUCreateReadyRenderPipelineCallback callback,
+                                       void* userdata);
         RenderBundleEncoder* CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);

@@ -56,6 +56,10 @@ class ProcTableAsClass {
                                               WGPUComputePipelineDescriptor const * descriptor,
                                               WGPUCreateReadyComputePipelineCallback callback,
                                               void* userdata);
+        void DeviceCreateReadyRenderPipeline(WGPUDevice self,
+                                             WGPURenderPipelineDescriptor const * descriptor,
+                                             WGPUCreateReadyRenderPipelineCallback callback,
+                                             void* userdata);
         void DeviceSetUncapturedErrorCallback(WGPUDevice self,
                                     WGPUErrorCallback callback,
                                     void* userdata);
@@ -80,6 +84,11 @@ class ProcTableAsClass {
             WGPUComputePipelineDescriptor const * descriptor,
             WGPUCreateReadyComputePipelineCallback callback,
             void* userdata) = 0;
+        virtual void OnDeviceCreateReadyRenderPipelineCallback(
+            WGPUDevice device,
+            WGPURenderPipelineDescriptor const * descriptor,
+            WGPUCreateReadyRenderPipelineCallback callback,
+            void* userdata) = 0;
         virtual void OnDeviceSetUncapturedErrorCallback(WGPUDevice device,
                                               WGPUErrorCallback callback,
                                               void* userdata) = 0;
@@ -102,6 +111,10 @@ class ProcTableAsClass {
                                                           WGPUCreateReadyPipelineStatus status,
                                                           WGPUComputePipeline pipeline,
                                                           const char* message);
+        void CallDeviceCreateReadyRenderPipelineCallback(WGPUDevice device,
+                                                         WGPUCreateReadyPipelineStatus status,
+                                                         WGPURenderPipeline pipeline,
+                                                         const char* message);
         void CallDeviceErrorCallback(WGPUDevice device, WGPUErrorType type, const char* message);
         void CallDeviceLostCallback(WGPUDevice device, const char* message);
         void CallMapAsyncCallback(WGPUBuffer buffer, WGPUBufferMapAsyncStatus status);
@@ -111,6 +124,7 @@ class ProcTableAsClass {
             ProcTableAsClass* procs = nullptr;
             WGPUErrorCallback deviceErrorCallback = nullptr;
             WGPUCreateReadyComputePipelineCallback createReadyComputePipelineCallback = nullptr;
+            WGPUCreateReadyRenderPipelineCallback createReadyRenderPipelineCallback = nullptr;
             WGPUDeviceLostCallback deviceLostCallback = nullptr;
             WGPUBufferMapCallback mapAsyncCallback = nullptr;
             WGPUFenceOnCompletionCallback fenceOnCompletionCallback = nullptr;
@@ -148,6 +162,12 @@ class MockProcTable : public ProcTableAsClass {
                     OnDeviceCreateReadyComputePipelineCallback,
                     (WGPUDevice device, WGPUComputePipelineDescriptor const * descriptor,
                      WGPUCreateReadyComputePipelineCallback callback,
+                     void* userdata),
+                    (override));
+        MOCK_METHOD(void,
+                    OnDeviceCreateReadyRenderPipelineCallback,
+                    (WGPUDevice device, WGPURenderPipelineDescriptor const * descriptor,
+                     WGPUCreateReadyRenderPipelineCallback callback,
                      void* userdata),
                     (override));
         MOCK_METHOD(void, OnDeviceSetUncapturedErrorCallback, (WGPUDevice device, WGPUErrorCallback callback, void* userdata), (override));

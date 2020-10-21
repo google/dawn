@@ -85,8 +85,13 @@ namespace dawn_wire { namespace client {
     bool Client::DoDeviceCreateReadyComputePipelineCallback(uint64_t requestSerial,
                                                             WGPUCreateReadyPipelineStatus status,
                                                             const char* message) {
-        mDevice->OnCreateReadyComputePipelineCallback(requestSerial, status, message);
-        return true;
+        return mDevice->OnCreateReadyComputePipelineCallback(requestSerial, status, message);
+    }
+
+    bool Client::DoDeviceCreateReadyRenderPipelineCallback(uint64_t requestSerial,
+                                                           WGPUCreateReadyPipelineStatus status,
+                                                           const char* message) {
+        return mDevice->OnCreateReadyRenderPipelineCallback(requestSerial, status, message);
     }
 
 }}  // namespace dawn_wire::client

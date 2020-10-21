@@ -112,6 +112,18 @@ void ProcTableAsClass::DeviceCreateReadyComputePipeline(
     OnDeviceCreateReadyComputePipelineCallback(self, descriptor, callback, userdata);
 }
 
+void ProcTableAsClass::DeviceCreateReadyRenderPipeline(
+    WGPUDevice self,
+    WGPURenderPipelineDescriptor const * descriptor,
+    WGPUCreateReadyRenderPipelineCallback callback,
+    void* userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->createReadyRenderPipelineCallback = callback;
+    object->userdata = userdata;
+
+    OnDeviceCreateReadyRenderPipelineCallback(self, descriptor, callback, userdata);
+}
+
 void ProcTableAsClass::CallDeviceErrorCallback(WGPUDevice device,
                                                WGPUErrorType type,
                                                const char* message) {
@@ -141,6 +153,14 @@ void ProcTableAsClass::CallDeviceCreateReadyComputePipelineCallback(WGPUDevice d
                                                                     const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->createReadyComputePipelineCallback(status, pipeline, message, object->userdata);
+}
+
+void ProcTableAsClass::CallDeviceCreateReadyRenderPipelineCallback(WGPUDevice device,
+                                                                   WGPUCreateReadyPipelineStatus status,
+                                                                   WGPURenderPipeline pipeline,
+                                                                   const char* message) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    object->createReadyRenderPipelineCallback(status, pipeline, message, object->userdata);
 }
 
 {% for type in by_category["object"] %}

@@ -18,39 +18,72 @@
 
 namespace dawn_native {
 
+    CreateReadyPipelineTaskBase::CreateReadyPipelineTaskBase(void* userdata) : mUserData(userdata) {
+    }
+
+    CreateReadyPipelineTaskBase::~CreateReadyPipelineTaskBase() {
+    }
+
     CreateReadyComputePipelineTask::CreateReadyComputePipelineTask(
         ComputePipelineBase* pipeline,
         WGPUCreateReadyComputePipelineCallback callback,
         void* userdata)
-        : mPipeline(pipeline), mCallback(callback), mUserData(userdata) {
-    }
-
-    CreateReadyComputePipelineTask::~CreateReadyComputePipelineTask() {
+        : CreateReadyPipelineTaskBase(userdata),
+          mPipeline(pipeline),
+          mCreateReadyComputePipelineCallback(callback) {
     }
 
     void CreateReadyComputePipelineTask::Finish() {
-        mCallback(WGPUCreateReadyPipelineStatus_Success,
-                  reinterpret_cast<WGPUComputePipeline>(mPipeline), "", mUserData);
+        ASSERT(mPipeline != nullptr);
+        ASSERT(mCreateReadyComputePipelineCallback != nullptr);
+
+        mCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus_Success,
+                                            reinterpret_cast<WGPUComputePipeline>(mPipeline), "",
+                                            mUserData);
+
+        // Set mCreateReadyComputePipelineCallback to nullptr in case it is called more than once.
+        mCreateReadyComputePipelineCallback = nullptr;
+    }
+
+    CreateReadyRenderPipelineTask::CreateReadyRenderPipelineTask(
+        RenderPipelineBase* pipeline,
+        WGPUCreateReadyRenderPipelineCallback callback,
+        void* userdata)
+        : CreateReadyPipelineTaskBase(userdata),
+          mPipeline(pipeline),
+          mCreateReadyRenderPipelineCallback(callback) {
+    }
+
+    void CreateReadyRenderPipelineTask::Finish() {
+        ASSERT(mPipeline != nullptr);
+        ASSERT(mCreateReadyRenderPipelineCallback != nullptr);
+
+        mCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus_Success,
+                                           reinterpret_cast<WGPURenderPipeline>(mPipeline), "",
+                                           mUserData);
+
+        // Set mCreateReadyPipelineCallback to nullptr in case it is called more than once.
+        mCreateReadyRenderPipelineCallback = nullptr;
     }
 
     CreateReadyPipelineTracker::CreateReadyPipelineTracker(DeviceBase* device) : mDevice(device) {
     }
 
     CreateReadyPipelineTracker::~CreateReadyPipelineTracker() {
-        ASSERT(mCreateReadyComputePipelineTasksInFlight.Empty());
+        ASSERT(mCreateReadyPipelineTasksInFlight.Empty());
     }
 
-    void CreateReadyPipelineTracker::TrackTask(std::unique_ptr<CreateReadyComputePipelineTask> task,
+    void CreateReadyPipelineTracker::TrackTask(std::unique_ptr<CreateReadyPipelineTaskBase> task,
                                                ExecutionSerial serial) {
-        mCreateReadyComputePipelineTasksInFlight.Enqueue(std::move(task), serial);
+        mCreateReadyPipelineTasksInFlight.Enqueue(std::move(task), serial);
         mDevice->AddFutureSerial(serial);
     }
 
     void CreateReadyPipelineTracker::Tick(ExecutionSerial finishedSerial) {
-        for (auto& task : mCreateReadyComputePipelineTasksInFlight.IterateUpTo(finishedSerial)) {
+        for (auto& task : mCreateReadyPipelineTasksInFlight.IterateUpTo(finishedSerial)) {
             task->Finish();
         }
-        mCreateReadyComputePipelineTasksInFlight.ClearUpTo(finishedSerial);
+        mCreateReadyPipelineTasksInFlight.ClearUpTo(finishedSerial);
     }
 
 }  // namespace dawn_native

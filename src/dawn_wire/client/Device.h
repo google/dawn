@@ -43,6 +43,9 @@ namespace dawn_wire { namespace client {
         void CreateReadyComputePipeline(WGPUComputePipelineDescriptor const* descriptor,
                                         WGPUCreateReadyComputePipelineCallback callback,
                                         void* userdata);
+        void CreateReadyRenderPipeline(WGPURenderPipelineDescriptor const* descriptor,
+                                       WGPUCreateReadyRenderPipelineCallback callback,
+                                       void* userdata);
 
         void HandleError(WGPUErrorType errorType, const char* message);
         void HandleDeviceLost(const char* message);
@@ -52,6 +55,9 @@ namespace dawn_wire { namespace client {
         bool OnCreateReadyComputePipelineCallback(uint64_t requestSerial,
                                                   WGPUCreateReadyPipelineStatus status,
                                                   const char* message);
+        bool OnCreateReadyRenderPipelineCallback(uint64_t requestSerial,
+                                                 WGPUCreateReadyPipelineStatus status,
+                                                 const char* message);
 
         WGPUQueue GetDefaultQueue();
 
@@ -64,13 +70,14 @@ namespace dawn_wire { namespace client {
         uint64_t mErrorScopeRequestSerial = 0;
         uint64_t mErrorScopeStackSize = 0;
 
-        struct CreateReadyComputePipelineRequest {
-            WGPUCreateReadyComputePipelineCallback callback = nullptr;
+        struct CreateReadyPipelineRequest {
+            WGPUCreateReadyComputePipelineCallback createReadyComputePipelineCallback = nullptr;
+            WGPUCreateReadyRenderPipelineCallback createReadyRenderPipelineCallback = nullptr;
             void* userdata = nullptr;
             ObjectId pipelineObjectID;
         };
-        std::map<uint64_t, CreateReadyComputePipelineRequest> mCreateReadyComputePipelineRequests;
-        uint64_t mCreateReadyComputePipelineRequestSerial = 0;
+        std::map<uint64_t, CreateReadyPipelineRequest> mCreateReadyPipelineRequests;
+        uint64_t mCreateReadyPipelineRequestSerial = 0;
 
         Client* mClient = nullptr;
         WGPUErrorCallback mErrorCallback = nullptr;
