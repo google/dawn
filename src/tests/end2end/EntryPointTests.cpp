@@ -121,7 +121,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
     DAWN_SKIP_TEST_IF(IsVulkan());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        type Data = [[block]] struct {
+        [[block]] struct Data {
             [[offset(0)]] data : u32;
         };
         [[binding(0), set(0)]] var<storage_buffer> data : Data;

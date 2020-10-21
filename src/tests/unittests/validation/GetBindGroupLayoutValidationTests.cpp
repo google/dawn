@@ -830,7 +830,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 // TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
 TEST_F(GetBindGroupLayoutTests, DISABLED_FromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        type Data = [[block]] struct {
+        [[block]] struct Data {
             [[offset 0]] data : f32;
         };
         [[binding 0, set 0]] var<storage_buffer> data0 : Data;

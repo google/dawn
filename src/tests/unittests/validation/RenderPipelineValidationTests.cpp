@@ -744,7 +744,7 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        type Uniforms = [[block]] struct {
+        [[block]] struct Uniforms {
             [[offset 0]] data : vec4<f32>;
         };
         [[binding 0, set 0]] var<uniform> var0 : Uniforms;
