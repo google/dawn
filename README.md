@@ -34,7 +34,7 @@ Developer documentation:
  - [Debugging Dawn](docs/debugging.md)
  - [Dawn's infrastructure](docs/infra.md)
 
-User documentation: (TODO, figure out what overlaps with webgpu.h docs)
+User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
 
 ## Status
 
