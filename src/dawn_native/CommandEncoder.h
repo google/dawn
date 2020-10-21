@@ -22,11 +22,14 @@
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
 
+#include <map>
 #include <string>
 
 namespace dawn_native {
 
     struct BeginRenderPassCmd;
+
+    using UsedQueryMap = std::map<QuerySetBase*, std::vector<bool>>;
 
     class CommandEncoder final : public ObjectBase {
       public:
@@ -36,6 +39,8 @@ namespace dawn_native {
         CommandBufferResourceUsage AcquireResourceUsages();
 
         void TrackUsedQuerySet(QuerySetBase* querySet);
+        void TrackUsedQueryIndex(QuerySetBase* querySet, uint32_t queryIndex);
+        const UsedQueryMap& GetUsedQueryIndices() const;
 
         // Dawn API
         ComputePassEncoder* BeginComputePass(const ComputePassDescriptor* descriptor);
@@ -77,6 +82,7 @@ namespace dawn_native {
         std::set<BufferBase*> mTopLevelBuffers;
         std::set<TextureBase*> mTopLevelTextures;
         std::set<QuerySetBase*> mUsedQuerySets;
+        UsedQueryMap mUsedQueryIndices;
     };
 
 }  // namespace dawn_native
