@@ -35,7 +35,7 @@ class RefCounted {
     virtual void DeleteThis();
 
   private:
-    std::atomic_uint64_t mRefCount;
+    std::atomic<uint64_t> mRefCount;
 };
 
 template <typename T>
