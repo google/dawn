@@ -55,6 +55,15 @@ class TestCase:
     def GetResult(self, fmt):
         return self.results[fmt]
 
+    def GetReason(self):
+        with open(self.GetInputPath()) as test:
+            first_line = test.readline()
+        if (first_line.startswith("# v-")):
+            reason = first_line[2:8]
+        else:
+            reason = ''
+        return reason
+
 
 """
 The test runner, will execute a series of test cases and record the
@@ -81,40 +90,80 @@ class TestRunner:
                                               stderr=subprocess.STDOUT)
 
         except Exception as e:
-            if not tc.IsExpectedFail():
-                print("{}".format("".join(map(chr, bytearray(e.output)))))
-                print(e)
-            return False
+            failure_reason = "{}".format("".join(map(chr,
+                                                     bytearray(e.output))))
+            if tc.IsExpectedFail():
+                right_reason = tc.GetReason()
+                if (right_reason in failure_reason):
+                    return False, ""
+                else:
+                    return False, right_reason
 
-        return True
+            if not tc.IsExpectedFail():
+                print(failure_reason)
+                print(e)
+                return False, ""
+
+        return True, ""
 
     def RunTests(self):
         """Runs a set of test cases"""
         for tc in self.test_cases:
-            result = self.RunTest(tc)
-
-            if not tc.IsExpectedFail() and not result:
-                self.failures.append(tc.GetInputPath())
-            elif tc.IsExpectedFail() and result:
+            result, reason = self.RunTest(tc)
+            """evaluate final result based on result, tc.IsExpectedFail() and reason"""
+            if not result:
+                # result == false, expected true, reason:don't care
+                if not tc.IsExpectedFail():
+                    print("Expected: " + tc.GetInputPath() +
+                          " to pass but failed.")
+                    self.failures.append(tc.GetInputPath())
+                # result == false, expected false, reason: wrong
+                else:
+                    if reason.startswith("v-"):
+                        print("Failed for a wrong reason: " +
+                              tc.GetInputPath() +
+                              " expected with error code: " + reason)
+                        self.failures_wrong_reason.append(tc.GetInputPath())
+            # result == true, expected false, reason:don't care
+            elif tc.IsExpectedFail():
                 print("Expected: " + tc.GetInputPath() +
                       " to fail but passed.")
                 self.failures.append(tc.GetInputPath())
 
+    def GetUnexpectedFailures(self):
+        for failure in self.failures + self.failures_wrong_reason:
+            if failure not in self.known_failures:
+                self.unexpected_failures.append(failure)
+        return
+
     def SummarizeResults(self):
         """Prints a summarization of the test results to STDOUT"""
+        if len(self.unexpected_failures):
+            self.unexpected_failures.sort()
+            print('\nSummary of unexpected failures:')
+            for unexpected_fail in self.unexpected_failures:
+                print(unexpected_fail)
 
-        if len(self.failures) > 0:
-            self.failures.sort()
+        for f in self.known_failures:
+            if f not in self.failures_wrong_reason + self.failures:
+                self.unexpected_successes.append(f)
 
-            print('\nSummary of Failures:')
-            for failure in self.failures:
-                print(failure)
+        if len(self.unexpected_successes):
+            print('\nSummary of unexpected successes:')
+            for s in self.unexpected_successes:
+                print(s)
 
         print('')
         print('Test cases executed: {}'.format(len(self.test_cases)))
         print('  Successes:  {}'.format(
-            (len(self.test_cases) - len(self.failures))))
-        print('  Failures:   {}'.format(len(self.failures)))
+            (len(self.test_cases) - len(self.failures) -
+             len(self.failures_wrong_reason))))
+        print('  Failures:   {}'.format(
+            len(self.failures) + len(self.failures_wrong_reason)))
+        print('  Unexpected Failures:  {}'.format(len(
+            self.unexpected_failures)))
+        print('  Unexpected Successes:  {}'.format(
+            len(self.unexpected_successes)))
         print('')
 
     def Run(self):
@@ -133,6 +182,10 @@ class TestRunner:
                                                'src', 'webgpu', 'shader',
                                                'validation', 'wgsl'),
                           help='path to directory containing test files')
+        parser.add_option(
+            '--known-failures-file',
+            default=os.path.join(base_path, 'tools', 'known_tint_failures'),
+            help='path to directory containing the known failures file')
         parser.add_option(
             '--test-prog-path',
             default=None,
@@ -179,13 +232,23 @@ class TestRunner:
                         if os.path.isfile(input_path):
                             self.test_cases.append(
                                 TestCase(input_path, self.options.parse_only))
+            known_failure_file = self.options.known_failures_file
+            self.known_failures = []
+            with open(known_failure_file, 'r') as f:
+                for failure_filename in f.read().splitlines():
+                    self.known_failures.append(
+                        os.path.join(self.options.test_dir, failure_filename))
 
         self.failures = []
+        self.failures_wrong_reason = []
+        self.unexpected_failures = []
+        self.unexpected_successes = []
 
         self.RunTests()
+        self.GetUnexpectedFailures()
         self.SummarizeResults()
 
-        return len(self.failures)
+        return not len(self.unexpected_failures + self.unexpected_successes)
 
 
 def main():
