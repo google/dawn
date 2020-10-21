@@ -168,21 +168,11 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
   if (ty->IsAlias()) {
     auto* alias = ty->AsAlias();
-    // Emitting an alias to a struct where the names are the same means we can
-    // skip emitting the alias and just emit the struct. This will go away once
-    // the anonymous structs are removed from the type alias
-    if (alias->type()->IsStruct() &&
-        alias->type()->AsStruct()->name() == alias->name()) {
-      if (!EmitStructType(alias->type()->AsStruct())) {
-        return false;
-      }
-    } else {
-      out_ << "type " << alias->name() << " = ";
-      if (!EmitType(alias->type())) {
-        return false;
-      }
-      out_ << ";" << std::endl;
+    out_ << "type " << alias->name() << " = ";
+    if (!EmitType(alias->type())) {
+      return false;
     }
+    out_ << ";" << std::endl;
   } else if (ty->IsStruct()) {
     if (!EmitStructType(ty->AsStruct())) {
       return false;

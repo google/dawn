@@ -202,22 +202,22 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
 
   if (ty->IsAlias()) {
     auto* alias = ty->AsAlias();
-    // This will go away once type_alias doesn't accept anonymous
-    // structs anymore
-    if (alias->type()->IsStruct() &&
-        alias->type()->AsStruct()->name() == alias->name()) {
-      if (!EmitStructType(out, alias->type()->AsStruct())) {
+    // HLSL typedef is for intrinsic types only. For an alias'd struct,
+    // generate a secondary struct with the new name.
+    if (alias->type()->IsStruct()) {
+      if (!EmitStructType(out, alias->type()->AsStruct(), alias->name())) {
         return false;
       }
-    } else {
-      out << "typedef ";
-      if (!EmitType(out, alias->type(), "")) {
-        return false;
-      }
-      out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+      return true;
     }
+    out << "typedef ";
+    if (!EmitType(out, alias->type(), "")) {
+      return false;
+    }
+    out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
   } else if (ty->IsStruct()) {
-    if (!EmitStructType(out, ty->AsStruct())) {
+    auto* str = ty->AsStruct();
+    if (!EmitStructType(out, str, str->name())) {
       return false;
     }
   } else {
@@ -1975,11 +1975,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const ast::type::StructType* str) {
+                                   const ast::type::StructType* str,
+                                   const std::string& name) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
   // }
-  out << "struct " << str->name() << " {" << std::endl;
+  out << "struct " << name << " {" << std::endl;
 
   increment_indent();
   for (const auto& mem : str->impl()->members()) {

@@ -181,7 +181,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
+  ASSERT_TRUE(gen().EmitStructType(out(), &s, "S")) << gen().error();
   EXPECT_EQ(result(), R"(struct S {
   int a;
   float b;
@@ -263,7 +263,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
+  ASSERT_TRUE(gen().EmitStructType(out(), &s, "S")) << gen().error();
   EXPECT_EQ(result(), R"(struct S {
   int double_tint_0;
   float float_tint_0;
@@ -293,8 +293,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s)) << gen().error();
-  EXPECT_EQ(result(), R"(struct S {
+  ASSERT_TRUE(gen().EmitStructType(out(), &s, "B")) << gen().error();
+  EXPECT_EQ(result(), R"(struct B {
   int a;
   float b;
 })");

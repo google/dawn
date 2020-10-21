@@ -92,17 +92,6 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   EXPECT_EQ(m.constructed_types()[0]->AsAlias()->name(), "A");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Struct) {
-  auto* p = parser("type A = struct { a : f32; };");
-  p->global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto m = p->module();
-  ASSERT_EQ(m.constructed_types().size(), 1u);
-  ASSERT_TRUE(m.constructed_types()[0]->IsStruct());
-  EXPECT_EQ(m.constructed_types()[0]->AsStruct()->name(), "A");
-}
-
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
   auto* p = parser(R"(struct A {
   a : f32;
@@ -237,21 +226,6 @@ TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {
   p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:22: missing ';' for struct declaration");
-}
-
-// This was failing due to not finding the missing ;. https://crbug.com/tint/218
-TEST_F(ParserImplTest, TypeDecl_Struct_Empty) {
-  auto* p = parser("type str = struct {};");
-  p->global_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  auto module = p->module();
-  ASSERT_EQ(module.constructed_types().size(), 1u);
-
-  ASSERT_TRUE(module.constructed_types()[0]->IsStruct());
-  auto* str = module.constructed_types()[0]->AsStruct();
-  EXPECT_EQ(str->name(), "str");
-  EXPECT_EQ(str->impl()->members().size(), 0u);
 }
 
 }  // namespace

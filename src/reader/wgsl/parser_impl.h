@@ -156,9 +156,8 @@ class ParserImpl {
   /// @returns the storage class or StorageClass::kNone if none matched
   ast::StorageClass storage_class();
   /// Parses a `struct_decl` grammar element
-  /// @param name the name of the struct
   /// @returns the struct type or nullptr on error
-  std::unique_ptr<ast::type::StructType> struct_decl(const std::string& name);
+  std::unique_ptr<ast::type::StructType> struct_decl();
   /// Parses a `struct_decoration_decl` grammar element, appending newly
   /// parsed decorations to the end of |decos|.
   /// @param decos list to store the parsed decorations

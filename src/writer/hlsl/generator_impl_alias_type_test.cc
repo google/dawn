@@ -63,13 +63,13 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
   auto str = std::make_unique<ast::Struct>();
   str->set_members(std::move(members));
 
-  ast::type::StructType s("a", std::move(str));
-  ast::type::AliasType alias("a", &s);
+  ast::type::StructType s("A", std::move(str));
+  ast::type::AliasType alias("B", &s);
 
   ast::Module m;
   GeneratorImpl g(&m);
   ASSERT_TRUE(gen().EmitConstructedType(out(), &alias)) << gen().error();
-  EXPECT_EQ(result(), R"(struct a {
+  EXPECT_EQ(result(), R"(struct B {
   float a;
   int b;
 };

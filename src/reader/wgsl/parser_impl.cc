@@ -261,7 +261,7 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  auto str = struct_decl("");
+  auto str = struct_decl();
   if (has_error()) {
     return;
   }
@@ -1080,7 +1080,6 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-//   | TYPE IDENT EQUAL struct_decl
 ast::type::Type* ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
@@ -1105,17 +1104,8 @@ ast::type::Type* ParserImpl::type_alias() {
   if (has_error())
     return nullptr;
   if (type == nullptr) {
-    auto str = struct_decl(name);
-    if (has_error())
-      return nullptr;
-    if (str == nullptr) {
-      set_error(peek(), "invalid type alias");
-      return nullptr;
-    }
-
-    type = ctx_.type_mgr().Get(std::move(str));
-    register_constructed(name, type);
-    return type;
+    set_error(peek(), "invalid type alias");
+    return nullptr;
   }
   if (type == nullptr) {
     set_error(peek(), "invalid type for alias");
@@ -1501,9 +1491,8 @@ ast::StorageClass ParserImpl::storage_class() {
 }
 
 // struct_decl
-//   : struct_decoration_decl* STRUCT struct_body_decl
-std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
-    const std::string& name) {
+//   : struct_decoration_decl* STRUCT IDENT struct_body_decl
+std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   auto t = peek();
   auto source = t.source();
 
@@ -1527,17 +1516,12 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
   }
   next();  // Consume the peek
 
-  // If there is no name this is a global struct call. This check will go
-  // away when the type_alias struct entry is removed.
-  std::string str_name = name;
-  if (name.empty()) {
-    t = next();
-    if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for struct declaration");
-      return nullptr;
-    }
-    str_name = t.to_str();
+  t = next();
+  if (!t.IsIdentifier()) {
+    set_error(t, "missing identifier for struct declaration");
+    return nullptr;
   }
+  auto name = t.to_str();
 
   auto body = struct_body_decl();
   if (has_error()) {
@@ -1545,7 +1529,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
   }
 
   return std::make_unique<ast::type::StructType>(
-      str_name,
+      name,
       std::make_unique<ast::Struct>(source, std::move(decos), std::move(body)));
 }
 

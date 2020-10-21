@@ -39,7 +39,7 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_F32) {
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitAliasType_Struct_Ident) {
+TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -70,8 +70,7 @@ type B = A;
 )");
 }
 
-// This should go away once type_alias'd anonymous structs are removed.
-TEST_F(WgslGeneratorImplTest, EmitAliasType_Struct) {
+TEST_F(WgslGeneratorImplTest, EmitAliasType_ToStruct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -88,15 +87,11 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_Struct) {
   str->set_members(std::move(members));
 
   ast::type::StructType s("A", std::move(str));
-  ast::type::AliasType alias("A", &s);
+  ast::type::AliasType alias("B", &s);
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct A {
-  a : f32;
-  [[offset(4)]]
-  b : i32;
-};
+  EXPECT_EQ(g.result(), R"(type B = A;
 )");
 }
 

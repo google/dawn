@@ -28,22 +28,7 @@ struct S {
   a : i32;
   [[offset(4)]] b : f32;
 })");
-  auto s = p->struct_decl("");
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(s, nullptr);
-  ASSERT_EQ(s->name(), "S");
-  ASSERT_EQ(s->impl()->members().size(), 2u);
-  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
-}
-
-TEST_F(ParserImplTest, StructDecl_Parses_WithoutName) {
-  auto* p = parser(R"(
-struct {
-  a : i32;
-  [[offset(4)]] b : f32;
-})");
-  auto s = p->struct_decl("S");
+  auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->name(), "S");
@@ -58,7 +43,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   a : f32;
   b : f32;
 })");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->name(), "B");
@@ -76,7 +61,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   a : f32;
   b : f32;
 })");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->name(), "S");
@@ -90,7 +75,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
   auto* p = parser("struct S {}");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->impl()->members().size(), 0u);
@@ -98,7 +83,7 @@ TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
 
 TEST_F(ParserImplTest, StructDecl_MissingIdent) {
   auto* p = parser("struct {}");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
   EXPECT_EQ(p->error(), "1:8: missing identifier for struct declaration");
@@ -106,7 +91,7 @@ TEST_F(ParserImplTest, StructDecl_MissingIdent) {
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
   auto* p = parser("struct S }");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
   EXPECT_EQ(p->error(), "1:10: missing { for struct declaration");
@@ -114,7 +99,7 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
   auto* p = parser("struct S { a : B; }");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
   EXPECT_EQ(p->error(), "1:16: unknown constructed type 'B'");
@@ -122,7 +107,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
   auto* p = parser("[[block struct S { a : i32; }");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
   EXPECT_EQ(p->error(), "1:9: missing ]] for struct decoration");
@@ -130,7 +115,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
 
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
   auto* p = parser("[[block]] S {}");
-  auto s = p->struct_decl("");
+  auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
   EXPECT_EQ(p->error(), "1:11: missing struct declaration");

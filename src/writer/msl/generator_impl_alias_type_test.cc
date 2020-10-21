@@ -80,35 +80,6 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasMatchStruct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-
-  ast::StructMemberList members;
-  members.push_back(std::make_unique<ast::StructMember>(
-      "a", &f32, ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &i32, std::move(b_deco)));
-
-  auto str = std::make_unique<ast::Struct>();
-  str->set_members(std::move(members));
-
-  ast::type::StructType s("a", std::move(str));
-  ast::type::AliasType alias("a", &s);
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct a {
-  float a;
-  int b;
-};
-)");
-}
-
 TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;

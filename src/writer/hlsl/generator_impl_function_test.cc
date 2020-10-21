@@ -32,7 +32,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -310,13 +309,12 @@ TEST_F(HlslGeneratorImplTest_Function,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Uniforms", std::move(str));
-  auto alias = std::make_unique<ast::type::AliasType>("Uniforms", &s);
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "uniforms", ast::StorageClass::kUniform, alias.get()));
+          "uniforms", ast::StorageClass::kUniform, &s));
 
-  mod()->AddConstructedType(alias.get());
+  mod()->AddConstructedType(&s);
 
   ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));

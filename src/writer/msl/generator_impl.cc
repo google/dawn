@@ -245,19 +245,11 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   if (ty->IsAlias()) {
     auto* alias = ty->AsAlias();
 
-    // This will go away once type_alias does not accept anonymous structs
-    if (alias->type()->IsStruct() &&
-        alias->type()->AsStruct()->name() == alias->name()) {
-      if (!EmitStructType(alias->type()->AsStruct())) {
-        return false;
-      }
-    } else {
-      out_ << "typedef ";
-      if (!EmitType(alias->type(), "")) {
-        return false;
-      }
-      out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
+    out_ << "typedef ";
+    if (!EmitType(alias->type(), "")) {
+      return false;
     }
+    out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
   } else if (ty->IsStruct()) {
     if (!EmitStructType(ty->AsStruct())) {
       return false;
