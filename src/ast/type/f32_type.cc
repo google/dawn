@@ -30,6 +30,10 @@ std::string F32Type::type_name() const {
   return "__f32";
 }
 
+uint64_t F32Type::MinBufferBindingSize() const {
+  return 4;
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

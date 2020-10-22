@@ -29,6 +29,16 @@
 namespace tint {
 namespace inspector {
 
+/// Container for information about how a resource is bound
+struct ResourceBinding {
+  /// Bind group the binding belongs
+  uint32_t bind_group;
+  /// Identifier to identify this binding within the bind group
+  uint32_t binding;
+  /// Minimum size required for this binding, in bytes.
+  uint64_t min_buffer_binding_size;
+};
+
 /// Extracts information from a module
 class Inspector {
  public:
@@ -47,6 +57,11 @@ class Inspector {
 
   /// @returns map of const_id to initial value
   std::map<uint32_t, Scalar> GetConstantIDs();
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for Uniform buffers.
+  std::vector<ResourceBinding> GetUniformBufferResourceBindings(
+      const std::string& entry_point);
 
  private:
   const ast::Module& module_;

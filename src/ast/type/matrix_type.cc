@@ -28,6 +28,8 @@ MatrixType::MatrixType(Type* subtype, uint32_t rows, uint32_t columns)
   assert(columns < 5);
 }
 
+MatrixType::~MatrixType() = default;
+
 bool MatrixType::IsMatrix() const {
   return true;
 }
@@ -37,7 +39,9 @@ std::string MatrixType::type_name() const {
          subtype_->type_name();
 }
 
-MatrixType::~MatrixType() = default;
+uint64_t MatrixType::MinBufferBindingSize() const {
+  return rows_ * columns_ * subtype_->MinBufferBindingSize();
+}
 
 }  // namespace type
 }  // namespace ast

@@ -45,6 +45,10 @@ class VectorType : public Type {
   /// @returns the name for th type
   std::string type_name() const override;
 
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
+
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 2;

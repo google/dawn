@@ -33,6 +33,18 @@ bool ArrayType::IsArray() const {
   return true;
 }
 
+uint64_t ArrayType::MinBufferBindingSize() const {
+  if (IsRuntimeArray()) {
+    return array_stride();
+  }
+
+  if (has_array_stride()) {
+    return size_ * array_stride();
+  }
+
+  return size_ * type()->MinBufferBindingSize();
+}
+
 uint32_t ArrayType::array_stride() const {
   for (const auto& deco : decos_) {
     if (deco->IsStride()) {

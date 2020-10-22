@@ -25,6 +25,8 @@ StructType::StructType(const std::string& name, std::unique_ptr<Struct> impl)
 
 StructType::StructType(StructType&&) = default;
 
+StructType::~StructType() = default;
+
 bool StructType::IsStruct() const {
   return true;
 }
@@ -33,7 +35,21 @@ std::string StructType::type_name() const {
   return "__struct_" + name_;
 }
 
-StructType::~StructType() = default;
+uint64_t StructType::MinBufferBindingSize() const {
+  if (!struct_->members().size()) {
+    return 0;
+  }
+
+  const auto& last_member = struct_->members().back();
+
+  // If there is no offset, then this is not a host-shareable struct, returning
+  // 0 indicates this to the caller.
+  if (!last_member->has_offset_decoration()) {
+    return 0;
+  }
+
+  return last_member->offset() + last_member->type()->MinBufferBindingSize();
+}
 
 }  // namespace type
 }  // namespace ast

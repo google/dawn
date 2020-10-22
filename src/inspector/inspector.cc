@@ -25,6 +25,7 @@
 #include "src/ast/null_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
@@ -129,6 +130,44 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     }
 
     result[constant_id] = Scalar();
+  }
+
+  return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
+    const std::string& entry_point) {
+  auto* func = module_.FindFunctionByName(entry_point);
+  if (!func) {
+    error_ += entry_point + " was not found!";
+    return {};
+  }
+
+  if (!func->IsEntryPoint()) {
+    error_ += entry_point + " is not an entry point!";
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+
+  for (auto& ruv : func->referenced_uniform_variables()) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = ruv;
+    if (!var->type()->IsStruct()) {
+      continue;
+    }
+
+    if (!var->type()->AsStruct()->IsBlockDecorated()) {
+      continue;
+    }
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize();
+
+    result.push_back(std::move(entry));
   }
 
   return result;

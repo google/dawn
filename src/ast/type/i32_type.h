@@ -37,6 +37,10 @@ class I32Type : public Type {
 
   /// @returns the name for this type
   std::string type_name() const override;
+
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
 };
 
 }  // namespace type

@@ -109,6 +109,10 @@ bool Type::IsVoid() const {
   return false;
 }
 
+uint64_t Type::MinBufferBindingSize() const {
+  return 0;
+}
+
 bool Type::is_scalar() {
   return is_float_scalar() || is_integer_scalar() || IsBool();
 }

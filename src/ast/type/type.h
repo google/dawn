@@ -72,6 +72,10 @@ class Type {
   /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;
 
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  virtual uint64_t MinBufferBindingSize() const;
+
   /// @returns the pointee type if this is a pointer, |this| otherwise
   Type* UnwrapPtrIfNeeded();
 

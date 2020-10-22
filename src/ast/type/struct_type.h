@@ -48,8 +48,12 @@ class StructType : public Type {
   /// @returns the struct name
   Struct* impl() const { return struct_.get(); }
 
-  /// @returns the name for th type
+  /// @returns the name for the type
   std::string type_name() const override;
+
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
 
  private:
   std::string name_;

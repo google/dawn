@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 namespace type {
 
-/// A type alias type. Holds a name a pointer to another type.
+/// A type alias type. Holds a name and pointer to another type.
 class AliasType : public Type {
  public:
   /// Constructor
@@ -44,6 +44,10 @@ class AliasType : public Type {
 
   /// @returns the name for this type
   std::string type_name() const override;
+
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
 
  private:
   std::string name_;

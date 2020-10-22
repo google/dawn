@@ -46,6 +46,10 @@ class ArrayType : public Type {
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }
 
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
+
   /// Sets the array decorations
   /// @param decos the decorations to set
   void set_decorations(ast::ArrayDecorationList decos) {

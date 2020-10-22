@@ -32,6 +32,10 @@ std::string U32Type::type_name() const {
   return "__u32";
 }
 
+uint64_t U32Type::MinBufferBindingSize() const {
+  return 4;
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

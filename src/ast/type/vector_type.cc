@@ -38,6 +38,10 @@ std::string VectorType::type_name() const {
   return "__vec_" + std::to_string(size_) + subtype_->type_name();
 }
 
+uint64_t VectorType::MinBufferBindingSize() const {
+  return size_ * subtype_->MinBufferBindingSize();
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

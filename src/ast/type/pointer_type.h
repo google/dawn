@@ -39,6 +39,10 @@ class PointerType : public Type {
   /// @returns true if the type is a pointer type
   bool IsPointer() const override;
 
+  /// @returns minimum size required for this type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t MinBufferBindingSize() const override;
+
   /// @returns the pointee type
   Type* type() const { return subtype_; }
   /// @returns the storage class of the pointer
