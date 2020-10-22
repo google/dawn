@@ -30,7 +30,12 @@ class SwapChainTests : public DawnTest {
         glfwSetErrorCallback([](int code, const char* message) {
             dawn::ErrorLog() << "GLFW error " << code << " " << message;
         });
-        glfwInit();
+
+        // GLFW can fail to start in headless environments, in which SwapChainTests are
+        // inapplicable. Skip this cases without producing a test failure.
+        if (glfwInit() == GLFW_FALSE) {
+            GTEST_SKIP();
+        }
 
         // The SwapChainTests don't create OpenGL contexts so we don't need to call
         // SetupGLFWWindowHintsForBackend. Set GLFW_NO_API anyway to avoid GLFW bringing up a GL
@@ -131,6 +136,10 @@ TEST_P(SwapChainTests, DestroySurfaceAfterGet) {
 
 // Test switching between present modes.
 TEST_P(SwapChainTests, SwitchPresentMode) {
+    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
+    // makes the test fail.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Fifo,
@@ -156,6 +165,10 @@ TEST_P(SwapChainTests, SwitchPresentMode) {
 
 // Test resizing the swapchain and without resizing the window.
 TEST_P(SwapChainTests, ResizingSwapChainOnly) {
+    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
+    // makes the test fail.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
     for (int i = 0; i < 10; i++) {
         wgpu::SwapChainDescriptor desc = baseDescriptor;
         desc.width += i * 10;
@@ -182,6 +195,10 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
 
 // Test resizing both the window and the swapchain at the same time.
 TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
+    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
+    // makes the test fail.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
     for (int i = 0; i < 10; i++) {
         glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
@@ -202,7 +219,11 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
 
 // Test switching devices on the same adapter.
 TEST_P(SwapChainTests, SwitchingDevice) {
-    wgpu::Device device2 = GetAdapter().CreateDevice();
+    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
+    // makes the test fail.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
+    wgpu::Device device2 = wgpu::Device::Acquire(GetAdapter().CreateDevice());
 
     for (int i = 0; i < 3; i++) {
         wgpu::Device deviceToUse;
@@ -218,4 +239,4 @@ TEST_P(SwapChainTests, SwitchingDevice) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(SwapChainTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(SwapChainTests, MetalBackend(), VulkanBackend());

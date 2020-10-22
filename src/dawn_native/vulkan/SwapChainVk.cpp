@@ -183,6 +183,8 @@ namespace dawn_native { namespace vulkan {
         DetachFromSurface();
     }
 
+    // Note that when we need to re-create the swapchain because it is out of date,
+    // previousSwapChain can be set to `this`.
     MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
         Device* device = ToBackend(GetDevice());
         Adapter* adapter = ToBackend(GetDevice()->GetAdapter());
@@ -217,7 +219,9 @@ namespace dawn_native { namespace vulkan {
             std::swap(previousVulkanSwapChain->mSwapChain, oldVkSwapChain);
             device->GetFencedDeleter()->DeleteWhenUnused(oldVkSwapChain);
 
-            previousSwapChain->DetachFromSurface();
+            if (previousSwapChain != this) {
+                previousSwapChain->DetachFromSurface();
+            }
         }
 
         if (mVkSurface == VK_NULL_HANDLE) {
@@ -236,12 +240,11 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.surface = mVkSurface;
         createInfo.minImageCount = 3;                                    // TODO
-        createInfo.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;               // TODO
-        createInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;  // TODO?
-        createInfo.imageExtent.width = GetWidth();                       // TODO
-        createInfo.imageExtent.height = GetHeight();                     // TODO
+        createInfo.imageFormat = mConfig.format;
+        createInfo.imageColorSpace = mConfig.colorSpace;
+        createInfo.imageExtent = mConfig.extent;
         createInfo.imageArrayLayers = 1;
-        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        createInfo.imageUsage = mConfig.usage;
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
@@ -310,19 +313,131 @@ namespace dawn_native { namespace vulkan {
             config.presentMode = kPresentModeFallbacks[modeIndex];
         }
 
+        // Choose the target width or do a blit.
+        if (GetWidth() < surfaceInfo.capabilities.minImageExtent.width ||
+            GetWidth() > surfaceInfo.capabilities.maxImageExtent.width ||
+            GetHeight() < surfaceInfo.capabilities.minImageExtent.height ||
+            GetHeight() > surfaceInfo.capabilities.maxImageExtent.height) {
+            config.needsBlit = true;
+        } else {
+            config.extent.width = GetWidth();
+            config.extent.height = GetHeight();
+        }
+
+        // Choose the target usage or do a blit.
+        VkImageUsageFlags targetUsages =
+            VulkanImageUsage(GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
+        VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
+        if ((supportedUsages & targetUsages) != targetUsages) {
+            config.needsBlit = true;
+        } else {
+            config.usage = targetUsages;
+            config.wgpuUsage = GetUsage();
+        }
+
+        // Only support BGRA8Unorm with SRGB color space for now.
+        bool hasBGRA8Unorm = false;
+        for (const VkSurfaceFormatKHR& format : surfaceInfo.formats) {
+            if (format.format == VK_FORMAT_B8G8R8A8_UNORM &&
+                format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                hasBGRA8Unorm = true;
+                break;
+            }
+        }
+        if (!hasBGRA8Unorm) {
+            return DAWN_INTERNAL_ERROR(
+                "Vulkan swapchain must support BGRA8Unorm with SRGB colorspace");
+        }
+        config.format = VK_FORMAT_B8G8R8A8_UNORM;
+        config.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+        config.wgpuFormat = wgpu::TextureFormat::BGRA8Unorm;
+
+        // Choose a valid config for the swapchain texture that will receive the blit.
+        if (config.needsBlit) {
+            // Vulkan has provisions to have surfaces that adapt to the swapchain size. If that's
+            // the case it is very likely that the target extent works, but clamp it just in case.
+            // Using the target extent for the blit is better when possible so that texels don't
+            // get stretched. This case is exposed by having the special "-1" value in both
+            // dimensions of the extent.
+            constexpr uint32_t kSpecialValue = 0xFFFF'FFFF;
+            if (surfaceInfo.capabilities.currentExtent.width == kSpecialValue &&
+                surfaceInfo.capabilities.currentExtent.height == kSpecialValue) {
+                // extent = clamp(targetExtent, minExtent, maxExtent)
+                config.extent.width = GetWidth();
+                config.extent.width =
+                    std::min(config.extent.width, surfaceInfo.capabilities.maxImageExtent.width);
+                config.extent.width =
+                    std::max(config.extent.width, surfaceInfo.capabilities.minImageExtent.width);
+
+                config.extent.height = GetHeight();
+                config.extent.height =
+                    std::min(config.extent.height, surfaceInfo.capabilities.maxImageExtent.height);
+                config.extent.height =
+                    std::max(config.extent.height, surfaceInfo.capabilities.minImageExtent.height);
+            } else {
+                // If it is not an adaptable swapchain, just use the current extent for the blit
+                // texture.
+                config.extent = surfaceInfo.capabilities.currentExtent;
+            }
+
+            // TODO(cwallez@chromium.org): If the swapchain image doesn't support TRANSFER_DST
+            // then we'll need to have a second fallback that uses a blit shader :(
+            if ((supportedUsages & VK_IMAGE_USAGE_TRANSFER_DST_BIT) == 0) {
+                return DAWN_INTERNAL_ERROR(
+                    "Swapchain cannot fallback to a blit because of a missing "
+                    "VK_IMAGE_USAGE_TRANSFER_DST_BIT");
+            }
+            config.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            config.wgpuUsage = wgpu::TextureUsage::CopyDst;
+        }
+
         return config;
     }
 
     MaybeError SwapChain::PresentImpl() {
         Device* device = ToBackend(GetDevice());
 
-        // Transition the texture to the present usage.
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+
+        if (mConfig.needsBlit) {
+            // TODO ditto same as present below: eagerly transition the blit texture to CopySrc.
+            mBlitTexture->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
+                                             mBlitTexture->GetAllSubresources());
+            mTexture->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
+                                         mTexture->GetAllSubresources());
+
+            VkImageBlit region;
+            region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            region.srcSubresource.mipLevel = 0;
+            region.srcSubresource.baseArrayLayer = 0;
+            region.srcSubresource.layerCount = 1;
+            region.srcOffsets[0] = {0, 0, 0};
+            region.srcOffsets[1] = {static_cast<int32_t>(mBlitTexture->GetWidth()),
+                                    static_cast<int32_t>(mBlitTexture->GetHeight()), 1};
+
+            region.dstSubresource = region.srcSubresource;
+            region.dstOffsets[0] = {0, 0, 0};
+            region.dstOffsets[1] = {static_cast<int32_t>(mTexture->GetWidth()),
+                                    static_cast<int32_t>(mTexture->GetHeight()), 1};
+
+            device->fn.CmdBlitImage(recordingContext->commandBuffer, mBlitTexture->GetHandle(),
+                                    mBlitTexture->GetCurrentLayoutForSwapChain(),
+                                    mTexture->GetHandle(), mTexture->GetCurrentLayoutForSwapChain(),
+                                    1, &region, VK_FILTER_LINEAR);
+
+            // TODO(cwallez@chromium.org): Find a way to reuse the blit texture between frames
+            // instead of creating a new one every time. This will involve "un-destroying" the
+            // texture or making the blit texture "external".
+            mBlitTexture->Destroy();
+            mBlitTexture = nullptr;
+        }
+
         // TODO(cwallez@chromium.org): Remove the need for this by eagerly transitioning the
         // presentable texture to present at the end of submits that use them and ideally even
         // folding that in the free layout transition at the end of render passes.
-        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         mTexture->TransitionUsageNow(recordingContext, kPresentTextureUsage,
                                      mTexture->GetAllSubresources());
+
         DAWN_TRY(device->SubmitPendingCommands());
 
         // Assuming that the present queue is the same as the graphics queue, the proper
@@ -345,18 +460,28 @@ namespace dawn_native { namespace vulkan {
 
         VkResult result =
             VkResult::WrapUnsafe(device->fn.QueuePresentKHR(device->GetQueue(), &presentInfo));
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            // TODO reinitialize?
-        } else if (result == VK_ERROR_SURFACE_LOST_KHR) {
-            // TODO IDK what to do here, just lose the device?
-        } else {
-            DAWN_TRY(CheckVkSuccess(::VkResult(result), "QueuePresent"));
-        }
 
-        return {};
+        switch (result) {
+            case VK_SUCCESS:
+                return {};
+
+            case VK_ERROR_OUT_OF_DATE_KHR:
+                // This present cannot be recovered. Re-initialize the VkSwapchain so that future
+                // presents work..
+                return Initialize(this);
+
+            // TODO(cwallez@chromium.org): Allow losing the surface at Dawn's API level?
+            case VK_ERROR_SURFACE_LOST_KHR:
+            default:
+                return CheckVkSuccess(::VkResult(result), "QueuePresent");
+        }
     }
 
     ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
+        return GetCurrentTextureViewInternal();
+    }
+
+    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewInternal(bool isReentrant) {
         Device* device = ToBackend(GetDevice());
 
         // Transiently create a semaphore that will be signaled when the presentation engine is done
@@ -371,34 +496,78 @@ namespace dawn_native { namespace vulkan {
             device->fn.CreateSemaphore(device->GetVkDevice(), &createInfo, nullptr, &*semaphore),
             "CreateSemaphore"));
 
-        // TODO(cwallez@chromium.org) put the semaphore on the texture so it is waited on when used
-        // instead of directly on the recording context?
-        device->GetPendingRecordingContext()->waitSemaphores.push_back(semaphore);
-
         VkResult result = VkResult::WrapUnsafe(device->fn.AcquireNextImageKHR(
             device->GetVkDevice(), mSwapChain, std::numeric_limits<uint64_t>::max(), semaphore,
             VkFence{}, &mLastImageIndex));
-        if (result == VK_SUBOPTIMAL_KHR) {
-            // TODO reinitialize?
-        } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            // TODO reinitialize?
-        } else if (result == VK_ERROR_SURFACE_LOST_KHR) {
-            // TODO IDK what to do here, just lose the device?
+
+        if (result == VK_SUCCESS) {
+            // TODO(cwallez@chromium.org) put the semaphore on the texture so it is waited on when
+            // used instead of directly on the recording context?
+            device->GetPendingRecordingContext()->waitSemaphores.push_back(semaphore);
         } else {
-            DAWN_TRY(CheckVkSuccess(::VkResult(result), "AcquireNextImage"));
+            // The semaphore wasn't actually used (? this is unclear in the spec). Delete it when
+            // we get a chance.
+            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(semaphore);
         }
 
-        VkImage currentImage = mSwapChainImages[mLastImageIndex];
+        switch (result) {
+            // TODO(cwallez@chromium.org): Introduce a mechanism to notify the application that
+            // the swapchain is in a suboptimal state?
+            case VK_SUBOPTIMAL_KHR:
+            case VK_SUCCESS:
+                break;
 
-        TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
+            case VK_ERROR_OUT_OF_DATE_KHR: {
+                // Prevent infinite recursive calls to GetCurrentTextureViewInternal when the
+                // swapchains always return that they are out of date.
+                if (isReentrant) {
+                    // TODO(cwallez@chromium.org): Allow losing the surface instead?
+                    return DAWN_INTERNAL_ERROR(
+                        "Wasn't able to recuperate the surface after a VK_ERROR_OUT_OF_DATE_KHR");
+                }
+
+                // Re-initialize the VkSwapchain and try getting the texture again.
+                DAWN_TRY(Initialize(this));
+                return GetCurrentTextureViewInternal(true);
+            }
+
+            // TODO(cwallez@chromium.org): Allow losing the surface at Dawn's API level?
+            case VK_ERROR_SURFACE_LOST_KHR:
+            default:
+                DAWN_TRY(CheckVkSuccess(::VkResult(result), "AcquireNextImage"));
+        }
+
+        TextureDescriptor textureDesc;
+        textureDesc.size.width = mConfig.extent.width;
+        textureDesc.size.height = mConfig.extent.height;
+        textureDesc.format = mConfig.wgpuFormat;
+        textureDesc.usage = mConfig.wgpuUsage;
+
+        VkImage currentImage = mSwapChainImages[mLastImageIndex];
         mTexture = Texture::CreateForSwapChain(device, &textureDesc, currentImage);
-        return mTexture->CreateView(nullptr);
+
+        // In the happy path we can use the swapchain image directly.
+        if (!mConfig.needsBlit) {
+            return mTexture->CreateView(nullptr);
+        }
+
+        // The blit texture always perfectly matches what the user requested for the swapchain.
+        // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
+        TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
+        DAWN_TRY_ASSIGN(mBlitTexture,
+                        Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+        return mBlitTexture->CreateView(nullptr);
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
-        if (mTexture.Get() != nullptr) {
+        if (mTexture) {
             mTexture->Destroy();
             mTexture = nullptr;
+        }
+
+        if (mBlitTexture) {
+            mBlitTexture->Destroy();
+            mBlitTexture = nullptr;
         }
 
         // The swapchain images are destroyed with the swapchain.

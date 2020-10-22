@@ -55,13 +55,23 @@ namespace dawn_native { namespace vulkan {
         MaybeError Initialize(NewSwapChainBase* previousSwapChain);
 
         struct Config {
-            // Information that's passed to swapchain creation.
+            // Information that's passed to vulkan swapchain creation.
             VkPresentModeKHR presentMode;
+            VkExtent2D extent;
+            VkImageUsageFlags usage;
+            VkFormat format;
+            VkColorSpaceKHR colorSpace;
 
-            // TODO more information used to create the swapchain.
-            // TODO information about the blit that needs to happen.
+            // Redundant information but as WebGPU enums to create the wgpu::Texture that
+            // encapsulates the native swapchain texture.
+            wgpu::TextureUsage wgpuUsage;
+            wgpu::TextureFormat wgpuFormat;
+
+            // Information about the blit workarounds we need to do (if any)
+            bool needsBlit = false;
         };
         ResultOrError<Config> ChooseConfig(const VulkanSurfaceInfo& surfaceInfo) const;
+        ResultOrError<TextureViewBase*> GetCurrentTextureViewInternal(bool isReentrant = false);
 
         // NewSwapChainBase implementation
         MaybeError PresentImpl() override;
@@ -75,6 +85,7 @@ namespace dawn_native { namespace vulkan {
         std::vector<VkImage> mSwapChainImages;
         uint32_t mLastImageIndex = 0;
 
+        Ref<Texture> mBlitTexture;
         Ref<Texture> mTexture;
     };
 

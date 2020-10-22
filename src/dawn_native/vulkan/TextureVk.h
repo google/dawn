@@ -41,8 +41,9 @@ namespace dawn_native { namespace vulkan {
     class Texture final : public TextureBase {
       public:
         // Used to create a regular texture from a descriptor.
-        static ResultOrError<Ref<TextureBase>> Create(Device* device,
-                                                      const TextureDescriptor* descriptor);
+        static ResultOrError<Ref<Texture>> Create(Device* device,
+                                                  const TextureDescriptor* descriptor,
+                                                  VkImageUsageFlags extraUsages = 0);
 
         // Creates a texture and initializes it with a VkImage that references an external memory
         // object. Before the texture can be used, the VkDeviceMemory associated with the external
@@ -84,6 +85,8 @@ namespace dawn_native { namespace vulkan {
         void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  const SubresourceRange& range);
 
+        VkImageLayout GetCurrentLayoutForSwapChain() const;
+
         // Binds externally allocated memory to the VkImage and on success, takes ownership of
         // semaphores.
         MaybeError BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
@@ -100,7 +103,7 @@ namespace dawn_native { namespace vulkan {
         ~Texture() override;
         using TextureBase::TextureBase;
 
-        MaybeError InitializeAsInternalTexture();
+        MaybeError InitializeAsInternalTexture(VkImageUsageFlags extraUsages);
         MaybeError InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
                                           external_memory::Service* externalMemoryService);
         void InitializeForSwapChain(VkImage nativeImage);

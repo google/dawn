@@ -455,11 +455,12 @@ namespace dawn_native { namespace vulkan {
     }
 
     // static
-    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
-                                                    const TextureDescriptor* descriptor) {
+    ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                                const TextureDescriptor* descriptor,
+                                                VkImageUsageFlags extraUsages) {
         Ref<Texture> texture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
-        DAWN_TRY(texture->InitializeAsInternalTexture());
+        DAWN_TRY(texture->InitializeAsInternalTexture(extraUsages));
         return std::move(texture);
     }
 
@@ -485,7 +486,7 @@ namespace dawn_native { namespace vulkan {
         return std::move(texture);
     }
 
-    MaybeError Texture::InitializeAsInternalTexture() {
+    MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
         Device* device = ToBackend(GetDevice());
 
         // Create the Vulkan image "container". We don't need to check that the format supports the
@@ -499,7 +500,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.format = VulkanImageFormat(device, GetFormat().format);
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());
+        createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat()) | extraUsages;
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
@@ -1092,6 +1093,11 @@ namespace dawn_native { namespace vulkan {
             GetDevice()->ConsumedError(
                 ClearTexture(recordingContext, range, TextureBase::ClearValue::Zero));
         }
+    }
+
+    VkImageLayout Texture::GetCurrentLayoutForSwapChain() const {
+        ASSERT(mSubresourceLastUsages.size() == 1);
+        return VulkanImageLayout(mSubresourceLastUsages[0], GetFormat());
     }
 
     // static
