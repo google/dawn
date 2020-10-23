@@ -73,9 +73,6 @@ if (${TINT_BUILD_SPV_READER})
   include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
 endif()
 
-include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-headers/include")
-include_directories("${PROJECT_SOURCE_DIR}/include")
-
 if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR
     ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR
     (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND
@@ -116,19 +113,25 @@ if(MSVC)
 endif()
 
 function(tint_default_compile_options TARGET)
-  include_directories("${PROJECT_SOURCE_DIR}")
+  target_include_directories(${TARGET} PUBLIC "${PROJECT_SOURCE_DIR}")
+  target_include_directories(${TARGET} PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
-  target_compile_definitions(${TARGET} PRIVATE
+  if (${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+    target_include_directories(${TARGET} PUBLIC
+        "${PROJECT_SOURCE_DIR}/third_party/spirv-headers/include")
+  endif()
+
+  target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
-  target_compile_definitions(${TARGET} PRIVATE
+  target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
-  target_compile_definitions(${TARGET} PRIVATE
+  target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
-  target_compile_definitions(${TARGET} PRIVATE
+  target_compile_definitions(${TARGET} PUBLIC
     -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
-  target_compile_definitions(${TARGET} PRIVATE
+  target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
-  target_compile_definitions(${TARGET} PRIVATE
+  target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
 
   if (${COMPILER_IS_LIKE_GNU})
