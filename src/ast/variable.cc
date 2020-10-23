@@ -87,7 +87,11 @@ void Variable::constructor_to_str(std::ostream& out, size_t indent) const {
 
 void Variable::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Variable{" << std::endl;
+  out << "Variable";
+  if (is_const()) {
+    out << "Const";
+  }
+  out << "{" << std::endl;
   info_to_str(out, indent + 2);
   constructor_to_str(out, indent + 2);
   make_indent(out, indent);

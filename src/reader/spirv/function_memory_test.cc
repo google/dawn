@@ -168,7 +168,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadBool) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __bool
@@ -197,7 +197,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadScalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -207,7 +207,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadScalar) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_3
     none
     __u32
@@ -238,7 +238,7 @@ TEST_F(SpvParserTest, EmitStatement_UseLoadedScalarTwice) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -905,7 +905,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __ptr_storage_buffer__u32

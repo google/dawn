@@ -207,7 +207,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -234,7 +234,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__bool
@@ -289,7 +289,7 @@ TEST_P(SpvBinaryLogicalTest, EmitExpression) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   std::ostringstream ss;
-  ss << R"(Variable{
+  ss << R"(VariableConst{
     x_1
     none
     )"
@@ -697,7 +697,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -728,7 +728,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -767,7 +767,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -798,7 +798,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -837,7 +837,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -868,7 +868,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -907,7 +907,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -938,7 +938,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -977,7 +977,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1008,7 +1008,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1047,7 +1047,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1078,7 +1078,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1117,7 +1117,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1148,7 +1148,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -1179,7 +1179,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __f32
@@ -1210,7 +1210,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -1249,7 +1249,7 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -1294,7 +1294,7 @@ TEST_F(SpvLogicalTest, Any) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1327,7 +1327,7 @@ TEST_F(SpvLogicalTest, All) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1360,7 +1360,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1389,7 +1389,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__bool
@@ -1422,7 +1422,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __bool
@@ -1451,7 +1451,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__bool

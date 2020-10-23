@@ -695,7 +695,7 @@ TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -765,7 +765,7 @@ TEST_F(SpvParserTest,
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -971,7 +971,7 @@ TEST_F(
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -988,7 +988,7 @@ If{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_3
     none
     __u32
@@ -1059,7 +1059,7 @@ TEST_F(SpvParserTest,
   )
   {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_1
         none
         __u32
@@ -1076,7 +1076,7 @@ TEST_F(SpvParserTest,
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_3
         none
         __u32
@@ -1144,7 +1144,7 @@ TEST_F(
   )
   {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_1
         none
         __u32
@@ -1163,7 +1163,7 @@ TEST_F(
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_3
         none
         __u32
@@ -1220,7 +1220,7 @@ TEST_F(SpvParserTest,
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -1230,7 +1230,7 @@ TEST_F(SpvParserTest,
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -1307,7 +1307,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
     }
   }
   VariableDeclStatement{
-    Variable{
+    VariableConst{
       x_101
       none
       __bool
@@ -1317,7 +1317,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
     }
   }
   VariableDeclStatement{
-    Variable{
+    VariableConst{
       x_102
       none
       __bool
@@ -1344,7 +1344,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   }
   Loop{
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_2
         none
         __u32
@@ -1354,7 +1354,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_3
         none
         __u32
@@ -1449,7 +1449,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     }
   }
   VariableDeclStatement{
-    Variable{
+    VariableConst{
       x_101
       none
       __bool
@@ -1459,7 +1459,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     }
   }
   VariableDeclStatement{
-    Variable{
+    VariableConst{
       x_102
       none
       __bool
@@ -1493,7 +1493,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_2
         none
         __u32
@@ -1503,7 +1503,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_3
         none
         __u32
@@ -1590,7 +1590,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_101
     none
     __bool
@@ -1631,7 +1631,7 @@ Loop{
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_2
         none
         __u32
@@ -1641,7 +1641,7 @@ Loop{
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_5
         none
         __u32
@@ -1651,7 +1651,7 @@ Loop{
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_4
         none
         __u32
@@ -1665,7 +1665,7 @@ Loop{
       }
     }
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_6
         none
         __u32
@@ -1758,7 +1758,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_101
     none
     __bool
@@ -1768,7 +1768,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_102
     none
     __bool
@@ -1815,7 +1815,7 @@ Loop{
   }
   continuing {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_2
         none
         __u32
@@ -1878,7 +1878,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_101
     none
     __bool
@@ -1888,7 +1888,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_102
     none
     __bool
@@ -1930,7 +1930,7 @@ Loop{
   }
   continuing {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_2
         none
         __u32
@@ -1991,7 +1991,7 @@ TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __bool
@@ -2005,7 +2005,7 @@ VariableDeclStatement{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_12
     none
     __bool
@@ -2033,7 +2033,7 @@ If{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_101
     none
     __bool

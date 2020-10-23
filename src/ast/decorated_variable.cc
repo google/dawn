@@ -77,7 +77,11 @@ bool DecoratedVariable::IsValid() const {
 
 void DecoratedVariable::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "DecoratedVariable{" << std::endl;
+  out << "DecoratedVariable";
+  if (is_const()) {
+    out << "Const";
+  }
+  out << "{" << std::endl;
 
   make_indent(out, indent + 2);
   out << "Decorations{" << std::endl;

@@ -208,7 +208,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   ()
   {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         leaf_result
         none
         __u32
@@ -231,7 +231,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   ()
   {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         branch_result
         none
         __u32

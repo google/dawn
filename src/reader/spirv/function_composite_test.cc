@@ -87,7 +87,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -101,7 +101,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __vec_2__i32
@@ -115,7 +115,7 @@ VariableDeclStatement{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_3
     none
     __vec_2__f32
@@ -143,7 +143,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __mat_2_3__f32
@@ -184,7 +184,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __array__u32_5
@@ -215,7 +215,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __struct_S
@@ -250,7 +250,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __f32
@@ -301,7 +301,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __vec_2__f32
@@ -352,7 +352,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __f32
@@ -386,7 +386,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -437,7 +437,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __i32
@@ -479,7 +479,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -492,7 +492,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   })"))
       << ToString(fe.ast_body());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_4
     none
     __u32
@@ -545,7 +545,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_2
     none
     __f32
@@ -584,7 +584,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -594,7 +594,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __u32
@@ -622,7 +622,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __ptr_function__u32
@@ -632,7 +632,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_2
     none
     __ptr_function__u32
@@ -661,7 +661,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __vec_4__u32
@@ -703,7 +703,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __vec_4__u32
@@ -762,7 +762,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __vec_2__u32

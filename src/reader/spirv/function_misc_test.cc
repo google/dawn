@@ -68,7 +68,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __bool
@@ -78,7 +78,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_12
     none
     __u32
@@ -88,7 +88,7 @@ VariableDeclStatement{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_13
     none
     __i32
@@ -98,7 +98,7 @@ VariableDeclStatement{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_14
     none
     __f32
@@ -128,7 +128,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __vec_2__u32
@@ -142,7 +142,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_12
     none
     __vec_2__i32
@@ -156,7 +156,7 @@ VariableDeclStatement{
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_13
     none
     __vec_2__f32
@@ -188,7 +188,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __mat_2_2__f32
@@ -229,7 +229,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __array__u32_2
@@ -261,7 +261,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_11
     none
     __struct_S

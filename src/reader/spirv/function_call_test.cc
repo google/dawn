@@ -92,7 +92,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
     FunctionEmitter fe(p, *spirv_function(100));
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -155,7 +155,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   }
 }
 VariableDeclStatement{
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -245,7 +245,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   ()
   {
     VariableDeclStatement{
-      Variable{
+      VariableConst{
         x_1
         none
         __u32

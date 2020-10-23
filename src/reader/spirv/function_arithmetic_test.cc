@@ -136,7 +136,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __i32
@@ -163,7 +163,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __i32
@@ -192,7 +192,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -221,7 +221,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -252,7 +252,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__i32
@@ -283,7 +283,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__i32
@@ -316,7 +316,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -349,7 +349,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -384,7 +384,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __f32
@@ -411,7 +411,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__f32
@@ -467,7 +467,7 @@ TEST_P(SpvBinaryArithTest, EmitExpression) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   std::ostringstream ss;
-  ss << R"(Variable{
+  ss << R"(VariableConst{
     x_1
     none
     )"
@@ -691,7 +691,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -726,7 +726,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -835,7 +835,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __u32
@@ -870,7 +870,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
-  Variable{
+  VariableConst{
     x_1
     none
     __vec_2__u32
@@ -922,7 +922,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __vec_2__f32
@@ -951,7 +951,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -980,7 +980,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -1009,7 +1009,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -1038,7 +1038,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
