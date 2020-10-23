@@ -354,12 +354,11 @@ class InspectorHelper {
   ast::type::I32Type* i32_type() { return &i32_type_; }
   ast::type::U32Type* u32_type() { return &u32_type_; }
   ast::type::ArrayType* u32_array_type(uint32_t count) {
-    static std::map<uint32_t, std::unique_ptr<ast::type::ArrayType>> memo;
-    if (memo.find(count) == memo.end()) {
-      memo[count] = std::make_unique<ast::type::ArrayType>(u32_type(), count);
+    if (array_type_memo_.find(count) == array_type_memo_.end()) {
+      array_type_memo_[count] =
+          std::make_unique<ast::type::ArrayType>(u32_type(), count);
     }
-
-    return memo[count].get();
+    return array_type_memo_[count].get();
   }
   ast::type::VoidType* void_type() { return &void_type_; }
 
@@ -374,6 +373,7 @@ class InspectorHelper {
   ast::type::I32Type i32_type_;
   ast::type::U32Type u32_type_;
   ast::type::VoidType void_type_;
+  std::map<uint32_t, std::unique_ptr<ast::type::ArrayType>> array_type_memo_;
 };
 
 class InspectorTest : public InspectorHelper, public testing::Test {};
