@@ -69,6 +69,7 @@ option(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_META
 option(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
 option(DAWN_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ${ENABLE_OPENGL})
 option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
+option(DAWN_ENABLE_WGSL "Enable WGSL support" OFF)
 option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
 option(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 
@@ -84,6 +85,7 @@ set(DAWN_SHADERC_DIR "${DAWN_THIRD_PARTY_DIR}/shaderc" CACHE STRING "Directory i
 set(DAWN_SPIRV_CROSS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-cross" CACHE STRING "Directory in which to find SPIRV-Cross")
 set(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers" CACHE STRING "Directory in which to find SPIRV-Headers")
 set(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/SPIRV-Tools" CACHE STRING "Directory in which to find SPIRV-Tools")
+set(DAWN_TINT_DIR "${DAWN_THIRD_PARTY_DIR}/tint" CACHE STRING "Directory in which to find Tint")
 
 ################################################################################
 # Dawn's public and internal "configs"
@@ -123,13 +125,15 @@ endif()
 if (DAWN_ENABLE_VULKAN)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_ENABLE_BACKEND_VULKAN")
 endif()
+if (DAWN_ENABLE_WGSL)
+    target_compile_definitions(dawn_internal_config INTERFACE "-DDAWN_ENABLE_WGSL=1")
+endif()
 if (DAWN_USE_X11)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_USE_X11")
 endif()
 if (WIN32)
     target_compile_definitions(dawn_internal_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
 endif()
-
 
 set(CMAKE_CXX_STANDARD "14")
 
@@ -144,6 +148,8 @@ add_subdirectory(src/dawn)
 add_subdirectory(src/dawn_platform)
 add_subdirectory(src/dawn_native)
 add_subdirectory(src/dawn_wire)
+# TODO(dawn:269): Remove once the implementation-based swapchains are removed.
+add_subdirectory(src/utils)
 
 if (DAWN_BUILD_EXAMPLES)
     add_subdirectory(src/utils)

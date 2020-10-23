@@ -78,6 +78,13 @@ if (DAWN_BUILD_EXAMPLES)
     endif()
 endif()
 
+if (DAWN_BUILD_WGSL)
+    if (NOT TARGET libtint)
+        message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
+        add_subdirectory(${DAWN_TINT_DIR})
+    endif()
+endif()
+
 # Header-only library for khrplatform.h
 add_library(dawn_khronos_platform INTERFACE)
 target_sources(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/KHR/khrplatform.h")
