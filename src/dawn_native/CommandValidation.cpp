@@ -381,47 +381,53 @@ namespace dawn_native {
                static_cast<uint64_t>(maxStart);
     }
 
+    template <typename A, typename B>
+    DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
+        static_assert(std::is_same<A, uint32_t>::value, "'a' must be uint32_t");
+        static_assert(std::is_same<B, uint32_t>::value, "'b' must be uint32_t");
+        return uint64_t(a) * uint64_t(b);
+    }
+
     ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
                                                        const Extent3D& copySize,
                                                        uint32_t bytesPerRow,
                                                        uint32_t rowsPerImage) {
+        ASSERT(copySize.width % blockInfo.width == 0);
         ASSERT(copySize.height % blockInfo.height == 0);
+        uint32_t widthInBlocks = copySize.width / blockInfo.width;
         uint32_t heightInBlocks = copySize.height / blockInfo.height;
+        uint64_t bytesInLastRow = Safe32x32(widthInBlocks, blockInfo.byteSize);
+        uint64_t bytesPerImage = Safe32x32(bytesPerRow, rowsPerImage);
 
-        // Default value for rowsPerImage
-        if (rowsPerImage == 0) {
-            rowsPerImage = heightInBlocks;
-        }
-
-        ASSERT(rowsPerImage >= heightInBlocks);
-        if (copySize.height > 1 || copySize.depth > 1) {
-            ASSERT(bytesPerRow >= copySize.width / blockInfo.width * blockInfo.byteSize);
-        }
-
-        if (copySize.width == 0 || copySize.height == 0 || copySize.depth == 0) {
+        if (copySize.depth == 0) {
             return 0;
         }
 
-        ASSERT(copySize.height >= 1);
-        ASSERT(copySize.depth >= 1);
-
-        // bytesPerImage won't overflow since we're multiplying two uint32_t numbers
-        uint64_t bytesPerImage = uint64_t(rowsPerImage) * bytesPerRow;
-        // Provided that copySize.height > 1: bytesInLastSlice won't overflow since it's at most
-        // bytesPerImage. Otherwise the result is a multiplication of two uint32_t numbers.
-        uint64_t bytesInLastSlice =
-            uint64_t(bytesPerRow) * (heightInBlocks - 1) +
-            (uint64_t(copySize.width) / blockInfo.width * blockInfo.byteSize);
-
-        // This error cannot be thrown for copySize.depth = 1.
-        // For copySize.depth > 1 we know that:
-        // requiredBytesInCopy >= (copySize.depth * bytesPerImage) / 2, so if
-        // copySize.depth * bytesPerImage overflows uint64_t, then requiredBytesInCopy is definitely
-        // too large to fit in the available data size.
-        if (std::numeric_limits<uint64_t>::max() / copySize.depth < bytesPerImage) {
-            return DAWN_VALIDATION_ERROR("requiredBytesInCopy is too large");
+        // Check for potential overflows for the rest of the computations. We have the following
+        // inequalities:
+        //
+        //   lastRowBytes <= bytesPerRow
+        //   heightInBlocks <= rowsPerImage
+        //
+        // So:
+        //
+        //   bytesInLastImage  = bytesPerRow * (heightInBlocks - 1) + bytesInLastRow
+        //                    <= bytesPerRow * heightInBlocks
+        //                    <= bytesPerRow * rowsPerImage
+        //                    <= bytesPerImage
+        //
+        // This means that if the computation of depth * bytesPerImage doesn't overflow, none of the
+        // computations for requiredBytesInCopy will. (and it's not a very pessimizing check)
+        if (bytesPerImage > std::numeric_limits<uint64_t>::max() / copySize.depth) {
+            return DAWN_VALIDATION_ERROR("requiredBytesInCopy is too large.");
         }
-        return bytesPerImage * (copySize.depth - 1) + bytesInLastSlice;
+
+        uint64_t requiredBytesInCopy = bytesPerImage * (copySize.depth - 1);
+        if (heightInBlocks > 0) {
+            uint64_t bytesInLastImage = Safe32x32(bytesPerRow, heightInBlocks - 1) + bytesInLastRow;
+            requiredBytesInCopy += bytesInLastImage;
+        }
+        return requiredBytesInCopy;
     }
 
     MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
@@ -436,7 +442,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
+    MaybeError ValidateLinearTextureData(TextureDataLayout layout,
                                          uint64_t byteSize,
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent) {
@@ -445,18 +451,31 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
         }
 
+        ASSERT(copyExtent.width % blockInfo.width == 0);
+        uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
+        ASSERT(copyExtent.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
+
+        // Default value for rowsPerImage
+        if (layout.rowsPerImage == 0) {
+            layout.rowsPerImage = heightInBlocks;
+        }
+
         // Validation for other members in layout:
-        if ((copyExtent.height > 1 || copyExtent.depth > 1) &&
-            layout.bytesPerRow < copyExtent.width / blockInfo.width * blockInfo.byteSize) {
-            return DAWN_VALIDATION_ERROR(
-                "bytesPerRow must not be less than the number of bytes per row");
+        ASSERT(Safe32x32(widthInBlocks, blockInfo.byteSize) <=
+               std::numeric_limits<uint32_t>::max());
+        uint32_t lastRowBytes = widthInBlocks * blockInfo.byteSize;
+        if (lastRowBytes > layout.bytesPerRow) {
+            if (copyExtent.height > 1 || copyExtent.depth > 1) {
+                return DAWN_VALIDATION_ERROR("The byte size of a row must be <= bytesPerRow.");
+            } else {
+                // bytesPerRow is unused. Populate it with a valid value for later validation.
+                layout.bytesPerRow = lastRowBytes;
+            }
         }
 
         // TODO(tommek@google.com): to match the spec there should be another condition here
         // on rowsPerImage >= copyExtent.height if copyExtent.depth > 1.
-
-        ASSERT(copyExtent.height % blockInfo.height == 0);
-        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
 
         // Validation for the copy being in-bounds:
         if (layout.rowsPerImage != 0 && layout.rowsPerImage < heightInBlocks) {
@@ -476,7 +495,7 @@ namespace dawn_native {
             layout.offset <= byteSize && (requiredBytesInCopy <= (byteSize - layout.offset));
         if (!fitsInData) {
             return DAWN_VALIDATION_ERROR(
-                "Required size for texture data layout exceeds the given size");
+                "Required size for texture data layout exceeds the linear data size.");
         }
 
         return {};

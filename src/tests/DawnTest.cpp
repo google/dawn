@@ -27,6 +27,7 @@
 #include "utils/PlatformDebugLogger.h"
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
+#include "utils/TestUtils.h"
 #include "utils/WGPUHelpers.h"
 
 #include <algorithm>
@@ -851,7 +852,10 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
         ASSERT(bytesPerRow == Align(bytesPerRow, kTextureBytesPerRowAlignment));
     }
 
-    uint32_t size = bytesPerRow * (height - 1) + width * dataSize;
+    uint32_t rowsPerImage = height;
+    uint32_t depth = 1;
+    uint32_t size =
+        utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, width, height, depth, dataSize);
 
     // TODO(enga): We should have the map async alignment in Contants.h. Also, it should change to 8
     // for Float64Array.

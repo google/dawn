@@ -923,6 +923,34 @@ TEST_F(CopyCommandTest_T2B, Success) {
     }
 }
 
+// Edge cases around requiredBytesInCopy computation for empty copies
+TEST_F(CopyCommandTest_T2B, Empty) {
+    wgpu::Texture source =
+        Create2DTexture(16, 16, 1, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
+
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(0, wgpu::BufferUsage::CopyDst), 0, 256, 4, {0, 0, 0});
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(0, wgpu::BufferUsage::CopyDst), 0, 256, 4, {4, 0, 0});
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(0, wgpu::BufferUsage::CopyDst), 0, 256, 4, {4, 4, 0});
+
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(1024, wgpu::BufferUsage::CopyDst), 0, 256, 4, {4, 0, 2});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0},
+                CreateBuffer(1023, wgpu::BufferUsage::CopyDst), 0, 256, 4, {4, 0, 2});
+
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(1792, wgpu::BufferUsage::CopyDst), 0, 256, 4, {0, 4, 2});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0},
+                CreateBuffer(1791, wgpu::BufferUsage::CopyDst), 0, 256, 4, {0, 4, 2});
+
+    TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
+                CreateBuffer(1024, wgpu::BufferUsage::CopyDst), 0, 256, 4, {0, 0, 2});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0},
+                CreateBuffer(1023, wgpu::BufferUsage::CopyDst), 0, 256, 4, {0, 0, 2});
+}
+
 // Test OOB conditions on the texture
 TEST_F(CopyCommandTest_T2B, OutOfBoundsOnTexture) {
     uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);

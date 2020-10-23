@@ -30,11 +30,6 @@ namespace utils {
     };
 
     uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
-    uint32_t GetBytesInBufferTextureCopy(wgpu::TextureFormat format,
-                                         uint32_t width,
-                                         uint32_t bytesPerRow,
-                                         uint32_t rowsPerImage,
-                                         uint32_t copyArrayLayerCount);
     TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(
         wgpu::TextureFormat format,
         wgpu::Extent3D textureSizeAtLevel0,
@@ -45,6 +40,12 @@ namespace utils {
                                  uint64_t rowsPerImage,
                                  wgpu::Extent3D copyExtent,
                                  wgpu::TextureFormat textureFormat);
+    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
+                                 uint64_t rowsPerImage,
+                                 uint64_t widthInBlocks,
+                                 uint64_t heightInBlocks,
+                                 uint64_t depth,
+                                 uint64_t bytesPerBlock);
 
     uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
                                        uint64_t rowsPerImage,

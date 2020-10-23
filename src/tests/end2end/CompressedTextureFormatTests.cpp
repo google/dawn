@@ -52,18 +52,18 @@ class CompressedTextureBCFormatTest : public DawnTest {
     std::vector<uint8_t> UploadData(const CopyConfig& copyConfig) {
         uint32_t copyWidthInBlock = copyConfig.copyExtent3D.width / kBCBlockWidthInTexels;
         uint32_t copyHeightInBlock = copyConfig.copyExtent3D.height / kBCBlockHeightInTexels;
-        uint32_t rowPitchInBytes = 0;
+        uint32_t copyBytesPerRow = 0;
         if (copyConfig.bytesPerRowAlignment != 0) {
-            rowPitchInBytes = copyConfig.bytesPerRowAlignment;
+            copyBytesPerRow = copyConfig.bytesPerRowAlignment;
         } else {
-            rowPitchInBytes = copyWidthInBlock *
+            copyBytesPerRow = copyWidthInBlock *
                               utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
         uint32_t copyRowsPerImage = copyConfig.rowsPerImage;
         if (copyRowsPerImage == 0) {
             copyRowsPerImage = copyHeightInBlock;
         }
-        uint32_t copyBytesPerImage = rowPitchInBytes * copyRowsPerImage;
+        uint32_t copyBytesPerImage = copyBytesPerRow * copyRowsPerImage;
         uint32_t uploadBufferSize =
             copyConfig.bufferOffset + copyBytesPerImage * copyConfig.copyExtent3D.depth;
 
@@ -75,7 +75,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
             for (uint32_t h = 0; h < copyHeightInBlock; ++h) {
                 for (uint32_t w = 0; w < copyWidthInBlock; ++w) {
                     uint32_t uploadBufferOffset = copyConfig.bufferOffset +
-                                                  copyBytesPerImage * layer + rowPitchInBytes * h +
+                                                  copyBytesPerImage * layer + copyBytesPerRow * h +
                                                   oneBlockCompressedTextureData.size() * w;
                     std::memcpy(&data[uploadBufferOffset], oneBlockCompressedTextureData.data(),
                                 oneBlockCompressedTextureData.size() * sizeof(uint8_t));
