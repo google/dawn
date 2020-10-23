@@ -271,8 +271,8 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
-        if (descriptor->aspect != wgpu::TextureAspect::All) {
-            return DAWN_VALIDATION_ERROR("Texture aspect must be 'all'");
+        if (TryConvertAspect(texture->GetFormat(), descriptor->aspect) == Aspect::None) {
+            return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture view.");
         }
 
         // TODO(jiawei.shao@intel.com): check stuff based on resource limits
@@ -358,15 +358,19 @@ namespace dawn_native {
     }
 
     Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
+        Aspect aspectMask = TryConvertAspect(format, aspect);
+        ASSERT(aspectMask != Aspect::None);
+        return aspectMask;
+    }
+
+    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
         switch (aspect) {
             case wgpu::TextureAspect::All:
                 return format.aspects;
             case wgpu::TextureAspect::DepthOnly:
-                ASSERT(format.aspects & Aspect::Depth);
-                return Aspect::Depth;
+                return format.aspects & Aspect::Depth;
             case wgpu::TextureAspect::StencilOnly:
-                ASSERT(format.aspects & Aspect::Stencil);
-                return Aspect::Stencil;
+                return format.aspects & Aspect::Stencil;
         }
     }
 

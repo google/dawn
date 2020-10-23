@@ -344,20 +344,43 @@ namespace {
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 
-    // Test that only TextureAspect::All is supported
-    TEST_F(TextureViewValidationTest, AspectMustBeAll) {
+    // Test that the selected TextureAspects must exist in the texture format
+    TEST_F(TextureViewValidationTest, AspectMustExist) {
         wgpu::TextureDescriptor descriptor = {};
         descriptor.size = {1, 1, 1};
-        descriptor.format = wgpu::TextureFormat::Depth32Float;
         descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
-        wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        wgpu::TextureViewDescriptor viewDescriptor = {};
-        viewDescriptor.aspect = wgpu::TextureAspect::All;
-        texture.CreateView(&viewDescriptor);
+        // Can select: All and DepthOnly from Depth32Float, but not StencilOnly
+        {
+            descriptor.format = wgpu::TextureFormat::Depth32Float;
+            wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
-        ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
+            wgpu::TextureViewDescriptor viewDescriptor = {};
+            viewDescriptor.aspect = wgpu::TextureAspect::All;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
+        }
+
+        // Can select: All, DepthOnly, and StencilOnly from Depth24PlusStencil8
+        {
+            descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+            wgpu::TextureViewDescriptor viewDescriptor = {};
+            viewDescriptor.aspect = wgpu::TextureAspect::All;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
+            texture.CreateView(&viewDescriptor);
+
+            viewDescriptor.aspect = wgpu::TextureAspect::StencilOnly;
+            texture.CreateView(&viewDescriptor);
+        }
     }
 
 }  // anonymous namespace

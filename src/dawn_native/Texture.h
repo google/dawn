@@ -73,8 +73,18 @@ namespace dawn_native {
         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Storage |
         wgpu::TextureUsage::OutputAttachment;
 
+    // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
+    // does not exist in the format.
+    // Also ASSERTs if "All" is selected and results in more than one aspect.
     Aspect ConvertSingleAspect(const Format& format, wgpu::TextureAspect aspect);
+
+    // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
+    // does not exist in the format.
     Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect);
+
+    // Try to convert the TextureAspect to an Aspect mask for the format. May return
+    // Aspect::None.
+    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect);
 
     struct SubresourceRange {
         uint32_t baseMipLevel;

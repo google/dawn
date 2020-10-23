@@ -501,24 +501,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("mipLevel out of range");
         }
 
-        switch (textureCopy.aspect) {
-            case wgpu::TextureAspect::All:
-                break;
-            case wgpu::TextureAspect::DepthOnly:
-                if ((texture->GetFormat().aspects & Aspect::Depth) == 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Texture does not have depth aspect for texture copy");
-                }
-                break;
-            case wgpu::TextureAspect::StencilOnly:
-                if ((texture->GetFormat().aspects & Aspect::Stencil) == 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Texture does not have stencil aspect for texture copy");
-                }
-                break;
-            default:
-                UNREACHABLE();
-                break;
+        if (TryConvertAspect(texture->GetFormat(), textureCopy.aspect) == Aspect::None) {
+            return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture copy.");
         }
 
         if (texture->GetSampleCount() > 1 || texture->GetFormat().HasDepthOrStencil()) {
