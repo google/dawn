@@ -346,7 +346,8 @@ namespace dawn_native {
         }
 
         if (descriptor->colorStateCount == 0 && !descriptor->depthStencilState) {
-            return DAWN_VALIDATION_ERROR("Should have at least one attachment");
+            return DAWN_VALIDATION_ERROR(
+                "Should have at least one colorState or a depthStencilState");
         }
 
         ASSERT(descriptor->fragmentStage != nullptr);
