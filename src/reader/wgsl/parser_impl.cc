@@ -1991,8 +1991,14 @@ ast::VariableList ParserImpl::param_list() {
     return {};
 
   for (;;) {
-    ret.push_back(std::make_unique<ast::Variable>(
-        source, name, ast::StorageClass::kNone, type));
+    auto var = std::make_unique<ast::Variable>(source, name,
+                                               ast::StorageClass::kNone, type);
+    // Formal parameters are treated like a const declaration where the
+    // initializer value is provided by the call's argument.  The key point is
+    // that it's not updatable after intially set.  This is unlike C or GLSL
+    // which treat formal parameters like local variables that can be updated.
+    var->set_is_const(true);
+    ret.push_back(std::move(var));
 
     t = peek();
     if (!t.IsComma())

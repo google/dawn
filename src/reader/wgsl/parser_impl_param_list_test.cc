@@ -38,6 +38,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
 
   EXPECT_EQ(e[0]->name(), "a");
   EXPECT_EQ(e[0]->type(), i32);
+  EXPECT_TRUE(e[0]->is_const());
 }
 
 TEST_F(ParserImplTest, ParamList_Multiple) {
@@ -52,12 +53,15 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
 
   EXPECT_EQ(e[0]->name(), "a");
   EXPECT_EQ(e[0]->type(), i32);
+  EXPECT_TRUE(e[0]->is_const());
 
   EXPECT_EQ(e[1]->name(), "b");
   EXPECT_EQ(e[1]->type(), f32);
+  EXPECT_TRUE(e[1]->is_const());
 
   EXPECT_EQ(e[2]->name(), "c");
   EXPECT_EQ(e[2]->type(), vec2);
+  EXPECT_TRUE(e[1]->is_const());
 }
 
 TEST_F(ParserImplTest, ParamList_Empty) {
