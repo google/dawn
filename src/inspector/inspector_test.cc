@@ -308,7 +308,7 @@ class InspectorHelper {
   /// Generates a function that references a specific UBO
   /// @param func_name name of the function created
   /// @param ubo_name name of the UBO to be accessed
-  /// @param member_idx index of the member to access
+  /// @param members list of members to access, by index and type
   /// @returns a function that references all of the UBO members specified
   std::unique_ptr<ast::Function> MakeUBOReferenceBodyFunction(
       std::string func_name,
