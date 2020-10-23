@@ -614,8 +614,11 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
       [this, &ast_params](const spvtools::opt::Instruction* param) {
         auto* ast_type = parser_impl_.ConvertType(param->type_id());
         if (ast_type != nullptr) {
-          ast_params.emplace_back(parser_impl_.MakeVariable(
-              param->result_id(), ast::StorageClass::kNone, ast_type));
+          auto ast_param = parser_impl_.MakeVariable(
+              param->result_id(), ast::StorageClass::kNone, ast_type);
+          // Parameters are treated as const declarations.
+          ast_param->set_is_const(true);
+          ast_params.emplace_back(std::move(ast_param));
           // The value is accessible by name.
           identifier_values_.insert(param->result_id());
         } else {

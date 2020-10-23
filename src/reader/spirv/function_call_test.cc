@@ -219,12 +219,12 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   EXPECT_THAT(module_ast_str, HasSubstr(R"(Module{
   Function x_50 -> __u32
   (
-    Variable{
+    VariableConst{
       x_51
       none
       __u32
     }
-    Variable{
+    VariableConst{
       x_52
       none
       __u32

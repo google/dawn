@@ -104,17 +104,17 @@ TEST_F(SpvParserTest, EmitFunctionDeclaration_MixedParamTypes) {
   EXPECT_THAT(p->module().to_str(), HasSubstr(R"(
   Function x_100 -> __void
   (
-    Variable{
+    VariableConst{
       a
       none
       __u32
     }
-    Variable{
+    VariableConst{
       b
       none
       __f32
     }
-    Variable{
+    VariableConst{
       c
       none
       __i32
@@ -143,17 +143,17 @@ TEST_F(SpvParserTest, EmitFunctionDeclaration_GenerateParamNames) {
   EXPECT_THAT(p->module().to_str(), HasSubstr(R"(
   Function x_100 -> __void
   (
-    Variable{
+    VariableConst{
       x_14
       none
       __u32
     }
-    Variable{
+    VariableConst{
       x_15
       none
       __f32
     }
-    Variable{
+    VariableConst{
       x_16
       none
       __i32
