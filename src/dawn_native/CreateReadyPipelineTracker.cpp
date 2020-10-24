@@ -14,7 +14,9 @@
 
 #include "dawn_native/CreateReadyPipelineTracker.h"
 
+#include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/RenderPipeline.h"
 
 namespace dawn_native {
 
@@ -33,13 +35,21 @@ namespace dawn_native {
           mCreateReadyComputePipelineCallback(callback) {
     }
 
-    void CreateReadyComputePipelineTask::Finish() {
+    void CreateReadyComputePipelineTask::Finish(WGPUCreateReadyPipelineStatus status) {
         ASSERT(mPipeline != nullptr);
         ASSERT(mCreateReadyComputePipelineCallback != nullptr);
 
-        mCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus_Success,
-                                            reinterpret_cast<WGPUComputePipeline>(mPipeline), "",
-                                            mUserData);
+        if (status != WGPUCreateReadyPipelineStatus_Success) {
+            // TODO(jiawei.shao@intel.com): support handling device lost
+            ASSERT(status == WGPUCreateReadyPipelineStatus_DeviceDestroyed);
+            mCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+                                                nullptr, "Device destroyed before callback",
+                                                mUserData);
+            mPipeline->Release();
+        } else {
+            mCreateReadyComputePipelineCallback(
+                status, reinterpret_cast<WGPUComputePipeline>(mPipeline), "", mUserData);
+        }
 
         // Set mCreateReadyComputePipelineCallback to nullptr in case it is called more than once.
         mCreateReadyComputePipelineCallback = nullptr;
@@ -54,13 +64,21 @@ namespace dawn_native {
           mCreateReadyRenderPipelineCallback(callback) {
     }
 
-    void CreateReadyRenderPipelineTask::Finish() {
+    void CreateReadyRenderPipelineTask::Finish(WGPUCreateReadyPipelineStatus status) {
         ASSERT(mPipeline != nullptr);
         ASSERT(mCreateReadyRenderPipelineCallback != nullptr);
 
-        mCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus_Success,
-                                           reinterpret_cast<WGPURenderPipeline>(mPipeline), "",
-                                           mUserData);
+        if (status != WGPUCreateReadyPipelineStatus_Success) {
+            // TODO(jiawei.shao@intel.com): support handling device lost
+            ASSERT(status == WGPUCreateReadyPipelineStatus_DeviceDestroyed);
+            mCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+                                               nullptr, "Device destroyed before callback",
+                                               mUserData);
+            mPipeline->Release();
+        } else {
+            mCreateReadyRenderPipelineCallback(
+                status, reinterpret_cast<WGPURenderPipeline>(mPipeline), "", mUserData);
+        }
 
         // Set mCreateReadyPipelineCallback to nullptr in case it is called more than once.
         mCreateReadyRenderPipelineCallback = nullptr;
@@ -81,9 +99,16 @@ namespace dawn_native {
 
     void CreateReadyPipelineTracker::Tick(ExecutionSerial finishedSerial) {
         for (auto& task : mCreateReadyPipelineTasksInFlight.IterateUpTo(finishedSerial)) {
-            task->Finish();
+            task->Finish(WGPUCreateReadyPipelineStatus_Success);
         }
         mCreateReadyPipelineTasksInFlight.ClearUpTo(finishedSerial);
+    }
+
+    void CreateReadyPipelineTracker::ClearForShutDown() {
+        for (auto& task : mCreateReadyPipelineTasksInFlight.IterateAll()) {
+            task->Finish(WGPUCreateReadyPipelineStatus_DeviceDestroyed);
+        }
+        mCreateReadyPipelineTasksInFlight.Clear();
     }
 
 }  // namespace dawn_native

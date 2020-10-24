@@ -40,20 +40,21 @@ namespace dawn_wire { namespace client {
         // Fire pending error scopes
         auto errorScopes = std::move(mErrorScopes);
         for (const auto& it : errorScopes) {
-            it.second.callback(WGPUErrorType_Unknown, "Device destroyed", it.second.userdata);
+            it.second.callback(WGPUErrorType_Unknown, "Device destroyed before callback",
+                               it.second.userdata);
         }
 
         auto createReadyPipelineRequests = std::move(mCreateReadyPipelineRequests);
         for (const auto& it : createReadyPipelineRequests) {
             if (it.second.createReadyComputePipelineCallback != nullptr) {
-                it.second.createReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus_Unknown,
-                                                             nullptr, "Device destroyed",
-                                                             it.second.userdata);
+                it.second.createReadyComputePipelineCallback(
+                    WGPUCreateReadyPipelineStatus_DeviceDestroyed, nullptr,
+                    "Device destroyed before callback", it.second.userdata);
             } else {
                 ASSERT(it.second.createReadyRenderPipelineCallback != nullptr);
-                it.second.createReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus_Unknown,
-                                                            nullptr, "Device destroyed",
-                                                            it.second.userdata);
+                it.second.createReadyRenderPipelineCallback(
+                    WGPUCreateReadyPipelineStatus_DeviceDestroyed, nullptr,
+                    "Device destroyed before callback", it.second.userdata);
             }
         }
 

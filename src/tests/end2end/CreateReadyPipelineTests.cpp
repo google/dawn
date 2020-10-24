@@ -26,7 +26,10 @@ namespace {
     };
 }  // anonymous namespace
 
-class CreateReadyPipelineTest : public DawnTest {};
+class CreateReadyPipelineTest : public DawnTest {
+  protected:
+    CreateReadyPipelineTask task;
+};
 
 // Verify the basic use of CreateReadyComputePipeline works on all backends.
 TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
@@ -42,7 +45,6 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
     csDesc.computeStage.entryPoint = "main";
 
-    CreateReadyPipelineTask task;
     device.CreateReadyComputePipeline(
         &csDesc,
         [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
@@ -110,7 +112,6 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
     csDesc.computeStage.entryPoint = "main0";
 
-    CreateReadyPipelineTask task;
     device.CreateReadyComputePipeline(
         &csDesc,
         [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
@@ -159,7 +160,6 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
     renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
-    CreateReadyPipelineTask task;
     device.CreateReadyRenderPipeline(
         &renderPipelineDescriptor,
         [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
@@ -237,7 +237,6 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
     renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
-    CreateReadyPipelineTask task;
     device.CreateReadyRenderPipeline(
         &renderPipelineDescriptor,
         [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
@@ -257,6 +256,75 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
 
     ASSERT_FALSE(task.message.empty());
     ASSERT_EQ(nullptr, task.computePipeline.Get());
+}
+
+// Verify there is no error when the device is released before the callback of
+// CreateReadyComputePipeline() is called.
+TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputePipeline) {
+    const char* computeShader = R"(
+        #version 450
+        void main() {
+        })";
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
+    csDesc.computeStage.entryPoint = "main";
+
+    device.CreateReadyComputePipeline(
+        &csDesc,
+        [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
+           const char* message, void* userdata) {
+            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+                      status);
+
+            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+}
+
+// Verify there is no error when the device is released before the callback of
+// CreateReadyRenderPipeline() is called.
+TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPipeline) {
+    const char* vertexShader = R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+            gl_PointSize = 1.0f;
+        })";
+    const char* fragmentShader = R"(
+        #version 450
+        layout(location = 0) out vec4 o_color;
+        void main() {
+            o_color = vec4(0.f, 1.f, 0.f, 1.f);
+        })";
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    wgpu::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
+    wgpu::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    renderPipelineDescriptor.vertexStage.module = vsModule;
+    renderPipelineDescriptor.cFragmentStage.module = fsModule;
+    renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+
+    device.CreateReadyRenderPipeline(
+        &renderPipelineDescriptor,
+        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+                      status);
+
+            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
 }
 
 DAWN_INSTANTIATE_TEST(CreateReadyPipelineTest,

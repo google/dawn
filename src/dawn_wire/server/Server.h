@@ -56,6 +56,7 @@ namespace dawn_wire { namespace server {
     };
 
     struct CreateReadyPipelineUserData {
+        std::weak_ptr<bool> isServerAlive;
         Server* server;
         uint64_t requestSerial;
         ObjectId pipelineObjectID;
@@ -131,6 +132,8 @@ namespace dawn_wire { namespace server {
         DawnProcTable mProcs;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
         MemoryTransferService* mMemoryTransferService = nullptr;
+
+        std::shared_ptr<bool> mIsAlive;
     };
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();

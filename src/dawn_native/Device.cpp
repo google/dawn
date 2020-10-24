@@ -151,7 +151,8 @@ namespace dawn_native {
             // pending callbacks.
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
             GetDefaultQueue()->Tick(GetCompletedCommandSerial());
-            mCreateReadyPipelineTracker->Tick(GetCompletedCommandSerial());
+
+            mCreateReadyPipelineTracker->ClearForShutDown();
 
             // call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
@@ -787,6 +788,7 @@ namespace dawn_native {
             mDynamicUploader->Deallocate(mCompletedSerial);
             mErrorScopeTracker->Tick(mCompletedSerial);
             GetDefaultQueue()->Tick(mCompletedSerial);
+
             mCreateReadyPipelineTracker->Tick(mCompletedSerial);
         }
 

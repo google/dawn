@@ -30,20 +30,34 @@ namespace dawn_wire { namespace server {
                                                    WGPUComputePipeline pipeline,
                                                    const char* message,
                                                    void* userdata) {
-        CreateReadyPipelineUserData* createReadyPipelineUserData =
-            static_cast<CreateReadyPipelineUserData*>(userdata);
+        std::unique_ptr<CreateReadyPipelineUserData> createReadyPipelineUserData(
+            static_cast<CreateReadyPipelineUserData*>(userdata));
+
+        // We need to ensure createReadyPipelineUserData->server is still pointing to a valid
+        // object before doing any operations on it.
+        if (createReadyPipelineUserData->isServerAlive.expired()) {
+            return;
+        }
+
         createReadyPipelineUserData->server->OnCreateReadyComputePipelineCallback(
-            status, pipeline, message, createReadyPipelineUserData);
+            status, pipeline, message, createReadyPipelineUserData.release());
     }
 
     void Server::ForwardCreateReadyRenderPipeline(WGPUCreateReadyPipelineStatus status,
                                                   WGPURenderPipeline pipeline,
                                                   const char* message,
                                                   void* userdata) {
-        CreateReadyPipelineUserData* createReadyPipelineUserData =
-            static_cast<CreateReadyPipelineUserData*>(userdata);
+        std::unique_ptr<CreateReadyPipelineUserData> createReadyPipelineUserData(
+            static_cast<CreateReadyPipelineUserData*>(userdata));
+
+        // We need to ensure createReadyPipelineUserData->server is still pointing to a valid
+        // object before doing any operations on it.
+        if (createReadyPipelineUserData->isServerAlive.expired()) {
+            return;
+        }
+
         createReadyPipelineUserData->server->OnCreateReadyRenderPipelineCallback(
-            status, pipeline, message, createReadyPipelineUserData);
+            status, pipeline, message, createReadyPipelineUserData.release());
     }
 
     void Server::OnUncapturedError(WGPUErrorType type, const char* message) {
@@ -87,6 +101,7 @@ namespace dawn_wire { namespace server {
 
         std::unique_ptr<CreateReadyPipelineUserData> userdata =
             std::make_unique<CreateReadyPipelineUserData>();
+        userdata->isServerAlive = mIsAlive;
         userdata->server = this;
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
@@ -101,10 +116,27 @@ namespace dawn_wire { namespace server {
                                                       const char* message,
                                                       CreateReadyPipelineUserData* userdata) {
         std::unique_ptr<CreateReadyPipelineUserData> data(userdata);
-        if (status != WGPUCreateReadyPipelineStatus_Success) {
-            ComputePipelineObjects().Free(data->pipelineObjectID);
-        } else {
-            ComputePipelineObjects().Get(data->pipelineObjectID)->handle = pipeline;
+
+        auto* computePipelineObject = ComputePipelineObjects().Get(data->pipelineObjectID);
+        ASSERT(computePipelineObject != nullptr);
+
+        switch (status) {
+            case WGPUCreateReadyPipelineStatus_Success:
+                computePipelineObject->handle = pipeline;
+                break;
+
+            case WGPUCreateReadyPipelineStatus_Error:
+                ComputePipelineObjects().Free(data->pipelineObjectID);
+                break;
+
+            // Currently this code is unreachable because WireServer is always deleted before the
+            // removal of the device. In the future this logic may be changed when we decide to
+            // support sharing one pair of WireServer/WireClient to multiple devices.
+            case WGPUCreateReadyPipelineStatus_DeviceLost:
+            case WGPUCreateReadyPipelineStatus_DeviceDestroyed:
+            case WGPUCreateReadyPipelineStatus_Unknown:
+            default:
+                UNREACHABLE();
         }
 
         ReturnDeviceCreateReadyComputePipelineCallbackCmd cmd;
@@ -128,6 +160,7 @@ namespace dawn_wire { namespace server {
 
         std::unique_ptr<CreateReadyPipelineUserData> userdata =
             std::make_unique<CreateReadyPipelineUserData>();
+        userdata->isServerAlive = mIsAlive;
         userdata->server = this;
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
@@ -142,10 +175,27 @@ namespace dawn_wire { namespace server {
                                                      const char* message,
                                                      CreateReadyPipelineUserData* userdata) {
         std::unique_ptr<CreateReadyPipelineUserData> data(userdata);
-        if (status != WGPUCreateReadyPipelineStatus_Success) {
-            RenderPipelineObjects().Free(data->pipelineObjectID);
-        } else {
-            RenderPipelineObjects().Get(data->pipelineObjectID)->handle = pipeline;
+
+        auto* renderPipelineObject = RenderPipelineObjects().Get(data->pipelineObjectID);
+        ASSERT(renderPipelineObject != nullptr);
+
+        switch (status) {
+            case WGPUCreateReadyPipelineStatus_Success:
+                renderPipelineObject->handle = pipeline;
+                break;
+
+            case WGPUCreateReadyPipelineStatus_Error:
+                RenderPipelineObjects().Free(data->pipelineObjectID);
+                break;
+
+            // Currently this code is unreachable because WireServer is always deleted before the
+            // removal of the device. In the future this logic may be changed when we decide to
+            // support sharing one pair of WireServer/WireClient to multiple devices.
+            case WGPUCreateReadyPipelineStatus_DeviceLost:
+            case WGPUCreateReadyPipelineStatus_DeviceDestroyed:
+            case WGPUCreateReadyPipelineStatus_Unknown:
+            default:
+                UNREACHABLE();
         }
 
         ReturnDeviceCreateReadyRenderPipelineCallbackCmd cmd;

@@ -516,7 +516,8 @@
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
             {"value": 2, "name": "device lost"},
-            {"value": 3, "name": "unknown"}
+            {"value": 3, "name": "device destroyed"},
+            {"value": 4, "name": "unknown"}
         ]
     },
     "create ready render pipeline callback": {
