@@ -254,12 +254,12 @@ class InspectorHelper {
     return std::to_string(idx) + type->type_name();
   }
 
-  /// Generates a struct type appropriate for using in a UBO
+  /// Generates a struct type appropriate for using in an uniform buffer
   /// @param name name for the type
   /// @param members_info a vector of {type, offset} where each entry is the
   ///                     type and offset of a member of the struct
-  /// @returns a struct type suitable to use for a UBO
-  std::unique_ptr<ast::type::StructType> MakeUBOStructType(
+  /// @returns a struct type suitable to use for an uniform buffer
+  std::unique_ptr<ast::type::StructType> MakeUniformBufferStructType(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     ast::StructMemberList members;
@@ -284,15 +284,15 @@ class InspectorHelper {
     return std::make_unique<ast::type::StructType>(name, std::move(str));
   }
 
-  /// Adds a UBO variable to the module
+  /// Adds an uniform buffer variable to the module
   /// @param name the name of the variable
   /// @param struct_type the type to use
-  /// @param set the binding group/set to use for the UBO
-  /// @param binding the binding number to use for the UBO
-  void AddUBO(const std::string& name,
-              ast::type::StructType* struct_type,
-              uint32_t set,
-              uint32_t binding) {
+  /// @param set the binding group/set to use for the uniform buffer
+  /// @param binding the binding number to use for the uniform buffer
+  void AddUniformBuffer(const std::string& name,
+                        ast::type::StructType* struct_type,
+                        uint32_t set,
+                        uint32_t binding) {
     auto var = std::make_unique<ast::DecoratedVariable>(
         std::make_unique<ast::Variable>(name, ast::StorageClass::kUniform,
                                         struct_type));
@@ -305,14 +305,14 @@ class InspectorHelper {
     mod()->AddGlobalVariable(std::move(var));
   }
 
-  /// Generates a function that references a specific UBO
+  /// Generates a function that references a specific uniform buffer
   /// @param func_name name of the function created
-  /// @param ubo_name name of the UBO to be accessed
+  /// @param ub_name name of the uniform buffer to be accessed
   /// @param members list of members to access, by index and type
-  /// @returns a function that references all of the UBO members specified
-  std::unique_ptr<ast::Function> MakeUBOReferenceBodyFunction(
+  /// @returns a function that references all of the ub members specified
+  std::unique_ptr<ast::Function> MakeUniformBufferReferenceBodyFunction(
       std::string func_name,
-      std::string ubo_name,
+      std::string ub_name,
       std::vector<std::tuple<size_t, ast::type::Type*>> members) {
     auto body = std::make_unique<ast::BlockStatement>();
 
@@ -334,7 +334,7 @@ class InspectorHelper {
       body->append(std::make_unique<ast::AssignmentStatement>(
           std::make_unique<ast::IdentifierExpression>("local" + member_name),
           std::make_unique<ast::MemberAccessorExpression>(
-              std::make_unique<ast::IdentifierExpression>(ubo_name),
+              std::make_unique<ast::IdentifierExpression>(ub_name),
               std::make_unique<ast::IdentifierExpression>(member_name))));
     }
 
@@ -798,21 +798,21 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, NonEntryPointFunc) {
-  auto foo_type = MakeUBOStructType("foo_type", {{i32_type(), 0}});
-  AddUBO("foo_ubo", foo_type.get(), 0, 0);
+  auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
+  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ubo_func =
-      MakeUBOReferenceBodyFunction("ubo_func", "foo_ubo", {{0, i32_type()}});
-  mod()->AddFunction(std::move(ubo_func));
+  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
+                                                        {{0, i32_type()}});
+  mod()->AddFunction(std::move(ub_func));
 
-  auto ep_func = MakeCallerBodyFunction("ep_func", "ubo_func");
+  auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
   ep_func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ubo_func");
+  auto result = inspector()->GetUniformBufferResourceBindings("ub_func");
   std::string error = inspector()->error();
   EXPECT_TRUE(error.find("not an entry point") != std::string::npos);
 }
@@ -833,13 +833,13 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MissingBlockDeco) {
   auto foo_type =
       std::make_unique<ast::type::StructType>("foo_type", std::move(str));
 
-  AddUBO("foo_ubo", foo_type.get(), 0, 0);
+  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ubo_func =
-      MakeUBOReferenceBodyFunction("ubo_func", "foo_ubo", {{0, i32_type()}});
-  mod()->AddFunction(std::move(ubo_func));
+  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
+                                                        {{0, i32_type()}});
+  mod()->AddFunction(std::move(ub_func));
 
-  auto ep_func = MakeCallerBodyFunction("ep_func", "ubo_func");
+  auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
   ep_func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(ep_func));
@@ -852,14 +852,14 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, Simple) {
-  auto foo_type = MakeUBOStructType("foo_type", {{i32_type(), 0}});
-  AddUBO("foo_ubo", foo_type.get(), 0, 0);
+  auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
+  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ubo_func =
-      MakeUBOReferenceBodyFunction("ubo_func", "foo_ubo", {{0, i32_type()}});
-  mod()->AddFunction(std::move(ubo_func));
+  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
+                                                        {{0, i32_type()}});
+  mod()->AddFunction(std::move(ub_func));
 
-  auto ep_func = MakeCallerBodyFunction("ep_func", "ubo_func");
+  auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
   ep_func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(ep_func));
@@ -876,16 +876,15 @@ TEST_F(InspectorGetUniformBufferResourceBindings, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
-  auto foo_type = MakeUBOStructType(
+  auto foo_type = MakeUniformBufferStructType(
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
-  AddUBO("foo_ubo", foo_type.get(), 0, 0);
+  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ubo_func = MakeUBOReferenceBodyFunction(
-      "ubo_func", "foo_ubo",
-      {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
-  mod()->AddFunction(std::move(ubo_func));
+  auto ub_func = MakeUniformBufferReferenceBodyFunction(
+      "ub_func", "foo_ub", {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
+  mod()->AddFunction(std::move(ub_func));
 
-  auto ep_func = MakeCallerBodyFunction("ep_func", "ubo_func");
+  auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
   ep_func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(ep_func));
@@ -901,23 +900,23 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
   EXPECT_EQ(12u, result[0].min_buffer_binding_size);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUBOs) {
-  auto ubo_type = MakeUBOStructType(
-      "ubo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
-  AddUBO("ubo_foo", ubo_type.get(), 0, 0);
-  AddUBO("ubo_bar", ubo_type.get(), 0, 1);
-  AddUBO("ubo_baz", ubo_type.get(), 2, 0);
+TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBufferS) {
+  auto ub_type = MakeUniformBufferStructType(
+      "ub_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
+  AddUniformBuffer("ub_foo", ub_type.get(), 0, 0);
+  AddUniformBuffer("ub_bar", ub_type.get(), 0, 1);
+  AddUniformBuffer("ub_baz", ub_type.get(), 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
-    auto ubo_func = MakeUBOReferenceBodyFunction(
+    auto ub_func = MakeUniformBufferReferenceBodyFunction(
         func_name, var_name,
         {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
-    mod()->AddFunction(std::move(ubo_func));
+    mod()->AddFunction(std::move(ub_func));
   };
-  AddReferenceFunc("ubo_foo_func", "ubo_foo");
-  AddReferenceFunc("ubo_bar_func", "ubo_bar");
-  AddReferenceFunc("ubo_baz_func", "ubo_baz");
+  AddReferenceFunc("ub_foo_func", "ub_foo");
+  AddReferenceFunc("ub_bar_func", "ub_bar");
+  AddReferenceFunc("ub_baz_func", "ub_baz");
 
   auto AddFuncCall = [](ast::BlockStatement* body, const std::string& callee) {
     auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
@@ -927,9 +926,9 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUBOs) {
   };
   auto body = std::make_unique<ast::BlockStatement>();
 
-  AddFuncCall(body.get(), "ubo_foo_func");
-  AddFuncCall(body.get(), "ubo_bar_func");
-  AddFuncCall(body.get(), "ubo_baz_func");
+  AddFuncCall(body.get(), "ub_foo_func");
+  AddFuncCall(body.get(), "ub_bar_func");
+  AddFuncCall(body.get(), "ub_baz_func");
 
   body->append(std::make_unique<ast::ReturnStatement>());
   std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
@@ -960,15 +959,15 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUBOs) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
-  auto foo_type =
-      MakeUBOStructType("foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
-  AddUBO("foo_ubo", foo_type.get(), 0, 0);
+  auto foo_type = MakeUniformBufferStructType(
+      "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
+  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ubo_func =
-      MakeUBOReferenceBodyFunction("ubo_func", "foo_ubo", {{0, i32_type()}});
-  mod()->AddFunction(std::move(ubo_func));
+  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
+                                                        {{0, i32_type()}});
+  mod()->AddFunction(std::move(ub_func));
 
-  auto ep_func = MakeCallerBodyFunction("ep_func", "ubo_func");
+  auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
   ep_func->add_decoration(
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(ep_func));
