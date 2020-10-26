@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
@@ -81,6 +82,39 @@ TEST_F(BuilderTest, Return_WithValue) {
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(OpReturnValue %5
+)");
+}
+
+TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
+  ast::type::F32Type f32;
+
+  ast::Variable var("param", ast::StorageClass::kFunction, &f32);
+
+  ast::ReturnStatement ret(
+      std::make_unique<ast::IdentifierExpression>("param"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_TRUE(b.GenerateReturnStatement(&ret)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Function %3
+%4 = OpConstantNull %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%5 = OpLoad %3 %1
+OpReturnValue %5
 )");
 }
 

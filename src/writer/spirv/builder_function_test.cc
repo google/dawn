@@ -24,6 +24,8 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -60,10 +62,14 @@ TEST_F(BuilderTest, Function_WithParams) {
   ast::type::I32Type i32;
 
   ast::VariableList params;
-  params.push_back(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
-  params.push_back(
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &i32));
+  auto var_a =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
+  var_a->set_is_const(true);
+  params.push_back(std::move(var_a));
+  auto var_b =
+      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &i32);
+  var_b->set_is_const(true);
+  params.push_back(std::move(var_b));
 
   ast::Function func("a_func", std::move(params), &f32);
 
@@ -72,7 +78,13 @@ TEST_F(BuilderTest, Function_WithParams) {
       std::make_unique<ast::IdentifierExpression>("a")));
   func.set_body(std::move(body));
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(func.params()[0].get());
+  td.RegisterVariableForTesting(func.params()[1].get());
+  EXPECT_TRUE(td.DetermineFunction(&func));
+
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
@@ -87,7 +99,7 @@ OpName %6 "b"
 %7 = OpLabel
 OpReturnValue %5
 OpFunctionEnd
-)");
+)") << DumpBuilder(b);
 }
 
 TEST_F(BuilderTest, Function_WithBody) {

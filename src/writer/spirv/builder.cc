@@ -2151,6 +2151,7 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
     if (val_id == 0) {
       return false;
     }
+    val_id = GenerateLoadIfNeeded(stmt->value()->result_type(), val_id);
     push_function_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)});
   } else {
     push_function_inst(spv::Op::OpReturn, {});
