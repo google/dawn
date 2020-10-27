@@ -140,7 +140,7 @@ namespace dawn_native { namespace null {
         Surface* surface,
         NewSwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) {
-        return new SwapChain(this, surface, previousSwapChain, descriptor);
+        return SwapChain::Create(this, surface, previousSwapChain, descriptor);
     }
     ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return AcquireRef(new Texture(this, descriptor, TextureBase::TextureState::OwnedInternal));
@@ -347,23 +347,31 @@ namespace dawn_native { namespace null {
 
     // SwapChain
 
-    SwapChain::SwapChain(Device* device,
-                         Surface* surface,
-                         NewSwapChainBase* previousSwapChain,
-                         const SwapChainDescriptor* descriptor)
-        : NewSwapChainBase(device, surface, descriptor) {
+    // static
+    ResultOrError<SwapChain*> SwapChain::Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor) {
+        std::unique_ptr<SwapChain> swapchain =
+            std::make_unique<SwapChain>(device, surface, descriptor);
+        DAWN_TRY(swapchain->Initialize(previousSwapChain));
+        return swapchain.release();
+    }
+
+    MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
         if (previousSwapChain != nullptr) {
             // TODO(cwallez@chromium.org): figure out what should happen when surfaces are used by
             // multiple backends one after the other. It probably needs to block until the backend
             // and GPU are completely finished with the previous swapchain.
-            ASSERT(previousSwapChain->GetBackendType() == wgpu::BackendType::Null);
-            previousSwapChain->DetachFromSurface();
+            if (previousSwapChain->GetBackendType() != wgpu::BackendType::Null) {
+                return DAWN_VALIDATION_ERROR("null::SwapChain cannot switch between APIs");
+            }
         }
+
+        return {};
     }
 
-    SwapChain::~SwapChain() {
-        DetachFromSurface();
-    }
+    SwapChain::~SwapChain() = default;
 
     MaybeError SwapChain::PresentImpl() {
         mTexture->Destroy();

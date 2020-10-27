@@ -261,7 +261,7 @@ namespace dawn_native {
                                        Surface* surface,
                                        const SwapChainDescriptor* descriptor)
         : SwapChainBase(device),
-          mAttached(true),
+          mAttached(false),
           mWidth(descriptor->width),
           mHeight(descriptor->height),
           mFormat(descriptor->format),
@@ -277,16 +277,18 @@ namespace dawn_native {
         }
 
         ASSERT(!mAttached);
-        ASSERT(mSurface == nullptr);
     }
 
     void NewSwapChainBase::DetachFromSurface() {
         if (mAttached) {
             DetachFromSurfaceImpl();
-            GetSurface()->SetAttachedSwapChain(nullptr);
             mSurface = nullptr;
             mAttached = false;
         }
+    }
+
+    void NewSwapChainBase::SetIsAttached() {
+        mAttached = true;
     }
 
     void NewSwapChainBase::Configure(wgpu::TextureFormat format,

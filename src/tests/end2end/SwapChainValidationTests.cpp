@@ -71,24 +71,38 @@ class SwapChainValidationTests : public DawnTest {
 
     // Checks that an OutputAttachment view is an error by trying to create a render pass on it.
     void CheckTextureViewIsError(wgpu::TextureView view) {
-        utils::ComboRenderPassDescriptor renderPassDesc({view});
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
-        pass.EndPass();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
+        CheckTextureView(view, true, false);
     }
 
-    // Checks that an OutputAttachment view is an error by trying to create a render pass on it.
+    // Checks that an OutputAttachment view is an error by trying to submit a render pass on it.
     void CheckTextureViewIsDestroyed(wgpu::TextureView view) {
+        CheckTextureView(view, false, true);
+    }
+
+    // Checks that an OutputAttachment view is valid by submitting a render pass on it.
+    void CheckTextureViewIsValid(wgpu::TextureView view) {
+        CheckTextureView(view, false, false);
+    }
+
+  private:
+    void CheckTextureView(wgpu::TextureView view, bool errorAtFinish, bool errorAtSubmit) {
         utils::ComboRenderPassDescriptor renderPassDesc({view});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
         pass.EndPass();
-        wgpu::CommandBuffer commands = encoder.Finish();
 
-        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        if (errorAtFinish) {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        } else {
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (errorAtSubmit) {
+                ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            } else {
+                queue.Submit(1, &commands);
+            }
+        }
     }
 };
 
@@ -181,12 +195,17 @@ TEST_P(SwapChainValidationTests, PresentWithoutCurrentView) {
     ASSERT_DEVICE_ERROR(swapchain.Present());
 }
 
-// Check that the current view is in the destroyed state after the swapchain is destroyed.
-TEST_P(SwapChainValidationTests, ViewDestroyedAfterSwapChainDestruction) {
+// Check that the current view isn't destroyed when the ref to the swapchain is lost because the
+// swapchain is kept alive by the surface. Also check after we lose all refs to the surface, the
+// texture is destroyed.
+TEST_P(SwapChainValidationTests, ViewValidAfterSwapChainRefLost) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
-    swapchain = nullptr;
 
+    swapchain = nullptr;
+    CheckTextureViewIsValid(view);
+
+    surface = nullptr;
     CheckTextureViewIsDestroyed(view);
 }
 

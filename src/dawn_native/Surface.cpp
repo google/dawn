@@ -151,8 +151,8 @@ namespace dawn_native {
         }
     }
 
-    NewSwapChainBase* Surface::GetAttachedSwapChain() const {
-        return mSwapChain;
+    NewSwapChainBase* Surface::GetAttachedSwapChain() {
+        return mSwapChain.Get();
     }
 
     void Surface::SetAttachedSwapChain(NewSwapChainBase* swapChain) {

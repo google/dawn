@@ -60,6 +60,12 @@ namespace dawn_native { namespace vulkan {
                 return "VK_ERROR_FORMAT_NOT_SUPPORTED";
             case VK_ERROR_FRAGMENTED_POOL:
                 return "VK_ERROR_FRAGMENTED_POOL";
+
+            case VK_ERROR_SURFACE_LOST_KHR:
+                return "VK_ERROR_SURFACE_LOST_KHR";
+            case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
+                return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+
             case VK_FAKE_DEVICE_OOM_FOR_TESTING:
                 return "VK_FAKE_DEVICE_OOM_FOR_TESTING";
             case VK_FAKE_ERROR_FOR_TESTING:

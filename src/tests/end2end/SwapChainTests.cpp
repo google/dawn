@@ -136,9 +136,9 @@ TEST_P(SwapChainTests, DestroySurfaceAfterGet) {
 
 // Test switching between present modes.
 TEST_P(SwapChainTests, SwitchPresentMode) {
-    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
-    // makes the test fail.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    // Fails with "internal drawable creation failed" on the Windows NVIDIA CQ builders but not
+    // locally.
+    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
@@ -165,10 +165,6 @@ TEST_P(SwapChainTests, SwitchPresentMode) {
 
 // Test resizing the swapchain and without resizing the window.
 TEST_P(SwapChainTests, ResizingSwapChainOnly) {
-    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
-    // makes the test fail.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
-
     for (int i = 0; i < 10; i++) {
         wgpu::SwapChainDescriptor desc = baseDescriptor;
         desc.width += i * 10;
@@ -195,10 +191,6 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
 
 // Test resizing both the window and the swapchain at the same time.
 TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
-    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
-    // makes the test fail.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
-
     for (int i = 0; i < 10; i++) {
         glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
@@ -219,9 +211,10 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
 
 // Test switching devices on the same adapter.
 TEST_P(SwapChainTests, SwitchingDevice) {
-    // For unclear reasons recreating the swapchain produces a debug report warning on NVIDIA and
-    // makes the test fail.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    // The Vulkan Validation Layers incorrectly disallow gracefully passing a swapchain between two
+    // VkDevices using "vkSwapchainCreateInfoKHR::oldSwapchain".
+    // See https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/2256
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     wgpu::Device device2 = wgpu::Device::Acquire(GetAdapter().CreateDevice());
 

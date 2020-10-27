@@ -57,22 +57,36 @@ namespace dawn_native { namespace metal {
 
     // SwapChain
 
-    SwapChain::SwapChain(Device* device,
-                         Surface* surface,
-                         NewSwapChainBase* previousSwapChain,
-                         const SwapChainDescriptor* descriptor)
-        : NewSwapChainBase(device, surface, descriptor) {
-        ASSERT(surface->GetType() == Surface::Type::MetalLayer);
+    // static
+    ResultOrError<SwapChain*> SwapChain::Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor) {
+        std::unique_ptr<SwapChain> swapchain =
+            std::make_unique<SwapChain>(device, surface, descriptor);
+        DAWN_TRY(swapchain->Initialize(previousSwapChain));
+        return swapchain.release();
+    }
+
+    SwapChain::~SwapChain() {
+        DetachFromSurface();
+    }
+
+    MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
+        ASSERT(GetSurface()->GetType() == Surface::Type::MetalLayer);
 
         if (previousSwapChain != nullptr) {
             // TODO(cwallez@chromium.org): figure out what should happen when surfaces are used by
             // multiple backends one after the other. It probably needs to block until the backend
             // and GPU are completely finished with the previous swapchain.
-            ASSERT(previousSwapChain->GetBackendType() == wgpu::BackendType::Metal);
+            if (previousSwapChain->GetBackendType() != wgpu::BackendType::Metal) {
+                return DAWN_VALIDATION_ERROR("metal::SwapChain cannot switch between APIs");
+            }
+
             previousSwapChain->DetachFromSurface();
         }
 
-        mLayer = static_cast<CAMetalLayer*>(surface->GetMetalLayer());
+        mLayer = static_cast<CAMetalLayer*>(GetSurface()->GetMetalLayer());
         ASSERT(mLayer != nullptr);
 
         CGSize size = {};
@@ -91,10 +105,8 @@ namespace dawn_native { namespace metal {
 #endif  // defined(DAWN_PLATFORM_MACOS)
 
         // There is no way to control Fifo vs. Mailbox in Metal.
-    }
 
-    SwapChain::~SwapChain() {
-        DetachFromSurface();
+        return {};
     }
 
     MaybeError SwapChain::PresentImpl() {

@@ -37,13 +37,15 @@ namespace dawn_native { namespace metal {
 
     class SwapChain final : public NewSwapChainBase {
       public:
-        SwapChain(Device* device,
-                  Surface* surface,
-                  NewSwapChainBase* previousSwapChain,
-                  const SwapChainDescriptor* descriptor);
+        static ResultOrError<SwapChain*> Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor);
+        ~SwapChain() override;
 
       private:
-        ~SwapChain() override;
+        using NewSwapChainBase::NewSwapChainBase;
+        MaybeError Initialize(NewSwapChainBase* previousSwapChain);
 
         CAMetalLayer* mLayer = nullptr;
 

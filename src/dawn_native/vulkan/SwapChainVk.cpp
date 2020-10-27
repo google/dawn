@@ -189,7 +189,7 @@ namespace dawn_native { namespace vulkan {
         Device* device = ToBackend(GetDevice());
         Adapter* adapter = ToBackend(GetDevice()->GetAdapter());
 
-        VkSwapchainKHR oldVkSwapChain = VK_NULL_HANDLE;
+        VkSwapchainKHR previousVkSwapChain = VK_NULL_HANDLE;
 
         if (previousSwapChain != nullptr) {
             // TODO(cwallez@chromium.org): The first time a surface is used with a Device, check
@@ -198,30 +198,33 @@ namespace dawn_native { namespace vulkan {
             // TODO(cwallez@chromium.org): figure out what should happen when surfaces are used by
             // multiple backends one after the other. It probably needs to block until the backend
             // and GPU are completely finished with the previous swapchain.
-            ASSERT(previousSwapChain->GetBackendType() == wgpu::BackendType::Vulkan);
-
-            // The previous swapchain is a dawn_native::vulkan::SwapChain so we can reuse its
-            // VkSurfaceKHR provided they are on the same instance.
-            // TODO(cwallez@chromium.org): check they are the same instance.
+            if (previousSwapChain->GetBackendType() != wgpu::BackendType::Vulkan) {
+                return DAWN_VALIDATION_ERROR("vulkan::SwapChain cannot switch between APIs");
+            }
             // TODO(cwallez@chromium.org): use ToBackend once OldSwapChainBase is removed.
             SwapChain* previousVulkanSwapChain = static_cast<SwapChain*>(previousSwapChain);
-            std::swap(previousVulkanSwapChain->mVkSurface, mVkSurface);
 
             // TODO(cwallez@chromium.org): Figure out switching a single surface between multiple
-            // Vulkan devices. Probably needs to block too, but could reuse the surface!
-            ASSERT(previousSwapChain->GetDevice() == GetDevice());
-
-            // The previous swapchain was on the same Vulkan device so we can use Vulkan's
-            // "oldSwapchain" mechanism to ensure a seamless transition. We track the old swapchain
-            // for release immediately so it is not leaked in case of an error. (Vulkan allows
-            // destroying it immediately after the call to vkCreateSwapChainKHR but tracking
-            // using the fenced deleter makes the code simpler).
-            std::swap(previousVulkanSwapChain->mSwapChain, oldVkSwapChain);
-            device->GetFencedDeleter()->DeleteWhenUnused(oldVkSwapChain);
-
-            if (previousSwapChain != this) {
-                previousSwapChain->DetachFromSurface();
+            // Vulkan devices on different VkInstances. Probably needs to block too!
+            VkInstance previousInstance =
+                ToBackend(previousSwapChain->GetDevice())->GetVkInstance();
+            if (previousInstance != ToBackend(GetDevice())->GetVkInstance()) {
+                return DAWN_VALIDATION_ERROR("vulkan::SwapChain cannot switch between instances");
             }
+
+            // The previous swapchain is a dawn_native::vulkan::SwapChain so we can reuse its
+            // VkSurfaceKHR provided since they are on the same instance.
+            std::swap(previousVulkanSwapChain->mVkSurface, mVkSurface);
+
+            // The previous swapchain was on the same Vulkan instance so we can use Vulkan's
+            // "oldSwapchain" mechanism to ensure a seamless transition. We track the previous
+            // swapchain for release immediately so it is not leaked in case of an error. (Vulkan
+            // allows destroying it immediately after the call to vkCreateSwapChainKHR but tracking
+            // using the fenced deleter makes the code simpler).
+            std::swap(previousVulkanSwapChain->mSwapChain, previousVkSwapChain);
+            ToBackend(previousSwapChain->GetDevice())
+                ->GetFencedDeleter()
+                ->DeleteWhenUnused(previousVkSwapChain);
         }
 
         if (mVkSurface == VK_NULL_HANDLE) {
@@ -252,7 +255,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;    // TODO
         createInfo.presentMode = mConfig.presentMode;
         createInfo.clipped = false;
-        createInfo.oldSwapchain = oldVkSwapChain;
+        createInfo.oldSwapchain = previousVkSwapChain;
 
         DAWN_TRY(CheckVkSuccess(device->fn.CreateSwapchainKHR(device->GetVkDevice(), &createInfo,
                                                               nullptr, &*mSwapChain),

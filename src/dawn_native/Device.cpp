@@ -1017,21 +1017,24 @@ namespace dawn_native {
             DAWN_TRY(ValidateSwapChainDescriptor(this, surface, descriptor));
         }
 
+        // TODO(dawn:269): Remove this code path once implementation-based swapchains are removed.
         if (surface == nullptr) {
             DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
         } else {
             ASSERT(descriptor->implementation == 0);
 
             NewSwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
-            NewSwapChainBase* newSwapChain;
-            DAWN_TRY_ASSIGN(newSwapChain,
-                            CreateSwapChainImpl(surface, previousSwapChain, descriptor));
+            ResultOrError<NewSwapChainBase*> maybeNewSwapChain =
+                CreateSwapChainImpl(surface, previousSwapChain, descriptor);
 
             if (previousSwapChain != nullptr) {
-                ASSERT(!previousSwapChain->IsAttached());
+                previousSwapChain->DetachFromSurface();
             }
-            ASSERT(newSwapChain->IsAttached());
 
+            NewSwapChainBase* newSwapChain = nullptr;
+            DAWN_TRY_ASSIGN(newSwapChain, std::move(maybeNewSwapChain));
+
+            newSwapChain->SetIsAttached();
             surface->SetAttachedSwapChain(newSwapChain);
             *result = newSwapChain;
         }

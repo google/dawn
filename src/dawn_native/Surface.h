@@ -36,7 +36,7 @@ namespace dawn_native {
         Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
 
         void SetAttachedSwapChain(NewSwapChainBase* swapChain);
-        NewSwapChainBase* GetAttachedSwapChain() const;
+        NewSwapChainBase* GetAttachedSwapChain();
 
         // These are valid to call on all Surfaces.
         enum class Type { MetalLayer, WindowsHWND, Xlib };
@@ -61,7 +61,7 @@ namespace dawn_native {
         Type mType;
 
         // The swapchain will set this to null when it is destroyed.
-        NewSwapChainBase* mSwapChain = nullptr;
+        Ref<NewSwapChainBase> mSwapChain;
 
         // MetalLayer
         void* mMetalLayer = nullptr;
