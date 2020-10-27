@@ -34,6 +34,7 @@ TEST_F(PointerTypeTest, Creation) {
 TEST_F(PointerTypeTest, Is) {
   I32Type i32;
   PointerType p{&i32, StorageClass::kFunction};
+  EXPECT_FALSE(p.IsAccessControl());
   EXPECT_FALSE(p.IsAlias());
   EXPECT_FALSE(p.IsArray());
   EXPECT_FALSE(p.IsBool());

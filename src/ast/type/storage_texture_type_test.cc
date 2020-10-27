@@ -29,6 +29,7 @@ using StorageTextureTypeTest = testing::Test;
 TEST_F(StorageTextureTypeTest, Is) {
   StorageTextureType s(TextureDimension::k2dArray, StorageAccess::kRead,
                        ImageFormat::kRgba32Float);
+  EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());

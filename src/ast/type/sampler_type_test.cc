@@ -36,6 +36,7 @@ TEST_F(SamplerTypeTest, Creation_ComparisonSampler) {
 
 TEST_F(SamplerTypeTest, Is) {
   SamplerType s{SamplerKind::kSampler};
+  EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());

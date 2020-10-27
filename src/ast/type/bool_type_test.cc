@@ -25,6 +25,7 @@ using BoolTypeTest = testing::Test;
 
 TEST_F(BoolTypeTest, Is) {
   BoolType b;
+  EXPECT_FALSE(b.IsAccessControl());
   EXPECT_FALSE(b.IsAlias());
   EXPECT_FALSE(b.IsArray());
   EXPECT_TRUE(b.IsBool());

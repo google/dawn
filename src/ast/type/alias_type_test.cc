@@ -38,6 +38,7 @@ TEST_F(AliasTypeTest, Is) {
   I32Type i32;
 
   AliasType at{"a", &i32};
+  EXPECT_FALSE(at.IsAccessControl());
   EXPECT_TRUE(at.IsAlias());
   EXPECT_FALSE(at.IsArray());
   EXPECT_FALSE(at.IsBool());

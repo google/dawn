@@ -35,6 +35,7 @@ TEST_F(MatrixTypeTest, Creation) {
 TEST_F(MatrixTypeTest, Is) {
   I32Type i32;
   MatrixType m{&i32, 2, 3};
+  EXPECT_FALSE(m.IsAccessControl());
   EXPECT_FALSE(m.IsAlias());
   EXPECT_FALSE(m.IsArray());
   EXPECT_FALSE(m.IsBool());

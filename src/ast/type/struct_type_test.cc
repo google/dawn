@@ -36,6 +36,7 @@ TEST_F(StructTypeTest, Creation) {
 TEST_F(StructTypeTest, Is) {
   auto impl = std::make_unique<Struct>();
   StructType s{"S", std::move(impl)};
+  EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());

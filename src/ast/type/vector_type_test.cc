@@ -34,6 +34,7 @@ TEST_F(VectorTypeTest, Creation) {
 TEST_F(VectorTypeTest, Is) {
   I32Type i32;
   VectorType v{&i32, 4};
+  EXPECT_FALSE(v.IsAccessControl());
   EXPECT_FALSE(v.IsAlias());
   EXPECT_FALSE(v.IsArray());
   EXPECT_FALSE(v.IsBool());

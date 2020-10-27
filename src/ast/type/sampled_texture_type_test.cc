@@ -27,6 +27,7 @@ using SampledTextureTypeTest = testing::Test;
 TEST_F(SampledTextureTypeTest, Is) {
   F32Type f32;
   SampledTextureType s(TextureDimension::kCube, &f32);
+  EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());

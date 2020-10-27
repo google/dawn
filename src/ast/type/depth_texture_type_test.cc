@@ -25,6 +25,7 @@ using DepthTextureTypeTest = testing::Test;
 
 TEST_F(DepthTextureTypeTest, Is) {
   DepthTextureType d(TextureDimension::kCube);
+  EXPECT_FALSE(d.IsAccessControl());
   EXPECT_FALSE(d.IsAlias());
   EXPECT_FALSE(d.IsArray());
   EXPECT_FALSE(d.IsBool());

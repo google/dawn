@@ -48,6 +48,7 @@ TEST_F(ArrayTypeTest, Is) {
   I32Type i32;
 
   ArrayType arr{&i32, 3};
+  EXPECT_FALSE(arr.IsAccessControl());
   EXPECT_FALSE(arr.IsAlias());
   EXPECT_TRUE(arr.IsArray());
   EXPECT_FALSE(arr.IsBool());

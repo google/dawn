@@ -27,6 +27,7 @@ using MultisampledTextureTypeTest = testing::Test;
 TEST_F(MultisampledTextureTypeTest, Is) {
   F32Type f32;
   MultisampledTextureType s(TextureDimension::kCube, &f32);
+  EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
   EXPECT_FALSE(s.IsArray());
   EXPECT_FALSE(s.IsBool());

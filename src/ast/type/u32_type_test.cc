@@ -25,6 +25,7 @@ using U32TypeTest = testing::Test;
 
 TEST_F(U32TypeTest, Is) {
   U32Type u;
+  EXPECT_FALSE(u.IsAccessControl());
   EXPECT_FALSE(u.IsAlias());
   EXPECT_FALSE(u.IsArray());
   EXPECT_FALSE(u.IsBool());

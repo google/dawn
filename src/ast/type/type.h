@@ -21,6 +21,7 @@ namespace tint {
 namespace ast {
 namespace type {
 
+class AccessControlType;
 class AliasType;
 class ArrayType;
 class BoolType;
@@ -42,6 +43,8 @@ class Type {
   Type(Type&&) = default;
   virtual ~Type();
 
+  /// @returns true if the type is an access control type
+  virtual bool IsAccessControl() const;
   /// @returns true if the type is an alias type
   virtual bool IsAlias() const;
   /// @returns true if the type is an array type
@@ -117,6 +120,8 @@ class Type {
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector();
 
+  /// @returns the type as an access control type
+  const AccessControlType* AsAccessControl() const;
   /// @returns the type as an alias type
   const AliasType* AsAlias() const;
   /// @returns the type as an array type
@@ -144,6 +149,8 @@ class Type {
   /// @returns the type as a void type
   const VoidType* AsVoid() const;
 
+  /// @returns the type as an access control type
+  AccessControlType* AsAccessControl();
   /// @returns the type as an alias type
   AliasType* AsAlias();
   /// @returns the type as an array type
