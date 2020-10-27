@@ -152,6 +152,7 @@ add_subdirectory(src/dawn_wire)
 add_subdirectory(src/utils)
 
 if (DAWN_BUILD_EXAMPLES)
-    add_subdirectory(src/utils)
+    #TODO(dawn:269): Add this once implementation-based swapchains are removed.
+    #add_subdirectory(src/utils)
     add_subdirectory(examples)
 endif()
