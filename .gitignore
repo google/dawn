@@ -6,6 +6,8 @@
 .vscode
 build
 buildtools
+coverage.summary
+lcov.info
 out
 testing
 third_party/cpplint

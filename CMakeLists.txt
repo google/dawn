@@ -39,6 +39,8 @@ option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
 option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
+option(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
+
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
 if(WIN32)
@@ -173,6 +175,18 @@ function(tint_default_compile_options TARGET)
     endif()
   endif()
 
+  if (${TINT_EMIT_COVERAGE})
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        target_compile_options(${TARGET} PRIVATE "--coverage")
+        target_link_options(${TARGET} PRIVATE "gcov")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
+    else()
+        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
+    endif()
+  endif()
+
   if (MSVC)
     # Specify /EHs for exception handling.
     target_compile_options(${TARGET} PRIVATE
@@ -228,3 +242,18 @@ add_custom_target(tint-format
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   COMMENT "Running formatter"
   VERBATIM)
+
+
+if (${TINT_EMIT_COVERAGE} AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Generates a lcov.info file at the project root.
+  # This can be used by tools such as VSCode's Coverage Gutters extension to
+  # visualize code coverage in the editor.
+  get_filename_component(CLANG_BIN_DIR ${CMAKE_C_COMPILER} DIRECTORY)
+  set(PATH_WITH_CLANG "${CLANG_BIN_DIR}:$ENV{PATH}")
+  add_custom_target(tint-generate-coverage
+    COMMAND ${CMAKE_COMMAND} -E env PATH=${PATH_WITH_CLANG} ./tools/tint-generate-coverage $<TARGET_FILE:tint_unittests>
+    DEPENDS tint_unittests
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating tint coverage data"
+    VERBATIM)
+endif()
