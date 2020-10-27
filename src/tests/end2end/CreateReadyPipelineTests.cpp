@@ -135,7 +135,7 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
 
 // Verify the basic use of CreateReadyRenderPipeline() works on all backends.
 TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
-    constexpr wgpu::TextureFormat kOutputAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     const char* vertexShader = R"(
         #version 450
@@ -157,7 +157,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
     renderPipelineDescriptor.vertexStage.module = vsModule;
     renderPipelineDescriptor.cFragmentStage.module = fsModule;
-    renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
+    renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
     device.CreateReadyRenderPipeline(
@@ -175,8 +175,8 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.format = kOutputAttachmentFormat;
-    textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    textureDescriptor.format = kRenderAttachmentFormat;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     wgpu::Texture outputTexture = device.CreateTexture(&textureDescriptor);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
@@ -212,7 +212,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
 TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
     DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
 
-    constexpr wgpu::TextureFormat kOutputAttachmentFormat = wgpu::TextureFormat::Depth32Float;
+    constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 
     const char* vertexShader = R"(
         #version 450
@@ -234,7 +234,7 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
     renderPipelineDescriptor.vertexStage.module = vsModule;
     renderPipelineDescriptor.cFragmentStage.module = fsModule;
-    renderPipelineDescriptor.cColorStates[0].format = kOutputAttachmentFormat;
+    renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
     device.CreateReadyRenderPipeline(

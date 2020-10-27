@@ -34,7 +34,7 @@ class DepthStencilStateTest : public DawnTest {
         renderTargetDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         renderTargetDescriptor.mipLevelCount = 1;
         renderTargetDescriptor.usage =
-            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
         renderTargetView = renderTarget.CreateView();
@@ -47,7 +47,7 @@ class DepthStencilStateTest : public DawnTest {
         depthDescriptor.sampleCount = 1;
         depthDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
         depthDescriptor.mipLevelCount = 1;
-        depthDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        depthDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
         depthTexture = device.CreateTexture(&depthDescriptor);
 
         depthTextureView = depthTexture.CreateView();

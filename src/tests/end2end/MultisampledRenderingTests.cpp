@@ -27,12 +27,12 @@ class MultisampledRenderingTest : public DawnTest {
     }
 
     void InitTexturesForTest() {
-        mMultisampledColorTexture = CreateTextureForOutputAttachment(kColorFormat, kSampleCount);
+        mMultisampledColorTexture = CreateTextureForRenderAttachment(kColorFormat, kSampleCount);
         mMultisampledColorView = mMultisampledColorTexture.CreateView();
-        mResolveTexture = CreateTextureForOutputAttachment(kColorFormat, 1);
+        mResolveTexture = CreateTextureForRenderAttachment(kColorFormat, 1);
         mResolveView = mResolveTexture.CreateView();
 
-        mDepthStencilTexture = CreateTextureForOutputAttachment(kDepthStencilFormat, kSampleCount);
+        mDepthStencilTexture = CreateTextureForRenderAttachment(kDepthStencilFormat, kSampleCount);
         mDepthStencilView = mDepthStencilTexture.CreateView();
     }
 
@@ -89,7 +89,7 @@ class MultisampledRenderingTest : public DawnTest {
                                            alphaToCoverageEnabled);
     }
 
-    wgpu::Texture CreateTextureForOutputAttachment(wgpu::TextureFormat format,
+    wgpu::Texture CreateTextureForRenderAttachment(wgpu::TextureFormat format,
                                                    uint32_t sampleCount,
                                                    uint32_t mipLevelCount = 1,
                                                    uint32_t arrayLayerCount = 1) {
@@ -101,7 +101,7 @@ class MultisampledRenderingTest : public DawnTest {
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 
@@ -395,8 +395,8 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
     DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
-    wgpu::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+    wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
     wgpu::TextureView resolveView2 = resolveTexture2.CreateView();
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -438,7 +438,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
 
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
 
-    wgpu::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
+    wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
 
     // In first render pass we draw a green triangle and specify mResolveView as the resolve target.
     {
@@ -483,7 +483,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
     textureViewDescriptor.baseMipLevel = kBaseMipLevel;
 
     wgpu::Texture resolveTexture =
-        CreateTextureForOutputAttachment(kColorFormat, 1, kBaseMipLevel + 1, 1);
+        CreateTextureForRenderAttachment(kColorFormat, 1, kBaseMipLevel + 1, 1);
     wgpu::TextureView resolveView = resolveTexture.CreateView(&textureViewDescriptor);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -511,7 +511,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
 
     wgpu::TextureViewDescriptor baseTextureViewDescriptor;
     baseTextureViewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
@@ -523,7 +523,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     constexpr uint32_t kBaseArrayLayer1 = 2;
     constexpr uint32_t kBaseMipLevel1 = 0;
     wgpu::Texture resolveTexture1 =
-        CreateTextureForOutputAttachment(kColorFormat, 1, kBaseMipLevel1 + 1, kBaseArrayLayer1 + 1);
+        CreateTextureForRenderAttachment(kColorFormat, 1, kBaseMipLevel1 + 1, kBaseArrayLayer1 + 1);
     wgpu::TextureViewDescriptor resolveViewDescriptor1 = baseTextureViewDescriptor;
     resolveViewDescriptor1.baseArrayLayer = kBaseArrayLayer1;
     resolveViewDescriptor1.baseMipLevel = kBaseMipLevel1;
@@ -534,7 +534,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     constexpr uint32_t kBaseArrayLayer2 = 5;
     constexpr uint32_t kBaseMipLevel2 = 3;
     wgpu::Texture resolveTexture2 =
-        CreateTextureForOutputAttachment(kColorFormat, 1, kBaseMipLevel2 + 1, kBaseArrayLayer2 + 1);
+        CreateTextureForRenderAttachment(kColorFormat, 1, kBaseMipLevel2 + 1, kBaseArrayLayer2 + 1);
     wgpu::TextureViewDescriptor resolveViewDescriptor2 = baseTextureViewDescriptor;
     resolveViewDescriptor2.baseArrayLayer = kBaseArrayLayer2;
     resolveViewDescriptor2.baseMipLevel = kBaseMipLevel2;
@@ -629,8 +629,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) 
 // mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMask) {
     wgpu::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
-    wgpu::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+    wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
     wgpu::TextureView resolveView2 = resolveTexture2.CreateView();
 
     // The first and fourth samples are included,
@@ -774,8 +774,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 // shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
     wgpu::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
-    wgpu::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+    wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
     wgpu::TextureView resolveView2 = resolveTexture2.CreateView();
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -871,8 +871,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
 // component of the first color output attachment.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCoverage) {
     wgpu::TextureView multisampledColorView2 =
-        CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
-    wgpu::Texture resolveTexture2 = CreateTextureForOutputAttachment(kColorFormat, 1);
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+    wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
     wgpu::TextureView resolveView2 = resolveTexture2.CreateView();
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
     constexpr float kMSAACoverage = 0.50f;

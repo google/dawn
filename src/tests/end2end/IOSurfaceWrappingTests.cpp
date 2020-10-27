@@ -123,7 +123,7 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
         descriptor.size = {10, 10, 1};
         descriptor.sampleCount = 1;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     }
 
   protected:
@@ -339,7 +339,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         textureDescriptor.size = {1, 1, 1};
         textureDescriptor.sampleCount = 1;
         textureDescriptor.mipLevelCount = 1;
-        textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
         wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
         wgpu::TextureView ioSurfaceView = ioSurfaceTexture.CreateView();
@@ -463,7 +463,7 @@ TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
     textureDescriptor.size = {1, 1, 1};
     textureDescriptor.sampleCount = 1;
     textureDescriptor.mipLevelCount = 1;
-    textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
     // wrap ioSurface and ensure color is not visible when isInitialized set to false
     wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), 0, false);

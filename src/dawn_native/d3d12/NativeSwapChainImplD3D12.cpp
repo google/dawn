@@ -29,7 +29,7 @@ namespace dawn_native { namespace d3d12 {
             if (allowedUsages & WGPUTextureUsage_Storage) {
                 usage |= DXGI_USAGE_UNORDERED_ACCESS;
             }
-            if (allowedUsages & WGPUTextureUsage_OutputAttachment) {
+            if (allowedUsages & WGPUTextureUsage_RenderAttachment) {
                 usage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
             }
             return usage;

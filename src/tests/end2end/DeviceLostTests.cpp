@@ -226,7 +226,7 @@ TEST_P(DeviceLostTest, CreateTextureFails) {
     descriptor.size.depth = 1;
     descriptor.mipLevelCount = 1;
     descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }

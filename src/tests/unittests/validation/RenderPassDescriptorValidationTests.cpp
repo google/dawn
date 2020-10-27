@@ -50,7 +50,7 @@ namespace {
                                 uint32_t arrayLayerCount,
                                 uint32_t mipLevelCount,
                                 uint32_t sampleCount = 1,
-                                wgpu::TextureUsage usage = wgpu::TextureUsage::OutputAttachment) {
+                                wgpu::TextureUsage usage = wgpu::TextureUsage::RenderAttachment) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = dimension;
         descriptor.size.width = width;
@@ -548,8 +548,8 @@ namespace {
     }
 
     // It is not allowed to use a resolve target which is created from a texture whose usage does
-    // not include wgpu::TextureUsage::OutputAttachment.
-    TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsageNoOutputAttachment) {
+    // not include wgpu::TextureUsage::RenderAttachment.
+    TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsageNoRenderAttachment) {
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture nonColorUsageResolveTexture =

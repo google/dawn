@@ -900,7 +900,7 @@ namespace {
         {
             // Create a texture
             wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as sampled binding
@@ -969,7 +969,7 @@ namespace {
         {
             // Create a texture
             wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as writeonly storage binding
@@ -1059,10 +1059,10 @@ namespace {
         {
             // Create textures that will be used as both a sampled texture and a render target
             wgpu::Texture t0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView v0 = t0.CreateView();
             wgpu::Texture t1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView v1 = t1.CreateView();
 
             // Create bind groups to use the texture as sampled
@@ -1312,7 +1312,7 @@ namespace {
         wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::CopySrc);
         wgpu::Texture texture1 =
             CreateTexture(wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                          wgpu::TextureUsage::OutputAttachment);
+                          wgpu::TextureUsage::RenderAttachment);
         wgpu::TextureView view0 = texture0.CreateView();
         wgpu::TextureView view1 = texture1.CreateView();
 
@@ -1353,10 +1353,10 @@ namespace {
         {
             // Create textures that will be used as both a sampled texture and a render target
             wgpu::Texture texture0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view0 = texture0.CreateView();
             wgpu::Texture texture1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view1 = texture1.CreateView();
 
             // Create the bind group to use the texture as sampled
@@ -1516,7 +1516,7 @@ namespace {
     TEST_F(ResourceUsageTrackingTest, TextureUsageConflictWithInvisibleStageInBindGroup) {
         // Create texture and texture view
         wgpu::Texture texture =
-            CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::OutputAttachment);
+            CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::RenderAttachment);
         wgpu::TextureView view = texture.CreateView();
 
         // Test render pass

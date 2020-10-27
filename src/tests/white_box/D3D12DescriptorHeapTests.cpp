@@ -69,7 +69,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
         descriptor.sampleCount = 1;
         descriptor.format = format;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture color = device.CreateTexture(&descriptor);
 
         return utils::BasicRenderPass(width, height, color);
@@ -739,7 +739,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment |
+    descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
                        wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     wgpu::TextureView textureView = texture.CreateView();

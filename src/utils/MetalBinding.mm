@@ -65,7 +65,7 @@ namespace utils {
             [mLayer setDrawableSize:size];
 
             constexpr uint32_t kFramebufferOnlyTextureUsages =
-                WGPUTextureUsage_OutputAttachment | WGPUTextureUsage_Present;
+                WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_Present;
             bool hasOnlyFramebufferUsages = !(usage & (~kFramebufferOnlyTextureUsages));
             if (hasOnlyFramebufferUsages) {
                 [mLayer setFramebufferOnly:YES];

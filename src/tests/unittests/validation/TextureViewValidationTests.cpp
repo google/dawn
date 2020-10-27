@@ -348,7 +348,7 @@ namespace {
     TEST_F(TextureViewValidationTest, AspectMustExist) {
         wgpu::TextureDescriptor descriptor = {};
         descriptor.size = {1, 1, 1};
-        descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
+        descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
 
         // Can select: All and DepthOnly from Depth32Float, but not StencilOnly
         {

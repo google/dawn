@@ -123,7 +123,7 @@ class TextureZeroInitTest : public DawnTest {
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
 TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Texture's first usage is in EXPECT_PIXEL_RGBA8_EQ's call to CopyTextureToBuffer
@@ -140,7 +140,7 @@ TEST_P(TextureZeroInitTest, CopyMultipleTextureArrayLayersToBufferSource) {
     constexpr uint32_t kArrayLayers = 6u;
 
     const wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, kArrayLayers, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, kArrayLayers, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
@@ -183,7 +183,7 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
     uint32_t layerCount = 1;
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        levelCount, layerCount, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        levelCount, layerCount, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
@@ -228,7 +228,7 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
     uint32_t layerCount = 4;
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        levelCount, layerCount, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        levelCount, layerCount, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
@@ -374,7 +374,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
 
     wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopyDst |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst |
                                     wgpu::TextureUsage::CopySrc,
                                 kColorFormat);
     wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
@@ -429,7 +429,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 
     wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopyDst |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst |
                                     wgpu::TextureUsage::CopySrc,
                                 kColorFormat);
     wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
@@ -462,12 +462,12 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                    wgpu::TextureUsage::OutputAttachment,
+                                    wgpu::TextureUsage::RenderAttachment,
                                 kColorFormat);
     wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -504,12 +504,12 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                    wgpu::TextureUsage::OutputAttachment,
+                                    wgpu::TextureUsage::RenderAttachment,
                                 kColorFormat);
     wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -546,12 +546,12 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                    wgpu::TextureUsage::OutputAttachment,
+                                    wgpu::TextureUsage::RenderAttachment,
                                 kColorFormat);
     wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -585,7 +585,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -620,7 +620,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
             wgpu::TextureDescriptor colorDescriptor =
                 CreateTextureDescriptor(1, 1,
                                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                            wgpu::TextureUsage::OutputAttachment,
+                                            wgpu::TextureUsage::RenderAttachment,
                                         kColorFormat);
             wgpu::Texture colorTexture = device.CreateTexture(&colorDescriptor);
 
@@ -694,7 +694,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
             wgpu::TextureDescriptor colorDescriptor =
                 CreateTextureDescriptor(1, 1,
                                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                            wgpu::TextureUsage::OutputAttachment,
+                                            wgpu::TextureUsage::RenderAttachment,
                                         kColorFormat);
             wgpu::Texture colorTexture = device.CreateTexture(&colorDescriptor);
 
@@ -747,7 +747,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -792,7 +792,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
         wgpu::TextureDescriptor colorDescriptor =
             CreateTextureDescriptor(1, 1,
                                     wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                        wgpu::TextureUsage::OutputAttachment,
+                                        wgpu::TextureUsage::RenderAttachment,
                                     kColorFormat);
         wgpu::Texture colorTexture = device.CreateTexture(&colorDescriptor);
 
@@ -820,7 +820,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
 // This tests the color attachments clear to 0s
 TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+        1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
     renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
@@ -848,7 +848,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
@@ -1053,7 +1053,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
@@ -1121,13 +1121,13 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                                    wgpu::TextureUsage::OutputAttachment,
+                                    wgpu::TextureUsage::RenderAttachment,
                                 kColorFormat);
     wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     wgpu::TextureDescriptor depthStencilDescriptor =
         CreateTextureDescriptor(1, 1,
-                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc |
+                                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc |
                                     wgpu::TextureUsage::CopyDst,
                                 kDepthStencilFormat);
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
@@ -1203,7 +1203,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     // Fill the sample texture's second mip with data
@@ -1282,7 +1282,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     // Fill the sample texture's second array layer with data

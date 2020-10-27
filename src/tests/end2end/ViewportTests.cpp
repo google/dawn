@@ -113,7 +113,7 @@ class ViewportTest : public DawnTest {
         wgpu::TextureDescriptor depthDesc;
         depthDesc.size = {3, 1, 1};
         depthDesc.format = wgpu::TextureFormat::Depth32Float;
-        depthDesc.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        depthDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture depthTexture = device.CreateTexture(&depthDesc);
 
         // Render the three points with the viewport call.

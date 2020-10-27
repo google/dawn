@@ -285,7 +285,7 @@ void DrawCallPerf::SetUp() {
         descriptor.size.width = kTextureSize;
         descriptor.size.height = kTextureSize;
         descriptor.size.depth = 1;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         mColorAttachment = device.CreateTexture(&descriptor).CreateView();

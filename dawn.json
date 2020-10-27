@@ -1713,6 +1713,7 @@
             {"value": 4, "name": "sampled"},
             {"value": 8, "name": "storage"},
             {"value": 16, "name": "output attachment"},
+            {"value": 16, "name": "render attachment"},
             {"value": 32, "name": "present"}
         ]
     },

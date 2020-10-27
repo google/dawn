@@ -234,7 +234,7 @@ namespace dawn_native { namespace vulkan {
             defaultDescriptor.size = {1, 1, 1};
             defaultDescriptor.sampleCount = 1;
             defaultDescriptor.mipLevelCount = 1;
-            defaultDescriptor.usage = wgpu::TextureUsage::OutputAttachment |
+            defaultDescriptor.usage = wgpu::TextureUsage::RenderAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         }
 
@@ -401,7 +401,7 @@ namespace dawn_native { namespace vulkan {
             defaultDescriptor.size = {1, 1, 1};
             defaultDescriptor.sampleCount = 1;
             defaultDescriptor.mipLevelCount = 1;
-            defaultDescriptor.usage = wgpu::TextureUsage::OutputAttachment |
+            defaultDescriptor.usage = wgpu::TextureUsage::RenderAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         }
 

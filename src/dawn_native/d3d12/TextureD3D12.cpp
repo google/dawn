@@ -56,7 +56,7 @@ namespace dawn_native { namespace d3d12 {
             if (usage & wgpu::TextureUsage::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & wgpu::TextureUsage::OutputAttachment) {
+            if (usage & wgpu::TextureUsage::RenderAttachment) {
                 if (format.HasDepthOrStencil()) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
                 } else {
@@ -79,7 +79,7 @@ namespace dawn_native { namespace d3d12 {
             // A multisampled resource must have either D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET or
             // D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL set in D3D12_RESOURCE_DESC::Flags.
             // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_resource_desc
-            if ((usage & wgpu::TextureUsage::OutputAttachment) != 0 || isMultisampledTexture) {
+            if ((usage & wgpu::TextureUsage::RenderAttachment) != 0 || isMultisampledTexture) {
                 if (format.HasDepthOrStencil()) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
                 } else {
@@ -864,7 +864,7 @@ namespace dawn_native { namespace d3d12 {
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
-        if ((GetUsage() & wgpu::TextureUsage::OutputAttachment) != 0) {
+        if ((GetUsage() & wgpu::TextureUsage::RenderAttachment) != 0) {
             if (GetFormat().HasDepthOrStencil()) {
                 TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE, range);
 

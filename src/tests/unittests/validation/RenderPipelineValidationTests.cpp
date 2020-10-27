@@ -229,7 +229,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     baseTextureDescriptor.size.depth = 1;
     baseTextureDescriptor.mipLevelCount = 1;
     baseTextureDescriptor.dimension = wgpu::TextureDimension::e2D;
-    baseTextureDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+    baseTextureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
     utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
     nonMultisampledPipelineDescriptor.sampleCount = 1;

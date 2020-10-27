@@ -215,7 +215,7 @@ class TextureFormatTest : public DawnTest {
         ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
 
         wgpu::TextureDescriptor renderTargetDesc;
-        renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment;
+        renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
         renderTargetDesc.size = {width, 1, 1};
         renderTargetDesc.format = renderFormatInfo.format;
 

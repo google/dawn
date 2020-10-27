@@ -130,7 +130,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)
     descriptor.sampleCount = 1;
     descriptor.format = attachmentFormat;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     attachment = device.CreateTexture(&descriptor);
 
     wgpu::TextureView view = attachment.CreateView();

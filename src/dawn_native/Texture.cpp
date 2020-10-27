@@ -198,9 +198,9 @@ namespace dawn_native {
             }
 
             if (!format->isRenderable &&
-                (descriptor->usage & wgpu::TextureUsage::OutputAttachment)) {
+                (descriptor->usage & wgpu::TextureUsage::RenderAttachment)) {
                 return DAWN_VALIDATION_ERROR(
-                    "Non-renderable format used with OutputAttachment usage");
+                    "Non-renderable format used with RenderAttachment usage");
             }
 
             if (!format->supportsStorageUsage &&

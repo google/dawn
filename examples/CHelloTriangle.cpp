@@ -34,7 +34,7 @@ void init() {
         swapchain = wgpuDeviceCreateSwapChain(device, nullptr, &descriptor);
     }
     swapChainFormat = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
-    wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_OutputAttachment, 640, 480);
+    wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_RenderAttachment, 640, 480);
 
     const char* vs =
         "#version 450\n"

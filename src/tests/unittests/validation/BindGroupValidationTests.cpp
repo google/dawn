@@ -287,7 +287,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 
     // Make an output attachment texture and try to set it for a SampledTexture binding
     wgpu::Texture outputTexture =
-        CreateTexture(wgpu::TextureUsage::OutputAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
+        CreateTexture(wgpu::TextureUsage::RenderAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
     wgpu::TextureView outputTextureView = outputTexture.CreateView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
 }

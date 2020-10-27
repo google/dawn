@@ -37,7 +37,7 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     RGBA8 filled(255, 255, 255, 255);
@@ -56,7 +56,7 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     descriptor.size.depth = 1;
     descriptor.sampleCount = 1;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     descriptor.format = wgpu::TextureFormat::Depth32Float;
 
     // We can only really test Depth32Float here because Depth24Plus(Stencil8)? may be in an unknown
@@ -79,7 +79,7 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = mipLevels;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;
@@ -103,7 +103,7 @@ TEST_P(NonzeroTextureCreationTests, ArrayLayerClears) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;
@@ -192,7 +192,7 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
     baseDescriptor.sampleCount = 1;
     baseDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     baseDescriptor.mipLevelCount = 1;
-    baseDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    baseDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
     RGBA8 filled(255, 255, 255, 255);
 

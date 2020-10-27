@@ -188,7 +188,7 @@ wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     auto depthStencilTexture = device.CreateTexture(&descriptor);
     return depthStencilTexture.CreateView();
 }

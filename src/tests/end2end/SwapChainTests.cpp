@@ -53,7 +53,7 @@ class SwapChainTests : public DawnTest {
 
         baseDescriptor.width = width;
         baseDescriptor.height = height;
-        baseDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        baseDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
         baseDescriptor.format = wgpu::TextureFormat::BGRA8Unorm;
         baseDescriptor.presentMode = wgpu::PresentMode::Mailbox;
     }

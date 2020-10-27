@@ -45,7 +45,7 @@ namespace dawn_native { namespace metal {
                 result |= MTLTextureUsageShaderRead;
             }
 
-            if (usage & (wgpu::TextureUsage::OutputAttachment)) {
+            if (usage & (wgpu::TextureUsage::RenderAttachment)) {
                 result |= MTLTextureUsageRenderTarget;
             }
 
@@ -385,7 +385,7 @@ namespace dawn_native { namespace metal {
         const uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         const double dClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.0 : 1.0;
 
-        if ((GetUsage() & wgpu::TextureUsage::OutputAttachment) != 0) {
+        if ((GetUsage() & wgpu::TextureUsage::RenderAttachment) != 0) {
             ASSERT(GetFormat().isRenderable);
 
             // End the blit encoder if it is open.

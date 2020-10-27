@@ -800,7 +800,7 @@ TEST_F(CopyCommandTest_B2T, CopyToStencilAspect) {
 
         wgpu::Texture destination =
             Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8,
-                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::OutputAttachment);
+                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
 
         TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, {0, 0, 0},
                     {15, 15, 1}, wgpu::TextureAspect::StencilOnly);
@@ -817,7 +817,7 @@ TEST_F(CopyCommandTest_B2T, CopyToStencilAspect) {
 
         wgpu::Texture destination =
             Create2DTexture(16, 16, 2, 1, wgpu::TextureFormat::Depth24PlusStencil8,
-                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::OutputAttachment);
+                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
 
         // Whole mip is success
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 1, {0, 0, 0},
@@ -839,7 +839,7 @@ TEST_F(CopyCommandTest_B2T, CopyToStencilAspect) {
 
         wgpu::Texture destination =
             Create2DTexture(17, 17, 2, 1, wgpu::TextureFormat::Depth24PlusStencil8,
-                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::OutputAttachment);
+                            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
 
         // Whole mip is success
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 1, {0, 0, 0},

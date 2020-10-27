@@ -60,7 +60,7 @@ class RenderPassTest : public DawnTest {
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 

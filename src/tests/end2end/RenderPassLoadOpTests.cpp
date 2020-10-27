@@ -64,7 +64,7 @@ class RenderPassLoadOpTests : public DawnTest {
         descriptor.sampleCount = 1;
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         renderTarget = device.CreateTexture(&descriptor);
 
         renderTargetView = renderTarget.CreateView();
@@ -105,7 +105,7 @@ class RenderPassLoadOpTests : public DawnTest {
         textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.size = kTextureSize;
         textureDescriptor.usage =
-            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         textureDescriptor.format = format;
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 

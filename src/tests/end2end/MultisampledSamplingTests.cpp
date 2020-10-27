@@ -131,7 +131,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
     wgpu::Texture colorTexture;
     {
         wgpu::TextureDescriptor desc = {};
-        desc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
+        desc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
         desc.size = kTextureSize;
         desc.format = kColorFormat;
         desc.sampleCount = kSampleCount;
@@ -141,7 +141,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
     wgpu::Texture depthTexture;
     {
         wgpu::TextureDescriptor desc = {};
-        desc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
+        desc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
         desc.size = kTextureSize;
         desc.format = kDepthFormat;
         desc.sampleCount = kSampleCount;

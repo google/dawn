@@ -751,7 +751,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
     for (uint32_t i = 0; i < 4; ++i) {
         renderTargets[i] = device.CreateTexture(&descriptor);

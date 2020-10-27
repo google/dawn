@@ -36,7 +36,7 @@ namespace {
             descriptor.sampleCount = kDefaultSampleCount;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.format = kDefaultTextureFormat;
-            descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::Sampled;
+            descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::Sampled;
             return descriptor;
         }
 
@@ -329,11 +329,11 @@ namespace {
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
 
-    // Test it is an error to create an OutputAttachment texture with a non-renderable format.
-    TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
+    // Test it is an error to create an RenderAttachment texture with a non-renderable format.
+    TEST_F(TextureValidationTest, NonRenderableAndRenderAttachment) {
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {1, 1, 1};
-        descriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
         // Succeeds because RGBA8Unorm is renderable
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -457,7 +457,7 @@ namespace {
         // Test that only CopySrc, CopyDst and Sampled are accepted as the texture usage of the
         // textures in BC formats.
         wgpu::TextureUsage invalidUsages[] = {
-            wgpu::TextureUsage::OutputAttachment,
+            wgpu::TextureUsage::RenderAttachment,
             wgpu::TextureUsage::Storage,
             wgpu::TextureUsage::Present,
         };

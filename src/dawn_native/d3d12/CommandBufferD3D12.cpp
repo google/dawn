@@ -629,7 +629,7 @@ namespace dawn_native { namespace d3d12 {
                 // Clear textures that are not output attachments. Output attachments will be
                 // cleared during record render pass if the texture subresource has not been
                 // initialized before the render pass.
-                if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::OutputAttachment)) {
+                if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::RenderAttachment)) {
                     texture->EnsureSubresourceContentInitialized(commandContext,
                                                                  texture->GetAllSubresources());
                 }

@@ -155,7 +155,7 @@ class DepthStencilCopyTests : public DawnTest {
                                                                 wgpu::TextureUsage usage,
                                                                 uint32_t mipLevel = 0) {
         wgpu::Texture src = CreateDepthStencilTexture(
-            width, height, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+            width, height, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
             mipLevel + 1);
 
         wgpu::Texture dst = CreateDepthStencilTexture(
@@ -193,7 +193,7 @@ class DepthStencilCopyTests : public DawnTest {
         wgpu::TextureDescriptor colorTexDesc = {};
         colorTexDesc.size = {width, height, 1};
         colorTexDesc.format = wgpu::TextureFormat::R32Uint;
-        colorTexDesc.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        colorTexDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture colorTexture = device.CreateTexture(&colorTexDesc);
 
         // Make a sampleable texture to store the depth data. We'll sample this in the
@@ -306,7 +306,7 @@ TEST_P(DepthStencilCopyTests, FromDepthAspect) {
     constexpr uint32_t kHeight = 4;
 
     wgpu::Texture depthTexture = CreateDepthTexture(
-        kWidth, kHeight, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc);
+        kWidth, kHeight, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
     InitializeDepthTextureRegion(depthTexture, 0.f, 0.3f);
 
@@ -327,7 +327,7 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
     constexpr uint32_t kHeight = 4;
 
     wgpu::Texture depthStencilTexture = CreateDepthStencilTexture(
-        kWidth, kHeight, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc);
+        kWidth, kHeight, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
     InitializeDepthStencilTextureRegion(depthStencilTexture, 0.f, 0.3f, 0u, 1u);
 
@@ -349,7 +349,7 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::Texture depthStencilTexture = CreateDepthStencilTexture(
-        9, 9, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 2);
+        9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
 
     InitializeDepthStencilTextureRegion(depthStencilTexture, 0.f, 0.3f, 0u, 1u, 1u);
 
@@ -367,7 +367,7 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
 // Test copying the non-zero mip, depth-only aspect into a buffer.
 TEST_P(DepthStencilCopyTests, FromNonZeroMipDepthAspect) {
     wgpu::Texture depthTexture = CreateDepthTexture(
-        9, 9, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 2);
+        9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
 
     InitializeDepthTextureRegion(depthTexture, 0.f, 0.4f, 1);
 
@@ -386,8 +386,8 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipDepthAspect) {
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
     // TODO(enga): Figure out why this fails on MacOS Intel Iris.
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
-    // Maybe has to do with the OutputAttachment usage. Notably, a later test
-    // T2TBothAspectsThenCopyNonRenderableStencil does not use OutputAttachment and works correctly.
+    // Maybe has to do with the RenderAttachment usage. Notably, a later test
+    // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
     constexpr uint32_t kWidth = 4;
@@ -395,7 +395,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, kWidth, kHeight,
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment);
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     // Check the stencil
     std::vector<uint8_t> expectedData = {
@@ -457,7 +457,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
     constexpr uint32_t kHeight = 4;
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
-        0.1f, 0.3f, 1u, 3u, kWidth, kHeight, wgpu::TextureUsage::OutputAttachment);
+        0.1f, 0.3f, 1u, 3u, kWidth, kHeight, wgpu::TextureUsage::RenderAttachment);
 
     // Check the depth
     ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight, 0,
@@ -472,7 +472,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
 // Test copying both aspects in a T2T copy, then copying only depth at a nonzero mip.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
-        0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::OutputAttachment, 1);
+        0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::RenderAttachment, 1);
 
     // Check the depth
     ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, 4, 4, 1,
@@ -491,7 +491,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, kWidth, kHeight,
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment);
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     // Check the stencil
     std::vector<uint8_t> expectedData = {
@@ -527,7 +527,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, kWidth, kHeight,
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment);
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     // Check the depth
     ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight, 0,
@@ -568,7 +568,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
 
     wgpu::Texture depthStencilTexture =
         CreateDepthStencilTexture(kWidth, kHeight,
-                                  wgpu::TextureUsage::OutputAttachment |
+                                  wgpu::TextureUsage::RenderAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
 
     {

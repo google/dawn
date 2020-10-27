@@ -292,7 +292,7 @@ void init() {
 
     queue = device.GetDefaultQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::OutputAttachment,
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::RenderAttachment,
                         640, 480);
 
     initBuffers();

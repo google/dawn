@@ -81,8 +81,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Format must (currently) be BGRA8Unorm");
             }
 
-            if (descriptor->usage != wgpu::TextureUsage::OutputAttachment) {
-                return DAWN_VALIDATION_ERROR("Usage must (currently) be OutputAttachment");
+            if (descriptor->usage != wgpu::TextureUsage::RenderAttachment) {
+                return DAWN_VALIDATION_ERROR("Usage must (currently) be RenderAttachment");
             }
 
             if (descriptor->width == 0 || descriptor->height == 0) {

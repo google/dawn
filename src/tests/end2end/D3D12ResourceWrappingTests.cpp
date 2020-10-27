@@ -65,7 +65,7 @@ namespace {
             baseDawnDescriptor.sampleCount = 1;
             baseDawnDescriptor.mipLevelCount = 1;
             baseDawnDescriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc |
-                                       wgpu::TextureUsage::OutputAttachment |
+                                       wgpu::TextureUsage::RenderAttachment |
                                        wgpu::TextureUsage::CopyDst;
 
             baseD3dDescriptor.Width = kTestWidth;

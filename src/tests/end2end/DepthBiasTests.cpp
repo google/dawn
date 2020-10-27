@@ -71,7 +71,7 @@ class DepthBiasTests : public DawnTest {
             wgpu::TextureDescriptor descriptor;
             descriptor.size = {kRTSize, kRTSize, 1};
             descriptor.format = depthFormat;
-            descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
             mDepthTexture = device.CreateTexture(&descriptor);
         }
 
@@ -79,7 +79,7 @@ class DepthBiasTests : public DawnTest {
             wgpu::TextureDescriptor descriptor;
             descriptor.size = {kRTSize, kRTSize, 1};
             descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-            descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
             mRenderTarget = device.CreateTexture(&descriptor);
         }
 

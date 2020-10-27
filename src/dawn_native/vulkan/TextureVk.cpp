@@ -71,7 +71,7 @@ namespace dawn_native { namespace vulkan {
             if (usage & wgpu::TextureUsage::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
-            if (usage & wgpu::TextureUsage::OutputAttachment) {
+            if (usage & wgpu::TextureUsage::RenderAttachment) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -130,7 +130,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::TextureUsage::Storage:
                 case kReadonlyStorageTexture:
                     return VK_IMAGE_LAYOUT_GENERAL;
-                case wgpu::TextureUsage::OutputAttachment:
+                case wgpu::TextureUsage::RenderAttachment:
                     if (format.HasDepthOrStencil()) {
                         return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     } else {
@@ -168,7 +168,7 @@ namespace dawn_native { namespace vulkan {
                 flags |=
                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & wgpu::TextureUsage::OutputAttachment) {
+            if (usage & wgpu::TextureUsage::RenderAttachment) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -395,7 +395,7 @@ namespace dawn_native { namespace vulkan {
         if (usage & wgpu::TextureUsage::Storage) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
-        if (usage & wgpu::TextureUsage::OutputAttachment) {
+        if (usage & wgpu::TextureUsage::RenderAttachment) {
             if (format.HasDepthOrStencil()) {
                 flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             } else {

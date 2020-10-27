@@ -851,7 +851,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     wgpu::TextureDescriptor textureDesc = {};
-    textureDesc.usage = wgpu::TextureUsage::OutputAttachment;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
     textureDesc.size = wgpu::Extent3D({400, 400, 1});
 
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -921,7 +921,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     wgpu::TextureDescriptor textureDesc = {};
-    textureDesc.usage = wgpu::TextureUsage::OutputAttachment;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
     textureDesc.size = wgpu::Extent3D({400, 400, 1});
 
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -978,7 +978,7 @@ TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     wgpu::TextureDescriptor textureDesc = {};
-    textureDesc.usage = wgpu::TextureUsage::OutputAttachment;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
     textureDesc.size = wgpu::Extent3D({400, 400, 1});
 
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;

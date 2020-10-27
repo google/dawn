@@ -19,7 +19,7 @@
 #include "utils/WGPUHelpers.h"
 
 // Test that rendering to a subresource of a texture works.
-class SubresourceOutputAttachmentTest : public DawnTest {
+class SubresourceRenderAttachmentTest : public DawnTest {
     constexpr static uint32_t kRTSize = 2;
 
   protected:
@@ -125,7 +125,7 @@ class SubresourceOutputAttachmentTest : public DawnTest {
         renderTargetDesc.sampleCount = 1;
         renderTargetDesc.format = format;
         renderTargetDesc.mipLevelCount = kMipLevelCount;
-        renderTargetDesc.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        renderTargetDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
         wgpu::Texture renderTarget = device.CreateTexture(&renderTargetDesc);
 
@@ -139,22 +139,22 @@ class SubresourceOutputAttachmentTest : public DawnTest {
 };
 
 // Test rendering into a subresource of a color texture
-TEST_P(SubresourceOutputAttachmentTest, ColorTexture) {
+TEST_P(SubresourceRenderAttachmentTest, ColorTexture) {
     DoTest(Type::Color);
 }
 
 // Test rendering into a subresource of a depth texture
-TEST_P(SubresourceOutputAttachmentTest, DepthTexture) {
+TEST_P(SubresourceRenderAttachmentTest, DepthTexture) {
     DoTest(Type::Depth);
 }
 
 // Test rendering into a subresource of a stencil texture
 // TODO(crbug.com/dawn/439): sample / copy of the stencil aspect.
-TEST_P(SubresourceOutputAttachmentTest, DISABLED_StencilTexture) {
+TEST_P(SubresourceRenderAttachmentTest, DISABLED_StencilTexture) {
     DoTest(Type::Stencil);
 }
 
-DAWN_INSTANTIATE_TEST(SubresourceOutputAttachmentTest,
+DAWN_INSTANTIATE_TEST(SubresourceRenderAttachmentTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),

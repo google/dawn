@@ -495,7 +495,7 @@ class StorageTextureTests : public DawnTest {
         utils::ComboRenderPipelineDescriptor desc(device);
         desc.vertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
-        desc.cColorStates[0].format = kOutputAttachmentFormat;
+        desc.cColorStates[0].format = kRenderAttachmentFormat;
         desc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
         return device.CreateRenderPipeline(&desc);
     }
@@ -509,8 +509,8 @@ class StorageTextureTests : public DawnTest {
 
         // Clear the output attachment to red at the beginning of the render pass.
         wgpu::Texture outputTexture =
-            CreateTexture(kOutputAttachmentFormat,
-                          wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
+            CreateTexture(kRenderAttachmentFormat,
+                          wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
         utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
         renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
         renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
@@ -570,8 +570,8 @@ class StorageTextureTests : public DawnTest {
         // TODO(jiawei.shao@intel.com): remove the output attachment when Dawn supports beginning a
         // render pass with no attachments.
         wgpu::Texture dummyOutputTexture =
-            CreateTexture(kOutputAttachmentFormat,
-                          wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
+            CreateTexture(kRenderAttachmentFormat,
+                          wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
         utils::ComboRenderPassDescriptor renderPassDescriptor({dummyOutputTexture.CreateView()});
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPassEncoder.SetBindGroup(0, bindGroup);
@@ -660,7 +660,7 @@ class StorageTextureTests : public DawnTest {
 
     static constexpr size_t kWidth = 4u;
     static constexpr size_t kHeight = 4u;
-    static constexpr wgpu::TextureFormat kOutputAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+    static constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     const char* kSimpleVertexShader = R"(
         #version 450

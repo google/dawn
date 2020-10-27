@@ -462,7 +462,7 @@ class TextureViewRenderingTest : public DawnTest {
         ASSERT_LT(textureViewBaseLevel, levelCount);
 
         constexpr wgpu::TextureUsage kUsage =
-            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0,
                                                 layerCount, levelCount, kUsage);
 

@@ -63,7 +63,7 @@ class CullingTest : public DawnTest {
         textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
         textureDescriptor.size = {kSize, kSize, 1};

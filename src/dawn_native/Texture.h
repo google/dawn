@@ -71,7 +71,7 @@ namespace dawn_native {
 
     static constexpr wgpu::TextureUsage kWritableTextureUsages =
         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Storage |
-        wgpu::TextureUsage::OutputAttachment;
+        wgpu::TextureUsage::RenderAttachment;
 
     // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
     // does not exist in the format.
