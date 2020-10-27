@@ -254,14 +254,16 @@ class InspectorHelper {
     return std::to_string(idx) + type->type_name();
   }
 
-  /// Generates a struct type appropriate for using in an uniform buffer
+  /// Generates a struct type
   /// @param name name for the type
   /// @param members_info a vector of {type, offset} where each entry is the
   ///                     type and offset of a member of the struct
-  /// @returns a struct type suitable to use for an uniform buffer
-  std::unique_ptr<ast::type::StructType> MakeUniformBufferStructType(
+  /// @param is_block whether or not to decorate as a Block
+  /// @returns a struct type
+  std::unique_ptr<ast::type::StructType> MakeStructType(
       const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info,
+      bool is_block) {
     ast::StructMemberList members;
     for (auto& member_info : members_info) {
       ast::type::Type* type;
@@ -275,13 +277,60 @@ class InspectorHelper {
       members.push_back(std::make_unique<ast::StructMember>(
           StructMemberName(members.size(), type), type, std::move(deco)));
     }
+
     ast::StructDecorationList decos;
-    decos.push_back(ast::StructDecoration::kBlock);
+    if (is_block) {
+      decos.push_back(ast::StructDecoration::kBlock);
+    }
 
     auto str =
         std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 
     return std::make_unique<ast::type::StructType>(name, std::move(str));
+  }
+
+  /// Generates a struct type appropriate for using in an uniform buffer
+  /// @param name name for the type
+  /// @param members_info a vector of {type, offset} where each entry is the
+  ///                     type and offset of a member of the struct
+  /// @returns a struct type suitable to use for an uniform buffer
+  std::unique_ptr<ast::type::StructType> MakeUniformBufferStructType(
+      const std::string& name,
+      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+    return MakeStructType(name, members_info, true);
+  }
+
+  /// Generates a struct type appropriate for using in an storage buffer
+  /// @param name name for the type
+  /// @param members_info a vector of {type, offset} where each entry is the
+  ///                     type and offset of a member of the struct
+  /// @returns a struct type suitable to use for an uniform buffer
+  std::unique_ptr<ast::type::StructType> MakeStorageBufferStructType(
+      const std::string& name,
+      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+    return MakeStructType(name, members_info, false);
+  }
+
+  /// Adds a binding variable with a struct type to the module
+  /// @param name the name of the variable
+  /// @param struct_type the type to use
+  /// @param storage_class the storage class to use
+  /// @param set the binding group/set to use for the uniform buffer
+  /// @param binding the binding number to use for the uniform buffer
+  void AddStructBinding(const std::string& name,
+                        ast::type::StructType* struct_type,
+                        ast::StorageClass storage_class,
+                        uint32_t set,
+                        uint32_t binding) {
+    auto var = std::make_unique<ast::DecoratedVariable>(
+        std::make_unique<ast::Variable>(name, storage_class, struct_type));
+    ast::VariableDecorationList decorations;
+
+    decorations.push_back(std::make_unique<ast::BindingDecoration>(binding));
+    decorations.push_back(std::make_unique<ast::SetDecoration>(set));
+    var->set_decorations(std::move(decorations));
+
+    mod()->AddGlobalVariable(std::move(var));
   }
 
   /// Adds an uniform buffer variable to the module
@@ -293,26 +342,31 @@ class InspectorHelper {
                         ast::type::StructType* struct_type,
                         uint32_t set,
                         uint32_t binding) {
-    auto var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>(name, ast::StorageClass::kUniform,
-                                        struct_type));
-    ast::VariableDecorationList decorations;
-
-    decorations.push_back(std::make_unique<ast::BindingDecoration>(binding));
-    decorations.push_back(std::make_unique<ast::SetDecoration>(set));
-    var->set_decorations(std::move(decorations));
-
-    mod()->AddGlobalVariable(std::move(var));
+    AddStructBinding(name, struct_type, ast::StorageClass::kUniform, set,
+                     binding);
   }
 
-  /// Generates a function that references a specific uniform buffer
+  /// Adds an storage buffer variable to the module
+  /// @param name the name of the variable
+  /// @param struct_type the type to use
+  /// @param set the binding group/set to use for the storage buffer
+  /// @param binding the binding number to use for the storage buffer
+  void AddStorageBuffer(const std::string& name,
+                        ast::type::StructType* struct_type,
+                        uint32_t set,
+                        uint32_t binding) {
+    AddStructBinding(name, struct_type, ast::StorageClass::kStorageBuffer, set,
+                     binding);
+  }
+
+  /// Generates a function that references a specific struct variable
   /// @param func_name name of the function created
-  /// @param ub_name name of the uniform buffer to be accessed
+  /// @param struct_name name of the struct variabler to be accessed
   /// @param members list of members to access, by index and type
-  /// @returns a function that references all of the ub members specified
-  std::unique_ptr<ast::Function> MakeUniformBufferReferenceBodyFunction(
+  /// @returns a function that references all of the members specified
+  std::unique_ptr<ast::Function> MakeStructVariableReferenceBodyFunction(
       std::string func_name,
-      std::string ub_name,
+      std::string struct_name,
       std::vector<std::tuple<size_t, ast::type::Type*>> members) {
     auto body = std::make_unique<ast::BlockStatement>();
 
@@ -334,7 +388,7 @@ class InspectorHelper {
       body->append(std::make_unique<ast::AssignmentStatement>(
           std::make_unique<ast::IdentifierExpression>("local" + member_name),
           std::make_unique<ast::MemberAccessorExpression>(
-              std::make_unique<ast::IdentifierExpression>(ub_name),
+              std::make_unique<ast::IdentifierExpression>(struct_name),
               std::make_unique<ast::IdentifierExpression>(member_name))));
     }
 
@@ -381,6 +435,7 @@ class InspectorTest : public InspectorHelper, public testing::Test {};
 class InspectorGetEntryPointTest : public InspectorTest {};
 class InspectorGetConstantIDsTest : public InspectorTest {};
 class InspectorGetUniformBufferResourceBindings : public InspectorTest {};
+class InspectorGetStorageBufferResourceBindings : public InspectorTest {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   auto result = inspector()->GetEntryPoints();
@@ -801,8 +856,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, NonEntryPointFunc) {
   auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
-                                                        {{0, i32_type()}});
+  auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                                         {{0, i32_type()}});
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
@@ -835,8 +890,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MissingBlockDeco) {
 
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
-                                                        {{0, i32_type()}});
+  auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                                         {{0, i32_type()}});
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
@@ -855,8 +910,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, Simple) {
   auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
-                                                        {{0, i32_type()}});
+  auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                                         {{0, i32_type()}});
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
@@ -880,7 +935,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ub_func = MakeUniformBufferReferenceBodyFunction(
+  auto ub_func = MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
   mod()->AddFunction(std::move(ub_func));
 
@@ -900,7 +955,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
   EXPECT_EQ(12u, result[0].min_buffer_binding_size);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBufferS) {
+TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBuffers) {
   auto ub_type = MakeUniformBufferStructType(
       "ub_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddUniformBuffer("ub_foo", ub_type.get(), 0, 0);
@@ -909,7 +964,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBufferS) {
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
-    auto ub_func = MakeUniformBufferReferenceBodyFunction(
+    auto ub_func = MakeStructVariableReferenceBodyFunction(
         func_name, var_name,
         {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
     mod()->AddFunction(std::move(ub_func));
@@ -963,8 +1018,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
-  auto ub_func = MakeUniformBufferReferenceBodyFunction("ub_func", "foo_ub",
-                                                        {{0, i32_type()}});
+  auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                                         {{0, i32_type()}});
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
@@ -981,6 +1036,163 @@ TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].min_buffer_binding_size);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindings, Simple) {
+  auto foo_type = MakeStorageBufferStructType("foo_type", {{i32_type(), 0}});
+  AddStorageBuffer("foo_sb", foo_type.get(), 0, 0);
+
+  auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                                         {{0, i32_type()}});
+  mod()->AddFunction(std::move(sb_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
+  ep_func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(4u, result[0].min_buffer_binding_size);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindings, MultipleMembers) {
+  auto foo_type = MakeStorageBufferStructType(
+      "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
+  AddStorageBuffer("foo_sb", foo_type.get(), 0, 0);
+
+  auto sb_func = MakeStructVariableReferenceBodyFunction(
+      "sb_func", "foo_sb", {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
+  mod()->AddFunction(std::move(sb_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
+  ep_func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(12u, result[0].min_buffer_binding_size);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindings, MultipleStorageBuffers) {
+  auto sb_type = MakeStorageBufferStructType(
+      "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
+  AddStorageBuffer("sb_foo", sb_type.get(), 0, 0);
+  AddStorageBuffer("sb_bar", sb_type.get(), 0, 1);
+  AddStorageBuffer("sb_baz", sb_type.get(), 2, 0);
+
+  auto AddReferenceFunc = [this](const std::string& func_name,
+                                 const std::string& var_name) {
+    auto sb_func = MakeStructVariableReferenceBodyFunction(
+        func_name, var_name,
+        {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
+    mod()->AddFunction(std::move(sb_func));
+  };
+  AddReferenceFunc("sb_foo_func", "sb_foo");
+  AddReferenceFunc("sb_bar_func", "sb_bar");
+  AddReferenceFunc("sb_baz_func", "sb_baz");
+
+  auto AddFuncCall = [](ast::BlockStatement* body, const std::string& callee) {
+    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
+    auto call_expr = std::make_unique<ast::CallExpression>(
+        std::move(ident_expr), ast::ExpressionList());
+    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  };
+  auto body = std::make_unique<ast::BlockStatement>();
+
+  AddFuncCall(body.get(), "sb_foo_func");
+  AddFuncCall(body.get(), "sb_bar_func");
+  AddFuncCall(body.get(), "sb_baz_func");
+
+  body->append(std::make_unique<ast::ReturnStatement>());
+  std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
+      "ep_func", ast::VariableList(), void_type());
+  func->set_body(std::move(body));
+
+  func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_EQ(3u, result.size());
+
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(12u, result[0].min_buffer_binding_size);
+
+  EXPECT_EQ(0u, result[1].bind_group);
+  EXPECT_EQ(1u, result[1].binding);
+  EXPECT_EQ(12u, result[1].min_buffer_binding_size);
+
+  EXPECT_EQ(2u, result[2].bind_group);
+  EXPECT_EQ(0u, result[2].binding);
+  EXPECT_EQ(12u, result[2].min_buffer_binding_size);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindings, ContainingArray) {
+  auto foo_type = MakeStorageBufferStructType(
+      "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
+  AddStorageBuffer("foo_sb", foo_type.get(), 0, 0);
+
+  auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                                         {{0, i32_type()}});
+  mod()->AddFunction(std::move(sb_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
+  ep_func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(20u, result[0].min_buffer_binding_size);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindings, ContainingRuntimeArray) {
+  auto foo_type = MakeStorageBufferStructType(
+      "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
+  AddStorageBuffer("foo_sb", foo_type.get(), 0, 0);
+
+  auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                                         {{0, i32_type()}});
+  mod()->AddFunction(std::move(sb_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
+  ep_func->add_decoration(
+      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(8u, result[0].min_buffer_binding_size);
 }
 
 }  // namespace

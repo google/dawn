@@ -34,15 +34,15 @@ bool ArrayType::IsArray() const {
 }
 
 uint64_t ArrayType::MinBufferBindingSize() const {
-  if (IsRuntimeArray()) {
-    return array_stride();
-  }
+  // RTAs have a size_ = 0, but the value that is wanted from this call is the
+  // minimum size, so assuming atleast 1 element in the RTA.
+  uint32_t size = IsRuntimeArray() ? 1 : size_;
 
   if (has_array_stride()) {
-    return size_ * array_stride();
+    return size * array_stride();
   }
 
-  return size_ * type()->MinBufferBindingSize();
+  return size * type()->MinBufferBindingSize();
 }
 
 uint32_t ArrayType::array_stride() const {

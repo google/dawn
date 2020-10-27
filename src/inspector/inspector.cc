@@ -137,14 +137,8 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
 
 std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     const std::string& entry_point) {
-  auto* func = module_.FindFunctionByName(entry_point);
+  auto* func = FindEntryPointByName(entry_point);
   if (!func) {
-    error_ += entry_point + " was not found!";
-    return {};
-  }
-
-  if (!func->IsEntryPoint()) {
-    error_ += entry_point + " is not an entry point!";
     return {};
   }
 
@@ -171,6 +165,54 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
   }
 
   return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+  for (auto& ruv : func->referenced_storagebuffer_variables()) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = ruv;
+    if (!var->type()->IsStruct()) {
+      continue;
+    }
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize();
+
+    result.push_back(std::move(entry));
+  }
+
+  return result;
+}
+
+std::vector<ResourceBinding>
+Inspector::GetReadOnlyStorageBufferResourceBindings(const std::string&) {
+  error_ += "GetReadOnlyStorageBufferResourceBindings is not implemented!";
+  return {};
+}
+
+ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
+  auto* func = module_.FindFunctionByName(name);
+  if (!func) {
+    error_ += name + " was not found!";
+    return nullptr;
+  }
+
+  if (!func->IsEntryPoint()) {
+    error_ += name + " is not an entry point!";
+    return nullptr;
+  }
+
+  return func;
 }
 
 }  // namespace inspector

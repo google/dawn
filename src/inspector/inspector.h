@@ -59,13 +59,31 @@ class Inspector {
   std::map<uint32_t, Scalar> GetConstantIDs();
 
   /// @param entry_point name of the entry point to get information about.
-  /// @returns vector of all of the bindings for Uniform buffers.
+  /// @returns vector of all of the bindings for uniform buffers.
   std::vector<ResourceBinding> GetUniformBufferResourceBindings(
+      const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for storage buffers.
+  std::vector<ResourceBinding> GetStorageBufferResourceBindings(
+      const std::string& entry_point);
+
+  // TODO(rharrison): Implement once
+  //                  https://dawn-review.googlesource.com/c/tint/+/31060 lands.
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns an empty vector and sets the error string. In the future it will
+  ///          return of all of the bindings for read-only storage buffers.
+  std::vector<ResourceBinding> GetReadOnlyStorageBufferResourceBindings(
       const std::string& entry_point);
 
  private:
   const ast::Module& module_;
   std::string error_;
+
+  /// @param name name of the entry point to find
+  /// @returns a pointer to the entry point if it exists, otherwise returns
+  ///          nullptr and sets the error string.
+  ast::Function* FindEntryPointByName(const std::string& name);
 };
 
 }  // namespace inspector
