@@ -101,36 +101,20 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureToBufferCopyRestrictions(const TextureCopyView& src) {
-            const Format& format = src.texture->GetFormat();
-
-            bool depthSelected = false;
-            switch (src.aspect) {
-                case wgpu::TextureAspect::All:
-                    switch (format.aspects) {
-                        case Aspect::Color:
-                        case Aspect::Stencil:
-                            break;
-                        case Aspect::Depth:
-                            depthSelected = true;
-                            break;
-                        default:
-                            return DAWN_VALIDATION_ERROR(
-                                "A single aspect must be selected for multi planar formats in "
-                                "texture to buffer copies");
-                    }
-                    break;
-                case wgpu::TextureAspect::DepthOnly:
-                    ASSERT(format.aspects & Aspect::Depth);
-                    depthSelected = true;
-                    break;
-                case wgpu::TextureAspect::StencilOnly:
-                    ASSERT(format.aspects & Aspect::Stencil);
-                    break;
+        MaybeError ValidateLinearTextureCopyOffset(const TextureDataLayout& layout,
+                                                   const TexelBlockInfo& blockInfo) {
+            if (layout.offset % blockInfo.byteSize != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "offset must be a multiple of the texel block byte size.");
             }
+            return {};
+        }
 
-            if (depthSelected) {
-                switch (format.format) {
+        MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const TextureCopyView& src) {
+            Aspect aspectUsed;
+            DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTextureCopyView(src));
+            if (aspectUsed == Aspect::Depth) {
+                switch (src.texture->GetFormat().format) {
                     case wgpu::TextureFormat::Depth24Plus:
                     case wgpu::TextureFormat::Depth24PlusStencil8:
                         return DAWN_VALIDATION_ERROR(
@@ -640,7 +624,7 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
 
-                DAWN_TRY(ValidateBufferToTextureCopyRestrictions(*destination));
+                DAWN_TRY(ValidateLinearToDepthStencilCopyRestrictions(*destination));
                 // We validate texture copy range before validating linear texture data,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
@@ -650,6 +634,7 @@ namespace dawn_native {
             const TexelBlockInfo& blockInfo =
                 destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(ValidateLinearTextureCopyOffset(source->layout, blockInfo));
                 DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
                                                    blockInfo, *copySize));
 
@@ -700,11 +685,11 @@ namespace dawn_native {
                 DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source, *copySize));
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source->texture));
+                DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(*source));
 
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
                 DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
 
-                DAWN_TRY(ValidateTextureToBufferCopyRestrictions(*source));
                 // We validate texture copy range before validating linear texture data,
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
@@ -714,6 +699,7 @@ namespace dawn_native {
             const TexelBlockInfo& blockInfo =
                 source->texture->GetFormat().GetAspectInfo(source->aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(ValidateLinearTextureCopyOffset(destination->layout, blockInfo));
                 DAWN_TRY(ValidateLinearTextureData(
                     destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
 

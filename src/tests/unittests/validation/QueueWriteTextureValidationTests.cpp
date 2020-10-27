@@ -278,18 +278,20 @@ namespace {
             TestWriteTexture(dataSize, 0, 256, 3, destination, 0, {0, 0, 0}, {4, 4, 1}));
     }
 
-    // Test WriteTexture with incorrect data offset usage
-    TEST_F(QueueWriteTextureValidationTest, IncorrectDataOffset) {
+    // Test WriteTexture with data offset
+    TEST_F(QueueWriteTextureValidationTest, DataOffset) {
         uint64_t dataSize =
             utils::RequiredBytesInCopy(256, 0, {4, 4, 1}, wgpu::TextureFormat::RGBA8Unorm);
         wgpu::Texture destination = Create2DTexture({16, 16, 1}, 5, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // Correct usage
+        // Offset aligned
         TestWriteTexture(dataSize, dataSize - 4, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1});
-
+        // Offset not aligned
+        TestWriteTexture(dataSize, dataSize - 5, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1});
+        // Offset+size too large
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, dataSize - 6, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1}));
+            TestWriteTexture(dataSize, dataSize - 3, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1}));
     }
 
     // Test multisampled textures can be used in WriteTexture.
@@ -551,23 +553,21 @@ namespace {
         static constexpr uint32_t kHeight = 16;
     };
 
-    // Tests to verify that data offset must be a multiple of the compressed texture blocks in bytes
+    // Tests to verify that data offset may not be a multiple of the compressed texture block size
     TEST_F(WriteTextureTest_CompressedTextureFormats, DataOffset) {
         for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
             wgpu::Texture texture = Create2DTexture(bcFormat);
 
-            // Valid usages of data offset.
+            // Valid if aligned.
             {
-                uint32_t validDataOffset = utils::GetTexelBlockSizeInBytes(bcFormat);
-                QueueWriteTextureValidationTest::TestWriteTexture(512, validDataOffset, 256, 4,
-                                                                  texture, 0, {0, 0, 0}, {4, 4, 1});
+                uint32_t kAlignedOffset = utils::GetTexelBlockSizeInBytes(bcFormat);
+                TestWriteTexture(1024, kAlignedOffset, 256, 4, texture, 0, {0, 0, 0}, {4, 16, 1});
             }
 
-            // Failures on invalid data offset.
+            // Still valid if not aligned.
             {
-                uint32_t kInvalidDataOffset = utils::GetTexelBlockSizeInBytes(bcFormat) / 2;
-                ASSERT_DEVICE_ERROR(TestWriteTexture(512, kInvalidDataOffset, 256, 4, texture, 0,
-                                                     {0, 0, 0}, {4, 4, 1}));
+                uint32_t kUnalignedOffset = utils::GetTexelBlockSizeInBytes(bcFormat) - 1;
+                TestWriteTexture(1024, kUnalignedOffset, 256, 4, texture, 0, {0, 0, 0}, {4, 16, 1});
             }
         }
     }

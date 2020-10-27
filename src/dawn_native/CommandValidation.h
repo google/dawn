@@ -57,7 +57,8 @@ namespace dawn_native {
                                          const Extent3D& copyExtent);
     MaybeError ValidateTextureCopyRange(const TextureCopyView& textureCopyView,
                                         const Extent3D& copySize);
-    MaybeError ValidateBufferToTextureCopyRestrictions(const TextureCopyView& dst);
+    ResultOrError<Aspect> SingleAspectUsedByTextureCopyView(const TextureCopyView& view);
+    MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TextureCopyView& dst);
 
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView);

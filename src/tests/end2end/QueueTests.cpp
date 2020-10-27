@@ -446,9 +446,8 @@ TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
     textureSpec.textureSize = {kWidth, kHeight, 1};
     textureSpec.level = 0;
 
-    for (unsigned int i : {1, 2, 4, 17, 64, 128, 300}) {
+    for (uint64_t offset : {1, 2, 4, 17, 64, 128, 300}) {
         DataSpec dataSpec = MinimumDataSpec({kWidth, kHeight, 1});
-        uint64_t offset = i * utils::GetTexelBlockSizeInBytes(kTextureFormat);
         dataSpec.size += offset;
         dataSpec.offset += offset;
         DoTest(textureSpec, dataSpec, {kWidth, kHeight, 1});

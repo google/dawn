@@ -446,11 +446,6 @@ namespace dawn_native {
                                          uint64_t byteSize,
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent) {
-        // Validation for the texel block alignments:
-        if (layout.offset % blockInfo.byteSize != 0) {
-            return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
-        }
-
         ASSERT(copyExtent.width % blockInfo.width == 0);
         uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
         ASSERT(copyExtent.height % blockInfo.height == 0);
@@ -589,36 +584,35 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateBufferToTextureCopyRestrictions(const TextureCopyView& dst) {
-        const Format& format = dst.texture->GetFormat();
-
-        bool depthSelected = false;
-        switch (dst.aspect) {
+    // Always returns a single aspect (color, stencil, or depth).
+    ResultOrError<Aspect> SingleAspectUsedByTextureCopyView(const TextureCopyView& view) {
+        const Format& format = view.texture->GetFormat();
+        switch (view.aspect) {
             case wgpu::TextureAspect::All:
-                switch (format.aspects) {
-                    case Aspect::Color:
-                    case Aspect::Stencil:
-                        break;
-                    case Aspect::Depth:
-                        depthSelected = true;
-                        break;
-                    default:
-                        return DAWN_VALIDATION_ERROR(
-                            "A single aspect must be selected for multi planar formats in buffer "
-                            "to texture copies");
+                if (HasOneBit(format.aspects)) {
+                    return Aspect{format.aspects};
+                } else {
+                    return DAWN_VALIDATION_ERROR(
+                        "A single aspect must be selected for multi-planar formats in "
+                        "texture <-> linear data copies");
                 }
                 break;
             case wgpu::TextureAspect::DepthOnly:
                 ASSERT(format.aspects & Aspect::Depth);
-                depthSelected = true;
-                break;
+                return Aspect::Depth;
             case wgpu::TextureAspect::StencilOnly:
                 ASSERT(format.aspects & Aspect::Stencil);
-                break;
+                return Aspect::Stencil;
         }
-        if (depthSelected) {
+    }
+
+    MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TextureCopyView& dst) {
+        Aspect aspectUsed;
+        DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTextureCopyView(dst));
+        if (aspectUsed == Aspect::Depth) {
             return DAWN_VALIDATION_ERROR("Cannot copy into the depth aspect of a texture");
         }
+
         return {};
     }
 
