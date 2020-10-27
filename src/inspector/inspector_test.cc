@@ -184,52 +184,38 @@ class InspectorHelper {
     dvar->set_decorations(std::move(decos));
     if (val) {
       dvar->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-          MakeLiteral<T>(type, val)));
+          MakeLiteral(type, val)));
     }
     mod()->AddGlobalVariable(std::move(dvar));
-  }
-
-  /// Generates an ast::Literal for the given value
-  /// @tparam T C++ type of the literal, must agree with type
-  /// @returns a Literal of the expected type and value
-  template <class T>
-  std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type*, T*) {
-    return nullptr;
   }
 
   /// @param type AST type of the literal, must resolve to BoolLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  template <>
-  std::unique_ptr<ast::Literal> MakeLiteral<bool>(ast::type::Type* type,
-                                                  bool* val) {
+  std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type, bool* val) {
     return std::make_unique<ast::BoolLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to UIntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  template <>
-  std::unique_ptr<ast::Literal> MakeLiteral<uint32_t>(ast::type::Type* type,
-                                                      uint32_t* val) {
+  std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type,
+                                            uint32_t* val) {
     return std::make_unique<ast::UintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to IntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  template <>
-  std::unique_ptr<ast::Literal> MakeLiteral<int32_t>(ast::type::Type* type,
-                                                     int32_t* val) {
+  std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type,
+                                            int32_t* val) {
     return std::make_unique<ast::SintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to FloattLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  template <>
-  std::unique_ptr<ast::Literal> MakeLiteral<float>(ast::type::Type* type,
-                                                   float* val) {
+  std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type, float* val) {
     return std::make_unique<ast::FloatLiteral>(type, *val);
   }
 
