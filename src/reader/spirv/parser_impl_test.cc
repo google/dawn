@@ -206,7 +206,7 @@ TEST_F(SpvParserTest, Impl_Source_InvalidId) {
 }
 
 TEST_F(SpvParserTest, Impl_IsValidIdentifier) {
-  EXPECT_FALSE(ParserImpl::IsValidIdentifier(""));     // empty
+  EXPECT_FALSE(ParserImpl::IsValidIdentifier(""));  // empty
   EXPECT_FALSE(
       ParserImpl::IsValidIdentifier("_"));  // leading underscore, but ok later
   EXPECT_FALSE(

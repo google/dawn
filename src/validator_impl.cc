@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cassert>
 #include "src/validator_impl.h"
+
+#include <cassert>
 #include <unordered_set>
+
 #include "src/ast/call_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/int_literal.h"
