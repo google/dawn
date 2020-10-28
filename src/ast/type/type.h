@@ -82,20 +82,20 @@ class Type {
   /// @returns the pointee type if this is a pointer, |this| otherwise
   Type* UnwrapPtrIfNeeded();
 
-  /// Removes all levels of aliasing, if this is an alias type.  Otherwise
-  /// returns |this|.  This is just enough to assist with WGSL translation
+  /// Removes all levels of aliasing and access control.
+  /// This is just enough to assist with WGSL translation
   /// in that you want see through one level of pointer to get from an
   /// identifier-like expression as an l-value to its corresponding r-value,
-  /// plus see through the aliases on either side.
+  /// plus see through the wrappers on either side.
   /// @returns the completely unaliased type.
-  Type* UnwrapAliasesIfNeeded();
+  Type* UnwrapIfNeeded();
 
   /// Returns the type found after:
-  /// - removing all layers of aliasing if they exist, then
+  /// - removing all layers of aliasing and access control if they exist, then
   /// - removing the pointer, if it exists, then
-  /// - removing all further layers of aliasing, if they exist
+  /// - removing all further layers of aliasing or access control, if they exist
   /// @returns the unwrapped type
-  Type* UnwrapAliasPtrAlias();
+  Type* UnwrapAll();
 
   /// @returns true if this type is a scalar
   bool is_scalar();

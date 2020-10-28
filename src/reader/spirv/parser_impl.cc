@@ -1143,7 +1143,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     return {};
   }
 
-  auto* ast_type = original_ast_type->UnwrapAliasesIfNeeded();
+  auto* ast_type = original_ast_type->UnwrapIfNeeded();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
@@ -1220,7 +1220,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
   }
 
   auto* original_type = type;
-  type = type->UnwrapAliasesIfNeeded();
+  type = type->UnwrapIfNeeded();
 
   if (type->IsBool()) {
     return std::make_unique<ast::ScalarConstructorExpression>(

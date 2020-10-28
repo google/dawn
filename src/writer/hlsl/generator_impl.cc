@@ -1170,7 +1170,7 @@ bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
     }
     // auto* set = data.second.set;
 
-    auto* type = var->type()->UnwrapAliasesIfNeeded();
+    auto* type = var->type()->UnwrapIfNeeded();
     if (type->IsStruct()) {
       auto* strct = type->AsStruct();
 
@@ -1558,7 +1558,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     first = false;
     if (expr->IsMemberAccessor()) {
       auto* mem = expr->AsMemberAccessor();
-      auto* res_type = mem->structure()->result_type()->UnwrapAliasPtrAlias();
+      auto* res_type = mem->structure()->result_type()->UnwrapAll();
       if (res_type->IsStruct()) {
         auto* str_type = res_type->AsStruct()->impl();
         auto* str_member = str_type->get_member(mem->member()->name());
@@ -1593,7 +1593,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       expr = mem->structure();
     } else if (expr->IsArrayAccessor()) {
       auto* ary = expr->AsArrayAccessor();
-      auto* ary_type = ary->array()->result_type()->UnwrapAliasPtrAlias();
+      auto* ary_type = ary->array()->result_type()->UnwrapAll();
 
       out << "(";
       if (ary_type->IsArray()) {
@@ -1641,7 +1641,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
                                               std::ostream& out,
                                               ast::Expression* expr,
                                               ast::Expression* rhs) {
-  auto* result_type = expr->result_type()->UnwrapAliasPtrAlias();
+  auto* result_type = expr->result_type()->UnwrapAll();
   bool is_store = rhs != nullptr;
 
   std::string access_method = is_store ? "Store" : "Load";
@@ -1758,7 +1758,7 @@ bool GeneratorImpl::is_storage_buffer_access(
 bool GeneratorImpl::is_storage_buffer_access(
     ast::MemberAccessorExpression* expr) {
   auto* structure = expr->structure();
-  auto* data_type = structure->result_type()->UnwrapAliasPtrAlias();
+  auto* data_type = structure->result_type()->UnwrapAll();
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
   if (data_type->IsVector() && expr->member()->name().size() > 1) {

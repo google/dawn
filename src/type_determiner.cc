@@ -331,7 +331,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
   }
 
   auto* res = expr->array()->result_type();
-  auto* parent_type = res->UnwrapAliasPtrAlias();
+  auto* parent_type = res->UnwrapAll();
   ast::type::Type* ret = nullptr;
   if (parent_type->IsArray()) {
     ret = parent_type->AsArray()->type();
@@ -942,7 +942,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   }
 
   auto* res = expr->structure()->result_type();
-  auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapAliasesIfNeeded();
+  auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   ast::type::Type* ret = nullptr;
   if (data_type->IsStruct()) {

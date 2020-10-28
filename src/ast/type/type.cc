@@ -46,16 +46,22 @@ Type* Type::UnwrapPtrIfNeeded() {
   return this;
 }
 
-Type* Type::UnwrapAliasesIfNeeded() {
+Type* Type::UnwrapIfNeeded() {
   auto* where = this;
-  while (where->IsAlias()) {
-        where = where->AsAlias()->type();
+  while (true) {
+    if (where->IsAlias()) {
+          where = where->AsAlias()->type();
+    } else if (where->IsAccessControl()) {
+          where = where->AsAccessControl()->type();
+    } else {
+      break;
+    }
   }
   return where;
 }
 
-Type* Type::UnwrapAliasPtrAlias() {
-  return UnwrapAliasesIfNeeded()->UnwrapPtrIfNeeded()->UnwrapAliasesIfNeeded();
+Type* Type::UnwrapAll() {
+  return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
 bool Type::IsAccessControl() const {

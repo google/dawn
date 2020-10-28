@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/u32_type.h"
@@ -59,25 +60,40 @@ TEST_F(AliasTypeTest, TypeName) {
   EXPECT_EQ(at.type_name(), "__alias_Particle__i32");
 }
 
-TEST_F(AliasTypeTest, UnwrapAliasesIfNeeded) {
+TEST_F(AliasTypeTest, UnwrapIfNeeded_Alias) {
   U32Type u32;
   AliasType a{"a_type", &u32};
   EXPECT_EQ(a.name(), "a_type");
   EXPECT_EQ(a.type(), &u32);
-  EXPECT_EQ(a.UnwrapAliasesIfNeeded(), &u32);
-  EXPECT_EQ(u32.UnwrapAliasesIfNeeded(), &u32);
+  EXPECT_EQ(a.UnwrapIfNeeded(), &u32);
+  EXPECT_EQ(u32.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapAliasesIfNeeded_MultiLevel) {
+TEST_F(AliasTypeTest, UnwrapIfNeeded_AccessControl) {
+  U32Type u32;
+  AccessControlType a{AccessControl::kReadOnly, &u32};
+  EXPECT_EQ(a.type(), &u32);
+  EXPECT_EQ(a.UnwrapIfNeeded(), &u32);
+}
+
+TEST_F(AliasTypeTest, UnwrapIfNeeded_MultiLevel) {
   U32Type u32;
   AliasType a{"a_type", &u32};
   AliasType aa{"aa_type", &a};
   EXPECT_EQ(aa.name(), "aa_type");
   EXPECT_EQ(aa.type(), &a);
-  EXPECT_EQ(aa.UnwrapAliasesIfNeeded(), &u32);
+  EXPECT_EQ(aa.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapAliasPtrAlias_TwiceAliasPointerTwiceAlias) {
+TEST_F(AliasTypeTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  AccessControlType aa{AccessControl::kReadWrite, &a};
+  EXPECT_EQ(aa.type(), &a);
+  EXPECT_EQ(aa.UnwrapIfNeeded(), &u32);
+}
+
+TEST_F(AliasTypeTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   U32Type u32;
   AliasType a{"a_type", &u32};
   AliasType aa{"aa_type", &a};
@@ -86,23 +102,21 @@ TEST_F(AliasTypeTest, UnwrapAliasPtrAlias_TwiceAliasPointerTwiceAlias) {
   AliasType aapaa{"aapaa_type", &apaa};
   EXPECT_EQ(aapaa.name(), "aapaa_type");
   EXPECT_EQ(aapaa.type(), &apaa);
-  EXPECT_EQ(aapaa.UnwrapAliasPtrAlias(), &u32);
-  EXPECT_EQ(u32.UnwrapAliasPtrAlias(), &u32);
+  EXPECT_EQ(aapaa.UnwrapAll(), &u32);
+  EXPECT_EQ(u32.UnwrapAll(), &u32);
 }
 
-TEST_F(AliasTypeTest,
-       UnwrapAliasPtrAlias_SecondConsecutivePointerBlocksWUnrapping) {
+TEST_F(AliasTypeTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
   U32Type u32;
   AliasType a{"a_type", &u32};
   AliasType aa{"aa_type", &a};
   PointerType paa{&aa, StorageClass::kUniform};
   PointerType ppaa{&paa, StorageClass::kUniform};
   AliasType appaa{"appaa_type", &ppaa};
-  EXPECT_EQ(appaa.UnwrapAliasPtrAlias(), &paa);
+  EXPECT_EQ(appaa.UnwrapAll(), &paa);
 }
 
-TEST_F(AliasTypeTest,
-       UnwrapAliasPtrAlias_SecondNonConsecutivePointerBlocksWUnrapping) {
+TEST_F(AliasTypeTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
   U32Type u32;
   AliasType a{"a_type", &u32};
   AliasType aa{"aa_type", &a};
@@ -111,7 +125,25 @@ TEST_F(AliasTypeTest,
   AliasType aapaa{"aapaa_type", &apaa};
   PointerType paapaa{&aapaa, StorageClass::kUniform};
   AliasType apaapaa{"apaapaa_type", &paapaa};
-  EXPECT_EQ(apaapaa.UnwrapAliasPtrAlias(), &paa);
+  EXPECT_EQ(apaapaa.UnwrapAll(), &paa);
+}
+
+TEST_F(AliasTypeTest, UnwrapAll_AccessControlPointer) {
+  U32Type u32;
+  AccessControlType a{AccessControl::kReadOnly, &u32};
+  PointerType pa{&a, StorageClass::kUniform};
+  EXPECT_EQ(pa.type(), &a);
+  EXPECT_EQ(pa.UnwrapAll(), &u32);
+  EXPECT_EQ(u32.UnwrapAll(), &u32);
+}
+
+TEST_F(AliasTypeTest, UnwrapAll_PointerAccessControl) {
+  U32Type u32;
+  PointerType p{&u32, StorageClass::kUniform};
+  AccessControlType a{AccessControl::kReadOnly, &p};
+  EXPECT_EQ(a.type(), &p);
+  EXPECT_EQ(a.UnwrapAll(), &u32);
+  EXPECT_EQ(u32.UnwrapAll(), &u32);
 }
 
 }  // namespace

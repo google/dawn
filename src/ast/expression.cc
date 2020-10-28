@@ -36,8 +36,8 @@ Expression::Expression(const Source& source) : Node(source) {}
 Expression::~Expression() = default;
 
 void Expression::set_result_type(type::Type* type) {
-  // The expression result should never be an alias type
-  result_type_ = type->UnwrapAliasesIfNeeded();
+  // The expression result should never be an alias or access-controlled type
+  result_type_ = type->UnwrapIfNeeded();
 }
 
 bool Expression::IsArrayAccessor() const {

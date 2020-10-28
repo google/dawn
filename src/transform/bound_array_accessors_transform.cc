@@ -181,7 +181,7 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
     return false;
   }
 
-  auto* ret_type = expr->array()->result_type()->UnwrapAliasPtrAlias();
+  auto* ret_type = expr->array()->result_type()->UnwrapAll();
   if (!ret_type->IsArray() && !ret_type->IsMatrix() && !ret_type->IsVector()) {
     return true;
   }

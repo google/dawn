@@ -814,10 +814,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 
 bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
-  auto* data_type = expr->structure()
-                        ->result_type()
-                        ->UnwrapPtrIfNeeded()
-                        ->UnwrapAliasesIfNeeded();
+  auto* data_type =
+      expr->structure()->result_type()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
@@ -1137,7 +1135,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
   }
 
   auto* tc = expr->AsConstructor()->AsTypeConstructor();
-  auto* result_type = tc->type()->UnwrapAliasPtrAlias();
+  auto* result_type = tc->type()->UnwrapAll();
   for (size_t i = 0; i < tc->values().size(); ++i) {
     auto* e = tc->values()[i].get();
 
@@ -1165,21 +1163,17 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     }
 
     auto* sc = e->AsConstructor()->AsScalarConstructor();
-    ast::type::Type* subtype = result_type->UnwrapAliasPtrAlias();
+    ast::type::Type* subtype = result_type->UnwrapAll();
     if (subtype->IsVector()) {
-      subtype = subtype->AsVector()->type()->UnwrapAliasPtrAlias();
+      subtype = subtype->AsVector()->type()->UnwrapAll();
     } else if (subtype->IsMatrix()) {
-      subtype = subtype->AsMatrix()->type()->UnwrapAliasPtrAlias();
+      subtype = subtype->AsMatrix()->type()->UnwrapAll();
     } else if (subtype->IsArray()) {
-      subtype = subtype->AsArray()->type()->UnwrapAliasPtrAlias();
+      subtype = subtype->AsArray()->type()->UnwrapAll();
     } else if (subtype->IsStruct()) {
-      subtype = subtype->AsStruct()
-                    ->impl()
-                    ->members()[i]
-                    ->type()
-                    ->UnwrapAliasPtrAlias();
+      subtype = subtype->AsStruct()->impl()->members()[i]->type()->UnwrapAll();
     }
-    if (subtype != sc->result_type()->UnwrapAliasPtrAlias()) {
+    if (subtype != sc->result_type()->UnwrapAll()) {
       return false;
     }
   }
@@ -1200,7 +1194,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   std::ostringstream out;
   out << "__const";
 
-  auto* result_type = init->type()->UnwrapAliasPtrAlias();
+  auto* result_type = init->type()->UnwrapAll();
   bool constructor_is_const = is_constructor_const(init, is_global_init);
   if (has_error()) {
     return 0;
@@ -1209,7 +1203,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   bool can_cast_or_copy = result_type->is_scalar();
 
   if (result_type->IsVector() && result_type->AsVector()->type()->is_scalar()) {
-    auto* value_type = values[0]->result_type()->UnwrapAliasPtrAlias();
+    auto* value_type = values[0]->result_type()->UnwrapAll();
     can_cast_or_copy =
         (value_type->IsVector() &&
          value_type->AsVector()->type()->is_scalar() &&
@@ -1773,7 +1767,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     }
     params.push_back(Operand::Int(struct_id));
 
-    auto* type = accessor->structure()->result_type()->UnwrapAliasPtrAlias();
+    auto* type = accessor->structure()->result_type()->UnwrapAll();
     if (!type->IsStruct()) {
       error_ =
           "invalid type (" + type->type_name() + ") for runtime array length";
@@ -1866,11 +1860,8 @@ uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                            ast::CallExpression* call,
                                            uint32_t result_id,
                                            OperandList wgsl_params) {
-  auto* texture_type = call->params()[0]
-                           .get()
-                           ->result_type()
-                           ->UnwrapAliasPtrAlias()
-                           ->AsTexture();
+  auto* texture_type =
+      call->params()[0].get()->result_type()->UnwrapAll()->AsTexture();
 
   // TODO: Remove the LOD param from textureLoad on storage textures when
   // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.

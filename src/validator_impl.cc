@@ -168,9 +168,8 @@ bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
   ast::type::Type* func_type = current_function_->return_type();
 
   ast::type::VoidType void_type;
-  auto* ret_type = ret->has_value()
-                       ? ret->value()->result_type()->UnwrapAliasPtrAlias()
-                       : &void_type;
+  auto* ret_type =
+      ret->has_value() ? ret->value()->result_type()->UnwrapAll() : &void_type;
 
   if (func_type->type_name() != ret_type->type_name()) {
     set_error(ret->source(),
@@ -249,7 +248,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
     return false;
   }
 
-  auto* cond_type = s->condition()->result_type()->UnwrapAliasPtrAlias();
+  auto* cond_type = s->condition()->result_type()->UnwrapAll();
   if (!(cond_type->IsI32() || cond_type->IsU32())) {
     set_error(s->condition()->source(),
               "v-0025: switch statement selector expression must be of a "
@@ -393,8 +392,8 @@ bool ValidatorImpl::ValidateResultTypes(const ast::AssignmentStatement* a) {
     return false;
   }
 
-  auto* lhs_result_type = a->lhs()->result_type()->UnwrapAliasPtrAlias();
-  auto* rhs_result_type = a->rhs()->result_type()->UnwrapAliasPtrAlias();
+  auto* lhs_result_type = a->lhs()->result_type()->UnwrapAll();
+  auto* rhs_result_type = a->rhs()->result_type()->UnwrapAll();
   if (lhs_result_type != rhs_result_type) {
     // TODO(sarahM0): figur out what should be the error number.
     set_error(a->source(), "v-000x: invalid assignment of '" +
