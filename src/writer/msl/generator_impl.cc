@@ -38,6 +38,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -1178,9 +1179,17 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
+    if (!var->type()->IsAccessControl()) {
+      error_ = "invalid type for storage buffer, expected access control";
+      return false;
+    }
+    auto* ac = var->type()->AsAccessControl();
+    if (ac->IsReadOnly()) {
+      out_ << "const ";
+    }
+
     out_ << "device ";
-    // TODO(dsinclair): Can arrays be in storage buffers? If so, fix this ...
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(ac->type(), "")) {
       return false;
     }
     out_ << "& " << var->name();
@@ -1331,10 +1340,17 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
+    if (!var->type()->IsAccessControl()) {
+      error_ = "invalid type for storage buffer, expected access control";
+      return false;
+    }
+    auto* ac = var->type()->AsAccessControl();
+    if (ac->IsReadOnly()) {
+      out_ << "const ";
+    }
+
     out_ << "device ";
-    // TODO(dsinclair): Can you have a storagebuffer have an array? If so, this
-    // needs to be updated to handle arrays property.
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(ac->type(), "")) {
       return false;
     }
     out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
@@ -1728,7 +1744,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   } else if (type->IsVoid()) {
     out_ << "void";
   } else {
-    error_ = "unknown type in EmitType";
+    error_ = "unknown type in EmitType: " + type->type_name();
     return false;
   }
 
