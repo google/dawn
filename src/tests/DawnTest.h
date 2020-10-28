@@ -270,6 +270,8 @@ class DawnTestBase {
     DawnProcTable backendProcs = {};
     WGPUDevice backendDevice = nullptr;
 
+    size_t mLastWarningCount = 0;
+
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,
                                              int line,
@@ -406,6 +408,24 @@ class DawnTestBase {
             GTEST_SKIP();                                       \
             return;                                             \
         }                                                       \
+    } while (0)
+
+#define EXPECT_DEPRECATION_WARNING(statement)                                    \
+    do {                                                                         \
+        if (UsesWire()) {                                                        \
+            statement;                                                           \
+        } else {                                                                 \
+            size_t warningsBefore =                                              \
+                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
+            statement;                                                           \
+            size_t warningsAfter =                                               \
+                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
+            EXPECT_EQ(mLastWarningCount, warningsBefore);                        \
+            if (!IsDawnValidationSkipped()) {                                    \
+                EXPECT_EQ(warningsAfter, warningsBefore + 1);                    \
+            }                                                                    \
+            mLastWarningCount = warningsAfter;                                   \
+        }                                                                        \
     } while (0)
 
 template <typename Params = AdapterTestParam>

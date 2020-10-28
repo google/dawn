@@ -30,33 +30,7 @@ class DeprecationTests : public DawnTest {
         // Skip when validation is off because warnings might be emitted during validation calls
         DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
     }
-
-    void TearDown() override {
-        if (!UsesWire()) {
-            EXPECT_EQ(mLastWarningCount,
-                      dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
-        }
-        DawnTest::TearDown();
-    }
-
-    size_t mLastWarningCount = 0;
 };
-
-#define EXPECT_DEPRECATION_WARNING(statement)                                    \
-    do {                                                                         \
-        if (UsesWire()) {                                                        \
-            statement;                                                           \
-        } else {                                                                 \
-            size_t warningsBefore =                                              \
-                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
-            statement;                                                           \
-            size_t warningsAfter =                                               \
-                dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
-            EXPECT_EQ(mLastWarningCount, warningsBefore);                        \
-            EXPECT_EQ(warningsAfter, warningsBefore + 1);                        \
-            mLastWarningCount = warningsAfter;                                   \
-        }                                                                        \
-    } while (0)
 
 // Test that using BGLEntry.multisampled = true emits a deprecation warning.
 TEST_P(DeprecationTests, BGLEntryMultisampledDeprecated) {

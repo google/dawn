@@ -773,6 +773,11 @@ void DawnTestBase::TearDown() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
+
+    if (!UsesWire()) {
+        EXPECT_EQ(mLastWarningCount,
+                  dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
+    }
 }
 
 void DawnTestBase::StartExpectDeviceError() {
