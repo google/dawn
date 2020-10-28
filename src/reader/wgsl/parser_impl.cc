@@ -1107,10 +1107,6 @@ ast::type::Type* ParserImpl::type_alias() {
     set_error(peek(), "invalid type alias");
     return nullptr;
   }
-  if (type == nullptr) {
-    set_error(peek(), "invalid type for alias");
-    return nullptr;
-  }
 
   auto* alias =
       ctx_.type_mgr().Get(std::make_unique<ast::type::AliasType>(name, type));
@@ -1674,7 +1670,7 @@ bool ParserImpl::struct_member_decoration_decl(
   for (;;) {
     auto deco = struct_member_decoration();
     if (has_error())
-      return {};
+      return false;
     if (deco == nullptr)
       break;
 
