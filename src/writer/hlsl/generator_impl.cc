@@ -35,6 +35,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
@@ -1206,7 +1207,16 @@ bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
     auto* var = data.first;
     auto* binding = data.second.binding;
 
-    out << "RWByteAddressBuffer " << var->name() << " : register(u"
+    if (!var->type()->IsAccessControl()) {
+      error_ = "access control type required for storage buffer";
+      return false;
+    }
+    auto* ac = var->type()->AsAccessControl();
+
+    if (ac->IsReadWrite()) {
+      out << "RW";
+    }
+    out << "ByteAddressBuffer " << var->name() << " : register(u"
         << binding->value() << ");" << std::endl;
     emitted_storagebuffer = true;
   }
