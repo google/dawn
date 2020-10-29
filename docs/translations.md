@@ -25,84 +25,84 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 
 
 # Builtin Decorations
-Name | SPIR-V | MSL | HLSL
-=====|========|=====|=====
-position | SpvBuiltInPosition |position | SV_Position
-vertex_idx | SpvBuiltInVertexIndex |vertex_id | SV_VertexID
-instance_idx | SpvBuiltInInstanceIndex | instance_id| SV_InstanceID
-front_facing | SpvBuiltInFrontFacing | front_facing | SV_IsFrontFacing
-frag_coord | SpvBuiltInFragCoord | position | SV_Position
-frag_depth | SpvBuiltInFragDepth | depth(any) | SV_Depth
-local_invocation_id | SpvBuiltInLocalInvocationId | thread_position_in_threadgroup | SV_GroupThreadID
-local_invocation_idx | SpvBuiltInLocalInvocationIndex | thread_index_in_threadgroup | SV_GroupIndex
-global_invocation_id | SpvBuiltInGlobalInvocationId | thread_position_in_grid | SV_DispatchThreadID
+| Name | SPIR-V | MSL | HLSL |
+|------|--------|-----|------|
+| position | SpvBuiltInPosition |position | SV_Position |
+| vertex_idx | SpvBuiltInVertexIndex |vertex_id | SV_VertexID |
+| instance_idx | SpvBuiltInInstanceIndex | instance_id| SV_InstanceID |
+| front_facing | SpvBuiltInFrontFacing | front_facing | SV_IsFrontFacing |
+| frag_coord | SpvBuiltInFragCoord | position | SV_Position |
+| frag_depth | SpvBuiltInFragDepth | depth(any) | SV_Depth |
+| local_invocation_id | SpvBuiltInLocalInvocationId | thread_position_in_threadgroup | SV_GroupThreadID |
+| local_invocation_idx | SpvBuiltInLocalInvocationIndex | thread_index_in_threadgroup | SV_GroupIndex |
+| global_invocation_id | SpvBuiltInGlobalInvocationId | thread_position_in_grid | SV_DispatchThreadID |
 
 
 # Builtins Methods
-Name | SPIR-V | MSL | HLSL
-=====|========|=====|======
-abs | GLSLstd450FAbs or GLSLstd450SAbs| fabs or abs | abs
-acos | GLSLstd450Acos | acos | acos
-all | SpvOpAll | all | all
-any | SpvOpAny | any | any
-arrayLength | SpvOpArrayLength | |
-asin | GLSLstd450Asin | asin | asin
-atan | GLSLstd450Atan | atan | atan
-atan2 | GLSLstd450Atan2| atan2 | atan2
-ceil | GLSLstd450Ceil| ceil | ceil
-clamp | GLSLstd450NClamp or GLSLstd450UClamp or GLSLstd450SClamp| clamp | clamp
-cos | GLSLstd450Cos | cos | cos
-cosh | GLSLstd450Cosh | cosh | cosh
-countOneBits | SpvOpBitCount | popcount | countbits
-cross | GLSLstd450Cross | cross | cross
-determinant | GLSLstd450Determinant | determinant | determinant
-distance | GLSLstd450Distance | distance | distance
-dot | SpOpDot | dot | dot
-dpdx | SpvOpDPdx | dpdx | ddx
-dpdxCoarse | SpvOpDPdxCoarse | dpdx | ddx_coarse
-dpdxFine | SpvOpDPdxFine | dpdx | ddx_fine
-dpdy | SpvOpDPdy | dpdy | ddy
-dpdyCoarse | SpvOpDPdyCoarse | dpdy | ddy_coarse
-dpdyFine | SpvOpDPdyFine | dpdy | ddy_fine
-exp | GLSLstd450Exp | exp |  exp
-exp2 | GLSLstd450Exp2 | exp2 | exp2
-faceForward | GLSLstd450FaceForward | faceforward | faceforward
-floor | GLSLstd450Floor | floor | floor
-fma | GLSLstd450Fma | fma | fma
-fract | GLSLstd450Fract | fract | frac
-frexp | GLSLstd450Frexp | |
-fwidth | SpvOpFwidth | fwidth | fwidth
-fwidthCoarse | SpvOpFwidthCoarse | fwidth | fwidth
-fwidthFine | SpvOpFwidthFine | fwidth | fwidth
-inverseSqrt | GLSLstd450InverseSqrt | rsqrt | rsqrt
-isFinite | | isfinite | isfinite
-isInf | SpvOpIsInf | isinf | isinf
-isNan | SpvOpIsNan | isnan | isnan
-isNormal | | isnormal |
-ldexp | GLSLstd450Ldexp | |
-length | GLSLstd450Length | length | length
-log | GLSLstd450Log | log | log
-log2 | GLSLstd450Log2 | log2 | log2
-max | GLSLstd450NMax or GLSLstd450SMax or GLSLstd450UMax | fmax or max | max
-min | GLSLstd450NMin or GLSLstd450SMin or GLSLstd450UMin | fmin or min | min
-mix | GLSLstd450FMix | mix | mix
-modf | GLSLstd450Modf | |
-normalize | GLSLstd450Normalize | normalize | normalize
-outerProduct | SpvOpOuterProduct | |
-pow | GLSLstd450Pow | pow | pow
-reflect | GLSLstd450Reflect | reflect | reflect
-reverseBits | SpvOpBitReverse | reverse_bits | reversebits
-round | GLSLstd450Round | round | round
-select | SpvOpSelect | select |
-sign | GLSLstd450FSign | sign | sign
-sin | GLSLstd450Sin | sin | sin
-sinh | GLSLstd450Sinh | sinh | sinh
-smoothStep | GLSLstd450SmoothStep | smoothstep | smoothstep
-sqrt | GLSLstd450Sqrt | sqrt | sqrt
-step | GLSLstd450Step | step | step
-tan | GLSLstd450Tan | tan | tan
-tanh | GLSLstd450Tanh | tanh | tanh
-trunc | GLSLstd450Trunc | trunc | trunc
+| Name | SPIR-V | MSL | HLSL |
+| ------|--------|-----|------ |
+| abs | GLSLstd450FAbs or GLSLstd450SAbs| fabs or abs | abs |
+| acos | GLSLstd450Acos | acos | acos |
+| all | SpvOpAll | all | all |
+| any | SpvOpAny | any | any |
+| arrayLength | SpvOpArrayLength | | |
+| asin | GLSLstd450Asin | asin | asin |
+| atan | GLSLstd450Atan | atan | atan |
+| atan2 | GLSLstd450Atan2| atan2 | atan2 |
+| ceil | GLSLstd450Ceil| ceil | ceil |
+| clamp | GLSLstd450NClamp or GLSLstd450UClamp or GLSLstd450SClamp| clamp | clamp |
+| cos | GLSLstd450Cos | cos | cos |
+| cosh | GLSLstd450Cosh | cosh | cosh |
+| countOneBits | SpvOpBitCount | popcount | countbits |
+| cross | GLSLstd450Cross | cross | cross |
+| determinant | GLSLstd450Determinant | determinant | determinant |
+| distance | GLSLstd450Distance | distance | distance |
+| dot | SpOpDot | dot | dot |
+| dpdx | SpvOpDPdx | dpdx | ddx |
+| dpdxCoarse | SpvOpDPdxCoarse | dpdx | ddx_coarse |
+| dpdxFine | SpvOpDPdxFine | dpdx | ddx_fine |
+| dpdy | SpvOpDPdy | dpdy | ddy |
+| dpdyCoarse | SpvOpDPdyCoarse | dpdy | ddy_coarse |
+| dpdyFine | SpvOpDPdyFine | dpdy | ddy_fine |
+| exp | GLSLstd450Exp | exp |  exp |
+| exp2 | GLSLstd450Exp2 | exp2 | exp2 |
+| faceForward | GLSLstd450FaceForward | faceforward | faceforward |
+| floor | GLSLstd450Floor | floor | floor |
+| fma | GLSLstd450Fma | fma | fma |
+| fract | GLSLstd450Fract | fract | frac |
+| frexp | GLSLstd450Frexp | | |
+| fwidth | SpvOpFwidth | fwidth | fwidth |
+| fwidthCoarse | SpvOpFwidthCoarse | fwidth | fwidth |
+| fwidthFine | SpvOpFwidthFine | fwidth | fwidth |
+| inverseSqrt | GLSLstd450InverseSqrt | rsqrt | rsqrt |
+| isFinite | | isfinite | isfinite |
+| isInf | SpvOpIsInf | isinf | isinf |
+| isNan | SpvOpIsNan | isnan | isnan |
+| isNormal | | isnormal | |
+| ldexp | GLSLstd450Ldexp | | |
+| length | GLSLstd450Length | length | length |
+| log | GLSLstd450Log | log | log |
+| log2 | GLSLstd450Log2 | log2 | log2 |
+| max | GLSLstd450NMax or GLSLstd450SMax or GLSLstd450UMax | fmax or max | max |
+| min | GLSLstd450NMin or GLSLstd450SMin or GLSLstd450UMin | fmin or min | min |
+| mix | GLSLstd450FMix | mix | mix |
+| modf | GLSLstd450Modf | | |
+| normalize | GLSLstd450Normalize | normalize | normalize |
+| outerProduct | SpvOpOuterProduct | | |
+| pow | GLSLstd450Pow | pow | pow |
+| reflect | GLSLstd450Reflect | reflect | reflect |
+| reverseBits | SpvOpBitReverse | reverse_bits | reversebits |
+| round | GLSLstd450Round | round | round |
+| select | SpvOpSelect | select | |
+| sign | GLSLstd450FSign | sign | sign |
+| sin | GLSLstd450Sin | sin | sin |
+| sinh | GLSLstd450Sinh | sinh | sinh |
+| smoothStep | GLSLstd450SmoothStep | smoothstep | smoothstep |
+| sqrt | GLSLstd450Sqrt | sqrt | sqrt |
+| step | GLSLstd450Step | step | step |
+| tan | GLSLstd450Tan | tan | tan |
+| tanh | GLSLstd450Tanh | tanh | tanh |
+| trunc | GLSLstd450Trunc | trunc | trunc |
 
 # Short-circuting
 ## HLSL
