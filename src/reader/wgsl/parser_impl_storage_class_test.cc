@@ -31,24 +31,7 @@ inline std::ostream& operator<<(std::ostream& out, StorageClassData data) {
   return out;
 }
 
-class StorageClassTest : public testing::TestWithParam<StorageClassData> {
- public:
-  StorageClassTest() = default;
-  ~StorageClassTest() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class StorageClassTest : public ParserImplTestWithParam<StorageClassData> {};
 
 TEST_P(StorageClassTest, Parses) {
   auto params = GetParam();

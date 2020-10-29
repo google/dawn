@@ -31,24 +31,7 @@ inline std::ostream& operator<<(std::ostream& out, PipelineStageData data) {
   return out;
 }
 
-class PipelineStageTest : public testing::TestWithParam<PipelineStageData> {
- public:
-  PipelineStageTest() = default;
-  ~PipelineStageTest() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class PipelineStageTest : public ParserImplTestWithParam<PipelineStageData> {};
 
 TEST_P(PipelineStageTest, Parses) {
   auto params = GetParam();

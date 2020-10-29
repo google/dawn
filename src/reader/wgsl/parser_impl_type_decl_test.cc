@@ -123,24 +123,8 @@ inline std::ostream& operator<<(std::ostream& out, VecData data) {
   out << std::string(data.input);
   return out;
 }
-class VecTest : public testing::TestWithParam<VecData> {
- public:
-  VecTest() = default;
-  ~VecTest() override = default;
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class VecTest : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecTest, Parse) {
   auto params = GetParam();
@@ -157,24 +141,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3<f32>", 3},
                                          VecData{"vec4<f32>", 4}));
 
-class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
- public:
-  VecMissingGreaterThanTest() = default;
-  ~VecMissingGreaterThanTest() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
@@ -190,24 +157,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3<f32", 3},
                                          VecData{"vec4<f32", 4}));
 
-class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
- public:
-  VecMissingLessThanTest() = default;
-  ~VecMissingLessThanTest() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class VecMissingLessThanTest : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
@@ -223,24 +173,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3", 3},
                                          VecData{"vec4", 4}));
 
-class VecBadType : public testing::TestWithParam<VecData> {
- public:
-  VecBadType() = default;
-  ~VecBadType() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class VecBadType : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecBadType, Handles_Unknown_Type) {
   auto params = GetParam();
@@ -256,24 +189,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec3<unknown", 3},
                                          VecData{"vec4<unknown", 4}));
 
-class VecMissingType : public testing::TestWithParam<VecData> {
- public:
-  VecMissingType() = default;
-  ~VecMissingType() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class VecMissingType : public ParserImplTestWithParam<VecData> {};
 
 TEST_P(VecMissingType, Handles_Missing_Type) {
   auto params = GetParam();
@@ -604,24 +520,8 @@ inline std::ostream& operator<<(std::ostream& out, MatrixData data) {
   out << std::string(data.input);
   return out;
 }
-class MatrixTest : public testing::TestWithParam<MatrixData> {
- public:
-  MatrixTest() = default;
-  ~MatrixTest() override = default;
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class MatrixTest : public ParserImplTestWithParam<MatrixData> {};
 
 TEST_P(MatrixTest, Parse) {
   auto params = GetParam();
@@ -646,24 +546,9 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3<f32>", 4, 3},
                                          MatrixData{"mat4x4<f32>", 4, 4}));
 
-class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
- public:
-  MatrixMissingGreaterThanTest() = default;
-  ~MatrixMissingGreaterThanTest() override = default;
+class MatrixMissingGreaterThanTest
+    : public ParserImplTestWithParam<MatrixData> {};
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
 TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto* p = parser(params.input);
@@ -684,24 +569,8 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3<f32", 4, 3},
                                          MatrixData{"mat4x4<f32", 4, 4}));
 
-class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
- public:
-  MatrixMissingLessThanTest() = default;
-  ~MatrixMissingLessThanTest() override = default;
+class MatrixMissingLessThanTest : public ParserImplTestWithParam<MatrixData> {};
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
 TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto* p = parser(params.input);
@@ -722,24 +591,8 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3 f32>", 4, 3},
                                          MatrixData{"mat4x4 f32>", 4, 4}));
 
-class MatrixBadType : public testing::TestWithParam<MatrixData> {
- public:
-  MatrixBadType() = default;
-  ~MatrixBadType() override = default;
+class MatrixBadType : public ParserImplTestWithParam<MatrixData> {};
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
 TEST_P(MatrixBadType, Handles_Unknown_Type) {
   auto params = GetParam();
   auto* p = parser(params.input);
@@ -760,24 +613,8 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3<unknown>", 4, 3},
                                          MatrixData{"mat4x4<unknown>", 4, 4}));
 
-class MatrixMissingType : public testing::TestWithParam<MatrixData> {
- public:
-  MatrixMissingType() = default;
-  ~MatrixMissingType() override = default;
+class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
   auto params = GetParam();
   auto* p = parser(params.input);

@@ -32,24 +32,7 @@ inline std::ostream& operator<<(std::ostream& out, StructDecorationData data) {
 }
 
 class StructDecorationTest
-    : public testing::TestWithParam<StructDecorationData> {
- public:
-  StructDecorationTest() = default;
-  ~StructDecorationTest() override = default;
-
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+    : public ParserImplTestWithParam<StructDecorationData> {};
 
 TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();

@@ -76,24 +76,8 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
   out << std::string(data.input);
   return out;
 }
-class BuiltinTest : public testing::TestWithParam<BuiltinData> {
- public:
-  BuiltinTest() = default;
-  ~BuiltinTest() override = default;
 
-  void SetUp() override { ctx_.Reset(); }
-
-  void TearDown() override { impl_ = nullptr; }
-
-  ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
-    return impl_.get();
-  }
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-  Context ctx_;
-};
+class BuiltinTest : public ParserImplTestWithParam<BuiltinData> {};
 
 TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   auto params = GetParam();

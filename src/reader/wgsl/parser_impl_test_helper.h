@@ -55,6 +55,36 @@ class ParserImplTest : public testing::Test {
   Context ctx_;
 };
 
+/// WGSL Parser test class with param
+template <typename T>
+class ParserImplTestWithParam : public testing::TestWithParam<T> {
+ public:
+  /// Constructor
+  ParserImplTestWithParam() = default;
+  ~ParserImplTestWithParam() override = default;
+
+  /// Sets up the test helper
+  void SetUp() override { ctx_.Reset(); }
+
+  /// Tears down the test helper
+  void TearDown() override { impl_ = nullptr; }
+
+  /// Retrieves the parser from the helper
+  /// @param str the string to parse
+  /// @returns the parser implementation
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
+    return impl_.get();
+  }
+
+  /// @returns the type manager
+  TypeManager* tm() { return &(ctx_.type_mgr()); }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+};
+
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint
