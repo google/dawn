@@ -485,6 +485,9 @@ class ParserImpl : Reader {
   // and Block decoration.
   std::unordered_set<uint32_t> remap_buffer_block_type_;
 
+  // The struct types with only read-only members.
+  std::unordered_set<ast::type::Type*> read_only_struct_types_;
+
   // Maps function_id to a list of entrypoint information
   std::unordered_map<uint32_t, std::vector<EntryPointInfo>>
       function_to_ep_info_;

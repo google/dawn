@@ -51,6 +51,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -391,9 +392,10 @@ ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
       }
       return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1]);
     case SpvDecorationNonReadable:
+      // WGSL doesn't have a member decoration for this.  Silently drop it.
+      return nullptr;
     case SpvDecorationNonWritable:
-      // TODO(dneto): Drop these for now.
-      // https://github.com/gpuweb/gpuweb/issues/935
+      // WGSL doesn't have a member decoration for this.
       return nullptr;
     case SpvDecorationColMajor:
       // WGSL only supports column major matrices.
@@ -813,6 +815,7 @@ ast::type::Type* ParserImpl::ConvertType(
   // Compute members
   ast::StructMemberList ast_members;
   const auto members = struct_ty->element_types();
+  unsigned num_non_writable_members = 0;
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
     const auto member_type_id = type_mgr_->GetId(members[member_index]);
@@ -822,6 +825,7 @@ ast::type::Type* ParserImpl::ConvertType(
       return nullptr;
     }
     ast::StructMemberDecorationList ast_member_decorations;
+    bool is_non_writable = false;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
       if (decoration.empty()) {
         Fail() << "malformed SPIR-V decoration: it's empty";
@@ -844,6 +848,11 @@ ast::type::Type* ParserImpl::ConvertType(
         }
         Fail() << "unrecognized builtin " << decoration[1];
         return nullptr;
+      } else if (decoration[0] == SpvDecorationNonWritable) {
+        // WGSL doesn't represent individual members as non-writable. Instead,
+        // apply the ReadOnly access control to the containing struct if all
+        // the members are non-writable.
+        is_non_writable = true;
       } else {
         auto ast_member_decoration =
             ConvertMemberDecoration(type_id, member_index, decoration);
@@ -854,6 +863,11 @@ ast::type::Type* ParserImpl::ConvertType(
           ast_member_decorations.push_back(std::move(ast_member_decoration));
         }
       }
+    }
+    if (is_non_writable) {
+      // Count a member as non-writable only once, no matter how many
+      // NonWritable decorations are applied to it.
+      ++num_non_writable_members;
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
     auto ast_struct_member = std::make_unique<ast::StructMember>(
@@ -871,6 +885,9 @@ ast::type::Type* ParserImpl::ConvertType(
 
   auto* result = ctx_.type_mgr().Get(std::move(ast_struct_type));
   id_to_type_[type_id] = result;
+  if (num_non_writable_members == members.size()) {
+    read_only_struct_types_.insert(result);
+  }
   ast_module_.AddConstructedType(result);
   return result;
 }
@@ -1058,6 +1075,16 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
   }
+
+  if (sc == ast::StorageClass::kStorageBuffer) {
+    // Apply the access(read) or access(read_write) modifier.
+    auto access = read_only_struct_types_.count(type)
+                      ? ast::AccessControl::kReadOnly
+                      : ast::AccessControl::kReadWrite;
+    type = ctx_.type_mgr().Get(
+        std::make_unique<ast::type::AccessControlType>(access, type));
+  }
+
   auto ast_var = std::make_unique<ast::Variable>(namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;

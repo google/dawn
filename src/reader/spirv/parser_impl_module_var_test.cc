@@ -1203,7 +1203,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
     }
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   })"))
       << module_str;
 }
@@ -1257,7 +1257,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
     }
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   })"))
       << module_str;
 }
@@ -1292,7 +1292,8 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
+TEST_F(SpvParserTest,
+       ModuleScopeVar_StructMember_NonReadableDecoration_Dropped) {
   auto* p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %strct Block
@@ -1301,7 +1302,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
      %myvar = OpVariable %ptr_sb_strct StorageBuffer
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
@@ -1314,36 +1315,9 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
   Variable{
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   }
-})")) << module_str;
-}
-
-TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
-  auto* p = parser(test::Assemble(R"(
-     OpName %myvar "myvar"
-     OpDecorate %strct Block
-     OpMemberDecorate %strct 0 NonWritable
-)" + CommonTypes() + R"(
-     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
-     %myvar = OpVariable %ptr_sb_strct StorageBuffer
-  )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
-    [[block]]
-    StructMember{field0: __u32}
-    StructMember{field1: __f32}
-    StructMember{field2: __array__u32_2}
-  }
-  Variable{
-    myvar
-    storage_buffer
-    __struct_S
-  }
-})")) << module_str;
+)")) << module_str;
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
@@ -1370,7 +1344,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
   Variable{
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   }
 })")) << module_str;
 }
@@ -1399,7 +1373,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
   Variable{
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   }
 })")) << module_str;
 }
@@ -1422,6 +1396,97 @@ TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
       p->error(),
       Eq(R"(WGSL does not support row-major matrices: can't translate member 0 of %2 = OpTypeStruct %5)"))
       << p->error();
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_AllMembers) {
+  // Variable should have access(read)
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 NonWritable
+     OpMemberDecorate %s 1 NonWritable
+     %float = OpTypeFloat 32
+
+     %s = OpTypeStruct %float %float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  S Struct{
+    [[block]]
+    StructMember{field0: __f32}
+    StructMember{field1: __f32}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __access_control_read_only__struct_S
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers) {
+  // Variable should have access(read_write)
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 NonWritable
+     %float = OpTypeFloat 32
+
+     %s = OpTypeStruct %float %float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  S Struct{
+    [[block]]
+    StructMember{field0: __f32}
+    StructMember{field1: __f32}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __access_control_read_write__struct_S
+  }
+})")) << module_str;
+}
+
+TEST_F(
+    SpvParserTest,
+    ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {
+  // Variable should have access(read_write)
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 NonWritable
+     OpMemberDecorate %s 0 NonWritable ; same member. Don't double-count it
+     %float = OpTypeFloat 32
+
+     %s = OpTypeStruct %float %float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  S Struct{
+    [[block]]
+    StructMember{field0: __f32}
+    StructMember{field1: __f32}
+  }
+  Variable{
+    myvar
+    storage_buffer
+    __access_control_read_write__struct_S
+  }
+})")) << module_str;
 }
 
 }  // namespace

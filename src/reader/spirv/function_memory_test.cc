@@ -808,7 +808,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   Variable{
     myvar
     storage_buffer
-    __struct_S
+    __access_control_read_write__struct_S
   })"));
 }
 
