@@ -237,16 +237,17 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
   } else {
     auto* u32 = ctx_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
 
+    ast::ExpressionList cast_expr;
+    cast_expr.push_back(expr->take_idx_expr());
+
     ast::ExpressionList params;
-    params.push_back(expr->take_idx_expr());
-    params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::UintLiteral>(u32, 0)));
+    params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+        u32, std::move(cast_expr)));
     params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
         std::make_unique<ast::UintLiteral>(u32, size - 1)));
 
     auto call_expr = std::make_unique<ast::CallExpression>(
-        std::make_unique<ast::IdentifierExpression>("clamp"),
-        std::move(params));
+        std::make_unique<ast::IdentifierExpression>("min"), std::move(params));
     call_expr->set_result_type(u32);
 
     expr->set_idx_expr(std::move(call_expr));

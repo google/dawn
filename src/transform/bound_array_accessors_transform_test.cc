@@ -35,6 +35,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
@@ -82,7 +83,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   // const c : u32 =  1;
   // const b : ptr<function, f32> = a[c]
   //
-  //   -> const b : ptr<function, i32> = a[clamp(c, 0, 2)]
+  //   -> const b : ptr<function, i32> = a[min(u32(c), 2)]
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -119,20 +120,20 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
 
   auto* idx = ptr->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
-  ASSERT_EQ(idx->params()[0].get(), access_ptr);
+  ASSERT_EQ(idx->params().size(), 2u);
+
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), access_ptr);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -146,7 +147,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   // var i : u32;
   // var c : f32 = a[b[i]];
   //
-  // -> var c : f32 = a[clamp(b[clamp(i, 0, 4)], 0, 2)];
+  // -> var c : f32 = a[min(u32(b[min(u32(i), 4)]), 2)];
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -186,41 +187,40 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
 
   auto* idx = ptr->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
+  ASSERT_EQ(idx->params().size(), 2u);
 
-  auto* sub = idx->params()[0].get();
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+
+  auto* sub = tc->values()[0].get();
   ASSERT_TRUE(sub->IsArrayAccessor());
   ASSERT_TRUE(sub->AsArrayAccessor()->idx_expr()->IsCall());
 
   auto* sub_idx = sub->AsArrayAccessor()->idx_expr()->AsCall();
   ASSERT_TRUE(sub_idx->func()->IsIdentifier());
-  EXPECT_EQ(sub_idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(sub_idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(sub_idx->params()[0].get(), b_access_ptr);
+  ASSERT_TRUE(sub_idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(sub_idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  tc = sub_idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), b_access_ptr);
 
   ASSERT_TRUE(sub_idx->params()[1]->IsConstructor());
   ASSERT_TRUE(sub_idx->params()[1]->AsConstructor()->IsScalarConstructor());
   auto* scalar = sub_idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(sub_idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(sub_idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = sub_idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 4u);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -273,7 +273,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   // var c : u32;
   // var b : f32 = a[c + 2 - 3]
   //
-  // -> var b : f32 = a[clamp((c + 2 - 3), 0, 2)]
+  // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -312,20 +312,20 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
 
   auto* idx = ptr->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
-  ASSERT_EQ(idx->params()[0].get(), access_ptr);
+  ASSERT_EQ(idx->params().size(), 2u);
+
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), access_ptr);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -458,7 +458,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   // var c : u32;
   // var b : f32 = a[c + 2 - 3]
   //
-  // -> var b : f32 = a[clamp((c + 2 - 3), 0, 2)]
+  // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -497,20 +497,19 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
 
   auto* idx = ptr->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
-  ASSERT_EQ(idx->params()[0].get(), access_ptr);
+  ASSERT_EQ(idx->params().size(), 2u);
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), access_ptr);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -659,7 +658,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   // var c : u32;
   // var b : f32 = a[c + 2 - 3][1]
   //
-  // -> var b : f32 = a[clamp((c + 2 - 3), 0, 2)][1]
+  // -> var b : f32 = a[min(u32(c + 2 - 3), 2)][1]
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -705,20 +704,20 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(ary->idx_expr()->IsCall());
   auto* idx = ary->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
-  ASSERT_EQ(idx->params()[0].get(), access_ptr);
+  ASSERT_EQ(idx->params().size(), 2u);
+
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), access_ptr);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -741,7 +740,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   // var c : u32;
   // var b : f32 = a[1][c + 2 - 3]
   //
-  // -> var b : f32 = a[1][clamp((c + 2 - 3), 0, 1)]
+  // -> var b : f32 = a[1][min(u32(c + 2 - 3), 1)]
 
   ast::type::F32Type f32;
   ast::type::U32Type u32;
@@ -794,20 +793,20 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(ptr->idx_expr()->IsCall());
   auto* idx = ptr->idx_expr()->AsCall();
   ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "clamp");
+  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
 
-  ASSERT_EQ(idx->params().size(), 3u);
-  ASSERT_EQ(idx->params()[0].get(), access_ptr);
+  ASSERT_EQ(idx->params().size(), 2u);
+
+  ASSERT_TRUE(idx->params()[0]->IsConstructor());
+  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
+  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(tc->type()->IsU32());
+  ASSERT_EQ(tc->values().size(), 1u);
+  ASSERT_EQ(tc->values()[0].get(), access_ptr);
 
   ASSERT_TRUE(idx->params()[1]->IsConstructor());
   ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
   scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 0u);
-
-  ASSERT_TRUE(idx->params()[2]->IsConstructor());
-  ASSERT_TRUE(idx->params()[2]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -1046,7 +1045,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
   // var a : vec3<f32>
   // var b : f32 = a[idx]
   //
-  // ->var b : f32 =  a[clamp(idx, 0, 2)]
+  // ->var b : f32 =  a[min(u32(idx), 2)]
 }
 
 // TODO(dsinclair): Implement when constant_id exists
@@ -1055,7 +1054,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
   // var a : array<f32, 4>
   // var b : f32 = a[idx]
   //
-  // -> var b : f32 = a[clamp(idx, 0, 3)]
+  // -> var b : f32 = a[min(u32(idx), 3)]
 }
 
 // TODO(dsinclair): Implement when constant_id exists
@@ -1064,7 +1063,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
   // var a : mat3x2<f32>
   // var b : f32 = a[idx][1]
   //
-  // -> var b : f32 = a[clamp(idx, 0, 2)][1]
+  // -> var b : f32 = a[min(u32(idx), 2)][1]
 }
 
 // TODO(dsinclair): Implement when constant_id exists
@@ -1073,7 +1072,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
   // var a : mat3x2<f32>
   // var b : f32 = a[1][idx]
   //
-  // -> var b : f32 = a[1][clamp(idx, 0, 1)]
+  // -> var b : f32 = a[1][min(u32(idx), 0, 1)]
 }
 
 // TODO(dsinclair): Implement when we have arrayLength for Runtime Arrays
@@ -1085,7 +1084,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_RuntimeArray_Clamps) {
   // S s;
   // var b : f32 = s.b[25]
   //
-  // -> var b : f32 = s.b[clamp(25, 0, arrayLength(s.b))]
+  // -> var b : f32 = s.b[min(u32(25), arrayLength(s.b))]
 }
 
 // TODO(dsinclair): Clamp atomics when available.
@@ -1109,8 +1108,8 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Scoped_Variable) {
   // }
   // var c : f32 = a[i];
   //
-  // -> var b : f32 = a[clamp(i, 0, 4)];
-  //    var c : f32 = a[clamp(i, 0, 2)];
+  // -> var b : f32 = a[min(u32(i), 4)];
+  //    var c : f32 = a[min(u32(i), 2)];
   FAIL();
 }
 
