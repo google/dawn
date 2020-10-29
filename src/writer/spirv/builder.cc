@@ -2362,7 +2362,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   } else if (texture->IsMultisampled()) {
     type_id = GenerateTypeIfNeeded(texture->AsMultisampled()->type());
   } else if (texture->IsStorage()) {
-    if (texture->AsStorage()->access() == ast::type::StorageAccess::kWrite) {
+    if (texture->AsStorage()->access() == ast::AccessControl::kWriteOnly) {
       ast::type::VoidType void_type;
       type_id = GenerateTypeIfNeeded(&void_type);
     } else {

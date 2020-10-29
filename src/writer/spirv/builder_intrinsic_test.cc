@@ -588,7 +588,7 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_1d) {
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   Context ctx;
@@ -640,7 +640,7 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_2d) {
   ast::type::I32Type i32;
   ast::type::VectorType vec2(&f32, 2);
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   Context ctx;

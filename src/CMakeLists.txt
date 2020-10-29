@@ -38,6 +38,8 @@ endfunction()
 
 set(TINT_LIB_SRCS
   ../include/tint/tint.h
+  ast/access_control.cc
+  ast/access_control.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
   ast/array_decoration.cc

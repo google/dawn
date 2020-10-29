@@ -347,7 +347,7 @@ TEST_F(MslGeneratorImplTest,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadWrite, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
 
@@ -426,7 +426,7 @@ TEST_F(MslGeneratorImplTest,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadOnly, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
 
@@ -857,7 +857,7 @@ TEST_F(MslGeneratorImplTest,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadWrite, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
 
@@ -958,7 +958,7 @@ TEST_F(MslGeneratorImplTest,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadOnly, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
 

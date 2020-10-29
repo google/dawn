@@ -17,15 +17,12 @@
 
 #include <string>
 
+#include "src/ast/access_control.h"
 #include "src/ast/type/texture_type.h"
 
 namespace tint {
 namespace ast {
 namespace type {
-
-/// The access value of the storage texture
-enum class StorageAccess { kRead, kWrite };
-std::ostream& operator<<(std::ostream& out, StorageAccess dim);
 
 /// The image format in the storage texture
 enum class ImageFormat {
@@ -76,7 +73,7 @@ class StorageTextureType : public TextureType {
   /// @param access the access type for the texture
   /// @param format the image format of the texture
   StorageTextureType(TextureDimension dim,
-                     StorageAccess access,
+                     AccessControl access,
                      ImageFormat format);
 
   /// Move constructor
@@ -93,7 +90,7 @@ class StorageTextureType : public TextureType {
   Type* type() const;
 
   /// @returns the storage access
-  StorageAccess access() const { return storage_access_; }
+  AccessControl access() const { return access_; }
 
   /// @returns the image format
   ImageFormat image_format() const { return image_format_; }
@@ -103,7 +100,7 @@ class StorageTextureType : public TextureType {
 
  private:
   Type* type_ = nullptr;
-  StorageAccess storage_access_ = StorageAccess::kRead;
+  AccessControl access_ = AccessControl::kReadOnly;
   ImageFormat image_format_ = ImageFormat::kRgba32Float;
 };
 

@@ -177,7 +177,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   EXPECT_EQ(t->AsTexture()->AsStorage()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
   EXPECT_EQ(t->AsTexture()->AsStorage()->access(),
-            ast::type::StorageAccess::kRead);
+            ast::AccessControl::kReadOnly);
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
 }
 
@@ -191,7 +191,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   EXPECT_EQ(t->AsTexture()->AsStorage()->image_format(),
             ast::type::ImageFormat::kR16Float);
   EXPECT_EQ(t->AsTexture()->AsStorage()->access(),
-            ast::type::StorageAccess::kWrite);
+            ast::AccessControl::kWriteOnly);
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 

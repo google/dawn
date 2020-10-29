@@ -653,8 +653,8 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
   }
 
   ast::type::TextureDimension storage_dim;
-  ast::type::StorageAccess storage_access;
-  std::tie(storage_dim, storage_access) = storage_texture_type();
+  ast::AccessControl access;
+  std::tie(storage_dim, access) = storage_texture_type();
   if (storage_dim != ast::type::TextureDimension::kNone) {
     auto t = next();
     if (!t.IsLessThan()) {
@@ -677,7 +677,7 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     }
 
     return ctx_.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
-        storage_dim, storage_access, format));
+        storage_dim, access, format));
   }
 
   return nullptr;
@@ -764,54 +764,54 @@ ast::type::TextureDimension ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_WO_2D
 //  | TEXTURE_WO_2D_ARRAY
 //  | TEXTURE_WO_3D
-std::pair<ast::type::TextureDimension, ast::type::StorageAccess>
+std::pair<ast::type::TextureDimension, ast::AccessControl>
 ParserImpl::storage_texture_type() {
   auto t = peek();
   if (t.IsTextureStorageReadonly1d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k1d, ast::type::StorageAccess::kRead};
+    return {ast::type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
   }
   if (t.IsTextureStorageReadonly1dArray()) {
     next();  // Consume the peek
     return {ast::type::TextureDimension::k1dArray,
-            ast::type::StorageAccess::kRead};
+            ast::AccessControl::kReadOnly};
   }
   if (t.IsTextureStorageReadonly2d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k2d, ast::type::StorageAccess::kRead};
+    return {ast::type::TextureDimension::k2d, ast::AccessControl::kReadOnly};
   }
   if (t.IsTextureStorageReadonly2dArray()) {
     next();  // Consume the peek
     return {ast::type::TextureDimension::k2dArray,
-            ast::type::StorageAccess::kRead};
+            ast::AccessControl::kReadOnly};
   }
   if (t.IsTextureStorageReadonly3d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k3d, ast::type::StorageAccess::kRead};
+    return {ast::type::TextureDimension::k3d, ast::AccessControl::kReadOnly};
   }
   if (t.IsTextureStorageWriteonly1d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k1d, ast::type::StorageAccess::kWrite};
+    return {ast::type::TextureDimension::k1d, ast::AccessControl::kWriteOnly};
   }
   if (t.IsTextureStorageWriteonly1dArray()) {
     next();  // Consume the peek
     return {ast::type::TextureDimension::k1dArray,
-            ast::type::StorageAccess::kWrite};
+            ast::AccessControl::kWriteOnly};
   }
   if (t.IsTextureStorageWriteonly2d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k2d, ast::type::StorageAccess::kWrite};
+    return {ast::type::TextureDimension::k2d, ast::AccessControl::kWriteOnly};
   }
   if (t.IsTextureStorageWriteonly2dArray()) {
     next();  // Consume the peek
     return {ast::type::TextureDimension::k2dArray,
-            ast::type::StorageAccess::kWrite};
+            ast::AccessControl::kWriteOnly};
   }
   if (t.IsTextureStorageWriteonly3d()) {
     next();  // Consume the peek
-    return {ast::type::TextureDimension::k3d, ast::type::StorageAccess::kWrite};
+    return {ast::type::TextureDimension::k3d, ast::AccessControl::kWriteOnly};
   }
-  return {ast::type::TextureDimension::kNone, ast::type::StorageAccess::kRead};
+  return {ast::type::TextureDimension::kNone, ast::AccessControl::kReadOnly};
 }
 
 // depth_texture_type

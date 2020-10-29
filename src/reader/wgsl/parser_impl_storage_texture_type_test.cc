@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, StorageTextureType_Invalid) {
   auto* p = parser("abc");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::kNone);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly1d) {
   auto* p = parser("texture_ro_1d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k1d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly1dArray) {
   auto* p = parser("texture_ro_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k1dArray);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly2d) {
   auto* p = parser("texture_ro_2d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k2d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly2dArray) {
   auto* p = parser("texture_ro_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k2dArray);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly3d) {
   auto* p = parser("texture_ro_3d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k3d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kRead);
+  EXPECT_EQ(t.second, ast::AccessControl::kReadOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly1d) {
   auto* p = parser("texture_wo_1d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k1d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t.second, ast::AccessControl::kWriteOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly1dArray) {
   auto* p = parser("texture_wo_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k1dArray);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t.second, ast::AccessControl::kWriteOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly2d) {
   auto* p = parser("texture_wo_2d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k2d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t.second, ast::AccessControl::kWriteOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly2dArray) {
   auto* p = parser("texture_wo_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k2dArray);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t.second, ast::AccessControl::kWriteOnly);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly3d) {
   auto* p = parser("texture_wo_3d");
   auto t = p->storage_texture_type();
   EXPECT_EQ(t.first, ast::type::TextureDimension::k3d);
-  EXPECT_EQ(t.second, ast::type::StorageAccess::kWrite);
+  EXPECT_EQ(t.second, ast::AccessControl::kWriteOnly);
   EXPECT_FALSE(p->has_error());
 }
 

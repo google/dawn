@@ -17,19 +17,11 @@
 
 #include "src/ast/type/type.h"
 
+#include "src/ast/access_control.h"
+
 namespace tint {
 namespace ast {
 namespace type {
-
-/// The access control settings
-enum class AccessControl {
-  /// Read only
-  kReadOnly = 0,
-  /// Write only
-  kWriteOnly,
-  /// Read write
-  kReadWrite
-};
 
 /// An access control type. Holds an access setting and pointer to another type.
 class AccessControlType : public Type {

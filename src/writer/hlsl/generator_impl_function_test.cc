@@ -383,7 +383,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadWrite, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -449,7 +449,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadOnly, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -515,7 +515,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadWrite, &s);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
@@ -899,7 +899,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
-  ast::type::AccessControlType ac(ast::type::AccessControl::kReadWrite, &vec4);
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &vec4);
   auto coord_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "coord", ast::StorageClass::kStorageBuffer, &ac));

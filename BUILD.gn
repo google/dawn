@@ -217,6 +217,8 @@ tint_language_header("cldebuginfo100") {
 
 source_set("libtint_core_src") {
   sources = [
+    "src/ast/access_control.cc",
+    "src/ast/access_control.h",
     "src/ast/array_accessor_expression.cc",
     "src/ast/array_accessor_expression.h",
     "src/ast/array_decoration.cc",

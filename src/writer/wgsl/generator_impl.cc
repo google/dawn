@@ -465,9 +465,9 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     } else if (texture->IsStorage()) {
       auto* storage = texture->AsStorage();
 
-      if (storage->access() == ast::type::StorageAccess::kRead) {
+      if (storage->access() == ast::AccessControl::kReadOnly) {
         out_ << "ro_";
-      } else if (storage->access() == ast::type::StorageAccess::kWrite) {
+      } else if (storage->access() == ast::AccessControl::kWriteOnly) {
         out_ << "wo_";
       } else {
         error_ = "unknown storage texture access";

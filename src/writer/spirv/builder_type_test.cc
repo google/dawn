@@ -952,7 +952,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R16Float) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -970,7 +970,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8SNorm) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR8Snorm);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -988,7 +988,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8UNorm) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR8Unorm);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1006,7 +1006,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_array) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1dArray,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1024,7 +1024,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_2d) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1042,7 +1042,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_2dArray) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2dArray,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1060,7 +1060,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_3d) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k3d,
-                                  ast::type::StorageAccess::kRead,
+                                  ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1078,7 +1078,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_1d) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::type::StorageAccess::kWrite,
+                                  ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1096,7 +1096,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_1dArray) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1dArray,
-                                  ast::type::StorageAccess::kWrite,
+                                  ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1114,7 +1114,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_2d) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2d,
-                                  ast::type::StorageAccess::kWrite,
+                                  ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1132,7 +1132,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_2dArray) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2dArray,
-                                  ast::type::StorageAccess::kWrite,
+                                  ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
@@ -1150,7 +1150,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_3d) {
   Builder b(&mod);
 
   ast::type::StorageTextureType s(ast::type::TextureDimension::k3d,
-                                  ast::type::StorageAccess::kWrite,
+                                  ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();

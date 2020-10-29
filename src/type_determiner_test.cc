@@ -1918,7 +1918,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
 
   ast::type::Type* texture_type =
       ctx()->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
-          dim, ast::type::StorageAccess::kRead, format));
+          dim, ast::AccessControl::kReadOnly, format));
 
   ast::ExpressionList call_params;
 

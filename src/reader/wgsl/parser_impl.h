@@ -208,7 +208,7 @@ class ParserImpl {
   /// Parses a `storage_texture_type` grammar element
   /// @returns returns the storage texture dimension and the storage access.
   ///          Returns kNone and kRead if none matched.
-  std::pair<ast::type::TextureDimension, ast::type::StorageAccess>
+  std::pair<ast::type::TextureDimension, ast::AccessControl>
   storage_texture_type();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
