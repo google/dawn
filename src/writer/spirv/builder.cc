@@ -49,6 +49,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
@@ -695,11 +696,13 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   push_debug(spv::Op::OpName,
              {Operand::Int(var_id), Operand::String(var->name())});
 
+  auto* type = var->type()->UnwrapAll();
+
   OperandList ops = {Operand::Int(type_id), result,
                      Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (!var->type()->IsTexture() && !var->type()->IsSampler()) {
+  } else if (!type->IsTexture() && !type->IsSampler()) {
     // Certain cases require us to generate a constructor value.
     //
     // 1- ConstantId's must be attached to the OpConstant, if we have a
@@ -707,7 +710,6 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    auto* type = var->type()->UnwrapPtrIfNeeded();
     if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
       if (type->IsF32()) {
         ast::FloatLiteral l(type, 0.0f);
@@ -2251,6 +2253,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     return 0;
   }
 
+  // The alias is a wrapper around the subtype, so emit the subtype
   if (type->IsAlias()) {
     return GenerateTypeIfNeeded(type->AsAlias()->type());
   }
@@ -2263,7 +2266,18 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   auto result = result_op();
   auto id = result.to_i();
 
-  if (type->IsArray()) {
+  if (type->IsAccessControl()) {
+    auto* ac = type->AsAccessControl();
+    auto* subtype = ac->type()->UnwrapIfNeeded();
+    if (!subtype->IsStruct()) {
+      error_ = "Access control attached to non-struct type.";
+      return 0;
+    }
+    if (!GenerateStructType(subtype->AsStruct(), ac->access_control(),
+                            result)) {
+      return 0;
+    }
+  } else if (type->IsArray()) {
     if (!GenerateArrayType(type->AsArray(), result)) {
       return 0;
     }
@@ -2282,7 +2296,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
       return 0;
     }
   } else if (type->IsStruct()) {
-    if (!GenerateStructType(type->AsStruct(), result)) {
+    if (!GenerateStructType(type->AsStruct(), ast::AccessControl::kReadWrite,
+                            result)) {
       return 0;
     }
   } else if (type->IsU32()) {
@@ -2449,6 +2464,7 @@ bool Builder::GeneratePointerType(ast::type::PointerType* ptr,
 }
 
 bool Builder::GenerateStructType(ast::type::StructType* struct_type,
+                                 ast::AccessControl access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
   auto* impl = struct_type->impl();
@@ -2471,6 +2487,19 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
     auto mem_id = GenerateStructMember(struct_id, i, members[i].get());
     if (mem_id == 0) {
       return false;
+    }
+
+    // We're attaching the access control to the members of the struct instead
+    // of to the variable. The reason we do this is that WGSL models the access
+    // as part of the type. If we attach to the variable, it's no longer part
+    // of the type in the SPIR-V backend, but part of the variable. This differs
+    // from the modeling and other backends. Attaching to the struct members
+    // means the access control stays part of the type where it logically makes
+    // the most sense.
+    if (access_control == ast::AccessControl::kReadOnly) {
+      push_annot(spv::Op::OpMemberDecorate,
+                 {Operand::Int(struct_id), Operand::Int(i),
+                  Operand::Int(SpvDecorationNonWritable)});
     }
 
     ops.push_back(Operand::Int(mem_id));

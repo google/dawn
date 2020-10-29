@@ -26,6 +26,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
@@ -238,6 +239,13 @@ class Builder {
   /// @param func the function to generate for
   /// @returns the ID to use for the function type. Returns 0 on failure.
   uint32_t GenerateFunctionTypeIfNeeded(ast::Function* func);
+  /// Generates access control annotations if needed
+  /// @param type the type to generate for
+  /// @param struct_id the struct id
+  /// @param member_idx the member index
+  void GenerateMemberAccessControlIfNeeded(ast::type::Type* type,
+                                           uint32_t struct_id,
+                                           uint32_t member_idx);
   /// Generates a function variable
   /// @param var the variable
   /// @returns true if the variable was generated
@@ -409,9 +417,11 @@ class Builder {
   bool GeneratePointerType(ast::type::PointerType* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
+  /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
   bool GenerateStructType(ast::type::StructType* struct_type,
+                          ast::AccessControl access_control,
                           const Operand& result);
   /// Generates a struct member
   /// @param struct_id the id of the parent structure

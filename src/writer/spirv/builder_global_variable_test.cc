@@ -27,9 +27,12 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/struct.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -519,6 +522,168 @@ INSTANTIATE_TEST_SUITE_P(
                     SpvBuiltInLocalInvocationIndex},
         BuiltinData{ast::Builtin::kGlobalInvocationId,
                     SpvBuiltInGlobalInvocationId}));
+
+TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
+  // struct A {
+  //   a : i32;
+  // };
+  // var b : [[access(read)]] A
+
+  ast::type::I32Type i32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &i32, std::move(decos)));
+
+  ast::type::StructType A("A",
+                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
+
+  ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
+OpMemberDecorate %3 1 NonWritable
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpMemberName %3 1 "b"
+OpName %1 "b"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeStruct %4 %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
+  // struct A {
+  //   a : i32;
+  // };
+  // type B = A;
+  // var b : [[access(read)]] B
+
+  ast::type::I32Type i32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+
+  ast::type::StructType A("A",
+                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::AliasType B("B", &A);
+  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &B};
+
+  ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
+  // struct A {
+  //   a : i32;
+  // };
+  // type B = [[access(read)]] A;
+  // var b : B
+
+  ast::type::I32Type i32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+
+  ast::type::StructType A("A",
+                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
+  ast::type::AliasType B("B", &ac);
+
+  ast::Variable var("b", ast::StorageClass::kStorageBuffer, &B);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
+  // struct A {
+  //   a : i32;
+  // };
+  // var b : [[access(read)]] A
+  // var c : [[access(read_write)]] A
+
+  ast::type::I32Type i32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+
+  ast::type::StructType A("A",
+                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::AccessControlType read{ast::AccessControl::kReadOnly, &A};
+  ast::type::AccessControlType rw{ast::AccessControl::kReadWrite, &A};
+
+  ast::Variable var_b("b", ast::StorageClass::kStorageBuffer, &read);
+  ast::Variable var_c("c", ast::StorageClass::kStorageBuffer, &rw);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var_b)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var_c)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
+OpName %7 "A"
+OpMemberName %7 0 "a"
+OpName %5 "c"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeStruct %4
+%6 = OpTypePointer StorageBuffer %7
+%5 = OpVariable %6 StorageBuffer
+)");
+}
 
 }  // namespace
 }  // namespace spirv

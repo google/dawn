@@ -44,6 +44,8 @@ class AccessControlType : public Type {
   /// @returns true if the access control is read/write
   bool IsReadWrite() const { return access_ == AccessControl::kReadWrite; }
 
+  /// @returns the access control value
+  AccessControl access_control() const { return access_; }
   /// @returns the subtype type
   Type* type() const { return subtype_; }
 
