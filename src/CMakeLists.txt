@@ -450,6 +450,7 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_else_stmt_test.cc
     reader/wgsl/parser_impl_elseif_stmt_test.cc
     reader/wgsl/parser_impl_equality_expression_test.cc
+    reader/wgsl/parser_impl_error_msg_test.cc
     reader/wgsl/parser_impl_exclusive_or_expression_test.cc
     reader/wgsl/parser_impl_for_stmt_test.cc
     reader/wgsl/parser_impl_function_decl_test.cc
