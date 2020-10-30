@@ -41,8 +41,8 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 
   BitcastExpression exp(Source{20, 2}, &f32, std::move(expr));
   auto src = exp.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BitcastExpressionTest, IsBitcast) {

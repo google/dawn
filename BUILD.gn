@@ -386,6 +386,7 @@ source_set("libtint_core_src") {
     "src/reader/reader.cc",
     "src/reader/reader.h",
     "src/scope_stack.h",
+    "src/source.cc",
     "src/source.h",
     "src/transform/bound_array_accessors_transform.cc",
     "src/transform/bound_array_accessors_transform.h",

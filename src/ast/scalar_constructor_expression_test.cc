@@ -37,8 +37,8 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   ScalarConstructorExpression c(Source{20, 2}, std::move(b));
   auto src = c.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ScalarConstructorExpressionTest, IsValid) {

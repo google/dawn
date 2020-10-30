@@ -19,6 +19,7 @@
 #include <string>
 
 #include "src/reader/reader.h"
+#include "src/source.h"
 
 namespace tint {
 namespace reader {
@@ -29,10 +30,18 @@ class ParserImpl;
 /// Parser for WGSL source data
 class Parser : public Reader {
  public:
-  /// Creates a new parser
+  /// Creates a new parser from the given file.
   /// @param ctx the non-null context object
-  /// @param input the input string to parse
-  Parser(Context* ctx, const std::string& input);
+  /// @param file the input source file to parse
+  Parser(Context* ctx, Source::File const* file);
+
+  /// Creates a new parser from the given file content.
+  /// @param ctx the non-null context object
+  /// @param content the input string to parse
+  /// TODO(bclayton): Remove this constructor.
+  /// It purely exists to break up changes into bite sized pieces.
+  Parser(Context* ctx, const std::string& content);
+
   ~Parser() override;
 
   /// Run the parser

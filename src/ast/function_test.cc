@@ -58,8 +58,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
 
   Function f(Source{20, 2}, "func", std::move(params), &void_type);
   auto src = f.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(FunctionTest, AddDuplicateReferencedVariables) {

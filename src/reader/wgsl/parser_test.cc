@@ -26,14 +26,14 @@ using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Empty) {
   Context ctx;
-  Parser p(&ctx, "");
+  Source::File file("test.wgsl", "");
+  Parser p(&ctx, &file);
   ASSERT_TRUE(p.Parse()) << p.error();
 }
 
 TEST_F(ParserTest, Parses) {
   Context ctx;
-
-  Parser p(&ctx, R"(
+  Source::File file("test.wgsl", R"(
 [[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
 [[stage(vertex)]]
@@ -41,6 +41,7 @@ fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
 )");
+  Parser p(&ctx, &file);
   ASSERT_TRUE(p.Parse()) << p.error();
 
   auto m = p.module();
@@ -50,10 +51,11 @@ fn main() -> void {
 
 TEST_F(ParserTest, HandlesError) {
   Context ctx;
-  Parser p(&ctx, R"(
+  Source::File file("test.wgsl", R"(
 fn main() ->  {  # missing return type
   return;
 })");
+  Parser p(&ctx, &file);
 
   ASSERT_FALSE(p.Parse());
   ASSERT_TRUE(p.has_error());

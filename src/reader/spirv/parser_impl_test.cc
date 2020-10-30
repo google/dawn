@@ -139,14 +139,14 @@ TEST_F(SpvParserTest, Impl_Source_NoOpLine) {
   EXPECT_TRUE(p->error().empty());
   // Use instruction counting.
   auto s5 = p->GetSourceForResultIdForTest(5);
-  EXPECT_EQ(7u, s5.line);
-  EXPECT_EQ(0u, s5.column);
+  EXPECT_EQ(7u, s5.range.begin.line);
+  EXPECT_EQ(0u, s5.range.begin.column);
   auto s60 = p->GetSourceForResultIdForTest(60);
-  EXPECT_EQ(8u, s60.line);
-  EXPECT_EQ(0u, s60.column);
+  EXPECT_EQ(8u, s60.range.begin.line);
+  EXPECT_EQ(0u, s60.range.begin.column);
   auto s1 = p->GetSourceForResultIdForTest(1);
-  EXPECT_EQ(10u, s1.line);
-  EXPECT_EQ(0u, s1.column);
+  EXPECT_EQ(10u, s1.range.begin.line);
+  EXPECT_EQ(0u, s1.range.begin.column);
 }
 
 TEST_F(SpvParserTest, Impl_Source_WithOpLine_WithOpNoLine) {
@@ -172,15 +172,15 @@ TEST_F(SpvParserTest, Impl_Source_WithOpLine_WithOpNoLine) {
   EXPECT_TRUE(p->error().empty());
   // Use the information from the OpLine that is still in scope.
   auto s5 = p->GetSourceForResultIdForTest(5);
-  EXPECT_EQ(42u, s5.line);
-  EXPECT_EQ(53u, s5.column);
+  EXPECT_EQ(42u, s5.range.begin.line);
+  EXPECT_EQ(53u, s5.range.begin.column);
   auto s60 = p->GetSourceForResultIdForTest(60);
-  EXPECT_EQ(42u, s60.line);
-  EXPECT_EQ(53u, s60.column);
+  EXPECT_EQ(42u, s60.range.begin.line);
+  EXPECT_EQ(53u, s60.range.begin.column);
   // After OpNoLine, revert back to instruction counting.
   auto s1 = p->GetSourceForResultIdForTest(1);
-  EXPECT_EQ(13u, s1.line);
-  EXPECT_EQ(0u, s1.column);
+  EXPECT_EQ(13u, s1.range.begin.line);
+  EXPECT_EQ(0u, s1.range.begin.column);
 }
 
 TEST_F(SpvParserTest, Impl_Source_InvalidId) {
@@ -201,8 +201,8 @@ TEST_F(SpvParserTest, Impl_Source_InvalidId) {
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
   auto s99 = p->GetSourceForResultIdForTest(99);
-  EXPECT_EQ(0u, s99.line);
-  EXPECT_EQ(0u, s99.column);
+  EXPECT_EQ(0u, s99.range.begin.line);
+  EXPECT_EQ(0u, s99.range.begin.column);
 }
 
 TEST_F(SpvParserTest, Impl_IsValidIdentifier) {

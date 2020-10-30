@@ -119,10 +119,17 @@ bool IsFunctionDecoration(Token t) {
 
 }  // namespace
 
-ParserImpl::ParserImpl(Context* ctx, const std::string& input)
-    : ctx_(*ctx), lexer_(std::make_unique<Lexer>(input)) {}
+ParserImpl::ParserImpl(Context* ctx, Source::File const* file, bool owns_file)
+    : ctx_(*ctx),
+      lexer_(std::make_unique<Lexer>(file)),
+      file_(file),
+      owns_file_(owns_file) {}
 
-ParserImpl::~ParserImpl() = default;
+ParserImpl::~ParserImpl() {
+  if (owns_file_) {
+    delete file_;
+  }
+}
 
 void ParserImpl::set_error(const Token& t, const std::string& err) {
   auto prefix =

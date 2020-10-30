@@ -46,8 +46,8 @@ TEST_F(ElseStatementTest, Creation) {
 TEST_F(ElseStatementTest, Creation_WithSource) {
   ElseStatement e(Source{20, 2}, std::make_unique<BlockStatement>());
   auto src = e.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ElseStatementTest, IsElse) {

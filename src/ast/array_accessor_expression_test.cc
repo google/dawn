@@ -40,8 +40,8 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
 
   ArrayAccessorExpression exp(Source{20, 2}, std::move(ary), std::move(idx));
   auto src = exp.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {

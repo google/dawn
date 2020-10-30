@@ -48,8 +48,8 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 
   TypeConstructorExpression t(Source{20, 2}, &f32, std::move(expr));
   auto src = t.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {

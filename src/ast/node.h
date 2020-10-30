@@ -34,10 +34,11 @@ class Node {
   /// @param source the source data
   void set_source(const Source& source) { source_ = source; }
 
+  // TODO(bclayton): Deprecate - use source().range.begin instead
   /// @returns the line the node was declared on
-  size_t line() const { return source_.line; }
+  size_t line() const { return source_.range.begin.line; }
   /// @returns the column the node was declared on
-  size_t column() const { return source_.column; }
+  size_t column() const { return source_.range.begin.column; }
 
   /// @returns true if the node is valid
   virtual bool IsValid() const = 0;

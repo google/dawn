@@ -45,8 +45,8 @@ TEST_F(IfStatementTest, Creation_WithSource) {
 
   IfStatement stmt(Source{20, 2}, std::move(cond), std::move(body));
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IfStatementTest, IsIf) {

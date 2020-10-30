@@ -62,9 +62,9 @@ TypeDeterminer::~TypeDeterminer() = default;
 
 void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ = "";
-  if (src.line > 0) {
-    error_ +=
-        std::to_string(src.line) + ":" + std::to_string(src.column) + ": ";
+  if (src.range.begin.line > 0) {
+    error_ += std::to_string(src.range.begin.line) + ":" +
+              std::to_string(src.range.begin.column) + ": ";
   }
   error_ += msg;
 }

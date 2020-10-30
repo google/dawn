@@ -207,6 +207,7 @@ set(TINT_LIB_SRCS
   reader/reader.cc
   reader/reader.h
   scope_stack.h
+  source.cc
   source.h
   transform/bound_array_accessors_transform.cc
   transform/bound_array_accessors_transform.h

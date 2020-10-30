@@ -11,25 +11,28 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "src/reader/wgsl/parser_impl_test_helper.h"
+
+#include <sstream>
+
+#include "source.h"
 
 namespace tint {
-namespace reader {
-namespace wgsl {
-
-ParserImplTest::ParserImplTest() = default;
-
-ParserImplTest::~ParserImplTest() = default;
-
-void ParserImplTest::SetUp() {
-  ctx_.Reset();
+namespace {
+std::vector<std::string> split_lines(const std::string& str) {
+  std::stringstream stream(str);
+  std::string line;
+  std::vector<std::string> lines;
+  while (std::getline(stream, line, '\n')) {
+    lines.emplace_back(std::move(line));
+  }
+  return lines;
 }
+}  // namespace
 
-void ParserImplTest::TearDown() {
-  impl_ = nullptr;
-  files_.clear();
-}
+Source::File::File(const std::string& file_path,
+                   const std::string& file_content)
+    : path(file_path), content(file_content), lines(split_lines(content)) {}
 
-}  // namespace wgsl
-}  // namespace reader
+Source::File::~File() = default;
+
 }  // namespace tint

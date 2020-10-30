@@ -474,12 +474,12 @@ bool ParserImpl::ParseInternalModule() {
 }
 
 void ParserImpl::RegisterLineNumbers() {
-  Source instruction_number{0, 0};
+  Source::Location instruction_number{0, 0};
 
   // Has there been an OpLine since the last OpNoLine or start of the module?
   bool in_op_line_scope = false;
   // The source location provided by the most recent OpLine instruction.
-  Source op_line_source{0, 0};
+  Source::Location op_line_source{0, 0};
   const bool run_on_debug_insts = true;
   module_->ForEachInst(
       [this, &in_op_line_scope, &op_line_source,
@@ -515,7 +515,7 @@ Source ParserImpl::GetSourceForInst(
   if (where == inst_source_.end()) {
     return {};
   }
-  return where->second;
+  return Source{where->second};
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {

@@ -76,17 +76,21 @@ struct ForHeader {
 /// ParserImpl for WGSL source data
 class ParserImpl {
  public:
-  /// Creates a new parser
+  /// Creates a new parser using the given file
   /// @param ctx the non-null context object
-  /// @param input the input string to parse
-  ParserImpl(Context* ctx, const std::string& input);
+  /// @param file the input source file to parse
+  /// @param owns_file if true, the file will be deleted on parser destruction.
+  /// TODO(bclayton): Remove owns_file.
+  /// It purely exists to break up changes into bite sized pieces.
+  ParserImpl(Context* ctx, Source::File const* file, bool owns_file = false);
+
   ~ParserImpl();
 
   /// Run the parser
   /// @returns true if the parse was successful, false otherwise.
   bool Parse();
 
-  /// @returns true if an error was encountered
+  /// @returns true if an error was encountered.
   bool has_error() const { return error_.size() > 0; }
   /// @returns the parser error string
   const std::string& error() const { return error_; }
@@ -411,6 +415,9 @@ class ParserImpl {
   std::deque<Token> token_queue_;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
+
+  Source::File const* file_;
+  bool owns_file_;
 };
 
 }  // namespace wgsl

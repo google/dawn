@@ -18,14 +18,71 @@
 
 #include <stddef.h>
 
+#include <string>
+#include <vector>
+
 namespace tint {
 
-/// Represents a line and column position
-struct Source {
-  /// The line the token appeared on
-  size_t line = 0;
-  /// The column the token appeared in
-  size_t column = 0;
+/// Source describes a range of characters within a source file.
+class Source {
+ public:
+  /// File describes a source file, including path and content.
+  class File {
+   public:
+    /// Constructs the File with the given file path and content.
+    File(const std::string& file_path, const std::string& file_content);
+    ~File();
+
+    const std::string path;                /// file path (optional)
+    const std::string content;             /// file content
+    const std::vector<std::string> lines;  /// |content| split by lines
+  };
+
+  /// Location holds a 1-based line and column index.
+  /// 0's for |line| or |column| represent invalid values.
+  class Location {
+   public:
+    size_t line = 0;
+    size_t column = 0;
+  };
+
+  /// Range holds a Location interval described by [begin, end).
+  class Range {
+   public:
+    /// Constructs a zero initialized Range.
+    inline Range() = default;
+
+    /// Constructs a zero-length Range starting at |loc|.
+    inline explicit Range(const Location& loc) : begin(loc), end(loc) {}
+
+    /// Constructs the Range beginning at |b| and ending at |e|.
+    inline Range(const Location& b, const Location& e) : begin(b), end(e) {}
+
+    Location begin;  /// The location of the first character in the range.
+    Location end;  /// The location of one-past the last character in the range.
+  };
+
+  /// Constructs the Source with an zero initialized Range and null File.
+  inline Source() = default;
+
+  /// Constructs the Source with the Range |rng| and a null File.
+  inline explicit Source(const Range& rng) : range(rng) {}
+
+  /// Constructs the Source with the Range |loc| and a null File.
+  inline explicit Source(const Location& loc) : range(Range(loc)) {}
+
+  /// Constructs the Source with the Range |rng| and File |f|.
+  inline Source(const Range& rng, File const* f) : range(rng), file(f) {}
+
+  /// Constructs the Source with the zero-length range starting at |line| and
+  /// |column| with a null File.
+  /// TODO(bclayton): Remove this constructor.
+  /// It purely exists to break up changes into bite sized pieces.
+  inline explicit Source(size_t line, size_t column)
+      : Source(Location{line, column}) {}
+
+  Range range;
+  File const* file = nullptr;
 };
 
 }  // namespace tint

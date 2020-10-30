@@ -29,8 +29,8 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   ASSERT_NE(var, nullptr);
   ASSERT_EQ(var->name(), "my_var");
   ASSERT_NE(var->type(), nullptr);
-  ASSERT_EQ(var->source().line, 1u);
-  ASSERT_EQ(var->source().column, 1u);
+  ASSERT_EQ(var->source().range.begin.line, 1u);
+  ASSERT_EQ(var->source().range.begin.column, 1u);
   ASSERT_TRUE(var->type()->IsF32());
 }
 

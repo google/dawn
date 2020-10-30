@@ -36,8 +36,8 @@ ValidatorImpl::ValidatorImpl() = default;
 ValidatorImpl::~ValidatorImpl() = default;
 
 void ValidatorImpl::set_error(const Source& src, const std::string& msg) {
-  error_ +=
-      std::to_string(src.line) + ":" + std::to_string(src.column) + ": " + msg;
+  error_ += std::to_string(src.range.begin.line) + ":" +
+            std::to_string(src.range.begin.column) + ": " + msg;
 }
 
 bool ValidatorImpl::Validate(const ast::Module* module) {

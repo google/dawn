@@ -421,6 +421,7 @@ int main(int argc, const char** argv) {
   tint::Context ctx;
 
   std::unique_ptr<tint::reader::Reader> reader;
+  std::unique_ptr<tint::Source::File> source_file;
 #if TINT_BUILD_WGSL_READER
   if (options.input_filename.size() > 5 &&
       options.input_filename.substr(options.input_filename.size() - 5) ==
@@ -429,8 +430,10 @@ int main(int argc, const char** argv) {
     if (!ReadFile<uint8_t>(options.input_filename, &data)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::wgsl::Parser>(
-        &ctx, std::string(data.begin(), data.end()));
+    source_file = std::make_unique<tint::Source::File>(
+        options.input_filename, std::string(data.begin(), data.end()));
+    reader =
+        std::make_unique<tint::reader::wgsl::Parser>(&ctx, source_file.get());
   }
 #endif  // TINT_BUILD_WGSL_READER
 

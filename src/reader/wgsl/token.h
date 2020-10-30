@@ -778,10 +778,12 @@ class Token {
   /// @returns true if token is a 'workgroup_size'
   bool IsWorkgroupSize() const { return type_ == Type::kWorkgroupSize; }
 
+  // TODO(bclayton): Deprecate - use source().range.begin instead
   /// @returns the source line of the token
-  size_t line() const { return source_.line; }
+  size_t line() const { return source_.range.begin.line; }
   /// @returns the source column of the token
-  size_t column() const { return source_.column; }
+  size_t column() const { return source_.range.begin.column; }
+
   /// @returns the source information for this token
   Source source() const { return source_; }
 

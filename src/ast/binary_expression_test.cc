@@ -45,8 +45,8 @@ TEST_F(BinaryExpressionTest, Creation_WithSource) {
   BinaryExpression r(Source{20, 2}, BinaryOp::kEqual, std::move(lhs),
                      std::move(rhs));
   auto src = r.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BinaryExpressionTest, IsBinaryal) {

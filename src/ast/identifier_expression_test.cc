@@ -32,8 +32,8 @@ TEST_F(IdentifierExpressionTest, Creation_WithSource) {
   EXPECT_EQ(i.name(), "ident");
 
   auto src = i.source();
-  EXPECT_EQ(src.line, 20u);
-  EXPECT_EQ(src.column, 2u);
+  EXPECT_EQ(src.range.begin.line, 20u);
+  EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IdentifierExpressionTest, IsIdentifier) {

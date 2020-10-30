@@ -28,8 +28,8 @@ namespace wgsl {
 class Lexer {
  public:
   /// Creates a new Lexer
-  /// @param input the input to parse
-  explicit Lexer(const std::string& input);
+  /// @param file the input file to parse
+  explicit Lexer(Source::File const* file);
   ~Lexer();
 
   /// Returns the next token in the input stream
@@ -40,7 +40,7 @@ class Lexer {
   void skip_whitespace();
   void skip_comments();
 
-  Token build_token_from_int_if_possible(const Source& source,
+  Token build_token_from_int_if_possible(Source source,
                                          size_t start,
                                          size_t end,
                                          int32_t base);
@@ -63,15 +63,13 @@ class Lexer {
   bool matches(size_t pos, const std::string& substr);
 
   /// The source to parse
-  std::string input_;
+  Source::File const* file_;
   /// The length of the input
   uint32_t len_ = 0;
   /// The current position within the input
   uint32_t pos_ = 0;
-  /// The current line within the input
-  uint32_t line_ = 1;
-  /// The current column within the input
-  uint32_t column_ = 1;
+  /// The current location within the input
+  Source::Location location_;
 };
 
 }  // namespace wgsl

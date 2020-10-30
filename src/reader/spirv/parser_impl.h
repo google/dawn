@@ -454,7 +454,8 @@ class ParserImpl : Reader {
   // is in effect for the instruction, map the instruction to its position
   // in the SPIR-V module, counting by instructions, where the first
   // instruction is line 1.
-  std::unordered_map<const spvtools::opt::Instruction*, Source> inst_source_;
+  std::unordered_map<const spvtools::opt::Instruction*, Source::Location>
+      inst_source_;
 
   // The set of IDs that are imports of the GLSL.std.450 extended instruction
   // sets.

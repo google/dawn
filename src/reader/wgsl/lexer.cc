@@ -32,8 +32,10 @@ bool is_whitespace(char c) {
 
 }  // namespace
 
-Lexer::Lexer(const std::string& input)
-    : input_(input), len_(static_cast<uint32_t>(input.size())) {}
+Lexer::Lexer(Source::File const* file)
+    : file_(file),
+      len_(static_cast<uint32_t>(file->content.size())),
+      location_{1, 1} {}
 
 Lexer::~Lexer() = default;
 
@@ -79,7 +81,11 @@ Token Lexer::next() {
 }
 
 Source Lexer::make_source() const {
-  return Source{line_, column_};
+  Source src{};
+  src.file = file_;
+  src.range.begin = location_;
+  src.range.end = location_;
+  return src;
 }
 
 bool Lexer::is_eof() const {
@@ -103,24 +109,24 @@ bool Lexer::is_hex(char ch) const {
 }
 
 bool Lexer::matches(size_t pos, const std::string& substr) {
-  if (pos >= input_.size())
+  if (pos >= len_)
     return false;
-  return input_.substr(pos, substr.size()) == substr;
+  return file_->content.substr(pos, substr.size()) == substr;
 }
 
 void Lexer::skip_whitespace() {
   for (;;) {
     auto pos = pos_;
-    while (!is_eof() && is_whitespace(input_[pos_])) {
+    while (!is_eof() && is_whitespace(file_->content[pos_])) {
       if (matches(pos_, "\n")) {
         pos_++;
-        line_++;
-        column_ = 1;
+        location_.line++;
+        location_.column = 1;
         continue;
       }
 
       pos_++;
-      column_++;
+      location_.column++;
     }
 
     skip_comments();
@@ -139,7 +145,7 @@ void Lexer::skip_comments() {
 
   while (!is_eof() && !matches(pos_, "\n")) {
     pos_++;
-    column_++;
+    location_.column++;
   }
 }
 
@@ -152,7 +158,7 @@ Token Lexer::try_float() {
   if (matches(end, "-")) {
     end++;
   }
-  while (end < len_ && is_digit(input_[end])) {
+  while (end < len_ && is_digit(file_->content[end])) {
     end++;
   }
 
@@ -161,7 +167,7 @@ Token Lexer::try_float() {
   }
   end++;
 
-  while (end < len_ && is_digit(input_[end])) {
+  while (end < len_ && is_digit(file_->content[end])) {
     end++;
   }
 
@@ -173,7 +179,7 @@ Token Lexer::try_float() {
     }
 
     auto exp_start = end;
-    while (end < len_ && isdigit(input_[end])) {
+    while (end < len_ && isdigit(file_->content[end])) {
       end++;
     }
 
@@ -182,14 +188,14 @@ Token Lexer::try_float() {
       return {};
   }
 
-  auto str = input_.substr(start, end - start);
+  auto str = file_->content.substr(start, end - start);
   if (str == "." || str == "-.")
     return {};
 
   pos_ = end;
-  column_ += (end - start);
+  location_.column += (end - start);
 
-  auto res = strtod(input_.c_str() + start, nullptr);
+  auto res = strtod(file_->content.c_str() + start, nullptr);
   // This handles if the number is a really small in the exponent
   if (res > 0 && res < static_cast<double>(std::numeric_limits<float>::min())) {
     return {Token::Type::kError, source, "f32 (" + str + " too small"};
@@ -205,28 +211,31 @@ Token Lexer::try_float() {
   return {source, static_cast<float>(res)};
 }
 
-Token Lexer::build_token_from_int_if_possible(const Source& source,
+Token Lexer::build_token_from_int_if_possible(Source source,
                                               size_t start,
                                               size_t end,
                                               int32_t base) {
-  auto res = strtoll(input_.c_str() + start, nullptr, base);
+  auto res = strtoll(file_->content.c_str() + start, nullptr, base);
   if (matches(pos_, "u")) {
     if (static_cast<uint64_t>(res) >
         static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
-      return {Token::Type::kError, source,
-              "u32 (" + input_.substr(start, end - start) + ") too large"};
+      return {
+          Token::Type::kError, source,
+          "u32 (" + file_->content.substr(start, end - start) + ") too large"};
     }
     pos_ += 1;
     return {source, static_cast<uint32_t>(res)};
   }
 
   if (res < static_cast<int64_t>(std::numeric_limits<int32_t>::min())) {
-    return {Token::Type::kError, source,
-            "i32 (" + input_.substr(start, end - start) + ") too small"};
+    return {
+        Token::Type::kError, source,
+        "i32 (" + file_->content.substr(start, end - start) + ") too small"};
   }
   if (res > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
-    return {Token::Type::kError, source,
-            "i32 (" + input_.substr(start, end - start) + ") too large"};
+    return {
+        Token::Type::kError, source,
+        "i32 (" + file_->content.substr(start, end - start) + ") too large"};
   }
   return {source, static_cast<int32_t>(res)};
 }
@@ -245,12 +254,12 @@ Token Lexer::try_hex_integer() {
   }
   end += 2;
 
-  while (!is_eof() && is_hex(input_[end])) {
+  while (!is_eof() && is_hex(file_->content[end])) {
     end += 1;
   }
 
   pos_ = end;
-  column_ += (end - start);
+  location_.column += (end - start);
 
   return build_token_from_int_if_possible(source, start, end, 16);
 }
@@ -264,41 +273,41 @@ Token Lexer::try_integer() {
   if (matches(end, "-")) {
     end++;
   }
-  if (end >= len_ || !is_digit(input_[end])) {
+  if (end >= len_ || !is_digit(file_->content[end])) {
     return {};
   }
 
   auto first = end;
-  while (end < len_ && is_digit(input_[end])) {
+  while (end < len_ && is_digit(file_->content[end])) {
     end++;
   }
 
   // If the first digit is a zero this must only be zero as leading zeros
   // are not allowed.
-  if (input_[first] == '0' && (end - first != 1))
+  if (file_->content[first] == '0' && (end - first != 1))
     return {};
 
   pos_ = end;
-  column_ += (end - start);
+  location_.column += (end - start);
 
   return build_token_from_int_if_possible(source, start, end, 10);
 }
 
 Token Lexer::try_ident() {
   // Must begin with an a-zA-Z_
-  if (!is_alpha(input_[pos_])) {
+  if (!is_alpha(file_->content[pos_])) {
     return {};
   }
 
   auto source = make_source();
 
   auto s = pos_;
-  while (!is_eof() && is_alphanum(input_[pos_])) {
+  while (!is_eof() && is_alphanum(file_->content[pos_])) {
     pos_++;
-    column_++;
+    location_.column++;
   }
 
-  auto str = input_.substr(s, pos_ - s);
+  auto str = file_->content.substr(s, pos_ - s);
   auto t = check_reserved(source, str);
   if (!t.IsUninitialized()) {
     return t;
@@ -325,10 +334,10 @@ Token Lexer::try_string() {
   }
   auto end = pos_;
   pos_++;
-  column_ += (pos_ - start) + 1;
+  location_.column += (pos_ - start) + 1;
 
   return {Token::Type::kStringLiteral, source,
-          input_.substr(start, end - start)};
+          file_->content.substr(start, end - start)};
 }
 
 Token Lexer::try_punctuation() {
@@ -338,131 +347,131 @@ Token Lexer::try_punctuation() {
   if (matches(pos_, "[[")) {
     type = Token::Type::kAttrLeft;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "]]")) {
     type = Token::Type::kAttrRight;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "(")) {
     type = Token::Type::kParenLeft;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, ")")) {
     type = Token::Type::kParenRight;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "[")) {
     type = Token::Type::kBracketLeft;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "]")) {
     type = Token::Type::kBracketRight;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "{")) {
     type = Token::Type::kBraceLeft;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "}")) {
     type = Token::Type::kBraceRight;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "&&")) {
     type = Token::Type::kAndAnd;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "&")) {
     type = Token::Type::kAnd;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "/")) {
     type = Token::Type::kForwardSlash;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "!=")) {
     type = Token::Type::kNotEqual;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "!")) {
     type = Token::Type::kBang;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "::")) {
     type = Token::Type::kNamespace;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, ":")) {
     type = Token::Type::kColon;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, ",")) {
     type = Token::Type::kComma;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "==")) {
     type = Token::Type::kEqualEqual;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "=")) {
     type = Token::Type::kEqual;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, ">=")) {
     type = Token::Type::kGreaterThanEqual;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, ">")) {
     type = Token::Type::kGreaterThan;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "<=")) {
     type = Token::Type::kLessThanEqual;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "<")) {
     type = Token::Type::kLessThan;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "%")) {
     type = Token::Type::kMod;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "->")) {
     type = Token::Type::kArrow;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "-")) {
     type = Token::Type::kMinus;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, ".")) {
     type = Token::Type::kPeriod;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "+")) {
     type = Token::Type::kPlus;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "||")) {
     type = Token::Type::kOrOr;
     pos_ += 2;
-    column_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "|")) {
     type = Token::Type::kOr;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, ";")) {
     type = Token::Type::kSemicolon;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "*")) {
     type = Token::Type::kStar;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "^")) {
     type = Token::Type::kXor;
     pos_ += 1;
-    column_ += 1;
+    location_.column += 1;
   }
 
   return {type, source};
