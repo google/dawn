@@ -28,7 +28,8 @@ and add it to your PATH.
 
 ```sh
 # Clone the repo as "tint"
-git clone https://dawn.googlesource.com/tint tint && cd tint
+git clone https://dawn.googlesource.com/tint tint
+cd tint
 
 # Bootstrap the gclient configuration
 cp standalone.gclient .gclient
