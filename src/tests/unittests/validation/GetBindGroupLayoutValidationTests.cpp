@@ -247,7 +247,6 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
 TEST_F(GetBindGroupLayoutTests, Multisampled) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
-    binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = wgpu::ShaderStage::Fragment;
     binding.hasDynamicOffset = false;
 
@@ -256,6 +255,7 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
     desc.entries = &binding;
 
     {
+        binding.type = wgpu::BindingType::SampledTexture;
         binding.multisampled = false;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         #version 450
@@ -266,13 +266,28 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
     }
 
     {
-        binding.multisampled = true;
+        binding.type = wgpu::BindingType::MultisampledTexture;
+        binding.multisampled = false;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         #version 450
         layout(set = 0, binding = 0) uniform texture2DMS tex;
 
         void main() {})");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
+    }
+
+    // TODO(crbug.com/dawn/527): Remove this block when multisampled=true is removed.
+    {
+        binding.type = wgpu::BindingType::SampledTexture;
+        binding.multisampled = true;
+        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform texture2DMS tex;
+
+        void main() {})");
+        wgpu::BindGroupLayout bgl;
+        EXPECT_DEPRECATION_WARNING(bgl = device.CreateBindGroupLayout(&desc));
+        EXPECT_EQ(bgl.Get(), pipeline.GetBindGroupLayout(0).Get());
     }
 }
 

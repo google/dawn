@@ -72,6 +72,11 @@ ValidationTest::~ValidationTest() {
 
 void ValidationTest::TearDown() {
     ASSERT_FALSE(mExpectError);
+
+    if (device) {
+        EXPECT_EQ(mLastWarningCount,
+                  dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
+    }
 }
 
 void ValidationTest::StartExpectDeviceError() {

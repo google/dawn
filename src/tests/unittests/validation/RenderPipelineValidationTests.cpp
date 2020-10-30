@@ -585,7 +585,7 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
                 // TODO(crbug.com/dawn/502): Once setIndexBuffer requires an
                 // indexFormat. this should fail. For now it succeeds to allow
                 // backwards compatibility during the deprecation period.
-                device.CreateRenderPipeline(&descriptor);
+                EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
             }
         }
     }

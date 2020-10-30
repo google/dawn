@@ -39,6 +39,15 @@
         }                                                       \
     } while (0)
 
+#define EXPECT_DEPRECATION_WARNING(statement)                                                    \
+    do {                                                                                         \
+        size_t warningsBefore = dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
+        statement;                                                                               \
+        size_t warningsAfter = dawn_native::GetDeprecationWarningCountForTesting(device.Get());  \
+        EXPECT_EQ(mLastWarningCount, warningsBefore);                                            \
+        mLastWarningCount = warningsAfter;                                                       \
+    } while (0)
+
 class ValidationTest : public testing::Test {
   public:
     ValidationTest();
@@ -75,6 +84,8 @@ class ValidationTest : public testing::Test {
     wgpu::Device device;
     dawn_native::Adapter adapter;
     std::unique_ptr<dawn_native::Instance> instance;
+
+    size_t mLastWarningCount = 0;
 
   private:
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
