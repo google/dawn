@@ -89,11 +89,7 @@ class ParserImpl {
   /// Creates a new parser using the given file
   /// @param ctx the non-null context object
   /// @param file the input source file to parse
-  /// @param owns_file if true, the file will be deleted on parser destruction.
-  /// TODO(bclayton): Remove owns_file.
-  /// It purely exists to break up changes into bite sized pieces.
-  ParserImpl(Context* ctx, Source::File const* file, bool owns_file = false);
-
+  ParserImpl(Context* ctx, Source::File const* file);
   ~ParserImpl();
 
   /// Run the parser
@@ -431,9 +427,6 @@ class ParserImpl {
   std::deque<Token> token_queue_;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
-
-  Source::File const* file_;
-  bool owns_file_;
 };
 
 }  // namespace wgsl

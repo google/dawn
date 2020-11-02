@@ -34,14 +34,6 @@ class Parser : public Reader {
   /// @param ctx the non-null context object
   /// @param file the input source file to parse
   Parser(Context* ctx, Source::File const* file);
-
-  /// Creates a new parser from the given file content.
-  /// @param ctx the non-null context object
-  /// @param content the input string to parse
-  /// TODO(bclayton): Remove this constructor.
-  /// It purely exists to break up changes into bite sized pieces.
-  Parser(Context* ctx, const std::string& content);
-
   ~Parser() override;
 
   /// Run the parser

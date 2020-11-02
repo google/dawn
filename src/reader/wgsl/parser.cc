@@ -21,13 +21,7 @@ namespace reader {
 namespace wgsl {
 
 Parser::Parser(Context* ctx, Source::File const* file)
-    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, file, false)) {}
-
-Parser::Parser(Context* ctx, const std::string& content)
-    : Reader(ctx),
-      impl_(std::make_unique<ParserImpl>(ctx,
-                                         new Source::File("", content),
-                                         true)) {}
+    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, file)) {}
 
 Parser::~Parser() = default;
 
