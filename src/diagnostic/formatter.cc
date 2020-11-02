@@ -59,76 +59,137 @@ std::basic_ostream<CharT, Traits>& operator<<(
 
 class BasicFormatter : public Formatter {
  public:
+  struct State {
+    explicit State(Printer* p) : printer(p) {}
+    ~State() { flush(); }
+
+    // set_style() sets the current style to new_style, flushing any pending
+    // messages to the printer if the style changed.
+    void set_style(const Style& new_style) {
+      if (style.color != new_style.color || style.bold != new_style.bold) {
+        flush();
+        style = new_style;
+      }
+    }
+
+    // flush() writes any pending messages to the printer, clearing the buffer.
+    void flush() {
+      auto str = stream.str();
+      if (str.length() > 0) {
+        printer->write(str, style);
+        std::stringstream reset;
+        stream.swap(reset);
+      }
+    }
+
+    // operator<<() queues msg to be written to the printer.
+    template <typename T>
+    State& operator<<(const T& msg) {
+      stream << msg;
+      return *this;
+    }
+
+    // newline() queues a newline to be written to the printer.
+    void newline() { stream << std::endl; }
+
+    // repeat() queues the character c to be writen to the printer n times.
+    void repeat(char c, size_t n) {
+      while (n-- > 0) {
+        stream << c;
+      }
+    }
+
+   private:
+    Printer* printer;
+    Style style;
+    std::stringstream stream;
+  };
+
   BasicFormatter(bool print_file, bool print_severity, bool print_line)
       : print_file_(print_file),
         print_severity_(print_severity),
         print_line_(print_line) {}
 
-  std::string format(const List& list) const override {
+  void format(const List& list, Printer* printer) const override {
+    State state{printer};
+
     bool first = true;
-    std::stringstream ss;
     for (auto diag : list) {
+      state.set_style({});
       if (!first) {
-        ss << std::endl;
+        state.newline();
       }
-      format(diag, ss);
+      format(diag, &state);
       first = false;
     }
-    return ss.str();
   }
 
  private:
-  void format(const Diagnostic& diag, std::stringstream& ss) const {
+  void format(const Diagnostic& diag, State* state) const {
     auto const& src = diag.source;
     auto const& rng = src.range;
 
+    state->set_style({Color::kDefault, true});
+
     if (print_file_ && src.file != nullptr && !src.file->path.empty()) {
-      ss << src.file->path;
+      (*state) << src.file->path;
       if (rng.begin.line > 0) {
-        ss << ":" << rng.begin;
+        (*state) << ":" << rng.begin;
       }
     } else {
-      ss << rng.begin;
+      (*state) << rng.begin;
     }
     if (print_severity_) {
-      ss << " " << diag.severity;
+      switch (diag.severity) {
+        case Severity::Warning:
+          state->set_style({Color::kYellow, true});
+          break;
+        case Severity::Error:
+        case Severity::Fatal:
+          state->set_style({Color::kRed, true});
+          break;
+        default:
+          break;
+      }
+      (*state) << " " << diag.severity;
     }
-    ss << ": " << diag.message;
+
+    state->set_style({Color::kDefault, true});
+    (*state) << ": " << diag.message;
 
     if (print_line_ && src.file != nullptr && rng.begin.line > 0) {
-      ss << std::endl;
+      state->newline();
+      state->set_style({Color::kDefault, false});
+
       for (size_t line = rng.begin.line; line <= rng.end.line; line++) {
         if (line < src.file->lines.size() + 1) {
           auto len = src.file->lines[line - 1].size();
 
-          ss << src.file->lines[line - 1];
-          ss << std::endl;
+          (*state) << src.file->lines[line - 1];
+          state->newline();
+          state->set_style({Color::kCyan, false});
 
           if (line == rng.begin.line && line == rng.end.line) {
             // Single line
-            repeat(' ', rng.begin.column - 1, ss);
-            repeat('^', std::max<size_t>(rng.end.column - rng.begin.column, 1),
-                   ss);
+            state->repeat(' ', rng.begin.column - 1);
+            state->repeat(
+                '^', std::max<size_t>(rng.end.column - rng.begin.column, 1));
           } else if (line == rng.begin.line) {
             // Start of multi-line
-            repeat(' ', rng.begin.column - 1, ss);
-            repeat('^', len - (rng.begin.column - 1), ss);
+            state->repeat(' ', rng.begin.column - 1);
+            state->repeat('^', len - (rng.begin.column - 1));
           } else if (line == rng.end.line) {
             // End of multi-line
-            repeat('^', rng.end.column - 1, ss);
+            state->repeat('^', rng.end.column - 1);
           } else {
             // Middle of multi-line
-            repeat('^', len, ss);
+            state->repeat('^', len);
           }
-          ss << std::endl;
+          state->newline();
         }
       }
-    }
-  }
 
-  void repeat(char c, size_t n, std::stringstream& ss) const {
-    while (n-- > 0) {
-      ss << c;
+      state->set_style({});
     }
   }
 

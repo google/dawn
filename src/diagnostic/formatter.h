@@ -18,6 +18,8 @@
 #include <memory>
 #include <string>
 
+#include "src/diagnostic/printer.h"
+
 namespace tint {
 namespace diag {
 
@@ -37,8 +39,18 @@ class Formatter {
 
   virtual ~Formatter();
 
-  /// @return the human readable list of diagnostics formatted to a string.
-  virtual std::string format(const List&) const = 0;
+  /// format prints the formatted diagnostic list |list| to |printer|.
+  /// @param list the list of diagnostic messages to format
+  /// @param printer the printer used to display the formatted diagnostics
+  virtual void format(const List& list, Printer* printer) const = 0;
+
+  /// @return the list of diagnostics |list| formatted to a string.
+  /// @param list the list of diagnostic messages to format
+  inline std::string format(const List& list) const {
+    StringPrinter printer;
+    format(list, &printer);
+    return printer.str();
+  }
 };
 
 }  // namespace diag

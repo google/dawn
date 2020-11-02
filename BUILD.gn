@@ -381,6 +381,8 @@ source_set("libtint_core_src") {
     "src/diagnostic/diagnostic.h",
     "src/diagnostic/formatter.cc",
     "src/diagnostic/formatter.h",
+    "src/diagnostic/printer.cc",
+    "src/diagnostic/printer.h",
     "src/inspector/entry_point.cc",
     "src/inspector/entry_point.h",
     "src/inspector/inspector.cc",
@@ -417,6 +419,14 @@ source_set("libtint_core_src") {
     "src/writer/writer.cc",
     "src/writer/writer.h",
   ]
+
+  if (is_linux) {
+    sources += [ "src/diagnostic/printer_linux.cc" ]
+  } else if (is_win) {
+    sources += [ "src/diagnostic/printer_windows.cc" ]
+  } else {
+    sources += [ "src/diagnostic/printer_other.cc" ]
+  }
 
   public_deps = [
     ":tint_core_enums_unified1",
@@ -772,6 +782,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/variable_test.cc",
     "src/ast/workgroup_decoration_test.cc",
     "src/diagnostic/formatter_test.cc",
+    "src/diagnostic/printer_test.cc",
     "src/inspector/inspector_test.cc",
     "src/scope_stack_test.cc",
     "src/transform/bound_array_accessors_transform_test.cc",

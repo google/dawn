@@ -202,6 +202,8 @@ set(TINT_LIB_SRCS
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
   diagnostic/formatter.h
+  diagnostic/printer.cc
+  diagnostic/printer.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -238,6 +240,14 @@ set(TINT_LIB_SRCS
   writer/writer.cc
   writer/writer.h
 )
+
+if(UNIX)
+  list(APPEND TINT_LIB_SRCS diagnostic/printer_linux.cc)
+elseif(WIN32)
+  list(APPEND TINT_LIB_SRCS diagnostic/printer_windows.cc)
+else()
+  list(APPEND TINT_LIB_SRCS diagnostic/printer_other.cc)
+endif()
 
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
@@ -382,6 +392,7 @@ set(TINT_TEST_SRCS
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
   diagnostic/formatter_test.cc
+  diagnostic/printer_test.cc
   inspector/inspector_test.cc
   scope_stack_test.cc
   transform/bound_array_accessors_transform_test.cc
