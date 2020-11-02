@@ -34,6 +34,11 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->IsF32());
 
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 7u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 8u);
+
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->IsConstructor());
 }

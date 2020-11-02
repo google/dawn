@@ -35,6 +35,11 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   EXPECT_EQ(m->name(), "a");
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 0u);
+
+  ASSERT_EQ(m->source().range.begin.line, 1u);
+  ASSERT_EQ(m->source().range.begin.column, 1u);
+  ASSERT_EQ(m->source().range.end.line, 1u);
+  ASSERT_EQ(m->source().range.end.column, 2u);
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
@@ -50,6 +55,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->IsOffset());
   EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
+
+  ASSERT_EQ(m->source().range.begin.line, 1u);
+  ASSERT_EQ(m->source().range.begin.column, 15u);
+  ASSERT_EQ(m->source().range.end.line, 1u);
+  ASSERT_EQ(m->source().range.end.column, 16u);
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
@@ -68,6 +78,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
   EXPECT_TRUE(m->decorations()[1]->IsOffset());
   EXPECT_EQ(m->decorations()[1]->AsOffset()->offset(), 4u);
+
+  ASSERT_EQ(m->source().range.begin.line, 2u);
+  ASSERT_EQ(m->source().range.begin.column, 15u);
+  ASSERT_EQ(m->source().range.end.line, 2u);
+  ASSERT_EQ(m->source().range.end.column, 16u);
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {

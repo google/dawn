@@ -29,9 +29,12 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   ASSERT_NE(var, nullptr);
   ASSERT_EQ(var->name(), "my_var");
   ASSERT_NE(var->type(), nullptr);
-  ASSERT_EQ(var->source().range.begin.line, 1u);
-  ASSERT_EQ(var->source().range.begin.column, 1u);
   ASSERT_TRUE(var->type()->IsF32());
+
+  ASSERT_EQ(var->source().range.begin.line, 1u);
+  ASSERT_EQ(var->source().range.begin.column, 5u);
+  ASSERT_EQ(var->source().range.end.line, 1u);
+  ASSERT_EQ(var->source().range.end.column, 11u);
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
@@ -60,6 +63,11 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
   EXPECT_EQ(v->name(), "my_var");
   EXPECT_TRUE(v->type()->IsF32());
   EXPECT_EQ(v->storage_class(), ast::StorageClass::kPrivate);
+
+  EXPECT_EQ(v->source().range.begin.line, 1u);
+  EXPECT_EQ(v->source().range.begin.column, 14u);
+  EXPECT_EQ(v->source().range.end.line, 1u);
+  EXPECT_EQ(v->source().range.end.column, 20u);
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {

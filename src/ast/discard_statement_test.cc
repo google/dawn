@@ -28,12 +28,17 @@ TEST_F(DiscardStatementTest, Creation) {
   DiscardStatement stmt;
   EXPECT_EQ(stmt.source().range.begin.line, 0u);
   EXPECT_EQ(stmt.source().range.begin.column, 0u);
+  EXPECT_EQ(stmt.source().range.end.line, 0u);
+  EXPECT_EQ(stmt.source().range.end.column, 0u);
 }
 
 TEST_F(DiscardStatementTest, Creation_WithSource) {
-  DiscardStatement stmt(Source{Source::Location{20, 2}});
+  DiscardStatement stmt(
+      Source{Source::Range{Source::Location{20, 2}, Source::Location{20, 5}}});
   EXPECT_EQ(stmt.source().range.begin.line, 20u);
   EXPECT_EQ(stmt.source().range.begin.column, 2u);
+  EXPECT_EQ(stmt.source().range.end.line, 20u);
+  EXPECT_EQ(stmt.source().range.end.column, 5u);
 }
 
 TEST_F(DiscardStatementTest, IsDiscard) {

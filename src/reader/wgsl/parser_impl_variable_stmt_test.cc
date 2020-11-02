@@ -32,6 +32,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
+  ASSERT_EQ(e->source().range.begin.line, 1u);
+  ASSERT_EQ(e->source().range.begin.column, 5u);
+  ASSERT_EQ(e->source().range.end.line, 1u);
+  ASSERT_EQ(e->source().range.end.column, 6u);
+
   EXPECT_EQ(e->variable()->constructor(), nullptr);
 }
 
@@ -43,6 +48,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   ASSERT_TRUE(e->IsVariableDecl());
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
+
+  ASSERT_EQ(e->source().range.begin.line, 1u);
+  ASSERT_EQ(e->source().range.begin.column, 5u);
+  ASSERT_EQ(e->source().range.end.line, 1u);
+  ASSERT_EQ(e->source().range.end.column, 6u);
 
   ASSERT_NE(e->variable()->constructor(), nullptr);
   EXPECT_TRUE(e->variable()->constructor()->IsConstructor());
@@ -70,6 +80,11 @@ TEST_F(ParserImplTest, VariableStmt_Const) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsVariableDecl());
+
+  ASSERT_EQ(e->source().range.begin.line, 1u);
+  ASSERT_EQ(e->source().range.begin.column, 7u);
+  ASSERT_EQ(e->source().range.end.line, 1u);
+  ASSERT_EQ(e->source().range.end.column, 8u);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {

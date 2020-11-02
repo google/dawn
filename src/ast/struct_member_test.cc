@@ -39,11 +39,13 @@ TEST_F(StructMemberTest, Creation) {
   EXPECT_TRUE(st.decorations()[0]->IsOffset());
   EXPECT_EQ(st.source().range.begin.line, 0u);
   EXPECT_EQ(st.source().range.begin.column, 0u);
+  EXPECT_EQ(st.source().range.end.line, 0u);
+  EXPECT_EQ(st.source().range.end.column, 0u);
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
   type::I32Type i32;
-  Source s{Source::Location{27, 4}};
+  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}};
 
   StructMember st{s, "a", &i32, {}};
   EXPECT_EQ(st.name(), "a");
@@ -51,6 +53,8 @@ TEST_F(StructMemberTest, CreationWithSource) {
   EXPECT_EQ(st.decorations().size(), 0u);
   EXPECT_EQ(st.source().range.begin.line, 27u);
   EXPECT_EQ(st.source().range.begin.column, 4u);
+  EXPECT_EQ(st.source().range.end.line, 27u);
+  EXPECT_EQ(st.source().range.end.column, 8u);
 }
 
 TEST_F(StructMemberTest, IsValid) {

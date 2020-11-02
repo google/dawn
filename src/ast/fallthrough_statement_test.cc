@@ -26,6 +26,8 @@ TEST_F(FallthroughStatementTest, Creation) {
   FallthroughStatement stmt;
   EXPECT_EQ(stmt.source().range.begin.line, 0u);
   EXPECT_EQ(stmt.source().range.begin.column, 0u);
+  EXPECT_EQ(stmt.source().range.end.line, 0u);
+  EXPECT_EQ(stmt.source().range.end.column, 0u);
 }
 
 TEST_F(FallthroughStatementTest, Creation_WithSource) {

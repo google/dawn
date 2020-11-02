@@ -40,6 +40,8 @@ TEST_F(StructTest, Creation) {
   EXPECT_TRUE(s.decorations().empty());
   EXPECT_EQ(s.source().range.begin.line, 0u);
   EXPECT_EQ(s.source().range.begin.column, 0u);
+  EXPECT_EQ(s.source().range.end.line, 0u);
+  EXPECT_EQ(s.source().range.end.column, 0u);
 }
 
 TEST_F(StructTest, Creation_WithDecorations) {
@@ -58,6 +60,8 @@ TEST_F(StructTest, Creation_WithDecorations) {
   EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
   EXPECT_EQ(s.source().range.begin.line, 0u);
   EXPECT_EQ(s.source().range.begin.column, 0u);
+  EXPECT_EQ(s.source().range.end.line, 0u);
+  EXPECT_EQ(s.source().range.end.column, 0u);
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
@@ -70,13 +74,16 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
   StructDecorationList decos;
   decos.push_back(StructDecoration::kBlock);
 
-  Struct s{Source{Source::Location{27, 4}}, std::move(decos),
-           std::move(members)};
+  Struct s{
+      Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
+      std::move(decos), std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
   EXPECT_EQ(s.source().range.begin.line, 27u);
   EXPECT_EQ(s.source().range.begin.column, 4u);
+  EXPECT_EQ(s.source().range.end.line, 27u);
+  EXPECT_EQ(s.source().range.end.column, 8u);
 }
 
 TEST_F(StructTest, IsValid) {

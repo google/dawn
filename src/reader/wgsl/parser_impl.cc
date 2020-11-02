@@ -354,21 +354,18 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   if (!t.IsConst())
     return nullptr;
 
-  auto source = t.source();
   next();  // Consume the peek
 
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = variable_ident_decl();
+  auto decl = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name.empty() || type == nullptr) {
+  if (decl.name.empty() || decl.type == nullptr) {
     set_error(peek(), "error parsing constant variable identifier");
     return nullptr;
   }
 
-  auto var = std::make_unique<ast::Variable>(source, name,
-                                             ast::StorageClass::kNone, type);
+  auto var = std::make_unique<ast::Variable>(
+      decl.source, decl.name, ast::StorageClass::kNone, decl.type);
   var->set_is_const(true);
 
   t = next();
@@ -567,7 +564,6 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 //   : VAR variable_storage_decoration? variable_ident_decl
 std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   auto t = peek();
-  auto source = t.source();
   if (!t.IsVar())
     return nullptr;
 
@@ -577,17 +573,15 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   if (has_error())
     return {};
 
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = variable_ident_decl();
+  auto decl = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name.empty() || type == nullptr) {
+  if (decl.name.empty() || decl.type == nullptr) {
     set_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
 
-  return std::make_unique<ast::Variable>(source, name, sc, type);
+  return std::make_unique<ast::Variable>(decl.source, decl.name, sc, decl.type);
 }
 
 // texture_sampler_types
@@ -1034,12 +1028,13 @@ ast::type::ImageFormat ParserImpl::image_storage_type() {
 
 // variable_ident_decl
 //   : IDENT COLON type_decl
-std::pair<std::string, ast::type::Type*> ParserImpl::variable_ident_decl() {
+ParserImpl::TypedIdentifier ParserImpl::variable_ident_decl() {
   auto t = peek();
   if (!t.IsIdentifier())
     return {};
 
   auto name = t.to_str();
+  auto source = t.source();
   next();  // Consume the peek
 
   t = next();
@@ -1056,7 +1051,7 @@ std::pair<std::string, ast::type::Type*> ParserImpl::variable_ident_decl() {
     return {};
   }
 
-  return {name, type};
+  return {type, name, source};
 }
 
 // variable_storage_decoration
@@ -1620,7 +1615,6 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
 std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
   auto t = peek();
-  auto source = t.source();
 
   ast::StructMemberDecorationList decos;
   for (;;) {
@@ -1635,12 +1629,10 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
   if (has_error())
     return nullptr;
 
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = variable_ident_decl();
+  auto decl = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name.empty() || type == nullptr) {
+  if (decl.name.empty() || decl.type == nullptr) {
     set_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
@@ -1651,7 +1643,7 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
     return nullptr;
   }
 
-  return std::make_unique<ast::StructMember>(source, name, type,
+  return std::make_unique<ast::StructMember>(decl.source, decl.name, decl.type,
                                              std::move(decos));
 }
 
@@ -1981,21 +1973,18 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 //   | (variable_ident_decl COMMA)* variable_ident_decl
 ast::VariableList ParserImpl::param_list() {
   auto t = peek();
-  auto source = t.source();
 
   ast::VariableList ret;
 
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = variable_ident_decl();
+  auto decl = variable_ident_decl();
   if (has_error())
     return {};
-  if (name.empty() || type == nullptr)
+  if (decl.name.empty() || decl.type == nullptr)
     return {};
 
   for (;;) {
-    auto var = std::make_unique<ast::Variable>(source, name,
-                                               ast::StorageClass::kNone, type);
+    auto var = std::make_unique<ast::Variable>(
+        decl.source, decl.name, ast::StorageClass::kNone, decl.type);
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
@@ -2007,13 +1996,12 @@ ast::VariableList ParserImpl::param_list() {
     if (!t.IsComma())
       break;
 
-    source = t.source();
     next();  // Consume the peek
 
-    std::tie(name, type) = variable_ident_decl();
+    decl = variable_ident_decl();
     if (has_error())
       return {};
-    if (name.empty() || type == nullptr) {
+    if (decl.name.empty() || decl.type == nullptr) {
       set_error(t, "found , but no variable declaration");
       return {};
     }
@@ -2279,16 +2267,13 @@ std::unique_ptr<ast::ReturnStatement> ParserImpl::return_stmt() {
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
   auto t = peek();
-  auto source = t.source();
   if (t.IsConst()) {
     next();  // Consume the peek
 
-    std::string name;
-    ast::type::Type* type;
-    std::tie(name, type) = variable_ident_decl();
+    auto decl = variable_ident_decl();
     if (has_error())
       return nullptr;
-    if (name.empty() || type == nullptr) {
+    if (decl.name.empty() || decl.type == nullptr) {
       set_error(peek(), "unable to parse variable declaration");
       return nullptr;
     }
@@ -2307,12 +2292,13 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
       return nullptr;
     }
 
-    auto var = std::make_unique<ast::Variable>(source, name,
-                                               ast::StorageClass::kNone, type);
+    auto var = std::make_unique<ast::Variable>(
+        decl.source, decl.name, ast::StorageClass::kNone, decl.type);
     var->set_is_const(true);
     var->set_constructor(std::move(constructor));
 
-    return std::make_unique<ast::VariableDeclStatement>(source, std::move(var));
+    return std::make_unique<ast::VariableDeclStatement>(decl.source,
+                                                        std::move(var));
   }
 
   auto var = variable_decl();
@@ -2334,7 +2320,8 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
     var->set_constructor(std::move(constructor));
   }
 
-  return std::make_unique<ast::VariableDeclStatement>(source, std::move(var));
+  return std::make_unique<ast::VariableDeclStatement>(var->source(),
+                                                      std::move(var));
 }
 
 // if_stmt

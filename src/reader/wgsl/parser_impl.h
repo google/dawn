@@ -76,6 +76,14 @@ struct ForHeader {
 /// ParserImpl for WGSL source data
 class ParserImpl {
  public:
+  /// TypedIdentifier holds a parsed identifier and type. Returned by
+  /// variable_ident_decl().
+  struct TypedIdentifier {
+    ast::type::Type* type = nullptr;  /// Parsed type.
+    std::string name;                 /// Parsed identifier.
+    Source source;                    /// Source to the identifier.
+  };
+
   /// Creates a new parser using the given file
   /// @param ctx the non-null context object
   /// @param file the input source file to parse
@@ -146,7 +154,7 @@ class ParserImpl {
   std::unique_ptr<ast::Variable> variable_decl();
   /// Parses a `variable_ident_decl` grammar element
   /// @returns the identifier and type parsed or empty otherwise
-  std::pair<std::string, ast::type::Type*> variable_ident_decl();
+  TypedIdentifier variable_ident_decl();
   /// Parses a `variable_storage_decoration` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
   ast::StorageClass variable_storage_decoration();

@@ -44,7 +44,7 @@ Token Lexer::next() {
   skip_comments();
 
   if (is_eof()) {
-    return {Token::Type::kEOF, make_source()};
+    return {Token::Type::kEOF, begin_source()};
   }
 
   auto t = try_hex_integer();
@@ -77,15 +77,19 @@ Token Lexer::next() {
     return t;
   }
 
-  return {Token::Type::kError, make_source(), "invalid character found"};
+  return {Token::Type::kError, begin_source(), "invalid character found"};
 }
 
-Source Lexer::make_source() const {
+Source Lexer::begin_source() const {
   Source src{};
   src.file = file_;
   src.range.begin = location_;
   src.range.end = location_;
   return src;
+}
+
+void Lexer::end_source(Source& src) const {
+  src.range.end = location_;
 }
 
 bool Lexer::is_eof() const {
@@ -153,7 +157,7 @@ Token Lexer::try_float() {
   auto start = pos_;
   auto end = pos_;
 
-  auto source = make_source();
+  auto source = begin_source();
 
   if (matches(end, "-")) {
     end++;
@@ -195,6 +199,8 @@ Token Lexer::try_float() {
   pos_ = end;
   location_.column += (end - start);
 
+  end_source(source);
+
   auto res = strtod(file_->content.c_str() + start, nullptr);
   // This handles if the number is a really small in the exponent
   if (res > 0 && res < static_cast<double>(std::numeric_limits<float>::min())) {
@@ -224,6 +230,8 @@ Token Lexer::build_token_from_int_if_possible(Source source,
           "u32 (" + file_->content.substr(start, end - start) + ") too large"};
     }
     pos_ += 1;
+    location_.column += 1;
+    end_source(source);
     return {source, static_cast<uint32_t>(res)};
   }
 
@@ -237,6 +245,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
         Token::Type::kError, source,
         "i32 (" + file_->content.substr(start, end - start) + ") too large"};
   }
+  end_source(source);
   return {source, static_cast<int32_t>(res)};
 }
 
@@ -244,7 +253,7 @@ Token Lexer::try_hex_integer() {
   auto start = pos_;
   auto end = pos_;
 
-  auto source = make_source();
+  auto source = begin_source();
 
   if (matches(end, "-")) {
     end++;
@@ -268,7 +277,7 @@ Token Lexer::try_integer() {
   auto start = pos_;
   auto end = start;
 
-  auto source = make_source();
+  auto source = begin_source();
 
   if (matches(end, "-")) {
     end++;
@@ -299,7 +308,7 @@ Token Lexer::try_ident() {
     return {};
   }
 
-  auto source = make_source();
+  auto source = begin_source();
 
   auto s = pos_;
   while (!is_eof() && is_alphanum(file_->content[pos_])) {
@@ -313,6 +322,8 @@ Token Lexer::try_ident() {
     return t;
   }
 
+  end_source(source);
+
   t = check_keyword(source, str);
   if (!t.IsUninitialized()) {
     return t;
@@ -325,7 +336,7 @@ Token Lexer::try_string() {
   if (!matches(pos_, R"(")"))
     return {};
 
-  auto source = make_source();
+  auto source = begin_source();
 
   pos_++;
   auto start = pos_;
@@ -333,15 +344,19 @@ Token Lexer::try_string() {
     pos_++;
   }
   auto end = pos_;
-  pos_++;
+  if (matches(pos_, R"(")")) {
+    pos_++;
+  }
   location_.column += (pos_ - start) + 1;
+
+  end_source(source);
 
   return {Token::Type::kStringLiteral, source,
           file_->content.substr(start, end - start)};
 }
 
 Token Lexer::try_punctuation() {
-  auto source = make_source();
+  auto source = begin_source();
   auto type = Token::Type::kUninitialized;
 
   if (matches(pos_, "[[")) {
@@ -473,6 +488,8 @@ Token Lexer::try_punctuation() {
     pos_ += 1;
     location_.column += 1;
   }
+
+  end_source(source);
 
   return {type, source};
 }

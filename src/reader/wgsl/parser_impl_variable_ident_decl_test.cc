@@ -23,23 +23,24 @@ namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   auto* p = parser("my_var : f32");
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = p->variable_ident_decl();
+  auto decl = p->variable_ident_decl();
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(name, "my_var");
-  ASSERT_NE(type, nullptr);
-  ASSERT_TRUE(type->IsF32());
+  ASSERT_EQ(decl.name, "my_var");
+  ASSERT_NE(decl.type, nullptr);
+  ASSERT_TRUE(decl.type->IsF32());
+
+  ASSERT_EQ(decl.source.range.begin.line, 1u);
+  ASSERT_EQ(decl.source.range.begin.column, 1u);
+  ASSERT_EQ(decl.source.range.end.line, 1u);
+  ASSERT_EQ(decl.source.range.end.column, 7u);
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
   auto* p = parser(": f32");
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = p->variable_ident_decl();
+  auto decl = p->variable_ident_decl();
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(name, "");
-  ASSERT_EQ(type, nullptr);
+  ASSERT_EQ(decl.name, "");
+  ASSERT_EQ(decl.type, nullptr);
 
   auto t = p->next();
   ASSERT_TRUE(t.IsColon());
@@ -61,12 +62,10 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   auto* p = parser("123 : f32");
-  std::string name;
-  ast::type::Type* type;
-  std::tie(name, type) = p->variable_ident_decl();
+  auto decl = p->variable_ident_decl();
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(name, "");
-  ASSERT_EQ(type, nullptr);
+  ASSERT_EQ(decl.name, "");
+  ASSERT_EQ(decl.type, nullptr);
 
   auto t = p->next();
   ASSERT_TRUE(t.IsSintLiteral());

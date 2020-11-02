@@ -53,7 +53,8 @@ class Lexer {
   Token try_punctuation();
   Token try_string();
 
-  Source make_source() const;
+  Source begin_source() const;
+  void end_source(Source&) const;
 
   bool is_eof() const;
   bool is_alpha(char ch) const;

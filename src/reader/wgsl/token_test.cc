@@ -67,9 +67,18 @@ TEST_F(TokenTest, ReturnsMaxU32) {
 }
 
 TEST_F(TokenTest, Source) {
-  Token t(Token::Type::kUintLiteral, Source{Source::Location{3, 9}});
+  Source::File file("", "");
+  Source src;
+  src.file = &file;
+  src.range.begin = Source::Location{3, 9};
+  src.range.end = Source::Location{4, 3};
+
+  Token t(Token::Type::kUintLiteral, src);
   EXPECT_EQ(t.source().range.begin.line, 3u);
   EXPECT_EQ(t.source().range.begin.column, 9u);
+  EXPECT_EQ(t.source().range.end.line, 4u);
+  EXPECT_EQ(t.source().range.end.column, 3u);
+  EXPECT_EQ(t.source().file, &file);
 }
 
 }  // namespace

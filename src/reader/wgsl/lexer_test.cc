@@ -40,6 +40,8 @@ TEST_F(LexerTest, Skips_Whitespace) {
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.source().range.begin.line, 2u);
   EXPECT_EQ(t.source().range.begin.column, 6u);
+  EXPECT_EQ(t.source().range.end.line, 2u);
+  EXPECT_EQ(t.source().range.end.column, 11u);
   EXPECT_EQ(t.to_str(), "ident");
 
   t = l.next();
@@ -57,12 +59,16 @@ ident1 #ends with comment
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.source().range.begin.line, 2u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 2u);
+  EXPECT_EQ(t.source().range.end.column, 7u);
   EXPECT_EQ(t.to_str(), "ident1");
 
   t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.source().range.begin.line, 4u);
   EXPECT_EQ(t.source().range.begin.column, 2u);
+  EXPECT_EQ(t.source().range.end.line, 4u);
+  EXPECT_EQ(t.source().range.end.column, 8u);
   EXPECT_EQ(t.to_str(), "ident2");
 
   t = l.next();
@@ -78,18 +84,24 @@ TEST_F(LexerTest, StringTest_Parse) {
   EXPECT_EQ(t.to_str(), "id");
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 3u);
 
   t = l.next();
   EXPECT_TRUE(t.IsStringLiteral());
   EXPECT_EQ(t.to_str(), "this is string content");
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 4u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 28u);
 
   t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.to_str(), "id2");
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 29u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 32u);
 }
 
 TEST_F(LexerTest, StringTest_Unterminated) {
@@ -101,12 +113,16 @@ TEST_F(LexerTest, StringTest_Unterminated) {
   EXPECT_EQ(t.to_str(), "id");
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 3u);
 
   t = l.next();
   EXPECT_TRUE(t.IsStringLiteral());
   EXPECT_EQ(t.to_str(), "this is string content");
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 4u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 27u);
 
   t = l.next();
   EXPECT_TRUE(t.IsEof());
@@ -131,6 +147,8 @@ TEST_P(FloatTest, Parse) {
   EXPECT_EQ(t.to_f32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 
   t = l.next();
   EXPECT_TRUE(t.IsEof());
@@ -182,6 +200,8 @@ TEST_P(IdentifierTest, Parse) {
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(GetParam()));
   EXPECT_EQ(t.to_str(), GetParam());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -216,6 +236,8 @@ TEST_P(IntegerTest_HexSigned, Matches) {
   EXPECT_TRUE(t.IsSintLiteral());
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
   EXPECT_EQ(t.to_i32(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -263,6 +285,8 @@ TEST_P(IntegerTest_HexUnsigned, Matches) {
   EXPECT_TRUE(t.IsUintLiteral());
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
   EXPECT_EQ(t.to_u32(), params.result);
 
   t = l.next();
@@ -306,6 +330,8 @@ TEST_P(IntegerTest_Unsigned, Matches) {
   EXPECT_EQ(t.to_u32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          IntegerTest_Unsigned,
@@ -333,6 +359,8 @@ TEST_P(IntegerTest_Signed, Matches) {
   EXPECT_EQ(t.to_i32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,
@@ -375,6 +403,8 @@ TEST_P(PunctuationTest, Parses) {
   EXPECT_TRUE(t.Is(params.type));
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 
   t = l.next();
   EXPECT_EQ(t.source().range.begin.column,
@@ -426,6 +456,8 @@ TEST_P(KeywordTest, Parses) {
   EXPECT_TRUE(t.Is(params.type)) << params.input;
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
+  EXPECT_EQ(t.source().range.end.line, 1u);
+  EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 
   t = l.next();
   EXPECT_EQ(t.source().range.begin.column,

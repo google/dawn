@@ -42,10 +42,12 @@ TEST_F(DecoratedVariableTest, Creation) {
   EXPECT_EQ(dv.type(), &t);
   EXPECT_EQ(dv.source().range.begin.line, 0u);
   EXPECT_EQ(dv.source().range.begin.column, 0u);
+  EXPECT_EQ(dv.source().range.end.line, 0u);
+  EXPECT_EQ(dv.source().range.end.column, 0u);
 }
 
 TEST_F(DecoratedVariableTest, CreationWithSource) {
-  Source s{Source::Location{27, 4}};
+  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}};
   type::F32Type t;
   auto var = std::make_unique<Variable>(s, "i", StorageClass::kPrivate, &t);
   DecoratedVariable dv(std::move(var));
@@ -55,6 +57,8 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
   EXPECT_EQ(dv.type(), &t);
   EXPECT_EQ(dv.source().range.begin.line, 27u);
   EXPECT_EQ(dv.source().range.begin.column, 4u);
+  EXPECT_EQ(dv.source().range.end.line, 27u);
+  EXPECT_EQ(dv.source().range.end.column, 5u);
 }
 
 TEST_F(DecoratedVariableTest, NoDecorations) {
