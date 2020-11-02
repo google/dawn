@@ -15,6 +15,7 @@
 #include <string>
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
@@ -1487,6 +1488,186 @@ TEST_F(
     __access_control_read_write__struct_S
   }
 })")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     OpDecorate %c SpecId 12
+     %bool = OpTypeBool
+     %c = OpSpecConstantTrue %bool
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariableConst{
+    Decorations{
+      ConstantIdDecoration{12}
+    }
+    myconst
+    none
+    __bool
+    {
+      ScalarConstructor{true}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     OpDecorate %c SpecId 12
+     %bool = OpTypeBool
+     %c = OpSpecConstantFalse %bool
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariableConst{
+    Decorations{
+      ConstantIdDecoration{12}
+    }
+    myconst
+    none
+    __bool
+    {
+      ScalarConstructor{false}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     OpDecorate %c SpecId 12
+     %uint = OpTypeInt 32 0
+     %c = OpSpecConstant %uint 42
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariableConst{
+    Decorations{
+      ConstantIdDecoration{12}
+    }
+    myconst
+    none
+    __u32
+    {
+      ScalarConstructor{42}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     OpDecorate %c SpecId 12
+     %int = OpTypeInt 32 1
+     %c = OpSpecConstant %int 42
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariableConst{
+    Decorations{
+      ConstantIdDecoration{12}
+    }
+    myconst
+    none
+    __i32
+    {
+      ScalarConstructor{42}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     OpDecorate %c SpecId 12
+     %float = OpTypeFloat 32
+     %c = OpSpecConstant %float 2.5
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariableConst{
+    Decorations{
+      ConstantIdDecoration{12}
+    }
+    myconst
+    none
+    __f32
+    {
+      ScalarConstructor{2.500000}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
+  // When we don't have a spec ID, declare an undecorated module-scope constant.
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     %float = OpTypeFloat 32
+     %c = OpSpecConstant %float 2.5
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  VariableConst{
+    myconst
+    none
+    __f32
+    {
+      ScalarConstructor{2.500000}
+    }
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %c "myconst"
+     %float = OpTypeFloat 32
+     %c = OpSpecConstant %float 2.5
+     %floatfn = OpTypeFunction %float
+     %100 = OpFunction %float None %floatfn
+     %entry = OpLabel
+     %1 = OpIAdd %float %c %c
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __f32
+    {
+      Binary{
+        Identifier{myconst}
+        add
+        Identifier{myconst}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
 }
 
 }  // namespace

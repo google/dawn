@@ -40,6 +40,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -534,6 +535,9 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
   if (!RegisterTypes()) {
     return false;
   }
+  if (!EmitScalarSpecConstants()) {
+    return false;
+  }
   if (!EmitModuleScopeVariables()) {
     return false;
   }
@@ -943,6 +947,82 @@ bool ParserImpl::RegisterTypes() {
     builtin_position_.member_pointer_type_id = type_mgr_->FindPointerToType(
         builtin_position_.member_type_id, builtin_position_.storage_class);
     ConvertType(builtin_position_.member_pointer_type_id);
+  }
+  return success_;
+}
+
+bool ParserImpl::EmitScalarSpecConstants() {
+  if (!success_) {
+    return false;
+  }
+  // Generate a module-scope const declaration for each instruction
+  // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
+  for (auto& inst : module_->types_values()) {
+    // These will be populated for a valid scalar spec constant.
+    ast::type::Type* ast_type = nullptr;
+    std::unique_ptr<ast::ScalarConstructorExpression> ast_expr;
+
+    switch (inst.opcode()) {
+      case SpvOpSpecConstantTrue:
+      case SpvOpSpecConstantFalse: {
+        ast_type = ConvertType(inst.type_id());
+        ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
+            std::make_unique<ast::BoolLiteral>(
+                ast_type, inst.opcode() == SpvOpSpecConstantTrue));
+        break;
+      }
+      case SpvOpSpecConstant: {
+        ast_type = ConvertType(inst.type_id());
+        const uint32_t literal_value = inst.GetSingleWordInOperand(0);
+        if (ast_type->IsI32()) {
+          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
+              std::make_unique<ast::SintLiteral>(
+                  ast_type, static_cast<int32_t>(literal_value)));
+        } else if (ast_type->IsU32()) {
+          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
+              std::make_unique<ast::UintLiteral>(
+                  ast_type, static_cast<uint32_t>(literal_value)));
+        } else if (ast_type->IsF32()) {
+          float float_value;
+          // Copy the bits so we can read them as a float.
+          std::memcpy(&float_value, &literal_value, sizeof(float_value));
+          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
+              std::make_unique<ast::FloatLiteral>(ast_type, float_value));
+        } else {
+          return Fail() << " invalid result type for OpSpecConstant "
+                        << inst.PrettyPrint();
+        }
+        break;
+      }
+      default:
+        break;
+    }
+    if (ast_type && ast_expr) {
+      auto ast_var =
+          MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type);
+      ast::VariableDecorationList spec_id_decos;
+      for (const auto& deco : GetDecorationsFor(inst.result_id())) {
+        if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
+          auto cid = std::make_unique<ast::ConstantIdDecoration>(deco[1]);
+          spec_id_decos.push_back(std::move(cid));
+          break;
+        }
+      }
+      if (spec_id_decos.empty()) {
+        // Register it as a named constant, without specialization id.
+        ast_var->set_is_const(true);
+        ast_var->set_constructor(std::move(ast_expr));
+        ast_module_.AddGlobalVariable(std::move(ast_var));
+      } else {
+        auto ast_deco_var =
+            std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
+        ast_deco_var->set_is_const(true);
+        ast_deco_var->set_constructor(std::move(ast_expr));
+        ast_deco_var->set_decorations(std::move(spec_id_decos));
+        ast_module_.AddGlobalVariable(std::move(ast_deco_var));
+      }
+      scalar_spec_constants_.insert(inst.result_id());
+    }
   }
   return success_;
 }

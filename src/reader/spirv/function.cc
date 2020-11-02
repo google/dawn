@@ -1700,7 +1700,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   if (failed()) {
     return {};
   }
-  if (identifier_values_.count(id)) {
+  if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
     return TypedExpression(
         parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
         std::make_unique<ast::IdentifierExpression>(namer_.Name(id)));
