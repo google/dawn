@@ -198,6 +198,10 @@ set(TINT_LIB_SRCS
   ast/workgroup_decoration.h
   context.cc
   context.h
+  diagnostic/diagnostic.cc
+  diagnostic/diagnostic.h
+  diagnostic/formatter.cc
+  diagnostic/formatter.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -377,6 +381,7 @@ set(TINT_TEST_SRCS
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
+  diagnostic/formatter_test.cc
   inspector/inspector_test.cc
   scope_stack_test.cc
   transform/bound_array_accessors_transform_test.cc
