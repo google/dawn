@@ -1072,6 +1072,7 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
   if (val_id == 0) {
     return 0;
   }
+  val_id = GenerateLoadIfNeeded(expr->expr()->result_type(), val_id);
 
   auto type_id = GenerateTypeIfNeeded(expr->result_type());
   if (type_id == 0) {

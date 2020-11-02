@@ -124,6 +124,44 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%5 = " + param.name + " %1 %4 %4\n");
 }
+TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+
+  ast::Variable var("param", ast::StorageClass::kFunction, &i32);
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("param");
+  auto rhs = std::make_unique<ast::IdentifierExpression>("param");
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 7u) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Function %3
+%4 = OpConstantNull %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%5 = OpLoad %3 %1
+%6 = OpLoad %3 %1
+%7 = )" + param.name +
+                R"( %3 %5 %6
+)");
+}
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithSignedIntegerTest,
