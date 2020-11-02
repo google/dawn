@@ -74,13 +74,6 @@ class Source {
   /// Constructs the Source with the Range |rng| and File |f|.
   inline Source(const Range& rng, File const* f) : range(rng), file(f) {}
 
-  /// Constructs the Source with the zero-length range starting at |line| and
-  /// |column| with a null File.
-  /// TODO(bclayton): Remove this constructor.
-  /// It purely exists to break up changes into bite sized pieces.
-  inline explicit Source(size_t line, size_t column)
-      : Source(Location{line, column}) {}
-
   Range range;
   File const* file = nullptr;
 };

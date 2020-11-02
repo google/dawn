@@ -102,7 +102,7 @@ class TypeDeterminerTestWithParam : public TypeDeterminerHelper,
 
 TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
   FakeStmt s;
-  s.set_source(Source{0, 0});
+  s.set_source(Source{});
 
   EXPECT_FALSE(td()->DetermineResultType(&s));
   EXPECT_EQ(td()->error(),
@@ -111,7 +111,7 @@ TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
 
 TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
   FakeStmt s;
-  s.set_source(Source{2, 30});
+  s.set_source(Source{Source::Location{2, 30}});
 
   EXPECT_FALSE(td()->DetermineResultType(&s));
   EXPECT_EQ(td()->error(),
@@ -400,7 +400,8 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   ast::type::F32Type f32;
   ast::ExpressionList call_params;
   auto call_expr = std::make_unique<ast::CallExpression>(
-      std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "func"),
+      std::make_unique<ast::IdentifierExpression>(
+          Source{Source::Location{12, 34}}, "func"),
       std::move(call_params));
   ast::VariableList params0;
   auto func_main =
@@ -454,7 +455,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
 
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
   FakeExpr e;
-  e.set_source(Source{2, 30});
+  e.set_source(Source{Source::Location{2, 30}});
 
   EXPECT_FALSE(td()->DetermineResultType(&e));
   EXPECT_EQ(td()->error(), "2:30: unknown expression for type determination");

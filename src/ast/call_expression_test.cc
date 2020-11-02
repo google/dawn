@@ -44,7 +44,7 @@ TEST_F(CallExpressionTest, Creation) {
 
 TEST_F(CallExpressionTest, Creation_WithSource) {
   auto func = std::make_unique<IdentifierExpression>("func");
-  CallExpression stmt(Source{20, 2}, std::move(func), {});
+  CallExpression stmt(Source{Source::Location{20, 2}}, std::move(func), {});
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

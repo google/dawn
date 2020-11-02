@@ -68,8 +68,8 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1));
   auto rhs = std::make_unique<ast::IdentifierExpression>("my_var");
-  ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
-                                  std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
+                                  std::move(lhs), std::move(rhs));
 
   // TODO(sarahM0): Invalidate assignment to scalar.
   ASSERT_TRUE(v()->has_error());
@@ -81,11 +81,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   // b = 2;
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "b");
+  auto lhs = std::make_unique<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, "b");
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
   auto assign = std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs));
 
   EXPECT_FALSE(td()->DetermineResultType(assign.get()));
   EXPECT_EQ(td()->error(),
@@ -98,13 +99,14 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   // }
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "b");
+  auto lhs = std::make_unique<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, "b");
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_FALSE(td()->DetermineStatements(body.get()));
   EXPECT_EQ(td()->error(),
@@ -126,8 +128,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
       std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* rhs_ptr = rhs.get();
 
-  ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
-                                  std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
+                                  std::move(lhs), std::move(rhs));
   td()->RegisterVariableForTesting(var.get());
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -153,8 +155,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
   auto* rhs_ptr = rhs.get();
 
-  ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
-                                  std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
+                                  std::move(lhs), std::move(rhs));
   td()->RegisterVariableForTesting(var.get());
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -187,7 +189,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -217,7 +219,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   ast::BlockStatement block;
   block.append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   block.append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(&block)) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -234,7 +236,8 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
+      &f32);
   mod()->AddGlobalVariable(std::move(global_var));
   EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
       << v()->error();
@@ -244,7 +247,8 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kNone, &f32);
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
+      &f32);
   mod()->AddGlobalVariable(std::move(global_var));
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
@@ -255,7 +259,8 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kInput, &f32);
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
+      &f32);
   global_var->set_is_const(true);
 
   mod()->AddGlobalVariable(std::move(global_var));
@@ -270,7 +275,8 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
   ast::type::F32Type f32;
   auto global_var = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kNone, &f32);
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
+      &f32);
   global_var->set_is_const(true);
 
   mod()->AddGlobalVariable(std::move(global_var));
@@ -291,8 +297,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
           std::make_unique<ast::FloatLiteral>(&f32, 2.1)));
   mod()->AddGlobalVariable(std::move(global_var));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>(Source{12, 34},
-                                                         "not_global_var");
+  auto lhs = std::make_unique<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, "not_global_var");
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
 
@@ -302,7 +308,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
   func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
 
@@ -336,7 +342,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
   func->add_decoration(
@@ -364,7 +370,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "a");
+  auto lhs = std::make_unique<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, "a");
   auto* lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
@@ -374,7 +381,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   outer_body->append(
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
   outer_body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -394,7 +401,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>(Source{12, 34}, "a");
+  auto lhs = std::make_unique<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, "a");
   auto* lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.14f));
@@ -404,7 +412,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   auto outer_body = std::make_unique<ast::BlockStatement>();
   outer_body->append(
@@ -429,7 +437,8 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   mod()->AddGlobalVariable(std::move(var0));
 
   auto var1 = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var1", ast::StorageClass::kPrivate, &f32);
+      Source{Source::Location{12, 34}}, "global_var1",
+      ast::StorageClass::kPrivate, &f32);
   var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
@@ -450,7 +459,8 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   mod()->AddGlobalVariable(std::move(var0));
 
   auto var1 = std::make_unique<ast::Variable>(
-      Source{12, 34}, "global_var", ast::StorageClass::kPrivate, &f32);
+      Source{Source::Location{12, 34}}, "global_var",
+      ast::StorageClass::kPrivate, &f32);
   var1->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0)));
   mod()->AddGlobalVariable(std::move(var1));
@@ -481,7 +491,7 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -515,8 +525,8 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
-                                                            std::move(var)));
+  body->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{Source::Location{12, 34}}, std::move(var)));
   func->set_body(std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
@@ -552,7 +562,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   body->append(std::make_unique<ast::VariableDeclStatement>(
-      Source{12, 34}, std::move(var_a_float)));
+      Source{Source::Location{12, 34}}, std::move(var_a_float)));
   func->set_body(std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
@@ -590,7 +600,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   outer_body->append(
       std::make_unique<ast::IfStatement>(std::move(cond), std::move(body)));
   outer_body->append(std::make_unique<ast::VariableDeclStatement>(
-      Source{12, 34}, std::move(var_a_float)));
+      Source{Source::Location{12, 34}}, std::move(var_a_float)));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body.get())) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(outer_body.get())) << v()->error();
@@ -619,8 +629,8 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
   auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
-                                                            std::move(var)));
+  body->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{Source::Location{12, 34}}, std::move(var)));
 
   auto outer_body = std::make_unique<ast::BlockStatement>();
   outer_body->append(
@@ -652,8 +662,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto func0 =
       std::make_unique<ast::Function>("func0", std::move(params0), &void_type);
   auto body0 = std::make_unique<ast::BlockStatement>();
-  body0->append(std::make_unique<ast::VariableDeclStatement>(Source{12, 34},
-                                                             std::move(var0)));
+  body0->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{Source::Location{12, 34}}, std::move(var0)));
   body0->append(std::make_unique<ast::ReturnStatement>());
   func0->set_body(std::move(body0));
 
@@ -661,8 +671,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto func1 =
       std::make_unique<ast::Function>("func1", std::move(params1), &void_type);
   auto body1 = std::make_unique<ast::BlockStatement>();
-  body1->append(std::make_unique<ast::VariableDeclStatement>(Source{13, 34},
-                                                             std::move(var1)));
+  body1->append(std::make_unique<ast::VariableDeclStatement>(
+      Source{Source::Location{13, 34}}, std::move(var1)));
   body1->append(std::make_unique<ast::ReturnStatement>());
   func1->set_body(std::move(body1));
   func1->add_decoration(
@@ -694,7 +704,7 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   body->append(std::make_unique<ast::AssignmentStatement>(
-      Source{12, 34}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
 
   EXPECT_TRUE(td()->DetermineStatements(body.get())) << td()->error();
   ASSERT_NE(lhs_ptr->result_type(), nullptr);

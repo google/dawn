@@ -35,7 +35,7 @@ TEST_F(ScalarConstructorExpressionTest, Creation) {
 TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  ScalarConstructorExpression c(Source{20, 2}, std::move(b));
+  ScalarConstructorExpression c(Source{Source::Location{20, 2}}, std::move(b));
   auto src = c.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

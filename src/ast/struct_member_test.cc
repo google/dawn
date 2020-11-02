@@ -43,7 +43,7 @@ TEST_F(StructMemberTest, Creation) {
 
 TEST_F(StructMemberTest, CreationWithSource) {
   type::I32Type i32;
-  Source s{27, 4};
+  Source s{Source::Location{27, 4}};
 
   StructMember st{s, "a", &i32, {}};
   EXPECT_EQ(st.name(), "a");

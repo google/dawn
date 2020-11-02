@@ -46,7 +46,8 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
   ExpressionList expr;
   expr.push_back(std::make_unique<IdentifierExpression>("expr"));
 
-  TypeConstructorExpression t(Source{20, 2}, &f32, std::move(expr));
+  TypeConstructorExpression t(Source{Source::Location{20, 2}}, &f32,
+                              std::move(expr));
   auto src = t.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

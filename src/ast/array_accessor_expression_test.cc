@@ -38,7 +38,8 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
   auto ary = std::make_unique<IdentifierExpression>("ary");
   auto idx = std::make_unique<IdentifierExpression>("idx");
 
-  ArrayAccessorExpression exp(Source{20, 2}, std::move(ary), std::move(idx));
+  ArrayAccessorExpression exp(Source{Source::Location{20, 2}}, std::move(ary),
+                              std::move(idx));
   auto src = exp.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

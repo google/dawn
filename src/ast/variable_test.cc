@@ -37,7 +37,7 @@ TEST_F(VariableTest, Creation) {
 }
 
 TEST_F(VariableTest, CreationWithSource) {
-  Source s{27, 4};
+  Source s{Source::Location{27, 4}};
   type::F32Type t;
   Variable v(s, "i", StorageClass::kPrivate, &t);
 
@@ -49,7 +49,7 @@ TEST_F(VariableTest, CreationWithSource) {
 }
 
 TEST_F(VariableTest, CreationEmpty) {
-  Source s{27, 4};
+  Source s{Source::Location{27, 4}};
   Variable v;
   v.set_source(s);
   v.set_storage_class(StorageClass::kWorkgroup);

@@ -23,7 +23,7 @@ namespace {
 using ContinueStatementTest = testing::Test;
 
 TEST_F(ContinueStatementTest, Creation_WithSource) {
-  ContinueStatement stmt(Source{20, 2});
+  ContinueStatement stmt(Source{Source::Location{20, 2}});
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

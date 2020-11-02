@@ -39,7 +39,7 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
   type::F32Type f32;
   auto expr = std::make_unique<IdentifierExpression>("expr");
 
-  BitcastExpression exp(Source{20, 2}, &f32, std::move(expr));
+  BitcastExpression exp(Source{Source::Location{20, 2}}, &f32, std::move(expr));
   auto src = exp.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

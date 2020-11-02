@@ -47,8 +47,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
 
   ast::VariableList params;
   ast::type::VoidType void_type;
-  auto func = std::make_unique<ast::Function>(Source{12, 34}, "func",
-                                              std::move(params), &void_type);
+  auto func = std::make_unique<ast::Function>(
+      Source{Source::Location{12, 34}}, "func", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   func->set_body(std::move(body));
@@ -64,8 +64,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> void {}
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>(Source{12, 34}, "func",
-                                              std::move(params), &void_type);
+  auto func = std::make_unique<ast::Function>(
+      Source{Source::Location{12, 34}}, "func", std::move(params), &void_type);
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -104,8 +104,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
 
-  body->append(std::make_unique<ast::ReturnStatement>(Source{12, 34},
-                                                      std::move(return_expr)));
+  body->append(std::make_unique<ast::ReturnStatement>(
+      Source{Source::Location{12, 34}}, std::move(return_expr)));
   func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
 
@@ -127,8 +127,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
 
-  body->append(std::make_unique<ast::ReturnStatement>(Source{12, 34},
-                                                      std::move(return_expr)));
+  body->append(std::make_unique<ast::ReturnStatement>(
+      Source{Source::Location{12, 34}}, std::move(return_expr)));
   func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
 
@@ -157,7 +157,7 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
 
   ast::VariableList params_copy;
   auto func_copy = std::make_unique<ast::Function>(
-      Source{12, 34}, "func", std::move(params_copy), &i32);
+      Source{Source::Location{12, 34}}, "func", std::move(params_copy), &i32);
   auto body_copy = std::make_unique<ast::BlockStatement>();
   auto return_expr_copy = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2));
@@ -181,7 +181,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   ast::type::VoidType void_type;
   ast::ExpressionList call_params;
   auto call_expr = std::make_unique<ast::CallExpression>(
-      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      Source{Source::Location{12, 34}},
+      std::make_unique<ast::IdentifierExpression>("func"),
       std::move(call_params));
   ast::VariableList params0;
   auto func0 =
@@ -204,7 +205,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   ast::ExpressionList call_params;
   auto call_expr = std::make_unique<ast::CallExpression>(
-      Source{12, 34}, std::make_unique<ast::IdentifierExpression>("func"),
+      Source{Source::Location{12, 34}},
+      std::make_unique<ast::IdentifierExpression>("func"),
       std::move(call_params));
   var->set_constructor(std::move(call_expr));
   ast::VariableList params0;
@@ -229,8 +231,8 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // fn vtx_main() -> i32 { return 0; }
   ast::type::I32Type i32;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>(Source{12, 34}, "vtx_main",
-                                              std::move(params), &i32);
+  auto func = std::make_unique<ast::Function>(
+      Source{Source::Location{12, 34}}, "vtx_main", std::move(params), &i32);
   auto return_expr = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 0));
 
@@ -255,8 +257,9 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   ast::VariableList params;
   params.push_back(
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32));
-  auto func = std::make_unique<ast::Function>(Source{12, 34}, "vtx_func",
-                                              std::move(params), &void_type);
+  auto func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
+                                              "vtx_func", std::move(params),
+                                              &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
@@ -278,8 +281,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
   // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>(Source{5, 6}, "main",
-                                              std::move(params), &void_type);
+  auto func = std::make_unique<ast::Function>(
+      Source{Source::Location{5, 6}}, "main", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
@@ -287,8 +290,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
 
-  func = std::make_unique<ast::Function>(Source{12, 34}, "main",
-                                         std::move(params), &void_type);
+  func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
+                                         "main", std::move(params), &void_type);
   body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
@@ -310,8 +313,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
   // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = std::make_unique<ast::Function>(Source{5, 6}, "main",
-                                              std::move(params), &void_type);
+  auto func = std::make_unique<ast::Function>(
+      Source{Source::Location{5, 6}}, "main", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
@@ -319,8 +322,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
       std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
   mod()->AddFunction(std::move(func));
 
-  func = std::make_unique<ast::Function>(Source{12, 34}, "main",
-                                         std::move(params), &void_type);
+  func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
+                                         "main", std::move(params), &void_type);
   body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));

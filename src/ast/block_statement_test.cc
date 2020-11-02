@@ -60,7 +60,7 @@ TEST_F(BlockStatementTest, Creation_WithInsert) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
-  BlockStatement b(Source{20, 2});
+  BlockStatement b(Source{Source::Location{20, 2}});
   auto src = b.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

@@ -31,7 +31,7 @@ TEST_F(DiscardStatementTest, Creation) {
 }
 
 TEST_F(DiscardStatementTest, Creation_WithSource) {
-  DiscardStatement stmt(Source{20, 2});
+  DiscardStatement stmt(Source{Source::Location{20, 2}});
   EXPECT_EQ(stmt.line(), 20u);
   EXPECT_EQ(stmt.column(), 2u);
 }

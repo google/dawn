@@ -36,7 +36,8 @@ TEST_F(UnaryOpExpressionTest, Creation) {
 
 TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  UnaryOpExpression u(Source{20, 2}, UnaryOp::kNot, std::move(ident));
+  UnaryOpExpression u(Source{Source::Location{20, 2}}, UnaryOp::kNot,
+                      std::move(ident));
   auto src = u.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

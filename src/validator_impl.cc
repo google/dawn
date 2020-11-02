@@ -134,7 +134,7 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
   }
 
   if (pipeline_count == 0) {
-    set_error(Source{0, 0},
+    set_error(Source{},
               "v-0003: At least one of vertex, fragment or compute shader must "
               "be present");
     return false;

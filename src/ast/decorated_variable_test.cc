@@ -45,7 +45,7 @@ TEST_F(DecoratedVariableTest, Creation) {
 }
 
 TEST_F(DecoratedVariableTest, CreationWithSource) {
-  Source s{27, 4};
+  Source s{Source::Location{27, 4}};
   type::F32Type t;
   auto var = std::make_unique<Variable>(s, "i", StorageClass::kPrivate, &t);
   DecoratedVariable dv(std::move(var));

@@ -56,7 +56,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f(Source{20, 2}, "func", std::move(params), &void_type);
+  Function f(Source{Source::Location{20, 2}}, "func", std::move(params),
+             &void_type);
   auto src = f.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

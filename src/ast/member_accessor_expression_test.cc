@@ -41,7 +41,8 @@ TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
   auto str = std::make_unique<IdentifierExpression>("structure");
   auto mem = std::make_unique<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt(Source{20, 2}, std::move(str), std::move(mem));
+  MemberAccessorExpression stmt(Source{Source::Location{20, 2}}, std::move(str),
+                                std::move(mem));
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

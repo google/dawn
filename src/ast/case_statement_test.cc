@@ -74,7 +74,8 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
   auto body = std::make_unique<BlockStatement>();
   body->append(std::make_unique<DiscardStatement>());
 
-  CaseStatement c(Source{20, 2}, std::move(b), std::move(body));
+  CaseStatement c(Source{Source::Location{20, 2}}, std::move(b),
+                  std::move(body));
   auto src = c.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);

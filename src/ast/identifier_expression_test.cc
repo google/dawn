@@ -28,7 +28,7 @@ TEST_F(IdentifierExpressionTest, Creation) {
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-  IdentifierExpression i(Source{20, 2}, "ident");
+  IdentifierExpression i(Source{Source::Location{20, 2}}, "ident");
   EXPECT_EQ(i.name(), "ident");
 
   auto src = i.source();

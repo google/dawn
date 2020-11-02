@@ -37,7 +37,7 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableDeclStatement stmt(Source{20, 2}, std::move(var));
+  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -71,7 +71,7 @@ TEST_F(VariableDeclStatementTest, ToStr) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableDeclStatement stmt(Source{20, 2}, std::move(var));
+  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  VariableDeclStatement{

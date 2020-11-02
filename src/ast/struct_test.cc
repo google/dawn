@@ -70,7 +70,8 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
   StructDecorationList decos;
   decos.push_back(StructDecoration::kBlock);
 
-  Struct s{Source{27, 4}, std::move(decos), std::move(members)};
+  Struct s{Source{Source::Location{27, 4}}, std::move(decos),
+           std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
