@@ -37,20 +37,31 @@ inline bool operator>=(Severity a, Severity b) {
 /// message.
 class Diagnostic {
  public:
+  /// severity is the severity of the diagnostic message.
   Severity severity = Severity::Error;
+  /// source is the location of the diagnostic.
   Source source;
+  /// message is the text associated with the diagnostic.
   std::string message;
 };
 
 /// List is a container of Diagnostic messages.
 class List {
  public:
+  /// iterator is the type used for range based iteration.
   using iterator = std::vector<Diagnostic>::const_iterator;
 
+  /// Constructs the list with no elements.
   List();
+
+  /// Constructs the list with a copy of the diagnostics in |list|.
+  /// @param list the list of diagnostics to copy into this list.
   List(std::initializer_list<Diagnostic> list);
+
   ~List();
 
+  /// adds a diagnostic to the end of this list.
+  /// @param diag the diagnostic to append to this list.
   void add(Diagnostic&& diag) {
     entries_.emplace_back(std::move(diag));
     if (diag.severity >= Severity::Error) {

@@ -81,9 +81,12 @@ class ParserImpl {
   /// TypedIdentifier holds a parsed identifier and type. Returned by
   /// variable_ident_decl().
   struct TypedIdentifier {
-    ast::type::Type* type = nullptr;  /// Parsed type.
-    std::string name;                 /// Parsed identifier.
-    Source source;                    /// Source to the identifier.
+    /// Parsed type.
+    ast::type::Type* type = nullptr;
+    /// Parsed identifier.
+    std::string name;
+    /// Source to the identifier.
+    Source source;
   };
 
   /// Creates a new parser using the given file
