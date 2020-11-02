@@ -38,8 +38,8 @@ TEST_F(StructTest, Creation) {
   Struct s{std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
   EXPECT_TRUE(s.decorations().empty());
-  EXPECT_EQ(s.line(), 0u);
-  EXPECT_EQ(s.column(), 0u);
+  EXPECT_EQ(s.source().range.begin.line, 0u);
+  EXPECT_EQ(s.source().range.begin.column, 0u);
 }
 
 TEST_F(StructTest, Creation_WithDecorations) {
@@ -56,8 +56,8 @@ TEST_F(StructTest, Creation_WithDecorations) {
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
-  EXPECT_EQ(s.line(), 0u);
-  EXPECT_EQ(s.column(), 0u);
+  EXPECT_EQ(s.source().range.begin.line, 0u);
+  EXPECT_EQ(s.source().range.begin.column, 0u);
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
@@ -75,8 +75,8 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
-  EXPECT_EQ(s.line(), 27u);
-  EXPECT_EQ(s.column(), 4u);
+  EXPECT_EQ(s.source().range.begin.line, 27u);
+  EXPECT_EQ(s.source().range.begin.column, 4u);
 }
 
 TEST_F(StructTest, IsValid) {

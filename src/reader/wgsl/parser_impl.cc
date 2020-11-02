@@ -132,8 +132,8 @@ ParserImpl::~ParserImpl() {
 }
 
 void ParserImpl::set_error(const Token& t, const std::string& err) {
-  auto prefix =
-      std::to_string(t.line()) + ":" + std::to_string(t.column()) + ": ";
+  auto prefix = std::to_string(t.source().range.begin.line) + ":" +
+                std::to_string(t.source().range.begin.column) + ": ";
 
   if (t.IsReservedKeyword()) {
     error_ = prefix + "reserved token (" + t.to_str() + ") found";

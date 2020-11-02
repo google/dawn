@@ -68,8 +68,8 @@ TEST_F(TokenTest, ReturnsMaxU32) {
 
 TEST_F(TokenTest, Source) {
   Token t(Token::Type::kUintLiteral, Source{Source::Location{3, 9}});
-  EXPECT_EQ(t.line(), 3u);
-  EXPECT_EQ(t.column(), 9u);
+  EXPECT_EQ(t.source().range.begin.line, 3u);
+  EXPECT_EQ(t.source().range.begin.column, 9u);
 }
 
 }  // namespace

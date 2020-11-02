@@ -40,8 +40,8 @@ TEST_F(DecoratedVariableTest, Creation) {
   EXPECT_EQ(dv.name(), "my_var");
   EXPECT_EQ(dv.storage_class(), StorageClass::kFunction);
   EXPECT_EQ(dv.type(), &t);
-  EXPECT_EQ(dv.line(), 0u);
-  EXPECT_EQ(dv.column(), 0u);
+  EXPECT_EQ(dv.source().range.begin.line, 0u);
+  EXPECT_EQ(dv.source().range.begin.column, 0u);
 }
 
 TEST_F(DecoratedVariableTest, CreationWithSource) {
@@ -53,8 +53,8 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
   EXPECT_EQ(dv.name(), "i");
   EXPECT_EQ(dv.storage_class(), StorageClass::kPrivate);
   EXPECT_EQ(dv.type(), &t);
-  EXPECT_EQ(dv.line(), 27u);
-  EXPECT_EQ(dv.column(), 4u);
+  EXPECT_EQ(dv.source().range.begin.line, 27u);
+  EXPECT_EQ(dv.source().range.begin.column, 4u);
 }
 
 TEST_F(DecoratedVariableTest, NoDecorations) {

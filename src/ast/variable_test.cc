@@ -32,8 +32,8 @@ TEST_F(VariableTest, Creation) {
   EXPECT_EQ(v.name(), "my_var");
   EXPECT_EQ(v.storage_class(), StorageClass::kFunction);
   EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.line(), 0u);
-  EXPECT_EQ(v.column(), 0u);
+  EXPECT_EQ(v.source().range.begin.line, 0u);
+  EXPECT_EQ(v.source().range.begin.column, 0u);
 }
 
 TEST_F(VariableTest, CreationWithSource) {
@@ -44,8 +44,8 @@ TEST_F(VariableTest, CreationWithSource) {
   EXPECT_EQ(v.name(), "i");
   EXPECT_EQ(v.storage_class(), StorageClass::kPrivate);
   EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.line(), 27u);
-  EXPECT_EQ(v.column(), 4u);
+  EXPECT_EQ(v.source().range.begin.line, 27u);
+  EXPECT_EQ(v.source().range.begin.column, 4u);
 }
 
 TEST_F(VariableTest, CreationEmpty) {
@@ -61,8 +61,8 @@ TEST_F(VariableTest, CreationEmpty) {
   EXPECT_EQ(v.name(), "a_var");
   EXPECT_EQ(v.storage_class(), StorageClass::kWorkgroup);
   EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.line(), 27u);
-  EXPECT_EQ(v.column(), 4u);
+  EXPECT_EQ(v.source().range.begin.line, 27u);
+  EXPECT_EQ(v.source().range.begin.column, 4u);
 }
 
 TEST_F(VariableTest, IsValid) {

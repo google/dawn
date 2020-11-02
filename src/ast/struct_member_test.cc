@@ -37,8 +37,8 @@ TEST_F(StructMemberTest, Creation) {
   EXPECT_EQ(st.type(), &i32);
   EXPECT_EQ(st.decorations().size(), 1u);
   EXPECT_TRUE(st.decorations()[0]->IsOffset());
-  EXPECT_EQ(st.line(), 0u);
-  EXPECT_EQ(st.column(), 0u);
+  EXPECT_EQ(st.source().range.begin.line, 0u);
+  EXPECT_EQ(st.source().range.begin.column, 0u);
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
@@ -49,8 +49,8 @@ TEST_F(StructMemberTest, CreationWithSource) {
   EXPECT_EQ(st.name(), "a");
   EXPECT_EQ(st.type(), &i32);
   EXPECT_EQ(st.decorations().size(), 0u);
-  EXPECT_EQ(st.line(), 27u);
-  EXPECT_EQ(st.column(), 4u);
+  EXPECT_EQ(st.source().range.begin.line, 27u);
+  EXPECT_EQ(st.source().range.begin.column, 4u);
 }
 
 TEST_F(StructMemberTest, IsValid) {
