@@ -1687,7 +1687,6 @@ bool FunctionEmitter::EmitFunctionVariables() {
           parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1))
               .expr);
     }
-    // TODO(dneto): Add the initializer via Variable::set_constructor.
     auto var_decl_stmt =
         std::make_unique<ast::VariableDeclStatement>(std::move(var));
     AddStatementForInstruction(std::move(var_decl_stmt), inst);
