@@ -44,8 +44,8 @@ class DiagFormatterTest : public testing::Test {
 };
 
 TEST_F(DiagFormatterTest, Simple) {
-  auto fmt = Formatter::create(false, false, false);
-  auto got = fmt->format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  Formatter fmt{{false, false, false}};
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(1:14: purr
 2:14: grrr
 3:16: hiss
@@ -54,8 +54,8 @@ TEST_F(DiagFormatterTest, Simple) {
 }
 
 TEST_F(DiagFormatterTest, WithFile) {
-  auto fmt = Formatter::create(true, false, false);
-  auto got = fmt->format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  Formatter fmt{{true, false, false}};
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(file.name:1:14: purr
 file.name:2:14: grrr
 file.name:3:16: hiss
@@ -64,8 +64,8 @@ file.name:4:16: nothing)";
 }
 
 TEST_F(DiagFormatterTest, WithSeverity) {
-  auto fmt = Formatter::create(false, true, false);
-  auto got = fmt->format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  Formatter fmt{{false, true, false}};
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(1:14 info: purr
 2:14 warning: grrr
 3:16 error: hiss
@@ -74,8 +74,8 @@ TEST_F(DiagFormatterTest, WithSeverity) {
 }
 
 TEST_F(DiagFormatterTest, WithLine) {
-  auto fmt = Formatter::create(false, false, true);
-  auto got = fmt->format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  Formatter fmt{{false, false, true}};
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(1:14: purr
 the cat says meow
              ^
@@ -96,8 +96,8 @@ the snail says ???
 }
 
 TEST_F(DiagFormatterTest, BasicWithFileSeverityLine) {
-  auto fmt = Formatter::create(true, true, true);
-  auto got = fmt->format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  Formatter fmt{{true, true, true}};
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(file.name:1:14 info: purr
 the cat says meow
              ^
@@ -121,9 +121,8 @@ TEST_F(DiagFormatterTest, BasicWithMultiLine) {
   Diagnostic multiline{Severity::Warning,
                        Source{Source::Range{{2, 9}, {4, 15}}, &file},
                        "multiline"};
-
-  auto fmt = Formatter::create(false, false, true);
-  auto got = fmt->format(List{multiline});
+  Formatter fmt{{false, false, true}};
+  auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline
 the dog says woof
         ^^^^^^^^^

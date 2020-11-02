@@ -18,39 +18,49 @@
 #include <memory>
 #include <string>
 
-#include "src/diagnostic/printer.h"
-
 namespace tint {
 namespace diag {
 
+class Diagnostic;
 class List;
+class Printer;
 
-/// Formatters are used to format a list of diagnostics into a human readable
-/// string.
+/// Formatter are used to print a list of diagnostics messages.
 class Formatter {
  public:
-  /// @returns a basic diagnostic formatter
-  /// @param print_file include the file path for each diagnostic
-  /// @param print_severity include the severity for each diagnostic
-  /// @param print_line include the source line(s) for the diagnostic
-  static std::unique_ptr<Formatter> create(bool print_file,
-                                           bool print_severity,
-                                           bool print_line);
+  /// Style controls the formatter's output style.
+  struct Style {
+    /// include the file path for each diagnostic
+    bool print_file = true;
+    /// include the severity for each diagnostic
+    bool print_severity = true;
+    /// include the source line(s) for the diagnostic
+    bool print_line = true;
+  };
 
-  virtual ~Formatter();
+  /// Constructor for the formatter using a default style.
+  Formatter();
 
-  /// format prints the formatted diagnostic list |list| to |printer|.
+  /// Constructor for the formatter using the custom style.
+  /// @param style the style used for the formatter.
+  explicit Formatter(const Style& style);
+
+  ~Formatter();
+
   /// @param list the list of diagnostic messages to format
   /// @param printer the printer used to display the formatted diagnostics
-  virtual void format(const List& list, Printer* printer) const = 0;
+  void format(const List& list, Printer* printer) const;
 
   /// @return the list of diagnostics |list| formatted to a string.
   /// @param list the list of diagnostic messages to format
-  inline std::string format(const List& list) const {
-    StringPrinter printer;
-    format(list, &printer);
-    return printer.str();
-  }
+  std::string format(const List& list) const;
+
+ private:
+  struct State;
+
+  void format(const Diagnostic& diag, State& state) const;
+
+  Style const style_;
 };
 
 }  // namespace diag

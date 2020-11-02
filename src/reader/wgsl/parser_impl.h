@@ -104,7 +104,8 @@ class ParserImpl {
 
   /// @returns the parser error string
   std::string error() const {
-    return diag::Formatter::create(false, false, false)->format(diags_);
+    diag::Formatter formatter{{false, false, false}};
+    return formatter.format(diags_);
   }
 
   /// @returns the diagnostic messages

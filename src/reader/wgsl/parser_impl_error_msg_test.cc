@@ -23,16 +23,14 @@ namespace {
 
 class ParserImplErrorTest : public ParserImplTest {};
 
-#define EXPECT(SOURCE, EXPECTED)                                              \
-  do {                                                                        \
-    std::string source = SOURCE;                                              \
-    std::string expected = EXPECTED;                                          \
-    auto* p = parser(source);                                                 \
-    EXPECT_EQ(false, p->Parse());                                             \
-    EXPECT_EQ(true, p->diagnostics().contains_errors());                      \
-    EXPECT_EQ(                                                                \
-        expected,                                                             \
-        diag::Formatter::create(true, true, true)->format(p->diagnostics())); \
+#define EXPECT(SOURCE, EXPECTED)                                     \
+  do {                                                               \
+    std::string source = SOURCE;                                     \
+    std::string expected = EXPECTED;                                 \
+    auto* p = parser(source);                                        \
+    EXPECT_EQ(false, p->Parse());                                    \
+    EXPECT_EQ(true, p->diagnostics().contains_errors());             \
+    EXPECT_EQ(expected, diag::Formatter().format(p->diagnostics())); \
   } while (false)
 
 TEST_F(ParserImplErrorTest, AdditiveInvalidExpr) {
