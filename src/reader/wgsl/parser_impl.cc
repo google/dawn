@@ -132,27 +132,15 @@ ParserImpl::~ParserImpl() {
 }
 
 void ParserImpl::set_error(const Token& t, const std::string& err) {
-  auto prefix = std::to_string(t.source().range.begin.line) + ":" +
-                std::to_string(t.source().range.begin.column) + ": ";
-
-  if (t.IsReservedKeyword()) {
-    error_ = prefix + "reserved token (" + t.to_str() + ") found";
-    return;
-  }
-  if (t.IsError()) {
-    error_ = prefix + t.to_str();
-    return;
-  }
-
-  if (err.size() != 0) {
-    error_ = prefix + err;
-  } else {
-    error_ = prefix + "invalid token (" + t.to_name() + ") encountered";
-  }
+  diag::Diagnostic diagnostic;
+  diagnostic.severity = diag::Severity::Error;
+  diagnostic.message = err;
+  diagnostic.source = t.source();
+  diags_.add(std::move(diagnostic));
 }
 
 void ParserImpl::set_error(const Token& t) {
-  set_error(t, "");
+  set_error(t, "invalid token (" + t.to_name() + ") encountered");
 }
 
 Token ParserImpl::next() {

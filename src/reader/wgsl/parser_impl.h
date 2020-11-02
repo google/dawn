@@ -45,6 +45,8 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/context.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/diagnostic/formatter.h"
 #include "src/reader/wgsl/token.h"
 
 namespace tint {
@@ -99,9 +101,15 @@ class ParserImpl {
   bool Parse();
 
   /// @returns true if an error was encountered.
-  bool has_error() const { return error_.size() > 0; }
+  bool has_error() const { return diags_.contains_errors(); }
+
   /// @returns the parser error string
-  const std::string& error() const { return error_; }
+  std::string error() const {
+    return diag::Formatter::create(false, false, false)->format(diags_);
+  }
+
+  /// @returns the diagnostic messages
+  const diag::List& diagnostics() const { return diags_; }
 
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() { return std::move(module_); }
@@ -418,7 +426,7 @@ class ParserImpl {
       uint32_t depth);
 
   Context& ctx_;
-  std::string error_;
+  diag::List diags_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
