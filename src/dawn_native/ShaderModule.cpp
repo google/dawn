@@ -164,7 +164,8 @@ namespace dawn_native {
             errorStream << "Tint WGSL failure:" << std::endl;
 
             tint::Context context;
-            tint::reader::wgsl::Parser parser(&context, source);
+            tint::Source::File file("", source);
+            tint::reader::wgsl::Parser parser(&context, &file);
 
             if (!parser.Parse()) {
                 errorStream << "Parser: " << parser.error() << std::endl;
@@ -197,7 +198,8 @@ namespace dawn_native {
             errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
 
             tint::Context context;
-            tint::reader::wgsl::Parser parser(&context, source);
+            tint::Source::File file("", source);
+            tint::reader::wgsl::Parser parser(&context, &file);
 
             // TODO: This is a duplicate parse with ValidateWGSL, need to store
             // state between calls to avoid this.
@@ -240,7 +242,8 @@ namespace dawn_native {
             errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
 
             tint::Context context;
-            tint::reader::wgsl::Parser parser(&context, source);
+            tint::Source::File file("", source);
+            tint::reader::wgsl::Parser parser(&context, &file);
 
             // TODO: This is a duplicate parse with ValidateWGSL, need to store
             // state between calls to avoid this.
