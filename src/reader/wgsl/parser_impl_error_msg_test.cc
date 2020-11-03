@@ -286,6 +286,14 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
          "        ^\n");
 }
 
+TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
+  // TODO(bclayton) - BUG(https://crbug.com/tint/291)
+  EXPECT("[[shader(vertex)]] fn main() -> void {}",
+         "test.wgsl:1:1 error: invalid token ([[) encountered\n"
+         "[[shader(vertex)]] fn main() -> void {}\n"
+         "^^\n");
+}
+
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingLParen) {
   EXPECT("[[workgroup_size 1]] fn f() -> void {}",
          "test.wgsl:1:18 error: missing ( for workgroup_size\n"
