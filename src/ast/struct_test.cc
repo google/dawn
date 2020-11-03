@@ -52,7 +52,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>());
+  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
 
   Struct s{std::move(decos), std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
@@ -72,7 +72,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>());
+  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
 
   Struct s{
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
@@ -122,7 +122,7 @@ TEST_F(StructTest, ToStr) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>());
+  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
 
   Struct s{std::move(decos), std::move(members)};
 

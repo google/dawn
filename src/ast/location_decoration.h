@@ -27,7 +27,8 @@ class LocationDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param value the location value
-  explicit LocationDecoration(uint32_t value);
+  /// @param source the source of this decoration
+  explicit LocationDecoration(uint32_t value, const Source& source);
   ~LocationDecoration() override;
 
   /// @returns true if this is a location decoration

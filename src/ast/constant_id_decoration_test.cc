@@ -23,12 +23,12 @@ namespace {
 using ConstantIdDecorationTest = testing::Test;
 
 TEST_F(ConstantIdDecorationTest, Creation) {
-  ConstantIdDecoration d{12};
+  ConstantIdDecoration d{12, Source{}};
   EXPECT_EQ(12u, d.value());
 }
 
 TEST_F(ConstantIdDecorationTest, Is) {
-  ConstantIdDecoration d{27};
+  ConstantIdDecoration d{27, Source{}};
   EXPECT_FALSE(d.IsBinding());
   EXPECT_FALSE(d.IsBuiltin());
   EXPECT_TRUE(d.IsConstantId());
@@ -37,7 +37,7 @@ TEST_F(ConstantIdDecorationTest, Is) {
 }
 
 TEST_F(ConstantIdDecorationTest, ToStr) {
-  ConstantIdDecoration d{1200};
+  ConstantIdDecoration d{1200, Source{}};
   std::ostringstream out;
   d.to_str(out);
   EXPECT_EQ(out.str(), R"(ConstantIdDecoration{1200}

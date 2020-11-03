@@ -26,7 +26,8 @@ class BuiltinDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param builtin the builtin value
-  explicit BuiltinDecoration(Builtin builtin);
+  /// @param source the source of this decoration
+  BuiltinDecoration(Builtin builtin, const Source& source);
   ~BuiltinDecoration() override;
 
   /// @returns true if this is a builtin decoration

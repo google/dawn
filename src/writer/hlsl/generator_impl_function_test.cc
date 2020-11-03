@@ -133,12 +133,12 @@ TEST_F(HlslGeneratorImplTest_Function,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -150,8 +150,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
@@ -192,15 +192,15 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragCoord));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   auto depth_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "depth", ast::StorageClass::kOutput, &f32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -212,8 +212,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
@@ -256,8 +256,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -266,8 +266,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
@@ -318,8 +318,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod()->AddConstructedType(&s);
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -328,8 +328,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
@@ -370,12 +370,14 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -390,8 +392,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -400,8 +402,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
@@ -436,12 +438,14 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -456,8 +460,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -466,8 +470,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto var =
       std::make_unique<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
@@ -502,12 +506,14 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -522,8 +528,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -533,8 +539,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto assign = std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::MemberAccessorExpression>(
@@ -572,17 +578,17 @@ TEST_F(
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   auto val_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("val", ast::StorageClass::kOutput, &f32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   val_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -614,8 +620,8 @@ TEST_F(
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
-  func_1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func_1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -669,8 +675,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "depth", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(depth_var.get());
@@ -692,8 +698,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
-  func_1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func_1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -741,15 +747,15 @@ TEST_F(
           "coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragCoord));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   auto depth_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "depth", ast::StorageClass::kOutput, &f32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -778,8 +784,8 @@ TEST_F(
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
-  func_1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func_1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -831,8 +837,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -856,8 +862,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -905,8 +911,8 @@ TEST_F(HlslGeneratorImplTest_Function,
           "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -930,8 +936,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   ast::ExpressionList expr;
   expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -975,7 +981,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(bar_var.get());
@@ -984,8 +990,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
-  func_1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func_1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::AssignmentStatement>(
@@ -1034,8 +1040,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto func = std::make_unique<ast::Function>("GeometryShader",
                                               ast::VariableList{}, &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
 
   mod()->AddFunction(std::move(func));
 
@@ -1053,8 +1059,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("main", std::move(params), &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
@@ -1079,9 +1085,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("main", std::move(params), &void_type);
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
-  func->add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());

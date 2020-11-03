@@ -29,21 +29,21 @@ namespace {
 using DecorationTest = testing::Test;
 
 TEST_F(DecorationTest, AsCorrectType) {
-  auto* decoration = new ConstantIdDecoration(1);
+  auto* decoration = new ConstantIdDecoration(1, Source{});
   auto upcast = std::unique_ptr<Decoration>(decoration);
   auto downcast = As<VariableDecoration>(std::move(upcast));
   EXPECT_EQ(decoration, downcast.get());
 }
 
 TEST_F(DecorationTest, AsIncorrectType) {
-  auto* decoration = new ConstantIdDecoration(1);
+  auto* decoration = new ConstantIdDecoration(1, Source{});
   auto upcast = std::unique_ptr<Decoration>(decoration);
   auto downcast = As<ArrayDecoration>(std::move(upcast));
   EXPECT_EQ(nullptr, downcast.get());
 }
 
 TEST_F(DecorationTest, Is) {
-  auto decoration = std::make_unique<ConstantIdDecoration>(1);
+  auto decoration = std::make_unique<ConstantIdDecoration>(1, Source{});
   EXPECT_TRUE(decoration->Is<VariableDecoration>());
   EXPECT_FALSE(decoration->Is<ArrayDecoration>());
 }

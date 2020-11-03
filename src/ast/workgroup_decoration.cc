@@ -17,13 +17,19 @@
 namespace tint {
 namespace ast {
 
-WorkgroupDecoration::WorkgroupDecoration(uint32_t x) : x_(x) {}
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x, const Source& source)
+    : FunctionDecoration(source), x_(x) {}
 
-WorkgroupDecoration::WorkgroupDecoration(uint32_t x, uint32_t y)
-    : x_(x), y_(y) {}
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
+                                         uint32_t y,
+                                         const Source& source)
+    : FunctionDecoration(source), x_(x), y_(y) {}
 
-WorkgroupDecoration::WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z)
-    : x_(x), y_(y), z_(z) {}
+WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
+                                         uint32_t y,
+                                         uint32_t z,
+                                         const Source& source)
+    : FunctionDecoration(source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 

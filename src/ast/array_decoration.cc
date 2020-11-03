@@ -21,7 +21,8 @@
 namespace tint {
 namespace ast {
 
-ArrayDecoration::ArrayDecoration() : Decoration(Kind) {}
+ArrayDecoration::ArrayDecoration(const Source& source)
+    : Decoration(Kind, source) {}
 
 ArrayDecoration::~ArrayDecoration() = default;
 

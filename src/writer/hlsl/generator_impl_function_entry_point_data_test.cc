@@ -56,12 +56,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -73,8 +73,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("vtx_main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -115,12 +115,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -132,8 +132,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("vtx_main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -174,12 +174,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -190,8 +190,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -232,12 +232,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -248,8 +248,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -287,12 +287,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -303,8 +303,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -337,12 +337,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       std::make_unique<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
   auto bar_var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(foo_var.get());
@@ -353,8 +353,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();
@@ -395,15 +395,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
           "coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragCoord));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
   auto depth_var =
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "depth", ast::StorageClass::kOutput, &f32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
   td().RegisterVariableForTesting(coord_var.get());
@@ -415,8 +415,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("main", std::move(params), &void_type);
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   auto* func_ptr = func.get();
 
   auto body = std::make_unique<ast::BlockStatement>();

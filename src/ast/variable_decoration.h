@@ -67,7 +67,8 @@ class VariableDecoration : public Decoration {
 
  protected:
   /// Constructor
-  VariableDecoration();
+  /// @param source the source of this decoration
+  explicit VariableDecoration(const Source& source);
 };
 
 /// A list of unique variable decorations

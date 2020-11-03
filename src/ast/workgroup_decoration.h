@@ -29,16 +29,19 @@ class WorkgroupDecoration : public FunctionDecoration {
  public:
   /// constructor
   /// @param x the workgroup x dimension size
-  explicit WorkgroupDecoration(uint32_t x);
+  /// @param source the source of this decoration
+  WorkgroupDecoration(uint32_t x, const Source& source);
   /// constructor
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
-  WorkgroupDecoration(uint32_t x, uint32_t y);
+  /// @param source the source of this decoration
+  WorkgroupDecoration(uint32_t x, uint32_t y, const Source& source);
   /// constructor
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
   /// @param z the workgroup x dimension size
-  WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z);
+  /// @param source the source of this decoration
+  WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
   ~WorkgroupDecoration() override;
 
   /// @returns true if this is a workgroup decoration

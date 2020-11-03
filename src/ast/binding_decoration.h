@@ -27,7 +27,8 @@ class BindingDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param value the binding value
-  explicit BindingDecoration(uint32_t value);
+  /// @param source the source of this decoration
+  BindingDecoration(uint32_t value, const Source& source);
   ~BindingDecoration() override;
 
   /// @returns true if this is a binding decoration

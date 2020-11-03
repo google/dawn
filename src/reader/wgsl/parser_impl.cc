@@ -439,6 +439,7 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
 //  | SET INT PAREN_LEFT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   auto t = peek();
+  auto source = t.source();
   if (t.IsLocation()) {
     next();  // consume the peek
 
@@ -460,7 +461,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       set_error(t, "missing ) for location decoration");
       return {};
     }
-    return std::make_unique<ast::LocationDecoration>(val);
+    return std::make_unique<ast::LocationDecoration>(val, source);
   }
   if (t.IsBuiltin()) {
     next();  // consume the peek
@@ -488,7 +489,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       set_error(t, "missing ) for builtin decoration");
       return {};
     }
-    return std::make_unique<ast::BuiltinDecoration>(builtin);
+    return std::make_unique<ast::BuiltinDecoration>(builtin, source);
   }
   if (t.IsBinding()) {
     next();  // consume the peek
@@ -512,7 +513,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       return {};
     }
 
-    return std::make_unique<ast::BindingDecoration>(val);
+    return std::make_unique<ast::BindingDecoration>(val, source);
   }
   if (t.IsSet()) {
     next();  // consume the peek
@@ -536,7 +537,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       return {};
     }
 
-    return std::make_unique<ast::SetDecoration>(val);
+    return std::make_unique<ast::SetDecoration>(val, source);
   }
 
   return nullptr;
@@ -1335,6 +1336,9 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
 
   for (;;) {
     t = next();
+
+    auto source = t.source();
+
     if (!t.IsStride()) {
       set_error(t, "unknown array decoration");
       return false;
@@ -1356,7 +1360,7 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
       return false;
     }
     uint32_t stride = static_cast<uint32_t>(t.to_i32());
-    decos.push_back(std::make_unique<ast::StrideDecoration>(stride));
+    decos.push_back(std::make_unique<ast::StrideDecoration>(stride, source));
 
     t = next();
     if (!t.IsParenRight()) {
@@ -1546,7 +1550,7 @@ bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
 //  : BLOCK
 std::unique_ptr<ast::StructDecoration> ParserImpl::struct_decoration(Token t) {
   if (t.IsBlock()) {
-    return std::make_unique<ast::StructBlockDecoration>();
+    return std::make_unique<ast::StructBlockDecoration>(t.source());
   }
   return nullptr;
 }
@@ -1677,6 +1681,8 @@ ParserImpl::struct_member_decoration() {
   if (!t.IsOffset())
     return nullptr;
 
+  auto source = t.source();
+
   next();  // Consume the peek
 
   t = next();
@@ -1702,7 +1708,7 @@ ParserImpl::struct_member_decoration() {
     return nullptr;
   }
 
-  return std::make_unique<ast::StructMemberOffsetDecoration>(val);
+  return std::make_unique<ast::StructMemberOffsetDecoration>(val, source);
 }
 
 // function_decl
@@ -1797,6 +1803,7 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
 //         (COMMA INT_LITERAL (COMMA INT_LITERAL)?)? PAREN_RIGHT
 std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
   auto t = peek();
+  auto source = t.source();
   if (t.IsWorkgroupSize()) {
     next();  // Consume the peek
 
@@ -1858,7 +1865,7 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
     }
 
     return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),
-                                                      uint32_t(z));
+                                                      uint32_t(z), source);
   }
   if (t.IsStage()) {
     next();  // Consume the peek
@@ -1883,7 +1890,7 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
       set_error(t, "missing ) for stage decoration");
       return nullptr;
     }
-    return std::make_unique<ast::StageDecoration>(stage);
+    return std::make_unique<ast::StageDecoration>(stage, source);
   }
   return nullptr;
 }

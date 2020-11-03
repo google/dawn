@@ -102,7 +102,7 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -112,7 +112,7 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -123,12 +123,12 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeStruct) {
   StructMemberList members;
 
   StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<StructMember>("foo", &u32, std::move(deco)));
 
   deco = StructMemberDecorationList();
-  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<StructMember>("bar", &u32, std::move(deco)));
 
@@ -152,7 +152,7 @@ TEST_F(AccessControlTypeTest, BaseAlignmentArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -162,7 +162,7 @@ TEST_F(AccessControlTypeTest, BaseAlignmentRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -174,13 +174,13 @@ TEST_F(AccessControlTypeTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }

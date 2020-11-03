@@ -26,7 +26,8 @@ class StageDecoration : public FunctionDecoration {
  public:
   /// constructor
   /// @param stage the pipeline stage
-  explicit StageDecoration(ast::PipelineStage stage);
+  /// @param source the source of this decoration
+  StageDecoration(ast::PipelineStage stage, const Source& source);
   ~StageDecoration() override;
 
   /// @returns true if this is a stage decoration

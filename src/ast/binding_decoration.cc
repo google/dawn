@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-BindingDecoration::BindingDecoration(uint32_t val) : value_(val) {}
+BindingDecoration::BindingDecoration(uint32_t val, const Source& source)
+    : VariableDecoration(source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
 

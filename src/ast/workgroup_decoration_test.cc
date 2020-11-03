@@ -25,7 +25,7 @@ namespace {
 using WorkgroupDecorationTest = testing::Test;
 
 TEST_F(WorkgroupDecorationTest, Creation_1param) {
-  WorkgroupDecoration d{2};
+  WorkgroupDecoration d{2, Source{}};
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
@@ -35,7 +35,7 @@ TEST_F(WorkgroupDecorationTest, Creation_1param) {
   EXPECT_EQ(z, 1u);
 }
 TEST_F(WorkgroupDecorationTest, Creation_2param) {
-  WorkgroupDecoration d{2, 4};
+  WorkgroupDecoration d{2, 4, Source{}};
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
@@ -46,7 +46,7 @@ TEST_F(WorkgroupDecorationTest, Creation_2param) {
 }
 
 TEST_F(WorkgroupDecorationTest, Creation_3param) {
-  WorkgroupDecoration d{2, 4, 6};
+  WorkgroupDecoration d{2, 4, 6, Source{}};
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
@@ -57,13 +57,13 @@ TEST_F(WorkgroupDecorationTest, Creation_3param) {
 }
 
 TEST_F(WorkgroupDecorationTest, Is) {
-  WorkgroupDecoration d{2, 4, 6};
+  WorkgroupDecoration d{2, 4, 6, Source{}};
   EXPECT_TRUE(d.IsWorkgroup());
   EXPECT_FALSE(d.IsStage());
 }
 
 TEST_F(WorkgroupDecorationTest, ToStr) {
-  WorkgroupDecoration d{2, 4, 6};
+  WorkgroupDecoration d{2, 4, 6, Source{}};
   std::ostringstream out;
   d.to_str(out);
   EXPECT_EQ(out.str(), R"(WorkgroupDecoration{2 4 6}

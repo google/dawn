@@ -165,7 +165,7 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -175,7 +175,7 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -187,13 +187,13 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
@@ -217,7 +217,7 @@ TEST_F(AliasTypeTest, BaseAlignmentArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -227,7 +227,7 @@ TEST_F(AliasTypeTest, BaseAlignmentRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -239,13 +239,13 @@ TEST_F(AliasTypeTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }

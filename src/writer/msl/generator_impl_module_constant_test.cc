@@ -64,7 +64,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23, Source{}));
 
   auto var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));

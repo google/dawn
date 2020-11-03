@@ -4702,8 +4702,8 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   func_a->set_body(std::move(body));
 
   auto ep_1 = std::make_unique<ast::Function>("ep_1", std::move(params), &f32);
-  ep_1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   auto* ep_1_ptr = ep_1.get();
 
   body = std::make_unique<ast::BlockStatement>();
@@ -4720,8 +4720,8 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   ep_1->set_body(std::move(body));
 
   auto ep_2 = std::make_unique<ast::Function>("ep_2", std::move(params), &f32);
-  ep_2->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_2->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   auto* ep_2_ptr = ep_2.get();
 
   body = std::make_unique<ast::BlockStatement>();

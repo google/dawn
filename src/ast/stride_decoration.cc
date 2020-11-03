@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-StrideDecoration::StrideDecoration(uint32_t stride) : stride_(stride) {}
+StrideDecoration::StrideDecoration(uint32_t stride, const Source& source)
+    : ArrayDecoration(source), stride_(stride) {}
 
 bool StrideDecoration::IsStride() const {
   return true;

@@ -90,24 +90,24 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   VariableDecorationList decos;
   DecoratedVariable loc1(
       std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   loc1.set_decorations(std::move(decos));
 
   DecoratedVariable loc2(
       std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   loc2.set_decorations(std::move(decos));
 
   DecoratedVariable builtin1(
       std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kPosition, Source{}));
   builtin1.set_decorations(std::move(decos));
 
   DecoratedVariable builtin2(
       std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   builtin2.set_decorations(std::move(decos));
 
   Function f("func", VariableList{}, &void_type);
@@ -133,24 +133,24 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   VariableDecorationList decos;
   DecoratedVariable loc1(
       std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   loc1.set_decorations(std::move(decos));
 
   DecoratedVariable loc2(
       std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   loc2.set_decorations(std::move(decos));
 
   DecoratedVariable builtin1(
       std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kPosition, Source{}));
   builtin1.set_decorations(std::move(decos));
 
   DecoratedVariable builtin2(
       std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kFragDepth, Source{}));
   builtin2.set_decorations(std::move(decos));
 
   Function f("func", VariableList{}, &void_type);
@@ -308,7 +308,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
 
   Function f("func", {}, &void_type);
   f.set_body(std::move(block));
-  f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6));
+  f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6, Source{}));
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -413,7 +413,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 TEST_F(FunctionTest, WorkgroupSize) {
   type::VoidType void_type;
   Function f("f", {}, &void_type);
-  f.add_decoration(std::make_unique<WorkgroupDecoration>(2u, 4u, 6u));
+  f.add_decoration(std::make_unique<WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
   uint32_t x = 0;
   uint32_t y = 0;

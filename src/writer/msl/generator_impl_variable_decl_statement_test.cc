@@ -95,7 +95,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
       "a", &f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 

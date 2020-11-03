@@ -22,7 +22,8 @@
 namespace tint {
 namespace ast {
 
-FunctionDecoration::FunctionDecoration() : Decoration(Kind) {}
+FunctionDecoration::FunctionDecoration(const Source& source)
+    : Decoration(Kind, source) {}
 
 FunctionDecoration::~FunctionDecoration() = default;
 

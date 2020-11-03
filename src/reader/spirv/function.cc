@@ -635,7 +635,7 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
 
   if (ep_info_ != nullptr) {
     ast_fn->add_decoration(
-        std::make_unique<ast::StageDecoration>(ep_info_->stage));
+        std::make_unique<ast::StageDecoration>(ep_info_->stage, Source{}));
   }
 
   ast_module_.AddFunction(std::move(ast_fn));

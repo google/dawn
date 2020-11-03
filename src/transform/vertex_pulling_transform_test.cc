@@ -44,8 +44,8 @@ class VertexPullingTransformHelper {
     auto func = std::make_unique<ast::Function>(
         "main", ast::VariableList{},
         ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
-    func->add_decoration(
-        std::make_unique<ast::StageDecoration>(ast::PipelineStage ::kVertex));
+    func->add_decoration(std::make_unique<ast::StageDecoration>(
+        ast::PipelineStage ::kVertex, Source{}));
     mod()->AddFunction(std::move(func));
   }
 
@@ -69,7 +69,8 @@ class VertexPullingTransformHelper {
         std::make_unique<ast::Variable>(name, ast::StorageClass::kInput, type));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<ast::LocationDecoration>(location));
+    decorations.push_back(
+        std::make_unique<ast::LocationDecoration>(location, Source{}));
 
     var->set_decorations(std::move(decorations));
     mod_->AddGlobalVariable(std::move(var));
@@ -112,8 +113,8 @@ TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
   auto func = std::make_unique<ast::Function>(
       "main", ast::VariableList{},
       ctx()->type_mgr().Get(std::make_unique<ast::type::VoidType>()));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(func));
 
   InitTransform({});
@@ -396,8 +397,8 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
                                         ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(
-        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx));
+    decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
+        ast::Builtin::kVertexIdx, Source{}));
 
     vertex_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(vertex_index_var));
@@ -409,8 +410,8 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
                                         ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(
-        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx));
+    decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
+        ast::Builtin::kInstanceIdx, Source{}));
 
     instance_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(instance_index_var));

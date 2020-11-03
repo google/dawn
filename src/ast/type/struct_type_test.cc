@@ -70,13 +70,13 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
@@ -95,26 +95,26 @@ TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
   ArrayType arr(&u32, 4);
   {
     ArrayDecorationList decos;
-    decos.push_back(std::make_unique<StrideDecoration>(4));
+    decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
     arr.set_decorations(std::move(decos));
   }
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &arr, std::move(deco)));
   }
@@ -134,26 +134,26 @@ TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
   ArrayType arr(&u32);
   {
     ArrayDecorationList decos;
-    decos.push_back(std::make_unique<StrideDecoration>(4));
+    decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
     arr.set_decorations(std::move(decos));
   }
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
@@ -173,7 +173,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec2, std::move(deco)));
   }
@@ -194,7 +194,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec3, std::move(deco)));
   }
@@ -216,7 +216,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec4, std::move(deco)));
   }
@@ -237,13 +237,13 @@ TEST_F(StructTypeTest, BaseAlignment) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
@@ -261,26 +261,26 @@ TEST_F(StructTypeTest, BaseAlignmentArray) {
   ArrayType arr(&u32, 4);
   {
     ArrayDecorationList decos;
-    decos.push_back(std::make_unique<StrideDecoration>(4));
+    decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
     arr.set_decorations(std::move(decos));
   }
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &arr, std::move(deco)));
   }
@@ -298,26 +298,26 @@ TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
   ArrayType arr(&u32);
   {
     ArrayDecorationList decos;
-    decos.push_back(std::make_unique<StrideDecoration>(4));
+    decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
     arr.set_decorations(std::move(decos));
   }
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(8, Source{}));
     members.push_back(
         std::make_unique<StructMember>("bar", &u32, std::move(deco)));
   }
@@ -336,7 +336,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec2) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec2, std::move(deco)));
   }
@@ -356,7 +356,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec3) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec3, std::move(deco)));
   }
@@ -376,7 +376,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec4) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
     members.push_back(
         std::make_unique<StructMember>("foo", &vec4, std::move(deco)));
   }

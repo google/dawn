@@ -26,7 +26,8 @@ class ConstantIdDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param val the constant_id value
-  explicit ConstantIdDecoration(uint32_t val);
+  /// @param source the source of this decoration
+  ConstantIdDecoration(uint32_t val, const Source& source);
   ~ConstantIdDecoration() override;
 
   /// @returns true if this is a constant_id decoration

@@ -27,7 +27,8 @@ class SetDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param value the set value
-  explicit SetDecoration(uint32_t value);
+  /// @param source the source of this decoration
+  SetDecoration(uint32_t value, const Source& source);
   ~SetDecoration() override;
 
   /// @returns true if this is a set decoration

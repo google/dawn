@@ -29,7 +29,8 @@ class StructMemberOffsetDecoration : public StructMemberDecoration {
  public:
   /// constructor
   /// @param offset the offset value
-  explicit StructMemberOffsetDecoration(uint32_t offset);
+  /// @param source the source of this decoration
+  StructMemberOffsetDecoration(uint32_t offset, const Source& source);
   ~StructMemberOffsetDecoration() override;
 
   /// @returns true if this is an offset decoration

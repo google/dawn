@@ -62,7 +62,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23, Source{}));
 
   auto var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
@@ -85,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23, Source{}));
 
   auto var = std::make_unique<ast::DecoratedVariable>(
       std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));

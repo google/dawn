@@ -29,7 +29,8 @@ class StrideDecoration : public ArrayDecoration {
  public:
   /// constructor
   /// @param stride the stride value
-  explicit StrideDecoration(uint32_t stride);
+  /// @param source the source of this decoration
+  StrideDecoration(uint32_t stride, const Source& source);
   ~StrideDecoration() override;
 
   /// @returns true if this is a stride decoration

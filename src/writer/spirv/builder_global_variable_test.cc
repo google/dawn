@@ -268,7 +268,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(5));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(5, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -292,8 +292,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(2));
-  decos.push_back(std::make_unique<ast::SetDecoration>(3));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(2, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(3, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -318,8 +318,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kPosition, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -342,7 +342,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
   ast::type::BoolType bool_type;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200, Source{}));
 
   ast::DecoratedVariable v(std::make_unique<ast::Variable>(
       "var", ast::StorageClass::kNone, &bool_type));
@@ -368,7 +368,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   ast::type::BoolType bool_type;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200, Source{}));
 
   ast::DecoratedVariable v(std::make_unique<ast::Variable>(
       "var", ast::StorageClass::kNone, &bool_type));
@@ -392,7 +392,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
@@ -418,7 +418,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
@@ -442,7 +442,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   ast::type::I32Type i32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32));
@@ -466,7 +466,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   ast::type::U32Type u32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &u32));

@@ -41,7 +41,8 @@ class StructDecoration : public Decoration {
 
  protected:
   /// Constructor
-  StructDecoration();
+  /// @param source the source of this decoration
+  explicit StructDecoration(const Source& source);
 };
 
 /// List of struct decorations

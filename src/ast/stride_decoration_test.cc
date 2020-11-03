@@ -23,13 +23,22 @@ namespace {
 using StrideDecorationTest = testing::Test;
 
 TEST_F(StrideDecorationTest, Creation) {
-  StrideDecoration d{2};
+  StrideDecoration d{2, Source{}};
   EXPECT_EQ(2u, d.stride());
 }
 
 TEST_F(StrideDecorationTest, Is) {
-  StrideDecoration d{2};
+  StrideDecoration d{2, Source{}};
   EXPECT_TRUE(d.IsStride());
+}
+
+TEST_F(StrideDecorationTest, Source) {
+  StrideDecoration d{
+      2, Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}};
+  EXPECT_EQ(d.GetSource().range.begin.line, 1u);
+  EXPECT_EQ(d.GetSource().range.begin.column, 2u);
+  EXPECT_EQ(d.GetSource().range.end.line, 3u);
+  EXPECT_EQ(d.GetSource().range.end.column, 4u);
 }
 
 }  // namespace

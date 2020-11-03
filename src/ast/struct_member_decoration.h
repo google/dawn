@@ -45,7 +45,8 @@ class StructMemberDecoration : public Decoration {
 
  protected:
   /// Constructor
-  StructMemberDecoration();
+  /// @param source the source of this decoration
+  explicit StructMemberDecoration(const Source& source);
 };
 
 /// A list of unique struct member decorations

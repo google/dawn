@@ -344,8 +344,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -674,8 +674,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       Source{Source::Location{13, 34}}, std::move(var1)));
   body1->append(std::make_unique<ast::ReturnStatement>());
   func1->set_body(std::move(body1));
-  func1->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func1->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
 
   mod()->AddFunction(std::move(func0));
   mod()->AddFunction(std::move(func1));

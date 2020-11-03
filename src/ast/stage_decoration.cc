@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-StageDecoration::StageDecoration(ast::PipelineStage stage) : stage_(stage) {}
+StageDecoration::StageDecoration(ast::PipelineStage stage, const Source& source)
+    : FunctionDecoration(source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
 

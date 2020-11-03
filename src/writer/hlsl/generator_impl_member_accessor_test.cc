@@ -51,7 +51,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("mem", &f32, std::move(deco)));
 
@@ -92,12 +93,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -140,12 +143,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -191,12 +196,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
 
@@ -254,12 +261,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
 
@@ -313,12 +322,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
 
@@ -368,12 +379,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
 
@@ -420,7 +433,8 @@ TEST_F(
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(deco)));
 
@@ -466,12 +480,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("z", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &mat, std::move(b_deco)));
 
@@ -518,12 +534,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4, Source{}));
   ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(a_deco)));
 
@@ -567,12 +584,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4, Source{}));
   ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(a_deco)));
 
@@ -627,12 +645,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -678,12 +698,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 5);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(4, Source{}));
   ary.set_decorations(std::move(decos));
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ary, std::move(a_deco)));
 
@@ -734,12 +755,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -789,12 +812,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(b_deco)));
 
@@ -840,12 +865,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(a_deco)));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(b_deco)));
 
@@ -913,11 +940,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -928,10 +957,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 
@@ -986,11 +1016,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -1001,10 +1033,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 
@@ -1062,11 +1095,13 @@ TEST_F(
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -1077,10 +1112,11 @@ TEST_F(
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 
@@ -1137,11 +1173,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -1152,10 +1190,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 
@@ -1213,11 +1252,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -1228,10 +1269,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 
@@ -1305,11 +1347,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("a", &ivec3, std::move(deco)));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(16));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &fvec3, std::move(deco)));
 
@@ -1320,10 +1364,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::ArrayType ary(&data, 4);
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32));
+  decos.push_back(std::make_unique<ast::StrideDecoration>(32, Source{}));
   ary.set_decorations(std::move(decos));
 
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &ary, std::move(deco)));
 

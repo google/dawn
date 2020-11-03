@@ -30,7 +30,8 @@ using StructMemberTest = testing::Test;
 TEST_F(StructMemberTest, Creation) {
   type::I32Type i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  decorations.emplace_back(
+      std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
 
   StructMember st{"a", &i32, std::move(decorations)};
   EXPECT_EQ(st.name(), "a");
@@ -77,7 +78,8 @@ TEST_F(StructMemberTest, IsValid_NullType) {
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
   type::I32Type i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  decorations.emplace_back(
+      std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
   decorations.push_back(nullptr);
 
   StructMember st{"a", &i32, std::move(decorations)};
@@ -87,7 +89,8 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
 TEST_F(StructMemberTest, ToStr) {
   type::I32Type i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  decorations.emplace_back(
+      std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
 
   StructMember st{"a", &i32, std::move(decorations)};
   std::ostringstream out;

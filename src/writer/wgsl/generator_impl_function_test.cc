@@ -87,7 +87,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+  func.add_decoration(
+      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
   GeneratorImpl g;
@@ -109,8 +110,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
-  func.add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func.add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   func.set_body(std::move(body));
 
   GeneratorImpl g;
@@ -132,9 +133,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
+  func.add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   func.add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
-  func.add_decoration(std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u));
+      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
   GeneratorImpl g;

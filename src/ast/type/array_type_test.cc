@@ -81,7 +81,7 @@ TEST_F(ArrayTypeTest, TypeName_RuntimeArray) {
 TEST_F(ArrayTypeTest, TypeName_WithStride) {
   I32Type i32;
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(16));
+  decos.push_back(std::make_unique<StrideDecoration>(16, Source{}));
 
   ArrayType arr{&i32, 3};
   arr.set_decorations(std::move(decos));
@@ -97,7 +97,7 @@ TEST_F(ArrayTypeTest, MinBufferBindingSizeNoStride) {
 TEST_F(ArrayTypeTest, MinBufferBindingSizeArray) {
   U32Type u32;
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32, 4);
   arr.set_decorations(std::move(decos));
@@ -107,7 +107,7 @@ TEST_F(ArrayTypeTest, MinBufferBindingSizeArray) {
 TEST_F(ArrayTypeTest, MinBufferBindingSizeRuntimeArray) {
   U32Type u32;
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32);
   arr.set_decorations(std::move(decos));
@@ -117,7 +117,7 @@ TEST_F(ArrayTypeTest, MinBufferBindingSizeRuntimeArray) {
 TEST_F(ArrayTypeTest, BaseAlignmentArray) {
   U32Type u32;
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32, 4);
   arr.set_decorations(std::move(decos));
@@ -128,7 +128,7 @@ TEST_F(ArrayTypeTest, BaseAlignmentArray) {
 TEST_F(ArrayTypeTest, BaseAlignmentRuntimeArray) {
   U32Type u32;
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4));
+  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32);
   arr.set_decorations(std::move(decos));

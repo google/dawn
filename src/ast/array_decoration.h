@@ -45,7 +45,8 @@ class ArrayDecoration : public Decoration {
 
  protected:
   /// Constructor
-  ArrayDecoration();
+  /// @param source the source of this decoration
+  explicit ArrayDecoration(const Source& source);
 };
 
 /// A list of unique array decorations

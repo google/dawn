@@ -49,13 +49,19 @@ class Decoration {
     return GetKind() == TO::Kind;
   }
 
+  /// @return the source of this decoration
+  const Source& GetSource() { return source_; }
+
  protected:
   /// Constructor
   /// @param kind represents the derived type
-  explicit Decoration(DecorationKind kind) : kind_(kind) {}
+  /// @param source the source of this decoration
+  Decoration(DecorationKind kind, const Source& source)
+      : kind_(kind), source_(source) {}
 
  private:
   DecorationKind const kind_;
+  Source const source_;
 };
 
 /// As dynamically casts |deco| to the target type |TO|.

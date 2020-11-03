@@ -84,8 +84,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->DetermineFunctions(mod()->functions())) << td()->error();
@@ -238,8 +238,8 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>(std::move(return_expr)));
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
 
   mod()->AddFunction(std::move(func));
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -262,8 +262,8 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
 
   mod()->AddFunction(std::move(func));
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -285,8 +285,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
@@ -294,8 +294,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
   body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -317,8 +317,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
@@ -326,8 +326,8 @@ TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
   body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -344,8 +344,8 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();

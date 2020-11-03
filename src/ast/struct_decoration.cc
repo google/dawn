@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-StructDecoration::StructDecoration() : Decoration(Kind) {}
+StructDecoration::StructDecoration(const Source& source)
+    : Decoration(Kind, source) {}
 
 StructDecoration::~StructDecoration() = default;
 

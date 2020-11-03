@@ -202,7 +202,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
       "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -226,7 +227,8 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
       "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
@@ -250,17 +252,20 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   ast::type::F32Type f32;
 
   ast::StructMemberDecorationList decos;
-  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  decos.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
 
   ast::StructMemberList members;
   members.push_back(
       std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
 
-  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(32));
+  decos.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(32, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
 
-  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(128));
+  decos.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(128, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("c", &f32, std::move(decos)));
 
@@ -320,12 +325,13 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
       "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+  b_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
   ast::StructDecorationList decos;
-  decos.push_back(std::make_unique<ast::StructBlockDecoration>());
+  decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
   auto str =
       std::make_unique<ast::Struct>(std::move(decos), std::move(members));
 

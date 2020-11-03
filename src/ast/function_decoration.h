@@ -51,7 +51,8 @@ class FunctionDecoration : public Decoration {
 
  protected:
   /// Constructor
-  FunctionDecoration();
+  /// @param source the source of this decoration
+  explicit FunctionDecoration(const Source& source);
 };
 
 /// A list of unique function decorations

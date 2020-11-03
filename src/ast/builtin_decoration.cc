@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-BuiltinDecoration::BuiltinDecoration(Builtin builtin) : builtin_(builtin) {}
+BuiltinDecoration::BuiltinDecoration(Builtin builtin, const Source& source)
+    : VariableDecoration(source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 

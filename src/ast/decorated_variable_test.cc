@@ -76,9 +76,10 @@ TEST_F(DecoratedVariableTest, WithDecorations) {
   DecoratedVariable dv(std::move(var));
 
   VariableDecorationList decos;
-  decos.push_back(std::make_unique<LocationDecoration>(1));
-  decos.push_back(std::make_unique<BuiltinDecoration>(ast::Builtin::kPosition));
-  decos.push_back(std::make_unique<ConstantIdDecoration>(1200));
+  decos.push_back(std::make_unique<LocationDecoration>(1, Source{}));
+  decos.push_back(
+      std::make_unique<BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
+  decos.push_back(std::make_unique<ConstantIdDecoration>(1200, Source{}));
 
   dv.set_decorations(std::move(decos));
 
@@ -93,7 +94,7 @@ TEST_F(DecoratedVariableTest, ConstantId) {
   DecoratedVariable dv(std::move(var));
 
   VariableDecorationList decos;
-  decos.push_back(std::make_unique<ConstantIdDecoration>(1200));
+  decos.push_back(std::make_unique<ConstantIdDecoration>(1200, Source{}));
   dv.set_decorations(std::move(decos));
 
   EXPECT_EQ(dv.constant_id(), 1200u);
@@ -118,8 +119,8 @@ TEST_F(DecoratedVariableTest, to_str) {
   dv.set_constructor(std::make_unique<IdentifierExpression>("expr"));
 
   VariableDecorationList decos;
-  decos.push_back(std::make_unique<BindingDecoration>(2));
-  decos.push_back(std::make_unique<SetDecoration>(1));
+  decos.push_back(std::make_unique<BindingDecoration>(2, Source{}));
+  decos.push_back(std::make_unique<SetDecoration>(1, Source{}));
 
   dv.set_decorations(std::move(decos));
   std::ostringstream out;

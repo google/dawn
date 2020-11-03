@@ -28,7 +28,8 @@ namespace ast {
 class StructBlockDecoration : public StructDecoration {
  public:
   /// constructor
-  StructBlockDecoration();
+  /// @param source the source of this decoration
+  explicit StructBlockDecoration(const Source& source);
   ~StructBlockDecoration() override;
 
   /// @returns true if this is a block struct

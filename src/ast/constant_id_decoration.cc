@@ -17,7 +17,8 @@
 namespace tint {
 namespace ast {
 
-ConstantIdDecoration::ConstantIdDecoration(uint32_t val) : value_(val) {}
+ConstantIdDecoration::ConstantIdDecoration(uint32_t val, const Source& source)
+    : VariableDecoration(source), value_(val) {}
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
 

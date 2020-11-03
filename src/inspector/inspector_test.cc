@@ -183,7 +183,7 @@ class InspectorHelper {
         std::make_unique<ast::Variable>(name, ast::StorageClass::kNone, type));
     dvar->set_is_const(true);
     ast::VariableDecorationList decos;
-    decos.push_back(std::make_unique<ast::ConstantIdDecoration>(id));
+    decos.push_back(std::make_unique<ast::ConstantIdDecoration>(id, Source{}));
     dvar->set_decorations(std::move(decos));
     if (val) {
       dvar->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
@@ -260,8 +260,8 @@ class InspectorHelper {
       std::tie(type, offset) = member_info;
 
       ast::StructMemberDecorationList deco;
-      deco.push_back(
-          std::make_unique<ast::StructMemberOffsetDecoration>(offset));
+      deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(
+          offset, Source{}));
 
       members.push_back(std::make_unique<ast::StructMember>(
           StructMemberName(members.size(), type), type, std::move(deco)));
@@ -269,7 +269,7 @@ class InspectorHelper {
 
     ast::StructDecorationList decos;
     if (is_block) {
-      decos.push_back(std::make_unique<ast::StructBlockDecoration>());
+      decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
     }
 
     auto str =
@@ -315,8 +315,9 @@ class InspectorHelper {
         std::make_unique<ast::Variable>(name, storage_class, struct_type));
     ast::VariableDecorationList decorations;
 
-    decorations.push_back(std::make_unique<ast::BindingDecoration>(binding));
-    decorations.push_back(std::make_unique<ast::SetDecoration>(set));
+    decorations.push_back(
+        std::make_unique<ast::BindingDecoration>(binding, Source{}));
+    decorations.push_back(std::make_unique<ast::SetDecoration>(set, Source{}));
     var->set_decorations(std::move(decorations));
 
     mod()->AddGlobalVariable(std::move(var));
@@ -401,7 +402,7 @@ class InspectorHelper {
       array_type_memo_[count] =
           std::make_unique<ast::type::ArrayType>(u32_type(), count);
       ast::ArrayDecorationList decos;
-      decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+      decos.push_back(std::make_unique<ast::StrideDecoration>(4, Source{}));
       array_type_memo_[count]->set_decorations(std::move(decos));
     }
     return array_type_memo_[count].get();
@@ -447,8 +448,8 @@ TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
 
 TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -461,13 +462,13 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeEmptyBodyFunction("bar");
-  bar->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  bar->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   auto result = inspector()->GetEntryPoints();
@@ -485,13 +486,13 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeCallerBodyFunction("bar", "func");
-  bar->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kFragment));
+  bar->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(bar));
 
   auto result = inspector()->GetEntryPoints();
@@ -506,8 +507,8 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -523,9 +524,10 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
   auto foo = MakeEmptyBodyFunction("foo");
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
-  foo->add_decoration(std::make_unique<ast::WorkgroupDecoration>(8u, 2u, 1u));
+      std::make_unique<ast::WorkgroupDecoration>(8u, 2u, 1u, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -544,8 +546,8 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -560,8 +562,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}});
 
   auto foo = MakeInOutVariableBodyFunction("foo", {{"in_var", "out_var"}});
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -584,8 +586,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -609,8 +611,8 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
 
   auto foo = MakeInOutVariableCallerBodyFunction("foo", "func",
                                                  {{"in_var", "out_var"}});
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -631,8 +633,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
 
   auto foo = MakeInOutVariableBodyFunction(
       "foo", {{"in_var", "out_var"}, {"in2_var", "out2_var"}});
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -658,8 +660,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -681,13 +683,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   auto foo = MakeInOutVariableBodyFunction("foo", {{"in_var", "out2_var"}});
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeInOutVariableBodyFunction("bar", {{"in2_var", "out_var"}});
-  bar->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  bar->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -718,13 +720,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   auto foo = MakeInOutVariableCallerBodyFunction("foo", "func",
                                                  {{"in_var", "out_var"}});
-  foo->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeCallerBodyFunction("bar", "func");
-  bar->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kCompute));
+  bar->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -853,8 +855,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, NonEntryPointFunc) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -867,7 +869,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, NonEntryPointFunc) {
 TEST_F(InspectorGetUniformBufferResourceBindings, MissingBlockDeco) {
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
 
   members.push_back(std::make_unique<ast::StructMember>(
       StructMemberName(members.size(), i32_type()), i32_type(),
@@ -887,8 +890,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MissingBlockDeco) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -907,8 +910,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, Simple) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -932,8 +935,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -982,8 +985,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBuffers) {
       "ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1015,8 +1018,8 @@ TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1039,8 +1042,8 @@ TEST_F(InspectorGetStorageBufferResourceBindings, Simple) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1064,8 +1067,8 @@ TEST_F(InspectorGetStorageBufferResourceBindings, MultipleMembers) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1114,8 +1117,8 @@ TEST_F(InspectorGetStorageBufferResourceBindings, MultipleStorageBuffers) {
       "ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1147,8 +1150,8 @@ TEST_F(InspectorGetStorageBufferResourceBindings, ContainingArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1172,8 +1175,8 @@ TEST_F(InspectorGetStorageBufferResourceBindings, ContainingRuntimeArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();

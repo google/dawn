@@ -392,7 +392,8 @@ ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
             << ShowType(struct_type_id);
         return nullptr;
       }
-      return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1]);
+      return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1],
+                                                                 Source{});
     case SpvDecorationNonReadable:
       // WGSL doesn't have a member decoration for this.  Silently drop it.
       return nullptr;
@@ -781,7 +782,8 @@ bool ParserImpl::ApplyArrayDecorations(
                       << ": multiple ArrayStride decorations";
       }
       ast::ArrayDecorationList decos;
-      decos.push_back(std::make_unique<ast::StrideDecoration>(stride));
+      decos.push_back(
+          std::make_unique<ast::StrideDecoration>(stride, Source{}));
       ast_type->set_decorations(std::move(decos));
     } else {
       return Fail() << "invalid array type ID " << type_id
@@ -804,10 +806,10 @@ ast::type::Type* ParserImpl::ConvertType(
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
       ast_struct_decorations.push_back(
-          std::make_unique<ast::StructBlockDecoration>());
+          std::make_unique<ast::StructBlockDecoration>(Source{}));
     } else if (decoration == SpvDecorationBufferBlock) {
       ast_struct_decorations.push_back(
-          std::make_unique<ast::StructBlockDecoration>());
+          std::make_unique<ast::StructBlockDecoration>(Source{}));
       remap_buffer_block_type_.insert(type_id);
     } else {
       Fail() << "struct with ID " << type_id
@@ -1006,7 +1008,8 @@ bool ParserImpl::EmitScalarSpecConstants() {
       ast::VariableDecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto cid = std::make_unique<ast::ConstantIdDecoration>(deco[1]);
+          auto cid =
+              std::make_unique<ast::ConstantIdDecoration>(deco[1], Source{});
           spec_id_decos.push_back(std::move(cid));
           break;
         }
@@ -1142,8 +1145,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.member_type_id)));
     ast::VariableDecorationList decos;
-    decos.push_back(
-        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+    decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+        ast::Builtin::kPosition, Source{}));
     var->set_decorations(std::move(decos));
 
     ast_module_.AddGlobalVariable(std::move(var));
@@ -1188,7 +1191,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::BuiltinDecoration>(ast_builtin));
+          std::make_unique<ast::BuiltinDecoration>(ast_builtin, Source{}));
     }
     if (deco[0] == SpvDecorationLocation) {
       if (deco.size() != 2) {
@@ -1197,7 +1200,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::LocationDecoration>(deco[1]));
+          std::make_unique<ast::LocationDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
@@ -1206,7 +1209,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::SetDecoration>(deco[1]));
+          std::make_unique<ast::SetDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
@@ -1215,7 +1218,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::BindingDecoration>(deco[1]));
+          std::make_unique<ast::BindingDecoration>(deco[1], Source{}));
     }
   }
   if (!ast_decorations.empty()) {

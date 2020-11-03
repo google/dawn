@@ -56,7 +56,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(2));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(2, Source{}));
 
   ast::DecoratedVariable dv;
   dv.set_name("a");
@@ -73,12 +73,12 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0));
-  decos.push_back(std::make_unique<ast::SetDecoration>(1));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(2));
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(42));
+  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kPosition, Source{}));
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(2, Source{}));
+  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(42, Source{}));
 
   ast::DecoratedVariable dv;
   dv.set_name("a");

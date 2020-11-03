@@ -143,8 +143,8 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
           vertex_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
-  decorations.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx));
+  decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kVertexIdx, Source{}));
 
   var->set_decorations(std::move(decorations));
   mod_->AddGlobalVariable(std::move(var));
@@ -186,8 +186,8 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
           instance_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
-  decorations.push_back(
-      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx));
+  decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
+      ast::Builtin::kInstanceIdx, Source{}));
 
   var->set_decorations(std::move(decorations));
   mod_->AddGlobalVariable(std::move(var));
@@ -221,7 +221,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   // The array inside the struct definition
   auto internal_array = std::make_unique<ast::type::ArrayType>(GetU32Type());
   ast::ArrayDecorationList ary_decos;
-  ary_decos.push_back(std::make_unique<ast::StrideDecoration>(4u));
+  ary_decos.push_back(std::make_unique<ast::StrideDecoration>(4u, Source{}));
   internal_array->set_decorations(std::move(ary_decos));
 
   auto* internal_array_type = ctx_->type_mgr().Get(std::move(internal_array));
@@ -229,13 +229,14 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   // Creating the struct type
   ast::StructMemberList members;
   ast::StructMemberDecorationList member_dec;
-  member_dec.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0u));
+  member_dec.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0u, Source{}));
 
   members.push_back(std::make_unique<ast::StructMember>(
       kStructBufferName, internal_array_type, std::move(member_dec)));
 
   ast::StructDecorationList decos;
-  decos.push_back(std::make_unique<ast::StructBlockDecoration>());
+  decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type =
       ctx_->type_mgr().Get(std::make_unique<ast::type::StructType>(
@@ -251,8 +252,10 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
 
     // Add decorations
     ast::VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<ast::BindingDecoration>(i));
-    decorations.push_back(std::make_unique<ast::SetDecoration>(pulling_set_));
+    decorations.push_back(
+        std::make_unique<ast::BindingDecoration>(i, Source{}));
+    decorations.push_back(
+        std::make_unique<ast::SetDecoration>(pulling_set_, Source{}));
     var->set_decorations(std::move(decorations));
 
     mod_->AddGlobalVariable(std::move(var));
