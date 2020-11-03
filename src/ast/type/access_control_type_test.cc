@@ -16,8 +16,14 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/stride_decoration.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_decoration.h"
+#include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 
 namespace tint {
@@ -81,6 +87,108 @@ TEST_F(AccessControlTypeTest, AccessReadWrite) {
   EXPECT_TRUE(at.IsReadWrite());
 
   EXPECT_EQ(at.type_name(), "__access_control_read_write__i32");
+}
+
+TEST_F(AccessControlTypeTest, MinBufferBindingSizeU32) {
+  U32Type u32;
+  AccessControlType at{AccessControl::kReadOnly, &u32};
+  EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, MinBufferBindingSizeArray) {
+  U32Type u32;
+  ArrayType array(&u32, 4);
+  ArrayDecorationList decos;
+  decos.push_back(std::make_unique<StrideDecoration>(4));
+  array.set_decorations(std::move(decos));
+  AccessControlType at{AccessControl::kReadOnly, &array};
+  EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, MinBufferBindingSizeRuntimeArray) {
+  U32Type u32;
+  ArrayType array(&u32);
+  ArrayDecorationList decos;
+  decos.push_back(std::make_unique<StrideDecoration>(4));
+  array.set_decorations(std::move(decos));
+  AccessControlType at{AccessControl::kReadOnly, &array};
+  EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, MinBufferBindingSizeStruct) {
+  U32Type u32;
+  StructMemberList members;
+
+  StructMemberDecorationList deco;
+  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+  members.push_back(
+      std::make_unique<StructMember>("foo", &u32, std::move(deco)));
+
+  deco = StructMemberDecorationList();
+  deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  members.push_back(
+      std::make_unique<StructMember>("bar", &u32, std::move(deco)));
+
+  ast::StructDecorationList decos;
+
+  auto str =
+      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  StructType struct_type("struct_type", std::move(str));
+  AccessControlType at{AccessControl::kReadOnly, &struct_type};
+  EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(8u, at.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(AccessControlTypeTest, BaseAlignmentU32) {
+  U32Type u32;
+  AccessControlType at{AccessControl::kReadOnly, &u32};
+  EXPECT_EQ(4u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, BaseAlignmentArray) {
+  U32Type u32;
+  ArrayType array(&u32, 4);
+  ArrayDecorationList decos;
+  decos.push_back(std::make_unique<StrideDecoration>(4));
+  array.set_decorations(std::move(decos));
+  AccessControlType at{AccessControl::kReadOnly, &array};
+  EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, BaseAlignmentRuntimeArray) {
+  U32Type u32;
+  ArrayType array(&u32);
+  ArrayDecorationList decos;
+  decos.push_back(std::make_unique<StrideDecoration>(4));
+  array.set_decorations(std::move(decos));
+  AccessControlType at{AccessControl::kReadOnly, &array};
+  EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(AccessControlTypeTest, BaseAlignmentStruct) {
+  U32Type u32;
+  StructMemberList members;
+
+  {
+    StructMemberDecorationList deco;
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0));
+    members.push_back(
+        std::make_unique<StructMember>("foo", &u32, std::move(deco)));
+  }
+  {
+    StructMemberDecorationList deco;
+    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4));
+    members.push_back(
+        std::make_unique<StructMember>("bar", &u32, std::move(deco)));
+  }
+  ast::StructDecorationList decos;
+
+  auto str =
+      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  StructType struct_type("struct_type", std::move(str));
+  AccessControlType at{AccessControl::kReadOnly, &struct_type};
+  EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(4u, at.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
 }  // namespace

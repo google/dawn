@@ -45,6 +45,16 @@ TEST_F(U32TypeTest, TypeName) {
   EXPECT_EQ(u.type_name(), "__u32");
 }
 
+TEST_F(U32TypeTest, MinBufferBindingSize) {
+  U32Type u;
+  EXPECT_EQ(4u, u.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(U32TypeTest, BaseAlignment) {
+  U32Type u;
+  EXPECT_EQ(4u, u.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

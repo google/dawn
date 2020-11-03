@@ -45,6 +45,16 @@ TEST_F(I32TypeTest, TypeName) {
   EXPECT_EQ(i.type_name(), "__i32");
 }
 
+TEST_F(I32TypeTest, MinBufferBindingSize) {
+  I32Type i;
+  EXPECT_EQ(4u, i.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(I32TypeTest, BaseAlignment) {
+  I32Type i;
+  EXPECT_EQ(4u, i.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

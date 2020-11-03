@@ -33,6 +33,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -398,6 +399,9 @@ class InspectorHelper {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
       array_type_memo_[count] =
           std::make_unique<ast::type::ArrayType>(u32_type(), count);
+      ast::ArrayDecorationList decos;
+      decos.push_back(std::make_unique<ast::StrideDecoration>(4));
+      array_type_memo_[count]->set_decorations(std::move(decos));
     }
     return array_type_memo_[count].get();
   }
@@ -914,7 +918,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, Simple) {
 
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
-  EXPECT_EQ(4u, result[0].min_buffer_binding_size);
+  EXPECT_EQ(16u, result[0].min_buffer_binding_size);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
@@ -939,7 +943,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleMembers) {
 
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
-  EXPECT_EQ(12u, result[0].min_buffer_binding_size);
+  EXPECT_EQ(16u, result[0].min_buffer_binding_size);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBuffers) {
@@ -989,15 +993,15 @@ TEST_F(InspectorGetUniformBufferResourceBindings, MultipleUniformBuffers) {
 
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
-  EXPECT_EQ(12u, result[0].min_buffer_binding_size);
+  EXPECT_EQ(16u, result[0].min_buffer_binding_size);
 
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
-  EXPECT_EQ(12u, result[1].min_buffer_binding_size);
+  EXPECT_EQ(16u, result[1].min_buffer_binding_size);
 
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
-  EXPECT_EQ(12u, result[2].min_buffer_binding_size);
+  EXPECT_EQ(16u, result[2].min_buffer_binding_size);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
@@ -1022,7 +1026,7 @@ TEST_F(InspectorGetUniformBufferResourceBindings, ContainingArray) {
 
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
-  EXPECT_EQ(20u, result[0].min_buffer_binding_size);
+  EXPECT_EQ(32u, result[0].min_buffer_binding_size);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindings, Simple) {

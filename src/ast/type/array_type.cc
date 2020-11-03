@@ -14,7 +14,10 @@
 
 #include "src/ast/type/array_type.h"
 
+#include <cmath>
+
 #include "src/ast/stride_decoration.h"
+#include "src/ast/type/vector_type.h"
 
 namespace tint {
 namespace ast {
@@ -33,16 +36,35 @@ bool ArrayType::IsArray() const {
   return true;
 }
 
-uint64_t ArrayType::MinBufferBindingSize() const {
-  // RTAs have a size_ = 0, but the value that is wanted from this call is the
-  // minimum size, so assuming atleast 1 element in the RTA.
-  uint32_t size = IsRuntimeArray() ? 1 : size_;
-
-  if (has_array_stride()) {
-    return size * array_stride();
+uint64_t ArrayType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+  if (!has_array_stride()) {
+    // Arrays in buffers are required to have a stride.
+    return 0;
   }
 
-  return size * type()->MinBufferBindingSize();
+  if (IsRuntimeArray()) {
+    // WebGPU spec 10.1.2:
+    // If the last field of the corresponding structure defined in the shader
+    // has an unbounded array type, then the value of minBufferBindingSize must
+    // be greater than or equal to the byte offset of that field plus the stride
+    // of the unbounded array
+    return array_stride();
+  } else {
+    // Not including the padding for the last element
+    return (size_ - 1) * array_stride() +
+           subtype_->MinBufferBindingSize(mem_layout);
+  }
+}
+
+uint64_t ArrayType::BaseAlignment(MemoryLayout mem_layout) const {
+  if (mem_layout == MemoryLayout::kUniformBuffer) {
+    float aligment = 16;  // for a vec4
+    float unaligned = subtype_->BaseAlignment(mem_layout);
+    return aligment * std::ceil(unaligned / aligment);
+  } else if (mem_layout == MemoryLayout::kStorageBuffer) {
+    return subtype_->BaseAlignment(mem_layout);
+  }
+  return 0;
 }
 
 uint32_t ArrayType::array_stride() const {

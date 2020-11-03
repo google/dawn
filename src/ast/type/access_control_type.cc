@@ -48,8 +48,13 @@ std::string AccessControlType::type_name() const {
   return name + subtype_->type_name();
 }
 
-uint64_t AccessControlType::MinBufferBindingSize() const {
-  return subtype_->MinBufferBindingSize();
+uint64_t AccessControlType::MinBufferBindingSize(
+    MemoryLayout mem_layout) const {
+  return subtype_->MinBufferBindingSize(mem_layout);
+}
+
+uint64_t AccessControlType::BaseAlignment(MemoryLayout mem_layout) const {
+  return subtype_->BaseAlignment(mem_layout);
 }
 
 }  // namespace type

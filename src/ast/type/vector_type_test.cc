@@ -55,6 +55,42 @@ TEST_F(VectorTypeTest, TypeName) {
   EXPECT_EQ(v.type_name(), "__vec_3__i32");
 }
 
+TEST_F(VectorTypeTest, MinBufferBindingSizeVec2) {
+  I32Type i32;
+  VectorType v{&i32, 2};
+  EXPECT_EQ(8u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(VectorTypeTest, MinBufferBindingSizeVec3) {
+  I32Type i32;
+  VectorType v{&i32, 3};
+  EXPECT_EQ(12u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(VectorTypeTest, MinBufferBindingSizeVec4) {
+  I32Type i32;
+  VectorType v{&i32, 4};
+  EXPECT_EQ(16u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(VectorTypeTest, BaseAlignmentVec2) {
+  I32Type i32;
+  VectorType v{&i32, 2};
+  EXPECT_EQ(8u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(VectorTypeTest, BaseAlignmentVec3) {
+  I32Type i32;
+  VectorType v{&i32, 3};
+  EXPECT_EQ(16u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
+TEST_F(VectorTypeTest, BaseAlignmentVec4) {
+  I32Type i32;
+  VectorType v{&i32, 4};
+  EXPECT_EQ(16u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

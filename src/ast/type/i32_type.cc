@@ -30,7 +30,11 @@ std::string I32Type::type_name() const {
   return "__i32";
 }
 
-uint64_t I32Type::MinBufferBindingSize() const {
+uint64_t I32Type::MinBufferBindingSize(MemoryLayout mem_layout) const {
+  return 4;
+}
+
+uint64_t I32Type::BaseAlignment(MemoryLayout mem_layout) const {
   return 4;
 }
 

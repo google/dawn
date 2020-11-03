@@ -27,6 +27,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/type.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
@@ -160,7 +161,8 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize();
+    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
+        ast::type::MemoryLayout::kUniformBuffer);
 
     result.push_back(std::move(entry));
   }
@@ -187,7 +189,8 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindings(
 
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize();
+    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
+        ast::type::MemoryLayout::kStorageBuffer);
 
     result.push_back(std::move(entry));
   }

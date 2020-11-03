@@ -69,6 +69,12 @@ TEST_F(MultisampledTextureTypeTest, TypeName) {
   EXPECT_EQ(s.type_name(), "__multisampled_texture_3d__f32");
 }
 
+TEST_F(MultisampledTextureTypeTest, MinBufferBindingSize) {
+  F32Type f32;
+  MultisampledTextureType s(TextureDimension::k3d, &f32);
+  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

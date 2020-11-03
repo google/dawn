@@ -61,6 +61,11 @@ TEST_F(SamplerTypeTest, TypeName_Comparison) {
   EXPECT_EQ(s.type_name(), "__sampler_comparison");
 }
 
+TEST_F(SamplerTypeTest, MinBufferBindingSize) {
+  SamplerType s{SamplerKind::kSampler};
+  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

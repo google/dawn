@@ -68,6 +68,12 @@ TEST_F(SampledTextureTypeTest, TypeName) {
   EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
+TEST_F(SampledTextureTypeTest, MinBufferBindingSize) {
+  F32Type f32;
+  SampledTextureType s(TextureDimension::kCube, &f32);
+  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

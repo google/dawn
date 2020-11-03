@@ -56,6 +56,62 @@ TEST_F(MatrixTypeTest, TypeName) {
   EXPECT_EQ(m.type_name(), "__mat_2_3__i32");
 }
 
+TEST_F(MatrixTypeTest, MinBufferBindingSize4x2) {
+  I32Type i32;
+  MatrixType m{&i32, 4, 2};
+  EXPECT_EQ(32u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(32u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, MinBufferBindingSize3x2) {
+  I32Type i32;
+  MatrixType m{&i32, 3, 2};
+  EXPECT_EQ(28u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(28u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, MinBufferBindingSize2x3) {
+  I32Type i32;
+  MatrixType m{&i32, 2, 3};
+  EXPECT_EQ(24u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(24u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, MinBufferBindingSize2x2) {
+  I32Type i32;
+  MatrixType m{&i32, 2, 2};
+  EXPECT_EQ(16u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(16u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, BaseAlignment4x2) {
+  I32Type i32;
+  MatrixType m{&i32, 4, 2};
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, BaseAlignment3x2) {
+  I32Type i32;
+  MatrixType m{&i32, 3, 2};
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, BaseAlignment2x3) {
+  I32Type i32;
+  MatrixType m{&i32, 2, 3};
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(8u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
+}
+
+TEST_F(MatrixTypeTest, BaseAlignment2x2) {
+  I32Type i32;
+  MatrixType m{&i32, 2, 2};
+  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
+  EXPECT_EQ(8u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

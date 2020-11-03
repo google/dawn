@@ -57,6 +57,11 @@ TEST_F(DepthTextureTypeTest, TypeName) {
   EXPECT_EQ(d.type_name(), "__depth_texture_cube");
 }
 
+TEST_F(DepthTextureTypeTest, MinBufferBindingSize) {
+  DepthTextureType d(TextureDimension::kCube);
+  EXPECT_EQ(0u, d.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

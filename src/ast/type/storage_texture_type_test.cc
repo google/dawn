@@ -119,6 +119,12 @@ TEST_F(StorageTextureTypeTest, I32Type) {
   EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsI32());
 }
 
+TEST_F(StorageTextureTypeTest, MinBufferBindingSize) {
+  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
+                       ImageFormat::kRgba32Sint);
+  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

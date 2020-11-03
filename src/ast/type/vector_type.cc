@@ -15,6 +15,7 @@
 #include "src/ast/type/vector_type.h"
 
 #include <assert.h>
+#include <cmath>
 
 namespace tint {
 namespace ast {
@@ -38,8 +39,18 @@ std::string VectorType::type_name() const {
   return "__vec_" + std::to_string(size_) + subtype_->type_name();
 }
 
-uint64_t VectorType::MinBufferBindingSize() const {
-  return size_ * subtype_->MinBufferBindingSize();
+uint64_t VectorType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+  return size_ * subtype_->MinBufferBindingSize(mem_layout);
+}
+
+uint64_t VectorType::BaseAlignment(MemoryLayout mem_layout) const {
+  if (size_ == 2) {
+    return 2 * subtype_->BaseAlignment(mem_layout);
+  } else if (size_ == 3 || size_ == 4) {
+    return 4 * subtype_->BaseAlignment(mem_layout);
+  }
+
+  return 0;  // vectors are only supposed to have 2, 3, or 4 elements.
 }
 
 }  // namespace type

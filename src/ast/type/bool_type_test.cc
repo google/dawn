@@ -45,6 +45,11 @@ TEST_F(BoolTypeTest, TypeName) {
   EXPECT_EQ(b.type_name(), "__bool");
 }
 
+TEST_F(BoolTypeTest, MinBufferBindingSize) {
+  BoolType b;
+  EXPECT_EQ(0u, b.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace ast

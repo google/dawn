@@ -120,7 +120,11 @@ bool Type::IsVoid() const {
   return false;
 }
 
-uint64_t Type::MinBufferBindingSize() const {
+uint64_t Type::MinBufferBindingSize(MemoryLayout) const {
+  return 0;
+}
+
+uint64_t Type::BaseAlignment(MemoryLayout) const {
   return 0;
 }
 

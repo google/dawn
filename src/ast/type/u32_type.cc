@@ -32,7 +32,11 @@ std::string U32Type::type_name() const {
   return "__u32";
 }
 
-uint64_t U32Type::MinBufferBindingSize() const {
+uint64_t U32Type::MinBufferBindingSize(MemoryLayout) const {
+  return 4;
+}
+
+uint64_t U32Type::BaseAlignment(MemoryLayout) const {
   return 4;
 }
 

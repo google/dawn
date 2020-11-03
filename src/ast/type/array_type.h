@@ -47,9 +47,15 @@ class ArrayType : public Type {
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }
 
+  /// @param mem_layout type of memory layout to use in calculation.
   /// @returns minimum size required for this type, in bytes.
   ///          0 for non-host shareable types.
-  uint64_t MinBufferBindingSize() const override;
+  uint64_t MinBufferBindingSize(MemoryLayout mem_layout) const override;
+
+  /// @param mem_layout type of memory layout to use in calculation.
+  /// @returns base alignment for the type, in bytes.
+  ///          0 for non-host shareable types.
+  uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
   /// Sets the array decorations
   /// @param decos the decorations to set

@@ -25,10 +25,6 @@ bool PointerType::IsPointer() const {
   return true;
 }
 
-uint64_t PointerType::MinBufferBindingSize() const {
-  return 4;
-}
-
 std::string PointerType::type_name() const {
   std::ostringstream out;
   out << "__ptr_" << storage_class_ << subtype_->type_name();

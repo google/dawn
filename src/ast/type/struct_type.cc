@@ -14,7 +14,13 @@
 
 #include "src/ast/type/struct_type.h"
 
+#include <cmath>
 #include <utility>
+
+#include "src/ast/type/alias_type.h"
+#include "src/ast/type/array_type.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/vector_type.h"
 
 namespace tint {
 namespace ast {
@@ -35,7 +41,7 @@ std::string StructType::type_name() const {
   return "__struct_" + name_;
 }
 
-uint64_t StructType::MinBufferBindingSize() const {
+uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
   if (!struct_->members().size()) {
     return 0;
   }
@@ -48,7 +54,32 @@ uint64_t StructType::MinBufferBindingSize() const {
     return 0;
   }
 
-  return last_member->offset() + last_member->type()->MinBufferBindingSize();
+  uint64_t size = last_member->type()->MinBufferBindingSize(mem_layout);
+  if (!size) {
+    return 0;
+  }
+
+  float unaligned = last_member->offset() + size;
+  float alignment = BaseAlignment(mem_layout);
+
+  return alignment * std::ceil(unaligned / alignment);
+}
+
+uint64_t StructType::BaseAlignment(MemoryLayout mem_layout) const {
+  uint64_t max = 0;
+  for (const auto& member : struct_->members()) {
+    if (member->type()->BaseAlignment(mem_layout) > max) {
+      max = member->type()->BaseAlignment(mem_layout);
+    }
+  }
+
+  if (mem_layout == MemoryLayout::kUniformBuffer) {
+    // Round up to a vec4.
+    return 16 * std::ceil(static_cast<float>(max) / 16.0f);
+  } else if (mem_layout == MemoryLayout::kStorageBuffer) {
+    return max;
+  }
+  return 0;
 }
 
 }  // namespace type
