@@ -137,13 +137,17 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
 
   state.set_style({Color::kDefault, true});
 
+  bool emit_colon = true;
   if (style_.print_file && src.file != nullptr && !src.file->path.empty()) {
     state << src.file->path;
     if (rng.begin.line > 0) {
       state << ":" << rng.begin;
     }
-  } else {
+  } else if (rng.begin.line > 0) {
     state << rng.begin;
+  } else {
+    // No position infomation was printed, so don't start the line with a colon.
+    emit_colon = false;
   }
   if (style_.print_severity) {
     switch (diag.severity) {
@@ -157,11 +161,16 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
       default:
         break;
     }
-    state << " " << diag.severity;
+    state << " " << diag.severity << ": ";
+    // A colon was just printed, don't repeat it.
+    emit_colon = false;
   }
 
   state.set_style({Color::kDefault, true});
-  state << ": " << diag.message;
+  if (emit_colon) {
+    state << ": ";
+  }
+  state << diag.message;
 
   if (style_.print_line && src.file != nullptr && rng.begin.line > 0) {
     state.newline();

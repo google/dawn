@@ -53,6 +53,14 @@ TEST_F(DiagFormatterTest, Simple) {
   ASSERT_EQ(expect, got);
 }
 
+TEST_F(DiagFormatterTest, SimpleNoSource) {
+  Formatter fmt{{false, false, false}};
+  Diagnostic diag{Severity::Info, Source{}, "no source!"};
+  auto got = fmt.format(List{diag});
+  auto* expect = "no source!";
+  ASSERT_EQ(expect, got);
+}
+
 TEST_F(DiagFormatterTest, WithFile) {
   Formatter fmt{{true, false, false}};
   auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
