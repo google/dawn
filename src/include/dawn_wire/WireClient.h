@@ -63,10 +63,11 @@ namespace dawn_wire {
     namespace client {
         class DAWN_WIRE_EXPORT MemoryTransferService {
           public:
+            MemoryTransferService();
+            virtual ~MemoryTransferService();
+
             class ReadHandle;
             class WriteHandle;
-
-            virtual ~MemoryTransferService();
 
             // Create a handle for reading server data.
             // This may fail and return nullptr.
@@ -84,6 +85,9 @@ namespace dawn_wire {
 
             class DAWN_WIRE_EXPORT ReadHandle {
               public:
+                ReadHandle();
+                virtual ~ReadHandle();
+
                 // Get the required serialization size for SerializeCreate
                 virtual size_t SerializeCreateSize() = 0;
 
@@ -100,11 +104,17 @@ namespace dawn_wire {
                                                     size_t deserializeSize,
                                                     const void** data,
                                                     size_t* dataLength) = 0;
-                virtual ~ReadHandle();
+
+              private:
+                ReadHandle(const ReadHandle&) = delete;
+                ReadHandle& operator=(const ReadHandle&) = delete;
             };
 
             class DAWN_WIRE_EXPORT WriteHandle {
               public:
+                WriteHandle();
+                virtual ~WriteHandle();
+
                 // Get the required serialization size for SerializeCreate
                 virtual size_t SerializeCreateSize() = 0;
 
@@ -123,8 +133,14 @@ namespace dawn_wire {
                 // server.
                 virtual void SerializeFlush(void* serializePointer) = 0;
 
-                virtual ~WriteHandle();
+              private:
+                WriteHandle(const WriteHandle&) = delete;
+                WriteHandle& operator=(const WriteHandle&) = delete;
             };
+
+          private:
+            MemoryTransferService(const MemoryTransferService&) = delete;
+            MemoryTransferService& operator=(const MemoryTransferService&) = delete;
         };
 
         // Backdoor to get the order of the ProcMap for testing

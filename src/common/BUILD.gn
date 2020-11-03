@@ -100,6 +100,7 @@ config("dawn_internal") {
       "-Wcstring-format-directive",
       "-Wc++11-narrowing",
       "-Wdeprecated-copy",
+      "-Wdeprecated-copy-dtor",
       "-Wduplicate-enum",
       "-Wextra-semi-stmt",
       "-Wimplicit-fallthrough",
@@ -120,9 +121,6 @@ config("dawn_internal") {
     #
     #   if (myUint64 > std::numeric_limits<size_t>::max()) {...}
     cflags += [ "-Wno-tautological-type-limit-compare" ]
-
-    # Suppressions for warnings found in Skia that should really be fixed.
-    cflags += [ "-Wno-deprecated-copy-dtor" ]
 
     if (is_win) {
       cflags += [

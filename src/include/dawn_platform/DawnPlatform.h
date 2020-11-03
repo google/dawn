@@ -30,8 +30,9 @@ namespace dawn_platform {
 
     class DAWN_NATIVE_EXPORT Platform {
       public:
-        virtual ~Platform() {
-        }
+        Platform();
+        virtual ~Platform();
+
         virtual const unsigned char* GetTraceCategoryEnabledFlag(TraceCategory category) = 0;
 
         virtual double MonotonicallyIncreasingTime() = 0;
@@ -46,6 +47,10 @@ namespace dawn_platform {
                                        const unsigned char* argTypes,
                                        const uint64_t* argValues,
                                        unsigned char flags) = 0;
+
+      private:
+        Platform(const Platform&) = delete;
+        Platform& operator=(const Platform&) = delete;
     };
 
 }  // namespace dawn_platform

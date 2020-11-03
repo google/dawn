@@ -19,6 +19,7 @@ source_set("dawn_platform") {
 
   sources = [
     "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
+    "DawnPlatform.cpp",
     "tracing/EventTracer.cpp",
     "tracing/EventTracer.h",
     "tracing/TraceEvent.h",

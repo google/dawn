@@ -15,6 +15,7 @@
 add_library(dawn_platform STATIC ${DAWN_DUMMY_FILE})
 target_sources(dawn_platform PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn_platform/DawnPlatform.h"
+    "DawnPlatform.cpp"
     "tracing/EventTracer.cpp"
     "tracing/EventTracer.h"
     "tracing/TraceEvent.h"

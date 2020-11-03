@@ -52,10 +52,11 @@ namespace dawn_wire {
     namespace server {
         class DAWN_WIRE_EXPORT MemoryTransferService {
           public:
+            MemoryTransferService();
+            virtual ~MemoryTransferService();
+
             class ReadHandle;
             class WriteHandle;
-
-            virtual ~MemoryTransferService();
 
             // Deserialize data to create Read/Write handles. These handles are for the client
             // to Read/Write data.
@@ -68,6 +69,9 @@ namespace dawn_wire {
 
             class DAWN_WIRE_EXPORT ReadHandle {
               public:
+                ReadHandle();
+                virtual ~ReadHandle();
+
                 // Get the required serialization size for SerializeInitialData
                 virtual size_t SerializeInitialDataSize(const void* data, size_t dataLength) = 0;
 
@@ -76,11 +80,17 @@ namespace dawn_wire {
                 virtual void SerializeInitialData(const void* data,
                                                   size_t dataLength,
                                                   void* serializePointer) = 0;
-                virtual ~ReadHandle();
+
+              private:
+                ReadHandle(const ReadHandle&) = delete;
+                ReadHandle& operator=(const ReadHandle&) = delete;
             };
 
             class DAWN_WIRE_EXPORT WriteHandle {
               public:
+                WriteHandle();
+                virtual ~WriteHandle();
+
                 // Set the target for writes from the client. DeserializeFlush should copy data
                 // into the target.
                 void SetTarget(void* data, size_t dataLength);
@@ -89,12 +99,19 @@ namespace dawn_wire {
                 // client::MemoryTransferService::WriteHandle::SerializeFlush.
                 virtual bool DeserializeFlush(const void* deserializePointer,
                                               size_t deserializeSize) = 0;
-                virtual ~WriteHandle();
 
               protected:
                 void* mTargetData = nullptr;
                 size_t mDataLength = 0;
+
+              private:
+                WriteHandle(const WriteHandle&) = delete;
+                WriteHandle& operator=(const WriteHandle&) = delete;
             };
+
+          private:
+            MemoryTransferService(const MemoryTransferService&) = delete;
+            MemoryTransferService& operator=(const MemoryTransferService&) = delete;
         };
     }  // namespace server
 

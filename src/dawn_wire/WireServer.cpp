@@ -37,9 +37,15 @@ namespace dawn_wire {
     }
 
     namespace server {
+        MemoryTransferService::MemoryTransferService() = default;
+
         MemoryTransferService::~MemoryTransferService() = default;
 
+        MemoryTransferService::ReadHandle::ReadHandle() = default;
+
         MemoryTransferService::ReadHandle::~ReadHandle() = default;
+
+        MemoryTransferService::WriteHandle::WriteHandle() = default;
 
         MemoryTransferService::WriteHandle::~WriteHandle() = default;
 

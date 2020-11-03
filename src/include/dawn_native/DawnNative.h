@@ -93,6 +93,9 @@ namespace dawn_native {
         Adapter(AdapterBase* impl);
         ~Adapter();
 
+        Adapter(const Adapter& other);
+        Adapter& operator=(const Adapter& other);
+
         // DEPRECATED: use GetProperties instead.
         BackendType GetBackendType() const;
         DeviceType GetDeviceType() const;
