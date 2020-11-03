@@ -59,10 +59,10 @@ uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
     return 0;
   }
 
-  float unaligned = last_member->offset() + size;
-  float alignment = BaseAlignment(mem_layout);
+  float unaligned = static_cast<float>(last_member->offset() + size);
+  float alignment = static_cast<float>(BaseAlignment(mem_layout));
 
-  return alignment * std::ceil(unaligned / alignment);
+  return static_cast<uint64_t>(alignment * std::ceil(unaligned / alignment));
 }
 
 uint64_t StructType::BaseAlignment(MemoryLayout mem_layout) const {
@@ -75,7 +75,8 @@ uint64_t StructType::BaseAlignment(MemoryLayout mem_layout) const {
 
   if (mem_layout == MemoryLayout::kUniformBuffer) {
     // Round up to a vec4.
-    return 16 * std::ceil(static_cast<float>(max) / 16.0f);
+    return static_cast<uint64_t>(16 *
+                                 std::ceil(static_cast<float>(max) / 16.0f));
   } else if (mem_layout == MemoryLayout::kStorageBuffer) {
     return max;
   }

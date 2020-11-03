@@ -59,8 +59,8 @@ uint64_t ArrayType::MinBufferBindingSize(MemoryLayout mem_layout) const {
 uint64_t ArrayType::BaseAlignment(MemoryLayout mem_layout) const {
   if (mem_layout == MemoryLayout::kUniformBuffer) {
     float aligment = 16;  // for a vec4
-    float unaligned = subtype_->BaseAlignment(mem_layout);
-    return aligment * std::ceil(unaligned / aligment);
+    float unaligned = static_cast<float>(subtype_->BaseAlignment(mem_layout));
+    return static_cast<uint64_t>(aligment * std::ceil(unaligned / aligment));
   } else if (mem_layout == MemoryLayout::kStorageBuffer) {
     return subtype_->BaseAlignment(mem_layout);
   }
