@@ -16,6 +16,7 @@
 #define SRC_WRITER_HLSL_TEST_HELPER_H_
 
 #include <sstream>
+#include <string>
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"

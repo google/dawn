@@ -1041,7 +1041,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
 TEST_F(
     HlslGeneratorImplTest_MemberAccessor,
-    EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {
+    EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {  // NOLINT
   // struct Data {
   //   [[offset(0)]] a : vec3<i32>;
   //   [[offset(16)]] b : vec3<f32>;

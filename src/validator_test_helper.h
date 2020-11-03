@@ -15,6 +15,8 @@
 #ifndef SRC_VALIDATOR_TEST_HELPER_H_
 #define SRC_VALIDATOR_TEST_HELPER_H_
 
+#include <memory>
+
 #include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator_impl.h"

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/writer/hlsl/namer.h"
+
 #include "gtest/gtest.h"
 
 namespace tint {

@@ -14,6 +14,8 @@
 
 #include "src/reader/wgsl/parser.h"
 
+#include <utility>
+
 #include "src/reader/wgsl/parser_impl.h"
 
 namespace tint {

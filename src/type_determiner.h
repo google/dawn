@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "src/ast/module.h"
 #include "src/ast/type/storage_texture_type.h"

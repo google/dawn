@@ -16,6 +16,7 @@
 #define SRC_WRITER_SPIRV_GENERATOR_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "src/ast/module.h"

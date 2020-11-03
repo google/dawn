@@ -14,6 +14,8 @@
 
 #include "src/transform/vertex_pulling_transform.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/function.h"

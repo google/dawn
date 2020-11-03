@@ -14,6 +14,11 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include <algorithm>
+#include <limits>
+#include <utility>
+#include <vector>
+
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"

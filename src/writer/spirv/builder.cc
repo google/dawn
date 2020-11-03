@@ -13,6 +13,7 @@
 
 #include "src/writer/spirv/builder.h"
 
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <utility>
@@ -68,8 +69,6 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-
-#include <iostream>
 
 namespace tint {
 namespace writer {
@@ -1866,8 +1865,8 @@ uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   auto* texture_type =
       call->params()[0].get()->result_type()->UnwrapAll()->AsTexture();
 
-  // TODO: Remove the LOD param from textureLoad on storage textures when
-  // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
+  // TODO(dsinclair): Remove the LOD param from textureLoad on storage textures
+  // when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
   if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
     std::vector<Operand> spirv_params = {
         std::move(wgsl_params[0]), std::move(wgsl_params[1]),

@@ -14,7 +14,10 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include <limits>
 #include <sstream>
+#include <utility>
+#include <vector>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"

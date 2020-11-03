@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "src/diagnostic/formatter.h"
-#include "src/diagnostic/diagnostic.h"
 
 #include "gtest/gtest.h"
+#include "src/diagnostic/diagnostic.h"
 
 namespace tint {
 namespace diag {

@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sstream>
+#include "src/source.h"
 
-#include "source.h"
+#include <sstream>
+#include <utility>
 
 namespace tint {
 namespace {

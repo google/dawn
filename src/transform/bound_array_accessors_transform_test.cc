@@ -15,6 +15,7 @@
 #include "src/transform/bound_array_accessors_transform.h"
 
 #include <memory>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"

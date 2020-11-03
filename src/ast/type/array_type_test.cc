@@ -14,6 +14,9 @@
 
 #include "src/ast/type/array_type.h"
 
+#include <memory>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/type/i32_type.h"

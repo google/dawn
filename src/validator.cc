@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/validator.h"
+
 #include "src/validator_impl.h"
 
 namespace tint {

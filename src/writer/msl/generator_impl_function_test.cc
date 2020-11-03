@@ -485,7 +485,7 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 
 TEST_F(
     MslGeneratorImplTest,
-    Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
+    Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -666,7 +666,7 @@ fragment ep_1_out ep_1() {
 
 TEST_F(
     MslGeneratorImplTest,
-    Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
+    Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);

@@ -15,6 +15,7 @@
 #ifndef SRC_INSPECTOR_ENTRY_POINT_H_
 #define SRC_INSPECTOR_ENTRY_POINT_H_
 
+#include <string>
 #include <tuple>
 #include <vector>
 

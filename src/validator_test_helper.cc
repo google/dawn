@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "src/validator_test_helper.h"
+
+#include <memory>
+
 #include "src/type_manager.h"
 
 namespace tint {

@@ -18,6 +18,7 @@
 #include <assert.h>
 
 #include <string>
+#include <utility>
 
 #include "src/ast/array_decoration.h"
 #include "src/ast/type/type.h"

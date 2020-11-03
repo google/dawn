@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+
 #include "src/ast/assignment_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/identifier_expression.h"
@@ -29,8 +31,6 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
-
-#include <memory>
 
 namespace tint {
 namespace writer {

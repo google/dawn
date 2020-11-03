@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <map>
+#include <utility>
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/constructor_expression.h"

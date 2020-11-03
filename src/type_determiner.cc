@@ -552,8 +552,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return true;
   }
   if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-    // TODO: Remove the LOD param from textureLoad on storage textures when
-    // https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
+    // TODO(dsinclair): Remove the LOD param from textureLoad on storage
+    // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
     uint32_t num_of_params =
         (ident->intrinsic() == ast::Intrinsic::kTextureLoad ||
          ident->intrinsic() == ast::Intrinsic::kTextureSample)

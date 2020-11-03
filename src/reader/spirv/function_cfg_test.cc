@@ -643,7 +643,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(
     SpvParserTest,
-    RegisterMerges_GoodLoopMerge_MultiBlockLoop_ContinueIsNotHeader_BranchConditional) {
+    RegisterMerges_GoodLoopMerge_MultiBlockLoop_ContinueIsNotHeader_BranchConditional) {  // NOLINT
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4570,7 +4570,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(
     SpvParserTest,
-    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsNotHeader) {
+    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsNotHeader) {  // NOLINT
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4606,7 +4606,7 @@ TEST_F(
 
 TEST_F(
     SpvParserTest,
-    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsHeader) {
+    ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct_ContinueIsHeader) {  // NOLINT
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 

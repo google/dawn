@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/validator_impl.h"
-
 #include "gtest/gtest.h"
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
@@ -28,6 +26,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/type_determiner.h"
+#include "src/validator_impl.h"
 #include "src/validator_test_helper.h"
 
 namespace tint {

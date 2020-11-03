@@ -67,7 +67,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
   ast::type::F32Type f32;
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
-  auto lit = std::make_unique<ast::FloatLiteral>(&f32, float((1 << 30) - 4));
+  auto lit = std::make_unique<ast::FloatLiteral>(
+      &f32, static_cast<float>((1 << 30) - 4));
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;

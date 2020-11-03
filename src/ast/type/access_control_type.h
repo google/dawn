@@ -15,9 +15,10 @@
 #ifndef SRC_AST_TYPE_ACCESS_CONTROL_TYPE_H_
 #define SRC_AST_TYPE_ACCESS_CONTROL_TYPE_H_
 
-#include "src/ast/type/type.h"
+#include <string>
 
 #include "src/ast/access_control.h"
+#include "src/ast/type/type.h"
 
 namespace tint {
 namespace ast {

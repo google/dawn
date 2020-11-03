@@ -1460,7 +1460,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers) {
 
 TEST_F(
     SpvParserTest,
-    ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {
+    ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
   // Variable should have access(read_write)
   auto* p = parser(test::Assemble(R"(
      OpName %myvar "myvar"

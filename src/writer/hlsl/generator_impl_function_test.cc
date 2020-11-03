@@ -564,7 +564,7 @@ void frag_main() {
 
 TEST_F(
     HlslGeneratorImplTest_Function,
-    Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {
+    Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
@@ -731,7 +731,7 @@ ep_1_out ep_1() {
 
 TEST_F(
     HlslGeneratorImplTest_Function,
-    Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
+    Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);

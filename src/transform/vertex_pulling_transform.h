@@ -15,6 +15,11 @@
 #ifndef SRC_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
 #define SRC_TRANSFORM_VERTEX_PULLING_TRANSFORM_H_
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "src/ast/expression.h"
 #include "src/ast/function.h"
 #include "src/ast/module.h"
@@ -22,11 +27,6 @@
 #include "src/ast/variable.h"
 #include "src/context.h"
 #include "src/transform/transformer.h"
-
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace tint {
 namespace transform {

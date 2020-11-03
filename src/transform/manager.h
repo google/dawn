@@ -17,6 +17,8 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "src/transform/transformer.h"
 

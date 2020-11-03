@@ -14,10 +14,11 @@
 
 #include "src/ast/type/storage_texture_type.h"
 
-#include "src/ast/identifier_expression.h"
-#include "src/type_determiner.h"
+#include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/identifier_expression.h"
+#include "src/type_determiner.h"
 
 namespace tint {
 namespace ast {

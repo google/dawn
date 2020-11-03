@@ -14,6 +14,8 @@
 
 #include "src/transform/vertex_pulling_transform.h"
 
+#include <utility>
+
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"

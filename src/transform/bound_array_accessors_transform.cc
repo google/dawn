@@ -14,6 +14,9 @@
 
 #include "src/transform/bound_array_accessors_transform.h"
 
+#include <memory>
+#include <utility>
+
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"

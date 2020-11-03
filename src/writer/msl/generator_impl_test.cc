@@ -15,6 +15,7 @@
 #include "src/writer/msl/generator_impl.h"
 
 #include <memory>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "src/ast/function.h"

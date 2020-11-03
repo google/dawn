@@ -15,6 +15,9 @@
 #ifndef SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 
+#include <string>
+#include <unordered_map>
+
 #include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
 #include "src/ast/module.h"

@@ -60,8 +60,9 @@ def CheckChange(input_api, output_api):
     results += input_api.canned_checks.CheckChangeHasNoStrayWhitespace(
         input_api, output_api)
     results += input_api.canned_checks.CheckDoNotSubmit(input_api, output_api)
-    results += input_api.canned_checks.CheckChangeLintsClean(
-        input_api, output_api)
+    results += input_api.canned_checks.CheckChangeLintsClean(input_api,
+                                                             output_api,
+                                                             lint_filters="")
     results += input_api.canned_checks.CheckGenderNeutral(
         input_api, output_api)
 

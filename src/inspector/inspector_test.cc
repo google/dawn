@@ -14,6 +14,8 @@
 
 #include "src/inspector/inspector.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bool_literal.h"
@@ -52,7 +54,6 @@
 #include "src/ast/workgroup_decoration.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-
 #include "tint/tint.h"
 
 namespace tint {

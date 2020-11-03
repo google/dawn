@@ -74,7 +74,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   auto preamble = b.entry_points();
-  ASSERT_TRUE(preamble.size() >= 1u);
+  ASSERT_GE(preamble.size(), 1u);
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
   ASSERT_GE(preamble[0].operands().size(), 3u);
