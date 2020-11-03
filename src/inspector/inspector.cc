@@ -26,6 +26,7 @@
 #include "src/ast/null_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/uint_literal.h"
@@ -172,36 +173,13 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindings(
     const std::string& entry_point) {
-  auto* func = FindEntryPointByName(entry_point);
-  if (!func) {
-    return {};
-  }
-
-  std::vector<ResourceBinding> result;
-  for (auto& ruv : func->referenced_storagebuffer_variables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = ruv;
-    if (!var->type()->IsStruct()) {
-      continue;
-    }
-
-    entry.bind_group = binding_info.set->value();
-    entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
-        ast::type::MemoryLayout::kStorageBuffer);
-
-    result.push_back(std::move(entry));
-  }
-
-  return result;
+  return GetStorageBufferResourceBindingsImpl(entry_point, false);
 }
 
 std::vector<ResourceBinding>
-Inspector::GetReadOnlyStorageBufferResourceBindings(const std::string&) {
-  error_ += "GetReadOnlyStorageBufferResourceBindings is not implemented!";
-  return {};
+Inspector::GetReadOnlyStorageBufferResourceBindings(
+    const std::string& entry_point) {
+  return GetStorageBufferResourceBindingsImpl(entry_point, true);
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
@@ -217,6 +195,44 @@ ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   }
 
   return func;
+}
+
+std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
+    const std::string& entry_point,
+    bool read_only) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+  for (auto& ruv : func->referenced_storagebuffer_variables()) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = ruv;
+    if (!var->type()->IsAccessControl()) {
+      continue;
+    }
+
+    auto* ac_type = var->type()->AsAccessControl();
+    if (read_only != ac_type->IsReadOnly()) {
+      continue;
+    }
+
+    if (!ac_type->type()->IsStruct()) {
+      continue;
+    }
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
+        ast::type::MemoryLayout::kStorageBuffer);
+
+    result.push_back(std::move(entry));
+  }
+
+  return result;
 }
 
 }  // namespace inspector

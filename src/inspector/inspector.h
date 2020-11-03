@@ -84,6 +84,14 @@ class Inspector {
   /// @returns a pointer to the entry point if it exists, otherwise returns
   ///          nullptr and sets the error string.
   ast::Function* FindEntryPointByName(const std::string& name);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @param read_only get only read only if true, otherwise get everything
+  ///                  else.
+  /// @returns vector of all of the bindings for the request storage buffers.
+  std::vector<ResourceBinding> GetStorageBufferResourceBindingsImpl(
+      const std::string& entry_point,
+      bool read_only);
 };
 
 }  // namespace inspector
