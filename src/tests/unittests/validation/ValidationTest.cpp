@@ -19,7 +19,7 @@
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"
 
-ValidationTest::ValidationTest() {
+void ValidationTest::SetUp() {
     instance = std::make_unique<dawn_native::Instance>();
     instance->DiscoverDefaultAdapters();
 
@@ -42,25 +42,8 @@ ValidationTest::ValidationTest() {
 
     dawnProcSetProcs(&dawn_native::GetProcs());
 
-    device = CreateDeviceFromAdapter(adapter, std::vector<const char*>());
-}
-
-wgpu::Device ValidationTest::CreateDeviceFromAdapter(
-    dawn_native::Adapter adapterToTest,
-    const std::vector<const char*>& requiredExtensions) {
-    wgpu::Device deviceToTest;
-
-    // Always keep this code path to test creating a device without a device descriptor.
-    if (requiredExtensions.empty()) {
-        deviceToTest = wgpu::Device::Acquire(adapterToTest.CreateDevice());
-    } else {
-        dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions = requiredExtensions;
-        deviceToTest = wgpu::Device::Acquire(adapterToTest.CreateDevice(&descriptor));
-    }
-
-    deviceToTest.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
-    return deviceToTest;
+    device = CreateTestDevice();
+    device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
 }
 
 ValidationTest::~ValidationTest() {
@@ -112,6 +95,10 @@ bool ValidationTest::HasWGSL() const {
 #else
     return false;
 #endif
+}
+
+wgpu::Device ValidationTest::CreateTestDevice() {
+    return wgpu::Device::Acquire(adapter.CreateDevice());
 }
 
 // static

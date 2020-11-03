@@ -50,12 +50,9 @@
 
 class ValidationTest : public testing::Test {
   public:
-    ValidationTest();
     ~ValidationTest() override;
 
-    wgpu::Device CreateDeviceFromAdapter(dawn_native::Adapter adapter,
-                                         const std::vector<const char*>& requiredExtensions);
-
+    void SetUp() override;
     void TearDown() override;
 
     void StartExpectDeviceError();
@@ -81,6 +78,8 @@ class ValidationTest : public testing::Test {
     bool HasWGSL() const;
 
   protected:
+    virtual wgpu::Device CreateTestDevice();
+
     wgpu::Device device;
     dawn_native::Adapter adapter;
     std::unique_ptr<dawn_native::Instance> instance;

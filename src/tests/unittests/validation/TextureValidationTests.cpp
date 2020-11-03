@@ -24,6 +24,8 @@ namespace {
     class TextureValidationTest : public ValidationTest {
       protected:
         void SetUp() override {
+            ValidationTest::SetUp();
+
             queue = device.GetDefaultQueue();
         }
 
@@ -377,15 +379,26 @@ namespace {
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
 
+    // Test that the creation of a texture with BC format will fail when the extension
+    // textureCompressionBC is not enabled.
+    TEST_F(TextureValidationTest, UseBCFormatWithoutEnablingExtension) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
     // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
     // compressed texture formats.
     class CompressedTextureFormatsValidationTests : public TextureValidationTest {
-      public:
-        CompressedTextureFormatsValidationTests() : TextureValidationTest() {
-            device = CreateDeviceFromAdapter(adapter, {"texture_compression_bc"});
+      protected:
+        wgpu::Device CreateTestDevice() override {
+            dawn_native::DeviceDescriptor descriptor;
+            descriptor.requiredExtensions = {"texture_compression_bc"};
+            return wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
         }
 
-      protected:
         wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
             wgpu::TextureDescriptor descriptor =
                 TextureValidationTest::CreateDefaultTextureDescriptor();
@@ -393,22 +406,13 @@ namespace {
                                wgpu::TextureUsage::Sampled;
             return descriptor;
         }
-
-        const std::array<wgpu::TextureFormat, 14> kBCFormats = {
-            wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
-            wgpu::TextureFormat::BC2RGBAUnorm,  wgpu::TextureFormat::BC2RGBAUnormSrgb,
-            wgpu::TextureFormat::BC3RGBAUnorm,  wgpu::TextureFormat::BC3RGBAUnormSrgb,
-            wgpu::TextureFormat::BC4RUnorm,     wgpu::TextureFormat::BC4RSnorm,
-            wgpu::TextureFormat::BC5RGUnorm,    wgpu::TextureFormat::BC5RGSnorm,
-            wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBFloat,
-            wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
     };
 
     // Test the validation of texture size when creating textures in compressed texture formats.
     TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
         // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
         // width and height of all BC formats) as the width or height of textures in BC formats.
-        for (wgpu::TextureFormat format : kBCFormats) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
@@ -440,18 +444,6 @@ namespace {
         }
     }
 
-    // Test the creation of a texture with BC format will fail when the extension
-    // textureCompressionBC is not enabled.
-    TEST_F(CompressedTextureFormatsValidationTests, UseBCFormatWithoutEnablingExtension) {
-        const std::vector<const char*> kEmptyVector;
-        wgpu::Device deviceWithoutExtension = CreateDeviceFromAdapter(adapter, kEmptyVector);
-        for (wgpu::TextureFormat format : kBCFormats) {
-            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-            descriptor.format = format;
-            ASSERT_DEVICE_ERROR(deviceWithoutExtension.CreateTexture(&descriptor));
-        }
-    }
-
     // Test the validation of texture usages when creating textures in compressed texture formats.
     TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
         // Test that only CopySrc, CopyDst and Sampled are accepted as the texture usage of the
@@ -461,7 +453,7 @@ namespace {
             wgpu::TextureUsage::Storage,
             wgpu::TextureUsage::Present,
         };
-        for (wgpu::TextureFormat format : kBCFormats) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
             for (wgpu::TextureUsage usage : invalidUsages) {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
@@ -475,7 +467,7 @@ namespace {
     TEST_F(CompressedTextureFormatsValidationTests, SampleCount) {
         // Test that it is invalid to specify SampleCount > 1 when we create a texture in BC
         // formats.
-        for (wgpu::TextureFormat format : kBCFormats) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
             descriptor.sampleCount = 4;
@@ -486,7 +478,7 @@ namespace {
     // Test the validation of creating 2D array textures in compressed texture formats.
     TEST_F(CompressedTextureFormatsValidationTests, 2DArrayTexture) {
         // Test that it is allowed to create a 2D array texture in BC formats.
-        for (wgpu::TextureFormat format : kBCFormats) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
             descriptor.size.depth = 6;

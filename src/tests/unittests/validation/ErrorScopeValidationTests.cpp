@@ -38,9 +38,10 @@ class ErrorScopeValidationTest : public ValidationTest {
     }
 
     void TearDown() override {
+        ValidationTest::TearDown();
+
         // Delete mocks so that expectations are checked
         mockDevicePopErrorScopeCallback = nullptr;
-        ValidationTest::TearDown();
     }
 };
 

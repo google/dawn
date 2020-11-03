@@ -36,6 +36,8 @@ class BindGroupValidationTest : public ValidationTest {
     }
 
     void SetUp() override {
+        ValidationTest::SetUp();
+
         // Create objects to use as resources inside test bind groups.
         {
             wgpu::BufferDescriptor descriptor;
@@ -1069,6 +1071,8 @@ constexpr uint32_t kBindingSize = 9;
 class SetBindGroupValidationTest : public ValidationTest {
   public:
     void SetUp() override {
+        ValidationTest::SetUp();
+
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
                       wgpu::BindingType::UniformBuffer, true},
@@ -1509,6 +1513,8 @@ TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {
 class SetBindGroupPersistenceValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
+        ValidationTest::SetUp();
+
         mVsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             void main() {

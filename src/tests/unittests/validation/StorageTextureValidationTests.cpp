@@ -20,6 +20,22 @@
 
 class StorageTextureValidationTests : public ValidationTest {
   protected:
+    void SetUp() override {
+        ValidationTest::SetUp();
+
+        mDefaultVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+        })");
+        mDefaultFSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        #version 450
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+            fragColor = vec4(1.f, 0.f, 0.f, 1.f);
+        })");
+    }
+
     static const char* GetGLSLFloatImageTypeDeclaration(wgpu::TextureViewDimension dimension) {
         switch (dimension) {
             case wgpu::TextureViewDimension::e1D:
@@ -97,19 +113,8 @@ class StorageTextureValidationTests : public ValidationTest {
         return device.CreateTexture(&descriptor);
     }
 
-    const wgpu::ShaderModule mDefaultVSModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-        })");
-    const wgpu::ShaderModule mDefaultFSModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(location = 0) out vec4 fragColor;
-        void main() {
-            fragColor = vec4(1.f, 0.f, 0.f, 1.f);
-        })");
+    wgpu::ShaderModule mDefaultVSModule;
+    wgpu::ShaderModule mDefaultFSModule;
 
     const std::array<wgpu::BindingType, 2> kSupportedStorageTextureBindingTypes = {
         wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
