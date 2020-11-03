@@ -44,6 +44,7 @@ TEST_F(PrinterTest, WithColors) {
   printer->write("Magenta", Style{Color::kMagenta, false});
   printer->write("Cyan", Style{Color::kCyan, false});
   printer->write("White", Style{Color::kWhite, false});
+  printf("\n");
 }
 
 TEST_F(PrinterTest, BoldWithColors) {
@@ -57,6 +58,7 @@ TEST_F(PrinterTest, BoldWithColors) {
   printer->write("Magenta", Style{Color::kMagenta, true});
   printer->write("Cyan", Style{Color::kCyan, true});
   printer->write("White", Style{Color::kWhite, true});
+  printf("\n");
 }
 
 TEST_F(PrinterTest, WithoutColors) {
@@ -70,6 +72,7 @@ TEST_F(PrinterTest, WithoutColors) {
   printer->write("Magenta", Style{Color::kMagenta, false});
   printer->write("Cyan", Style{Color::kCyan, false});
   printer->write("White", Style{Color::kWhite, false});
+  printf("\n");
 }
 
 TEST_F(PrinterTest, BoldWithoutColors) {
@@ -83,6 +86,7 @@ TEST_F(PrinterTest, BoldWithoutColors) {
   printer->write("Magenta", Style{Color::kMagenta, true});
   printer->write("Cyan", Style{Color::kCyan, true});
   printer->write("White", Style{Color::kWhite, true});
+  printf("\n");
 }
 
 }  // namespace
