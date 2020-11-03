@@ -25,7 +25,7 @@
 namespace tint {
 namespace ast {
 
-VariableDecoration::VariableDecoration() = default;
+VariableDecoration::VariableDecoration() : Decoration(Kind) {}
 
 VariableDecoration::~VariableDecoration() = default;
 

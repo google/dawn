@@ -19,15 +19,20 @@
 #include <string>
 #include <vector>
 
+#include "src/ast/decoration.h"
+
 namespace tint {
 namespace ast {
 
 class StructMemberOffsetDecoration;
 
 /// A decoration attached to a struct member
-class StructMemberDecoration {
+class StructMemberDecoration : public Decoration {
  public:
-  virtual ~StructMemberDecoration();
+  /// The kind of decoration that this type represents
+  static constexpr DecorationKind Kind = DecorationKind::kStructMember;
+
+  ~StructMemberDecoration() override;
 
   /// @returns true if this is an offset decoration
   virtual bool IsOffset() const;
@@ -39,6 +44,7 @@ class StructMemberDecoration {
   virtual std::string to_str() const = 0;
 
  protected:
+  /// Constructor
   StructMemberDecoration();
 };
 

@@ -23,7 +23,9 @@ Struct::Struct(StructMemberList members)
     : Node(), members_(std::move(members)) {}
 
 Struct::Struct(StructDecorationList decorations, StructMemberList members)
-    : Node(), decorations_(decorations), members_(std::move(members)) {}
+    : Node(),
+      decorations_(std::move(decorations)),
+      members_(std::move(members)) {}
 
 Struct::Struct(const Source& source, StructMemberList members)
     : Node(source), members_(std::move(members)) {}
@@ -31,7 +33,9 @@ Struct::Struct(const Source& source, StructMemberList members)
 Struct::Struct(const Source& source,
                StructDecorationList decorations,
                StructMemberList members)
-    : Node(source), decorations_(decorations), members_(std::move(members)) {}
+    : Node(source),
+      decorations_(std::move(decorations)),
+      members_(std::move(members)) {}
 
 Struct::Struct(Struct&&) = default;
 
@@ -47,8 +51,8 @@ StructMember* Struct::get_member(const std::string& name) const {
 }
 
 bool Struct::IsBlockDecorated() const {
-  for (auto deco : decorations_) {
-    if (deco == StructDecoration::kBlock) {
+  for (auto& deco : decorations_) {
+    if (deco->IsBlock()) {
       return true;
     }
   }
@@ -56,11 +60,6 @@ bool Struct::IsBlockDecorated() const {
 }
 
 bool Struct::IsValid() const {
-  for (auto deco : decorations_) {
-    if (deco == StructDecoration::kNone) {
-      return false;
-    }
-  }
   for (const auto& mem : members_) {
     if (mem == nullptr || !mem->IsValid()) {
       return false;
@@ -71,9 +70,11 @@ bool Struct::IsValid() const {
 
 void Struct::to_str(std::ostream& out, size_t indent) const {
   out << "Struct{" << std::endl;
-  for (auto deco : decorations_) {
+  for (auto& deco : decorations_) {
     make_indent(out, indent + 2);
-    out << "[[" << deco << "]]" << std::endl;
+    out << "[[";
+    deco->to_str(out);
+    out << "]]" << std::endl;
   }
   for (const auto& member : members_) {
     member->to_str(out, indent + 2);

@@ -12,36 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_STRUCT_DECORATION_H_
-#define SRC_AST_STRUCT_DECORATION_H_
+#ifndef SRC_AST_STRUCT_BLOCK_DECORATION_H_
+#define SRC_AST_STRUCT_BLOCK_DECORATION_H_
 
 #include <memory>
 #include <ostream>
 #include <vector>
 
-#include "src/ast/decoration.h"
+#include "src/ast/struct_decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// The struct decorations
-class StructDecoration : public Decoration {
+class StructBlockDecoration : public StructDecoration {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr DecorationKind Kind = DecorationKind::kStruct;
-
-  ~StructDecoration() override;
+  /// constructor
+  StructBlockDecoration();
+  ~StructBlockDecoration() override;
 
   /// @returns true if this is a block struct
-  virtual bool IsBlock() const = 0;
+  bool IsBlock() const override;
 
   /// Outputs the decoration to the given stream
   /// @param out the stream to output too
-  virtual void to_str(std::ostream& out) const = 0;
-
- protected:
-  /// Constructor
-  StructDecoration();
+  void to_str(std::ostream& out) const override;
 };
 
 /// List of struct decorations
@@ -50,4 +45,4 @@ using StructDecorationList = std::vector<std::unique_ptr<StructDecoration>>;
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_STRUCT_DECORATION_H_
+#endif  // SRC_AST_STRUCT_BLOCK_DECORATION_H_

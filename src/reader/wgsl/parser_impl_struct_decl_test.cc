@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
   ASSERT_EQ(s->impl()->decorations().size(), 1u);
-  EXPECT_EQ(s->impl()->decorations()[0], ast::StructDecoration::kBlock);
+  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
@@ -69,8 +69,8 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
   ASSERT_EQ(s->impl()->decorations().size(), 2u);
-  EXPECT_EQ(s->impl()->decorations()[0], ast::StructDecoration::kBlock);
-  EXPECT_EQ(s->impl()->decorations()[1], ast::StructDecoration::kBlock);
+  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
+  EXPECT_TRUE(s->impl()->decorations()[1]->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {

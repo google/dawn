@@ -48,6 +48,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -802,9 +803,11 @@ ast::type::Type* ParserImpl::ConvertType(
   if (struct_decorations.size() == 1) {
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
-      ast_struct_decorations.push_back(ast::StructDecoration::kBlock);
+      ast_struct_decorations.push_back(
+          std::make_unique<ast::StructBlockDecoration>());
     } else if (decoration == SpvDecorationBufferBlock) {
-      ast_struct_decorations.push_back(ast::StructDecoration::kBlock);
+      ast_struct_decorations.push_back(
+          std::make_unique<ast::StructBlockDecoration>());
       remap_buffer_block_type_.insert(type_id);
     } else {
       Fail() << "struct with ID " << type_id

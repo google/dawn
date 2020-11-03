@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_member_decoration.h"
-
-#include <assert.h>
-
-#include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
-StructMemberDecoration::StructMemberDecoration()
-    : Decoration(DecorationKind::kStructMember) {}
+Decoration::~Decoration() = default;
 
-StructMemberDecoration::~StructMemberDecoration() = default;
-
-bool StructMemberDecoration::IsOffset() const {
-  return false;
-}
-
-StructMemberOffsetDecoration* StructMemberDecoration::AsOffset() {
-  assert(IsOffset());
-  return static_cast<StructMemberOffsetDecoration*>(this);
+std::ostream& operator<<(std::ostream& out, DecorationKind data) {
+  switch (data) {
+    case DecorationKind::kArray:
+      return out << "array";
+    case DecorationKind::kFunction:
+      return out << "function";
+    case DecorationKind::kStruct:
+      return out << "struct";
+    case DecorationKind::kStructMember:
+      return out << "struct member";
+    case DecorationKind::kVariable:
+      return out << "variable";
+  }
+  return out << "<unknown>";
 }
 
 }  // namespace ast

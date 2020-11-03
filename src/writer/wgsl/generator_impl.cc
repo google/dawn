@@ -552,8 +552,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
 bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
   auto* impl = str->impl();
-  for (auto deco : impl->decorations()) {
-    out_ << "[[" << deco << "]]" << std::endl;
+  for (auto& deco : impl->decorations()) {
+    out_ << "[[";
+    deco->to_str(out_);
+    out_ << "]]" << std::endl;
   }
   out_ << "struct " << str->name() << " {" << std::endl;
 

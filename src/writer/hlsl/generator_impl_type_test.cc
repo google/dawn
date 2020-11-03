@@ -14,6 +14,7 @@
 
 #include "src/ast/module.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -286,7 +287,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
 
   ast::StructDecorationList decos;
-  decos.push_back(ast::StructDecoration::kBlock);
+  decos.push_back(std::make_unique<ast::StructBlockDecoration>());
 
   auto str =
       std::make_unique<ast::Struct>(std::move(decos), std::move(members));

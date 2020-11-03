@@ -19,15 +19,20 @@
 #include <string>
 #include <vector>
 
+#include "src/ast/decoration.h"
+
 namespace tint {
 namespace ast {
 
 class StrideDecoration;
 
 /// A decoration attached to an array
-class ArrayDecoration {
+class ArrayDecoration : public Decoration {
  public:
-  virtual ~ArrayDecoration();
+  /// The kind of decoration that this type represents
+  static constexpr DecorationKind Kind = DecorationKind::kArray;
+
+  ~ArrayDecoration() override;
 
   /// @returns true if this is a stride decoration
   virtual bool IsStride() const;
@@ -39,6 +44,7 @@ class ArrayDecoration {
   virtual std::string to_str() const = 0;
 
  protected:
+  /// Constructor
   ArrayDecoration();
 };
 

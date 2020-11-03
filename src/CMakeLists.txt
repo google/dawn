@@ -76,6 +76,8 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/decorated_variable.cc
   ast/decorated_variable.h
+  ast/decoration.cc
+  ast/decoration.h
   ast/discard_statement.cc
   ast/discard_statement.h
   ast/else_statement.cc
@@ -132,6 +134,8 @@ set(TINT_LIB_SRCS
   ast/stride_decoration.h
   ast/struct.cc
   ast/struct.h
+  ast/struct_block_decoration.cc
+  ast/struct_block_decoration.h
   ast/struct_decoration.cc
   ast/struct_decoration.h
   ast/struct_member.cc
@@ -344,6 +348,7 @@ set(TINT_TEST_SRCS
   ast/constant_id_decoration_test.cc
   ast/continue_statement_test.cc
   ast/discard_statement_test.cc
+  ast/decoration_test.cc
   ast/decorated_variable_test.cc
   ast/else_statement_test.cc
   ast/expression_test.cc

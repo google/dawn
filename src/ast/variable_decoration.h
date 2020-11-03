@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include "src/ast/decoration.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,9 +32,12 @@ class LocationDecoration;
 class SetDecoration;
 
 /// A decoration attached to a variable
-class VariableDecoration {
+class VariableDecoration : public Decoration {
  public:
-  virtual ~VariableDecoration();
+  /// The kind of decoration that this type represents
+  static constexpr DecorationKind Kind = DecorationKind::kVariable;
+
+  ~VariableDecoration() override;
 
   /// @returns true if this is a binding decoration
   virtual bool IsBinding() const;
@@ -58,11 +63,10 @@ class VariableDecoration {
 
   /// Outputs the variable decoration to the given stream
   /// @param out the stream to output too
-  //! @cond Doxygen_Suppress
   virtual void to_str(std::ostream& out) const = 0;
-  //! @endcond
 
  protected:
+  /// Constructor
   VariableDecoration();
 };
 

@@ -25,6 +25,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -234,7 +235,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
       kStructBufferName, internal_array_type, std::move(member_dec)));
 
   ast::StructDecorationList decos;
-  decos.push_back(ast::StructDecoration::kBlock);
+  decos.push_back(std::make_unique<ast::StructBlockDecoration>());
 
   auto* struct_type =
       ctx_->type_mgr().Get(std::make_unique<ast::type::StructType>(

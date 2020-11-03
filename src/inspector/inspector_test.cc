@@ -34,6 +34,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -268,7 +269,7 @@ class InspectorHelper {
 
     ast::StructDecorationList decos;
     if (is_block) {
-      decos.push_back(ast::StructDecoration::kBlock);
+      decos.push_back(std::make_unique<ast::StructBlockDecoration>());
     }
 
     auto str =

@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   ASSERT_TRUE(p->struct_decoration_decl(decos));
   ASSERT_FALSE(p->has_error());
   EXPECT_EQ(decos.size(), 1u);
-  EXPECT_EQ(decos[0], ast::StructDecoration::kBlock);
+  EXPECT_TRUE(decos[0]->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {

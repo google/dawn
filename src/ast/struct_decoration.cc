@@ -17,19 +17,9 @@
 namespace tint {
 namespace ast {
 
-std::ostream& operator<<(std::ostream& out, StructDecoration stage) {
-  switch (stage) {
-    case StructDecoration::kNone: {
-      out << "none";
-      break;
-    }
-    case StructDecoration::kBlock: {
-      out << "block";
-      break;
-    }
-  }
-  return out;
-}
+StructDecoration::StructDecoration() : Decoration(Kind) {}
+
+StructDecoration::~StructDecoration() = default;
 
 }  // namespace ast
 }  // namespace tint

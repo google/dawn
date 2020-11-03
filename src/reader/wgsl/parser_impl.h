@@ -189,7 +189,7 @@ class ParserImpl {
   /// Parses a `struct_decoration` grammar element
   /// @param t the current token
   /// @returns the struct decoration or StructDecoraton::kNone if none matched
-  ast::StructDecoration struct_decoration(Token t);
+  std::unique_ptr<ast::StructDecoration> struct_decoration(Token t);
   /// Parses a `struct_body_decl` grammar element
   /// @returns the struct members
   ast::StructMemberList struct_body_decl();

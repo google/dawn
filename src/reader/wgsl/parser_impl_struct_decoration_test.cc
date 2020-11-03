@@ -24,7 +24,7 @@ namespace {
 
 struct StructDecorationData {
   const char* input;
-  ast::StructDecoration result;
+  bool is_block;
 };
 inline std::ostream& operator<<(std::ostream& out, StructDecorationData data) {
   out << std::string(data.input);
@@ -40,17 +40,16 @@ TEST_P(StructDecorationTest, Parses) {
 
   auto deco = p->struct_decoration(p->peek());
   ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(deco, params.result);
+  EXPECT_EQ(deco->IsBlock(), params.is_block);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          StructDecorationTest,
-                         testing::Values(StructDecorationData{
-                             "block", ast::StructDecoration::kBlock}));
+                         testing::Values(StructDecorationData{"block", true}));
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
   auto* p = parser("not-a-stage");
   auto deco = p->struct_decoration(p->peek());
-  ASSERT_EQ(deco, ast::StructDecoration::kNone);
+  ASSERT_EQ(deco, nullptr);
 
   auto t = p->next();
   EXPECT_TRUE(t.IsIdentifier());

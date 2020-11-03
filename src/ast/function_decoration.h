@@ -19,6 +19,8 @@
 #include <ostream>
 #include <vector>
 
+#include "src/ast/decoration.h"
+
 namespace tint {
 namespace ast {
 
@@ -26,9 +28,12 @@ class StageDecoration;
 class WorkgroupDecoration;
 
 /// A decoration attached to a function
-class FunctionDecoration {
+class FunctionDecoration : public Decoration {
  public:
-  virtual ~FunctionDecoration();
+  /// The kind of decoration that this type represents
+  static constexpr DecorationKind Kind = DecorationKind::kFunction;
+
+  ~FunctionDecoration() override;
 
   /// @returns true if this is a stage decoration
   virtual bool IsStage() const;
@@ -42,11 +47,10 @@ class FunctionDecoration {
 
   /// Outputs the function decoration to the given stream
   /// @param out the stream to output too
-  //! @cond Doxygen_Suppress
   virtual void to_str(std::ostream& out) const = 0;
-  //! @endcond
 
  protected:
+  /// Constructor
   FunctionDecoration();
 };
 

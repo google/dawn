@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/struct_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type/i32_type.h"
 
@@ -52,12 +52,12 @@ TEST_F(StructTest, Creation_WithDecorations) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(StructDecoration::kBlock);
+  decos.push_back(std::make_unique<StructBlockDecoration>());
 
   Struct s{std::move(decos), std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
+  EXPECT_TRUE(s.decorations()[0]->IsBlock());
   EXPECT_EQ(s.source().range.begin.line, 0u);
   EXPECT_EQ(s.source().range.begin.column, 0u);
   EXPECT_EQ(s.source().range.end.line, 0u);
@@ -72,14 +72,14 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(StructDecoration::kBlock);
+  decos.push_back(std::make_unique<StructBlockDecoration>());
 
   Struct s{
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       std::move(decos), std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_EQ(s.decorations()[0], StructDecoration::kBlock);
+  EXPECT_TRUE(s.decorations()[0]->IsBlock());
   EXPECT_EQ(s.source().range.begin.line, 27u);
   EXPECT_EQ(s.source().range.begin.column, 4u);
   EXPECT_EQ(s.source().range.end.line, 27u);
@@ -114,20 +114,6 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
   EXPECT_FALSE(s.IsValid());
 }
 
-TEST_F(StructTest, IsValid_NoneDecoration) {
-  type::I32Type i32;
-
-  StructMemberList members;
-  members.push_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
-
-  StructDecorationList decos;
-  decos.push_back(StructDecoration::kNone);
-
-  Struct s{std::move(decos), std::move(members)};
-  EXPECT_FALSE(s.IsValid());
-}
-
 TEST_F(StructTest, ToStr) {
   type::I32Type i32;
 
@@ -136,7 +122,7 @@ TEST_F(StructTest, ToStr) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(StructDecoration::kBlock);
+  decos.push_back(std::make_unique<StructBlockDecoration>());
 
   Struct s{std::move(decos), std::move(members)};
 

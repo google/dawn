@@ -12,36 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/function_decoration.h"
-
-#include <assert.h>
-
-#include "src/ast/stage_decoration.h"
-#include "src/ast/workgroup_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 
 namespace tint {
 namespace ast {
 
-FunctionDecoration::FunctionDecoration() : Decoration(Kind) {}
+StructBlockDecoration::StructBlockDecoration() = default;
 
-FunctionDecoration::~FunctionDecoration() = default;
+StructBlockDecoration::~StructBlockDecoration() = default;
 
-bool FunctionDecoration::IsStage() const {
-  return false;
+bool StructBlockDecoration::IsBlock() const {
+  return true;
 }
 
-bool FunctionDecoration::IsWorkgroup() const {
-  return false;
-}
-
-const StageDecoration* FunctionDecoration::AsStage() const {
-  assert(IsStage());
-  return static_cast<const StageDecoration*>(this);
-}
-
-const WorkgroupDecoration* FunctionDecoration::AsWorkgroup() const {
-  assert(IsWorkgroup());
-  return static_cast<const WorkgroupDecoration*>(this);
+void StructBlockDecoration::to_str(std::ostream& out) const {
+  out << "block";
 }
 
 }  // namespace ast

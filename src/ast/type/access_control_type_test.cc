@@ -14,6 +14,9 @@
 
 #include "src/ast/type/access_control_type.h"
 
+#include <memory>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/stride_decoration.h"

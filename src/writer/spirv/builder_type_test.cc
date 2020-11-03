@@ -18,6 +18,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/access_control_type.h"
@@ -361,7 +362,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
   ast::StructDecorationList struct_decos;
-  struct_decos.push_back(ast::StructDecoration::kBlock);
+  struct_decos.push_back(std::make_unique<ast::StructBlockDecoration>());
 
   auto s = std::make_unique<ast::Struct>(std::move(struct_decos),
                                          std::move(members));

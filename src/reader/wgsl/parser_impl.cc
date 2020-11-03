@@ -42,6 +42,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/alias_type.h"
@@ -1524,10 +1525,10 @@ bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
   if (has_error()) {
     return false;
   }
-  if (deco == ast::StructDecoration::kNone) {
+  if (deco == nullptr) {
     return true;
   }
-  decos.push_back(deco);
+  decos.emplace_back(std::move(deco));
 
   next();  // Consume the peek of [[
   next();  // Consume the peek from the struct_decoration
@@ -1543,11 +1544,11 @@ bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
 
 // struct_decoration
 //  : BLOCK
-ast::StructDecoration ParserImpl::struct_decoration(Token t) {
+std::unique_ptr<ast::StructDecoration> ParserImpl::struct_decoration(Token t) {
   if (t.IsBlock()) {
-    return ast::StructDecoration::kBlock;
+    return std::make_unique<ast::StructBlockDecoration>();
   }
-  return ast::StructDecoration::kNone;
+  return nullptr;
 }
 
 // struct_body_decl
