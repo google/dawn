@@ -208,6 +208,7 @@ test("dawn_unittests") {
     "unittests/validation/TextureValidationTests.cpp",
     "unittests/validation/TextureViewValidationTests.cpp",
     "unittests/validation/ToggleValidationTests.cpp",
+    "unittests/validation/UnsafeAPIValidationTests.cpp",
     "unittests/validation/ValidationTest.cpp",
     "unittests/validation/ValidationTest.h",
     "unittests/validation/VertexBufferValidationTests.cpp",

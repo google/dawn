@@ -70,6 +70,14 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
 
+            // Indexed dispatches need a compute-shader based validation to check that the dispatch
+            // sizes aren't too big. Disallow them as unsafe until the validation is implemented.
+            if (GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                return DAWN_VALIDATION_ERROR(
+                    "DispatchIndirect is disallowed because it doesn't validate that the dispatch "
+                    "size is valid yet.");
+            }
+
             if (indirectOffset % 4 != 0) {
                 return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
             }

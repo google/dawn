@@ -148,6 +148,15 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Binding type cannot be used with this visibility.");
             }
 
+            // Dynamic storage buffers aren't bounds checked properly in D3D12. Disallow them as
+            // unsafe until the bounds checks are implemented.
+            if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
+                entry.type == wgpu::BindingType::StorageBuffer && entry.hasDynamicOffset) {
+                return DAWN_VALIDATION_ERROR(
+                    "Dynamic storage buffers are disallowed because they aren't secure yet. See "
+                    "https://crbug.com/dawn/429");
+            }
+
             IncrementBindingCounts(&bindingCounts, entry);
 
             bindingsSet.insert(bindingNumber);

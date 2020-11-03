@@ -43,6 +43,7 @@ namespace dawn_native {
         UseDXC,
         DisableRobustness,
         MetalEnableVertexPulling,
+        DisallowUnsafeAPIs,
 
         EnumCount,
         InvalidEnum = EnumCount,
