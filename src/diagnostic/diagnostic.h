@@ -54,11 +54,29 @@ class List {
   /// Constructs the list with no elements.
   List();
 
-  /// Constructs the list with a copy of the diagnostics in |list|.
+  /// Copy constructor. Copies the diagnostics from |list| into this list.
   /// @param list the list of diagnostics to copy into this list.
   List(std::initializer_list<Diagnostic> list);
 
+  /// Copy constructor. Copies the diagnostics from |list| into this list.
+  /// @param list the list of diagnostics to copy into this list.
+  List(const List& list);
+
+  /// Move constructor. Moves the diagnostics from |list| into this list.
+  /// @param list the list of diagnostics to move into this list.
+  List(List&& list);
   ~List();
+
+  /// Assignment operator. Copies the diagnostics from |list| into this list.
+  /// @param list the list to copy into this list.
+  /// @return this list.
+  List& operator=(const List& list);
+
+  /// Assignment move operator. Moves the diagnostics from |list| into this
+  /// list.
+  /// @param list the list to move into this list.
+  /// @return this list.
+  List& operator=(List&& list);
 
   /// adds a diagnostic to the end of this list.
   /// @param diag the diagnostic to append to this list.

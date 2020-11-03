@@ -26,6 +26,8 @@
 
 #include "tint/tint.h"
 
+#include "src/diagnostic/printer.h"
+
 namespace {
 
 enum class Format {
@@ -478,7 +480,8 @@ int main(int argc, const char** argv) {
     return 1;
   }
   if (!reader->Parse()) {
-    std::cerr << "Parse: " << reader->error() << std::endl;
+    auto printer = tint::diag::Printer::create(stderr, true);
+    tint::diag::Formatter().format(reader->diagnostics(), printer.get());
     return 1;
   }
 

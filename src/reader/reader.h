@@ -19,6 +19,8 @@
 
 #include "src/ast/module.h"
 #include "src/context.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/diagnostic/formatter.h"
 
 namespace tint {
 namespace reader {
@@ -32,10 +34,17 @@ class Reader {
   /// @returns true if the parse was successful
   virtual bool Parse() = 0;
 
-  /// @returns true if an error was encountered
-  bool has_error() const { return error_.size() > 0; }
+  /// @returns true if an error was encountered.
+  bool has_error() const { return diags_.contains_errors(); }
+
   /// @returns the parser error string
-  const std::string& error() const { return error_; }
+  std::string error() const {
+    diag::Formatter formatter{{false, false, false}};
+    return formatter.format(diags_);
+  }
+
+  /// @returns the full list of diagnostic messages.
+  const diag::List& diagnostics() const { return diags_; }
 
   /// @returns the module. The module in the parser will be reset after this.
   virtual ast::Module module() = 0;
@@ -45,15 +54,15 @@ class Reader {
   /// @param ctx the context object, must be non-null
   explicit Reader(Context* ctx);
 
-  /// Sets the error string
-  /// @param msg the error message
-  void set_error(const std::string& msg) { error_ = msg; }
+  /// Sets the diagnostic messages
+  /// @param diags the list of diagnostic messages
+  void set_diagnostics(const diag::List& diags) { diags_ = diags; }
 
   /// The Tint context object
   Context& ctx_;
 
-  /// An error message, if an error was encountered
-  std::string error_;
+  /// All diagnostic messages from the reader.
+  diag::List diags_;
 };
 
 }  // namespace reader

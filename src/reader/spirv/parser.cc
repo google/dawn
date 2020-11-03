@@ -27,7 +27,14 @@ Parser::~Parser() = default;
 
 bool Parser::Parse() {
   const auto result = impl_->Parse();
-  set_error(impl_->error());
+  auto err_msg = impl_->error();
+  if (!err_msg.empty()) {
+    // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
+    diag::Diagnostic error{};
+    error.severity = diag::Severity::Error;
+    error.message = err_msg;
+    set_diagnostics({error});
+  }
   return result;
 }
 

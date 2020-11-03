@@ -111,6 +111,9 @@ class ParserImpl {
   /// @returns the diagnostic messages
   const diag::List& diagnostics() const { return diags_; }
 
+  /// @returns the diagnostic messages
+  diag::List& diagnostics() { return diags_; }
+
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() { return std::move(module_); }
 

@@ -19,7 +19,13 @@ namespace diag {
 
 List::List() = default;
 List::List(std::initializer_list<Diagnostic> list) : entries_(list) {}
+List::List(const List&) = default;
+List::List(List&&) = default;
+
 List::~List() = default;
+
+List& List::operator=(const List&) = default;
+List& List::operator=(List&&) = default;
 
 }  // namespace diag
 }  // namespace tint

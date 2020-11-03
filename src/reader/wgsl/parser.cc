@@ -28,8 +28,7 @@ Parser::~Parser() = default;
 bool Parser::Parse() {
   bool ret = impl_->Parse();
 
-  if (impl_->has_error())
-    set_error(impl_->error());
+  set_diagnostics(std::move(impl_->diagnostics()));
 
   return ret;
 }
