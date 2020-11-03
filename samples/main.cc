@@ -24,7 +24,6 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
 
-#include "src/diagnostic/printer.h"
 #include "tint/tint.h"
 
 namespace {

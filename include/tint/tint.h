@@ -20,6 +20,7 @@
 
 #include "src/ast/pipeline_stage.h"
 #include "src/context.h"
+#include "src/diagnostic/printer.h"
 #include "src/inspector/inspector.h"
 #include "src/reader/reader.h"
 #include "src/transform/bound_array_accessors_transform.h"
