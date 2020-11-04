@@ -30,6 +30,7 @@
 #include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/Instance.h"
+#include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
@@ -105,6 +106,7 @@ namespace dawn_native {
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         mCreateReadyPipelineTracker = std::make_unique<CreateReadyPipelineTracker>(this);
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
+        mInternalPipelineStore = std::make_unique<InternalPipelineStore>();
 
         // Starting from now the backend can start doing reentrant calls so the device is marked as
         // alive.
@@ -171,6 +173,8 @@ namespace dawn_native {
         mCreateReadyPipelineTracker = nullptr;
 
         mEmptyBindGroupLayout = nullptr;
+
+        mInternalPipelineStore = nullptr;
 
         AssumeCommandsComplete();
         // Tell the backend that it can free all the objects now that the GPU timeline is empty.
@@ -327,6 +331,10 @@ namespace dawn_native {
 
     ExecutionSerial DeviceBase::GetFutureSerial() const {
         return mFutureSerial;
+    }
+
+    InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
+        return mInternalPipelineStore.get();
     }
 
     void DeviceBase::IncrementLastSubmittedCommandSerial() {

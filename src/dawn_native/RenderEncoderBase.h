@@ -25,9 +25,9 @@ namespace dawn_native {
         RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext);
 
         void Draw(uint32_t vertexCount,
-                  uint32_t instanceCount,
-                  uint32_t firstVertex,
-                  uint32_t firstInstance);
+                  uint32_t instanceCount = 1,
+                  uint32_t firstVertex = 0,
+                  uint32_t firstInstance = 0);
         void DrawIndexed(uint32_t vertexCount,
                          uint32_t instanceCount,
                          uint32_t firstIndex,

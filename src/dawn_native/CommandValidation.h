@@ -78,6 +78,14 @@ namespace dawn_native {
 
     bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 
+    MaybeError ValidateTextureToTextureCopyRestrictions(const TextureCopyView& src,
+                                                        const TextureCopyView& dst,
+                                                        const Extent3D& copySize);
+
+    MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage);
+
+    MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDVALIDATION_H_

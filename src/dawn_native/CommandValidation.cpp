@@ -616,4 +616,57 @@ namespace dawn_native {
         return {};
     }
 
+    MaybeError ValidateTextureToTextureCopyRestrictions(const TextureCopyView& src,
+                                                        const TextureCopyView& dst,
+                                                        const Extent3D& copySize) {
+        const uint32_t srcSamples = src.texture->GetSampleCount();
+        const uint32_t dstSamples = dst.texture->GetSampleCount();
+
+        if (srcSamples != dstSamples) {
+            return DAWN_VALIDATION_ERROR(
+                "Source and destination textures must have matching sample counts.");
+        }
+
+        if (src.texture->GetFormat().format != dst.texture->GetFormat().format) {
+            // Metal requires texture-to-texture copies be the same format
+            return DAWN_VALIDATION_ERROR("Source and destination texture formats must match.");
+        }
+
+        if (src.aspect != wgpu::TextureAspect::All || dst.aspect != wgpu::TextureAspect::All) {
+            // Metal cannot select a single aspect for texture-to-texture copies
+            return DAWN_VALIDATION_ERROR(
+                "Texture aspect must be \"all\" for texture to texture copies");
+        }
+
+        if (src.texture == dst.texture && src.mipLevel == dst.mipLevel) {
+            ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D &&
+                   dst.texture->GetDimension() == wgpu::TextureDimension::e2D);
+            if (IsRangeOverlapped(src.origin.z, dst.origin.z, copySize.depth)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Copy subresources cannot be overlapped when copying within the same "
+                    "texture.");
+            }
+        }
+
+        return {};
+    }
+
+    MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
+        ASSERT(wgpu::HasZeroOrOneBits(usage));
+        if (!(texture->GetUsage() & usage)) {
+            return DAWN_VALIDATION_ERROR("texture doesn't have the required usage.");
+        }
+
+        return {};
+    }
+
+    MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
+        ASSERT(wgpu::HasZeroOrOneBits(usage));
+        if (!(buffer->GetUsage() & usage)) {
+            return DAWN_VALIDATION_ERROR("buffer doesn't have the required usage.");
+        }
+
+        return {};
+    }
+
 }  // namespace dawn_native

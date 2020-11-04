@@ -72,7 +72,7 @@ namespace dawn_native {
                              uint64_t destinationOffset);
         void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
-        CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);
+        CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor = nullptr);
 
       private:
         MaybeError ValidateFinish(CommandIterator* commands,

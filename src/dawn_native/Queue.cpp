@@ -17,14 +17,18 @@
 #include "common/Constants.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/CopyTextureForBrowserHelper.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorScope.h"
 #include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/QuerySet.h"
+#include "dawn_native/RenderPassEncoder.h"
+#include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
@@ -131,7 +135,6 @@ namespace dawn_native {
                 UNREACHABLE();
             }
         };
-
     }  // namespace
 
     // QueueBase
@@ -306,6 +309,23 @@ namespace dawn_native {
         return device->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout,
                                                 &textureCopy, writeSizePixel);
     }
+
+    void QueueBase::CopyTextureForBrowser(const TextureCopyView* source,
+                                          const TextureCopyView* destination,
+                                          const Extent3D* copySize) {
+        GetDevice()->ConsumedError(CopyTextureForBrowserInternal(source, destination, copySize));
+    }
+
+    MaybeError QueueBase::CopyTextureForBrowserInternal(const TextureCopyView* source,
+                                                        const TextureCopyView* destination,
+                                                        const Extent3D* copySize) {
+        if (GetDevice()->IsValidationEnabled()) {
+            DAWN_TRY(ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize));
+        }
+
+        return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize);
+    }
+
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
                                          CommandBufferBase* const* commands) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "Queue::ValidateSubmit");

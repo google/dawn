@@ -275,6 +275,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/ComputeSharedMemoryTests.cpp",
     "end2end/ComputeStorageBufferBarrierTests.cpp",
     "end2end/CopyTests.cpp",
+    "end2end/CopyTextureForBrowserTests.cpp",
     "end2end/CreateReadyPipelineTests.cpp",
     "end2end/CullingTests.cpp",
     "end2end/DebugMarkerTests.cpp",
