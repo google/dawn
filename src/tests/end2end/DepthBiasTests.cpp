@@ -139,10 +139,6 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
     // NVIDIA GPUs under Vulkan seem to be using a different scale than everyone else.
     DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // OpenGL uses a different scale than the other APIs
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
@@ -162,10 +158,6 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
 
 // Test adding positive bias to output with a clamp
 TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // Clamping support in OpenGL is spotty
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
@@ -188,10 +180,6 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
     // NVIDIA GPUs seems to be using a different scale than everyone else
     DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // OpenGL uses a different scale than the other APIs
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
@@ -211,10 +199,6 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
 
 // Test adding negative bias to output with a clamp
 TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // Clamping support in OpenGL is spotty
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
@@ -234,10 +218,6 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
 
 // Test adding positive infinite slope bias to output
 TEST_P(DepthBiasTests, PositiveInfinitySlopeBiasOnFloat) {
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // NVIDIA GPUs do not clamp values to 1 when using Inf slope bias.
     DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
@@ -257,10 +237,6 @@ TEST_P(DepthBiasTests, PositiveInfinitySlopeBiasOnFloat) {
 
 // Test adding positive infinite slope bias to output
 TEST_P(DepthBiasTests, NegativeInfinityBiasOnFloat) {
-    // SwiftShader incorrectly uses depthBias directly when calculating bias.
-    // TODO(enrico.galli@intel.com): Remove once it has been fixed upstream.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
-
     // NVIDIA GPUs do not clamp values to 0 when using -Inf slope bias.
     DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
