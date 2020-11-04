@@ -1236,8 +1236,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1259,8 +1259,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1314,8 +1314,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
       "ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1351,8 +1351,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1381,8 +1381,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1409,8 +1409,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(
-      std::make_unique<ast::StageDecoration>(ast::PipelineStage::kVertex));
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
