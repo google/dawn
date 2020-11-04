@@ -541,6 +541,16 @@ ast::type::TextureDimension ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_WO_2D
 //  | TEXTURE_WO_2D_ARRAY
 //  | TEXTURE_WO_3D
+//  | TEXTURE_STORAGE_RO_1D
+//  | TEXTURE_STORAGE_RO_1D_ARRAY
+//  | TEXTURE_STORAGE_RO_2D
+//  | TEXTURE_STORAGE_RO_2D_ARRAY
+//  | TEXTURE_STORAGE_RO_3D
+//  | TEXTURE_STORAGE_WO_1D
+//  | TEXTURE_STORAGE_WO_1D_ARRAY
+//  | TEXTURE_STORAGE_WO_2D
+//  | TEXTURE_STORAGE_WO_2D_ARRAY
+//  | TEXTURE_STORAGE_WO_3D
 std::pair<ast::type::TextureDimension, ast::AccessControl>
 ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorageReadonly1d))

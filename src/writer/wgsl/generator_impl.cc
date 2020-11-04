@@ -463,8 +463,9 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     } else if (texture->IsMultisampled()) {
       out_ << "multisampled_";
     } else if (texture->IsStorage()) {
-      auto* storage = texture->AsStorage();
+      out_ << "storage_";
 
+      auto* storage = texture->AsStorage();
       if (storage->access() == ast::AccessControl::kReadOnly) {
         out_ << "ro_";
       } else if (storage->access() == ast::AccessControl::kWriteOnly) {

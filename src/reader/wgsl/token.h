@@ -300,15 +300,15 @@ class Token {
     kTextureDepthCubeArray,
     /// A 'texture_multisampled_2d'
     kTextureMultisampled2d,
-    /// A 'texture_ro_1d'
+    /// A 'texture_storage_ro_1d'
     kTextureStorageReadonly1d,
-    /// A 'texture_ro_2d_array'
+    /// A 'texture_storage_ro_2d_array'
     kTextureStorageReadonly1dArray,
-    /// A 'texture_ro_2d'
+    /// A 'texture_storage_ro_2d'
     kTextureStorageReadonly2d,
-    /// A 'texture_ro_2d_array'
+    /// A 'texture_storage_ro_2d_array'
     kTextureStorageReadonly2dArray,
-    /// A 'texture_ro_3d'
+    /// A 'texture_storage_ro_3d'
     kTextureStorageReadonly3d,
     /// A 'texture_1d'
     kTextureSampled1d,
@@ -689,23 +689,23 @@ class Token {
   bool IsTextureMultisampled2d() const {
     return type_ == Type::kTextureMultisampled2d;
   }
-  /// @returns true if token is a 'texture_ro_1d'
+  /// @returns true if token is a 'texture_storage_ro_1d'
   bool IsTextureStorageReadonly1d() const {
     return type_ == Type::kTextureStorageReadonly1d;
   }
-  /// @returns true if token is a 'texture_ro_1d_array'
+  /// @returns true if token is a 'texture_storage_ro_1d_array'
   bool IsTextureStorageReadonly1dArray() const {
     return type_ == Type::kTextureStorageReadonly1dArray;
   }
-  /// @returns true if token is a 'texture_ro_2d'
+  /// @returns true if token is a 'texture_storage_ro_2d'
   bool IsTextureStorageReadonly2d() const {
     return type_ == Type::kTextureStorageReadonly2d;
   }
-  /// @returns true if token is a 'texture_ro_2d_array'
+  /// @returns true if token is a 'texture_storage_ro_2d_array'
   bool IsTextureStorageReadonly2dArray() const {
     return type_ == Type::kTextureStorageReadonly2dArray;
   }
-  /// @returns true if token is a 'texture_ro_3d'
+  /// @returns true if token is a 'texture_storage_ro_3d'
   bool IsTextureStorageReadonly3d() const {
     return type_ == Type::kTextureStorageReadonly3d;
   }
@@ -731,23 +731,23 @@ class Token {
   bool IsTextureSampledCubeArray() const {
     return type_ == Type::kTextureSampledCubeArray;
   }
-  /// @returns true if token is a 'texture_wo_1d'
+  /// @returns true if token is a 'texture_storage_wo_1d'
   bool IsTextureStorageWriteonly1d() const {
     return type_ == Type::kTextureStorageWriteonly1d;
   }
-  /// @returns true if token is a 'texture_wo_1d_array'
+  /// @returns true if token is a 'texture_storage_wo_1d_array'
   bool IsTextureStorageWriteonly1dArray() const {
     return type_ == Type::kTextureStorageWriteonly1dArray;
   }
-  /// @returns true if token is a 'texture_wo_2d'
+  /// @returns true if token is a 'texture_storage_wo_2d'
   bool IsTextureStorageWriteonly2d() const {
     return type_ == Type::kTextureStorageWriteonly2d;
   }
-  /// @returns true if token is a 'texture_wo_2d_array'
+  /// @returns true if token is a 'texture_storage_wo_2d_array'
   bool IsTextureStorageWriteonly2dArray() const {
     return type_ == Type::kTextureStorageWriteonly2dArray;
   }
-  /// @returns true if token is a 'texture_wo_3d'
+  /// @returns true if token is a 'texture_storage_wo_3d'
   bool IsTextureStorageWriteonly3d() const {
     return type_ == Type::kTextureStorageWriteonly3d;
   }

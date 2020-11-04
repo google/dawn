@@ -290,15 +290,15 @@ std::string Token::TypeToName(Type type) {
     case Token::Type::kTextureMultisampled2d:
       return "texture_multisampled_2d";
     case Token::Type::kTextureStorageReadonly1d:
-      return "texture_ro_1d";
+      return "texture_storage_ro_1d";
     case Token::Type::kTextureStorageReadonly1dArray:
-      return "texture_ro_1d_array";
+      return "texture_storage_ro_1d_array";
     case Token::Type::kTextureStorageReadonly2d:
-      return "texture_ro_2d";
+      return "texture_storage_ro_2d";
     case Token::Type::kTextureStorageReadonly2dArray:
-      return "texture_ro_2d_array";
+      return "texture_storage_ro_2d_array";
     case Token::Type::kTextureStorageReadonly3d:
-      return "texture_ro_3d";
+      return "texture_storage_ro_3d";
     case Token::Type::kTextureSampled1d:
       return "texture_1d";
     case Token::Type::kTextureSampled1dArray:
@@ -314,15 +314,15 @@ std::string Token::TypeToName(Type type) {
     case Token::Type::kTextureSampledCubeArray:
       return "texture_cube_array";
     case Token::Type::kTextureStorageWriteonly1d:
-      return "texture_wo_1d";
+      return "texture_storage_wo_1d";
     case Token::Type::kTextureStorageWriteonly1dArray:
-      return "texture_wo_1d_array";
+      return "texture_storage_wo_1d_array";
     case Token::Type::kTextureStorageWriteonly2d:
-      return "texture_wo_2d";
+      return "texture_storage_wo_2d";
     case Token::Type::kTextureStorageWriteonly2dArray:
-      return "texture_wo_2d_array";
+      return "texture_storage_wo_2d_array";
     case Token::Type::kTextureStorageWriteonly3d:
-      return "texture_wo_3d";
+      return "texture_storage_wo_3d";
     case Token::Type::kTrue:
       return "true";
     case Token::Type::kType:
