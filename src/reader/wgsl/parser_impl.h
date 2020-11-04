@@ -429,7 +429,9 @@ class ParserImpl {
 
  private:
   /// @returns true and consumes the next token if it equals |tok|.
-  bool match(Token::Type tok);
+  /// @param source if not nullptr, the next token's source is written to this
+  /// pointer, regardless of success or error
+  bool match(Token::Type tok, Source* source = nullptr);
   /// Errors if the next token is not equal to |tok|.
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised.
@@ -461,8 +463,12 @@ class ParserImpl {
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised
   /// @param out the pointer to write the parsed identifier to
+  /// @param source if not nullptr, the next token's source is written to this
+  /// pointer, regardless of success or error
   /// @returns true if the identifier was parsed without error
-  bool expect_ident(const std::string& use, std::string* out);
+  bool expect_ident(const std::string& use,
+                    std::string* out,
+                    Source* source = nullptr);
 
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);

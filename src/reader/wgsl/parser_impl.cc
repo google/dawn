@@ -457,10 +457,8 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     if (!expect("builtin decoration", Token::Type::kParenLeft))
       return nullptr;
 
-    source = peek().source();
-
     std::string ident;
-    if (!expect_ident("builtin", &ident))
+    if (!expect_ident("builtin", &ident, &source))
       return nullptr;
 
     ast::Builtin builtin = ident_to_builtin(ident);
@@ -1280,9 +1278,8 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
   next();  // consume the peek of [[
 
   for (;;) {
-    auto source = peek().source();
-
-    if (!match(Token::Type::kStride)) {
+    Source source;
+    if (!match(Token::Type::kStride, &source)) {
       add_error(source, "unknown array decoration");
       return false;
     }
@@ -1596,9 +1593,8 @@ bool ParserImpl::struct_member_decoration_decl(
 //   : OFFSET PAREN_LEFT INT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::StructMemberDecoration>
 ParserImpl::struct_member_decoration() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kOffset))
+  Source source;
+  if (!match(Token::Type::kOffset, &source))
     return nullptr;
 
   const char* use = "offset decoration";
@@ -1779,9 +1775,8 @@ ast::type::Type* ParserImpl::function_type_decl() {
 // function_header
 //   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
 std::unique_ptr<ast::Function> ParserImpl::function_header() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kFn))
+  Source source;
+  if (!match(Token::Type::kFn, &source))
     return nullptr;
 
   const char* use = "function declaration";
@@ -2071,9 +2066,8 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
 // return_stmt
 //   : RETURN logical_or_expression?
 std::unique_ptr<ast::ReturnStatement> ParserImpl::return_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kReturn))
+  Source source;
+  if (!match(Token::Type::kReturn, &source))
     return nullptr;
 
   std::unique_ptr<ast::Expression> expr = nullptr;
@@ -2149,9 +2143,8 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
 // if_stmt
 //   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
 std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kIf))
+  Source source;
+  if (!match(Token::Type::kIf, &source))
     return nullptr;
 
   auto condition = paren_rhs_stmt();
@@ -2239,9 +2232,8 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
 // switch_stmt
 //   : SWITCH paren_rhs_stmt BRACKET_LEFT switch_body+ BRACKET_RIGHT
 std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kSwitch))
+  Source source;
+  if (!match(Token::Type::kSwitch, &source))
     return nullptr;
 
   auto condition = paren_rhs_stmt();
@@ -2387,9 +2379,8 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::case_body() {
 // loop_stmt
 //   : LOOP BRACKET_LEFT statements continuing_stmt? BRACKET_RIGHT
 std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kLoop))
+  Source source;
+  if (!match(Token::Type::kLoop, &source))
     return nullptr;
 
   auto t = next();
@@ -2483,9 +2474,8 @@ std::unique_ptr<ForHeader> ParserImpl::for_header() {
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT BRACE_LEFT statements BRACE_RIGHT
 std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kFor))
+  Source source;
+  if (!match(Token::Type::kFor, &source))
     return nullptr;
 
   if (!expect("for loop", Token::Type::kParenLeft))
@@ -2591,9 +2581,8 @@ std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
 // break_stmt
 //   : BREAK
 std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kBreak))
+  Source source;
+  if (!match(Token::Type::kBreak, &source))
     return nullptr;
 
   return std::make_unique<ast::BreakStatement>(source);
@@ -2602,9 +2591,8 @@ std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
 // continue_stmt
 //   : CONTINUE
 std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
-  auto source = peek().source();
-
-  if (!match(Token::Type::kContinue))
+  Source source;
+  if (!match(Token::Type::kContinue, &source))
     return nullptr;
 
   return std::make_unique<ast::ContinueStatement>(source);
@@ -2760,10 +2748,8 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
   } else if (t.IsPeriod()) {
     next();  // Consume the peek
 
-    source = peek().source();
-
     std::string ident;
-    if (!expect_ident("member accessor", &ident))
+    if (!expect_ident("member accessor", &ident, &source))
       return nullptr;
 
     expr = std::make_unique<ast::MemberAccessorExpression>(
@@ -3402,8 +3388,12 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
                                                             std::move(lit));
 }
 
-bool ParserImpl::match(Token::Type tok) {
+bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {
   auto t = peek();
+
+  if (source != nullptr)
+    *source = t.source();
+
   if (t.Is(tok)) {
     next();
     return true;
@@ -3464,12 +3454,19 @@ bool ParserImpl::expect_nonzero_positive_sint(const std::string& use,
   return true;
 }
 
-bool ParserImpl::expect_ident(const std::string& use, std::string* out) {
+bool ParserImpl::expect_ident(const std::string& use,
+                              std::string* out,
+                              Source* source /* = nullptr */) {
   auto t = next();
+
+  if (source != nullptr)
+    *source = t.source();
+
   if (!t.IsIdentifier()) {
     add_error(t, "expected identifier", use);
     return false;
   }
+
   *out = t.to_str();
   return true;
 }
