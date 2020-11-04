@@ -140,10 +140,10 @@ namespace wgpu {
         CType mHandle = nullptr;
     };
 
-{% macro render_cpp_default_value(member) -%}
+{% macro render_cpp_default_value(member, is_struct=True) -%}
     {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
         {{" "}}= nullptr
-    {%- elif member.type.category == "object" and member.optional -%}
+    {%- elif member.type.category == "object" and member.optional and is_struct -%}
         {{" "}}= nullptr
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
         {{" "}}= {{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
@@ -164,7 +164,7 @@ namespace wgpu {
             {%- else -%}
                 {{as_annotated_cppType(arg)}}
             {%- endif -%}
-            {{render_cpp_default_value(arg)}}
+            {{render_cpp_default_value(arg, False)}}
         {%- endfor -%}
     ) const
 {%- endmacro %}
