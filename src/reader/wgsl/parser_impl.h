@@ -257,9 +257,11 @@ class ParserImpl {
   /// Parses a `param_list` grammar element
   /// @returns the parsed variables
   ast::VariableList param_list();
-  /// Parses a `pipeline_stage` grammar element
-  /// @returns the pipeline stage or PipelineStage::kNone if none matched
-  ast::PipelineStage pipeline_stage();
+  /// Parses a `pipeline_stage` grammar element, erroring if the next token does
+  /// not match a stage name.
+  /// @returns the pipeline stage or PipelineStage::kNone if none matched, along
+  /// with the source location for the stage.
+  std::pair<ast::PipelineStage, Source> expect_pipeline_stage();
   /// Parses a `body_stmt` grammar element
   /// @returns the parsed statements
   std::unique_ptr<ast::BlockStatement> body_stmt();

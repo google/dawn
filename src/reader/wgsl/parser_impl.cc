@@ -1669,14 +1669,10 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
     if (!expect("stage decoration", Token::Type::kParenLeft))
       return nullptr;
 
-    auto stage = pipeline_stage();
-    if (has_error()) {
+    ast::PipelineStage stage;
+    std::tie(stage, source) = expect_pipeline_stage();
+    if (stage == ast::PipelineStage::kNone)
       return nullptr;
-    }
-    if (stage == ast::PipelineStage::kNone) {
-      add_error(peek(), "invalid value for stage decoration");
-      return nullptr;
-    }
 
     if (!expect("stage decoration", Token::Type::kParenRight))
       return nullptr;
@@ -1784,21 +1780,20 @@ ast::VariableList ParserImpl::param_list() {
 //   : VERTEX
 //   | FRAGMENT
 //   | COMPUTE
-ast::PipelineStage ParserImpl::pipeline_stage() {
+std::pair<ast::PipelineStage, Source> ParserImpl::expect_pipeline_stage() {
+  Source source;
+  if (match(Token::Type::kVertex, &source))
+    return {ast::PipelineStage::kVertex, source};
+
+  if (match(Token::Type::kFragment, &source))
+    return {ast::PipelineStage::kFragment, source};
+
+  if (match(Token::Type::kCompute, &source))
+    return {ast::PipelineStage::kCompute, source};
+
   auto t = peek();
-  if (t.IsVertex()) {
-    next();  // consume the peek
-    return ast::PipelineStage::kVertex;
-  }
-  if (t.IsFragment()) {
-    next();  // consume the peek
-    return ast::PipelineStage::kFragment;
-  }
-  if (t.IsCompute()) {
-    next();  // consume the peek
-    return ast::PipelineStage::kCompute;
-  }
-  return ast::PipelineStage::kNone;
+  add_error(t, "invalid value for stage decoration");
+  return {ast::PipelineStage::kNone, t.source()};
 }
 
 // body_stmt
