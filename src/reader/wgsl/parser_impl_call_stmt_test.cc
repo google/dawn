@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
   auto* p = parser("a(");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: missing ) for call statement");
+  EXPECT_EQ(p->error(), "1:3: expected ')' for call statement");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, Statement_Call_Bad_ArgList) {
   auto* p = parser("a(b c);");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: missing ) for call statement");
+  EXPECT_EQ(p->error(), "1:5: expected ')' for call statement");
 }
 
 }  // namespace

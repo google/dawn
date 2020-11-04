@@ -119,14 +119,14 @@ TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
 
 TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
   EXPECT("fn f() -> void { x = f(1.; }",
-         "test.wgsl:1:26 error: missing ) for call expression\n"
+         "test.wgsl:1:26 error: expected ')' for call expression\n"
          "fn f() -> void { x = f(1.; }\n"
          "                         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
   EXPECT("fn f() -> void { f(1.; }",
-         "test.wgsl:1:22 error: missing ) for call statement\n"
+         "test.wgsl:1:22 error: expected ')' for call statement\n"
          "fn f() -> void { f(1.; }\n"
          "                     ^\n");
 }

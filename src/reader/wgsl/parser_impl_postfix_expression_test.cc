@@ -144,7 +144,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:3: missing ) for call expression");
+  EXPECT_EQ(p->error(), "1:3: expected ')' for call expression");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {

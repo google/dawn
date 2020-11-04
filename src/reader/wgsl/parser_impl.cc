@@ -2587,11 +2587,8 @@ std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
       return nullptr;
   }
 
-  t = next();
-  if (!t.IsParenRight()) {
-    add_error(t, "missing ) for call statement");
+  if (!expect("call statement", Token::Type::kParenRight))
     return nullptr;
-  }
 
   return std::make_unique<ast::CallStatement>(
       std::make_unique<ast::CallExpression>(
@@ -2763,11 +2760,9 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
         return nullptr;
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for call expression");
+    if (!expect("call expression", Token::Type::kParenRight))
       return nullptr;
-    }
+
     expr = std::make_unique<ast::CallExpression>(source, std::move(prefix),
                                                  std::move(params));
   } else if (t.IsPeriod()) {
