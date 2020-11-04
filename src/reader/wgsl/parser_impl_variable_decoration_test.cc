@@ -57,7 +57,8 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: invalid value for location decoration");
+  EXPECT_EQ(p->error(),
+            "1:10: expected signed integer literal for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
@@ -65,7 +66,8 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: invalid value for location decoration");
+  EXPECT_EQ(p->error(),
+            "1:10: expected signed integer literal for location decoration");
 }
 
 struct BuiltinData {
@@ -178,7 +180,8 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: invalid value for binding decoration");
+  EXPECT_EQ(p->error(),
+            "1:9: expected signed integer literal for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
@@ -186,7 +189,8 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: invalid value for binding decoration");
+  EXPECT_EQ(p->error(),
+            "1:9: expected signed integer literal for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_set) {
@@ -221,7 +225,8 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: invalid value for set decoration");
+  EXPECT_EQ(p->error(),
+            "1:5: expected signed integer literal for set decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
@@ -229,7 +234,8 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: invalid value for set decoration");
+  EXPECT_EQ(p->error(),
+            "1:5: expected signed integer literal for set decoration");
 }
 
 }  // namespace

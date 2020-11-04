@@ -52,7 +52,8 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
   ast::StructMemberDecorationList decos;
   ASSERT_FALSE(p->struct_member_decoration_decl(decos));
   ASSERT_TRUE(p->has_error()) << p->error();
-  EXPECT_EQ(p->error(), "1:10: invalid value for offset decoration");
+  EXPECT_EQ(p->error(),
+            "1:10: expected signed integer literal for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {

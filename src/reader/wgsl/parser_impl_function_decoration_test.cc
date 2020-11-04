@@ -84,7 +84,8 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_X_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: invalid value for workgroup_size x parameter");
+  EXPECT_EQ(p->error(),
+            "1:16: workgroup_size x parameter must be greater than 0");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_Y_Value) {
@@ -92,7 +93,8 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_Y_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:19: invalid value for workgroup_size y parameter");
+  EXPECT_EQ(p->error(),
+            "1:19: workgroup_size y parameter must be greater than 0");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_Z_Value) {
@@ -100,7 +102,8 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_Z_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:22: invalid value for workgroup_size z parameter");
+  EXPECT_EQ(p->error(),
+            "1:22: workgroup_size z parameter must be greater than 0");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingLeftParam) {
@@ -124,7 +127,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingValues) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: missing x value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:16: expected signed integer literal for workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_X_Value) {
@@ -132,7 +137,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_X_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: missing x value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:16: expected signed integer literal for workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Comma) {
@@ -148,7 +155,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:19: missing y value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:19: expected signed integer literal for workgroup_size y parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Comma) {
@@ -164,7 +173,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Value) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:22: missing z value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:22: expected signed integer literal for workgroup_size z parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_X_Invalid) {
@@ -172,7 +183,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_X_Invalid) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: missing x value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:16: expected signed integer literal for workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Invalid) {
@@ -180,7 +193,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Invalid) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:19: missing y value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:19: expected signed integer literal for workgroup_size y parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Invalid) {
@@ -188,7 +203,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Invalid) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:22: missing z value for workgroup_size");
+  EXPECT_EQ(
+      p->error(),
+      "1:22: expected signed integer literal for workgroup_size z parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Stage) {

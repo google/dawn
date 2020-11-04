@@ -310,44 +310,74 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingRParen) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
   EXPECT("[[workgroup_size(x)]] fn f() -> void {}",
-         "test.wgsl:1:18 error: missing x value for workgroup_size\n"
+         "test.wgsl:1:18 error: expected signed integer literal for "
+         "workgroup_size x parameter\n"
          "[[workgroup_size(x)]] fn f() -> void {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXNegative) {
   EXPECT("[[workgroup_size(-1)]] fn f() -> void {}",
-         "test.wgsl:1:18 error: invalid value for workgroup_size x parameter\n"
+         "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
+         "than 0\n"
          "[[workgroup_size(-1)]] fn f() -> void {}\n"
          "                 ^^\n");
 }
 
+TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXZero) {
+  EXPECT("[[workgroup_size(0)]] fn f() -> void {}",
+         "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
+         "than 0\n"
+         "[[workgroup_size(0)]] fn f() -> void {}\n"
+         "                 ^\n");
+}
+
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
   EXPECT("[[workgroup_size(1, x)]] fn f() -> void {}",
-         "test.wgsl:1:21 error: missing y value for workgroup_size\n"
+         "test.wgsl:1:21 error: expected signed integer literal for "
+         "workgroup_size y parameter\n"
          "[[workgroup_size(1, x)]] fn f() -> void {}\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYNegative) {
   EXPECT("[[workgroup_size(1, -1)]] fn f() -> void {}",
-         "test.wgsl:1:21 error: invalid value for workgroup_size y parameter\n"
+         "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
+         "than 0\n"
          "[[workgroup_size(1, -1)]] fn f() -> void {}\n"
          "                    ^^\n");
 }
 
+TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYZero) {
+  EXPECT("[[workgroup_size(1, 0)]] fn f() -> void {}",
+         "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
+         "than 0\n"
+         "[[workgroup_size(1, 0)]] fn f() -> void {}\n"
+         "                    ^\n");
+}
+
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
   EXPECT("[[workgroup_size(1, 2, x)]] fn f() -> void {}",
-         "test.wgsl:1:24 error: missing z value for workgroup_size\n"
+         "test.wgsl:1:24 error: expected signed integer literal for "
+         "workgroup_size z parameter\n"
          "[[workgroup_size(1, 2, x)]] fn f() -> void {}\n"
          "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZNegative) {
   EXPECT("[[workgroup_size(1, 2, -1)]] fn f() -> void {}",
-         "test.wgsl:1:24 error: invalid value for workgroup_size z parameter\n"
+         "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
+         "than 0\n"
          "[[workgroup_size(1, 2, -1)]] fn f() -> void {}\n"
          "                       ^^\n");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZZero) {
+  EXPECT("[[workgroup_size(1, 2, 0)]] fn f() -> void {}",
+         "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
+         "than 0\n"
+         "[[workgroup_size(1, 2, 0)]] fn f() -> void {}\n"
+         "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingIdentifier) {
@@ -652,14 +682,15 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetInvaldValue) {
   EXPECT("struct S { [[offset(x)]] i : i32 };",
-         "test.wgsl:1:21 error: invalid value for offset decoration\n"
+         "test.wgsl:1:21 error: expected signed integer literal for offset "
+         "decoration\n"
          "struct S { [[offset(x)]] i : i32 };\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetNegativeValue) {
   EXPECT("struct S { [[offset(-2)]] i : i32 };",
-         "test.wgsl:1:21 error: offset value must be >= 0\n"
+         "test.wgsl:1:21 error: offset decoration must be positive\n"
          "struct S { [[offset(-2)]] i : i32 };\n"
          "                    ^^\n");
 }
@@ -708,14 +739,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeDecoInvalid) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingLessThan) {
   EXPECT("var i : array;",
-         "test.wgsl:1:14 error: missing < for array declaration\n"
+         "test.wgsl:1:14 error: expected '<' for array declaration\n"
          "var i : array;\n"
          "             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingGreaterThan) {
   EXPECT("var i : array<u32, 3;",
-         "test.wgsl:1:21 error: missing > for array declaration\n"
+         "test.wgsl:1:21 error: expected '>' for array declaration\n"
          "var i : array<u32, 3;\n"
          "                    ^\n");
 }
@@ -729,7 +760,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoNotArray) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoMissingEnd) {
   EXPECT("var i : [[stride(1) array<i32>;",
-         "test.wgsl:1:21 error: missing ]] for array decoration\n"
+         "test.wgsl:1:21 error: expected ']]' for array decoration\n"
          "var i : [[stride(1) array<i32>;\n"
          "                    ^^^^^\n");
 }
@@ -750,14 +781,15 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideInvalid) {
   EXPECT("var i : [[stride(x)]] array<i32>;",
-         "test.wgsl:1:18 error: missing value for stride decoration\n"
+         "test.wgsl:1:18 error: expected signed integer literal for stride "
+         "decoration\n"
          "var i : [[stride(x)]] array<i32>;\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoStrideNegative) {
   EXPECT("var i : [[stride(-1)]] array<i32>;",
-         "test.wgsl:1:18 error: invalid stride value: -1\n"
+         "test.wgsl:1:18 error: stride decoration must be greater than 0\n"
          "var i : [[stride(-1)]] array<i32>;\n"
          "                 ^^\n");
 }
@@ -770,15 +802,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingType) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayInvalidSize) {
-  EXPECT("var i : array<u32, x>;",
-         "test.wgsl:1:20 error: missing size of array declaration\n"
-         "var i : array<u32, x>;\n"
-         "                   ^\n");
+  EXPECT(
+      "var i : array<u32, x>;",
+      "test.wgsl:1:20 error: expected signed integer literal for array size\n"
+      "var i : array<u32, x>;\n"
+      "                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayNegativeSize) {
   EXPECT("var i : array<u32, -3>;",
-         "test.wgsl:1:20 error: invalid size for array declaration\n"
+         "test.wgsl:1:20 error: array size must be greater than 0\n"
          "var i : array<u32, -3>;\n"
          "                   ^^\n");
 }
@@ -827,7 +860,8 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoLocationInvalidValue) {
   EXPECT("[[location(x)]] var i : i32;",
-         "test.wgsl:1:12 error: invalid value for location decoration\n"
+         "test.wgsl:1:12 error: expected signed integer literal for location "
+         "decoration\n"
          "[[location(x)]] var i : i32;\n"
          "           ^\n");
 }
@@ -876,7 +910,8 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingInvalidValue) {
   EXPECT("[[binding(x)]] var i : i32;",
-         "test.wgsl:1:11 error: invalid value for binding decoration\n"
+         "test.wgsl:1:11 error: expected signed integer literal for binding "
+         "decoration\n"
          "[[binding(x)]] var i : i32;\n"
          "          ^\n");
 }
@@ -897,7 +932,8 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoSetMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingSetValue) {
   EXPECT("[[set(x)]] var i : i32;",
-         "test.wgsl:1:7 error: invalid value for set decoration\n"
+         "test.wgsl:1:7 error: expected signed integer literal for set "
+         "decoration\n"
          "[[set(x)]] var i : i32;\n"
          "      ^\n");
 }

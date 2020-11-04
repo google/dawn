@@ -51,7 +51,8 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
 })");
   auto m = p->struct_body_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "3:12: invalid value for offset decoration");
+  EXPECT_EQ(p->error(),
+            "3:12: expected signed integer literal for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {

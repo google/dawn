@@ -157,7 +157,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
 TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   auto* p = parser("struct A { b: i32; c: f32;};");
   p->global_decl();
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
@@ -175,7 +175,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto* p =
       parser("struct A { [[offset(0)]] data: [[stride(4)]] array<f32>; };");
   p->global_decl();
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
@@ -199,7 +199,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   auto* p = parser("[[block]] struct A { [[offset(0)]] data: f32; };");
   p->global_decl();
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
   ASSERT_EQ(m.constructed_types().size(), 1u);

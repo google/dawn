@@ -125,7 +125,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
   auto e = p->global_variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: invalid value for binding decoration");
+  EXPECT_EQ(p->error(),
+            "1:11: expected signed integer literal for binding decoration");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {

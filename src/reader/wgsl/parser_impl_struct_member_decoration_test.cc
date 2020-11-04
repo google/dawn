@@ -54,7 +54,8 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: invalid value for offset decoration");
+  EXPECT_EQ(p->error(),
+            "1:8: expected signed integer literal for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
@@ -62,7 +63,8 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: invalid value for offset decoration");
+  EXPECT_EQ(p->error(),
+            "1:8: expected signed integer literal for offset decoration");
 }
 
 }  // namespace

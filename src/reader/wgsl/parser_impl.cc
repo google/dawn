@@ -437,17 +437,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   if (t.IsLocation()) {
     next();  // consume the peek
 
-    if (!expect("location decoration", Token::Type::kParenLeft))
+    const char* use = "location decoration";
+
+    if (!expect(use, Token::Type::kParenLeft))
       return nullptr;
 
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "invalid value for location decoration");
-      return {};
-    }
-    int32_t val = t.to_i32();
+    uint32_t val;
+    if (!expect_positive_sint(use, &val))
+      return nullptr;
 
-    if (!expect("location decoration", Token::Type::kParenRight))
+    if (!expect(use, Token::Type::kParenRight))
       return nullptr;
 
     return std::make_unique<ast::LocationDecoration>(val, source);
@@ -478,17 +477,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   if (t.IsBinding()) {
     next();  // consume the peek
 
-    if (!expect("binding decoration", Token::Type::kParenLeft))
+    const char* use = "binding decoration";
+
+    if (!expect(use, Token::Type::kParenLeft))
       return nullptr;
 
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "invalid value for binding decoration");
-      return {};
-    }
-    int32_t val = t.to_i32();
+    uint32_t val;
+    if (!expect_positive_sint(use, &val))
+      return nullptr;
 
-    if (!expect("binding decoration", Token::Type::kParenRight))
+    if (!expect(use, Token::Type::kParenRight))
       return nullptr;
 
     return std::make_unique<ast::BindingDecoration>(val, source);
@@ -496,17 +494,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   if (t.IsSet()) {
     next();  // consume the peek
 
-    if (!expect("set decoration", Token::Type::kParenLeft))
+    const char* use = "set decoration";
+
+    if (!expect(use, Token::Type::kParenLeft))
       return nullptr;
 
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "invalid value for set decoration");
-      return {};
-    }
-    uint32_t val = t.to_i32();
+    uint32_t val;
+    if (!expect_positive_sint(use, &val))
+      return nullptr;
 
-    if (!expect("set decoration", Token::Type::kParenRight))
+    if (!expect(use, Token::Type::kParenRight))
       return nullptr;
 
     return std::make_unique<ast::SetDecoration>(val, source);
@@ -1145,7 +1142,8 @@ ast::type::Type* ParserImpl::type_decl() {
     return nullptr;
   }
   if (t.IsArray()) {
-    return type_decl_array(t, std::move(decos));
+    next();  // Consume the peek
+    return type_decl_array(std::move(decos));
   }
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
@@ -1238,15 +1236,11 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
       std::make_unique<ast::type::VectorType>(subtype, count));
 }
 
-ast::type::Type* ParserImpl::type_decl_array(Token t,
-                                             ast::ArrayDecorationList decos) {
-  next();  // Consume the peek
+ast::type::Type* ParserImpl::type_decl_array(ast::ArrayDecorationList decos) {
+  const char* use = "array declaration";
 
-  t = next();
-  if (!t.IsLessThan()) {
-    add_error(t, "missing < for array declaration");
+  if (!expect(use, Token::Type::kLessThan))
     return nullptr;
-  }
 
   auto* subtype = type_decl();
   if (has_error())
@@ -1256,25 +1250,14 @@ ast::type::Type* ParserImpl::type_decl_array(Token t,
     return nullptr;
   }
 
-  t = next();
   uint32_t size = 0;
-  if (t.IsComma()) {
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "missing size of array declaration");
+  if (match(Token::Type::kComma)) {
+    if (!expect_nonzero_positive_sint("array size", &size))
       return nullptr;
-    }
-    if (t.to_i32() <= 0) {
-      add_error(t, "invalid size for array declaration");
-      return nullptr;
-    }
-    size = static_cast<uint32_t>(t.to_i32());
-    t = next();
   }
-  if (!t.IsGreaterThan()) {
-    add_error(t, "missing > for array declaration");
+
+  if (!expect(use, Token::Type::kGreaterThan))
     return nullptr;
-  }
 
   auto ty = std::make_unique<ast::type::ArrayType>(subtype, size);
   ty->set_decorations(std::move(decos));
@@ -1301,45 +1284,35 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
   next();  // consume the peek of [[
 
   for (;;) {
-    t = next();
+    auto source = peek().source();
 
-    auto source = t.source();
-
-    if (!t.IsStride()) {
-      add_error(t, "unknown array decoration");
+    if (!match(Token::Type::kStride)) {
+      add_error(source, "unknown array decoration");
       return false;
     }
 
-    if (!expect("stride decoration", Token::Type::kParenLeft))
+    const char* use = "stride decoration";
+
+    if (!expect(use, Token::Type::kParenLeft))
       return false;
 
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "missing value for stride decoration");
+    uint32_t stride;
+    if (!expect_nonzero_positive_sint(use, &stride))
       return false;
-    }
-    if (t.to_i32() < 0) {
-      add_error(t, "invalid stride value: " + t.to_str());
-      return false;
-    }
-    uint32_t stride = static_cast<uint32_t>(t.to_i32());
+
     decos.push_back(std::make_unique<ast::StrideDecoration>(stride, source));
 
-    if (!expect("stride decoration", Token::Type::kParenRight))
+    if (!expect(use, Token::Type::kParenRight))
       return false;
 
-    t = peek();
-    if (!t.IsComma()) {
+    if (!match(Token::Type::kComma))
       break;
-    }
-    next();  // Consume the peek
   }
 
-  t = next();
-  if (!t.IsAttrRight()) {
-    add_error(t, "missing ]] for array decoration");
+  if (!expect("array decoration", Token::Type::kAttrRight)) {
     return false;
   }
+
   return true;
 }
 
@@ -1630,29 +1603,21 @@ bool ParserImpl::struct_member_decoration_decl(
 //   : OFFSET PAREN_LEFT INT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::StructMemberDecoration>
 ParserImpl::struct_member_decoration() {
-  auto t = peek();
-  if (!t.IsOffset())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kOffset))
     return nullptr;
 
-  auto source = t.source();
+  const char* use = "offset decoration";
 
-  next();  // Consume the peek
-
-  if (!expect("offset decoration", Token::Type::kParenLeft))
+  if (!expect(use, Token::Type::kParenLeft))
     return nullptr;
 
-  t = next();
-  if (!t.IsSintLiteral()) {
-    add_error(t, "invalid value for offset decoration");
+  uint32_t val;
+  if (!expect_positive_sint(use, &val))
     return nullptr;
-  }
-  int32_t val = t.to_i32();
-  if (val < 0) {
-    add_error(t, "offset value must be >= 0");
-    return nullptr;
-  }
 
-  if (!expect("offset decoration", Token::Type::kParenRight))
+  if (!expect(use, Token::Type::kParenRight))
     return nullptr;
 
   return std::make_unique<ast::StructMemberOffsetDecoration>(val, source);
@@ -1754,55 +1719,30 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
   if (t.IsWorkgroupSize()) {
     next();  // Consume the peek
 
-    if (!expect("workgroup_size decoration", Token::Type::kParenLeft))
+    const char* use = "workgroup_size decoration";
+
+    if (!expect(use, Token::Type::kParenLeft))
       return nullptr;
 
-    t = next();
-    if (!t.IsSintLiteral()) {
-      add_error(t, "missing x value for workgroup_size");
-      return nullptr;
-    }
-    if (t.to_i32() <= 0) {
-      add_error(t, "invalid value for workgroup_size x parameter");
+    uint32_t x;
+    if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
       return nullptr;
     }
-    int32_t x = t.to_i32();
-    int32_t y = 1;
-    int32_t z = 1;
 
-    t = peek();
-    if (t.IsComma()) {
-      next();  // Consume the peek
-
-      t = next();
-      if (!t.IsSintLiteral()) {
-        add_error(t, "missing y value for workgroup_size");
+    uint32_t y = 1;
+    uint32_t z = 1;
+    if (match(Token::Type::kComma)) {
+      if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
         return nullptr;
       }
-      if (t.to_i32() <= 0) {
-        add_error(t, "invalid value for workgroup_size y parameter");
-        return nullptr;
-      }
-      y = t.to_i32();
-
-      t = peek();
-      if (t.IsComma()) {
-        next();  // Consume the peek
-
-        t = next();
-        if (!t.IsSintLiteral()) {
-          add_error(t, "missing z value for workgroup_size");
+      if (match(Token::Type::kComma)) {
+        if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
           return nullptr;
         }
-        if (t.to_i32() <= 0) {
-          add_error(t, "invalid value for workgroup_size z parameter");
-          return nullptr;
-        }
-        z = t.to_i32();
       }
     }
 
-    if (!expect("workgroup_size decoration", Token::Type::kParenRight))
+    if (!expect(use, Token::Type::kParenRight))
       return nullptr;
 
     return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),

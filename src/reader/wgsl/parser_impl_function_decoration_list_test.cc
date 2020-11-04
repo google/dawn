@@ -81,7 +81,9 @@ TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
   ast::FunctionDecorationList decos;
   ASSERT_FALSE(p->function_decoration_decl(decos));
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:18: missing x value for workgroup_size");
+  ASSERT_EQ(
+      p->error(),
+      "1:18: expected signed integer literal for workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingRightAttr) {

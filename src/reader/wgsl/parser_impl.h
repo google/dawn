@@ -466,7 +466,7 @@ class ParserImpl {
 
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);
-  ast::type::Type* type_decl_array(Token t, ast::ArrayDecorationList decos);
+  ast::type::Type* type_decl_array(ast::ArrayDecorationList decos);
   bool array_decoration_list(ast::ArrayDecorationList& decos);
   ast::type::Type* type_decl_matrix(Token t);
 

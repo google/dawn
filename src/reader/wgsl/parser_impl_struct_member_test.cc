@@ -90,7 +90,8 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
-  EXPECT_EQ(p->error(), "1:10: invalid value for offset decoration");
+  EXPECT_EQ(p->error(),
+            "1:10: expected signed integer literal for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidVariable) {

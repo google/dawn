@@ -72,7 +72,8 @@ TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
   ast::VariableDecorationList decos;
   EXPECT_FALSE(p->variable_decoration_list(decos));
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:12: invalid value for location decoration");
+  ASSERT_EQ(p->error(),
+            "1:12: expected signed integer literal for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
