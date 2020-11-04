@@ -428,6 +428,42 @@ class ParserImpl {
   std::unique_ptr<ast::AssignmentStatement> assignment_stmt();
 
  private:
+  /// @returns true and consumes the next token if it equals |tok|.
+  bool match(Token::Type tok);
+  /// Errors if the next token is not equal to |tok|.
+  /// Always consumes the next token.
+  /// @param use a description of what was being parsed if an error was raised.
+  /// @param tok the token to test against
+  /// @returns true if the next token equals |tok|.
+  bool expect(const std::string& use, Token::Type tok);
+  /// Parses a signed integer from the next token in the stream, erroring if the
+  /// next token is not a signed integer.
+  /// Always consumes the next token.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param out the pointer to write the parsed integer to
+  /// @returns true if the signed integer was parsed without error
+  bool expect_sint(const std::string& use, int32_t* out);
+  /// Parses a signed integer from the next token in the stream, erroring if
+  /// the next token is not a signed integer or is negative.
+  /// Always consumes the next token.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param out the pointer to write the parsed integer to
+  /// @returns true if the signed integer was parsed without error
+  bool expect_positive_sint(const std::string& use, uint32_t* out);
+  /// Parses a non-zero signed integer from the next token in the stream,
+  /// erroring if the next token is not a signed integer or is less than 1.
+  /// Always consumes the next token.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param out the pointer to write the parsed integer to
+  /// @returns true if the signed integer was parsed without error
+  bool expect_nonzero_positive_sint(const std::string& use, uint32_t* out);
+  /// Errors if the next token is not an identifier.
+  /// Always consumes the next token.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param out the pointer to write the parsed identifier to
+  /// @returns true if the identifier was parsed without error
+  bool expect_ident(const std::string& use, std::string* out);
+
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);
   ast::type::Type* type_decl_array(Token t, ast::ArrayDecorationList decos);

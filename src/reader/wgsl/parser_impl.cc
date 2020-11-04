@@ -3621,6 +3621,78 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
                                                             std::move(lit));
 }
 
+bool ParserImpl::match(Token::Type tok) {
+  auto t = peek();
+  if (t.Is(tok)) {
+    next();
+    return true;
+  }
+  return false;
+}
+
+bool ParserImpl::expect(const std::string& use, Token::Type tok) {
+  auto t = next();
+  if (!t.Is(tok)) {
+    std::stringstream err;
+    err << "expected " << Token::TypeToName(tok);
+    if (!use.empty()) {
+      err << " for " << use;
+    }
+    add_error(t, err.str());
+    return false;
+  }
+  return true;
+}
+
+bool ParserImpl::expect_sint(const std::string& use, int32_t* out) {
+  auto t = next();
+  if (!t.IsSintLiteral()) {
+    add_error(t, "expected signed integer literal", use);
+    return false;
+  }
+  *out = t.to_i32();
+  return true;
+}
+
+bool ParserImpl::expect_positive_sint(const std::string& use, uint32_t* out) {
+  auto t = peek();
+  int32_t val;
+  if (!expect_sint(use, &val))
+    return false;
+
+  if (val < 0) {
+    add_error(t, use + " must be positive");
+    return false;
+  }
+  *out = static_cast<uint32_t>(val);
+  return true;
+}
+
+bool ParserImpl::expect_nonzero_positive_sint(const std::string& use,
+                                              uint32_t* out) {
+  auto t = peek();
+  int32_t val;
+  if (!expect_sint(use, &val))
+    return false;
+
+  if (val <= 0) {
+    add_error(t, use + " must be greater than 0");
+    return false;
+  }
+  *out = static_cast<uint32_t>(val);
+  return true;
+}
+
+bool ParserImpl::expect_ident(const std::string& use, std::string* out) {
+  auto t = next();
+  if (!t.IsIdentifier()) {
+    add_error(t, "expected identifier", use);
+    return false;
+  }
+  *out = t.to_str();
+  return true;
+}
+
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint
