@@ -461,7 +461,8 @@ using DawnTest = DawnTestWithParams<>;
         , testName,                                                                     \
         testing::ValuesIn(::detail::GetAvailableAdapterTestParamsForBackends(           \
             testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
-        testing::PrintToStringParamName())
+        testing::PrintToStringParamName());                                             \
+    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST

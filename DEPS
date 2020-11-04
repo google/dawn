@@ -22,15 +22,15 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@c10077be589bfb5151ebcd923928898a89ab33b8',
+    'url': '{chromium_git}/chromium/src/build@787a783b9651465a131c564103b8533394f0f949',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@ff93f3ea1a7f033d3caf8f60ec1937cc71351419',
+    'url': '{chromium_git}/chromium/src/buildtools@98881a1297863de584fad20fb671e8c44ad1a7d0',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@fcef86e30a0ab061b982b5c9d91bb060df8f5269',
+    'url': '{chromium_git}/chromium/src/tools/clang@eb065289a4d96151ad9065f0234cb6754512faaf',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -46,21 +46,21 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@e5ced5141379ee8ae28b4f93d3c02df039d2b052',
+    'url': '{chromium_git}/chromium/src/testing@3e2640a325dc34ec3d9cb2802b8da874aecaf52d',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@a09ea700d32bab83325aff9ff34d0582e50e3997',
+    'url': '{chromium_git}/external/github.com/google/googletest@2828773179fa425ee406df61890a150577178ea2',
     'condition': 'dawn_standalone',
   },
 
   # Jinja2 and MarkupSafe for the code generator
   'third_party/jinja2': {
-    'url': '{chromium_git}/chromium/src/third_party/jinja2@b41863e42637544c2941b574c7877d3e1f663e25',
+    'url': '{chromium_git}/chromium/src/third_party/jinja2@a82a4944a7f2496639f34a89c9923be5908b80aa',
     'condition': 'dawn_standalone',
   },
   'third_party/markupsafe': {
-    'url': '{chromium_git}/chromium/src/third_party/markupsafe@8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
+    'url': '{chromium_git}/chromium/src/third_party/markupsafe@0944e71f4b2cb9a871bcbe353f95e889b64a611a',
     'condition': 'dawn_standalone',
   },
 
