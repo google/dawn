@@ -262,6 +262,11 @@ class ParserImpl {
   /// @returns the pipeline stage or PipelineStage::kNone if none matched, along
   /// with the source location for the stage.
   std::pair<ast::PipelineStage, Source> expect_pipeline_stage();
+  /// Parses a builtin identifier, erroring if the next token does not match a
+  /// valid builtin name.
+  /// @returns the builtin or Builtin::kNone if none matched, along with the
+  /// source location for the stage.
+  std::pair<ast::Builtin, Source> expect_builtin();
   /// Parses a `body_stmt` grammar element
   /// @returns the parsed statements
   std::unique_ptr<ast::BlockStatement> body_stmt();

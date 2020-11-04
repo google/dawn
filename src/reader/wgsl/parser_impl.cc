@@ -452,15 +452,10 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     if (!expect("builtin decoration", Token::Type::kParenLeft))
       return nullptr;
 
-    std::string ident;
-    if (!expect_ident("builtin", &ident, &source))
+    ast::Builtin builtin;
+    std::tie(builtin, source) = expect_builtin();
+    if (builtin == ast::Builtin::kNone)
       return nullptr;
-
-    ast::Builtin builtin = ident_to_builtin(ident);
-    if (builtin == ast::Builtin::kNone) {
-      add_error(source, "invalid value for builtin decoration");
-      return nullptr;
-    }
 
     if (!expect("builtin decoration", Token::Type::kParenRight))
       return nullptr;
@@ -1794,6 +1789,20 @@ std::pair<ast::PipelineStage, Source> ParserImpl::expect_pipeline_stage() {
   auto t = peek();
   add_error(t, "invalid value for stage decoration");
   return {ast::PipelineStage::kNone, t.source()};
+}
+
+std::pair<ast::Builtin, Source> ParserImpl::expect_builtin() {
+  Source source;
+  std::string ident;
+
+  if (!expect_ident("builtin", &ident, &source))
+    return {ast::Builtin::kNone, source};
+
+  ast::Builtin builtin = ident_to_builtin(ident);
+  if (builtin == ast::Builtin::kNone)
+    add_error(source, "invalid value for builtin decoration");
+
+  return {builtin, source};
 }
 
 // body_stmt
