@@ -28,7 +28,7 @@ namespace dawn_platform {
         GPUWork,     // Actual GPU work
     };
 
-    class DAWN_NATIVE_EXPORT Platform {
+    class Platform {
       public:
         Platform();
         virtual ~Platform();
