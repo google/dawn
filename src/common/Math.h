@@ -90,4 +90,12 @@ bool IsFloat16NaN(uint16_t fp16);
 
 float SRGBToLinear(float srgb);
 
+template <typename T1,
+          typename T2,
+          typename Enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
+constexpr bool IsSubset(T1 subset, T2 set) {
+    T2 bitsAlsoInSet = subset & set;
+    return bitsAlsoInSet == subset;
+}
+
 #endif  // COMMON_MATH_H_

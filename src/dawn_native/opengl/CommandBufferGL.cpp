@@ -306,6 +306,24 @@ namespace dawn_native { namespace opengl {
                             for (auto unit : mPipeline->GetTextureUnitsForTextureView(viewIndex)) {
                                 gl.ActiveTexture(GL_TEXTURE0 + unit);
                                 gl.BindTexture(target, handle);
+                                if (ToBackend(view->GetTexture())->GetGLFormat().format ==
+                                    GL_DEPTH_STENCIL) {
+                                    Aspect aspect = view->GetAspects();
+                                    ASSERT(HasOneBit(aspect));
+                                    switch (aspect) {
+                                        case Aspect::None:
+                                        case Aspect::Color:
+                                            UNREACHABLE();
+                                        case Aspect::Depth:
+                                            gl.TexParameteri(target, GL_DEPTH_STENCIL_TEXTURE_MODE,
+                                                             GL_DEPTH_COMPONENT);
+                                            break;
+                                        case Aspect::Stencil:
+                                            gl.TexParameteri(target, GL_DEPTH_STENCIL_TEXTURE_MODE,
+                                                             GL_STENCIL_INDEX);
+                                            break;
+                                    }
+                                }
                             }
                             break;
                         }

@@ -150,7 +150,7 @@ namespace dawn_native {
         };
 
         auto AddDepthStencilFormat = [&AddFormat](wgpu::TextureFormat format, Aspect aspects,
-                                                  uint32_t byteSize, bool isDepthSampleable) {
+                                                  uint32_t byteSize) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = true;
@@ -162,12 +162,8 @@ namespace dawn_native {
             internalFormat.firstAspect.block.width = 1;
             internalFormat.firstAspect.block.height = 1;
             internalFormat.firstAspect.baseType = wgpu::TextureComponentType::Float;
-            if (isDepthSampleable) {
-                internalFormat.firstAspect.supportedComponentTypes =
-                    ComponentTypeBit::Float | ComponentTypeBit::DepthComparison;
-            } else {
-                internalFormat.firstAspect.supportedComponentTypes = ComponentTypeBit::None;
-            }
+            internalFormat.firstAspect.supportedComponentTypes =
+                ComponentTypeBit::Float | ComponentTypeBit::DepthComparison;
             AddFormat(internalFormat);
         };
 
@@ -238,12 +234,12 @@ namespace dawn_native {
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, Type::Float);
 
         // Depth-stencil formats
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth32Float, Aspect::Depth, 4, true);
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth24Plus, Aspect::Depth, 4, false);
+        AddDepthStencilFormat(wgpu::TextureFormat::Depth32Float, Aspect::Depth, 4);
+        AddDepthStencilFormat(wgpu::TextureFormat::Depth24Plus, Aspect::Depth, 4);
         // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
         // because its size isn't well defined, is it 4, 5 or 8?
         AddDepthStencilFormat(wgpu::TextureFormat::Depth24PlusStencil8,
-                              Aspect::Depth | Aspect::Stencil, 4, false);
+                              Aspect::Depth | Aspect::Stencil, 4);
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);

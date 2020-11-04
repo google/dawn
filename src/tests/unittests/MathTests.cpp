@@ -15,8 +15,22 @@
 #include <gtest/gtest.h>
 
 #include "common/Math.h"
+#include "dawn/EnumClassBitmasks.h"
 
 #include <cmath>
+
+namespace wgpu {
+    enum class TestEnum {
+        A = 0x1,
+        B = 0x2,
+        C = 0x4,
+    };
+}  // namespace wgpu
+
+template <>
+struct wgpu::IsDawnBitmask<wgpu::TestEnum> {
+    static constexpr bool enable = true;
+};
 
 // Tests for ScanForward
 TEST(Math, ScanForward) {
@@ -259,4 +273,33 @@ TEST(Math, RoundUp) {
     // Test extrema
     ASSERT_EQ(RoundUp(0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull), 0x8000000000000000ull);
     ASSERT_EQ(RoundUp(1, 1), 1u);
+}
+
+// Tests for IsSubset
+TEST(Math, IsSubset) {
+    // single value is a subset
+    ASSERT_TRUE(IsSubset(0b100, 0b101));
+    ASSERT_FALSE(IsSubset(0b010, 0b101));
+    ASSERT_TRUE(IsSubset(0b001, 0b101));
+
+    // empty set is a subset
+    ASSERT_TRUE(IsSubset(0b000, 0b101));
+
+    // equal-to is a subset
+    ASSERT_TRUE(IsSubset(0b101, 0b101));
+
+    // superset is not a subset
+    ASSERT_FALSE(IsSubset(0b111, 0b101));
+
+    // only empty is a subset of empty
+    ASSERT_FALSE(IsSubset(0b100, 0b000));
+    ASSERT_FALSE(IsSubset(0b010, 0b000));
+    ASSERT_FALSE(IsSubset(0b001, 0b000));
+    ASSERT_TRUE(IsSubset(0b000, 0b000));
+
+    // Test with enums
+    ASSERT_TRUE(IsSubset(wgpu::TestEnum::A, wgpu::TestEnum::A));
+    ASSERT_TRUE(IsSubset(wgpu::TestEnum::A, wgpu::TestEnum::A | wgpu::TestEnum::B));
+    ASSERT_FALSE(IsSubset(wgpu::TestEnum::C, wgpu::TestEnum::A | wgpu::TestEnum::B));
+    ASSERT_FALSE(IsSubset(wgpu::TestEnum::A | wgpu::TestEnum::C, wgpu::TestEnum::A));
 }

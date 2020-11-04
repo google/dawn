@@ -96,6 +96,16 @@ namespace dawn_native { namespace opengl {
                 return true;
             }
 
+            if (ToBackend(texture)->GetGLFormat().format == GL_DEPTH_STENCIL &&
+                (texture->GetUsage() & wgpu::TextureUsage::Sampled) != 0 &&
+                textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
+                // We need a separate view for one of the depth or stencil planes
+                // because each glTextureView needs it's own handle to set
+                // GL_DEPTH_STENCIL_TEXTURE_MODE. Choose the stencil aspect for the
+                // extra handle since it is likely sampled less often.
+                return true;
+            }
+
             switch (textureViewDescriptor->dimension) {
                 case wgpu::TextureViewDimension::Cube:
                 case wgpu::TextureViewDimension::CubeArray:

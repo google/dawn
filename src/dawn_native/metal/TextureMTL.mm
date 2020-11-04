@@ -34,7 +34,7 @@ namespace dawn_native { namespace metal {
             return usage & kUsageNeedsTextureView;
         }
 
-        MTLTextureUsage MetalTextureUsage(wgpu::TextureUsage usage) {
+        MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
             if (usage & (wgpu::TextureUsage::Storage)) {
@@ -43,6 +43,14 @@ namespace dawn_native { namespace metal {
 
             if (usage & (wgpu::TextureUsage::Sampled)) {
                 result |= MTLTextureUsageShaderRead;
+
+                // For sampling stencil aspect of combined depth/stencil. See TextureView
+                // constructor.
+                if (@available(macOS 10.12, iOS 10.0, *)) {
+                    if (IsSubset(Aspect::Depth | Aspect::Stencil, format.aspects)) {
+                        result |= MTLTextureUsagePixelFormatView;
+                    }
+                }
             }
 
             if (usage & (wgpu::TextureUsage::RenderAttachment)) {
@@ -82,6 +90,11 @@ namespace dawn_native { namespace metal {
             }
 
             if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
+                return true;
+            }
+
+            if (IsSubset(Aspect::Depth | Aspect::Stencil, texture->GetFormat().aspects) &&
+                textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
                 return true;
             }
 
@@ -285,7 +298,8 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    MTLTextureDescriptor* CreateMetalTextureDescriptor(const TextureDescriptor* descriptor) {
+    MTLTextureDescriptor* CreateMetalTextureDescriptor(DeviceBase* device,
+                                                       const TextureDescriptor* descriptor) {
         MTLTextureDescriptor* mtlDesc = [MTLTextureDescriptor new];
 
         mtlDesc.width = descriptor->size.width;
@@ -293,7 +307,8 @@ namespace dawn_native { namespace metal {
         mtlDesc.sampleCount = descriptor->sampleCount;
         // TODO: add MTLTextureUsagePixelFormatView when needed when we support format
         // reinterpretation.
-        mtlDesc.usage = MetalTextureUsage(descriptor->usage);
+        mtlDesc.usage = MetalTextureUsage(device->GetValidInternalFormat(descriptor->format),
+                                          descriptor->usage);
         mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
         mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
         mtlDesc.storageMode = MTLStorageModePrivate;
@@ -328,7 +343,7 @@ namespace dawn_native { namespace metal {
 
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : TextureBase(device, descriptor, TextureState::OwnedInternal) {
-        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
+        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(device, descriptor);
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
         [mtlDesc release];
 
@@ -351,7 +366,7 @@ namespace dawn_native { namespace metal {
                       reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor),
                       TextureState::OwnedInternal) {
         MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(
-            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor));
+            device, reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor));
         mtlDesc.storageMode = kIOSurfaceStorageMode;
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                              iosurface:ioSurface
@@ -581,6 +596,20 @@ namespace dawn_native { namespace metal {
             mMtlTextureView = [mtlTexture retain];
         } else {
             MTLPixelFormat format = MetalPixelFormat(descriptor->format);
+            if (descriptor->aspect == wgpu::TextureAspect::StencilOnly) {
+                if (@available(macOS 10.12, iOS 10.0, *)) {
+                    ASSERT(format == MTLPixelFormatDepth32Float_Stencil8);
+                    format = MTLPixelFormatX32_Stencil8;
+                } else {
+                    // TODO(enga): Add a workaround to back combined depth/stencil textures
+                    // with Sampled usage using two separate textures.
+                    // Or, consider always using the workaround for D32S8.
+                    GetDevice()->ConsumedError(
+                        DAWN_DEVICE_LOST_ERROR("Cannot create stencil-only texture view of "
+                                               "combined depth/stencil format."));
+                }
+            }
+
             MTLTextureType textureViewType =
                 MetalTextureViewType(descriptor->dimension, texture->GetSampleCount());
             auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->mipLevelCount);

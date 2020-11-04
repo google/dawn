@@ -311,10 +311,8 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uintTextureView}}));
 }
 
-// Test which depth-stencil formats are allowed to be sampled.
-// This is a regression test for a change in dawn_native mistakenly allowing the depth24plus formats
-// to be sampled without proper backend support.
-TEST_F(BindGroupValidationTest, SamplingDepthTexture) {
+// Test which depth-stencil formats are allowed to be sampled (all).
+TEST_F(BindGroupValidationTest, SamplingDepthStencilTexture) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
 
@@ -330,20 +328,30 @@ TEST_F(BindGroupValidationTest, SamplingDepthTexture) {
         utils::MakeBindGroup(device, layout, {{0, texture.CreateView()}});
     }
 
-    // Depth24Plus is not allowed to be sampled.
+    // Depth24Plus is allowed to be sampled.
     {
         desc.format = wgpu::TextureFormat::Depth24Plus;
         wgpu::Texture texture = device.CreateTexture(&desc);
 
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, texture.CreateView()}}));
+        utils::MakeBindGroup(device, layout, {{0, texture.CreateView()}});
     }
 
-    // Depth24PlusStencil8 is not allowed to be sampled.
+    // Depth24PlusStencil8 is allowed to be sampled, if the depth or stencil aspect is selected.
     {
         desc.format = wgpu::TextureFormat::Depth24PlusStencil8;
         wgpu::Texture texture = device.CreateTexture(&desc);
+        wgpu::TextureViewDescriptor viewDesc = {};
 
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, texture.CreateView()}}));
+        viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+        utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}});
+
+        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Fragment,
+                                            wgpu::BindingType::SampledTexture};
+        entry.textureComponentType = wgpu::TextureComponentType::Uint;
+        layout = utils::MakeBindGroupLayout(device, {entry});
+
+        viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
+        utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}});
     }
 }
 
