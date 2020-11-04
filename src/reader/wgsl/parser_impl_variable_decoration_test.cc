@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: missing ( for location decoration");
+  EXPECT_EQ(p->error(), "1:10: expected '(' for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:11: missing ) for location decoration");
+  EXPECT_EQ(p->error(), "1:11: expected ')' for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: missing ( for builtin decoration");
+  EXPECT_EQ(p->error(), "1:9: expected '(' for builtin decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:17: missing ) for builtin decoration");
+  EXPECT_EQ(p->error(), "1:17: expected ')' for builtin decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
@@ -162,7 +162,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: missing ( for binding decoration");
+  EXPECT_EQ(p->error(), "1:9: expected '(' for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
@@ -170,7 +170,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: missing ) for binding decoration");
+  EXPECT_EQ(p->error(), "1:10: expected ')' for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
@@ -205,7 +205,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: missing ( for set decoration");
+  EXPECT_EQ(p->error(), "1:5: expected '(' for set decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
@@ -213,7 +213,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: missing ) for set decoration");
+  EXPECT_EQ(p->error(), "1:6: expected ')' for set decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {

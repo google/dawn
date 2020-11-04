@@ -437,11 +437,8 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   if (t.IsLocation()) {
     next();  // consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for location decoration");
-      return {};
-    }
+    if (!expect("location decoration", Token::Type::kParenLeft))
+      return nullptr;
 
     t = next();
     if (!t.IsSintLiteral()) {
@@ -450,21 +447,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     }
     int32_t val = t.to_i32();
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for location decoration");
-      return {};
-    }
+    if (!expect("location decoration", Token::Type::kParenRight))
+      return nullptr;
+
     return std::make_unique<ast::LocationDecoration>(val, source);
   }
   if (t.IsBuiltin()) {
     next();  // consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for builtin decoration");
-      return {};
-    }
+    if (!expect("builtin decoration", Token::Type::kParenLeft))
+      return nullptr;
 
     t = next();
     if (!t.IsIdentifier() || t.to_str().empty()) {
@@ -478,21 +470,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
       return {};
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for builtin decoration");
-      return {};
-    }
+    if (!expect("builtin decoration", Token::Type::kParenRight))
+      return nullptr;
+
     return std::make_unique<ast::BuiltinDecoration>(builtin, source);
   }
   if (t.IsBinding()) {
     next();  // consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for binding decoration");
-      return {};
-    }
+    if (!expect("binding decoration", Token::Type::kParenLeft))
+      return nullptr;
 
     t = next();
     if (!t.IsSintLiteral()) {
@@ -501,22 +488,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     }
     int32_t val = t.to_i32();
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for binding decoration");
-      return {};
-    }
+    if (!expect("binding decoration", Token::Type::kParenRight))
+      return nullptr;
 
     return std::make_unique<ast::BindingDecoration>(val, source);
   }
   if (t.IsSet()) {
     next();  // consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for set decoration");
-      return {};
-    }
+    if (!expect("set decoration", Token::Type::kParenLeft))
+      return nullptr;
 
     t = next();
     if (!t.IsSintLiteral()) {
@@ -525,11 +506,8 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     }
     uint32_t val = t.to_i32();
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for set decoration");
-      return {};
-    }
+    if (!expect("set decoration", Token::Type::kParenRight))
+      return nullptr;
 
     return std::make_unique<ast::SetDecoration>(val, source);
   }
@@ -1332,11 +1310,8 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
       return false;
     }
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for stride attribute");
+    if (!expect("stride decoration", Token::Type::kParenLeft))
       return false;
-    }
 
     t = next();
     if (!t.IsSintLiteral()) {
@@ -1350,11 +1325,8 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
     uint32_t stride = static_cast<uint32_t>(t.to_i32());
     decos.push_back(std::make_unique<ast::StrideDecoration>(stride, source));
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for stride attribute");
+    if (!expect("stride decoration", Token::Type::kParenRight))
       return false;
-    }
 
     t = peek();
     if (!t.IsComma()) {
@@ -1666,11 +1638,8 @@ ParserImpl::struct_member_decoration() {
 
   next();  // Consume the peek
 
-  t = next();
-  if (!t.IsParenLeft()) {
-    add_error(t, "missing ( for offset");
+  if (!expect("offset decoration", Token::Type::kParenLeft))
     return nullptr;
-  }
 
   t = next();
   if (!t.IsSintLiteral()) {
@@ -1683,11 +1652,8 @@ ParserImpl::struct_member_decoration() {
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsParenRight()) {
-    add_error(t, "missing ) for offset");
+  if (!expect("offset decoration", Token::Type::kParenRight))
     return nullptr;
-  }
 
   return std::make_unique<ast::StructMemberOffsetDecoration>(val, source);
 }
@@ -1788,11 +1754,8 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
   if (t.IsWorkgroupSize()) {
     next();  // Consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for workgroup_size");
+    if (!expect("workgroup_size decoration", Token::Type::kParenLeft))
       return nullptr;
-    }
 
     t = next();
     if (!t.IsSintLiteral()) {
@@ -1839,11 +1802,8 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
       }
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for workgroup_size");
+    if (!expect("workgroup_size decoration", Token::Type::kParenRight))
       return nullptr;
-    }
 
     return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),
                                                       uint32_t(z), source);
@@ -1851,11 +1811,8 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
   if (t.IsStage()) {
     next();  // Consume the peek
 
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for stage decoration");
+    if (!expect("stage decoration", Token::Type::kParenLeft))
       return nullptr;
-    }
 
     auto stage = pipeline_stage();
     if (has_error()) {
@@ -1866,11 +1823,9 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
       return nullptr;
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for stage decoration");
+    if (!expect("stage decoration", Token::Type::kParenRight))
       return nullptr;
-    }
+
     return std::make_unique<ast::StageDecoration>(stage, source);
   }
   return nullptr;
@@ -1903,21 +1858,15 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
   }
   auto name = t.to_str();
 
-  t = next();
-  if (!t.IsParenLeft()) {
-    add_error(t, "missing ( for function declaration");
+  if (!expect("function declaration", Token::Type::kParenLeft))
     return nullptr;
-  }
 
   auto params = param_list();
   if (has_error())
     return nullptr;
 
-  t = next();
-  if (!t.IsParenRight()) {
-    add_error(t, "missing ) for function declaration");
+  if (!expect("function declaration", Token::Type::kParenRight))
     return nullptr;
-  }
 
   t = next();
   if (!t.IsArrow()) {
@@ -2026,12 +1975,8 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
 // paren_rhs_stmt
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
 std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
-  auto t = peek();
-  if (!t.IsParenLeft()) {
-    add_error(t, "expected (");
+  if (!expect("", Token::Type::kParenLeft))
     return nullptr;
-  }
-  next();  // Consume the peek
 
   auto expr = logical_or_expression();
   if (has_error())
@@ -2041,11 +1986,8 @@ std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsParenRight()) {
-    add_error(t, "expected )");
+  if (!expect("", Token::Type::kParenRight))
     return nullptr;
-  }
 
   return expr;
 }
@@ -2614,23 +2556,17 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
   if (!match(Token::Type::kFor))
     return nullptr;
 
-  auto t = next();
-  if (!t.IsParenLeft()) {
-    add_error(t, "missing for loop (");
+  if (!expect("for loop", Token::Type::kParenLeft))
     return nullptr;
-  }
 
   auto header = for_header();
   if (has_error())
     return nullptr;
 
-  t = next();
-  if (!t.IsParenRight()) {
-    add_error(t, "missing for loop )");
+  if (!expect("for loop", Token::Type::kParenRight))
     return nullptr;
-  }
 
-  t = next();
+  auto t = next();
   if (!t.IsBraceLeft()) {
     add_error(t, "missing for loop {");
     return nullptr;
@@ -2826,11 +2762,8 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (has_error())
     return nullptr;
   if (type != nullptr) {
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for type constructor");
+    if (!expect("type constructor", Token::Type::kParenLeft))
       return nullptr;
-    }
 
     t = peek();
     ast::ExpressionList params;
@@ -2840,11 +2773,9 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
         return nullptr;
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for type constructor");
+    if (!expect("type constructor", Token::Type::kParenRight))
       return nullptr;
-    }
+
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
                                                             std::move(params));
   }
@@ -3497,11 +3428,8 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
 
   auto* type = type_decl();
   if (type != nullptr) {
-    t = next();
-    if (!t.IsParenLeft()) {
-      add_error(t, "missing ( for type constructor");
+    if (!expect("type constructor", Token::Type::kParenLeft))
       return nullptr;
-    }
 
     ast::ExpressionList params;
     auto param = const_expr_internal(depth + 1);
@@ -3529,11 +3457,9 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
       params.push_back(std::move(param));
     }
 
-    t = next();
-    if (!t.IsParenRight()) {
-      add_error(t, "missing ) for type constructor");
+    if (!expect("type constructor", Token::Type::kParenRight))
       return nullptr;
-    }
+
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
                                                             std::move(params));
   }

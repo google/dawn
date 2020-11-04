@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:1: expected (");
+  EXPECT_EQ(p->error(), "1:1: expected '('");
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingRightParen) {
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingRightParen) {
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: expected )");
+  EXPECT_EQ(p->error(), "1:6: expected ')'");
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_InvalidExpression) {

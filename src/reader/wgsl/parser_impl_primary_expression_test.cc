@@ -103,7 +103,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing ( for type constructor");
+  EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:25: missing ) for type constructor");
+  EXPECT_EQ(p->error(), "1:25: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
@@ -147,7 +147,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: expected )");
+  EXPECT_EQ(p->error(), "1:8: expected ')'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:13: expected (");
+  EXPECT_EQ(p->error(), "1:13: expected '('");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:15: expected )");
+  EXPECT_EQ(p->error(), "1:15: expected ')'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingExpression) {

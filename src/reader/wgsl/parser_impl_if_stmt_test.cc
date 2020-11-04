@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:7: expected )");
+  EXPECT_EQ(p->error(), "1:7: expected ')'");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingCondition) {
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, IfStmt_MissingCondition) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:4: expected (");
+  EXPECT_EQ(p->error(), "1:4: expected '('");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidBody) {

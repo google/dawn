@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: expected )");
+  EXPECT_EQ(p->error(), "1:9: expected ')'");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: expected (");
+  EXPECT_EQ(p->error(), "1:8: expected '('");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {

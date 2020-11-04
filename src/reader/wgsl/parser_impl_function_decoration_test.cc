@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_TooManyValues) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: missing ) for workgroup_size");
+  EXPECT_EQ(p->error(), "1:23: expected ')' for workgroup_size decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Invalid_X_Value) {
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingLeftParam) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: missing ( for workgroup_size");
+  EXPECT_EQ(p->error(), "1:16: expected '(' for workgroup_size decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingRightParam) {
@@ -116,7 +116,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingRightParam) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: missing ) for workgroup_size");
+  EXPECT_EQ(p->error(), "1:23: expected ')' for workgroup_size decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_MissingValues) {
@@ -140,7 +140,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Comma) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:18: missing ) for workgroup_size");
+  EXPECT_EQ(p->error(), "1:18: expected ')' for workgroup_size decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Y_Value) {
@@ -156,7 +156,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Comma) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:21: missing ) for workgroup_size");
+  EXPECT_EQ(p->error(), "1:21: expected ')' for workgroup_size decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Workgroup_Missing_Z_Value) {
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingLeftParen) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:7: missing ( for stage decoration");
+  EXPECT_EQ(p->error(), "1:7: expected '(' for stage decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingRightParen) {
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingRightParen) {
   auto deco = p->function_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: missing ) for stage decoration");
+  EXPECT_EQ(p->error(), "1:14: expected ')' for stage decoration");
 }
 
 }  // namespace

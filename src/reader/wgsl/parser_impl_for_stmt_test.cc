@@ -168,7 +168,7 @@ class ForStmtErrorTest : public ParserImplTest {
 // Test a for loop with missing left parenthesis is invalid.
 TEST_F(ForStmtErrorTest, MissingLeftParen) {
   std::string for_str = "for { }";
-  std::string error_str = "1:5: missing for loop (";
+  std::string error_str = "1:5: expected '(' for for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -192,7 +192,7 @@ TEST_F(ForStmtErrorTest, MissingSecondSemicolon) {
 // Test a for loop with missing right parenthesis is invalid.
 TEST_F(ForStmtErrorTest, MissingRightParen) {
   std::string for_str = "for (;; {}";
-  std::string error_str = "1:9: missing for loop )";
+  std::string error_str = "1:9: expected ')' for for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -233,7 +233,7 @@ TEST_F(ForStmtErrorTest, InvalidInitializerMatch) {
 // Test a for loop with an invalid break condition.
 TEST_F(ForStmtErrorTest, InvalidBreakConditionAsExpression) {
   std::string for_str = "for (; (0 == 1; ) { }";
-  std::string error_str = "1:15: expected )";
+  std::string error_str = "1:15: expected ')'";
 
   TestForWithError(for_str, error_str);
 }
@@ -259,7 +259,7 @@ TEST_F(ForStmtErrorTest, InvalidContinuingAsFuncCall) {
 // assignment_stmt | func_call_stmt.
 TEST_F(ForStmtErrorTest, InvalidContinuingMatch) {
   std::string for_str = "for (;; var i: i32 = 0) { }";
-  std::string error_str = "1:9: missing for loop )";
+  std::string error_str = "1:9: expected ')' for for loop";
 
   TestForWithError(for_str, error_str);
 }

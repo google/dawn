@@ -408,7 +408,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: missing ( for stride attribute");
+  EXPECT_EQ(p->error(), "1:10: expected '(' for stride decoration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
@@ -416,7 +416,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:11: missing ) for stride attribute");
+  EXPECT_EQ(p->error(), "1:11: expected ')' for stride decoration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {

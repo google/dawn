@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: missing ( for offset");
+  EXPECT_EQ(p->error(), "1:8: expected '(' for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: missing ) for offset");
+  EXPECT_EQ(p->error(), "1:9: expected ')' for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {

@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:17: missing ) for type constructor");
+  EXPECT_EQ(p->error(), "1:17: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing ( for type constructor");
+  EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:14: missing ) for type constructor");
+  EXPECT_EQ(p->error(), "1:14: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_MissingExpr) {

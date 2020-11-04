@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenLeft) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing ( for function declaration");
+  EXPECT_EQ(p->error(), "1:8: expected '(' for function declaration");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidParamList) {
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:10: missing ) for function declaration");
+  EXPECT_EQ(p->error(), "1:10: expected ')' for function declaration");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingArrow) {
