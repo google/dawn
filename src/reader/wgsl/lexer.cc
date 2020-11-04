@@ -669,6 +669,22 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kStruct, source, "struct"};
   if (str == "switch")
     return {Token::Type::kSwitch, source, "switch"};
+  if (str == "texture_1d")
+    return {Token::Type::kTextureSampled1d, source, "texture_1d"};
+  if (str == "texture_1d_array")
+    return {Token::Type::kTextureSampled1dArray, source, "texture_1d_array"};
+  if (str == "texture_2d")
+    return {Token::Type::kTextureSampled2d, source, "texture_2d"};
+  if (str == "texture_2d_array")
+    return {Token::Type::kTextureSampled2dArray, source, "texture_2d_array"};
+  if (str == "texture_3d")
+    return {Token::Type::kTextureSampled3d, source, "texture_3d"};
+  if (str == "texture_cube")
+    return {Token::Type::kTextureSampledCube, source, "texture_cube"};
+  if (str == "texture_cube_array") {
+    return {Token::Type::kTextureSampledCubeArray, source,
+            "texture_cube_array"};
+  }
   if (str == "texture_depth_2d")
     return {Token::Type::kTextureDepth2d, source, "texture_depth_2d"};
   if (str == "texture_depth_2d_array") {
@@ -687,14 +703,16 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
   }
   if (str == "texture_ro_1d")
     return {Token::Type::kTextureStorageReadonly1d, source, "texture_ro_1d"};
-  if (str == "texture_ro_1d_array")
+  if (str == "texture_ro_1d_array") {
     return {Token::Type::kTextureStorageReadonly1dArray, source,
             "texture_ro_1d_array"};
+  }
   if (str == "texture_ro_2d")
     return {Token::Type::kTextureStorageReadonly2d, source, "texture_ro_2d"};
-  if (str == "texture_ro_2d_array")
+  if (str == "texture_ro_2d_array") {
     return {Token::Type::kTextureStorageReadonly2dArray, source,
             "texture_ro_2d_array"};
+  }
   if (str == "texture_ro_3d")
     return {Token::Type::kTextureStorageReadonly3d, source, "texture_ro_3d"};
   if (str == "texture_sampled_1d")
@@ -719,14 +737,16 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
   }
   if (str == "texture_wo_1d")
     return {Token::Type::kTextureStorageWriteonly1d, source, "texture_wo_1d"};
-  if (str == "texture_wo_1d_array")
+  if (str == "texture_wo_1d_array") {
     return {Token::Type::kTextureStorageWriteonly1dArray, source,
             "texture_wo_1d_array"};
+  }
   if (str == "texture_wo_2d")
     return {Token::Type::kTextureStorageWriteonly2d, source, "texture_wo_2d"};
-  if (str == "texture_wo_2d_array")
+  if (str == "texture_wo_2d_array") {
     return {Token::Type::kTextureStorageWriteonly2dArray, source,
             "texture_wo_2d_array"};
+  }
   if (str == "texture_wo_3d")
     return {Token::Type::kTextureStorageWriteonly3d, source, "texture_wo_3d"};
   if (str == "true")

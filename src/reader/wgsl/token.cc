@@ -300,19 +300,19 @@ std::string Token::TypeToName(Type type) {
     case Token::Type::kTextureStorageReadonly3d:
       return "texture_ro_3d";
     case Token::Type::kTextureSampled1d:
-      return "texture_sampled_1d";
+      return "texture_1d";
     case Token::Type::kTextureSampled1dArray:
-      return "texture_sampled_1d_array";
+      return "texture_1d_array";
     case Token::Type::kTextureSampled2d:
-      return "texture_sampled_2d";
+      return "texture_2d";
     case Token::Type::kTextureSampled2dArray:
-      return "texture_sampled_2d_array";
+      return "texture_2d_array";
     case Token::Type::kTextureSampled3d:
-      return "texture_sampled_3d";
+      return "texture_3d";
     case Token::Type::kTextureSampledCube:
-      return "texture_sampled_cube";
+      return "texture_cube";
     case Token::Type::kTextureSampledCubeArray:
-      return "texture_sampled_cube_array";
+      return "texture_cube_array";
     case Token::Type::kTextureStorageWriteonly1d:
       return "texture_wo_1d";
     case Token::Type::kTextureStorageWriteonly1dArray:

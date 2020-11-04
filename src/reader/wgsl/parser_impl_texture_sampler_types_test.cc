@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
   auto* p = parser("texture_sampled_1d<f32>");
   auto* t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
   auto* p = parser("texture_sampled_2d<i32>");
   auto* t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
   auto* p = parser("texture_sampled_3d<u32>");
   auto* t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k3d);
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid_Old) {
   auto* p = parser("texture_sampled_1d<abc>");
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
   EXPECT_EQ(p->error(), "1:20: unknown constructed type 'abc'");
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType_Old) {
   auto* p = parser("texture_sampled_1d<>");
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
   EXPECT_EQ(p->error(), "1:20: invalid subtype for sampled texture type");
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan_Old) {
   auto* p = parser("texture_sampled_1d");
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
@@ -116,12 +116,78 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
   EXPECT_EQ(p->error(), "1:19: missing '<' for sampled texture type");
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
+TEST_F(ParserImplTest,
+       TextureSamplerTypes_SampledTexture_MissingGreaterThan_Old) {
   auto* p = parser("texture_sampled_1d<u32");
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:23: missing '>' for sampled texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
+  auto* p = parser("texture_1d<f32>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
+  auto* p = parser("texture_2d<i32>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsI32());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
+  auto* p = parser("texture_3d<u32>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(t, nullptr);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsU32());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k3d);
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
+  auto* p = parser("texture_1d<abc>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:12: unknown constructed type 'abc'");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
+  auto* p = parser("texture_1d<>");
+  auto* t = p->texture_sampler_types();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:12: invalid subtype for sampled texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
+  auto* p = parser("texture_1d");
+  auto* t = p->texture_sampler_types();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:11: missing '<' for sampled texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
+  auto* p = parser("texture_1d<u32");
+  auto* t = p->texture_sampler_types();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(t, nullptr);
+  EXPECT_EQ(p->error(), "1:15: missing '>' for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {

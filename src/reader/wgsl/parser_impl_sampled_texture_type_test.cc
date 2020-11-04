@@ -29,50 +29,99 @@ TEST_F(ParserImplTest, SampledTextureType_Invalid) {
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_1d) {
+TEST_F(ParserImplTest, SampledTextureType_1d_Old) {
   auto* p = parser("texture_sampled_1d");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::k1d);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_1dArray) {
+TEST_F(ParserImplTest, SampledTextureType_1dArray_Old) {
   auto* p = parser("texture_sampled_1d_array");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::k1dArray);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_2d) {
+TEST_F(ParserImplTest, SampledTextureType_2d_Old) {
   auto* p = parser("texture_sampled_2d");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_2dArray) {
+TEST_F(ParserImplTest, SampledTextureType_2dArray_Old) {
   auto* p = parser("texture_sampled_2d_array");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_3d) {
+TEST_F(ParserImplTest, SampledTextureType_3d_Old) {
   auto* p = parser("texture_sampled_3d");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::k3d);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_Cube) {
+TEST_F(ParserImplTest, SampledTextureType_Cube_Old) {
   auto* p = parser("texture_sampled_cube");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, SampledTextureType_kCubeArray) {
+TEST_F(ParserImplTest, SampledTextureType_kCubeArray_Old) {
   auto* p = parser("texture_sampled_cube_array");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::kCubeArray);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_1d) {
+  auto* p = parser("texture_1d");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::k1d);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_1dArray) {
+  auto* p = parser("texture_1d_array");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::k1dArray);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_2d) {
+  auto* p = parser("texture_2d");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::k2d);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_2dArray) {
+  auto* p = parser("texture_2d_array");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::k2dArray);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_3d) {
+  auto* p = parser("texture_3d");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::k3d);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_Cube) {
+  auto* p = parser("texture_cube");
+  auto t = p->sampled_texture_type();
+  EXPECT_EQ(t, ast::type::TextureDimension::kCube);
+  EXPECT_FALSE(p->has_error());
+}
+
+TEST_F(ParserImplTest, SampledTextureType_kCubeArray) {
+  auto* p = parser("texture_cube_array");
   auto t = p->sampled_texture_type();
   EXPECT_EQ(t, ast::type::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());

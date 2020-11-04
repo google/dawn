@@ -310,19 +310,19 @@ class Token {
     kTextureStorageReadonly2dArray,
     /// A 'texture_ro_3d'
     kTextureStorageReadonly3d,
-    /// A 'texture_sampled_1d'
+    /// A 'texture_1d'
     kTextureSampled1d,
-    /// A 'texture_sampled_1d_array'
+    /// A 'texture_1d_array'
     kTextureSampled1dArray,
-    /// A 'texture_sampled_2d'
+    /// A 'texture_2d'
     kTextureSampled2d,
-    /// A 'texture_sampled_2d_array'
+    /// A 'texture_2d_array'
     kTextureSampled2dArray,
-    /// A 'texture_sampled_3d'
+    /// A 'texture_3d'
     kTextureSampled3d,
-    /// A 'texture_sampled_cube'
+    /// A 'texture_cube'
     kTextureSampledCube,
-    /// A 'texture_sampled_cube_array'
+    /// A 'texture_cube_array'
     kTextureSampledCubeArray,
     /// A 'texture_wo_1d'
     kTextureStorageWriteonly1d,
@@ -709,25 +709,25 @@ class Token {
   bool IsTextureStorageReadonly3d() const {
     return type_ == Type::kTextureStorageReadonly3d;
   }
-  /// @returns true if token is a 'texture_sampled_1d'
+  /// @returns true if token is a 'texture_1d'
   bool IsTextureSampled1d() const { return type_ == Type::kTextureSampled1d; }
-  /// @returns true if token is a 'texture_sampled_1d_array'
+  /// @returns true if token is a 'texture_1d_array'
   bool IsTextureSampled1dArray() const {
     return type_ == Type::kTextureSampled1dArray;
   }
-  /// @returns true if token is a 'texture_sampled_2d'
+  /// @returns true if token is a 'texture_2d'
   bool IsTextureSampled2d() const { return type_ == Type::kTextureSampled2d; }
-  /// @returns true if token is a 'texture_sampled_2d_array'
+  /// @returns true if token is a 'texture_2d_array'
   bool IsTextureSampled2dArray() const {
     return type_ == Type::kTextureSampled2dArray;
   }
-  /// @returns true if token is a 'texture_sampled_3d'
+  /// @returns true if token is a 'texture_3d'
   bool IsTextureSampled3d() const { return type_ == Type::kTextureSampled3d; }
-  /// @returns true if token is a 'texture_sampled_cube'
+  /// @returns true if token is a 'texture_cube'
   bool IsTextureSampledCube() const {
     return type_ == Type::kTextureSampledCube;
   }
-  /// @returns true if token is a 'texture_sampled_cube_array'
+  /// @returns true if token is a 'texture_cube_array'
   bool IsTextureSampledCubeArray() const {
     return type_ == Type::kTextureSampledCubeArray;
   }

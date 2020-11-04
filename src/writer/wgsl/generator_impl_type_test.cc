@@ -318,16 +318,14 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_SampledTextureTest,
     testing::Values(
-        TextureData{ast::type::TextureDimension::k1d, "texture_sampled_1d"},
-        TextureData{ast::type::TextureDimension::k1dArray,
-                    "texture_sampled_1d_array"},
-        TextureData{ast::type::TextureDimension::k2d, "texture_sampled_2d"},
-        TextureData{ast::type::TextureDimension::k2dArray,
-                    "texture_sampled_2d_array"},
-        TextureData{ast::type::TextureDimension::k3d, "texture_sampled_3d"},
-        TextureData{ast::type::TextureDimension::kCube, "texture_sampled_cube"},
+        TextureData{ast::type::TextureDimension::k1d, "texture_1d"},
+        TextureData{ast::type::TextureDimension::k1dArray, "texture_1d_array"},
+        TextureData{ast::type::TextureDimension::k2d, "texture_2d"},
+        TextureData{ast::type::TextureDimension::k2dArray, "texture_2d_array"},
+        TextureData{ast::type::TextureDimension::k3d, "texture_3d"},
+        TextureData{ast::type::TextureDimension::kCube, "texture_cube"},
         TextureData{ast::type::TextureDimension::kCubeArray,
-                    "texture_sampled_cube_array"}));
+                    "texture_cube_array"}));
 
 using WgslGenerator_MultiampledTextureTest =
     testing::TestWithParam<TextureData>;

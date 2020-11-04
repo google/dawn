@@ -533,25 +533,46 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
          "                                    ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan_Old) {
   EXPECT("var x : texture_sampled_1d;",
          "test.wgsl:1:28 error: missing '<' for sampled texture type\n"
          "var x : texture_sampled_1d;\n"
          "                           ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan_Old) {
   EXPECT("var x : texture_sampled_1d<f32;",
          "test.wgsl:1:32 error: missing '>' for sampled texture type\n"
          "var x : texture_sampled_1d<f32;\n"
          "                               ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype_Old) {
   EXPECT("var x : texture_sampled_1d<1>;",
          "test.wgsl:1:28 error: invalid subtype for sampled texture type\n"
          "var x : texture_sampled_1d<1>;\n"
          "                           ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
+  EXPECT("var x : texture_1d;",
+         "test.wgsl:1:20 error: missing '<' for sampled texture type\n"
+         "var x : texture_1d;\n"
+         "                   ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
+  EXPECT("var x : texture_1d<f32;",
+         "test.wgsl:1:24 error: missing '>' for sampled texture type\n"
+         "var x : texture_1d<f32;\n"
+         "                       ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
+  EXPECT("var x : texture_1d<1>;",
+         "test.wgsl:1:20 error: invalid subtype for sampled texture type\n"
+         "var x : texture_1d<1>;\n"
+         "                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingLessThan) {

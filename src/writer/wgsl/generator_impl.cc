@@ -459,7 +459,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     if (texture->IsDepth()) {
       out_ << "depth_";
     } else if (texture->IsSampled()) {
-      out_ << "sampled_";
+      /* nothing to emit */
     } else if (texture->IsMultisampled()) {
       out_ << "multisampled_";
     } else if (texture->IsStorage()) {
