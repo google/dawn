@@ -315,10 +315,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
     var = std::move(dv);
   }
 
-  auto t = peek();
-  if (t.IsEqual()) {
-    next();  // Consume the peek
-
+  if (match(Token::Type::kEqual)) {
     auto expr = const_expr();
     if (has_error())
       return nullptr;
@@ -335,11 +332,8 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
 // global_constant_decl
 //  : CONST variable_ident_decl EQUAL const_expr
 std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
-  auto t = peek();
-  if (!t.IsConst())
+  if (!match(Token::Type::kConst))
     return nullptr;
-
-  next();  // Consume the peek
 
   auto decl = variable_ident_decl();
   if (has_error())
@@ -353,7 +347,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
       decl.source, decl.name, ast::StorageClass::kNone, decl.type);
   var->set_is_const(true);
 
-  t = next();
+  auto t = next();
   if (!t.IsEqual()) {
     add_error(t, "missing = for const declaration");
     return nullptr;
@@ -404,11 +398,8 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
   for (;;) {
     decos.push_back(std::move(deco));
 
-    t = peek();
-    if (!t.IsComma()) {
+    if (!match(Token::Type::kComma))
       break;
-    }
-    next();  // consume the peek
 
     deco = variable_decoration();
     if (has_error()) {
@@ -549,11 +540,8 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 // variable_decl
 //   : VAR variable_storage_decoration? variable_ident_decl
 std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
-  auto t = peek();
-  if (!t.IsVar())
+  if (!match(Token::Type::kVar))
     return nullptr;
-
-  next();  // Consume the peek
 
   auto sc = variable_storage_decoration();
   if (has_error())
@@ -1043,11 +1031,8 @@ ParserImpl::TypedIdentifier ParserImpl::variable_ident_decl() {
 // variable_storage_decoration
 //   : LESS_THAN storage_class GREATER_THAN
 ast::StorageClass ParserImpl::variable_storage_decoration() {
-  auto t = peek();
-  if (!t.IsLessThan())
+  if (!match(Token::Type::kLessThan))
     return ast::StorageClass::kNone;
-
-  next();  // Consume the peek
 
   auto sc = storage_class();
   if (has_error())
@@ -1057,7 +1042,7 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
     return sc;
   }
 
-  t = next();
+  auto t = next();
   if (!t.IsGreaterThan()) {
     add_error(t, "missing > for variable decoration");
     return ast::StorageClass::kNone;
@@ -1639,14 +1624,10 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
 //                struct_member_decoration ATTR_RIGHT
 bool ParserImpl::struct_member_decoration_decl(
     ast::StructMemberDecorationList& decos) {
-  auto t = peek();
-  if (!t.IsAttrLeft()) {
+  if (!match(Token::Type::kAttrLeft))
     return true;
-  }
 
-  next();  // Consume the peek
-
-  t = peek();
+  auto t = peek();
   if (t.IsAttrRight()) {
     add_error(t, "empty struct member decoration found");
     return false;
@@ -1910,14 +1891,12 @@ ast::type::Type* ParserImpl::function_type_decl() {
 // function_header
 //   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
 std::unique_ptr<ast::Function> ParserImpl::function_header() {
-  auto t = peek();
-  if (!t.IsFn())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kFn))
     return nullptr;
 
-  auto source = t.source();
-  next();  // Consume the peek
-
-  t = next();
+  auto t = next();
   if (!t.IsIdentifier()) {
     add_error(t, "missing identifier for function");
     return nullptr;
@@ -2218,16 +2197,13 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
 // return_stmt
 //   : RETURN logical_or_expression?
 std::unique_ptr<ast::ReturnStatement> ParserImpl::return_stmt() {
-  auto t = peek();
-  if (!t.IsReturn())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kReturn))
     return nullptr;
 
-  auto source = t.source();
-  next();  // Consume the peek
-
   std::unique_ptr<ast::Expression> expr = nullptr;
-  t = peek();
-  if (!t.IsSemicolon()) {
+  if (!peek().IsSemicolon()) {
     expr = logical_or_expression();
     if (has_error())
       return nullptr;
@@ -2281,9 +2257,7 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
   if (var == nullptr)
     return nullptr;
 
-  t = peek();
-  if (t.IsEqual()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kEqual)) {
     auto constructor = logical_or_expression();
     if (has_error())
       return nullptr;
@@ -2301,12 +2275,10 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
 // if_stmt
 //   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
 std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
-  auto t = peek();
-  if (!t.IsIf())
-    return nullptr;
+  auto source = peek().source();
 
-  auto source = t.source();
-  next();  // Consume the peek
+  if (!match(Token::Type::kIf))
+    return nullptr;
 
   auto condition = paren_rhs_stmt();
   if (has_error())
@@ -2393,12 +2365,10 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
 // switch_stmt
 //   : SWITCH paren_rhs_stmt BRACKET_LEFT switch_body+ BRACKET_RIGHT
 std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
-  auto t = peek();
-  if (!t.IsSwitch())
-    return nullptr;
+  auto source = peek().source();
 
-  auto source = t.source();
-  next();  // Consume the peek
+  if (!match(Token::Type::kSwitch))
+    return nullptr;
 
   auto condition = paren_rhs_stmt();
   if (has_error())
@@ -2408,7 +2378,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
     return nullptr;
   }
 
-  t = next();
+  auto t = next();
   if (!t.IsBraceLeft()) {
     add_error(t, "missing { for switch statement");
     return nullptr;
@@ -2543,14 +2513,12 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::case_body() {
 // loop_stmt
 //   : LOOP BRACKET_LEFT statements continuing_stmt? BRACKET_RIGHT
 std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
-  auto t = peek();
-  if (!t.IsLoop())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kLoop))
     return nullptr;
 
-  auto source = t.source();
-  next();  // Consume the peek
-
-  t = next();
+  auto t = next();
   if (!t.IsBraceLeft()) {
     add_error(t, "missing { for loop");
     return nullptr;
@@ -2641,14 +2609,12 @@ std::unique_ptr<ForHeader> ParserImpl::for_header() {
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT BRACE_LEFT statements BRACE_RIGHT
 std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
-  auto t = peek();
-  if (!t.IsFor())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kFor))
     return nullptr;
 
-  auto source = t.source();
-  next();  // Consume the peek
-
-  t = next();
+  auto t = next();
   if (!t.IsParenLeft()) {
     add_error(t, "missing for loop (");
     return nullptr;
@@ -2760,33 +2726,30 @@ std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
 // break_stmt
 //   : BREAK
 std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
-  auto t = peek();
-  if (!t.IsBreak())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kBreak))
     return nullptr;
 
-  next();  // Consume the peek
-  return std::make_unique<ast::BreakStatement>(t.source());
+  return std::make_unique<ast::BreakStatement>(source);
 }
 
 // continue_stmt
 //   : CONTINUE
 std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
-  auto t = peek();
-  if (!t.IsContinue())
+  auto source = peek().source();
+
+  if (!match(Token::Type::kContinue))
     return nullptr;
 
-  next();  // Consume the peek
-  return std::make_unique<ast::ContinueStatement>(t.source());
+  return std::make_unique<ast::ContinueStatement>(source);
 }
 
 // continuing_stmt
 //   : CONTINUING body_stmt
 std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
-  auto t = peek();
-  if (!t.IsContinuing()) {
+  if (!match(Token::Type::kContinuing))
     return std::make_unique<ast::BlockStatement>();
-  }
-  next();  // Consume the peek
 
   return body_stmt();
 }
