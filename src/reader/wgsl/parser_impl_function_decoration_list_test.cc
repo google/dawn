@@ -24,20 +24,24 @@ namespace {
 
 TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
   auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_TRUE(p->function_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(decos.size(), 2u);
+
+  auto deco_0 = ast::As<ast::FunctionDecoration>(std::move(decos[0]));
+  auto deco_1 = ast::As<ast::FunctionDecoration>(std::move(decos[1]));
+  ASSERT_NE(deco_0, nullptr);
+  ASSERT_NE(deco_1, nullptr);
 
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  ASSERT_TRUE(decos[0]->IsWorkgroup());
-  std::tie(x, y, z) = decos[0]->AsWorkgroup()->values();
+  ASSERT_TRUE(deco_0->IsWorkgroup());
+  std::tie(x, y, z) = deco_0->AsWorkgroup()->values();
   EXPECT_EQ(x, 2u);
 
-  ASSERT_TRUE(decos[1]->IsWorkgroup());
-  std::tie(x, y, z) = decos[1]->AsWorkgroup()->values();
+  ASSERT_TRUE(deco_1->IsWorkgroup());
+  std::tie(x, y, z) = deco_1->AsWorkgroup()->values();
   EXPECT_EQ(x, 3u);
   EXPECT_EQ(y, 4u);
   EXPECT_EQ(z, 5u);
@@ -45,41 +49,36 @@ TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
 
 TEST_F(ParserImplTest, FunctionDecorationList_Empty) {
   auto* p = parser("[[]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_FALSE(p->function_decoration_decl(decos));
+  ast::DecorationList decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(),
-            "1:3: missing decorations for function decoration block");
+  ASSERT_EQ(p->error(), "1:3: empty decoration list");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_Invalid) {
   auto* p = parser("[[invalid]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_TRUE(p->function_decoration_decl(decos));
-  ASSERT_FALSE(p->has_error());
+  ast::DecorationList decos = p->decoration_list();
+  ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decos.empty());
+  ASSERT_EQ(p->error(), "1:3: expected decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_ExtraComma) {
   auto* p = parser("[[workgroup_size(2), ]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_FALSE(p->function_decoration_decl(decos));
+  ast::DecorationList decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:22: expected decoration but none found");
+  ASSERT_EQ(p->error(), "1:22: expected decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingComma) {
   auto* p = parser("[[workgroup_size(2) workgroup_size(2)]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_FALSE(p->function_decoration_decl(decos));
+  ast::DecorationList decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:21: missing ]] for function decorations");
+  ASSERT_EQ(p->error(), "1:21: expected ',' for decoration list");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
   auto* p = parser("[[workgroup_size()]]");
-  ast::FunctionDecorationList decos;
-  ASSERT_FALSE(p->function_decoration_decl(decos));
+  ast::DecorationList decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(
       p->error(),
@@ -88,10 +87,9 @@ TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingRightAttr) {
   auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
-  ast::FunctionDecorationList decos;
-  ASSERT_FALSE(p->function_decoration_decl(decos));
+  ast::DecorationList decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:45: missing ]] for function decorations");
+  ASSERT_EQ(p->error(), "1:45: expected ']]' for decoration list");
 }
 
 }  // namespace

@@ -26,7 +26,9 @@ namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
   auto* p = parser("fn main(a : i32, b : f32) -> void { return; }");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
@@ -48,7 +50,9 @@ TEST_F(ParserImplTest, FunctionDecl) {
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   auto* p = parser("[[workgroup_size(2, 3, 4)]] fn main() -> void { return; }");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
@@ -80,7 +84,9 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
   auto* p = parser(R"(
 [[workgroup_size(2, 3, 4), workgroup_size(5, 6, 7)]]
 fn main() -> void { return; })");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
@@ -119,7 +125,9 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
 [[workgroup_size(2, 3, 4)]]
 [[workgroup_size(5, 6, 7)]]
 fn main() -> void { return; })");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
@@ -155,7 +163,9 @@ fn main() -> void { return; })");
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
   auto* p = parser("fn main() -> { }");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
   EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
@@ -163,7 +173,9 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
   auto* p = parser("fn main() -> void { return }");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
   EXPECT_EQ(p->error(), "1:28: expected ';' for return statement");
@@ -171,7 +183,9 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
 
 TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
   auto* p = parser("fn main() -> void return; }");
-  auto f = p->function_decl();
+  auto decorations = p->decoration_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  auto f = p->function_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
   EXPECT_EQ(p->error(), "1:19: expected '{'");

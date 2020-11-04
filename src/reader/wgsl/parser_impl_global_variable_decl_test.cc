@@ -25,7 +25,8 @@ namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   auto* p = parser("var<out> a : f32");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
@@ -44,7 +45,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   auto* p = parser("var<out> a : f32 = 1.");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
@@ -66,7 +68,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   auto* p = parser("[[binding(2), set(1)]] var<out> a : f32");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsDecorated());
@@ -94,7 +97,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   auto* p = parser("[[binding(2)]] [[set(1)]] var<out> a : f32");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsDecorated());
@@ -122,7 +126,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
   auto* p = parser("[[binding()]] var<out> a : f32");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(),
@@ -131,7 +136,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
   auto* p = parser("var<out> a : f32 = if (a) {}");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:20: unable to parse const literal");
@@ -139,7 +145,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   auto* p = parser("var<invalid> a : f32;");
-  auto e = p->global_variable_decl();
+  auto decorations = p->decoration_list();
+  auto e = p->global_variable_decl(decorations);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");

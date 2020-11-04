@@ -25,52 +25,52 @@ namespace {
 
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
   auto* p = parser(R"([[location(4), builtin(position)]])");
-  ast::VariableDecorationList decos;
-  EXPECT_TRUE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(decos.size(), 2u);
-  ASSERT_TRUE(decos[0]->IsLocation());
-  EXPECT_EQ(decos[0]->AsLocation()->value(), 4u);
-  ASSERT_TRUE(decos[1]->IsBuiltin());
-  EXPECT_EQ(decos[1]->AsBuiltin()->value(), ast::Builtin::kPosition);
+
+  auto deco_0 = ast::As<ast::VariableDecoration>(std::move(decos[0]));
+  auto deco_1 = ast::As<ast::VariableDecoration>(std::move(decos[1]));
+  ASSERT_NE(deco_0, nullptr);
+  ASSERT_NE(deco_1, nullptr);
+
+  ASSERT_TRUE(deco_0->IsLocation());
+  EXPECT_EQ(deco_0->AsLocation()->value(), 4u);
+  ASSERT_TRUE(deco_1->IsBuiltin());
+  EXPECT_EQ(deco_1->AsBuiltin()->value(), ast::Builtin::kPosition);
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Empty) {
   auto* p = parser(R"([[]])");
-  ast::VariableDecorationList decos;
-  EXPECT_FALSE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:3: empty variable decoration list");
+  ASSERT_EQ(p->error(), "1:3: empty decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
   auto* p = parser(R"([[invalid]])");
-  ast::VariableDecorationList decos;
-  EXPECT_TRUE(p->variable_decoration_list(decos));
-  ASSERT_FALSE(p->has_error());
+  auto decos = p->decoration_list();
+  ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decos.empty());
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {
   auto* p = parser(R"([[builtin(position), ]])");
-  ast::VariableDecorationList decos;
-  EXPECT_FALSE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:22: missing variable decoration after comma");
+  ASSERT_EQ(p->error(), "1:22: expected decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_MissingComma) {
   auto* p = parser(R"([[binding(4) location(5)]])");
-  ast::VariableDecorationList decos;
-  EXPECT_FALSE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:14: missing comma in variable decoration list");
+  ASSERT_EQ(p->error(), "1:14: expected ',' for decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
   auto* p = parser(R"([[location(bad)]])");
-  ast::VariableDecorationList decos;
-  EXPECT_FALSE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(),
             "1:12: expected signed integer literal for location decoration");
@@ -78,8 +78,7 @@ TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
 
 TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
   auto* p = parser("[[builtin(invalid)]]");
-  ast::VariableDecorationList decos;
-  EXPECT_FALSE(p->variable_decoration_list(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:11: invalid value for builtin decoration");
 }

@@ -110,12 +110,10 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   return ast::Builtin::kNone;
 }
 
-bool IsVariableDecoration(Token t) {
-  return t.IsLocation() || t.IsBuiltin() || t.IsBinding() || t.IsSet();
-}
-
-bool IsFunctionDecoration(Token t) {
-  return t.IsWorkgroupSize() || t.IsStage();
+bool is_decoration(Token t) {
+  return t.IsLocation() || t.IsBinding() || t.IsSet() || t.IsBuiltin() ||
+         t.IsWorkgroupSize() || t.IsStage() || t.IsBlock() || t.IsStride() ||
+         t.IsOffset();
 }
 
 }  // namespace
@@ -219,7 +217,9 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  auto gv = global_variable_decl();
+  auto decos = decoration_list();
+
+  auto gv = global_variable_decl(decos);
   if (has_error()) {
     return;
   }
@@ -255,7 +255,7 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  auto str = struct_decl();
+  auto str = struct_decl(decos);
   if (has_error()) {
     return;
   }
@@ -269,7 +269,7 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  auto func = function_decl();
+  auto func = function_decl(decos);
   if (has_error()) {
     return;
   }
@@ -278,40 +278,27 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  add_error(t, "invalid token");
+  t = peek();
+  if (decos.size() > 0) {
+    add_error(t, "expected declaration after decorations");
+  } else {
+    add_error(t, "invalid token");
+  }
 }
 
 // global_variable_decl
 //  : variable_decoration_list* variable_decl
 //  | variable_decoration_list* variable_decl EQUAL const_expr
-std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
-  ast::VariableDecorationList decos;
-  for (;;) {
-    auto s = decos.size();
-    if (!variable_decoration_list(decos)) {
-      return nullptr;
-    }
-    if (s == decos.size()) {
-      break;
-    }
-  }
-  if (has_error())
-    return nullptr;
-
+std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl(
+    ast::DecorationList& decos) {
   auto var = variable_decl();
-  if (has_error())
+  if (has_error() || var == nullptr)
     return nullptr;
-  if (var == nullptr) {
-    if (decos.size() > 0)
-      add_error(peek(), "error parsing variable declaration");
 
-    return nullptr;
-  }
-
-  if (decos.size() > 0) {
+  auto var_decos = cast_decorations<ast::VariableDecoration>(decos);
+  if (var_decos.size() > 0) {
     auto dv = std::make_unique<ast::DecoratedVariable>(std::move(var));
-    dv->set_decorations(std::move(decos));
-
+    dv->set_decorations(std::move(var_decos));
     var = std::move(dv);
   }
 
@@ -363,113 +350,6 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   var->set_constructor(std::move(init));
 
   return var;
-}
-
-// variable_decoration_list
-//  : ATTR_LEFT (variable_decoration COMMA)* variable_decoration ATTR_RIGHT
-bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
-  auto t = peek();
-  if (!t.IsAttrLeft()) {
-    return true;
-  }
-
-  // Check the empty list before verifying the contents
-  t = peek(1);
-  if (t.IsAttrRight()) {
-    add_error(t, "empty variable decoration list");
-    return false;
-  }
-
-  // Make sure we're looking at variable decorations not some other kind
-  if (!IsVariableDecoration(peek(1))) {
-    return true;
-  }
-
-  next();  // consume the peek
-
-  auto deco = variable_decoration();
-  if (has_error()) {
-    return false;
-  }
-  if (deco == nullptr) {
-    add_error(peek(), "missing variable decoration for decoration list");
-    return false;
-  }
-  for (;;) {
-    decos.push_back(std::move(deco));
-
-    if (!match(Token::Type::kComma))
-      break;
-
-    deco = variable_decoration();
-    if (has_error()) {
-      return false;
-    }
-    if (deco == nullptr) {
-      add_error(peek(), "missing variable decoration after comma");
-      return false;
-    }
-  }
-
-  t = peek();
-  if (!t.IsAttrRight()) {
-    deco = variable_decoration();
-    if (deco != nullptr) {
-      add_error(t, "missing comma in variable decoration list");
-      return false;
-    }
-    add_error(t, "missing ]] for variable decoration");
-    return false;
-  }
-  next();  // consume the peek
-
-  return true;
-}
-
-// variable_decoration
-//  : LOCATION PAREN_LEFT INT_LITERAL PAREN_RIGHT
-//  | BUILTIN PAREN_LEFT IDENT PAREN_RIGHT
-//  | BINDING PAREN_LEFT INT_LITERAL PAREN_RIGHT
-//  | SET INT PAREN_LEFT_LITERAL PAREN_RIGHT
-std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
-  Source source;
-  if (match(Token::Type::kLocation, &source)) {
-    const char* use = "location decoration";
-    return expect_paren_block(use, [&] {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::LocationDecoration>(val, source)
-                : nullptr;
-    });
-  }
-  if (match(Token::Type::kBuiltin, &source)) {
-    return expect_paren_block("builtin decoration", [&] {
-      ast::Builtin builtin;
-      std::tie(builtin, source) = expect_builtin();
-      return (builtin != ast::Builtin::kNone)
-                 ? std::make_unique<ast::BuiltinDecoration>(builtin, source)
-                 : nullptr;
-    });
-  }
-  if (match(Token::Type::kBinding, &source)) {
-    const char* use = "binding decoration";
-    return expect_paren_block(use, [&] {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::BindingDecoration>(val, source)
-                : nullptr;
-    });
-  }
-  if (match(Token::Type::kSet, &source)) {
-    const char* use = "set decoration";
-    return expect_paren_block(use, [&] {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::SetDecoration>(val, source) : nullptr;
-    });
-  }
-
-  return nullptr;
 }
 
 // variable_decl
@@ -1012,30 +892,18 @@ ast::type::Type* ParserImpl::type_decl() {
     return type_decl_pointer(t);
   }
 
-  ast::ArrayDecorationList decos;
-  for (;;) {
-    size_t s = decos.size();
-    if (!array_decoration_list(decos)) {
-      return nullptr;
-    }
-    if (decos.size() == s) {
-      break;
-    }
-  }
+  auto decos = decoration_list();
   if (has_error()) {
     return nullptr;
   }
-  if (!decos.empty()) {
-    t = peek();
+
+  if (match(Token::Type::kArray)) {
+    auto array_decos = cast_decorations<ast::ArrayDecoration>(decos);
+    return type_decl_array(std::move(array_decos));
   }
-  if (!decos.empty() && !t.IsArray()) {
-    add_error(t, "found array decoration but no array");
-    return nullptr;
-  }
-  if (t.IsArray()) {
-    next();  // Consume the peek
-    return type_decl_array(std::move(decos));
-  }
+
+  expect_decorations_consumed(decos);
+
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
       t.IsMat4x4()) {
@@ -1155,56 +1023,6 @@ ast::type::Type* ParserImpl::type_decl_array(ast::ArrayDecorationList decos) {
   return ctx_.type_mgr().Get(std::move(ty));
 }
 
-// array_decoration_list
-//   : ATTR_LEFT (array_decoration COMMA)* array_decoration ATTR_RIGHT
-// array_decoration
-//   : STRIDE PAREN_LEFT INT_LITERAL PAREN_RIGHT
-//
-// As there is currently only one decoration I'm combining these for now.
-// we can split apart later if needed.
-bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
-  auto t = peek();
-  if (!t.IsAttrLeft()) {
-    return true;
-  }
-  t = peek(1);
-  if (!t.IsStride()) {
-    return true;
-  }
-
-  next();  // consume the peek of [[
-
-  for (;;) {
-    Source source;
-    if (match(Token::Type::kStride, &source)) {
-      const char* use = "stride decoration";
-      auto deco = expect_paren_block(use, [&] {
-        uint32_t val;
-        bool ok = expect_nonzero_positive_sint(use, &val);
-        return ok ? std::make_unique<ast::StrideDecoration>(val, source)
-                  : nullptr;
-      });
-
-      if (!deco)
-        return false;
-
-      decos.emplace_back(std::move(deco));
-    } else {
-      add_error(source, "unknown array decoration");
-      return false;
-    }
-
-    if (!match(Token::Type::kComma))
-      break;
-  }
-
-  if (!expect("array decoration", Token::Type::kAttrRight)) {
-    return false;
-  }
-
-  return true;
-}
-
 ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
   next();  // Consume the peek
 
@@ -1298,29 +1116,15 @@ ast::StorageClass ParserImpl::storage_class() {
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
+std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
+    ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
-  ast::StructDecorationList decos;
-  for (;;) {
-    size_t s = decos.size();
-    if (!struct_decoration_decl(decos)) {
-      return nullptr;
-    }
-    if (decos.size() == s) {
-      break;
-    }
-  }
+  if (!match(Token::Type::kStruct))
+    return nullptr;
 
-  t = peek();
-  if (!decos.empty() && !t.IsStruct()) {
-    add_error(t, "missing struct declaration");
-    return nullptr;
-  } else if (!t.IsStruct()) {
-    return nullptr;
-  }
-  next();  // Consume the peek
+  auto struct_decos = cast_decorations<ast::StructDecoration>(decos);
 
   std::string name;
   if (!expect_ident("struct declaration", &name))
@@ -1332,46 +1136,8 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   }
 
   return std::make_unique<ast::type::StructType>(
-      name,
-      std::make_unique<ast::Struct>(source, std::move(decos), std::move(body)));
-}
-
-// struct_decoration_decl
-//  : ATTR_LEFT struct_decoration ATTR_RIGHT
-bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
-  auto t = peek();
-  if (!t.IsAttrLeft()) {
-    return true;
-  }
-
-  auto deco = struct_decoration(peek(1));
-  if (has_error()) {
-    return false;
-  }
-  if (deco == nullptr) {
-    return true;
-  }
-  decos.emplace_back(std::move(deco));
-
-  next();  // Consume the peek of [[
-  next();  // Consume the peek from the struct_decoration
-
-  t = next();
-  if (!t.IsAttrRight()) {
-    add_error(t, "missing ]] for struct decoration");
-    return false;
-  }
-
-  return true;
-}
-
-// struct_decoration
-//  : BLOCK
-std::unique_ptr<ast::StructDecoration> ParserImpl::struct_decoration(Token t) {
-  if (t.IsBlock()) {
-    return std::make_unique<ast::StructBlockDecoration>(t.source());
-  }
-  return nullptr;
+      name, std::make_unique<ast::Struct>(source, std::move(struct_decos),
+                                          std::move(body)));
 }
 
 // struct_body_decl
@@ -1381,7 +1147,9 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
     ast::StructMemberList members;
 
     while (!peek().IsBraceRight() && !peek().IsEof()) {
-      auto mem = struct_member();
+      auto decos = decoration_list();
+
+      auto mem = struct_member(decos);
       if (has_error())
         return ast::StructMemberList{};
       if (mem == nullptr) {
@@ -1398,21 +1166,9 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
 
 // struct_member
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
-std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
+std::unique_ptr<ast::StructMember> ParserImpl::struct_member(
+    ast::DecorationList& decos) {
   auto t = peek();
-
-  ast::StructMemberDecorationList decos;
-  for (;;) {
-    size_t s = decos.size();
-    if (!struct_member_decoration_decl(decos)) {
-      return nullptr;
-    }
-    if (decos.size() == s) {
-      break;
-    }
-  }
-  if (has_error())
-    return nullptr;
 
   auto decl = variable_ident_decl();
   if (has_error())
@@ -1422,90 +1178,25 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
     return nullptr;
   }
 
+  auto member_decos = cast_decorations<ast::StructMemberDecoration>(decos);
+
   if (!expect("struct member", Token::Type::kSemicolon))
     return nullptr;
 
   return std::make_unique<ast::StructMember>(decl.source, decl.name, decl.type,
-                                             std::move(decos));
-}
-
-// struct_member_decoration_decl
-//   :
-//   | ATTR_LEFT (struct_member_decoration COMMA)*
-//                struct_member_decoration ATTR_RIGHT
-bool ParserImpl::struct_member_decoration_decl(
-    ast::StructMemberDecorationList& decos) {
-  if (!match(Token::Type::kAttrLeft))
-    return true;
-
-  auto t = peek();
-  if (t.IsAttrRight()) {
-    add_error(t, "empty struct member decoration found");
-    return false;
-  }
-
-  for (;;) {
-    auto deco = struct_member_decoration();
-    if (has_error())
-      return false;
-    if (deco == nullptr)
-      break;
-
-    decos.push_back(std::move(deco));
-
-    t = next();
-    if (!t.IsComma())
-      break;
-  }
-
-  if (!t.IsAttrRight()) {
-    add_error(t, "missing ]] for struct member decoration");
-    return false;
-  }
-  return true;
-}
-
-// struct_member_decoration
-//   : OFFSET PAREN_LEFT INT_LITERAL PAREN_RIGHT
-std::unique_ptr<ast::StructMemberDecoration>
-ParserImpl::struct_member_decoration() {
-  Source source;
-  if (!match(Token::Type::kOffset, &source))
-    return nullptr;
-
-  const char* use = "offset decoration";
-  return expect_paren_block(use, [&] {
-    uint32_t val;
-    bool ok = expect_positive_sint(use, &val);
-    return ok ? std::make_unique<ast::StructMemberOffsetDecoration>(val, source)
-              : nullptr;
-  });
+                                             std::move(member_decos));
 }
 
 // function_decl
-//   : function_decoration_decl* function_header body_stmt
-std::unique_ptr<ast::Function> ParserImpl::function_decl() {
-  ast::FunctionDecorationList decos;
-  for (;;) {
-    size_t s = decos.size();
-    if (!function_decoration_decl(decos)) {
-      return nullptr;
-    }
-    if (decos.size() == s) {
-      break;
-    }
-  }
-
+//   : function_header body_stmt
+std::unique_ptr<ast::Function> ParserImpl::function_decl(
+    ast::DecorationList& decos) {
   auto f = function_header();
-  if (has_error())
+  if (f == nullptr || has_error())
     return nullptr;
-  if (f == nullptr) {
-    if (decos.size() > 0) {
-      add_error(peek(), "error parsing function declaration");
-    }
-    return nullptr;
-  }
-  f->set_decorations(std::move(decos));
+
+  auto func_decos = cast_decorations<ast::FunctionDecoration>(decos);
+  f->set_decorations(std::move(func_decos));
 
   auto body = body_stmt();
   if (has_error())
@@ -1513,98 +1204,6 @@ std::unique_ptr<ast::Function> ParserImpl::function_decl() {
 
   f->set_body(std::move(body));
   return f;
-}
-
-// function_decoration_decl
-//   : ATTR_LEFT (function_decoration COMMA)* function_decoration ATTR_RIGHT
-bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
-  auto t = peek();
-  if (!t.IsAttrLeft()) {
-    return true;
-  }
-  // Handle error on empty attributes before the type check
-  t = peek(1);
-  if (t.IsAttrRight()) {
-    add_error(t, "missing decorations for function decoration block");
-    return false;
-  }
-
-  // Make sure we're looking at function decorations and not some other kind
-  if (!IsFunctionDecoration(peek(1))) {
-    return true;
-  }
-
-  next();  // Consume the peek
-
-  size_t count = 0;
-  for (;;) {
-    auto deco = function_decoration();
-    if (has_error()) {
-      return false;
-    }
-    if (deco == nullptr) {
-      add_error(peek(), "expected decoration but none found");
-      return false;
-    }
-    decos.push_back(std::move(deco));
-    count++;
-
-    t = peek();
-    if (!t.IsComma()) {
-      break;
-    }
-    next();  // Consume the peek
-  }
-  if (count == 0) {
-    add_error(peek(), "missing decorations for function decoration block");
-    return false;
-  }
-
-  t = next();
-  if (!t.IsAttrRight()) {
-    add_error(t, "missing ]] for function decorations");
-    return false;
-  }
-  return true;
-}
-
-// function_decoration
-//   : STAGE PAREN_LEFT pipeline_stage PAREN_RIGHT
-//   | WORKGROUP_SIZE PAREN_LEFT INT_LITERAL
-//         (COMMA INT_LITERAL (COMMA INT_LITERAL)?)? PAREN_RIGHT
-std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
-  Source source;
-  if (match(Token::Type::kWorkgroupSize, &source)) {
-    return expect_paren_block("workgroup_size decoration", [&]() {
-      uint32_t x;
-      if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
-        return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-      }
-      uint32_t y = 1;
-      uint32_t z = 1;
-      if (match(Token::Type::kComma)) {
-        if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
-          return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-        }
-        if (match(Token::Type::kComma)) {
-          if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
-            return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-          }
-        }
-      }
-      return std::make_unique<ast::WorkgroupDecoration>(x, y, z, source);
-    });
-  }
-  if (match(Token::Type::kStage, &source)) {
-    return expect_paren_block("stage decoration", [&]() {
-      ast::PipelineStage stage;
-      std::tie(stage, source) = expect_pipeline_stage();
-      return (stage != ast::PipelineStage::kNone)
-                 ? std::make_unique<ast::StageDecoration>(stage, source)
-                 : nullptr;
-    });
-  }
-  return nullptr;
 }
 
 // function_type_decl
@@ -3172,6 +2771,186 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
   }
   return std::make_unique<ast::ScalarConstructorExpression>(source,
                                                             std::move(lit));
+}
+
+ast::DecorationList ParserImpl::decoration_list() {
+  ast::DecorationList decos;
+  while (decoration_bracketed_list(decos)) {
+  }
+  return decos;
+}
+
+bool ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
+  if (!match(Token::Type::kAttrLeft)) {
+    return false;
+  }
+
+  auto t = peek();
+  if (match(Token::Type::kAttrRight)) {
+    add_error(t, "empty decoration list");
+    return false;
+  }
+
+  while (true) {
+    if (auto deco = expect_decoration()) {
+      decos.emplace_back(std::move(deco));
+    } else {
+      return false;
+    }
+
+    if (has_error()) {
+      return false;
+    }
+
+    if (match(Token::Type::kComma)) {
+      continue;
+    }
+
+    if (is_decoration(peek())) {
+      // We have two decorations in a bracket without a separating comma.
+      // e.g. [[location(1) set(2)]]
+      //                    ^^^ expected comma
+      expect("decoration list", Token::Type::kComma);
+      return false;
+    }
+
+    return expect("decoration list", Token::Type::kAttrRight);
+  }
+}
+
+std::unique_ptr<ast::Decoration> ParserImpl::expect_decoration() {
+  auto t = peek();
+  if (auto deco = decoration()) {
+    return deco;
+  }
+  if (!has_error()) {
+    add_error(t, "expected decoration");
+  }
+  return nullptr;
+}
+
+std::unique_ptr<ast::Decoration> ParserImpl::decoration() {
+  auto t = next();
+  if (t.IsLocation()) {
+    const char* use = "location decoration";
+    return expect_paren_block(use, [&]() {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::LocationDecoration>(val, t.source())
+                : nullptr;
+    });
+  }
+  if (t.IsBinding()) {
+    const char* use = "binding decoration";
+    return expect_paren_block(use, [&]() {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::BindingDecoration>(val, t.source())
+                : nullptr;
+    });
+  }
+  if (t.IsSet()) {
+    const char* use = "set decoration";
+    return expect_paren_block(use, [&]() {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::SetDecoration>(val, t.source())
+                : nullptr;
+    });
+  }
+  if (t.IsBuiltin()) {
+    return expect_paren_block("builtin decoration", [&]() {
+      ast::Builtin builtin;
+      Source source;
+      std::tie(builtin, source) = expect_builtin();
+      return (builtin != ast::Builtin::kNone)
+                 ? std::make_unique<ast::BuiltinDecoration>(builtin, source)
+                 : nullptr;
+    });
+  }
+  if (t.IsWorkgroupSize()) {
+    return expect_paren_block("workgroup_size decoration", [&]() {
+      uint32_t x;
+      if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
+        return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
+      }
+      uint32_t y = 1;
+      uint32_t z = 1;
+      if (match(Token::Type::kComma)) {
+        if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
+          return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
+        }
+        if (match(Token::Type::kComma)) {
+          if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
+            return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
+          }
+        }
+      }
+      return std::make_unique<ast::WorkgroupDecoration>(x, y, z, t.source());
+    });
+  }
+  if (t.IsStage()) {
+    return expect_paren_block("stage decoration", [&]() {
+      ast::PipelineStage stage;
+      Source source;
+      std::tie(stage, source) = expect_pipeline_stage();
+      return (stage != ast::PipelineStage::kNone)
+                 ? std::make_unique<ast::StageDecoration>(stage, source)
+                 : nullptr;
+    });
+  }
+  if (t.IsBlock()) {
+    return std::make_unique<ast::StructBlockDecoration>(t.source());
+  }
+  if (t.IsStride()) {
+    const char* use = "stride decoration";
+    return expect_paren_block(use, [&]() {
+      uint32_t val;
+      bool ok = expect_nonzero_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::StrideDecoration>(val, t.source())
+                : nullptr;
+    });
+  }
+  if (t.IsOffset()) {
+    const char* use = "offset decoration";
+    return expect_paren_block(use, [&]() {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::StructMemberOffsetDecoration>(
+                      val, t.source())
+                : nullptr;
+    });
+  }
+  return nullptr;
+}
+
+template <typename T>
+std::vector<std::unique_ptr<T>> ParserImpl::cast_decorations(
+    ast::DecorationList& in) {
+  std::vector<std::unique_ptr<T>> out;
+  out.reserve(in.size());
+  for (auto& deco : in) {
+    if (!deco->Is<T>()) {
+      std::stringstream msg;
+      msg << deco->GetKind() << " decoration type cannot be used for "
+          << T::Kind;
+      add_error(deco->GetSource(), msg.str());
+      continue;
+    }
+    out.emplace_back(ast::As<T>(std::move(deco)));
+  }
+  // clear in so that we can verify decorations were consumed with
+  // expect_decorations_consumed()
+  in.clear();
+  return out;
+}
+
+bool ParserImpl::expect_decorations_consumed(const ast::DecorationList& in) {
+  if (in.empty()) {
+    return true;
+  }
+  add_error(in[0]->GetSource(), "unexpected decorations");
+  return false;
 }
 
 bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {

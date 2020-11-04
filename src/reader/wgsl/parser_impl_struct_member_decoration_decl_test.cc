@@ -24,33 +24,32 @@ namespace {
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyStr) {
   auto* p = parser("");
-  ast::StructMemberDecorationList decos;
-  ASSERT_TRUE(p->struct_member_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error());
   EXPECT_EQ(decos.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyBlock) {
   auto* p = parser("[[]]");
-  ast::StructMemberDecorationList decos;
-  ASSERT_FALSE(p->struct_member_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: empty struct member decoration found");
+  EXPECT_EQ(decos.size(), 0u);
+  EXPECT_EQ(p->error(), "1:3: empty decoration list");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
   auto* p = parser("[[offset(4)]]");
-  ast::StructMemberDecorationList decos;
-  ASSERT_TRUE(p->struct_member_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(decos.size(), 1u);
-  EXPECT_TRUE(decos[0]->IsOffset());
+  auto deco = ast::As<ast::StructMemberDecoration>(std::move(decos[0]));
+  ASSERT_NE(deco, nullptr);
+  EXPECT_TRUE(deco->IsOffset());
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
   auto* p = parser("[[offset(nan)]]");
-  ast::StructMemberDecorationList decos;
-  ASSERT_FALSE(p->struct_member_decoration_decl(decos));
+  p->decoration_list();
   ASSERT_TRUE(p->has_error()) << p->error();
   EXPECT_EQ(p->error(),
             "1:10: expected signed integer literal for offset decoration");
@@ -58,10 +57,9 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {
   auto* p = parser("[[offset(4)");
-  ast::StructMemberDecorationList decos;
-  ASSERT_FALSE(p->struct_member_decoration_decl(decos));
+  p->decoration_list();
   ASSERT_TRUE(p->has_error()) << p->error();
-  EXPECT_EQ(p->error(), "1:12: missing ]] for struct member decoration");
+  EXPECT_EQ(p->error(), "1:12: expected ']]' for decoration list");
 }
 
 }  // namespace

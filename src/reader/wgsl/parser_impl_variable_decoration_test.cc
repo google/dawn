@@ -27,18 +27,20 @@ namespace {
 
 TEST_F(ParserImplTest, VariableDecoration_Location) {
   auto* p = parser("location(4)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_NE(deco, nullptr);
+  auto var_deco = ast::As<ast::VariableDecoration>(std::move(deco));
+  ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(deco->IsLocation());
+  ASSERT_TRUE(var_deco->IsLocation());
 
-  auto* loc = deco->AsLocation();
+  auto* loc = var_deco->AsLocation();
   EXPECT_EQ(loc->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
   auto* p = parser("location 4)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: expected '(' for location decoration");
@@ -46,7 +48,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
   auto* p = parser("location(4");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:11: expected ')' for location decoration");
@@ -54,7 +56,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
   auto* p = parser("location()");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -63,7 +65,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
   auto* p = parser("location(nan)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -85,12 +87,14 @@ TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   auto params = GetParam();
   auto* p = parser(std::string("builtin(") + params.input + ")");
 
-  auto deco = p->variable_decoration();
-  ASSERT_FALSE(p->has_error()) << p->error();
+  auto deco = p->decoration();
   ASSERT_NE(deco, nullptr);
-  ASSERT_TRUE(deco->IsBuiltin());
+  auto var_deco = ast::As<ast::VariableDecoration>(std::move(deco));
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_TRUE(var_deco->IsBuiltin());
 
-  auto* builtin = deco->AsBuiltin();
+  auto* builtin = var_deco->AsBuiltin();
   EXPECT_EQ(builtin->value(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -110,7 +114,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
   auto* p = parser("builtin position)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected '(' for builtin decoration");
@@ -118,7 +122,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
   auto* p = parser("builtin(position");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:17: expected ')' for builtin decoration");
@@ -126,7 +130,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
   auto* p = parser("builtin()");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
@@ -134,7 +138,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
   auto* p = parser("builtin(other_thingy)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: invalid value for builtin decoration");
@@ -142,7 +146,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
   auto* p = parser("builtin(3)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
@@ -150,18 +154,20 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
 
 TEST_F(ParserImplTest, VariableDecoration_Binding) {
   auto* p = parser("binding(4)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_NE(deco, nullptr);
+  auto var_deco = ast::As<ast::VariableDecoration>(std::move(deco));
+  ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(deco->IsBinding());
+  ASSERT_TRUE(var_deco->IsBinding());
 
-  auto* binding = deco->AsBinding();
+  auto* binding = var_deco->AsBinding();
   EXPECT_EQ(binding->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
   auto* p = parser("binding 4)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected '(' for binding decoration");
@@ -169,7 +175,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
   auto* p = parser("binding(4");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: expected ')' for binding decoration");
@@ -177,7 +183,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
   auto* p = parser("binding()");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -186,7 +192,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
   auto* p = parser("binding(nan)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -195,18 +201,20 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
 
 TEST_F(ParserImplTest, VariableDecoration_set) {
   auto* p = parser("set(4)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
+  ASSERT_NE(deco, nullptr);
+  auto var_deco = ast::As<ast::VariableDecoration>(std::move(deco));
   ASSERT_FALSE(p->has_error());
-  ASSERT_NE(deco.get(), nullptr);
-  ASSERT_TRUE(deco->IsSet());
+  ASSERT_NE(var_deco.get(), nullptr);
+  ASSERT_TRUE(var_deco->IsSet());
 
-  auto* set = deco->AsSet();
+  auto* set = var_deco->AsSet();
   EXPECT_EQ(set->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
   auto* p = parser("set 2)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:5: expected '(' for set decoration");
@@ -214,7 +222,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
   auto* p = parser("set(2");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:6: expected ')' for set decoration");
@@ -222,7 +230,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
   auto* p = parser("set()");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -231,7 +239,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
   auto* p = parser("set(nan)");
-  auto deco = p->variable_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),

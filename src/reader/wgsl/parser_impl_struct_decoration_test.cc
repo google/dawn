@@ -38,9 +38,12 @@ TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
   auto* p = parser(params.input);
 
-  auto deco = p->struct_decoration(p->peek());
+  auto deco = p->decoration();
   ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(deco->IsBlock(), params.is_block);
+  ASSERT_NE(deco, nullptr);
+  auto struct_deco = ast::As<ast::StructDecoration>(std::move(deco));
+  ASSERT_NE(struct_deco, nullptr);
+  EXPECT_EQ(struct_deco->IsBlock(), params.is_block);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          StructDecorationTest,
@@ -48,12 +51,8 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
   auto* p = parser("not-a-stage");
-  auto deco = p->struct_decoration(p->peek());
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
-
-  auto t = p->next();
-  EXPECT_TRUE(t.IsIdentifier());
-  EXPECT_EQ(t.to_str(), "not");
 }
 
 }  // namespace

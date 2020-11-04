@@ -218,7 +218,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
   auto* p = parser("[[block]] A {};");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:11: missing struct declaration");
+  EXPECT_EQ(p->error(), "1:11: expected declaration after decorations");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {

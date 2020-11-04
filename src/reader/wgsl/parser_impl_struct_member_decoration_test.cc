@@ -24,18 +24,21 @@ namespace {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   auto* p = parser("offset(4)");
-  auto deco = p->struct_member_decoration();
+  auto deco = p->decoration();
   ASSERT_NE(deco, nullptr);
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(deco->IsOffset());
 
-  auto* o = deco->AsOffset();
+  auto member_deco = ast::As<ast::StructMemberDecoration>(std::move(deco));
+  ASSERT_NE(member_deco, nullptr);
+  ASSERT_TRUE(member_deco->IsOffset());
+
+  auto* o = member_deco->AsOffset();
   EXPECT_EQ(o->offset(), 4u);
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
   auto* p = parser("offset 4)");
-  auto deco = p->struct_member_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: expected '(' for offset decoration");
@@ -43,7 +46,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
   auto* p = parser("offset(4");
-  auto deco = p->struct_member_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected ')' for offset decoration");
@@ -51,7 +54,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
   auto* p = parser("offset()");
-  auto deco = p->struct_member_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
@@ -60,7 +63,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
   auto* p = parser("offset(nan)");
-  auto deco = p->struct_member_decoration();
+  auto deco = p->decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),

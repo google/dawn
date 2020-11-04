@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "src/ast/array_decoration.h"
 #include "src/ast/assignment_statement.h"
@@ -156,20 +157,15 @@ class ParserImpl {
   void translation_unit();
   /// Parses the `global_decl` grammar element
   void global_decl();
-  /// Parses a `global_variable_decl` grammar element
+  /// Parses a `global_variable_decl` grammar element with the initial
+  /// `variable_decoration_list*` provided as |decos|.
   /// @returns the variable parsed or nullptr
-  std::unique_ptr<ast::Variable> global_variable_decl();
+  /// @param decos the list of decorations for the variable declaration.
+  std::unique_ptr<ast::Variable> global_variable_decl(
+      ast::DecorationList& decos);
   /// Parses a `global_constant_decl` grammar element
   /// @returns the const object or nullptr
   std::unique_ptr<ast::Variable> global_constant_decl();
-  /// Parses a `variable_decoration_list` grammar element, appending newly
-  /// parsed decorations to the end of |decos|.
-  /// @param decos list to store the parsed decorations
-  /// @returns the true on successful parse; false otherwise
-  bool variable_decoration_list(ast::VariableDecorationList& decos);
-  /// Parses a `variable_decoration` grammar element
-  /// @returns the variable decoration or nullptr if an error is encountered
-  std::unique_ptr<ast::VariableDecoration> variable_decoration();
   /// Parses a `variable_decl` grammar element
   /// @returns the parsed variable or nullptr otherwise
   std::unique_ptr<ast::Variable> variable_decl();
@@ -188,43 +184,25 @@ class ParserImpl {
   /// Parses a `storage_class` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
   ast::StorageClass storage_class();
-  /// Parses a `struct_decl` grammar element
+  /// Parses a `struct_decl` grammar element with the initial
+  /// `struct_decoration_decl*` provided as |decos|.
   /// @returns the struct type or nullptr on error
-  std::unique_ptr<ast::type::StructType> struct_decl();
-  /// Parses a `struct_decoration_decl` grammar element, appending newly
-  /// parsed decorations to the end of |decos|.
-  /// @param decos list to store the parsed decorations
-  /// @returns the true on successful parse; false otherwise
-  bool struct_decoration_decl(ast::StructDecorationList& decos);
-  /// Parses a `struct_decoration` grammar element
-  /// @param t the current token
-  /// @returns the struct decoration or StructDecoraton::kNone if none matched
-  std::unique_ptr<ast::StructDecoration> struct_decoration(Token t);
+  /// @param decos the list of decorations for the struct declaration.
+  std::unique_ptr<ast::type::StructType> struct_decl(
+      ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element
   /// @returns the struct members
   ast::StructMemberList struct_body_decl();
-  /// Parses a `struct_member` grammar element
+  /// Parses a `struct_member` grammar element with the initial
+  /// `struct_member_decoration_decl+` provided as |decos|.
+  /// @param decos the list of decorations for the struct member.
   /// @returns the struct member or nullptr
-  std::unique_ptr<ast::StructMember> struct_member();
-  /// Parses a `struct_member_decoration_decl` grammar element, appending newly
-  /// parsed decorations to the end of |decos|.
-  /// @param decos the decoration list
-  /// @returns true if parsing was successful.
-  bool struct_member_decoration_decl(ast::StructMemberDecorationList& decos);
-  /// Parses a `struct_member_decoration` grammar element
-  /// @returns the decoration or nullptr if none found
-  std::unique_ptr<ast::StructMemberDecoration> struct_member_decoration();
-  /// Parses a `function_decl` grammar element
+  std::unique_ptr<ast::StructMember> struct_member(ast::DecorationList& decos);
+  /// Parses a `function_decl` grammar element with the initial
+  /// `function_decoration_decl*` provided as |decos|.
+  /// @param decos the list of decorations for the function declaration.
   /// @returns the parsed function, nullptr otherwise
-  std::unique_ptr<ast::Function> function_decl();
-  /// Parses a `function_decoration_decl` grammar element, appending newly
-  /// parsed decorations to the end of |decos|.
-  /// @param decos list to store the parsed decorations
-  /// @returns true on successful parse; false otherwise
-  bool function_decoration_decl(ast::FunctionDecorationList& decos);
-  /// Parses a `function_decoration` grammar element
-  /// @returns the parsed decoration, nullptr otherwise
-  std::unique_ptr<ast::FunctionDecoration> function_decoration();
+  std::unique_ptr<ast::Function> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* texture_sampler_types();
@@ -434,6 +412,28 @@ class ParserImpl {
   /// Parses a `assignment_stmt` grammar element
   /// @returns the parsed assignment or nullptr
   std::unique_ptr<ast::AssignmentStatement> assignment_stmt();
+  /// Parses one or more bracketed decoration lists.
+  /// @return the parsed decoration list, or an empty list on error.
+  ast::DecorationList decoration_list();
+  /// Parses a list of decorations between `ATTR_LEFT` and `ATTR_RIGHT`
+  /// brackets.
+  /// @param decos the list to append newly parsed decorations to.
+  /// @return true if any decorations were be parsed, otherwise false.
+  bool decoration_bracketed_list(ast::DecorationList& decos);
+  /// Parses a single decoration of the following types:
+  /// * `struct_decoration`
+  /// * `struct_member_decoration`
+  /// * `array_decoration`
+  /// * `variable_decoration`
+  /// * `global_const_decoration`
+  /// * `function_decoration`
+  /// @return the parsed decoration, or nullptr.
+  std::unique_ptr<ast::Decoration> decoration();
+  /// Parses a single decoration, reporting an error if the next token does not
+  /// represent a decoration.
+  /// @see #decoration for the full list of decorations this method parses.
+  /// @return the parsed decoration, or nullptr on error.
+  std::unique_ptr<ast::Decoration> expect_decoration();
 
  private:
   /// ResultType resolves to the return type for the function or lambda F.
@@ -520,11 +520,17 @@ class ParserImpl {
   /// a zero-initialized |T|.
   template <typename F, typename T = ResultType<F>>
   T expect_brace_block(const std::string& use, F&& body);
+  /// Downcasts all the decorations in |list| to the type |T|, raising a parser
+  /// error if any of the decorations aren't of the type |T|.
+  template <typename T>
+  std::vector<std::unique_ptr<T>> cast_decorations(ast::DecorationList& in);
+  /// Reports an error if the decoration list |list| is not empty.
+  /// Used to ensure that all decorations are consumed.
+  bool expect_decorations_consumed(const ast::DecorationList& list);
 
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);
   ast::type::Type* type_decl_array(ast::ArrayDecorationList decos);
-  bool array_decoration_list(ast::ArrayDecorationList& decos);
   ast::type::Type* type_decl_matrix(Token t);
 
   std::unique_ptr<ast::ConstructorExpression> const_expr_internal(

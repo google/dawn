@@ -23,27 +23,25 @@ namespace {
 
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   auto* p = parser("[[block]]");
-  ast::StructDecorationList decos;
-  ASSERT_TRUE(p->struct_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(decos.size(), 1u);
-  EXPECT_TRUE(decos[0]->IsBlock());
+  ASSERT_EQ(decos.size(), 1u);
+  auto struct_deco = ast::As<ast::StructDecoration>(std::move(decos[0]));
+  EXPECT_TRUE(struct_deco->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
   auto* p = parser("[[block");
-  ast::StructDecorationList decos;
-  ASSERT_FALSE(p->struct_decoration_decl(decos));
+  auto decos = p->decoration_list();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: missing ]] for struct decoration");
+  EXPECT_EQ(p->error(), "1:8: expected ']]' for decoration list");
 }
 
-// Note, this isn't an error because it could be an array decoration
 TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
   auto* p = parser("[[invalid]]");
-  ast::StructDecorationList decos;
-  ASSERT_TRUE(p->struct_decoration_decl(decos));
-  ASSERT_FALSE(p->has_error());
+  auto decos = p->decoration_list();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(decos.size(), 0u);
   EXPECT_TRUE(decos.empty());
 }
 

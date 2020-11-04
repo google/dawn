@@ -253,14 +253,14 @@ TEST_F(ParserImplErrorTest, ForLoopMissingRBrace) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclInvalid) {
   EXPECT("[[stage(vertex)]] x;",
-         "test.wgsl:1:19 error: error parsing function declaration\n"
+         "test.wgsl:1:19 error: expected declaration after decorations\n"
          "[[stage(vertex)]] x;\n"
          "                  ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoMissingEnd) {
   EXPECT("[[stage(vertex) fn f() -> void {}",
-         "test.wgsl:1:17 error: missing ]] for function decorations\n"
+         "test.wgsl:1:17 error: expected ']]' for decoration list\n"
          "[[stage(vertex) fn f() -> void {}\n"
          "                ^^\n");
 }
@@ -287,11 +287,10 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
-  // TODO(bclayton) - BUG(https://crbug.com/tint/291)
   EXPECT("[[shader(vertex)]] fn main() -> void {}",
-         "test.wgsl:1:1 error: invalid token\n"
+         "test.wgsl:1:3 error: expected decoration\n"
          "[[shader(vertex)]] fn main() -> void {}\n"
-         "^^\n");
+         "  ^^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingLParen) {
@@ -619,14 +618,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingStruct) {
   EXPECT("[[block]];",
-         "test.wgsl:1:10 error: missing struct declaration\n"
+         "test.wgsl:1:10 error: expected declaration after decorations\n"
          "[[block]];\n"
          "         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingEnd) {
   EXPECT("[[block struct {};",
-         "test.wgsl:1:9 error: missing ]] for struct decoration\n"
+         "test.wgsl:1:9 error: expected ']]' for decoration list\n"
          "[[block struct {};\n"
          "        ^^^^^^\n");
 }
@@ -661,14 +660,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingRBrace) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberDecoEmpty) {
   EXPECT("struct S { [[]] i : i32; };",
-         "test.wgsl:1:14 error: empty struct member decoration found\n"
+         "test.wgsl:1:14 error: empty decoration list\n"
          "struct S { [[]] i : i32; };\n"
          "             ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberDecoMissingEnd) {
   EXPECT("struct S { [[ i : i32; };",
-         "test.wgsl:1:15 error: missing ]] for struct member decoration\n"
+         "test.wgsl:1:15 error: expected decoration\n"
          "struct S { [[ i : i32; };\n"
          "              ^\n");
 }
@@ -753,9 +752,9 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeInvalid) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeDecoInvalid) {
   EXPECT("var x : [[]] i32;",
-         "test.wgsl:1:9 error: invalid type for identifier declaration\n"
+         "test.wgsl:1:11 error: empty decoration list\n"
          "var x : [[]] i32;\n"
-         "        ^^\n");
+         "          ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingLessThan) {
@@ -774,14 +773,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoNotArray) {
   EXPECT("var i : [[stride(1)]] i32;",
-         "test.wgsl:1:23 error: found array decoration but no array\n"
+         "test.wgsl:1:11 error: unexpected decorations\n"
          "var i : [[stride(1)]] i32;\n"
-         "                      ^^^\n");
+         "          ^^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayDecoMissingEnd) {
   EXPECT("var i : [[stride(1) array<i32>;",
-         "test.wgsl:1:21 error: expected ']]' for array decoration\n"
+         "test.wgsl:1:21 error: expected ']]' for decoration list\n"
          "var i : [[stride(1) array<i32>;\n"
          "                    ^^^^^\n");
 }
@@ -839,28 +838,28 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayNegativeSize) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListEmpty) {
   EXPECT("[[]] var i : i32;",
-         "test.wgsl:1:3 error: empty variable decoration list\n"
+         "test.wgsl:1:3 error: empty decoration list\n"
          "[[]] var i : i32;\n"
          "  ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListInvalid) {
   EXPECT("[[location(1), meow]] var i : i32;",
-         "test.wgsl:1:16 error: missing variable decoration after comma\n"
+         "test.wgsl:1:16 error: expected decoration\n"
          "[[location(1), meow]] var i : i32;\n"
          "               ^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingComma) {
   EXPECT("[[location(1) set(2)]] var i : i32;",
-         "test.wgsl:1:15 error: missing comma in variable decoration list\n"
+         "test.wgsl:1:15 error: expected ',' for decoration list\n"
          "[[location(1) set(2)]] var i : i32;\n"
          "              ^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingEnd) {
   EXPECT("[[location(1) meow]] var i : i32;",
-         "test.wgsl:1:15 error: missing ]] for variable decoration\n"
+         "test.wgsl:1:15 error: expected ']]' for decoration list\n"
          "[[location(1) meow]] var i : i32;\n"
          "              ^^^^\n");
 }

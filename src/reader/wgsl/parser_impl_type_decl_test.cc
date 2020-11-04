@@ -383,7 +383,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: found array decoration but no array");
+  EXPECT_EQ(p->error(), "1:3: unexpected decorations");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingClosingAttr) {
@@ -391,16 +391,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingClosingAttr) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: expected ']]' for array decoration");
+  EXPECT_EQ(p->error(), "1:14: expected ']]' for decoration list");
 }
 
-// Note, this isn't an error because it could be a struct decoration, we just
-// don't have an array ...
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
   auto* p = parser("[[unknown 16]] array<f32, 5>");
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
-  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:3: expected decoration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
