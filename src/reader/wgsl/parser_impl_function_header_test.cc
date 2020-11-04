@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:4: missing identifier for function");
+  EXPECT_EQ(p->error(), "1:4: expected identifier for function declaration");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidIdent) {
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidIdent) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:4: missing identifier for function");
+  EXPECT_EQ(p->error(), "1:4: expected identifier for function declaration");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingParenLeft) {

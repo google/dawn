@@ -382,7 +382,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZZero) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingIdentifier) {
   EXPECT("fn () -> void {}",
-         "test.wgsl:1:4 error: missing identifier for function\n"
+         "test.wgsl:1:4 error: expected identifier for function declaration\n"
          "fn () -> void {}\n"
          "   ^\n");
 }
@@ -612,7 +612,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructDecoMissingEnd) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingIdentifier) {
   EXPECT("struct {};",
-         "test.wgsl:1:8 error: missing identifier for struct declaration\n"
+         "test.wgsl:1:8 error: expected identifier for struct declaration\n"
          "struct {};\n"
          "       ^\n");
 }
@@ -697,7 +697,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetNegativeValue) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingIdentifier) {
   EXPECT("type 1 = f32;",
-         "test.wgsl:1:6 error: missing identifier for type alias\n"
+         "test.wgsl:1:6 error: expected identifier for type alias\n"
          "type 1 = f32;\n"
          "     ^\n");
 }
@@ -711,7 +711,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasInvalidType) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingAssignment) {
   EXPECT("type meow f32",
-         "test.wgsl:1:11 error: missing = for type alias\n"
+         "test.wgsl:1:11 error: expected '=' for type alias\n"
          "type meow f32\n"
          "          ^^^\n");
 }
@@ -1094,7 +1094,7 @@ TEST_F(ParserImplErrorTest, LoopMissingRBrace) {
 
 TEST_F(ParserImplErrorTest, MemberExprMissingIdentifier) {
   EXPECT("fn f() -> void { x = a.; }",
-         "test.wgsl:1:24 error: missing identifier for member accessor\n"
+         "test.wgsl:1:24 error: expected identifier for member accessor\n"
          "fn f() -> void { x = a.; }\n"
          "                       ^\n");
 }

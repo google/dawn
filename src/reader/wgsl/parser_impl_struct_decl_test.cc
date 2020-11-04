@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, StructDecl_MissingIdent) {
   auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing identifier for struct declaration");
+  EXPECT_EQ(p->error(), "1:8: expected identifier for struct declaration");
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {

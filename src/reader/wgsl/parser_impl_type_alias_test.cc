@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
   auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
+  EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
   auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
+  EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
   auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing = for type alias");
+  EXPECT_EQ(p->error(), "1:8: expected '=' for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidType) {

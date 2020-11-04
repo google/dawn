@@ -457,16 +457,16 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     if (!expect("builtin decoration", Token::Type::kParenLeft))
       return nullptr;
 
-    t = next();
-    if (!t.IsIdentifier() || t.to_str().empty()) {
-      add_error(t, "expected identifier for builtin");
-      return {};
-    }
+    source = peek().source();
 
-    ast::Builtin builtin = ident_to_builtin(t.to_str());
+    std::string ident;
+    if (!expect_ident("builtin", &ident))
+      return nullptr;
+
+    ast::Builtin builtin = ident_to_builtin(ident);
     if (builtin == ast::Builtin::kNone) {
-      add_error(t, "invalid value for builtin decoration");
-      return {};
+      add_error(source, "invalid value for builtin decoration");
+      return nullptr;
     }
 
     if (!expect("builtin decoration", Token::Type::kParenRight))
@@ -1035,18 +1035,14 @@ ast::type::Type* ParserImpl::type_alias() {
 
   next();  // Consume the peek
 
-  t = next();
-  if (!t.IsIdentifier()) {
-    add_error(t, "missing identifier for type alias");
-    return nullptr;
-  }
-  auto name = t.to_str();
+  const char* use = "type alias";
 
-  t = next();
-  if (!t.IsEqual()) {
-    add_error(t, "missing = for type alias");
+  std::string name;
+  if (!expect_ident(use, &name))
     return nullptr;
-  }
+
+  if (!expect(use, Token::Type::kEqual))
+    return nullptr;
 
   auto* type = type_decl();
   if (has_error())
@@ -1433,12 +1429,9 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   }
   next();  // Consume the peek
 
-  t = next();
-  if (!t.IsIdentifier()) {
-    add_error(t, "missing identifier for struct declaration");
+  std::string name;
+  if (!expect_ident("struct declaration", &name))
     return nullptr;
-  }
-  auto name = t.to_str();
 
   auto body = struct_body_decl();
   if (has_error()) {
@@ -1791,24 +1784,23 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
   if (!match(Token::Type::kFn))
     return nullptr;
 
-  auto t = next();
-  if (!t.IsIdentifier()) {
-    add_error(t, "missing identifier for function");
-    return nullptr;
-  }
-  auto name = t.to_str();
+  const char* use = "function declaration";
 
-  if (!expect("function declaration", Token::Type::kParenLeft))
+  std::string name;
+  if (!expect_ident(use, &name))
+    return nullptr;
+
+  if (!expect(use, Token::Type::kParenLeft))
     return nullptr;
 
   auto params = param_list();
   if (has_error())
     return nullptr;
 
-  if (!expect("function declaration", Token::Type::kParenRight))
+  if (!expect(use, Token::Type::kParenRight))
     return nullptr;
 
-  t = next();
+  auto t = next();
   if (!t.IsArrow()) {
     add_error(t, "missing -> for function declaration");
     return nullptr;
@@ -2768,15 +2760,15 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
   } else if (t.IsPeriod()) {
     next();  // Consume the peek
 
-    t = next();
-    if (!t.IsIdentifier()) {
-      add_error(t, "missing identifier for member accessor");
+    source = peek().source();
+
+    std::string ident;
+    if (!expect_ident("member accessor", &ident))
       return nullptr;
-    }
 
     expr = std::make_unique<ast::MemberAccessorExpression>(
         source, std::move(prefix),
-        std::make_unique<ast::IdentifierExpression>(t.source(), t.to_str()));
+        std::make_unique<ast::IdentifierExpression>(source, ident));
   } else {
     return prefix;
   }

@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:3: missing identifier for member accessor");
+  EXPECT_EQ(p->error(), "1:3: expected identifier for member accessor");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
@@ -175,7 +175,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:3: missing identifier for member accessor");
+  EXPECT_EQ(p->error(), "1:3: expected identifier for member accessor");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
