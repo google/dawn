@@ -152,11 +152,16 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ruv;
-    if (!var->type()->IsStruct()) {
+    if (!var->type()->IsAccessControl()) {
+      continue;
+    }
+    auto* unwrapped_type = var->type()->UnwrapIfNeeded();
+
+    if (!unwrapped_type->IsStruct()) {
       continue;
     }
 
-    if (!var->type()->AsStruct()->IsBlockDecorated()) {
+    if (!unwrapped_type->AsStruct()->IsBlockDecorated()) {
       continue;
     }
 
@@ -220,7 +225,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    if (!ac_type->type()->IsStruct()) {
+    if (!var->type()->UnwrapIfNeeded()->IsStruct()) {
       continue;
     }
 

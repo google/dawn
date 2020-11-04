@@ -279,25 +279,34 @@ class InspectorHelper {
     return std::make_unique<ast::type::StructType>(name, std::move(str));
   }
 
-  /// Generates a struct type appropriate for using in an uniform buffer
+  /// Generates types appropriate for using in an uniform buffer
   /// @param name name for the type
   /// @param members_info a vector of {type, offset} where each entry is the
   ///                     type and offset of a member of the struct
-  /// @returns a struct type suitable to use for an uniform buffer
-  std::unique_ptr<ast::type::StructType> MakeUniformBufferStructType(
-      const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
-    return MakeStructType(name, members_info, true);
-  }
-
-  /// Generates a struct type appropriate for using in a storage buffer
-  /// @param name name for the type
-  /// @param members_info a vector of {type, offset} where each entry is the
-  ///                     type and offset of a member of the struct
-  /// @returns a struct type suitable to use for an uniform buffer
+  /// @returns a tuple {struct type, access control type}, where the struct has
+  ///          the layout for an uniform buffer, and the control type wraps the
+  ///          struct.
   std::tuple<std::unique_ptr<ast::type::StructType>,
              std::unique_ptr<ast::type::AccessControlType>>
-  MakeStorageBufferStructType(
+  MakeUniformBufferTypes(
+      const std::string& name,
+      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+    auto struct_type = MakeStructType(name, members_info, true);
+    auto access_type = std::make_unique<ast::type::AccessControlType>(
+        ast::AccessControl::kReadOnly, struct_type.get());
+    return {std::move(struct_type), std::move(access_type)};
+  }
+
+  /// Generates types appropriate for using in a storage buffer
+  /// @param name name for the type
+  /// @param members_info a vector of {type, offset} where each entry is the
+  ///                     type and offset of a member of the struct
+  /// @returns a tuple {struct type, access control type}, where the struct has
+  ///          the layout for a storage buffer, and the control type wraps the
+  ///          struct.
+  std::tuple<std::unique_ptr<ast::type::StructType>,
+             std::unique_ptr<ast::type::AccessControlType>>
+  MakeStorageBufferTypes(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     auto struct_type = MakeStructType(name, members_info, false);
@@ -306,15 +315,16 @@ class InspectorHelper {
     return {std::move(struct_type), std::move(access_type)};
   }
 
-  /// Generates a struct type appropriate for using in a read only storage
-  /// buffer.
+  /// Generates types appropriate for using in a read-only storage buffer
   /// @param name name for the type
   /// @param members_info a vector of {type, offset} where each entry is the
   ///                     type and offset of a member of the struct
-  /// @returns a struct type suitable to use for an uniform buffer
+  /// @returns a tuple {struct type, access control type}, where the struct has
+  ///          the layout for a read-only storage buffer, and the control type
+  ///          wraps the struct.
   std::tuple<std::unique_ptr<ast::type::StructType>,
              std::unique_ptr<ast::type::AccessControlType>>
-  MakeReadOnlyStorageBufferStructType(
+  MakeReadOnlyStorageBufferTypes(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     auto struct_type = MakeStructType(name, members_info, false);
@@ -870,8 +880,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
-  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
+  std::unique_ptr<ast::type::StructType> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::tie(foo_struct_type, foo_control_type) =
+      MakeUniformBufferTypes("foo_type", {{i32_type(), 0}});
+  AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
 
   auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                          {{0, i32_type()}});
@@ -925,8 +938,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  auto foo_type = MakeUniformBufferStructType("foo_type", {{i32_type(), 0}});
-  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
+  std::unique_ptr<ast::type::StructType> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::tie(foo_struct_type, foo_control_type) =
+      MakeUniformBufferTypes("foo_type", {{i32_type(), 0}});
+  AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
 
   auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                          {{0, i32_type()}});
@@ -949,9 +965,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  auto foo_type = MakeUniformBufferStructType(
+  std::unique_ptr<ast::type::StructType> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::tie(foo_struct_type, foo_control_type) = MakeUniformBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
-  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
+  AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
 
   auto ub_func = MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, i32_type()}, {1, u32_type()}, {2, f32_type()}});
@@ -974,11 +992,13 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  auto ub_type = MakeUniformBufferStructType(
+  std::unique_ptr<ast::type::StructType> ub_struct_type;
+  std::unique_ptr<ast::type::AccessControlType> ub_control_type;
+  std::tie(ub_struct_type, ub_control_type) = MakeUniformBufferTypes(
       "ub_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
-  AddUniformBuffer("ub_foo", ub_type.get(), 0, 0);
-  AddUniformBuffer("ub_bar", ub_type.get(), 0, 1);
-  AddUniformBuffer("ub_baz", ub_type.get(), 2, 0);
+  AddUniformBuffer("ub_foo", ub_control_type.get(), 0, 0);
+  AddUniformBuffer("ub_bar", ub_control_type.get(), 0, 1);
+  AddUniformBuffer("ub_baz", ub_control_type.get(), 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -1032,9 +1052,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
-  auto foo_type = MakeUniformBufferStructType(
+  std::unique_ptr<ast::type::StructType> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::tie(foo_struct_type, foo_control_type) = MakeUniformBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
-  AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
+  AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
 
   auto ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                          {{0, i32_type()}});
@@ -1060,7 +1082,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferStructType("foo_type", {{i32_type(), 0}});
+      MakeStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
@@ -1086,7 +1108,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferStructType(
+  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
@@ -1113,7 +1135,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   std::unique_ptr<ast::type::StructType> sb_struct_type;
   std::unique_ptr<ast::type::AccessControlType> sb_control_type;
-  std::tie(sb_struct_type, sb_control_type) = MakeStorageBufferStructType(
+  std::tie(sb_struct_type, sb_control_type) = MakeStorageBufferTypes(
       "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
   AddStorageBuffer("sb_bar", sb_control_type.get(), 0, 1);
@@ -1173,7 +1195,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferStructType(
+  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
@@ -1200,7 +1222,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferStructType(
+  std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
@@ -1228,7 +1250,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferStructType("foo_type", {{i32_type(), 0}});
+      MakeReadOnlyStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
@@ -1251,7 +1273,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferStructType("foo_type", {{i32_type(), 0}});
+      MakeReadOnlyStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
@@ -1279,9 +1301,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
   std::unique_ptr<ast::type::StructType> sb_struct_type;
   std::unique_ptr<ast::type::AccessControlType> sb_control_type;
-  std::tie(sb_struct_type, sb_control_type) =
-      MakeReadOnlyStorageBufferStructType(
-          "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
+  std::tie(sb_struct_type, sb_control_type) = MakeReadOnlyStorageBufferTypes(
+      "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
   AddStorageBuffer("sb_bar", sb_control_type.get(), 0, 1);
   AddStorageBuffer("sb_baz", sb_control_type.get(), 2, 0);
@@ -1341,9 +1362,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferStructType(
-          "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
+  std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
+      "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
@@ -1371,9 +1391,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferStructType(
-          "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
+  std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
+      "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
@@ -1401,7 +1420,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
   std::unique_ptr<ast::type::StructType> foo_struct_type;
   std::unique_ptr<ast::type::AccessControlType> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferStructType("foo_type", {{i32_type(), 0}});
+      MakeStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
 
   auto sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
