@@ -289,7 +289,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
   // TODO(bclayton) - BUG(https://crbug.com/tint/291)
   EXPECT("[[shader(vertex)]] fn main() -> void {}",
-         "test.wgsl:1:1 error: invalid token ([[) encountered\n"
+         "test.wgsl:1:1 error: invalid token\n"
          "[[shader(vertex)]] fn main() -> void {}\n"
          "^^\n");
 }
@@ -1178,7 +1178,7 @@ TEST_F(ParserImplErrorTest, UnaryInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, UnexpectedToken) {
   EXPECT("unexpected",
-         "test.wgsl:1:1 error: invalid token (kIdentifier) encountered\n"
+         "test.wgsl:1:1 error: invalid token\n"
          "unexpected\n"
          "^^^^^^^^^^\n");
 }

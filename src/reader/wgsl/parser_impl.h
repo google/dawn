@@ -125,13 +125,22 @@ class ParserImpl {
   /// @param idx the index of the token to return
   /// @returns the token |idx| positions ahead without advancing
   Token peek(size_t idx);
-  /// Sets the error from |t|
-  /// @param t the token to set the error from
-  void set_error(const Token& t);
-  /// Sets the error from |t| or |msg| if |t| is not in error
-  /// @param t the token to set the error from
+  /// Appends an error at |t| with the message |msg|
+  /// @param t the token to associate the error with
   /// @param msg the error message
-  void set_error(const Token& t, const std::string& msg);
+  void add_error(const Token& t, const std::string& msg);
+  /// Appends an error raised when parsing |use| at |t| with the message |msg|
+  /// @param t the token to associate the error with
+  /// @param msg the error message
+  /// @param use a description of what was being parsed when the error was
+  /// raised.
+  void add_error(const Token& t,
+                 const std::string& msg,
+                 const std::string& use);
+  /// Appends an error at |source| with the message |msg|
+  /// @param source the source to associate the error with
+  /// @param msg the error message
+  void add_error(const Source& source, const std::string& msg);
 
   /// Registers a constructed type into the parser
   /// @param name the constructed name

@@ -125,16 +125,27 @@ ParserImpl::ParserImpl(Context* ctx, Source::File const* file)
 
 ParserImpl::~ParserImpl() = default;
 
-void ParserImpl::set_error(const Token& t, const std::string& err) {
+void ParserImpl::add_error(const Token& t,
+                           const std::string& err,
+                           const std::string& use) {
+  std::stringstream msg;
+  msg << err;
+  if (!use.empty()) {
+    msg << " for " << use;
+  }
+  add_error(t, msg.str());
+}
+
+void ParserImpl::add_error(const Token& t, const std::string& err) {
+  add_error(t.source(), err);
+}
+
+void ParserImpl::add_error(const Source& source, const std::string& err) {
   diag::Diagnostic diagnostic;
   diagnostic.severity = diag::Severity::Error;
   diagnostic.message = err;
-  diagnostic.source = t.source();
+  diagnostic.source = source;
   diags_.add(std::move(diagnostic));
-}
-
-void ParserImpl::set_error(const Token& t) {
-  set_error(t, "invalid token (" + t.to_name() + ") encountered");
 }
 
 Token ParserImpl::next() {
@@ -215,7 +226,7 @@ void ParserImpl::global_decl() {
   if (gv != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for variable declaration");
+      add_error(t, "missing ';' for variable declaration");
       return;
     }
     module_.AddGlobalVariable(std::move(gv));
@@ -229,7 +240,7 @@ void ParserImpl::global_decl() {
   if (gc != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for constant declaration");
+      add_error(t, "missing ';' for constant declaration");
       return;
     }
     module_.AddGlobalVariable(std::move(gc));
@@ -243,7 +254,7 @@ void ParserImpl::global_decl() {
   if (ta != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for type alias");
+      add_error(t, "missing ';' for type alias");
       return;
     }
     module_.AddConstructedType(ta);
@@ -257,7 +268,7 @@ void ParserImpl::global_decl() {
   if (str != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ';' for struct declaration");
+      add_error(t, "missing ';' for struct declaration");
       return;
     }
     auto* type = ctx_.type_mgr().Get(std::move(str));
@@ -275,7 +286,7 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  set_error(t);
+  add_error(t, "invalid token");
 }
 
 // global_variable_decl
@@ -300,7 +311,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
     return nullptr;
   if (var == nullptr) {
     if (decos.size() > 0)
-      set_error(peek(), "error parsing variable declaration");
+      add_error(peek(), "error parsing variable declaration");
 
     return nullptr;
   }
@@ -320,7 +331,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
     if (has_error())
       return nullptr;
     if (expr == nullptr) {
-      set_error(peek(), "invalid expression");
+      add_error(peek(), "invalid expression");
       return nullptr;
     }
 
@@ -342,7 +353,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   if (has_error())
     return nullptr;
   if (decl.name.empty() || decl.type == nullptr) {
-    set_error(peek(), "error parsing constant variable identifier");
+    add_error(peek(), "error parsing constant variable identifier");
     return nullptr;
   }
 
@@ -352,7 +363,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
 
   t = next();
   if (!t.IsEqual()) {
-    set_error(t, "missing = for const declaration");
+    add_error(t, "missing = for const declaration");
     return nullptr;
   }
 
@@ -360,7 +371,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   if (has_error())
     return nullptr;
   if (init == nullptr) {
-    set_error(peek(), "error parsing scalar constructor");
+    add_error(peek(), "error parsing scalar constructor");
     return nullptr;
   }
   var->set_constructor(std::move(init));
@@ -379,7 +390,7 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
   // Check the empty list before verifying the contents
   t = peek(1);
   if (t.IsAttrRight()) {
-    set_error(t, "empty variable decoration list");
+    add_error(t, "empty variable decoration list");
     return false;
   }
 
@@ -395,7 +406,7 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
     return false;
   }
   if (deco == nullptr) {
-    set_error(peek(), "missing variable decoration for decoration list");
+    add_error(peek(), "missing variable decoration for decoration list");
     return false;
   }
   for (;;) {
@@ -412,7 +423,7 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
       return false;
     }
     if (deco == nullptr) {
-      set_error(peek(), "missing variable decoration after comma");
+      add_error(peek(), "missing variable decoration after comma");
       return false;
     }
   }
@@ -421,10 +432,10 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
   if (!t.IsAttrRight()) {
     deco = variable_decoration();
     if (deco != nullptr) {
-      set_error(t, "missing comma in variable decoration list");
+      add_error(t, "missing comma in variable decoration list");
       return false;
     }
-    set_error(t, "missing ]] for variable decoration");
+    add_error(t, "missing ]] for variable decoration");
     return false;
   }
   next();  // consume the peek
@@ -445,20 +456,20 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for location decoration");
+      add_error(t, "missing ( for location decoration");
       return {};
     }
 
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "invalid value for location decoration");
+      add_error(t, "invalid value for location decoration");
       return {};
     }
     int32_t val = t.to_i32();
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for location decoration");
+      add_error(t, "missing ) for location decoration");
       return {};
     }
     return std::make_unique<ast::LocationDecoration>(val, source);
@@ -468,25 +479,25 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for builtin decoration");
+      add_error(t, "missing ( for builtin decoration");
       return {};
     }
 
     t = next();
     if (!t.IsIdentifier() || t.to_str().empty()) {
-      set_error(t, "expected identifier for builtin");
+      add_error(t, "expected identifier for builtin");
       return {};
     }
 
     ast::Builtin builtin = ident_to_builtin(t.to_str());
     if (builtin == ast::Builtin::kNone) {
-      set_error(t, "invalid value for builtin decoration");
+      add_error(t, "invalid value for builtin decoration");
       return {};
     }
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for builtin decoration");
+      add_error(t, "missing ) for builtin decoration");
       return {};
     }
     return std::make_unique<ast::BuiltinDecoration>(builtin, source);
@@ -496,20 +507,20 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for binding decoration");
+      add_error(t, "missing ( for binding decoration");
       return {};
     }
 
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "invalid value for binding decoration");
+      add_error(t, "invalid value for binding decoration");
       return {};
     }
     int32_t val = t.to_i32();
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for binding decoration");
+      add_error(t, "missing ) for binding decoration");
       return {};
     }
 
@@ -520,20 +531,20 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for set decoration");
+      add_error(t, "missing ( for set decoration");
       return {};
     }
 
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "invalid value for set decoration");
+      add_error(t, "invalid value for set decoration");
       return {};
     }
     uint32_t val = t.to_i32();
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for set decoration");
+      add_error(t, "missing ) for set decoration");
       return {};
     }
 
@@ -560,7 +571,7 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   if (has_error())
     return nullptr;
   if (decl.name.empty() || decl.type == nullptr) {
-    set_error(peek(), "invalid identifier declaration");
+    add_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
 
@@ -588,7 +599,7 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
   if (dim != ast::type::TextureDimension::kNone) {
     auto t = next();
     if (!t.IsLessThan()) {
-      set_error(peek(), "missing '<' for sampled texture type");
+      add_error(peek(), "missing '<' for sampled texture type");
       return nullptr;
     }
 
@@ -596,13 +607,13 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     if (has_error())
       return nullptr;
     if (subtype == nullptr) {
-      set_error(peek(), "invalid subtype for sampled texture type");
+      add_error(peek(), "invalid subtype for sampled texture type");
       return nullptr;
     }
 
     t = next();
     if (!t.IsGreaterThan()) {
-      set_error(peek(), "missing '>' for sampled texture type");
+      add_error(peek(), "missing '>' for sampled texture type");
       return nullptr;
     }
 
@@ -614,7 +625,7 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
   if (dim != ast::type::TextureDimension::kNone) {
     auto t = next();
     if (!t.IsLessThan()) {
-      set_error(peek(), "missing '<' for multisampled texture type");
+      add_error(peek(), "missing '<' for multisampled texture type");
       return nullptr;
     }
 
@@ -622,13 +633,13 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     if (has_error())
       return nullptr;
     if (subtype == nullptr) {
-      set_error(peek(), "invalid subtype for multisampled texture type");
+      add_error(peek(), "invalid subtype for multisampled texture type");
       return nullptr;
     }
 
     t = next();
     if (!t.IsGreaterThan()) {
-      set_error(peek(), "missing '>' for multisampled texture type");
+      add_error(peek(), "missing '>' for multisampled texture type");
       return nullptr;
     }
 
@@ -642,7 +653,7 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
   if (storage_dim != ast::type::TextureDimension::kNone) {
     auto t = next();
     if (!t.IsLessThan()) {
-      set_error(peek(), "missing '<' for storage texture type");
+      add_error(peek(), "missing '<' for storage texture type");
       return nullptr;
     }
 
@@ -650,13 +661,13 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     if (has_error())
       return nullptr;
     if (format == ast::type::ImageFormat::kNone) {
-      set_error(peek(), "invalid format for storage texture type");
+      add_error(peek(), "invalid format for storage texture type");
       return nullptr;
     }
 
     t = next();
     if (!t.IsGreaterThan()) {
-      set_error(peek(), "missing '>' for storage texture type");
+      add_error(peek(), "missing '>' for storage texture type");
       return nullptr;
     }
 
@@ -1022,7 +1033,7 @@ ParserImpl::TypedIdentifier ParserImpl::variable_ident_decl() {
 
   t = next();
   if (!t.IsColon()) {
-    set_error(t, "missing : for identifier declaration");
+    add_error(t, "missing : for identifier declaration");
     return {};
   }
 
@@ -1030,7 +1041,7 @@ ParserImpl::TypedIdentifier ParserImpl::variable_ident_decl() {
   if (has_error())
     return {};
   if (type == nullptr) {
-    set_error(peek(), "invalid type for identifier declaration");
+    add_error(peek(), "invalid type for identifier declaration");
     return {};
   }
 
@@ -1050,13 +1061,13 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
   if (has_error())
     return sc;
   if (sc == ast::StorageClass::kNone) {
-    set_error(peek(), "invalid storage class for variable decoration");
+    add_error(peek(), "invalid storage class for variable decoration");
     return sc;
   }
 
   t = next();
   if (!t.IsGreaterThan()) {
-    set_error(t, "missing > for variable decoration");
+    add_error(t, "missing > for variable decoration");
     return ast::StorageClass::kNone;
   }
 
@@ -1074,14 +1085,14 @@ ast::type::Type* ParserImpl::type_alias() {
 
   t = next();
   if (!t.IsIdentifier()) {
-    set_error(t, "missing identifier for type alias");
+    add_error(t, "missing identifier for type alias");
     return nullptr;
   }
   auto name = t.to_str();
 
   t = next();
   if (!t.IsEqual()) {
-    set_error(t, "missing = for type alias");
+    add_error(t, "missing = for type alias");
     return nullptr;
   }
 
@@ -1089,7 +1100,7 @@ ast::type::Type* ParserImpl::type_alias() {
   if (has_error())
     return nullptr;
   if (type == nullptr) {
-    set_error(peek(), "invalid type alias");
+    add_error(peek(), "invalid type alias");
     return nullptr;
   }
 
@@ -1130,7 +1141,7 @@ ast::type::Type* ParserImpl::type_decl() {
     next();  // Consume the peek
     auto* ty = get_constructed(t.to_str());
     if (ty == nullptr) {
-      set_error(t, "unknown constructed type '" + t.to_str() + "'");
+      add_error(t, "unknown constructed type '" + t.to_str() + "'");
       return nullptr;
     }
     return ty;
@@ -1175,7 +1186,7 @@ ast::type::Type* ParserImpl::type_decl() {
     t = peek();
   }
   if (!decos.empty() && !t.IsArray()) {
-    set_error(t, "found array decoration but no array");
+    add_error(t, "found array decoration but no array");
     return nullptr;
   }
   if (t.IsArray()) {
@@ -1203,7 +1214,7 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
 
   t = next();
   if (!t.IsLessThan()) {
-    set_error(t, "missing < for ptr declaration");
+    add_error(t, "missing < for ptr declaration");
     return nullptr;
   }
 
@@ -1211,13 +1222,13 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
   if (has_error())
     return nullptr;
   if (sc == ast::StorageClass::kNone) {
-    set_error(peek(), "missing storage class for ptr declaration");
+    add_error(peek(), "missing storage class for ptr declaration");
     return nullptr;
   }
 
   t = next();
   if (!t.IsComma()) {
-    set_error(t, "missing , for ptr declaration");
+    add_error(t, "missing , for ptr declaration");
     return nullptr;
   }
 
@@ -1225,13 +1236,13 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
-    set_error(peek(), "missing type for ptr declaration");
+    add_error(peek(), "missing type for ptr declaration");
     return nullptr;
   }
 
   t = next();
   if (!t.IsGreaterThan()) {
-    set_error(t, "missing > for ptr declaration");
+    add_error(t, "missing > for ptr declaration");
     return nullptr;
   }
 
@@ -1250,7 +1261,7 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
 
   t = next();
   if (!t.IsLessThan()) {
-    set_error(t, "missing < for vector");
+    add_error(t, "missing < for vector");
     return nullptr;
   }
 
@@ -1258,13 +1269,13 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
-    set_error(peek(), "unable to determine subtype for vector");
+    add_error(peek(), "unable to determine subtype for vector");
     return nullptr;
   }
 
   t = next();
   if (!t.IsGreaterThan()) {
-    set_error(t, "missing > for vector");
+    add_error(t, "missing > for vector");
     return nullptr;
   }
 
@@ -1278,7 +1289,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t,
 
   t = next();
   if (!t.IsLessThan()) {
-    set_error(t, "missing < for array declaration");
+    add_error(t, "missing < for array declaration");
     return nullptr;
   }
 
@@ -1286,7 +1297,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t,
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
-    set_error(peek(), "invalid type for array declaration");
+    add_error(peek(), "invalid type for array declaration");
     return nullptr;
   }
 
@@ -1295,18 +1306,18 @@ ast::type::Type* ParserImpl::type_decl_array(Token t,
   if (t.IsComma()) {
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "missing size of array declaration");
+      add_error(t, "missing size of array declaration");
       return nullptr;
     }
     if (t.to_i32() <= 0) {
-      set_error(t, "invalid size for array declaration");
+      add_error(t, "invalid size for array declaration");
       return nullptr;
     }
     size = static_cast<uint32_t>(t.to_i32());
     t = next();
   }
   if (!t.IsGreaterThan()) {
-    set_error(t, "missing > for array declaration");
+    add_error(t, "missing > for array declaration");
     return nullptr;
   }
 
@@ -1340,23 +1351,23 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
     auto source = t.source();
 
     if (!t.IsStride()) {
-      set_error(t, "unknown array decoration");
+      add_error(t, "unknown array decoration");
       return false;
     }
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for stride attribute");
+      add_error(t, "missing ( for stride attribute");
       return false;
     }
 
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "missing value for stride decoration");
+      add_error(t, "missing value for stride decoration");
       return false;
     }
     if (t.to_i32() < 0) {
-      set_error(t, "invalid stride value: " + t.to_str());
+      add_error(t, "invalid stride value: " + t.to_str());
       return false;
     }
     uint32_t stride = static_cast<uint32_t>(t.to_i32());
@@ -1364,7 +1375,7 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for stride attribute");
+      add_error(t, "missing ) for stride attribute");
       return false;
     }
 
@@ -1377,7 +1388,7 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
 
   t = next();
   if (!t.IsAttrRight()) {
-    set_error(t, "missing ]] for array decoration");
+    add_error(t, "missing ]] for array decoration");
     return false;
   }
   return true;
@@ -1401,7 +1412,7 @@ ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
 
   t = next();
   if (!t.IsLessThan()) {
-    set_error(t, "missing < for matrix");
+    add_error(t, "missing < for matrix");
     return nullptr;
   }
 
@@ -1409,13 +1420,13 @@ ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
-    set_error(peek(), "unable to determine subtype for matrix");
+    add_error(peek(), "unable to determine subtype for matrix");
     return nullptr;
   }
 
   t = next();
   if (!t.IsGreaterThan()) {
-    set_error(t, "missing > for matrix");
+    add_error(t, "missing > for matrix");
     return nullptr;
   }
 
@@ -1493,7 +1504,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
 
   t = peek();
   if (!decos.empty() && !t.IsStruct()) {
-    set_error(t, "missing struct declaration");
+    add_error(t, "missing struct declaration");
     return nullptr;
   } else if (!t.IsStruct()) {
     return nullptr;
@@ -1502,7 +1513,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
 
   t = next();
   if (!t.IsIdentifier()) {
-    set_error(t, "missing identifier for struct declaration");
+    add_error(t, "missing identifier for struct declaration");
     return nullptr;
   }
   auto name = t.to_str();
@@ -1539,7 +1550,7 @@ bool ParserImpl::struct_decoration_decl(ast::StructDecorationList& decos) {
 
   t = next();
   if (!t.IsAttrRight()) {
-    set_error(t, "missing ]] for struct decoration");
+    add_error(t, "missing ]] for struct decoration");
     return false;
   }
 
@@ -1560,7 +1571,7 @@ std::unique_ptr<ast::StructDecoration> ParserImpl::struct_decoration(Token t) {
 ast::StructMemberList ParserImpl::struct_body_decl() {
   auto t = peek();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing { for struct declaration");
+    add_error(t, "missing { for struct declaration");
     return {};
   }
   next();  // Consume the peek
@@ -1577,7 +1588,7 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
     if (has_error())
       return {};
     if (mem == nullptr) {
-      set_error(peek(), "invalid struct member");
+      add_error(peek(), "invalid struct member");
       return {};
     }
 
@@ -1590,7 +1601,7 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing } for struct declaration");
+    add_error(t, "missing } for struct declaration");
     return {};
   }
 
@@ -1619,13 +1630,13 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
   if (has_error())
     return nullptr;
   if (decl.name.empty() || decl.type == nullptr) {
-    set_error(peek(), "invalid identifier declaration");
+    add_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
 
   t = next();
   if (!t.IsSemicolon()) {
-    set_error(t, "missing ; for struct member");
+    add_error(t, "missing ; for struct member");
     return nullptr;
   }
 
@@ -1648,7 +1659,7 @@ bool ParserImpl::struct_member_decoration_decl(
 
   t = peek();
   if (t.IsAttrRight()) {
-    set_error(t, "empty struct member decoration found");
+    add_error(t, "empty struct member decoration found");
     return false;
   }
 
@@ -1667,7 +1678,7 @@ bool ParserImpl::struct_member_decoration_decl(
   }
 
   if (!t.IsAttrRight()) {
-    set_error(t, "missing ]] for struct member decoration");
+    add_error(t, "missing ]] for struct member decoration");
     return false;
   }
   return true;
@@ -1687,24 +1698,24 @@ ParserImpl::struct_member_decoration() {
 
   t = next();
   if (!t.IsParenLeft()) {
-    set_error(t, "missing ( for offset");
+    add_error(t, "missing ( for offset");
     return nullptr;
   }
 
   t = next();
   if (!t.IsSintLiteral()) {
-    set_error(t, "invalid value for offset decoration");
+    add_error(t, "invalid value for offset decoration");
     return nullptr;
   }
   int32_t val = t.to_i32();
   if (val < 0) {
-    set_error(t, "offset value must be >= 0");
+    add_error(t, "offset value must be >= 0");
     return nullptr;
   }
 
   t = next();
   if (!t.IsParenRight()) {
-    set_error(t, "missing ) for offset");
+    add_error(t, "missing ) for offset");
     return nullptr;
   }
 
@@ -1730,7 +1741,7 @@ std::unique_ptr<ast::Function> ParserImpl::function_decl() {
     return nullptr;
   if (f == nullptr) {
     if (decos.size() > 0) {
-      set_error(peek(), "error parsing function declaration");
+      add_error(peek(), "error parsing function declaration");
     }
     return nullptr;
   }
@@ -1754,7 +1765,7 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
   // Handle error on empty attributes before the type check
   t = peek(1);
   if (t.IsAttrRight()) {
-    set_error(t, "missing decorations for function decoration block");
+    add_error(t, "missing decorations for function decoration block");
     return false;
   }
 
@@ -1772,7 +1783,7 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
       return false;
     }
     if (deco == nullptr) {
-      set_error(peek(), "expected decoration but none found");
+      add_error(peek(), "expected decoration but none found");
       return false;
     }
     decos.push_back(std::move(deco));
@@ -1785,13 +1796,13 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
     next();  // Consume the peek
   }
   if (count == 0) {
-    set_error(peek(), "missing decorations for function decoration block");
+    add_error(peek(), "missing decorations for function decoration block");
     return false;
   }
 
   t = next();
   if (!t.IsAttrRight()) {
-    set_error(t, "missing ]] for function decorations");
+    add_error(t, "missing ]] for function decorations");
     return false;
   }
   return true;
@@ -1809,17 +1820,17 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for workgroup_size");
+      add_error(t, "missing ( for workgroup_size");
       return nullptr;
     }
 
     t = next();
     if (!t.IsSintLiteral()) {
-      set_error(t, "missing x value for workgroup_size");
+      add_error(t, "missing x value for workgroup_size");
       return nullptr;
     }
     if (t.to_i32() <= 0) {
-      set_error(t, "invalid value for workgroup_size x parameter");
+      add_error(t, "invalid value for workgroup_size x parameter");
       return nullptr;
     }
     int32_t x = t.to_i32();
@@ -1832,11 +1843,11 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
       t = next();
       if (!t.IsSintLiteral()) {
-        set_error(t, "missing y value for workgroup_size");
+        add_error(t, "missing y value for workgroup_size");
         return nullptr;
       }
       if (t.to_i32() <= 0) {
-        set_error(t, "invalid value for workgroup_size y parameter");
+        add_error(t, "invalid value for workgroup_size y parameter");
         return nullptr;
       }
       y = t.to_i32();
@@ -1847,11 +1858,11 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
         t = next();
         if (!t.IsSintLiteral()) {
-          set_error(t, "missing z value for workgroup_size");
+          add_error(t, "missing z value for workgroup_size");
           return nullptr;
         }
         if (t.to_i32() <= 0) {
-          set_error(t, "invalid value for workgroup_size z parameter");
+          add_error(t, "invalid value for workgroup_size z parameter");
           return nullptr;
         }
         z = t.to_i32();
@@ -1860,7 +1871,7 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for workgroup_size");
+      add_error(t, "missing ) for workgroup_size");
       return nullptr;
     }
 
@@ -1872,7 +1883,7 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
 
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for stage decoration");
+      add_error(t, "missing ( for stage decoration");
       return nullptr;
     }
 
@@ -1881,13 +1892,13 @@ std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
       return nullptr;
     }
     if (stage == ast::PipelineStage::kNone) {
-      set_error(peek(), "invalid value for stage decoration");
+      add_error(peek(), "invalid value for stage decoration");
       return nullptr;
     }
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for stage decoration");
+      add_error(t, "missing ) for stage decoration");
       return nullptr;
     }
     return std::make_unique<ast::StageDecoration>(stage, source);
@@ -1919,14 +1930,14 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 
   t = next();
   if (!t.IsIdentifier()) {
-    set_error(t, "missing identifier for function");
+    add_error(t, "missing identifier for function");
     return nullptr;
   }
   auto name = t.to_str();
 
   t = next();
   if (!t.IsParenLeft()) {
-    set_error(t, "missing ( for function declaration");
+    add_error(t, "missing ( for function declaration");
     return nullptr;
   }
 
@@ -1936,13 +1947,13 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 
   t = next();
   if (!t.IsParenRight()) {
-    set_error(t, "missing ) for function declaration");
+    add_error(t, "missing ) for function declaration");
     return nullptr;
   }
 
   t = next();
   if (!t.IsArrow()) {
-    set_error(t, "missing -> for function declaration");
+    add_error(t, "missing -> for function declaration");
     return nullptr;
   }
 
@@ -1950,7 +1961,7 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
   if (has_error())
     return nullptr;
   if (type == nullptr) {
-    set_error(peek(), "unable to determine function return type");
+    add_error(peek(), "unable to determine function return type");
     return nullptr;
   }
 
@@ -1991,7 +2002,7 @@ ast::VariableList ParserImpl::param_list() {
     if (has_error())
       return {};
     if (decl.name.empty() || decl.type == nullptr) {
-      set_error(t, "found , but no variable declaration");
+      add_error(t, "found , but no variable declaration");
       return {};
     }
   }
@@ -2025,7 +2036,7 @@ ast::PipelineStage ParserImpl::pipeline_stage() {
 std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
   auto t = peek();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing {");
+    add_error(t, "missing {");
     return nullptr;
   }
 
@@ -2037,7 +2048,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing }");
+    add_error(t, "missing }");
     return nullptr;
   }
 
@@ -2049,7 +2060,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
 std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
   auto t = peek();
   if (!t.IsParenLeft()) {
-    set_error(t, "expected (");
+    add_error(t, "expected (");
     return nullptr;
   }
   next();  // Consume the peek
@@ -2058,13 +2069,13 @@ std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
   if (has_error())
     return nullptr;
   if (expr == nullptr) {
-    set_error(peek(), "unable to parse expression");
+    add_error(peek(), "unable to parse expression");
     return nullptr;
   }
 
   t = next();
   if (!t.IsParenRight()) {
-    set_error(t, "expected )");
+    add_error(t, "expected )");
     return nullptr;
   }
 
@@ -2116,7 +2127,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (ret_stmt != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return ret_stmt;
@@ -2152,7 +2163,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (func != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return func;
@@ -2164,7 +2175,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (var != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return var;
@@ -2176,7 +2187,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (b != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return b;
@@ -2188,7 +2199,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (cont != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return cont;
@@ -2200,7 +2211,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
 
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return std::make_unique<ast::DiscardStatement>(source);
@@ -2212,7 +2223,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (assign != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
+      add_error(t, "missing ;");
       return nullptr;
     }
     return assign;
@@ -2263,13 +2274,13 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
     if (has_error())
       return nullptr;
     if (decl.name.empty() || decl.type == nullptr) {
-      set_error(peek(), "unable to parse variable declaration");
+      add_error(peek(), "unable to parse variable declaration");
       return nullptr;
     }
 
     t = next();
     if (!t.IsEqual()) {
-      set_error(t, "missing = for constant declaration");
+      add_error(t, "missing = for constant declaration");
       return nullptr;
     }
 
@@ -2277,7 +2288,7 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
     if (has_error())
       return nullptr;
     if (constructor == nullptr) {
-      set_error(peek(), "missing constructor for const declaration");
+      add_error(peek(), "missing constructor for const declaration");
       return nullptr;
     }
 
@@ -2303,7 +2314,7 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
     if (has_error())
       return nullptr;
     if (constructor == nullptr) {
-      set_error(peek(), "missing constructor for variable declaration");
+      add_error(peek(), "missing constructor for variable declaration");
       return nullptr;
     }
     var->set_constructor(std::move(constructor));
@@ -2327,7 +2338,7 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   if (has_error())
     return nullptr;
   if (condition == nullptr) {
-    set_error(peek(), "unable to parse if condition");
+    add_error(peek(), "unable to parse if condition");
     return nullptr;
   }
 
@@ -2369,7 +2380,7 @@ ast::ElseStatementList ParserImpl::elseif_stmt() {
     if (has_error())
       return {};
     if (condition == nullptr) {
-      set_error(peek(), "unable to parse condition expression");
+      add_error(peek(), "unable to parse condition expression");
       return {};
     }
 
@@ -2419,13 +2430,13 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
   if (has_error())
     return nullptr;
   if (condition == nullptr) {
-    set_error(peek(), "unable to parse switch expression");
+    add_error(peek(), "unable to parse switch expression");
     return nullptr;
   }
 
   t = next();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing { for switch statement");
+    add_error(t, "missing { for switch statement");
     return nullptr;
   }
 
@@ -2442,7 +2453,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing } for switch statement");
+    add_error(t, "missing } for switch statement");
     return nullptr;
   }
   return std::make_unique<ast::SwitchStatement>(source, std::move(condition),
@@ -2467,7 +2478,7 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
     if (has_error())
       return nullptr;
     if (selectors.empty()) {
-      set_error(peek(), "unable to parse case selectors");
+      add_error(peek(), "unable to parse case selectors");
       return nullptr;
     }
     stmt->set_selectors(std::move(selectors));
@@ -2475,13 +2486,13 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
 
   t = next();
   if (!t.IsColon()) {
-    set_error(t, "missing : for case statement");
+    add_error(t, "missing : for case statement");
     return nullptr;
   }
 
   t = next();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing { for case statement");
+    add_error(t, "missing { for case statement");
     return nullptr;
   }
 
@@ -2493,7 +2504,7 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing } for case statement");
+    add_error(t, "missing } for case statement");
     return nullptr;
   }
 
@@ -2513,7 +2524,7 @@ ast::CaseSelectorList ParserImpl::case_selectors() {
     if (cond == nullptr)
       break;
     if (!cond->IsInt()) {
-      set_error(t, "invalid case selector must be an integer value");
+      add_error(t, "invalid case selector must be an integer value");
       return {};
     }
 
@@ -2538,7 +2549,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::case_body() {
 
       t = next();
       if (!t.IsSemicolon()) {
-        set_error(t, "missing ;");
+        add_error(t, "missing ;");
         return {};
       }
 
@@ -2570,7 +2581,7 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
 
   t = next();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing { for loop");
+    add_error(t, "missing { for loop");
     return nullptr;
   }
 
@@ -2584,7 +2595,7 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing } for loop");
+    add_error(t, "missing } for loop");
     return nullptr;
   }
 
@@ -2629,7 +2640,7 @@ std::unique_ptr<ForHeader> ParserImpl::for_header() {
 
   auto t = next();
   if (!t.IsSemicolon()) {
-    set_error(t, "missing ';' after initializer in for loop");
+    add_error(t, "missing ';' after initializer in for loop");
     return nullptr;
   }
 
@@ -2640,7 +2651,7 @@ std::unique_ptr<ForHeader> ParserImpl::for_header() {
 
   t = next();
   if (!t.IsSemicolon()) {
-    set_error(t, "missing ';' after condition in for loop");
+    add_error(t, "missing ';' after condition in for loop");
     return nullptr;
   }
 
@@ -2674,7 +2685,7 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
 
   t = next();
   if (!t.IsParenLeft()) {
-    set_error(t, "missing for loop (");
+    add_error(t, "missing for loop (");
     return nullptr;
   }
 
@@ -2684,13 +2695,13 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
 
   t = next();
   if (!t.IsParenRight()) {
-    set_error(t, "missing for loop )");
+    add_error(t, "missing for loop )");
     return nullptr;
   }
 
   t = next();
   if (!t.IsBraceLeft()) {
-    set_error(t, "missing for loop {");
+    add_error(t, "missing for loop {");
     return nullptr;
   }
 
@@ -2700,7 +2711,7 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
 
   t = next();
   if (!t.IsBraceRight()) {
-    set_error(t, "missing for loop }");
+    add_error(t, "missing for loop }");
     return nullptr;
   }
 
@@ -2771,7 +2782,7 @@ std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
 
   t = next();
   if (!t.IsParenRight()) {
-    set_error(t, "missing ) for call statement");
+    add_error(t, "missing ) for call statement");
     return nullptr;
   }
 
@@ -2849,7 +2860,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
 
     t = next();
     if (!t.IsLessThan()) {
-      set_error(t, "missing < for bitcast expression");
+      add_error(t, "missing < for bitcast expression");
       return nullptr;
     }
 
@@ -2857,13 +2868,13 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     if (has_error())
       return nullptr;
     if (type == nullptr) {
-      set_error(peek(), "missing type for bitcast expression");
+      add_error(peek(), "missing type for bitcast expression");
       return nullptr;
     }
 
     t = next();
     if (!t.IsGreaterThan()) {
-      set_error(t, "missing > for bitcast expression");
+      add_error(t, "missing > for bitcast expression");
       return nullptr;
     }
 
@@ -2871,7 +2882,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     if (has_error())
       return nullptr;
     if (params == nullptr) {
-      set_error(peek(), "unable to parse parameters");
+      add_error(peek(), "unable to parse parameters");
       return nullptr;
     }
 
@@ -2889,7 +2900,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (type != nullptr) {
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for type constructor");
+      add_error(t, "missing ( for type constructor");
       return nullptr;
     }
 
@@ -2903,7 +2914,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for type constructor");
+      add_error(t, "missing ) for type constructor");
       return nullptr;
     }
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
@@ -2930,13 +2941,13 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
     if (has_error())
       return nullptr;
     if (param == nullptr) {
-      set_error(peek(), "unable to parse expression inside []");
+      add_error(peek(), "unable to parse expression inside []");
       return nullptr;
     }
 
     t = next();
     if (!t.IsBracketRight()) {
-      set_error(t, "missing ] for array accessor");
+      add_error(t, "missing ] for array accessor");
       return nullptr;
     }
     expr = std::make_unique<ast::ArrayAccessorExpression>(
@@ -2955,7 +2966,7 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for call expression");
+      add_error(t, "missing ) for call expression");
       return nullptr;
     }
     expr = std::make_unique<ast::CallExpression>(source, std::move(prefix),
@@ -2965,7 +2976,7 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
 
     t = next();
     if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for member accessor");
+      add_error(t, "missing identifier for member accessor");
       return nullptr;
     }
 
@@ -2997,7 +3008,7 @@ ast::ExpressionList ParserImpl::argument_expression_list() {
   if (has_error())
     return {};
   if (arg == nullptr) {
-    set_error(peek(), "unable to parse argument expression");
+    add_error(peek(), "unable to parse argument expression");
     return {};
   }
 
@@ -3015,7 +3026,7 @@ ast::ExpressionList ParserImpl::argument_expression_list() {
     if (has_error())
       return {};
     if (arg == nullptr) {
-      set_error(peek(), "unable to parse argument expression after comma");
+      add_error(peek(), "unable to parse argument expression after comma");
       return {};
     }
     ret.push_back(std::move(arg));
@@ -3043,7 +3054,7 @@ std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
     if (has_error())
       return nullptr;
     if (expr == nullptr) {
-      set_error(peek(),
+      add_error(peek(),
                 "unable to parse right side of " + name + " expression");
       return nullptr;
     }
@@ -3080,7 +3091,7 @@ std::unique_ptr<ast::Expression> ParserImpl::multiplicative_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of " + name + " expression");
+    add_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
   return multiplicative_expr(std::make_unique<ast::BinaryExpression>(
@@ -3122,7 +3133,7 @@ std::unique_ptr<ast::Expression> ParserImpl::additive_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of + expression");
+    add_error(peek(), "unable to parse right side of + expression");
     return nullptr;
   }
   return additive_expr(std::make_unique<ast::BinaryExpression>(
@@ -3171,7 +3182,7 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), std::string("unable to parse right side of ") + name +
+    add_error(peek(), std::string("unable to parse right side of ") + name +
                           " expression");
     return nullptr;
   }
@@ -3220,7 +3231,7 @@ std::unique_ptr<ast::Expression> ParserImpl::relational_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of " + name + " expression");
+    add_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
   return relational_expr(std::make_unique<ast::BinaryExpression>(
@@ -3262,7 +3273,7 @@ std::unique_ptr<ast::Expression> ParserImpl::equality_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of " + name + " expression");
+    add_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
   return equality_expr(std::make_unique<ast::BinaryExpression>(
@@ -3297,7 +3308,7 @@ std::unique_ptr<ast::Expression> ParserImpl::and_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of & expression");
+    add_error(peek(), "unable to parse right side of & expression");
     return nullptr;
   }
   return and_expr(std::make_unique<ast::BinaryExpression>(
@@ -3332,7 +3343,7 @@ std::unique_ptr<ast::Expression> ParserImpl::exclusive_or_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of ^ expression");
+    add_error(peek(), "unable to parse right side of ^ expression");
     return nullptr;
   }
   return exclusive_or_expr(std::make_unique<ast::BinaryExpression>(
@@ -3367,7 +3378,7 @@ std::unique_ptr<ast::Expression> ParserImpl::inclusive_or_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of | expression");
+    add_error(peek(), "unable to parse right side of | expression");
     return nullptr;
   }
   return inclusive_or_expr(std::make_unique<ast::BinaryExpression>(
@@ -3402,7 +3413,7 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_and_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of && expression");
+    add_error(peek(), "unable to parse right side of && expression");
     return nullptr;
   }
   return logical_and_expr(std::make_unique<ast::BinaryExpression>(
@@ -3437,7 +3448,7 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_or_expr(
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of || expression");
+    add_error(peek(), "unable to parse right side of || expression");
     return nullptr;
   }
   return logical_or_expr(std::make_unique<ast::BinaryExpression>(
@@ -3470,7 +3481,7 @@ std::unique_ptr<ast::AssignmentStatement> ParserImpl::assignment_stmt() {
 
   t = next();
   if (!t.IsEqual()) {
-    set_error(t, "missing = for assignment");
+    add_error(t, "missing = for assignment");
     return nullptr;
   }
 
@@ -3478,7 +3489,7 @@ std::unique_ptr<ast::AssignmentStatement> ParserImpl::assignment_stmt() {
   if (has_error())
     return nullptr;
   if (rhs == nullptr) {
-    set_error(peek(), "unable to parse right side of assignment");
+    add_error(peek(), "unable to parse right side of assignment");
     return nullptr;
   }
 
@@ -3550,7 +3561,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
   auto t = peek();
 
   if (depth > kMaxConstExprDepth) {
-    set_error(t, "max const_expr depth reached");
+    add_error(t, "max const_expr depth reached");
     return nullptr;
   }
 
@@ -3560,7 +3571,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
   if (type != nullptr) {
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for type constructor");
+      add_error(t, "missing ( for type constructor");
       return nullptr;
     }
 
@@ -3569,7 +3580,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
     if (has_error())
       return nullptr;
     if (param == nullptr) {
-      set_error(peek(), "unable to parse constant expression");
+      add_error(peek(), "unable to parse constant expression");
       return nullptr;
     }
     params.push_back(std::move(param));
@@ -3584,7 +3595,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
       if (has_error())
         return nullptr;
       if (param == nullptr) {
-        set_error(peek(), "unable to parse constant expression");
+        add_error(peek(), "unable to parse constant expression");
         return nullptr;
       }
       params.push_back(std::move(param));
@@ -3592,7 +3603,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for type constructor");
+      add_error(t, "missing ) for type constructor");
       return nullptr;
     }
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
@@ -3603,7 +3614,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
   if (has_error())
     return nullptr;
   if (lit == nullptr) {
-    set_error(peek(), "unable to parse const literal");
+    add_error(peek(), "unable to parse const literal");
     return nullptr;
   }
   return std::make_unique<ast::ScalarConstructorExpression>(source,
