@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, StructMember_MissingSemicolon) {
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing ; for struct member");
+  EXPECT_EQ(p->error(), "1:8: expected ';' for struct member");
 }
 
 }  // namespace

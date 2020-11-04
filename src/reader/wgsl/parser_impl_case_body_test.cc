@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
   auto e = p->case_body();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing ;");
+  EXPECT_EQ(p->error(), "1:12: expected ';' for fallthrough statement");
 }
 
 }  // namespace

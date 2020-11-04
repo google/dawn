@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, Statement_Return_MissingSemi) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:7: missing ;");
+  EXPECT_EQ(p->error(), "1:7: expected ';' for return statement");
 }
 
 TEST_F(ParserImplTest, Statement_Return_Invalid) {
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, Statement_Return_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing ;");
+  EXPECT_EQ(p->error(), "1:8: expected ';' for return statement");
 }
 
 TEST_F(ParserImplTest, Statement_If) {
@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, Statement_Variable_MissingSemicolon) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing ;");
+  EXPECT_EQ(p->error(), "1:12: expected ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, Statement_Switch) {
@@ -170,7 +170,7 @@ TEST_F(ParserImplTest, Statement_Assignment_MissingSemicolon) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing ;");
+  EXPECT_EQ(p->error(), "1:6: expected ';' for assignment statement");
 }
 
 TEST_F(ParserImplTest, Statement_Break) {
@@ -186,7 +186,7 @@ TEST_F(ParserImplTest, Statement_Break_MissingSemicolon) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing ;");
+  EXPECT_EQ(p->error(), "1:6: expected ';' for break statement");
 }
 
 TEST_F(ParserImplTest, Statement_Continue) {
@@ -202,7 +202,7 @@ TEST_F(ParserImplTest, Statement_Continue_MissingSemicolon) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: missing ;");
+  EXPECT_EQ(p->error(), "1:9: expected ';' for continue statement");
 }
 
 TEST_F(ParserImplTest, Statement_Discard) {
@@ -218,7 +218,7 @@ TEST_F(ParserImplTest, Statement_Discard_MissingSemicolon) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing ;");
+  EXPECT_EQ(p->error(), "1:8: expected ';' for discard statement");
 }
 
 TEST_F(ParserImplTest, Statement_Body) {

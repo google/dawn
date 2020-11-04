@@ -77,7 +77,7 @@ TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment2) {
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingSemicolon) {
   EXPECT("fn f() -> void { a = 1 }",
-         "test.wgsl:1:24 error: missing ;\n"
+         "test.wgsl:1:24 error: expected ';' for assignment statement\n"
          "fn f() -> void { a = 1 }\n"
          "                       ^\n");
 }
@@ -112,7 +112,7 @@ TEST_F(ParserImplErrorTest, BitcastExprMissingType) {
 
 TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
   EXPECT("fn f() -> void { loop { break } }",
-         "test.wgsl:1:31 error: missing ;\n"
+         "test.wgsl:1:31 error: expected ';' for break statement\n"
          "fn f() -> void { loop { break } }\n"
          "                              ^\n");
 }
@@ -148,7 +148,7 @@ TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
 
 TEST_F(ParserImplErrorTest, CallStmtMissingSemicolon) {
   EXPECT("fn f() -> void { f() }",
-         "test.wgsl:1:22 error: missing ;\n"
+         "test.wgsl:1:22 error: expected ';' for function call\n"
          "fn f() -> void { f() }\n"
          "                     ^\n");
 }
@@ -190,14 +190,14 @@ TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
 
 TEST_F(ParserImplErrorTest, ContinueStmtMissingSemicolon) {
   EXPECT("fn f() -> void { loop { continue } }",
-         "test.wgsl:1:34 error: missing ;\n"
+         "test.wgsl:1:34 error: expected ';' for continue statement\n"
          "fn f() -> void { loop { continue } }\n"
          "                                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, DiscardStmtMissingSemicolon) {
   EXPECT("fn f() -> void { discard }",
-         "test.wgsl:1:26 error: missing ;\n"
+         "test.wgsl:1:26 error: expected ';' for discard statement\n"
          "fn f() -> void { discard }\n"
          "                         ^\n");
 }
@@ -211,14 +211,14 @@ TEST_F(ParserImplErrorTest, EqualityInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingSemicolon) {
   EXPECT("fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }",
-         "test.wgsl:1:39 error: missing ';' after initializer in for loop\n"
+         "test.wgsl:1:39 error: expected ';' for initializer in for loop\n"
          "fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }\n"
          "                                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopConditionMissingSemicolon) {
   EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8 i=i+1) {} }",
-         "test.wgsl:1:46 error: missing ';' after condition in for loop\n"
+         "test.wgsl:1:46 error: expected ';' for condition in for loop\n"
          "fn f() -> void { for (var i : i32 = 0; i < 8 i=i+1) {} }\n"
          "                                             ^\n");
 }
@@ -429,7 +429,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingSemicolon) {
   EXPECT("const i : i32 = 1",
-         "test.wgsl:1:18 error: missing ';' for constant declaration\n"
+         "test.wgsl:1:18 error: expected ';' for constant declaration\n"
          "const i : i32 = 1\n"
          "                 ^\n");
 }
@@ -589,7 +589,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingIdentifier) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingSemicolon) {
   EXPECT("struct S {}",
-         "test.wgsl:1:12 error: missing ';' for struct declaration\n"
+         "test.wgsl:1:12 error: expected ';' for struct declaration\n"
          "struct S {}\n"
          "           ^\n");
 }
@@ -631,7 +631,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberInvalidIdentifier) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberMissingSemicolon) {
   EXPECT("struct S { i : i32 };",
-         "test.wgsl:1:20 error: missing ; for struct member\n"
+         "test.wgsl:1:20 error: expected ';' for struct member\n"
          "struct S { i : i32 };\n"
          "                   ^\n");
 }
@@ -687,7 +687,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingAssignment) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
   EXPECT("type meow = f32",
-         "test.wgsl:1:16 error: missing ';' for type alias\n"
+         "test.wgsl:1:16 error: expected ';' for type alias\n"
          "type meow = f32\n"
          "               ^\n");
 }
@@ -932,7 +932,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingType) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMissingSemicolon) {
   EXPECT("var i : i32",
-         "test.wgsl:1:12 error: missing ';' for variable declaration\n"
+         "test.wgsl:1:12 error: expected ';' for variable declaration\n"
          "var i : i32\n"
          "           ^\n");
 }
@@ -1086,7 +1086,7 @@ TEST_F(ParserImplErrorTest, RelationalInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, ReturnStmtMissingSemicolon) {
   EXPECT("fn f() -> void { return }",
-         "test.wgsl:1:25 error: missing ;\n"
+         "test.wgsl:1:25 error: expected ';' for return statement\n"
          "fn f() -> void { return }\n"
          "                        ^\n");
 }
@@ -1150,14 +1150,14 @@ TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingRBrace) {
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseFallthroughMissingSemicolon) {
   EXPECT("fn f() -> void { switch(1) { case 1: { fallthrough } case 2: {} } }",
-         "test.wgsl:1:52 error: missing ;\n"
+         "test.wgsl:1:52 error: expected ';' for fallthrough statement\n"
          "fn f() -> void { switch(1) { case 1: { fallthrough } case 2: {} } }\n"
          "                                                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, VarStmtMissingSemicolon) {
   EXPECT("fn f() -> void { var a : u32 }",
-         "test.wgsl:1:30 error: missing ;\n"
+         "test.wgsl:1:30 error: expected ';' for variable declaration\n"
          "fn f() -> void { var a : u32 }\n"
          "                             ^\n");
 }

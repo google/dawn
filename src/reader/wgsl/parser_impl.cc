@@ -224,11 +224,9 @@ void ParserImpl::global_decl() {
     return;
   }
   if (gv != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ';' for variable declaration");
+    if (!expect("variable declaration", Token::Type::kSemicolon))
       return;
-    }
+
     module_.AddGlobalVariable(std::move(gv));
     return;
   }
@@ -238,11 +236,9 @@ void ParserImpl::global_decl() {
     return;
   }
   if (gc != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ';' for constant declaration");
+    if (!expect("constant declaration", Token::Type::kSemicolon))
       return;
-    }
+
     module_.AddGlobalVariable(std::move(gc));
     return;
   }
@@ -252,11 +248,9 @@ void ParserImpl::global_decl() {
     return;
   }
   if (ta != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ';' for type alias");
+    if (!expect("type alias", Token::Type::kSemicolon))
       return;
-    }
+
     module_.AddConstructedType(ta);
     return;
   }
@@ -266,11 +260,9 @@ void ParserImpl::global_decl() {
     return;
   }
   if (str != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ';' for struct declaration");
+    if (!expect("struct declaration", Token::Type::kSemicolon))
       return;
-    }
+
     auto* type = ctx_.type_mgr().Get(std::move(str));
     register_constructed(type->AsStruct()->name(), type);
     module_.AddConstructedType(type);
@@ -1634,11 +1626,8 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsSemicolon()) {
-    add_error(t, "missing ; for struct member");
+  if (!expect("struct member", Token::Type::kSemicolon))
     return nullptr;
-  }
 
   return std::make_unique<ast::StructMember>(decl.source, decl.name, decl.type,
                                              std::move(decos));
@@ -2115,21 +2104,18 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::statements() {
 //   | assignment_stmt SEMICOLON
 //   | body_stmt?
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
-  auto t = peek();
-  if (t.IsSemicolon()) {
-    next();  // Consume the peek
-    return statement();
+  while (match(Token::Type::kSemicolon)) {
+    // Skip empty statements
   }
 
+  auto t = peek();
   auto ret_stmt = return_stmt();
   if (has_error())
     return nullptr;
   if (ret_stmt != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("return statement", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return ret_stmt;
   }
 
@@ -2161,11 +2147,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (has_error())
     return nullptr;
   if (func != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("function call", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return func;
   }
 
@@ -2173,11 +2157,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (has_error())
     return nullptr;
   if (var != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("variable declaration", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return var;
   }
 
@@ -2185,11 +2167,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (has_error())
     return nullptr;
   if (b != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("break statement", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return b;
   }
 
@@ -2197,11 +2177,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (has_error())
     return nullptr;
   if (cont != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("continue statement", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return cont;
   }
 
@@ -2209,11 +2187,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     auto source = t.source();
     next();  // Consume the peek
 
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("discard statement", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return std::make_unique<ast::DiscardStatement>(source);
   }
 
@@ -2221,11 +2197,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   if (has_error())
     return nullptr;
   if (assign != nullptr) {
-    t = next();
-    if (!t.IsSemicolon()) {
-      add_error(t, "missing ;");
+    if (!expect("assignment statement", Token::Type::kSemicolon))
       return nullptr;
-    }
+
     return assign;
   }
 
@@ -2547,11 +2521,8 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::case_body() {
       auto source = t.source();
       next();  // Consume the peek
 
-      t = next();
-      if (!t.IsSemicolon()) {
-        add_error(t, "missing ;");
-        return {};
-      }
+      if (!expect("fallthrough statement", Token::Type::kSemicolon))
+        return nullptr;
 
       ret->append(std::make_unique<ast::FallthroughStatement>(source));
       break;
@@ -2638,22 +2609,16 @@ std::unique_ptr<ForHeader> ParserImpl::for_header() {
     }
   }
 
-  auto t = next();
-  if (!t.IsSemicolon()) {
-    add_error(t, "missing ';' after initializer in for loop");
+  if (!expect("initializer in for loop", Token::Type::kSemicolon))
     return nullptr;
-  }
 
   auto condition = logical_or_expression();
   if (has_error()) {
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsSemicolon()) {
-    add_error(t, "missing ';' after condition in for loop");
+  if (!expect("condition in for loop", Token::Type::kSemicolon))
     return nullptr;
-  }
 
   std::unique_ptr<ast::Statement> continuing = nullptr;
   if (continuing == nullptr) {
@@ -3634,7 +3599,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   auto t = next();
   if (!t.Is(tok)) {
     std::stringstream err;
-    err << "expected " << Token::TypeToName(tok);
+    err << "expected '" << Token::TypeToName(tok) << "'";
     if (!use.empty()) {
       err << " for " << use;
     }

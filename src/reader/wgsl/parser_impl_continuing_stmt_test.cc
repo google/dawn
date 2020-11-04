@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
   auto e = p->continuing_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:22: missing ;");
+  EXPECT_EQ(p->error(), "1:22: expected ';' for discard statement");
 }
 
 }  // namespace

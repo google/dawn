@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
   auto* p = parser("a()");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:4: missing ;");
+  EXPECT_EQ(p->error(), "1:4: expected ';' for function call");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Bad_ArgList) {

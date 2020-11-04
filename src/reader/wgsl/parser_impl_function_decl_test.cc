@@ -166,7 +166,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
   auto f = p->function_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:28: missing ;");
+  EXPECT_EQ(p->error(), "1:28: expected ';' for return statement");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {

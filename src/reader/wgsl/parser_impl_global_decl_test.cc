@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
   auto* p = parser("var<out> a : vec2<i32>");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: missing ';' for variable declaration");
+  EXPECT_EQ(p->error(), "1:23: expected ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
   auto* p = parser("const a : vec2<i32> = vec2<i32>(1, 2)");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:38: missing ';' for constant declaration");
+  EXPECT_EQ(p->error(), "1:38: expected ';' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
@@ -124,7 +124,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
   auto* p = parser("type A = i32");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:13: missing ';' for type alias");
+  EXPECT_EQ(p->error(), "1:13: expected ';' for type alias");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {
@@ -225,7 +225,7 @@ TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {
   auto* p = parser("[[block]] struct A {}");
   p->global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:22: missing ';' for struct declaration");
+  EXPECT_EQ(p->error(), "1:22: expected ';' for struct declaration");
 }
 
 }  // namespace

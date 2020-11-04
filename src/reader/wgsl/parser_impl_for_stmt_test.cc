@@ -176,7 +176,7 @@ TEST_F(ForStmtErrorTest, MissingLeftParen) {
 // Test a for loop with missing first semicolon is invalid.
 TEST_F(ForStmtErrorTest, MissingFirstSemicolon) {
   std::string for_str = "for () {}";
-  std::string error_str = "1:6: missing ';' after initializer in for loop";
+  std::string error_str = "1:6: expected ';' for initializer in for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -184,7 +184,7 @@ TEST_F(ForStmtErrorTest, MissingFirstSemicolon) {
 // Test a for loop with missing second semicolon is invalid.
 TEST_F(ForStmtErrorTest, MissingSecondSemicolon) {
   std::string for_str = "for (;) {}";
-  std::string error_str = "1:7: missing ';' after condition in for loop";
+  std::string error_str = "1:7: expected ';' for condition in for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -225,7 +225,7 @@ TEST_F(ForStmtErrorTest, InvalidInitializerAsConstDecl) {
 // variable_stmt | assignment_stmt | func_call_stmt.
 TEST_F(ForStmtErrorTest, InvalidInitializerMatch) {
   std::string for_str = "for (if (true) {} ;;) { }";
-  std::string error_str = "1:6: missing ';' after initializer in for loop";
+  std::string error_str = "1:6: expected ';' for initializer in for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -242,7 +242,7 @@ TEST_F(ForStmtErrorTest, InvalidBreakConditionAsExpression) {
 // logical_or_expression.
 TEST_F(ForStmtErrorTest, InvalidBreakConditionMatch) {
   std::string for_str = "for (; var i: i32 = 0;) { }";
-  std::string error_str = "1:8: missing ';' after condition in for loop";
+  std::string error_str = "1:8: expected ';' for condition in for loop";
 
   TestForWithError(for_str, error_str);
 }

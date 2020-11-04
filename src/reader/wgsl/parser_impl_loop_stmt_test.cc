@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:16: missing ;");
+  EXPECT_EQ(p->error(), "1:16: expected ';' for discard statement");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:29: missing ;");
+  EXPECT_EQ(p->error(), "1:29: expected ';' for discard statement");
 }
 
 }  // namespace
