@@ -432,11 +432,8 @@ bool ParserImpl::variable_decoration_list(ast::VariableDecorationList& decos) {
 //  | BINDING PAREN_LEFT INT_LITERAL PAREN_RIGHT
 //  | SET INT PAREN_LEFT_LITERAL PAREN_RIGHT
 std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
-  auto t = peek();
-  auto source = t.source();
-  if (t.IsLocation()) {
-    next();  // consume the peek
-
+  Source source;
+  if (match(Token::Type::kLocation, &source)) {
     const char* use = "location decoration";
 
     if (!expect(use, Token::Type::kParenLeft))
@@ -451,9 +448,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     return std::make_unique<ast::LocationDecoration>(val, source);
   }
-  if (t.IsBuiltin()) {
-    next();  // consume the peek
-
+  if (match(Token::Type::kBuiltin, &source)) {
     if (!expect("builtin decoration", Token::Type::kParenLeft))
       return nullptr;
 
@@ -472,9 +467,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     return std::make_unique<ast::BuiltinDecoration>(builtin, source);
   }
-  if (t.IsBinding()) {
-    next();  // consume the peek
-
+  if (match(Token::Type::kBinding, &source)) {
     const char* use = "binding decoration";
 
     if (!expect(use, Token::Type::kParenLeft))
@@ -489,9 +482,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
 
     return std::make_unique<ast::BindingDecoration>(val, source);
   }
-  if (t.IsSet()) {
-    next();  // consume the peek
-
+  if (match(Token::Type::kSet, &source)) {
     const char* use = "set decoration";
 
     if (!expect(use, Token::Type::kParenLeft))
@@ -635,17 +626,14 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
 ast::type::Type* ParserImpl::sampler_type() {
-  auto t = peek();
-  if (t.IsSampler()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kSampler))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
         ast::type::SamplerKind::kSampler));
-  }
-  if (t.IsComparisonSampler()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kComparisonSampler))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
         ast::type::SamplerKind::kComparisonSampler));
-  }
+
   return nullptr;
 }
 
@@ -658,46 +646,36 @@ ast::type::Type* ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
 ast::type::TextureDimension ParserImpl::sampled_texture_type() {
-  auto t = peek();
-  if (t.IsTextureSampled1d()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kTextureSampled1d))
     return ast::type::TextureDimension::k1d;
-  }
-  if (t.IsTextureSampled1dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampled1dArray))
     return ast::type::TextureDimension::k1dArray;
-  }
-  if (t.IsTextureSampled2d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampled2d))
     return ast::type::TextureDimension::k2d;
-  }
-  if (t.IsTextureSampled2dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampled2dArray))
     return ast::type::TextureDimension::k2dArray;
-  }
-  if (t.IsTextureSampled3d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampled3d))
     return ast::type::TextureDimension::k3d;
-  }
-  if (t.IsTextureSampledCube()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampledCube))
     return ast::type::TextureDimension::kCube;
-  }
-  if (t.IsTextureSampledCubeArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureSampledCubeArray))
     return ast::type::TextureDimension::kCubeArray;
-  }
+
   return ast::type::TextureDimension::kNone;
 }
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
 ast::type::TextureDimension ParserImpl::multisampled_texture_type() {
-  auto t = peek();
-  if (t.IsTextureMultisampled2d()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kTextureMultisampled2d))
     return ast::type::TextureDimension::k2d;
-  }
+
   return ast::type::TextureDimension::kNone;
 }
 
@@ -714,51 +692,40 @@ ast::type::TextureDimension ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_WO_3D
 std::pair<ast::type::TextureDimension, ast::AccessControl>
 ParserImpl::storage_texture_type() {
-  auto t = peek();
-  if (t.IsTextureStorageReadonly1d()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kTextureStorageReadonly1d))
     return {ast::type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
-  }
-  if (t.IsTextureStorageReadonly1dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageReadonly1dArray))
     return {ast::type::TextureDimension::k1dArray,
             ast::AccessControl::kReadOnly};
-  }
-  if (t.IsTextureStorageReadonly2d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageReadonly2d))
     return {ast::type::TextureDimension::k2d, ast::AccessControl::kReadOnly};
-  }
-  if (t.IsTextureStorageReadonly2dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageReadonly2dArray))
     return {ast::type::TextureDimension::k2dArray,
             ast::AccessControl::kReadOnly};
-  }
-  if (t.IsTextureStorageReadonly3d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageReadonly3d))
     return {ast::type::TextureDimension::k3d, ast::AccessControl::kReadOnly};
-  }
-  if (t.IsTextureStorageWriteonly1d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageWriteonly1d))
     return {ast::type::TextureDimension::k1d, ast::AccessControl::kWriteOnly};
-  }
-  if (t.IsTextureStorageWriteonly1dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageWriteonly1dArray))
     return {ast::type::TextureDimension::k1dArray,
             ast::AccessControl::kWriteOnly};
-  }
-  if (t.IsTextureStorageWriteonly2d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageWriteonly2d))
     return {ast::type::TextureDimension::k2d, ast::AccessControl::kWriteOnly};
-  }
-  if (t.IsTextureStorageWriteonly2dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageWriteonly2dArray))
     return {ast::type::TextureDimension::k2dArray,
             ast::AccessControl::kWriteOnly};
-  }
-  if (t.IsTextureStorageWriteonly3d()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureStorageWriteonly3d))
     return {ast::type::TextureDimension::k3d, ast::AccessControl::kWriteOnly};
-  }
+
   return {ast::type::TextureDimension::kNone, ast::AccessControl::kReadOnly};
 }
 
@@ -768,27 +735,22 @@ ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 ast::type::Type* ParserImpl::depth_texture_type() {
-  auto t = peek();
-  if (t.IsTextureDepth2d()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kTextureDepth2d))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
         ast::type::TextureDimension::k2d));
-  }
-  if (t.IsTextureDepth2dArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureDepth2dArray))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
         ast::type::TextureDimension::k2dArray));
-  }
-  if (t.IsTextureDepthCube()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureDepthCube))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
         ast::type::TextureDimension::kCube));
-  }
-  if (t.IsTextureDepthCubeArray()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kTextureDepthCubeArray))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::DepthTextureType>(
         ast::type::TextureDimension::kCubeArray));
-  }
+
   return nullptr;
 }
 
@@ -829,147 +791,111 @@ ast::type::Type* ParserImpl::depth_texture_type() {
 //  | RGBA32SINT
 //  | RGBA32FLOAT
 ast::type::ImageFormat ParserImpl::image_storage_type() {
-  auto t = peek();
-  if (t.IsFormatR8Unorm()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kFormatR8Unorm))
     return ast::type::ImageFormat::kR8Unorm;
-  }
-  if (t.IsFormatR8Snorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR8Snorm))
     return ast::type::ImageFormat::kR8Snorm;
-  }
-  if (t.IsFormatR8Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR8Uint))
     return ast::type::ImageFormat::kR8Uint;
-  }
-  if (t.IsFormatR8Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR8Sint))
     return ast::type::ImageFormat::kR8Sint;
-  }
-  if (t.IsFormatR16Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR16Uint))
     return ast::type::ImageFormat::kR16Uint;
-  }
-  if (t.IsFormatR16Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR16Sint))
     return ast::type::ImageFormat::kR16Sint;
-  }
-  if (t.IsFormatR16Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR16Float))
     return ast::type::ImageFormat::kR16Float;
-  }
-  if (t.IsFormatRg8Unorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg8Unorm))
     return ast::type::ImageFormat::kRg8Unorm;
-  }
-  if (t.IsFormatRg8Snorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg8Snorm))
     return ast::type::ImageFormat::kRg8Snorm;
-  }
-  if (t.IsFormatRg8Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg8Uint))
     return ast::type::ImageFormat::kRg8Uint;
-  }
-  if (t.IsFormatRg8Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg8Sint))
     return ast::type::ImageFormat::kRg8Sint;
-  }
-  if (t.IsFormatR32Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR32Uint))
     return ast::type::ImageFormat::kR32Uint;
-  }
-  if (t.IsFormatR32Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR32Sint))
     return ast::type::ImageFormat::kR32Sint;
-  }
-  if (t.IsFormatR32Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatR32Float))
     return ast::type::ImageFormat::kR32Float;
-  }
-  if (t.IsFormatRg16Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg16Uint))
     return ast::type::ImageFormat::kRg16Uint;
-  }
-  if (t.IsFormatRg16Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg16Sint))
     return ast::type::ImageFormat::kRg16Sint;
-  }
-  if (t.IsFormatRg16Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg16Float))
     return ast::type::ImageFormat::kRg16Float;
-  }
-  if (t.IsFormatRgba8Unorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba8Unorm))
     return ast::type::ImageFormat::kRgba8Unorm;
-  }
-  if (t.IsFormatRgba8UnormSrgb()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba8UnormSrgb))
     return ast::type::ImageFormat::kRgba8UnormSrgb;
-  }
-  if (t.IsFormatRgba8Snorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba8Snorm))
     return ast::type::ImageFormat::kRgba8Snorm;
-  }
-  if (t.IsFormatRgba8Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba8Uint))
     return ast::type::ImageFormat::kRgba8Uint;
-  }
-  if (t.IsFormatRgba8Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba8Sint))
     return ast::type::ImageFormat::kRgba8Sint;
-  }
-  if (t.IsFormatBgra8Unorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatBgra8Unorm))
     return ast::type::ImageFormat::kBgra8Unorm;
-  }
-  if (t.IsFormatBgra8UnormSrgb()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatBgra8UnormSrgb))
     return ast::type::ImageFormat::kBgra8UnormSrgb;
-  }
-  if (t.IsFormatRgb10A2Unorm()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgb10A2Unorm))
     return ast::type::ImageFormat::kRgb10A2Unorm;
-  }
-  if (t.IsFormatRg11B10Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg11B10Float))
     return ast::type::ImageFormat::kRg11B10Float;
-  }
-  if (t.IsFormatRg32Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg32Uint))
     return ast::type::ImageFormat::kRg32Uint;
-  }
-  if (t.IsFormatRg32Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg32Sint))
     return ast::type::ImageFormat::kRg32Sint;
-  }
-  if (t.IsFormatRg32Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRg32Float))
     return ast::type::ImageFormat::kRg32Float;
-  }
-  if (t.IsFormatRgba16Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba16Uint))
     return ast::type::ImageFormat::kRgba16Uint;
-  }
-  if (t.IsFormatRgba16Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba16Sint))
     return ast::type::ImageFormat::kRgba16Sint;
-  }
-  if (t.IsFormatRgba16Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba16Float))
     return ast::type::ImageFormat::kRgba16Float;
-  }
-  if (t.IsFormatRgba32Uint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba32Uint))
     return ast::type::ImageFormat::kRgba32Uint;
-  }
-  if (t.IsFormatRgba32Sint()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba32Sint))
     return ast::type::ImageFormat::kRgba32Sint;
-  }
-  if (t.IsFormatRgba32Float()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kFormatRgba32Float))
     return ast::type::ImageFormat::kRgba32Float;
-  }
+
   return ast::type::ImageFormat::kNone;
 }
 
