@@ -84,7 +84,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing { for switch statement");
+  EXPECT_EQ(p->error(), "1:11: expected '{' for switch statement");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing } for switch statement");
+  EXPECT_EQ(p->error(), "1:12: expected '}' for switch statement");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {

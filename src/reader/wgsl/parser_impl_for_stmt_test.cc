@@ -200,7 +200,7 @@ TEST_F(ForStmtErrorTest, MissingRightParen) {
 // Test a for loop with missing left brace is invalid.
 TEST_F(ForStmtErrorTest, MissingLeftBrace) {
   std::string for_str = "for (;;)";
-  std::string error_str = "1:9: missing for loop {";
+  std::string error_str = "1:9: expected '{' for for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -208,7 +208,7 @@ TEST_F(ForStmtErrorTest, MissingLeftBrace) {
 // Test a for loop with missing right brace is invalid.
 TEST_F(ForStmtErrorTest, MissingRightBrace) {
   std::string for_str = "for (;;) {";
-  std::string error_str = "1:11: missing for loop }";
+  std::string error_str = "1:11: expected '}' for for loop";
 
   TestForWithError(for_str, error_str);
 }
@@ -275,7 +275,7 @@ TEST_F(ForStmtErrorTest, InvalidBody) {
 // Test a for loop with a body not matching statements
 TEST_F(ForStmtErrorTest, InvalidBodyMatch) {
   std::string for_str = "for (;;) { fn main() -> void {} }";
-  std::string error_str = "1:12: missing for loop }";
+  std::string error_str = "1:12: expected '}' for for loop";
 
   TestForWithError(for_str, error_str);
 }

@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing : for case statement");
+  EXPECT_EQ(p->error(), "1:8: expected ':' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: missing { for case statement");
+  EXPECT_EQ(p->error(), "1:9: expected '{' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:18: missing } for case statement");
+  EXPECT_EQ(p->error(), "1:18: expected '}' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing } for case statement");
+  EXPECT_EQ(p->error(), "1:11: expected '}' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default) {
@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: missing : for case statement");
+  EXPECT_EQ(p->error(), "1:9: expected ':' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
@@ -113,7 +113,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: missing { for case statement");
+  EXPECT_EQ(p->error(), "1:10: expected '{' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:19: missing } for case statement");
+  EXPECT_EQ(p->error(), "1:19: expected '}' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing } for case statement");
+  EXPECT_EQ(p->error(), "1:12: expected '}' for case statement");
 }
 
 }  // namespace

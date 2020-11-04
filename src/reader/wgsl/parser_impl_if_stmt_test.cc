@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidBody) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: missing }");
+  EXPECT_EQ(p->error(), "1:10: expected '}'");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingBody) {
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, IfStmt_MissingBody) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:7: missing {");
+  EXPECT_EQ(p->error(), "1:7: expected '{'");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:24: missing }");
+  EXPECT_EQ(p->error(), "1:24: expected '}'");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {
@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidElse) {
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:18: missing }");
+  EXPECT_EQ(p->error(), "1:18: expected '}'");
 }
 
 }  // namespace

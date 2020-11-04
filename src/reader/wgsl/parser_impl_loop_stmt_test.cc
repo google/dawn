@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing { for loop");
+  EXPECT_EQ(p->error(), "1:6: expected '{' for loop");
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:17: missing } for loop");
+  EXPECT_EQ(p->error(), "1:17: expected '}' for loop");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {

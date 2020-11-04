@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
   auto e = p->else_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:8: missing }");
+  EXPECT_EQ(p->error(), "1:8: expected '}'");
 }
 
 TEST_F(ParserImplTest, ElseStmt_MissingBody) {
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, ElseStmt_MissingBody) {
   auto e = p->else_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:5: missing {");
+  EXPECT_EQ(p->error(), "1:5: expected '{'");
 }
 
 }  // namespace

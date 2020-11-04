@@ -44,14 +44,14 @@ TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
   auto* p = parser("{fn main() -> void {}}");
   auto e = p->body_stmt();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:2: missing }");
+  EXPECT_EQ(p->error(), "1:2: expected '}'");
 }
 
 TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
   auto* p = parser("{return;");
   auto e = p->body_stmt();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: missing }");
+  EXPECT_EQ(p->error(), "1:9: expected '}'");
 }
 
 }  // namespace

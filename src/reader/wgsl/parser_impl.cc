@@ -435,62 +435,38 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   Source source;
   if (match(Token::Type::kLocation, &source)) {
     const char* use = "location decoration";
-
-    if (!expect(use, Token::Type::kParenLeft))
-      return nullptr;
-
-    uint32_t val;
-    if (!expect_positive_sint(use, &val))
-      return nullptr;
-
-    if (!expect(use, Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::LocationDecoration>(val, source);
+    return expect_paren_block(use, [&] {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::LocationDecoration>(val, source)
+                : nullptr;
+    });
   }
   if (match(Token::Type::kBuiltin, &source)) {
-    if (!expect("builtin decoration", Token::Type::kParenLeft))
-      return nullptr;
-
-    ast::Builtin builtin;
-    std::tie(builtin, source) = expect_builtin();
-    if (builtin == ast::Builtin::kNone)
-      return nullptr;
-
-    if (!expect("builtin decoration", Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::BuiltinDecoration>(builtin, source);
+    return expect_paren_block("builtin decoration", [&] {
+      ast::Builtin builtin;
+      std::tie(builtin, source) = expect_builtin();
+      return (builtin != ast::Builtin::kNone)
+                 ? std::make_unique<ast::BuiltinDecoration>(builtin, source)
+                 : nullptr;
+    });
   }
   if (match(Token::Type::kBinding, &source)) {
     const char* use = "binding decoration";
-
-    if (!expect(use, Token::Type::kParenLeft))
-      return nullptr;
-
-    uint32_t val;
-    if (!expect_positive_sint(use, &val))
-      return nullptr;
-
-    if (!expect(use, Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::BindingDecoration>(val, source);
+    return expect_paren_block(use, [&] {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::BindingDecoration>(val, source)
+                : nullptr;
+    });
   }
   if (match(Token::Type::kSet, &source)) {
     const char* use = "set decoration";
-
-    if (!expect(use, Token::Type::kParenLeft))
-      return nullptr;
-
-    uint32_t val;
-    if (!expect_positive_sint(use, &val))
-      return nullptr;
-
-    if (!expect(use, Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::SetDecoration>(val, source);
+    return expect_paren_block(use, [&] {
+      uint32_t val;
+      bool ok = expect_positive_sint(use, &val);
+      return ok ? std::make_unique<ast::SetDecoration>(val, source) : nullptr;
+    });
   }
 
   return nullptr;
@@ -1200,24 +1176,23 @@ bool ParserImpl::array_decoration_list(ast::ArrayDecorationList& decos) {
 
   for (;;) {
     Source source;
-    if (!match(Token::Type::kStride, &source)) {
+    if (match(Token::Type::kStride, &source)) {
+      const char* use = "stride decoration";
+      auto deco = expect_paren_block(use, [&] {
+        uint32_t val;
+        bool ok = expect_nonzero_positive_sint(use, &val);
+        return ok ? std::make_unique<ast::StrideDecoration>(val, source)
+                  : nullptr;
+      });
+
+      if (!deco)
+        return false;
+
+      decos.emplace_back(std::move(deco));
+    } else {
       add_error(source, "unknown array decoration");
       return false;
     }
-
-    const char* use = "stride decoration";
-
-    if (!expect(use, Token::Type::kParenLeft))
-      return false;
-
-    uint32_t stride;
-    if (!expect_nonzero_positive_sint(use, &stride))
-      return false;
-
-    decos.push_back(std::make_unique<ast::StrideDecoration>(stride, source));
-
-    if (!expect(use, Token::Type::kParenRight))
-      return false;
 
     if (!match(Token::Type::kComma))
       break;
@@ -1402,43 +1377,23 @@ std::unique_ptr<ast::StructDecoration> ParserImpl::struct_decoration(Token t) {
 // struct_body_decl
 //   : BRACKET_LEFT struct_member* BRACKET_RIGHT
 ast::StructMemberList ParserImpl::struct_body_decl() {
-  auto t = peek();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing { for struct declaration");
-    return {};
-  }
-  next();  // Consume the peek
+  return expect_brace_block("struct declaration", [&] {
+    ast::StructMemberList members;
 
-  t = peek();
-  if (t.IsBraceRight()) {
-    next();  // Consume the peek
-    return {};
-  }
+    while (!peek().IsBraceRight() && !peek().IsEof()) {
+      auto mem = struct_member();
+      if (has_error())
+        return ast::StructMemberList{};
+      if (mem == nullptr) {
+        add_error(peek(), "invalid struct member");
+        return ast::StructMemberList{};
+      }
 
-  ast::StructMemberList members;
-  for (;;) {
-    auto mem = struct_member();
-    if (has_error())
-      return {};
-    if (mem == nullptr) {
-      add_error(peek(), "invalid struct member");
-      return {};
+      members.push_back(std::move(mem));
     }
 
-    members.push_back(std::move(mem));
-
-    t = peek();
-    if (t.IsBraceRight() || t.IsEof())
-      break;
-  }
-
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing } for struct declaration");
-    return {};
-  }
-
-  return members;
+    return members;
+  });
 }
 
 // struct_member
@@ -1519,18 +1474,12 @@ ParserImpl::struct_member_decoration() {
     return nullptr;
 
   const char* use = "offset decoration";
-
-  if (!expect(use, Token::Type::kParenLeft))
-    return nullptr;
-
-  uint32_t val;
-  if (!expect_positive_sint(use, &val))
-    return nullptr;
-
-  if (!expect(use, Token::Type::kParenRight))
-    return nullptr;
-
-  return std::make_unique<ast::StructMemberOffsetDecoration>(val, source);
+  return expect_paren_block(use, [&] {
+    uint32_t val;
+    bool ok = expect_positive_sint(use, &val);
+    return ok ? std::make_unique<ast::StructMemberOffsetDecoration>(val, source)
+              : nullptr;
+  });
 }
 
 // function_decl
@@ -1624,55 +1573,36 @@ bool ParserImpl::function_decoration_decl(ast::FunctionDecorationList& decos) {
 //   | WORKGROUP_SIZE PAREN_LEFT INT_LITERAL
 //         (COMMA INT_LITERAL (COMMA INT_LITERAL)?)? PAREN_RIGHT
 std::unique_ptr<ast::FunctionDecoration> ParserImpl::function_decoration() {
-  auto t = peek();
-  auto source = t.source();
-  if (t.IsWorkgroupSize()) {
-    next();  // Consume the peek
-
-    const char* use = "workgroup_size decoration";
-
-    if (!expect(use, Token::Type::kParenLeft))
-      return nullptr;
-
-    uint32_t x;
-    if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
-      return nullptr;
-    }
-
-    uint32_t y = 1;
-    uint32_t z = 1;
-    if (match(Token::Type::kComma)) {
-      if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
-        return nullptr;
+  Source source;
+  if (match(Token::Type::kWorkgroupSize, &source)) {
+    return expect_paren_block("workgroup_size decoration", [&]() {
+      uint32_t x;
+      if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
+        return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
       }
+      uint32_t y = 1;
+      uint32_t z = 1;
       if (match(Token::Type::kComma)) {
-        if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
-          return nullptr;
+        if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
+          return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
+        }
+        if (match(Token::Type::kComma)) {
+          if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
+            return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
+          }
         }
       }
-    }
-
-    if (!expect(use, Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::WorkgroupDecoration>(uint32_t(x), uint32_t(y),
-                                                      uint32_t(z), source);
+      return std::make_unique<ast::WorkgroupDecoration>(x, y, z, source);
+    });
   }
-  if (t.IsStage()) {
-    next();  // Consume the peek
-
-    if (!expect("stage decoration", Token::Type::kParenLeft))
-      return nullptr;
-
-    ast::PipelineStage stage;
-    std::tie(stage, source) = expect_pipeline_stage();
-    if (stage == ast::PipelineStage::kNone)
-      return nullptr;
-
-    if (!expect("stage decoration", Token::Type::kParenRight))
-      return nullptr;
-
-    return std::make_unique<ast::StageDecoration>(stage, source);
+  if (match(Token::Type::kStage, &source)) {
+    return expect_paren_block("stage decoration", [&]() {
+      ast::PipelineStage stage;
+      std::tie(stage, source) = expect_pipeline_stage();
+      return (stage != ast::PipelineStage::kNone)
+                 ? std::make_unique<ast::StageDecoration>(stage, source)
+                 : nullptr;
+    });
   }
   return nullptr;
 }
@@ -1702,14 +1632,9 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
   if (!expect_ident(use, &name))
     return nullptr;
 
-  if (!expect(use, Token::Type::kParenLeft))
-    return nullptr;
+  auto params = expect_paren_block(use, [&] { return param_list(); });
 
-  auto params = param_list();
   if (has_error())
-    return nullptr;
-
-  if (!expect(use, Token::Type::kParenRight))
     return nullptr;
 
   auto t = next();
@@ -1808,45 +1733,23 @@ std::pair<ast::Builtin, Source> ParserImpl::expect_builtin() {
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
 std::unique_ptr<ast::BlockStatement> ParserImpl::body_stmt() {
-  auto t = peek();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing {");
-    return nullptr;
-  }
-
-  next();  // Consume the peek
-
-  auto stmts = statements();
-  if (has_error())
-    return nullptr;
-
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing }");
-    return nullptr;
-  }
-
-  return stmts;
+  return expect_brace_block("", [&] { return statements(); });
 }
 
 // paren_rhs_stmt
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
 std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
-  if (!expect("", Token::Type::kParenLeft))
-    return nullptr;
+  return expect_paren_block("", [&]() -> std::unique_ptr<ast::Expression> {
+    auto expr = logical_or_expression();
+    if (has_error())
+      return nullptr;
 
-  auto expr = logical_or_expression();
-  if (has_error())
-    return nullptr;
-  if (expr == nullptr) {
-    add_error(peek(), "unable to parse expression");
-    return nullptr;
-  }
-
-  if (!expect("", Token::Type::kParenRight))
-    return nullptr;
-
-  return expr;
+    if (expr == nullptr) {
+      add_error(peek(), "unable to parse expression");
+      return nullptr;
+    }
+    return expr;
+  });
 }
 
 // statements
@@ -2174,28 +2077,23 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
     return nullptr;
   }
 
-  auto t = next();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing { for switch statement");
-    return nullptr;
-  }
-
   ast::CaseStatementList body;
-  for (;;) {
-    auto stmt = switch_body();
-    if (has_error())
-      return nullptr;
-    if (stmt == nullptr)
-      break;
+  bool ok = expect_brace_block("switch statement", [&] {
+    for (;;) {
+      auto stmt = switch_body();
+      if (has_error())
+        return false;
+      if (stmt == nullptr)
+        break;
 
-    body.push_back(std::move(stmt));
-  }
+      body.push_back(std::move(stmt));
+    }
+    return true;
+  });
 
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing } for switch statement");
+  if (!ok)
     return nullptr;
-  }
+
   return std::make_unique<ast::SwitchStatement>(source, std::move(condition),
                                                 std::move(body));
 }
@@ -2224,29 +2122,17 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
     stmt->set_selectors(std::move(selectors));
   }
 
-  t = next();
-  if (!t.IsColon()) {
-    add_error(t, "missing : for case statement");
-    return nullptr;
-  }
+  const char* use = "case statement";
 
-  t = next();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing { for case statement");
+  if (!expect(use, Token::Type::kColon))
     return nullptr;
-  }
 
-  auto body = case_body();
-  if (has_error())
+  auto body = expect_brace_block(use, [&] { return case_body(); });
+
+  if (body == nullptr)
     return nullptr;
 
   stmt->set_body(std::move(body));
-
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing } for case statement");
-    return nullptr;
-  }
 
   return stmt;
 }
@@ -2313,28 +2199,19 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
   if (!match(Token::Type::kLoop, &source))
     return nullptr;
 
-  auto t = next();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing { for loop");
-    return nullptr;
-  }
+  return expect_brace_block(
+      "loop", [&]() -> std::unique_ptr<ast::LoopStatement> {
+        auto body = statements();
+        if (has_error())
+          return nullptr;
 
-  auto body = statements();
-  if (has_error())
-    return nullptr;
+        auto continuing = continuing_stmt();
+        if (has_error())
+          return nullptr;
 
-  auto continuing = continuing_stmt();
-  if (has_error())
-    return nullptr;
-
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing } for loop");
-    return nullptr;
-  }
-
-  return std::make_unique<ast::LoopStatement>(source, std::move(body),
-                                              std::move(continuing));
+        return std::make_unique<ast::LoopStatement>(source, std::move(body),
+                                                    std::move(continuing));
+      });
 }
 
 ForHeader::ForHeader(std::unique_ptr<ast::Statement> init,
@@ -2408,31 +2285,14 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
   if (!match(Token::Type::kFor, &source))
     return nullptr;
 
-  if (!expect("for loop", Token::Type::kParenLeft))
+  auto header = expect_paren_block("for loop", [&] { return for_header(); });
+  if (header == nullptr)
     return nullptr;
 
-  auto header = for_header();
-  if (has_error())
-    return nullptr;
+  auto body = expect_brace_block("for loop", [&] { return statements(); });
 
-  if (!expect("for loop", Token::Type::kParenRight))
+  if (body == nullptr)
     return nullptr;
-
-  auto t = next();
-  if (!t.IsBraceLeft()) {
-    add_error(t, "missing for loop {");
-    return nullptr;
-  }
-
-  auto body = statements();
-  if (has_error())
-    return nullptr;
-
-  t = next();
-  if (!t.IsBraceRight()) {
-    add_error(t, "missing for loop }");
-    return nullptr;
-  }
 
   // The for statement is a syntactic sugar on top of the loop statement.
   // We create corresponding nodes in ast with the exact same behaviour
@@ -2609,19 +2469,21 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (has_error())
     return nullptr;
   if (type != nullptr) {
-    if (!expect("type constructor", Token::Type::kParenLeft))
-      return nullptr;
-
-    t = peek();
     ast::ExpressionList params;
-    if (!t.IsParenRight() && !t.IsEof()) {
-      params = argument_expression_list();
-      if (has_error())
-        return nullptr;
-    }
 
-    if (!expect("type constructor", Token::Type::kParenRight))
+    auto ok = expect_paren_block("type constructor", [&] {
+      t = peek();
+      if (!t.IsParenRight() && !t.IsEof()) {
+        params = argument_expression_list();
+        if (has_error())
+          return false;
+      }
+      return true;
+    });
+
+    if (!ok) {
       return nullptr;
+    }
 
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
                                                             std::move(params));
@@ -3271,36 +3133,30 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr_internal(
 
   auto* type = type_decl();
   if (type != nullptr) {
-    if (!expect("type constructor", Token::Type::kParenLeft))
-      return nullptr;
-
     ast::ExpressionList params;
-    auto param = const_expr_internal(depth + 1);
-    if (has_error())
-      return nullptr;
-    if (param == nullptr) {
-      add_error(peek(), "unable to parse constant expression");
-      return nullptr;
-    }
-    params.push_back(std::move(param));
-    for (;;) {
-      t = peek();
-      if (!t.IsComma())
-        break;
-
-      next();  // Consume the peek
-
-      param = const_expr_internal(depth + 1);
+    bool ok = expect_paren_block("type constructor", [&] {
+      auto param = const_expr_internal(depth + 1);
       if (has_error())
-        return nullptr;
+        return false;
       if (param == nullptr) {
         add_error(peek(), "unable to parse constant expression");
-        return nullptr;
+        return false;
       }
       params.push_back(std::move(param));
-    }
+      while (match(Token::Type::kComma)) {
+        param = const_expr_internal(depth + 1);
+        if (has_error())
+          return false;
+        if (param == nullptr) {
+          add_error(peek(), "unable to parse constant expression");
+          return false;
+        }
+        params.push_back(std::move(param));
+      }
+      return true;
+    });
 
-    if (!expect("type constructor", Token::Type::kParenRight))
+    if (!ok)
       return nullptr;
 
     return std::make_unique<ast::TypeConstructorExpression>(source, type,
@@ -3399,6 +3255,36 @@ bool ParserImpl::expect_ident(const std::string& use,
 
   *out = t.to_str();
   return true;
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_block(Token::Type start,
+                           Token::Type end,
+                           const std::string& use,
+                           F&& body) {
+  if (!expect(use, start)) {
+    return {};
+  }
+  auto res = body();
+  if (has_error()) {
+    return {};
+  }
+  if (!expect(use, end)) {
+    return {};
+  }
+  return res;
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_paren_block(const std::string& use, F&& body) {
+  return expect_block(Token::Type::kParenLeft, Token::Type::kParenRight, use,
+                      std::forward<F>(body));
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_brace_block(const std::string& use, F&& body) {
+  return expect_block(Token::Type::kBraceLeft, Token::Type::kBraceRight, use,
+                      std::forward<F>(body));
 }
 
 }  // namespace wgsl

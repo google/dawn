@@ -239,14 +239,14 @@ TEST_F(ParserImplErrorTest, ForLoopMissingRParen) {
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLBrace) {
   EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) } }",
-         "test.wgsl:1:54 error: missing for loop {\n"
+         "test.wgsl:1:54 error: expected '{' for for loop\n"
          "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) } }\n"
          "                                                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingRBrace) {
   EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) {",
-         "test.wgsl:1:55 error: missing for loop }\n"
+         "test.wgsl:1:55 error: expected '}' for for loop\n"
          "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) {\n"
          "                                                      ^\n");
 }
@@ -438,14 +438,14 @@ TEST_F(ParserImplErrorTest, FunctionDeclParamMissing) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLBrace) {
   EXPECT("fn f() -> void }",
-         "test.wgsl:1:16 error: missing {\n"
+         "test.wgsl:1:16 error: expected '{'\n"
          "fn f() -> void }\n"
          "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
   EXPECT("fn f() -> void {",
-         "test.wgsl:1:17 error: missing }\n"
+         "test.wgsl:1:17 error: expected '}'\n"
          "fn f() -> void {\n"
          "                ^\n");
 }
@@ -647,14 +647,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingSemicolon) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingLBrace) {
   EXPECT("struct S };",
-         "test.wgsl:1:10 error: missing { for struct declaration\n"
+         "test.wgsl:1:10 error: expected '{' for struct declaration\n"
          "struct S };\n"
          "         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingRBrace) {
   EXPECT("struct S { i : i32;",
-         "test.wgsl:1:20 error: missing } for struct declaration\n"
+         "test.wgsl:1:20 error: expected '}' for struct declaration\n"
          "struct S { i : i32;\n"
          "                   ^\n");
 }
@@ -1101,14 +1101,14 @@ TEST_F(ParserImplErrorTest, LogicalOrInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, LoopMissingLBrace) {
   EXPECT("fn f() -> void { loop } }",
-         "test.wgsl:1:23 error: missing { for loop\n"
+         "test.wgsl:1:23 error: expected '{' for loop\n"
          "fn f() -> void { loop } }\n"
          "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingRBrace) {
   EXPECT("fn f() -> void { loop {",
-         "test.wgsl:1:24 error: missing } for loop\n"
+         "test.wgsl:1:24 error: expected '}' for loop\n"
          "fn f() -> void { loop {\n"
          "                       ^\n");
 }
@@ -1157,14 +1157,14 @@ TEST_F(ParserImplErrorTest, ShiftInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingLBrace) {
   EXPECT("fn f() -> void { switch(1) }",
-         "test.wgsl:1:28 error: missing { for switch statement\n"
+         "test.wgsl:1:28 error: expected '{' for switch statement\n"
          "fn f() -> void { switch(1) }\n"
          "                           ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingRBrace) {
   EXPECT("fn f() -> void { switch(1) {",
-         "test.wgsl:1:29 error: missing } for switch statement\n"
+         "test.wgsl:1:29 error: expected '}' for switch statement\n"
          "fn f() -> void { switch(1) {\n"
          "                            ^\n");
 }
@@ -1186,21 +1186,21 @@ TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase2) {
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingColon) {
   EXPECT("fn f() -> void { switch(1) { case 1 {} } }",
-         "test.wgsl:1:37 error: missing : for case statement\n"
+         "test.wgsl:1:37 error: expected ':' for case statement\n"
          "fn f() -> void { switch(1) { case 1 {} } }\n"
          "                                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
   EXPECT("fn f() -> void { switch(1) { case 1: } } }",
-         "test.wgsl:1:38 error: missing { for case statement\n"
+         "test.wgsl:1:38 error: expected '{' for case statement\n"
          "fn f() -> void { switch(1) { case 1: } } }\n"
          "                                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingRBrace) {
   EXPECT("fn f() -> void { switch(1) { case 1: {",
-         "test.wgsl:1:39 error: missing } for case statement\n"
+         "test.wgsl:1:39 error: expected '}' for case statement\n"
          "fn f() -> void { switch(1) { case 1: {\n"
          "                                      ^\n");
 }

@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
   auto* p = parser("{a : i32;");
   auto m = p->struct_body_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: missing } for struct declaration");
+  EXPECT_EQ(p->error(), "1:10: expected '}' for struct declaration");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {

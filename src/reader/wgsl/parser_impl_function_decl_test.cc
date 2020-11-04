@@ -174,7 +174,7 @@ TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
   auto f = p->function_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:19: missing {");
+  EXPECT_EQ(p->error(), "1:19: expected '{'");
 }
 
 }  // namespace

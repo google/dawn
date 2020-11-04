@@ -18,6 +18,7 @@
 #include <deque>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -435,6 +436,10 @@ class ParserImpl {
   std::unique_ptr<ast::AssignmentStatement> assignment_stmt();
 
  private:
+  /// ResultType resolves to the return type for the function or lambda F.
+  template <typename F>
+  using ResultType = typename std::result_of<F()>::type;
+
   /// @returns true and consumes the next token if it equals |tok|.
   /// @param source if not nullptr, the next token's source is written to this
   /// pointer, regardless of success or error
@@ -476,6 +481,45 @@ class ParserImpl {
   bool expect_ident(const std::string& use,
                     std::string* out,
                     Source* source = nullptr);
+  /// Parses a lexical block starting with the token |start| and ending with
+  /// the token |end|. |body| is called to parse the lexical block body between
+  /// the |start| and |end| tokens.
+  /// If the |start| or |end| tokens are not matched then an error is generated
+  /// and a zero-initialized |T| is returned.
+  /// If |body| raises an error while parsing then a zero-initialized |T| is
+  /// returned.
+  /// @param start the token that begins the lexical block
+  /// @param end the token that ends the lexical block
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param body a function or lambda that is called to parse the lexical block
+  /// body, with the signature T().
+  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// a zero-initialized |T|.
+  template <typename F, typename T = ResultType<F>>
+  T expect_block(Token::Type start,
+                 Token::Type end,
+                 const std::string& use,
+                 F&& body);
+  /// A convenience function that calls |expect_block| passing
+  /// |Token::Type::kParenLeft| and |Token::Type::kParenRight| for the |start|
+  /// and |end| arguments, respectively.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param body a function or lambda that is called to parse the lexical block
+  /// body, with the signature T().
+  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// a zero-initialized |T|.
+  template <typename F, typename T = ResultType<F>>
+  T expect_paren_block(const std::string& use, F&& body);
+  /// A convenience function that calls |expect_block| passing
+  /// |Token::Type::kBraceLeft| and |Token::Type::kBraceRight| for the |start|
+  /// and |end| arguments, respectively.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param body a function or lambda that is called to parse the lexical block
+  /// body, with the signature T().
+  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// a zero-initialized |T|.
+  template <typename F, typename T = ResultType<F>>
+  T expect_brace_block(const std::string& use, F&& body);
 
   ast::type::Type* type_decl_pointer(Token t);
   ast::type::Type* type_decl_vector(Token t);

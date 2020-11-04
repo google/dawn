@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, Statement_If_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:10: missing }");
+  EXPECT_EQ(p->error(), "1:10: expected '}'");
 }
 
 TEST_F(ParserImplTest, Statement_Variable) {
@@ -146,7 +146,7 @@ TEST_F(ParserImplTest, Statement_Loop_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: missing { for loop");
+  EXPECT_EQ(p->error(), "1:6: expected '{' for loop");
 }
 
 TEST_F(ParserImplTest, Statement_Assignment) {
@@ -235,7 +235,7 @@ TEST_F(ParserImplTest, Statement_Body_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:3: missing }");
+  EXPECT_EQ(p->error(), "1:3: expected '}'");
 }
 
 }  // namespace

@@ -55,14 +55,14 @@ TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
   auto* p = parser("elseif (true) { fn main() -> void {}}");
   auto e = p->elseif_stmt();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:17: missing }");
+  EXPECT_EQ(p->error(), "1:17: expected '}'");
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_MissingBody) {
   auto* p = parser("elseif (true)");
   auto e = p->elseif_stmt();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: missing {");
+  EXPECT_EQ(p->error(), "1:14: expected '{'");
 }
 
 }  // namespace
