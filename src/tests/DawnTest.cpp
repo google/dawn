@@ -352,6 +352,7 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
         }
     }
 
+    std::set<std::pair<wgpu::BackendType, std::string>> adapterNameSet;
     for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
@@ -386,7 +387,15 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
             selected = true;
         }
 
-        mAdapterProperties.emplace_back(properties, selected);
+        // In Windows Remote Desktop sessions we may be able to discover multiple adapters that
+        // have the same name and backend type. We will just choose one adapter from them in our
+        // tests.
+        const auto adapterTypeAndName =
+            std::make_pair(properties.backendType, std::string(properties.name));
+        if (adapterNameSet.find(adapterTypeAndName) == adapterNameSet.end()) {
+            adapterNameSet.insert(adapterTypeAndName);
+            mAdapterProperties.emplace_back(properties, selected);
+        }
     }
 }
 
