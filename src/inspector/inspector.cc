@@ -187,6 +187,30 @@ Inspector::GetReadOnlyStorageBufferResourceBindings(
   return GetStorageBufferResourceBindingsImpl(entry_point, true);
 }
 
+std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+
+  for (auto& rs : func->referenced_sampler_variables()) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = rs;
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+
+    result.push_back(std::move(entry));
+  }
+
+  return result;
+}
+
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   auto* func = module_.FindFunctionByName(name);
   if (!func) {
@@ -211,11 +235,11 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
   }
 
   std::vector<ResourceBinding> result;
-  for (auto& ruv : func->referenced_storagebuffer_variables()) {
+  for (auto& rsv : func->referenced_storagebuffer_variables()) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = ruv;
+    std::tie(var, binding_info) = rsv;
     if (!var->type()->IsAccessControl()) {
       continue;
     }

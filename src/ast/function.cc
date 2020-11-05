@@ -167,6 +167,16 @@ Function::referenced_builtin_variables() const {
   return ret;
 }
 
+const std::vector<std::pair<Variable*, Function::BindingInfo>>
+Function::referenced_sampler_variables() const {
+  return ReferencedSamplerVariablesImpl(type::SamplerKind::kSampler);
+}
+
+const std::vector<std::pair<Variable*, Function::BindingInfo>>
+Function::referenced_comparison_sampler_variables() const {
+  return ReferencedSamplerVariablesImpl(type::SamplerKind::kComparisonSampler);
+}
+
 void Function::add_ancestor_entry_point(const std::string& ep) {
   for (const auto& point : ancestor_entry_points_) {
     if (point == ep) {
@@ -251,6 +261,35 @@ std::string Function::type_name() const {
   }
 
   return out.str();
+}
+
+const std::vector<std::pair<Variable*, Function::BindingInfo>>
+Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
+  std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
+
+  for (auto* var : referenced_module_variables()) {
+    auto* unwrapped_type = var->type()->UnwrapIfNeeded();
+    if (!var->IsDecorated() || !unwrapped_type->IsSampler() ||
+        unwrapped_type->AsSampler()->kind() != kind) {
+      continue;
+    }
+
+    BindingDecoration* binding = nullptr;
+    SetDecoration* set = nullptr;
+    for (const auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsBinding()) {
+        binding = deco->AsBinding();
+      } else if (deco->IsSet()) {
+        set = deco->AsSet();
+      }
+    }
+    if (binding == nullptr || set == nullptr) {
+      continue;
+    }
+
+    ret.push_back({var, BindingInfo{binding, set}});
+  }
+  return ret;
 }
 
 }  // namespace ast

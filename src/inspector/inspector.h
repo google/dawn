@@ -68,12 +68,14 @@ class Inspector {
   std::vector<ResourceBinding> GetStorageBufferResourceBindings(
       const std::string& entry_point);
 
-  // TODO(rharrison): Implement once
-  //                  https://dawn-review.googlesource.com/c/tint/+/31060 lands.
   /// @param entry_point name of the entry point to get information about.
-  /// @returns an empty vector and sets the error string. In the future it will
-  ///          return of all of the bindings for read-only storage buffers.
+  /// @returns vector of all of the bindings for read-only storage buffers.
   std::vector<ResourceBinding> GetReadOnlyStorageBufferResourceBindings(
+      const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for regular samplers.
+  std::vector<ResourceBinding> GetSamplerResourceBindings(
       const std::string& entry_point);
 
  private:

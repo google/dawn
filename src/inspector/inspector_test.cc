@@ -46,6 +46,8 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
@@ -67,7 +69,9 @@ class InspectorHelper {
  public:
   InspectorHelper()
       : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)),
-        inspector_(std::make_unique<Inspector>(mod_)) {}
+        inspector_(std::make_unique<Inspector>(mod_)),
+        sampler_type_(ast::type::SamplerKind::kSampler),
+        comparison_sampler_type_(ast::type::SamplerKind::kComparisonSampler) {}
 
   /// Generates an empty function
   /// @param name name of the function created
@@ -368,7 +372,7 @@ class InspectorHelper {
     AddBinding(name, type, ast::StorageClass::kUniform, set, binding);
   }
 
-  /// Adds an storage buffer variable to the module
+  /// Adds a storage buffer variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param set the binding group/set to use for the storage buffer
@@ -420,6 +424,89 @@ class InspectorHelper {
     return func;
   }
 
+  /// Adds a regular sampler variable to the module
+  /// @param name the name of the variable
+  /// @param set the binding group/set to use for the storage buffer
+  /// @param binding the binding number to use for the storage buffer
+  void AddSampler(const std::string& name, uint32_t set, uint32_t binding) {
+    AddBinding(name, sampler_type(), ast::StorageClass::kUniformConstant, set,
+               binding);
+  }
+
+  /// Adds a comparison sampler variable to the module
+  /// @param name the name of the variable
+  /// @param set the binding group/set to use for the storage buffer
+  /// @param binding the binding number to use for the storage buffer
+  void AddComparisonSampler(const std::string& name,
+                            uint32_t set,
+                            uint32_t binding) {
+    AddBinding(name, comparison_sampler_type(),
+               ast::StorageClass::kUniformConstant, set, binding);
+  }
+
+  /// Generates a SampledTextureType appropriate for the params
+  /// @param dim the dimensions of the texture
+  /// @param type the data type of the sampled texture
+  /// @returns the generated SampleTextureType
+  std::unique_ptr<ast::type::SampledTextureType> MakeSampledTextureType(
+      ast::type::TextureDimension dim,
+      ast::type::Type* type) {
+    return std::make_unique<ast::type::SampledTextureType>(dim, type);
+  }
+
+  /// Adds a sampled texture variable to the module
+  /// @param name the name of the variable
+  /// @param type the type to use
+  /// @param set the binding group/set to use for the sampled texture
+  /// @param binding the binding number to use for the sampled texture
+  void AddSampledTexture(const std::string& name,
+                         ast::type::Type* type,
+                         uint32_t set,
+                         uint32_t binding) {
+    AddBinding(name, type, ast::StorageClass::kUniformConstant, set, binding);
+  }
+
+  void AddF32(const std::string& name) {
+    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+        name, ast::StorageClass::kUniformConstant, f32_type()));
+  }
+
+  std::unique_ptr<ast::Function> MakeSamplerReferenceBodyFunction(
+      const std::string& func_name,
+      const std::string& texture_name,
+      const std::string& sampler_name,
+      const std::string& coords_name) {
+    std::string result_name = "sampler_result";
+
+    auto body = std::make_unique<ast::BlockStatement>();
+
+    auto call_result = std::make_unique<ast::Variable>(
+        "sampler_result", ast::StorageClass::kFunction, f32_type());
+    body->append(
+        std::make_unique<ast::VariableDeclStatement>(std::move(call_result)));
+
+    ast::ExpressionList call_params;
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(texture_name));
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(sampler_name));
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(coords_name));
+    auto call_expr = std::make_unique<ast::CallExpression>(
+        std::make_unique<ast::IdentifierExpression>("textureSample"),
+        std::move(call_params));
+
+    body->append(std::make_unique<ast::AssignmentStatement>(
+        std::make_unique<ast::IdentifierExpression>("sampler_result"),
+        std::move(call_expr)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+
+    auto func = std::make_unique<ast::Function>(func_name, ast::VariableList(),
+                                                void_type());
+    func->set_body(std::move(body));
+    return func;
+  }
+
   ast::Module* mod() { return &mod_; }
   TypeDeterminer* td() { return td_.get(); }
   Inspector* inspector() { return inspector_.get(); }
@@ -439,6 +526,10 @@ class InspectorHelper {
     return array_type_memo_[count].get();
   }
   ast::type::VoidType* void_type() { return &void_type_; }
+  ast::type::SamplerType* sampler_type() { return &sampler_type_; }
+  ast::type::SamplerType* comparison_sampler_type() {
+    return &comparison_sampler_type_;
+  }
 
  private:
   Context ctx_;
@@ -451,6 +542,8 @@ class InspectorHelper {
   ast::type::I32Type i32_type_;
   ast::type::U32Type u32_type_;
   ast::type::VoidType void_type_;
+  ast::type::SamplerType sampler_type_;
+  ast::type::SamplerType comparison_sampler_type_;
   std::map<uint32_t, std::unique_ptr<ast::type::ArrayType>> array_type_memo_;
 };
 
@@ -462,10 +555,11 @@ class InspectorGetUniformBufferResourceBindingsTest : public InspectorTest {};
 class InspectorGetStorageBufferResourceBindingsTest : public InspectorTest {};
 class InspectorGetReadOnlyStorageBufferResourceBindingsTest
     : public InspectorTest {};
+class InspectorGetSamplerResourceBindingsTest : public InspectorTest {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -474,7 +568,7 @@ TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
   mod()->AddFunction(MakeEmptyBodyFunction("foo"));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -486,7 +580,7 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ("foo", result[0].name);
@@ -505,7 +599,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
   mod()->AddFunction(std::move(bar));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("foo", result[0].name);
@@ -545,7 +639,7 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
   uint32_t x, y, z;
@@ -564,7 +658,7 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
   uint32_t x, y, z;
@@ -584,7 +678,7 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].input_variables.size());
@@ -602,7 +696,7 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -626,7 +720,7 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -651,7 +745,7 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -673,7 +767,7 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -700,7 +794,7 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -728,7 +822,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
 
@@ -765,7 +859,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
 
@@ -933,7 +1027,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   EXPECT_EQ(0u, result.size());
 }
 
@@ -956,7 +1050,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -983,7 +1077,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1035,7 +1129,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1070,7 +1164,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1097,7 +1191,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1124,7 +1218,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1176,7 +1270,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1211,7 +1305,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1238,7 +1332,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1265,7 +1359,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(0u, result.size());
 }
 
@@ -1289,7 +1383,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
   auto result =
       inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1343,7 +1437,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   auto result =
       inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1379,7 +1473,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
   auto result =
       inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1408,7 +1502,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   auto result =
       inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1436,8 +1530,90 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 
   auto result =
       inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error());
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
   ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
+  auto sampled_texture_type =
+      MakeSampledTextureType(ast::type::TextureDimension::k1d, f32_type());
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+
+  auto func = MakeSamplerReferenceBodyFunction("ep", "foo_texture",
+                                               "foo_sampler", "foo_coords");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(1u, result[0].binding);
+}
+
+TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
+  auto func = MakeEmptyBodyFunction("ep_func");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
+  auto sampled_texture_type =
+      MakeSampledTextureType(ast::type::TextureDimension::k1d, f32_type());
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+
+  auto foo_func = MakeSamplerReferenceBodyFunction("foo_func", "foo_texture",
+                                                   "foo_sampler", "foo_coords");
+  mod()->AddFunction(std::move(foo_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "foo_func");
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(1u, result[0].binding);
+}
+
+TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
+  auto sampled_texture_type =
+      MakeSampledTextureType(ast::type::TextureDimension::k1d, f32_type());
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+
+  auto func = MakeSamplerReferenceBodyFunction("ep", "foo_texture",
+                                               "foo_sampler", "foo_coords");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("foo");
+  ASSERT_TRUE(inspector()->has_error()) << inspector()->error();
 }
 
 }  // namespace

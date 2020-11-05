@@ -32,6 +32,7 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 
@@ -138,6 +139,16 @@ class Function : public Node {
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_storagebuffer_variables() const;
+  /// Retrieves any referenced regular Sampler variables. Note, the
+  /// storagebuffer must be decorated with both binding and set decorations.
+  /// @returns the referenced storagebuffers
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_sampler_variables() const;
+  /// Retrieves any referenced comparison Sampler variables. Note, the
+  /// storagebuffer must be decorated with both binding and set decorations.
+  /// @returns the referenced storagebuffers
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_comparison_sampler_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor
@@ -183,6 +194,8 @@ class Function : public Node {
 
  private:
   Function(const Function&) = delete;
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
 
   std::string name_;
   VariableList params_;
