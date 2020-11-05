@@ -72,6 +72,10 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
     // TODO: Reenable once Tint is able to produce Vulkan 1.0 / 1.1 SPIR-V.
     DAWN_SKIP_TEST_IF(IsVulkan());
 
+    // TODO: Reenable once Tint's HLSL writer supports multiple entryPoints on a single stage.
+    // https://crbug.com/tint/297
+    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Data {
             [[offset(0)]] data : u32;
@@ -141,6 +145,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 
 DAWN_INSTANTIATE_TEST(EntryPointTests,
                       D3D12Backend(),
+                      D3D12Backend({"use_tint_generator"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       VulkanBackend());

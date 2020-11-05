@@ -637,6 +637,15 @@ bool DawnTestBase::IsAsan() const {
 #endif
 }
 
+bool DawnTestBase::HasToggleEnabled(const char* toggle) const {
+    for (const char* toggleEnabled : mParam.forceEnabledWorkarounds) {
+        if (strcmp(toggle, toggleEnabled) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DawnTestBase::HasVendorIdFilter() const {
     return gTestEnv->HasVendorIdFilter();
 }

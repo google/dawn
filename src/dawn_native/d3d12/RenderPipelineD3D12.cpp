@@ -311,21 +311,32 @@ namespace dawn_native { namespace d3d12 {
 
         wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
-            // Note that the HLSL entryPoint will always be "main".
             std::string hlslSource;
-            DAWN_TRY_ASSIGN(hlslSource,
-                            modules[stage]->TranslateToHLSL(GetStage(stage).entryPoint.c_str(),
-                                                            stage, ToBackend(GetLayout())));
+            const char* entryPoint = GetStage(stage).entryPoint.c_str();
+
+            if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithTint(
+                                                entryPoint, stage, ToBackend(GetLayout())));
+
+            } else {
+                DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithSPIRVCross(
+                                                entryPoint, stage, ToBackend(GetLayout())));
+
+                // Note that the HLSL will always use entryPoint "main" under SPIRV-cross.
+                entryPoint = "main";
+            }
 
             if (device->IsToggleEnabled(Toggle::UseDXC)) {
-                DAWN_TRY_ASSIGN(compiledDXCShader[stage],
-                                CompileShaderDXC(device, stage, hlslSource, "main", compileFlags));
+                DAWN_TRY_ASSIGN(
+                    compiledDXCShader[stage],
+                    CompileShaderDXC(device, stage, hlslSource, entryPoint, compileFlags));
 
                 shaders[stage]->pShaderBytecode = compiledDXCShader[stage]->GetBufferPointer();
                 shaders[stage]->BytecodeLength = compiledDXCShader[stage]->GetBufferSize();
             } else {
-                DAWN_TRY_ASSIGN(compiledFXCShader[stage],
-                                CompileShaderFXC(device, stage, hlslSource, "main", compileFlags));
+                DAWN_TRY_ASSIGN(
+                    compiledFXCShader[stage],
+                    CompileShaderFXC(device, stage, hlslSource, entryPoint, compileFlags));
 
                 shaders[stage]->pShaderBytecode = compiledFXCShader[stage]->GetBufferPointer();
                 shaders[stage]->BytecodeLength = compiledFXCShader[stage]->GetBufferSize();

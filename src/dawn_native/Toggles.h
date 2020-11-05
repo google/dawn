@@ -44,6 +44,7 @@ namespace dawn_native {
         DisableRobustness,
         MetalEnableVertexPulling,
         DisallowUnsafeAPIs,
+        UseTintGenerator,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -40,9 +40,13 @@ namespace dawn_native { namespace d3d12 {
         static ResultOrError<ShaderModule*> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor);
 
-        ResultOrError<std::string> TranslateToHLSL(const char* entryPointName,
-                                                   SingleShaderStage stage,
-                                                   PipelineLayout* layout) const;
+        ResultOrError<std::string> TranslateToHLSLWithTint(const char* entryPointName,
+                                                           SingleShaderStage stage,
+                                                           PipelineLayout* layout) const;
+
+        ResultOrError<std::string> TranslateToHLSLWithSPIRVCross(const char* entryPointName,
+                                                                 SingleShaderStage stage,
+                                                                 PipelineLayout* layout) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

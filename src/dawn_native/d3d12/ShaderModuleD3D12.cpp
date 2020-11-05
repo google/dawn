@@ -29,6 +29,10 @@
 
 #include <spirv_hlsl.hpp>
 
+#ifdef DAWN_ENABLE_WGSL
+#    include <tint/tint.h>
+#endif  // DAWN_ENABLE_WGSL
+
 namespace dawn_native { namespace d3d12 {
 
     namespace {
@@ -176,10 +180,68 @@ namespace dawn_native { namespace d3d12 {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    ResultOrError<std::string> ShaderModule::TranslateToHLSL(const char* entryPointName,
-                                                             SingleShaderStage stage,
-                                                             PipelineLayout* layout) const {
+    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(const char* entryPointName,
+                                                                     SingleShaderStage stage,
+                                                                     PipelineLayout* layout) const {
         ASSERT(!IsError());
+
+#ifdef DAWN_ENABLE_WGSL
+        std::ostringstream errorStream;
+        errorStream << "Tint HLSL failure:" << std::endl;
+
+        // TODO: Remove redundant SPIRV step between WGSL and HLSL.
+        tint::Context context;
+        tint::reader::spirv::Parser parser(&context, GetSpirv());
+
+        if (!parser.Parse()) {
+            errorStream << "Parser: " << parser.error() << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        tint::ast::Module module = parser.module();
+        if (!module.IsValid()) {
+            errorStream << "Invalid module generated..." << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        tint::TypeDeterminer typeDeterminer(&context, &module);
+        if (!typeDeterminer.Determine()) {
+            errorStream << "Type Determination: " << typeDeterminer.error();
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        tint::Validator validator;
+        if (!validator.Validate(&module)) {
+            errorStream << "Validation: " << validator.error() << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        tint::transform::BoundArrayAccessorsTransform boundArrayTransformer(&context, &module);
+        if (!boundArrayTransformer.Run()) {
+            errorStream << "Bound Array Accessors Transform: " << boundArrayTransformer.error()
+                        << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        tint::writer::hlsl::Generator generator(std::move(module));
+        // TODO: Switch to GenerateEntryPoint once HLSL writer supports it.
+        if (!generator.Generate()) {
+            errorStream << "Generator: " << generator.error() << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        return generator.result();
+#else
+        return DAWN_VALIDATION_ERROR("Using Tint to generate HLSL is not supported.");
+#endif  // DAWN_ENABLE_WGSL
+    }
+
+    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithSPIRVCross(
+        const char* entryPointName,
+        SingleShaderStage stage,
+        PipelineLayout* layout) const {
+        ASSERT(!IsError());
+
         // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
         // be updated.
         spirv_cross::CompilerGLSL::Options options_glsl;

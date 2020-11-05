@@ -254,6 +254,8 @@ class DawnTestBase {
 
     bool IsAsan() const;
 
+    bool HasToggleEnabled(const char* workaround) const;
+
     void StartExpectDeviceError();
     bool EndExpectDeviceError();
 
