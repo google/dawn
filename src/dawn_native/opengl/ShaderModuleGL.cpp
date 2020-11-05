@@ -108,8 +108,7 @@ namespace dawn_native { namespace opengl {
             compiler.set_name(combined.combined_id, info->GetName());
         }
 
-        const EntryPointMetadata::BindingInfo& bindingInfo =
-            GetEntryPoint(entryPointName, stage).bindings;
+        const EntryPointMetadata::BindingInfo& bindingInfo = GetEntryPoint(entryPointName).bindings;
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which

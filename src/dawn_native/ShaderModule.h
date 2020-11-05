@@ -94,13 +94,12 @@ namespace dawn_native {
 
         static ShaderModuleBase* MakeError(DeviceBase* device);
 
-        // Return true iff the module has an entrypoint called `entryPoint` for stage `stage`.
-        bool HasEntryPoint(const std::string& entryPoint, SingleShaderStage stage) const;
+        // Return true iff the module has an entrypoint called `entryPoint`.
+        bool HasEntryPoint(const std::string& entryPoint) const;
 
-        // Returns the metadata for the given `entryPoint` and `stage`. HasEntryPoint with the same
-        // arguments must be true.
-        const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint,
-                                                SingleShaderStage stage) const;
+        // Returns the metadata for the given `entryPoint`. HasEntryPoint with the same argument
+        // must be true.
+        const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
@@ -132,7 +131,7 @@ namespace dawn_native {
         std::string mWgsl;
 
         // A map from [name, stage] to EntryPointMetadata.
-        std::unordered_map<std::string, PerStage<std::unique_ptr<EntryPointMetadata>>> mEntryPoints;
+        std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>> mEntryPoints;
     };
 
 }  // namespace dawn_native

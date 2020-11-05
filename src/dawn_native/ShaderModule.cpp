@@ -844,19 +844,13 @@ namespace dawn_native {
         return new ShaderModuleBase(device, ObjectBase::kError);
     }
 
-    bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint,
-                                         SingleShaderStage stage) const {
-        auto entryPointsForNameIt = mEntryPoints.find(entryPoint);
-        if (entryPointsForNameIt == mEntryPoints.end()) {
-            return false;
-        }
-        return entryPointsForNameIt->second[stage] != nullptr;
+    bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint) const {
+        return mEntryPoints.count(entryPoint) > 0;
     }
 
-    const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(const std::string& entryPoint,
-                                                              SingleShaderStage stage) const {
-        ASSERT(HasEntryPoint(entryPoint, stage));
-        return *mEntryPoints.at(entryPoint)[stage];
+    const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(const std::string& entryPoint) const {
+        ASSERT(HasEntryPoint(entryPoint));
+        return *mEntryPoints.at(entryPoint);
     }
 
     size_t ShaderModuleBase::HashFunc::operator()(const ShaderModuleBase* module) const {
@@ -921,13 +915,15 @@ namespace dawn_native {
 
         spirv_cross::Compiler compiler(mSpirv);
         for (const spirv_cross::EntryPoint& entryPoint : compiler.get_entry_points_and_stages()) {
+            ASSERT(mEntryPoints.count(entryPoint.name) == 0);
+
             SingleShaderStage stage = ExecutionModelToShaderStage(entryPoint.execution_model);
             compiler.set_entry_point(entryPoint.name, entryPoint.execution_model);
 
             std::unique_ptr<EntryPointMetadata> metadata;
             DAWN_TRY_ASSIGN(metadata,
                             ExtractSpirvInfo(GetDevice(), compiler, entryPoint.name, stage));
-            mEntryPoints[entryPoint.name][stage] = std::move(metadata);
+            mEntryPoints[entryPoint.name] = std::move(metadata);
         }
 
         return {};

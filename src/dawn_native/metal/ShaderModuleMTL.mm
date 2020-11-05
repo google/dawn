@@ -182,7 +182,7 @@ namespace dawn_native { namespace metal {
         out->needsStorageBufferLength = compiler.needs_buffer_size_buffer();
 
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            GetEntryPoint(entryPointName, stage).usedVertexAttributes.any()) {
+            GetEntryPoint(entryPointName).usedVertexAttributes.any()) {
             out->needsStorageBufferLength = true;
         }
 

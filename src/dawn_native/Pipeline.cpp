@@ -29,15 +29,20 @@ namespace dawn_native {
         const ShaderModuleBase* module = descriptor->module;
         DAWN_TRY(device->ValidateObject(module));
 
-        if (!module->HasEntryPoint(descriptor->entryPoint, stage)) {
+        if (!module->HasEntryPoint(descriptor->entryPoint)) {
             return DAWN_VALIDATION_ERROR("Entry point doesn't exist in the module");
         }
 
+        const EntryPointMetadata& metadata = module->GetEntryPoint(descriptor->entryPoint);
+
+        if (metadata.stage != stage) {
+            return DAWN_VALIDATION_ERROR("Entry point isn't for the correct stage");
+        }
+
         if (layout != nullptr) {
-            const EntryPointMetadata& metadata =
-                module->GetEntryPoint(descriptor->entryPoint, stage);
             DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, layout));
         }
+
         return {};
     }
 
@@ -54,7 +59,9 @@ namespace dawn_native {
             SingleShaderStage shaderStage = stage.first;
             ShaderModuleBase* module = stage.second->module;
             const char* entryPointName = stage.second->entryPoint;
-            const EntryPointMetadata& metadata = module->GetEntryPoint(entryPointName, shaderStage);
+
+            const EntryPointMetadata& metadata = module->GetEntryPoint(entryPointName);
+            ASSERT(metadata.stage == shaderStage);
 
             // Record them internally.
             bool isFirstStage = mStageMask == wgpu::ShaderStage::None;

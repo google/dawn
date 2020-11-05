@@ -330,8 +330,8 @@ namespace dawn_native {
             DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));
         }
 
-        const EntryPointMetadata& vertexMetadata = descriptor->vertexStage.module->GetEntryPoint(
-            descriptor->vertexStage.entryPoint, SingleShaderStage::Vertex);
+        const EntryPointMetadata& vertexMetadata =
+            descriptor->vertexStage.module->GetEntryPoint(descriptor->vertexStage.entryPoint);
         if ((vertexMetadata.usedVertexAttributes & ~attributesSetMask).any()) {
             return DAWN_VALIDATION_ERROR(
                 "Pipeline vertex stage uses vertex buffers not in the vertex state");
@@ -352,8 +352,7 @@ namespace dawn_native {
 
         ASSERT(descriptor->fragmentStage != nullptr);
         const EntryPointMetadata& fragmentMetadata =
-            descriptor->fragmentStage->module->GetEntryPoint(descriptor->fragmentStage->entryPoint,
-                                                             SingleShaderStage::Fragment);
+            descriptor->fragmentStage->module->GetEntryPoint(descriptor->fragmentStage->entryPoint);
         for (ColorAttachmentIndex i(uint8_t(0));
              i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorStateCount)); ++i) {
             DAWN_TRY(ValidateColorStateDescriptor(

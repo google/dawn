@@ -209,7 +209,7 @@ namespace dawn_native { namespace d3d12 {
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 
         const EntryPointMetadata::BindingInfo& moduleBindingInfo =
-            GetEntryPoint(entryPointName, stage).bindings;
+            GetEntryPoint(entryPointName).bindings;
 
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
