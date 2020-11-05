@@ -51,6 +51,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -401,7 +402,24 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
-  if (type->IsAlias()) {
+  if (type->IsAccessControl()) {
+    auto* ac = type->AsAccessControl();
+    // TODO(dsinclair): Access control isn't supported in WGSL yet, so this
+    // is disabled for now.
+    //
+    // out_ << "[[access(";
+    // if (ac->IsReadOnly()) {
+    //   out_ << "read";
+    // } else if (ac->IsWriteOnly()) {
+    //   out_ << "write";
+    // } else {
+    //   out_ << "read_write";
+    // }
+    // out_ << ")]]" << std::endl;
+    if (!EmitType(ac->type())) {
+      return false;
+    }
+  } else if (type->IsAlias()) {
     out_ << type->AsAlias()->name();
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
@@ -544,7 +562,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (type->IsVoid()) {
     out_ << "void";
   } else {
-    error_ = "unknown type in EmitType";
+    error_ = "unknown type in EmitType: " + type->type_name();
     return false;
   }
 

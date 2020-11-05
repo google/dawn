@@ -31,6 +31,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
@@ -1129,6 +1130,121 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   EXPECT_EQ(result(), R"(  void my_func(float a[5]) {
     return;
   }
+
+)");
+}
+
+// https://crbug.com/tint/297
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
+  // [[block]] struct Data {
+  //   [[offset(0)]] d : f32;
+  // };
+  // [[binding(0), set(0)]] var<storage_buffer> data : Data;
+  //
+  // [[stage(compute)]]
+  // fn a() -> void {
+  //   return;
+  // }
+  //
+  // [[stage(compute)]]
+  // fn b() -> void {
+  //   return;
+  // }
+
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
+  members.push_back(
+      std::make_unique<ast::StructMember>("d", &f32, std::move(a_deco)));
+
+  ast::StructDecorationList s_decos;
+  s_decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
+
+  auto str =
+      std::make_unique<ast::Struct>(std::move(s_decos), std::move(members));
+
+  ast::type::StructType s("Data", std::move(str));
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+
+  auto data_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &ac));
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
+  data_var->set_decorations(std::move(decos));
+
+  mod()->AddConstructedType(&s);
+  td().RegisterVariableForTesting(data_var.get());
+  mod()->AddGlobalVariable(std::move(data_var));
+
+  {
+    ast::VariableList params;
+    auto func =
+        std::make_unique<ast::Function>("a", std::move(params), &void_type);
+    func->add_decoration(std::make_unique<ast::StageDecoration>(
+        ast::PipelineStage::kCompute, Source{}));
+
+    auto var = std::make_unique<ast::Variable>(
+        "v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+        std::make_unique<ast::IdentifierExpression>("data"),
+        std::make_unique<ast::IdentifierExpression>("d")));
+
+    auto body = std::make_unique<ast::BlockStatement>();
+    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+    func->set_body(std::move(body));
+
+    mod()->AddFunction(std::move(func));
+  }
+
+  {
+    ast::VariableList params;
+    auto func =
+        std::make_unique<ast::Function>("b", std::move(params), &void_type);
+    func->add_decoration(std::make_unique<ast::StageDecoration>(
+        ast::PipelineStage::kCompute, Source{}));
+
+    auto var = std::make_unique<ast::Variable>(
+        "v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+        std::make_unique<ast::IdentifierExpression>("data"),
+        std::make_unique<ast::IdentifierExpression>("d")));
+
+    auto body = std::make_unique<ast::BlockStatement>();
+    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+    func->set_body(std::move(body));
+
+    mod()->AddFunction(std::move(func));
+  }
+
+  ASSERT_TRUE(td().Determine()) << td().error();
+  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  EXPECT_EQ(result(), R"(struct Data {
+  float d;
+};
+
+RWByteAddressBuffer data : register(u0);
+
+[numthreads(1, 1, 1)]
+void a() {
+  float v = asfloat(data.Load(0));
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void b() {
+  float v = asfloat(data.Load(0));
+  return;
+}
 
 )");
 }

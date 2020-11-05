@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
@@ -193,8 +194,11 @@ class GeneratorImpl {
   /// Handles emitting information for an entry point
   /// @param out the output stream
   /// @param func the entry point
+  /// @param emitted_globals the set of globals emitted over all entry points
   /// @returns true if the entry point data was emitted
-  bool EmitEntryPointData(std::ostream& out, ast::Function* func);
+  bool EmitEntryPointData(std::ostream& out,
+                          ast::Function* func,
+                          std::unordered_set<std::string>& emitted_globals);
   /// Handles emitting the entry point function
   /// @param out the output stream
   /// @param func the entry point

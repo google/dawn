@@ -32,6 +32,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -1164,6 +1165,126 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   void my_func(float a[5]) {
     return;
   }
+
+)");
+}
+
+// https://crbug.com/tint/297
+TEST_F(MslGeneratorImplTest,
+       Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {
+  // [[block]] struct Data {
+  //   [[offset(0)]] d : f32;
+  // };
+  // [[binding(0), set(0)]] var<storage_buffer> data : Data;
+  //
+  // [[stage(compute)]]
+  // fn a() -> void {
+  //   return;
+  // }
+  //
+  // [[stage(compute)]]
+  // fn b() -> void {
+  //   return;
+  // }
+
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  ast::StructMemberDecorationList a_deco;
+  a_deco.push_back(
+      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
+  members.push_back(
+      std::make_unique<ast::StructMember>("d", &f32, std::move(a_deco)));
+
+  ast::StructDecorationList s_decos;
+  s_decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
+
+  auto str =
+      std::make_unique<ast::Struct>(std::move(s_decos), std::move(members));
+
+  ast::type::StructType s("Data", std::move(str));
+  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+
+  auto data_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "data", ast::StorageClass::kStorageBuffer, &ac));
+
+  ast::VariableDecorationList decos;
+  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
+  data_var->set_decorations(std::move(decos));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  mod.AddConstructedType(&s);
+
+  td.RegisterVariableForTesting(data_var.get());
+  mod.AddGlobalVariable(std::move(data_var));
+
+  {
+    ast::VariableList params;
+    auto func =
+        std::make_unique<ast::Function>("a", std::move(params), &void_type);
+    func->add_decoration(std::make_unique<ast::StageDecoration>(
+        ast::PipelineStage::kCompute, Source{}));
+
+    auto var = std::make_unique<ast::Variable>(
+        "v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+        std::make_unique<ast::IdentifierExpression>("data"),
+        std::make_unique<ast::IdentifierExpression>("d")));
+
+    auto body = std::make_unique<ast::BlockStatement>();
+    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+    func->set_body(std::move(body));
+
+    mod.AddFunction(std::move(func));
+  }
+
+  {
+    ast::VariableList params;
+    auto func =
+        std::make_unique<ast::Function>("b", std::move(params), &void_type);
+    func->add_decoration(std::make_unique<ast::StageDecoration>(
+        ast::PipelineStage::kCompute, Source{}));
+
+    auto var = std::make_unique<ast::Variable>(
+        "v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
+        std::make_unique<ast::IdentifierExpression>("data"),
+        std::make_unique<ast::IdentifierExpression>("d")));
+
+    auto body = std::make_unique<ast::BlockStatement>();
+    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+    func->set_body(std::move(body));
+
+    mod.AddFunction(std::move(func));
+  }
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
+  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+
+struct Data {
+  float d;
+};
+
+kernel void a(device Data& data [[buffer(0)]]) {
+  float v = data.d;
+  return;
+}
+
+kernel void b(device Data& data [[buffer(0)]]) {
+  float v = data.d;
+  return;
+}
 
 )");
 }

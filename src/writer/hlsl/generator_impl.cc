@@ -135,13 +135,14 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
+  std::unordered_set<std::string> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
   for (const auto& func : module_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
 
-    if (!EmitEntryPointData(out, func.get())) {
+    if (!EmitEntryPointData(out, func.get(), emitted_globals)) {
       return false;
     }
   }
@@ -1136,7 +1137,10 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
+bool GeneratorImpl::EmitEntryPointData(
+    std::ostream& out,
+    ast::Function* func,
+    std::unordered_set<std::string>& emitted_globals) {
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
   for (auto data : func->referenced_location_variables()) {
@@ -1174,6 +1178,13 @@ bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
     }
     // auto* set = data.second.set;
 
+    // If the global has already been emitted we skip it, it's been emitted by
+    // a previous entry point.
+    if (emitted_globals.count(var->name()) != 0) {
+      continue;
+    }
+    emitted_globals.insert(var->name());
+
     auto* type = var->type()->UnwrapIfNeeded();
     if (type->IsStruct()) {
       auto* strct = type->AsStruct();
@@ -1209,6 +1220,13 @@ bool GeneratorImpl::EmitEntryPointData(std::ostream& out, ast::Function* func) {
   for (auto data : func->referenced_storagebuffer_variables()) {
     auto* var = data.first;
     auto* binding = data.second.binding;
+
+    // If the global has already been emitted we skip it, it's been emitted by
+    // a previous entry point.
+    if (emitted_globals.count(var->name()) != 0) {
+      continue;
+    }
+    emitted_globals.insert(var->name());
 
     if (!var->type()->IsAccessControl()) {
       error_ = "access control type required for storage buffer";

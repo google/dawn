@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <unordered_set>
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/decorated_variable.h"
@@ -88,8 +89,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(result(), R"(struct vtx_main_in {
   float foo : TEXCOORD0;
   int bar : TEXCOORD1;
@@ -147,8 +151,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(result(), R"(struct vtx_main_out {
   float foo : TEXCOORD0;
   int bar : TEXCOORD1;
@@ -205,8 +212,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(result(), R"(struct main_in {
   float foo : TEXCOORD0;
   int bar : TEXCOORD1;
@@ -263,8 +273,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(result(), R"(struct main_out {
   float foo : SV_Target0;
   int bar : SV_Target1;
@@ -318,8 +331,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_FALSE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_FALSE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(gen().error(), R"(invalid location variable for pipeline stage)");
 }
 
@@ -368,8 +384,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_FALSE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_FALSE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(gen().error(), R"(invalid location variable for pipeline stage)");
 }
 
@@ -429,8 +448,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod()->AddFunction(std::move(func));
 
+  std::unordered_set<std::string> globals;
+
   ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr)) << gen().error();
+  ASSERT_TRUE(gen().EmitEntryPointData(out(), func_ptr, globals))
+      << gen().error();
   EXPECT_EQ(result(), R"(struct main_in {
   vector<float, 4> coord : SV_Position;
 };
