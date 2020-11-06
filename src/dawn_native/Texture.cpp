@@ -192,7 +192,7 @@ namespace dawn_native {
             constexpr wgpu::TextureUsage kValidCompressedUsages = wgpu::TextureUsage::Sampled |
                                                                   wgpu::TextureUsage::CopySrc |
                                                                   wgpu::TextureUsage::CopyDst;
-            if (format->isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
+            if (format->isCompressed && !IsSubset(descriptor->usage, kValidCompressedUsages)) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
             }

@@ -308,7 +308,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
             }
 
-            bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
+            bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
 
             if (pass.passType == PassType::Render && !readOnly && !singleUse) {
@@ -332,7 +332,7 @@ namespace dawn_native {
             // The usage variable for the whole texture is a fast path for texture usage tracking.
             // Because in most cases a texture (with or without subresources) is used as
             // single-write or multiple read, then we can skip iterating the subresources' usages.
-            bool readOnly = (usage & kReadOnlyTextureUsages) == usage;
+            bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
             if (pass.passType != PassType::Render || readOnly || singleUse) {
                 continue;
@@ -340,7 +340,7 @@ namespace dawn_native {
             // Inspect the subresources if the usage of the whole texture violates usage validation.
             // Every single subresource can only be used as single-write or multiple read.
             for (wgpu::TextureUsage subresourceUsage : textureUsage.subresourceUsages) {
-                bool readOnly = (subresourceUsage & kReadOnlyTextureUsages) == subresourceUsage;
+                bool readOnly = IsSubset(subresourceUsage, kReadOnlyTextureUsages);
                 bool singleUse = wgpu::HasZeroOrOneBits(subresourceUsage);
                 if (!readOnly && !singleUse) {
                     return DAWN_VALIDATION_ERROR(

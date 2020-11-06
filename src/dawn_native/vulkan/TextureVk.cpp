@@ -802,7 +802,7 @@ namespace dawn_native { namespace vulkan {
 
     bool Texture::CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::TextureUsage usage) {
         // Reuse the texture directly and avoid encoding barriers when it isn't needed.
-        bool lastReadOnly = (lastUsage & kReadOnlyTextureUsages) == lastUsage;
+        bool lastReadOnly = IsSubset(lastUsage, kReadOnlyTextureUsages);
         if (lastReadOnly && lastUsage == usage && mLastExternalState == mExternalState) {
             return true;
         }

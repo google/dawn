@@ -221,7 +221,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         // We can skip transitions to already current usages.
-        if ((mLastUsage & newUsage) == newUsage) {
+        if (IsSubset(newUsage, mLastUsage)) {
             return false;
         }
 

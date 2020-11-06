@@ -121,7 +121,7 @@ namespace dawn_native {
 
             const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& requiredVertexBuffers =
                 mLastRenderPipeline->GetVertexBufferSlotsUsed();
-            if ((mVertexBufferSlotsUsed & requiredVertexBuffers) == requiredVertexBuffers) {
+            if (IsSubset(requiredVertexBuffers, mVertexBufferSlotsUsed)) {
                 mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             }
         }

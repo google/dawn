@@ -650,7 +650,7 @@ namespace dawn_native { namespace d3d12 {
                 D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
             if (lastState == D3D12_RESOURCE_STATE_COMMON) {
-                if (newState == (newState & kD3D12PromotableReadOnlyStates)) {
+                if (IsSubset(newState, kD3D12PromotableReadOnlyStates)) {
                     // Implicit texture state decays can only occur when the texture was implicitly
                     // transitioned to a read-only state. isValidToDecay is needed to differentiate
                     // between resources that were implictly or explicitly transitioned to a

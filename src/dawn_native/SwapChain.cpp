@@ -318,7 +318,7 @@ namespace dawn_native {
 
         // Check that the return texture view matches exactly what was given for this descriptor.
         ASSERT(view->GetTexture()->GetFormat().format == mFormat);
-        ASSERT((view->GetTexture()->GetUsage() & mUsage) == mUsage);
+        ASSERT(IsSubset(mUsage, view->GetTexture()->GetUsage()));
         ASSERT(view->GetLevelCount() == 1);
         ASSERT(view->GetLayerCount() == 1);
         ASSERT(view->GetDimension() == wgpu::TextureViewDimension::e2D);

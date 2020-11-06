@@ -144,7 +144,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Binding type cannot be dynamic.");
             }
 
-            if ((entry.visibility & allowedStages) != entry.visibility) {
+            if (!IsSubset(entry.visibility, allowedStages)) {
                 return DAWN_VALIDATION_ERROR("Binding type cannot be used with this visibility.");
             }
 

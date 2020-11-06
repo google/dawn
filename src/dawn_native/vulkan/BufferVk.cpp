@@ -214,8 +214,8 @@ namespace dawn_native { namespace vulkan {
                                                       VkBufferMemoryBarrier* barrier,
                                                       VkPipelineStageFlags* srcStages,
                                                       VkPipelineStageFlags* dstStages) {
-        bool lastIncludesTarget = (mLastUsage & usage) == usage;
-        bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
+        bool lastIncludesTarget = IsSubset(usage, mLastUsage);
+        bool lastReadOnly = IsSubset(mLastUsage, kReadOnlyBufferUsages);
 
         // We can skip transitions to already current read-only usages.
         if (lastIncludesTarget && lastReadOnly) {

@@ -44,8 +44,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
                                 VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
         mSupported =
-            mSupported &&
-            ((semaphoreProperties.externalSemaphoreFeatures & requiredFlags) == requiredFlags);
+            mSupported && IsSubset(requiredFlags, semaphoreProperties.externalSemaphoreFeatures);
     }
 
     Service::~Service() = default;

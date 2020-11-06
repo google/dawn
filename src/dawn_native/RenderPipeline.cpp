@@ -332,7 +332,7 @@ namespace dawn_native {
 
         const EntryPointMetadata& vertexMetadata =
             descriptor->vertexStage.module->GetEntryPoint(descriptor->vertexStage.entryPoint);
-        if ((vertexMetadata.usedVertexAttributes & ~attributesSetMask).any()) {
+        if (!IsSubset(vertexMetadata.usedVertexAttributes, attributesSetMask)) {
             return DAWN_VALIDATION_ERROR(
                 "Pipeline vertex stage uses vertex buffers not in the vertex state");
         }

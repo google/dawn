@@ -340,7 +340,7 @@ namespace dawn_native { namespace vulkan {
         VkImageUsageFlags targetUsages =
             VulkanImageUsage(GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
         VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
-        if ((supportedUsages & targetUsages) != targetUsages) {
+        if (!IsSubset(targetUsages, supportedUsages)) {
             config.needsBlit = true;
         } else {
             config.usage = targetUsages;
