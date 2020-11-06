@@ -78,6 +78,11 @@ class Inspector {
   std::vector<ResourceBinding> GetSamplerResourceBindings(
       const std::string& entry_point);
 
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for comparison samplers.
+  std::vector<ResourceBinding> GetComparisonSamplerResourceBindings(
+      const std::string& entry_point);
+
  private:
   const ast::Module& module_;
   std::string error_;

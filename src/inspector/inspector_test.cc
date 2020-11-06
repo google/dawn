@@ -42,6 +42,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -454,6 +455,15 @@ class InspectorHelper {
     return std::make_unique<ast::type::SampledTextureType>(dim, type);
   }
 
+  /// Generates a DepthTextureType appropriate for the params
+  /// @param dim the dimensions of the texture
+  /// @param type the data type of the sampled texture
+  /// @returns the generated DepthTextureType
+  std::unique_ptr<ast::type::DepthTextureType> MakeDepthTextureType(
+      ast::type::TextureDimension dim) {
+    return std::make_unique<ast::type::DepthTextureType>(dim);
+  }
+
   /// Adds a sampled texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
@@ -471,6 +481,20 @@ class InspectorHelper {
         name, ast::StorageClass::kUniformConstant, f32_type()));
   }
 
+  /// Adds a depth texture variable to the module
+  /// @param name the name of the variable
+  /// @param type the type to use
+  void AddDepthTexture(const std::string& name, ast::type::Type* type) {
+    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+        name, ast::StorageClass::kUniformConstant, type));
+  }
+
+  /// Generates a function that references a specific sampler variable
+  /// @param func_name name of the function created
+  /// @param texture_name name of the texture to be sampled
+  /// @param sampler_name name of the sampler to use
+  /// @param coords_name name of the coords variable to use
+  /// @returns a function that references all of the values specified
   std::unique_ptr<ast::Function> MakeSamplerReferenceBodyFunction(
       const std::string& func_name,
       const std::string& texture_name,
@@ -494,6 +518,53 @@ class InspectorHelper {
         std::make_unique<ast::IdentifierExpression>(coords_name));
     auto call_expr = std::make_unique<ast::CallExpression>(
         std::make_unique<ast::IdentifierExpression>("textureSample"),
+        std::move(call_params));
+
+    body->append(std::make_unique<ast::AssignmentStatement>(
+        std::make_unique<ast::IdentifierExpression>("sampler_result"),
+        std::move(call_expr)));
+    body->append(std::make_unique<ast::ReturnStatement>());
+
+    auto func = std::make_unique<ast::Function>(func_name, ast::VariableList(),
+                                                void_type());
+    func->set_body(std::move(body));
+    return func;
+  }
+
+  /// Generates a function that references a specific comparison sampler
+  /// variable.
+  /// @param func_name name of the function created
+  /// @param texture_name name of the depth texture to  use
+  /// @param sampler_name name of the sampler to use
+  /// @param coords_name name of the coords variable to use
+  /// @param depth_name name of the depth reference to use
+  /// @returns a function that references all of the values specified
+  std::unique_ptr<ast::Function> MakeComparisonSamplerReferenceBodyFunction(
+      const std::string& func_name,
+      const std::string& texture_name,
+      const std::string& sampler_name,
+      const std::string& coords_name,
+      const std::string& depth_name) {
+    std::string result_name = "sampler_result";
+
+    auto body = std::make_unique<ast::BlockStatement>();
+
+    auto call_result = std::make_unique<ast::Variable>(
+        "sampler_result", ast::StorageClass::kFunction, f32_type());
+    body->append(
+        std::make_unique<ast::VariableDeclStatement>(std::move(call_result)));
+
+    ast::ExpressionList call_params;
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(texture_name));
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(sampler_name));
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(coords_name));
+    call_params.push_back(
+        std::make_unique<ast::IdentifierExpression>(depth_name));
+    auto call_expr = std::make_unique<ast::CallExpression>(
+        std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
         std::move(call_params));
 
     body->append(std::make_unique<ast::AssignmentStatement>(
@@ -556,6 +627,8 @@ class InspectorGetStorageBufferResourceBindingsTest : public InspectorTest {};
 class InspectorGetReadOnlyStorageBufferResourceBindingsTest
     : public InspectorTest {};
 class InspectorGetSamplerResourceBindingsTest : public InspectorTest {};
+class InspectorGetComparisonSamplerResourceBindingsTest : public InspectorTest {
+};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   auto result = inspector()->GetEntryPoints();
@@ -1614,6 +1687,134 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 
   auto result = inspector()->GetSamplerResourceBindings("foo");
   ASSERT_TRUE(inspector()->has_error()) << inspector()->error();
+}
+
+TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
+  auto depth_texture_type =
+      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  AddDepthTexture("foo_texture", depth_texture_type.get());
+  AddComparisonSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+  AddF32("foo_depth");
+
+  auto func = MakeComparisonSamplerReferenceBodyFunction(
+      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
+  auto depth_texture_type =
+      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  AddDepthTexture("foo_texture", depth_texture_type.get());
+  AddComparisonSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+  AddF32("foo_depth");
+
+  auto func = MakeComparisonSamplerReferenceBodyFunction(
+      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetComparisonSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(1u, result[0].binding);
+}
+
+TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
+  auto func = MakeEmptyBodyFunction("ep_func");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetComparisonSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
+  auto depth_texture_type =
+      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  AddDepthTexture("foo_texture", depth_texture_type.get());
+  AddComparisonSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+  AddF32("foo_depth");
+
+  auto foo_func = MakeComparisonSamplerReferenceBodyFunction(
+      "foo_func", "foo_texture", "foo_sampler", "foo_coords", "foo_depth");
+  mod()->AddFunction(std::move(foo_func));
+
+  auto ep_func = MakeCallerBodyFunction("ep_func", "foo_func");
+  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(ep_func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetComparisonSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(1u, result[0].binding);
+}
+
+TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
+  auto depth_texture_type =
+      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  AddDepthTexture("foo_texture", depth_texture_type.get());
+  AddComparisonSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+  AddF32("foo_depth");
+
+  auto func = MakeComparisonSamplerReferenceBodyFunction(
+      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSamplerResourceBindings("foo");
+  ASSERT_TRUE(inspector()->has_error()) << inspector()->error();
+}
+
+TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
+  auto sampled_texture_type =
+      MakeSampledTextureType(ast::type::TextureDimension::k1d, f32_type());
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+
+  auto func = MakeSamplerReferenceBodyFunction("ep", "foo_texture",
+                                               "foo_sampler", "foo_coords");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetComparisonSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(0u, result.size());
 }
 
 }  // namespace
