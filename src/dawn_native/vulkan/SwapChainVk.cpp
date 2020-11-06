@@ -166,6 +166,18 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
+            switch (mode) {
+                case VK_PRESENT_MODE_FIFO_KHR:
+                case VK_PRESENT_MODE_IMMEDIATE_KHR:
+                    return 2;
+                case VK_PRESENT_MODE_MAILBOX_KHR:
+                    return 3;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
     }  // anonymous namespace
 
     // static
@@ -242,7 +254,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.surface = mVkSurface;
-        createInfo.minImageCount = 3;                                    // TODO
+        createInfo.minImageCount = mConfig.targetImageCount;
         createInfo.imageFormat = mConfig.format;
         createInfo.imageColorSpace = mConfig.colorSpace;
         createInfo.imageExtent = mConfig.extent;
@@ -251,8 +263,8 @@ namespace dawn_native { namespace vulkan {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
-        createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;  // TODO
-        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;    // TODO
+        createInfo.preTransform = mConfig.transform;
+        createInfo.compositeAlpha = mConfig.alphaMode;
         createInfo.presentMode = mConfig.presentMode;
         createInfo.clipped = false;
         createInfo.oldSwapchain = previousVkSwapChain;
@@ -268,9 +280,6 @@ namespace dawn_native { namespace vulkan {
             device->fn.GetSwapchainImagesKHR(device->GetVkDevice(), mSwapChain, &count, nullptr),
             "GetSwapChainImages1"));
 
-        // TODO(cwallez@chromium.org): Figure out if we can only have more swapchain images, or also
-        // less than requested (and what should happen in that case).
-        ASSERT(count >= 3);
         mSwapChainImages.resize(count);
         DAWN_TRY(CheckVkSuccess(
             device->fn.GetSwapchainImagesKHR(device->GetVkDevice(), mSwapChain, &count,
@@ -354,6 +363,32 @@ namespace dawn_native { namespace vulkan {
         config.format = VK_FORMAT_B8G8R8A8_UNORM;
         config.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
         config.wgpuFormat = wgpu::TextureFormat::BGRA8Unorm;
+
+        // Only the identity transform with opaque alpha is supported for now.
+        if ((surfaceInfo.capabilities.supportedTransforms &
+             VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) == 0) {
+            return DAWN_VALIDATION_ERROR("Vulkan swapchain must support the identity transform");
+        }
+        config.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+
+        if ((surfaceInfo.capabilities.supportedCompositeAlpha &
+             VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0) {
+            return DAWN_VALIDATION_ERROR("Vulkan swapchain must support opaque alpha");
+        }
+        config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+        // Choose the number of images for the swapchain= and clamp it to the min and max from the
+        // surface capabilities. maxImageCount = 0 means there is no limit.
+        ASSERT(surfaceInfo.capabilities.maxImageCount == 0 ||
+               surfaceInfo.capabilities.minImageCount <= surfaceInfo.capabilities.maxImageCount);
+        uint32_t targetCount = MinImageCountForPresentMode(config.presentMode);
+
+        targetCount = std::max(targetCount, surfaceInfo.capabilities.minImageCount);
+        if (surfaceInfo.capabilities.maxImageCount != 0) {
+            targetCount = std::min(targetCount, surfaceInfo.capabilities.maxImageCount);
+        }
+
+        config.targetImageCount = targetCount;
 
         // Choose a valid config for the swapchain texture that will receive the blit.
         if (config.needsBlit) {

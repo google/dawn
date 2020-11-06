@@ -61,6 +61,9 @@ namespace dawn_native { namespace vulkan {
             VkImageUsageFlags usage;
             VkFormat format;
             VkColorSpaceKHR colorSpace;
+            uint32_t targetImageCount;
+            VkSurfaceTransformFlagBitsKHR transform;
+            VkCompositeAlphaFlagBitsKHR alphaMode;
 
             // Redundant information but as WebGPU enums to create the wgpu::Texture that
             // encapsulates the native swapchain texture.
