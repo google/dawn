@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/validator_test_helper.h"
+#include "src/validator/validator_test_helper.h"
 
 #include <memory>
 

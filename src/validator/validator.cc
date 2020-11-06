@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/validator.h"
+#include "src/validator/validator.h"
 
-#include "src/validator_impl.h"
+#include "src/validator/validator_impl.h"
 
 namespace tint {
 

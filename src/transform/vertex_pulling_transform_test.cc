@@ -26,7 +26,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
-#include "src/validator.h"
+#include "src/validator/validator.h"
 
 namespace tint {
 namespace transform {

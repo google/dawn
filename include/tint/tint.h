@@ -28,7 +28,7 @@
 #include "src/transform/vertex_pulling_transform.h"
 #include "src/type_determiner.h"
 #include "src/type_manager.h"
-#include "src/validator.h"
+#include "src/validator/validator.h"
 #include "src/writer/writer.h"
 
 #if TINT_BUILD_SPV_READER

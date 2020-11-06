@@ -231,12 +231,12 @@ set(TINT_LIB_SRCS
   type_determiner.h
   type_manager.cc
   type_manager.h
-  validator.cc
-  validator.h
-  validator_impl.cc
-  validator_impl.h
-  validator_test_helper.cc
-  validator_test_helper.h
+  validator/validator.cc
+  validator/validator.h
+  validator/validator_impl.cc
+  validator/validator_impl.h
+  validator/validator_test_helper.cc
+  validator/validator_test_helper.h
   writer/text.cc
   writer/text.h
   writer/text_generator.cc
@@ -404,9 +404,9 @@ set(TINT_TEST_SRCS
   transform/vertex_pulling_transform_test.cc
   type_determiner_test.cc
   type_manager_test.cc
-  validator_control_block_test.cc
-  validator_function_test.cc
-  validator_test.cc
+  validator/validator_control_block_test.cc
+  validator/validator_function_test.cc
+  validator/validator_test.cc
 )
 
 ## Tint library

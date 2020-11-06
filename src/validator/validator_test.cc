@@ -52,8 +52,8 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/type_determiner.h"
-#include "src/validator_impl.h"
-#include "src/validator_test_helper.h"
+#include "src/validator/validator_impl.h"
+#include "src/validator/validator_test_helper.h"
 
 namespace tint {
 namespace {

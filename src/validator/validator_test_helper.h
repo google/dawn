@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_VALIDATOR_TEST_HELPER_H_
-#define SRC_VALIDATOR_TEST_HELPER_H_
+#ifndef SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
+#define SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 
 #include <memory>
 
 #include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
-#include "src/validator_impl.h"
+#include "src/validator/validator_impl.h"
 
 namespace tint {
 
@@ -50,4 +50,4 @@ class ValidatorTestHelper {
 
 }  // namespace tint
 
-#endif  // SRC_VALIDATOR_TEST_HELPER_H_
+#endif  // SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_

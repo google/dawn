@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_VALIDATOR_H_
-#define SRC_VALIDATOR_H_
+#ifndef SRC_VALIDATOR_VALIDATOR_H_
+#define SRC_VALIDATOR_VALIDATOR_H_
 
 #include <memory>
 #include <string>
@@ -22,7 +22,7 @@
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
-#include "src/validator_impl.h"
+#include "src/validator/validator_impl.h"
 
 namespace tint {
 
@@ -55,4 +55,4 @@ class Validator {
 
 }  // namespace tint
 
-#endif  // SRC_VALIDATOR_H_
+#endif  // SRC_VALIDATOR_VALIDATOR_H_
