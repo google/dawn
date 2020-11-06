@@ -889,7 +889,7 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     wgpu::TextureCopyView textureCopyView =
         utils::CreateTextureCopyView(texture, level, {x, y, slice}, aspect);
     wgpu::BufferCopyView bufferCopyView =
-        utils::CreateBufferCopyView(readback.buffer, readback.offset, bytesPerRow, 0);
+        utils::CreateBufferCopyView(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
     wgpu::Extent3D copySize = {width, height, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

@@ -53,7 +53,7 @@ namespace utils {
     wgpu::BufferCopyView CreateBufferCopyView(wgpu::Buffer buffer,
                                               uint64_t offset,
                                               uint32_t bytesPerRow,
-                                              uint32_t rowsPerImage);
+                                              uint32_t rowsPerImage = wgpu::kStrideUndefined);
     wgpu::TextureCopyView CreateTextureCopyView(
         wgpu::Texture texture,
         uint32_t level,
@@ -61,7 +61,7 @@ namespace utils {
         wgpu::TextureAspect aspect = wgpu::TextureAspect::All);
     wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
                                                     uint32_t bytesPerRow,
-                                                    uint32_t rowsPerImage);
+                                                    uint32_t rowsPerImage = wgpu::kStrideUndefined);
 
     struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
       public:

@@ -127,6 +127,10 @@ namespace dawn_native {
             // formats are set exactly once.
             ASSERT(!formatsSet[index]);
 
+            // Vulkan describes bytesPerRow in units of texels. If there's any format for which this
+            // ASSERT isn't true, then additional validation on bytesPerRow must be added.
+            ASSERT((kTextureBytesPerRowAlignment % format.firstAspect.block.byteSize) == 0);
+
             table[index] = format;
             formatsSet.set(index);
         };

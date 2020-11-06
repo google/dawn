@@ -533,7 +533,7 @@ namespace dawn_native { namespace vulkan {
         // Copy |deviceWrappedTexture| into |copyDstBuffer|
         wgpu::TextureCopyView copySrc =
             utils::CreateTextureCopyView(deviceWrappedTexture, 0, {0, 0, 0});
-        wgpu::BufferCopyView copyDst = utils::CreateBufferCopyView(copyDstBuffer, 0, 256, 0);
+        wgpu::BufferCopyView copyDst = utils::CreateBufferCopyView(copyDstBuffer, 0, 256);
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
@@ -585,7 +585,7 @@ namespace dawn_native { namespace vulkan {
             utils::CreateBufferFromData(secondDevice, wgpu::BufferUsage::CopySrc, {0x04030201});
 
         // Copy |copySrcBuffer| into |secondDeviceWrappedTexture|
-        wgpu::BufferCopyView copySrc = utils::CreateBufferCopyView(copySrcBuffer, 0, 256, 0);
+        wgpu::BufferCopyView copySrc = utils::CreateBufferCopyView(copySrcBuffer, 0, 256);
         wgpu::TextureCopyView copyDst =
             utils::CreateTextureCopyView(secondDeviceWrappedTexture, 0, {0, 0, 0});
 
@@ -817,7 +817,7 @@ namespace dawn_native { namespace vulkan {
             wgpu::Buffer copySrcBuffer = utils::CreateBufferFromData(
                 secondDevice, data.data(), data.size(), wgpu::BufferUsage::CopySrc);
             wgpu::BufferCopyView copySrc =
-                utils::CreateBufferCopyView(copySrcBuffer, 0, bytesPerRow, 0);
+                utils::CreateBufferCopyView(copySrcBuffer, 0, bytesPerRow);
             wgpu::TextureCopyView copyDst =
                 utils::CreateTextureCopyView(wrappedTexture, 0, {0, 0, 0});
             wgpu::Extent3D copySize = {width, height, 1};
@@ -846,7 +846,7 @@ namespace dawn_native { namespace vulkan {
             wgpu::TextureCopyView copySrc =
                 utils::CreateTextureCopyView(nextWrappedTexture, 0, {0, 0, 0});
             wgpu::BufferCopyView copyDst =
-                utils::CreateBufferCopyView(copyDstBuffer, 0, bytesPerRow, 0);
+                utils::CreateBufferCopyView(copyDstBuffer, 0, bytesPerRow);
 
             wgpu::Extent3D copySize = {width, height, 1};
 

@@ -92,7 +92,7 @@ class CopyTextureForBrowserTests : public DawnTest {
             utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat,
                 {srcSpec.textureSize.width, srcSpec.textureSize.height, copySize.depth},
-                srcSpec.level, 0);
+                srcSpec.level);
 
         const std::vector<RGBA8> textureArrayCopyData = GetExpectedTextureData(copyLayout);
         wgpu::TextureCopyView textureCopyView =
@@ -101,7 +101,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         wgpu::TextureDataLayout textureDataLayout;
         textureDataLayout.offset = 0;
         textureDataLayout.bytesPerRow = copyLayout.bytesPerRow;
-        textureDataLayout.rowsPerImage = copyLayout.bytesPerImage / copyLayout.bytesPerRow;
+        textureDataLayout.rowsPerImage = copyLayout.rowsPerImage;
 
         device.GetDefaultQueue().WriteTexture(&textureCopyView, textureArrayCopyData.data(),
                                               textureArrayCopyData.size() * sizeof(RGBA8),

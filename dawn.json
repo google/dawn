@@ -1622,8 +1622,8 @@
         "extensible": true,
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
-            {"name": "bytes per row", "type": "uint32_t"},
-            {"name": "rows per image", "type": "uint32_t", "default": 0}
+            {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_STRIDE_UNDEFINED"},
+            {"name": "rows per image", "type": "uint32_t", "default": "WGPU_STRIDE_UNDEFINED"}
         ]
     },
     "texture descriptor": {

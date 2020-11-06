@@ -397,7 +397,6 @@ namespace dawn_native {
         uint32_t widthInBlocks = copySize.width / blockInfo.width;
         uint32_t heightInBlocks = copySize.height / blockInfo.height;
         uint64_t bytesInLastRow = Safe32x32(widthInBlocks, blockInfo.byteSize);
-        uint64_t bytesPerImage = Safe32x32(bytesPerRow, rowsPerImage);
 
         if (copySize.depth == 0) {
             return 0;
@@ -406,7 +405,7 @@ namespace dawn_native {
         // Check for potential overflows for the rest of the computations. We have the following
         // inequalities:
         //
-        //   lastRowBytes <= bytesPerRow
+        //   bytesInLastRow <= bytesPerRow
         //   heightInBlocks <= rowsPerImage
         //
         // So:
@@ -418,12 +417,16 @@ namespace dawn_native {
         //
         // This means that if the computation of depth * bytesPerImage doesn't overflow, none of the
         // computations for requiredBytesInCopy will. (and it's not a very pessimizing check)
+        ASSERT(copySize.depth <= 1 ||
+               (bytesPerRow != wgpu::kStrideUndefined && rowsPerImage != wgpu::kStrideUndefined));
+        uint64_t bytesPerImage = Safe32x32(bytesPerRow, rowsPerImage);
         if (bytesPerImage > std::numeric_limits<uint64_t>::max() / copySize.depth) {
             return DAWN_VALIDATION_ERROR("requiredBytesInCopy is too large.");
         }
 
         uint64_t requiredBytesInCopy = bytesPerImage * (copySize.depth - 1);
         if (heightInBlocks > 0) {
+            ASSERT(heightInBlocks <= 1 || bytesPerRow != wgpu::kStrideUndefined);
             uint64_t bytesInLastImage = Safe32x32(bytesPerRow, heightInBlocks - 1) + bytesInLastRow;
             requiredBytesInCopy += bytesInLastImage;
         }
@@ -442,40 +445,98 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateLinearTextureData(TextureDataLayout layout,
-                                         uint64_t byteSize,
-                                         const TexelBlockInfo& blockInfo,
-                                         const Extent3D& copyExtent) {
-        ASSERT(copyExtent.width % blockInfo.width == 0);
-        uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
-        ASSERT(copyExtent.height % blockInfo.height == 0);
-        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
+    TextureDataLayout FixUpDeprecatedTextureDataLayoutOptions(
+        DeviceBase* device,
+        const TextureDataLayout& originalLayout,
+        const TexelBlockInfo& blockInfo,
+        const Extent3D& copyExtent) {
+        // TODO(crbug.com/dawn/520): Remove deprecated functionality.
+        TextureDataLayout layout = originalLayout;
 
-        // Default value for rowsPerImage
-        if (layout.rowsPerImage == 0) {
-            layout.rowsPerImage = heightInBlocks;
-        }
-
-        // Validation for other members in layout:
-        ASSERT(Safe32x32(widthInBlocks, blockInfo.byteSize) <=
-               std::numeric_limits<uint32_t>::max());
-        uint32_t lastRowBytes = widthInBlocks * blockInfo.byteSize;
-        if (lastRowBytes > layout.bytesPerRow) {
-            if (copyExtent.height > 1 || copyExtent.depth > 1) {
-                return DAWN_VALIDATION_ERROR("The byte size of a row must be <= bytesPerRow.");
-            } else {
-                // bytesPerRow is unused. Populate it with a valid value for later validation.
-                layout.bytesPerRow = lastRowBytes;
+        if (copyExtent.height != 0 && layout.rowsPerImage == 0) {
+            if (copyExtent.depth > 1) {
+                device->EmitDeprecationWarning(
+                    "rowsPerImage soon must be non-zero if copy depth > 1 (it will no longer "
+                    "default to the copy height).");
+                ASSERT(copyExtent.height % blockInfo.height == 0);
+                uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
+                layout.rowsPerImage = heightInBlocks;
+            } else if (copyExtent.depth == 1) {
+                device->EmitDeprecationWarning(
+                    "rowsPerImage soon must be non-zero or unspecified if copy depth == 1 (it will "
+                    "no longer default to the copy height).");
+                layout.rowsPerImage = wgpu::kStrideUndefined;
             }
         }
 
-        // TODO(tommek@google.com): to match the spec there should be another condition here
-        // on rowsPerImage >= copyExtent.height if copyExtent.depth > 1.
+        // Only bother to fix-up for height == 1 && depth == 1.
+        // The other cases that used to be allowed were zero-size copies.
+        ASSERT(copyExtent.width % blockInfo.width == 0);
+        uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
+        uint32_t bytesInLastRow = widthInBlocks * blockInfo.byteSize;
+        if (copyExtent.height == 1 && copyExtent.depth == 1 &&
+            bytesInLastRow > layout.bytesPerRow) {
+            device->EmitDeprecationWarning(
+                "Soon, even if copy height == 1, bytesPerRow must be >= the byte size of each row "
+                "or left unspecified.");
+            layout.bytesPerRow = wgpu::kStrideUndefined;
+        }
+        return layout;
+    }
 
-        // Validation for the copy being in-bounds:
-        if (layout.rowsPerImage != 0 && layout.rowsPerImage < heightInBlocks) {
+    // Replace wgpu::kStrideUndefined with real values, so backends don't have to think about it.
+    void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
+                                              const TexelBlockInfo& blockInfo,
+                                              const Extent3D& copyExtent) {
+        ASSERT(layout != nullptr);
+        ASSERT(copyExtent.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
+
+        if (layout->bytesPerRow == wgpu::kStrideUndefined) {
+            ASSERT(copyExtent.width % blockInfo.width == 0);
+            uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
+            uint32_t bytesInLastRow = widthInBlocks * blockInfo.byteSize;
+
+            ASSERT(heightInBlocks <= 1 && copyExtent.depth <= 1);
+            layout->bytesPerRow = Align(bytesInLastRow, kTextureBytesPerRowAlignment);
+        }
+        if (layout->rowsPerImage == wgpu::kStrideUndefined) {
+            ASSERT(copyExtent.depth <= 1);
+            layout->rowsPerImage = heightInBlocks;
+        }
+    }
+
+    MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
+                                         uint64_t byteSize,
+                                         const TexelBlockInfo& blockInfo,
+                                         const Extent3D& copyExtent) {
+        ASSERT(copyExtent.height % blockInfo.height == 0);
+        uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
+
+        if (copyExtent.depth > 1 && (layout.bytesPerRow == wgpu::kStrideUndefined ||
+                                     layout.rowsPerImage == wgpu::kStrideUndefined)) {
             return DAWN_VALIDATION_ERROR(
-                "rowsPerImage must not be less than the copy height in blocks.");
+                "If copy depth > 1, bytesPerRow and rowsPerImage must be specified.");
+        }
+        if (heightInBlocks > 1 && layout.bytesPerRow == wgpu::kStrideUndefined) {
+            return DAWN_VALIDATION_ERROR("If heightInBlocks > 1, bytesPerRow must be specified.");
+        }
+
+        // Validation for other members in layout:
+        ASSERT(copyExtent.width % blockInfo.width == 0);
+        uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
+        ASSERT(Safe32x32(widthInBlocks, blockInfo.byteSize) <=
+               std::numeric_limits<uint32_t>::max());
+        uint32_t bytesInLastRow = widthInBlocks * blockInfo.byteSize;
+
+        // These != wgpu::kStrideUndefined checks are technically redundant with the > checks, but
+        // they should get optimized out.
+        if (layout.bytesPerRow != wgpu::kStrideUndefined && bytesInLastRow > layout.bytesPerRow) {
+            return DAWN_VALIDATION_ERROR("The byte size of each row must be <= bytesPerRow.");
+        }
+        if (layout.rowsPerImage != wgpu::kStrideUndefined && heightInBlocks > layout.rowsPerImage) {
+            return DAWN_VALIDATION_ERROR(
+                "The height of each image, in blocks, must be <= rowsPerImage.");
         }
 
         // We compute required bytes in copy after validating texel block alignments
@@ -499,8 +560,10 @@ namespace dawn_native {
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView) {
         DAWN_TRY(device->ValidateObject(bufferCopyView.buffer));
-        if (bufferCopyView.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
-            return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
+        if (bufferCopyView.layout.bytesPerRow != wgpu::kStrideUndefined) {
+            if (bufferCopyView.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
+                return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
+            }
         }
 
         return {};

@@ -99,38 +99,53 @@ namespace {
         // Different copies, including some that touch the OOB condition
         {
             // Copy 4x4 block in corner of first mip.
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {4, 4, 1});
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {0, 0, 0}, {4, 4, 1});
             // Copy 4x4 block in opposite corner of first mip.
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {12, 12, 0}, {4, 4, 1});
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {12, 12, 0}, {4, 4, 1});
             // Copy 4x4 block in the 4x4 mip.
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 2, {0, 0, 0}, {4, 4, 1});
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 2, {0, 0, 0}, {4, 4, 1});
             // Copy with a data offset
-            TestWriteTexture(dataSize, dataSize - 4, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1});
+            TestWriteTexture(dataSize, dataSize - 4, 256, 1, destination, 0, {0, 0, 0}, {1, 1, 1});
+            TestWriteTexture(dataSize, dataSize - 4, 256, wgpu::kStrideUndefined, destination, 0,
+                             {0, 0, 0}, {1, 1, 1});
         }
 
         // Copies with a 256-byte aligned bytes per row but unaligned texture region
         {
             // Unaligned region
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {3, 4, 1});
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {0, 0, 0}, {3, 4, 1});
             // Unaligned region with texture offset
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {5, 7, 0}, {2, 3, 1});
+            TestWriteTexture(dataSize, 0, 256, 3, destination, 0, {5, 7, 0}, {2, 3, 1});
             // Unaligned region, with data offset
-            TestWriteTexture(dataSize, 31 * 4, 256, 0, destination, 0, {0, 0, 0}, {3, 3, 1});
+            TestWriteTexture(dataSize, 31 * 4, 256, 3, destination, 0, {0, 0, 0}, {3, 3, 1});
         }
 
         // Empty copies are valid
         {
             // An empty copy
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
+            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+                             {0, 0, 1});
             // An empty copy with depth = 0
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 0});
+            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+                             {0, 0, 0});
             // An empty copy touching the end of the data
             TestWriteTexture(dataSize, dataSize, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
+            TestWriteTexture(dataSize, dataSize, 0, wgpu::kStrideUndefined, destination, 0,
+                             {0, 0, 0}, {0, 0, 1});
             // An empty copy touching the side of the texture
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {16, 16, 0}, {0, 0, 1});
+            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {16, 16, 0},
+                             {0, 0, 1});
             // An empty copy with depth = 1 and bytesPerRow > 0
             TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
+            TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+                             {0, 0, 1});
             // An empty copy with height > 0, depth = 0, bytesPerRow > 0 and rowsPerImage > 0
+            TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+                             {0, 1, 0});
+            TestWriteTexture(dataSize, 0, 256, 1, destination, 0, {0, 0, 0}, {0, 1, 0});
             TestWriteTexture(dataSize, 0, 256, 16, destination, 0, {0, 0, 0}, {0, 1, 0});
         }
     }
@@ -144,15 +159,15 @@ namespace {
 
         // OOB on the data because we copy too many pixels
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {4, 5, 1}));
+            TestWriteTexture(dataSize, 0, 256, 5, destination, 0, {0, 0, 0}, {4, 5, 1}));
 
         // OOB on the data because of the offset
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 4, 256, 0, destination, 0, {0, 0, 0}, {4, 4, 1}));
+            TestWriteTexture(dataSize, 4, 256, 4, destination, 0, {0, 0, 0}, {4, 4, 1}));
 
         // OOB on the data because utils::RequiredBytesInCopy overflows
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 512, 0, destination, 0, {0, 0, 0}, {4, 3, 1}));
+            TestWriteTexture(dataSize, 0, 512, 3, destination, 0, {0, 0, 0}, {4, 3, 1}));
 
         // Not OOB on the data although bytes per row * height overflows
         // but utils::RequiredBytesInCopy * depth does not overflow
@@ -161,7 +176,7 @@ namespace {
                 utils::RequiredBytesInCopy(256, 0, {7, 3, 1}, wgpu::TextureFormat::RGBA8Unorm);
             ASSERT_TRUE(256 * 3 > sourceDataSize) << "bytes per row * height should overflow data";
 
-            TestWriteTexture(sourceDataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {7, 3, 1});
+            TestWriteTexture(sourceDataSize, 0, 256, 3, destination, 0, {0, 0, 0}, {7, 3, 1});
         }
     }
 
@@ -174,15 +189,15 @@ namespace {
 
         // OOB on the texture because x + width overflows
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {13, 12, 0}, {4, 4, 1}));
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {13, 12, 0}, {4, 4, 1}));
 
         // OOB on the texture because y + width overflows
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {12, 13, 0}, {4, 4, 1}));
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {12, 13, 0}, {4, 4, 1}));
 
         // OOB on the texture because we overflow a non-zero mip
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 2, {1, 0, 0}, {4, 4, 1}));
+            TestWriteTexture(dataSize, 0, 256, 4, destination, 2, {1, 0, 0}, {4, 4, 1}));
 
         // OOB on the texture even on an empty copy when we copy to a non-existent mip.
         ASSERT_DEVICE_ERROR(
@@ -214,68 +229,91 @@ namespace {
 
         // Incorrect destination usage
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, sampled, 0, {0, 0, 0}, {4, 4, 1}));
+            TestWriteTexture(dataSize, 0, 256, 4, sampled, 0, {0, 0, 0}, {4, 4, 1}));
     }
 
     // Test incorrect values of bytesPerRow and that values not divisible by 256 are allowed.
-    TEST_F(QueueWriteTextureValidationTest, BytesPerRowLimitations) {
-        wgpu::Texture destination = Create2DTexture({3, 7, 1}, 1, wgpu::TextureFormat::RGBA8Unorm,
+    TEST_F(QueueWriteTextureValidationTest, BytesPerRowConstraints) {
+        wgpu::Texture destination = Create2DTexture({3, 7, 2}, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // bytesPerRow = 0
+        // bytesPerRow = 0 or wgpu::kStrideUndefined
         {
             // copyHeight > 1
             ASSERT_DEVICE_ERROR(
-                TestWriteTexture(128, 0, 0, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+                TestWriteTexture(128, 0, 0, 7, destination, 0, {0, 0, 0}, {3, 7, 1}));
+            TestWriteTexture(128, 0, 0, 7, destination, 0, {0, 0, 0}, {0, 7, 1});
+            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kStrideUndefined, 7, destination, 0,
+                                                 {0, 0, 0}, {0, 7, 1}));
 
             // copyDepth > 1
             ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 2}));
+            TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {0, 1, 2});
+            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kStrideUndefined, 1, destination, 0,
+                                                 {0, 0, 0}, {0, 1, 2}));
 
             // copyHeight = 1 and copyDepth = 1
-            TestWriteTexture(128, 0, 0, 0, destination, 0, {0, 0, 0}, {3, 1, 1});
+            // TODO(crbug.com/dawn/520): Change to ASSERT_DEVICE_ERROR.
+            EXPECT_DEPRECATION_WARNING(
+                TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 1}));
+            TestWriteTexture(128, 0, wgpu::kStrideUndefined, 1, destination, 0, {0, 0, 0},
+                             {3, 1, 1});
         }
 
         // bytesPerRow = 11 is invalid since a row takes 12 bytes.
         {
             // copyHeight > 1
             ASSERT_DEVICE_ERROR(
-                TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 7, 1}));
+                TestWriteTexture(128, 0, 11, 7, destination, 0, {0, 0, 0}, {3, 7, 1}));
+            // copyHeight == 0
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 0, 1}));
 
             // copyDepth > 1
             ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 2}));
+            // copyDepth == 0
+            ASSERT_DEVICE_ERROR(
+                TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 0}));
 
             // copyHeight = 1 and copyDepth = 1
-            TestWriteTexture(128, 0, 11, 0, destination, 0, {0, 0, 0}, {3, 1, 1});
+            // TODO(crbug.com/dawn/520): Change to ASSERT_DEVICE_ERROR. bytesPerRow used to be only
+            // validated if height > 1 || depth > 1.
+            EXPECT_DEPRECATION_WARNING(
+                TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 1}));
         }
 
         // bytesPerRow = 12 is valid since a row takes 12 bytes.
-        TestWriteTexture(128, 0, 12, 0, destination, 0, {0, 0, 0}, {3, 7, 1});
+        TestWriteTexture(128, 0, 12, 7, destination, 0, {0, 0, 0}, {3, 7, 1});
 
         // bytesPerRow = 13 is valid since a row takes 12 bytes.
-        TestWriteTexture(128, 0, 13, 0, destination, 0, {0, 0, 0}, {3, 7, 1});
+        TestWriteTexture(128, 0, 13, 7, destination, 0, {0, 0, 0}, {3, 7, 1});
     }
 
     // Test that if rowsPerImage is greater than 0, it must be at least copy height.
-    TEST_F(QueueWriteTextureValidationTest, ImageHeightConstraint) {
+    TEST_F(QueueWriteTextureValidationTest, RowsPerImageConstraints) {
         uint64_t dataSize =
-            utils::RequiredBytesInCopy(256, 0, {4, 4, 1}, wgpu::TextureFormat::RGBA8Unorm);
-        wgpu::Texture destination = Create2DTexture({16, 16, 1}, 1, wgpu::TextureFormat::RGBA8Unorm,
+            utils::RequiredBytesInCopy(256, 5, {4, 4, 2}, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::Texture destination = Create2DTexture({16, 16, 2}, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // Image height is zero (Valid)
-        TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {4, 4, 1});
+        // rowsPerImage is wgpu::kStrideUndefined
+        TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+                         {4, 4, 1});
 
-        // Image height is equal to copy height (Valid)
+        // rowsPerImage is equal to copy height (Valid)
         TestWriteTexture(dataSize, 0, 256, 4, destination, 0, {0, 0, 0}, {4, 4, 1});
 
-        // Image height is larger than copy height (Valid)
+        // rowsPerImage is larger than copy height (Valid)
         TestWriteTexture(dataSize, 0, 256, 5, destination, 0, {0, 0, 0}, {4, 4, 1});
+        TestWriteTexture(dataSize, 0, 256, 5, destination, 0, {0, 0, 0}, {4, 4, 2});
 
-        // Image height is less than copy height (Invalid)
+        // rowsPerImage is less than copy height (Invalid)
         ASSERT_DEVICE_ERROR(
             TestWriteTexture(dataSize, 0, 256, 3, destination, 0, {0, 0, 0}, {4, 4, 1}));
+        EXPECT_DEPRECATION_WARNING(
+            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {4, 4, 1}));
     }
 
     // Test WriteTexture with data offset
@@ -286,12 +324,12 @@ namespace {
                                                     wgpu::TextureUsage::CopyDst);
 
         // Offset aligned
-        TestWriteTexture(dataSize, dataSize - 4, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1});
+        TestWriteTexture(dataSize, dataSize - 4, 256, 1, destination, 0, {0, 0, 0}, {1, 1, 1});
         // Offset not aligned
-        TestWriteTexture(dataSize, dataSize - 5, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1});
+        TestWriteTexture(dataSize, dataSize - 5, 256, 1, destination, 0, {0, 0, 0}, {1, 1, 1});
         // Offset+size too large
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, dataSize - 3, 256, 0, destination, 0, {0, 0, 0}, {1, 1, 1}));
+            TestWriteTexture(dataSize, dataSize - 3, 256, 1, destination, 0, {0, 0, 0}, {1, 1, 1}));
     }
 
     // Test multisampled textures can be used in WriteTexture.
@@ -302,7 +340,7 @@ namespace {
                                                     wgpu::TextureUsage::CopyDst, 4);
 
         ASSERT_DEVICE_ERROR(
-            TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {2, 2, 1}));
+            TestWriteTexture(dataSize, 0, 256, 2, destination, 0, {0, 0, 0}, {2, 2, 1}));
     }
 
     // Test that WriteTexture cannot be run with a destroyed texture.
@@ -366,7 +404,7 @@ namespace {
             for (wgpu::TextureFormat format : kFormats) {
                 wgpu::Texture destination =
                     Create2DTexture({kWidth, kHeight, 1}, 1, format, wgpu::TextureUsage::CopyDst);
-                ASSERT_DEVICE_ERROR(TestWriteTexture(kInvalidDataSize, 0, kBytesPerRow, 0,
+                ASSERT_DEVICE_ERROR(TestWriteTexture(kInvalidDataSize, 0, kBytesPerRow, kHeight,
                                                      destination, 0, {0, 0, 0},
                                                      {kWidth, kHeight, 1}));
             }
@@ -383,14 +421,14 @@ namespace {
                 // data size in this test.
                 {
                     uint32_t invalidDataSize = validDataSize - 1;
-                    ASSERT_DEVICE_ERROR(TestWriteTexture(invalidDataSize, 0, kBytesPerRow, 0,
+                    ASSERT_DEVICE_ERROR(TestWriteTexture(invalidDataSize, 0, kBytesPerRow, kHeight,
                                                          destination, 0, {0, 0, 0},
                                                          {kWidth, kHeight, 1}));
                 }
 
                 {
-                    TestWriteTexture(validDataSize, 0, kBytesPerRow, 0, destination, 0, {0, 0, 0},
-                                     {kWidth, kHeight, 1});
+                    TestWriteTexture(validDataSize, 0, kBytesPerRow, kHeight, destination, 0,
+                                     {0, 0, 0}, {kWidth, kHeight, 1});
                 }
             }
         }
@@ -406,19 +444,19 @@ namespace {
                             wgpu::TextureUsage::CopyDst);
 
         // Copy to top level mip map
-        TestWriteTexture(dataSize, 0, 256, 0, destination, maxMipmapLevel - 1, {0, 0, 0},
+        TestWriteTexture(dataSize, 0, 256, 1, destination, maxMipmapLevel - 1, {0, 0, 0},
                          {1, 1, 1});
         // Copy to high level mip map
-        TestWriteTexture(dataSize, 0, 256, 0, destination, maxMipmapLevel - 2, {0, 0, 0},
+        TestWriteTexture(dataSize, 0, 256, 1, destination, maxMipmapLevel - 2, {0, 0, 0},
                          {2, 1, 1});
         // Mip level out of range
-        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 0, destination, maxMipmapLevel,
+        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 1, destination, maxMipmapLevel,
                                              {0, 0, 0}, {1, 1, 1}));
         // Copy origin out of range
-        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 0, destination, maxMipmapLevel - 2,
+        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 1, destination, maxMipmapLevel - 2,
                                              {1, 0, 0}, {2, 1, 1}));
         // Copy size out of range
-        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 0, destination, maxMipmapLevel - 2,
+        ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, 256, 2, destination, maxMipmapLevel - 2,
                                              {0, 0, 0}, {2, 2, 1}));
     }
 
@@ -460,10 +498,10 @@ namespace {
             wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
                 {4, 4, 1}, 1, wgpu::TextureFormat::Depth32Float, wgpu::TextureUsage::CopyDst);
 
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All));
 
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1},
                                                  wgpu::TextureAspect::DepthOnly));
         }
@@ -473,10 +511,10 @@ namespace {
             wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
                 {4, 4, 1}, 1, wgpu::TextureFormat::Depth24Plus, wgpu::TextureUsage::CopyDst);
 
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::All));
 
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1},
                                                  wgpu::TextureAspect::DepthOnly));
         }
@@ -494,16 +532,16 @@ namespace {
                 {4, 4, 1}, 1, wgpu::TextureFormat::Depth24PlusStencil8,
                 wgpu::TextureUsage::CopyDst);
 
-            TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0, {0, 0, 0}, {4, 4, 1},
-                             wgpu::TextureAspect::StencilOnly);
+            TestWriteTexture(dataSize, 0, bytesPerRow, wgpu::kStrideUndefined, destination, 0,
+                             {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::StencilOnly);
 
             // And that it fails if the buffer is one byte too small
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize - 1, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize - 1, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1},
                                                  wgpu::TextureAspect::StencilOnly));
 
             // It is invalid to write just part of the subresource size
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 3, destination, 0,
                                                  {0, 0, 0}, {3, 3, 1},
                                                  wgpu::TextureAspect::StencilOnly));
         }
@@ -513,7 +551,7 @@ namespace {
             wgpu::Texture destination = QueueWriteTextureValidationTest::Create2DTexture(
                 {4, 4, 1}, 1, wgpu::TextureFormat::Depth24Plus, wgpu::TextureUsage::CopyDst);
 
-            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 0, destination, 0,
+            ASSERT_DEVICE_ERROR(TestWriteTexture(dataSize, 0, bytesPerRow, 4, destination, 0,
                                                  {0, 0, 0}, {4, 4, 1},
                                                  wgpu::TextureAspect::StencilOnly));
         }
@@ -608,14 +646,14 @@ namespace {
             // Valid usage of bytesPerRow in WriteTexture with compressed texture formats.
             {
                 constexpr uint32_t kValidBytesPerRow = 20;
-                TestWriteTexture(512, 0, kValidBytesPerRow, 0, texture, 0, {0, 0, 0}, {4, 4, 1});
+                TestWriteTexture(512, 0, kValidBytesPerRow, 4, texture, 0, {0, 0, 0}, {4, 4, 1});
             }
 
             // Valid bytesPerRow.
             // Note that image width is not a multiple of blockWidth.
             {
                 constexpr uint32_t kValidBytesPerRow = 17;
-                TestWriteTexture(512, 0, kValidBytesPerRow, 0, texture, 0, {0, 0, 0}, {4, 4, 1});
+                TestWriteTexture(512, 0, kValidBytesPerRow, 4, texture, 0, {0, 0, 0}, {4, 4, 1});
             }
         }
     }

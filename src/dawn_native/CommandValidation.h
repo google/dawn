@@ -51,7 +51,15 @@ namespace dawn_native {
                                                        uint32_t bytesPerRow,
                                                        uint32_t rowsPerImage);
 
-    MaybeError ValidateLinearTextureData(TextureDataLayout layout,
+    TextureDataLayout FixUpDeprecatedTextureDataLayoutOptions(
+        DeviceBase* device,
+        const TextureDataLayout& originalLayout,
+        const TexelBlockInfo& blockInfo,
+        const Extent3D& copyExtent);
+    void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
+                                              const TexelBlockInfo& blockInfo,
+                                              const Extent3D& copyExtent);
+    MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
                                          uint64_t byteSize,
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent);

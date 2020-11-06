@@ -580,28 +580,18 @@ namespace dawn_native {
             }
             const TexelBlockInfo& blockInfo =
                 destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
+            TextureDataLayout srcLayout = FixUpDeprecatedTextureDataLayoutOptions(
+                GetDevice(), source->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateLinearTextureCopyOffset(source->layout, blockInfo));
-                DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
-                                                   blockInfo, *copySize));
+                DAWN_TRY(ValidateLinearTextureCopyOffset(srcLayout, blockInfo));
+                DAWN_TRY(ValidateLinearTextureData(srcLayout, source->buffer->GetSize(), blockInfo,
+                                                   *copySize));
 
                 mTopLevelBuffers.insert(source->buffer);
                 mTopLevelTextures.insert(destination->texture);
             }
 
-            // Compute default value for rowsPerImage
-            uint32_t defaultedRowsPerImage = source->layout.rowsPerImage;
-            if (defaultedRowsPerImage == 0) {
-                ASSERT(copySize->height % blockInfo.height == 0);
-                defaultedRowsPerImage = copySize->height / blockInfo.height;
-            }
-
-            // In the case of one row copy bytesPerRow might not contain enough bytes
-            uint32_t bytesPerRow = source->layout.bytesPerRow;
-            if (copySize->height <= 1 && copySize->depth <= 1) {
-                bytesPerRow =
-                    Align(copySize->width * blockInfo.byteSize, kTextureBytesPerRowAlignment);
-            }
+            ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
 
             // Skip noop copies.
             if (copySize->width != 0 && copySize->height != 0 && copySize->depth != 0) {
@@ -609,9 +599,9 @@ namespace dawn_native {
                 CopyBufferToTextureCmd* copy =
                     allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
                 copy->source.buffer = source->buffer;
-                copy->source.offset = source->layout.offset;
-                copy->source.bytesPerRow = bytesPerRow;
-                copy->source.rowsPerImage = defaultedRowsPerImage;
+                copy->source.offset = srcLayout.offset;
+                copy->source.bytesPerRow = srcLayout.bytesPerRow;
+                copy->source.rowsPerImage = srcLayout.rowsPerImage;
                 copy->destination.texture = destination->texture;
                 copy->destination.origin = destination->origin;
                 copy->destination.mipLevel = destination->mipLevel;
@@ -645,28 +635,18 @@ namespace dawn_native {
             }
             const TexelBlockInfo& blockInfo =
                 source->texture->GetFormat().GetAspectInfo(source->aspect).block;
+            TextureDataLayout dstLayout = FixUpDeprecatedTextureDataLayoutOptions(
+                GetDevice(), destination->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateLinearTextureCopyOffset(destination->layout, blockInfo));
-                DAWN_TRY(ValidateLinearTextureData(
-                    destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
+                DAWN_TRY(ValidateLinearTextureCopyOffset(dstLayout, blockInfo));
+                DAWN_TRY(ValidateLinearTextureData(dstLayout, destination->buffer->GetSize(),
+                                                   blockInfo, *copySize));
 
                 mTopLevelTextures.insert(source->texture);
                 mTopLevelBuffers.insert(destination->buffer);
             }
 
-            // Compute default value for rowsPerImage
-            uint32_t defaultedRowsPerImage = destination->layout.rowsPerImage;
-            if (defaultedRowsPerImage == 0) {
-                ASSERT(copySize->height % blockInfo.height == 0);
-                defaultedRowsPerImage = copySize->height / blockInfo.height;
-            }
-
-            // In the case of one row copy bytesPerRow might not contain enough bytes
-            uint32_t bytesPerRow = destination->layout.bytesPerRow;
-            if (copySize->height <= 1 && copySize->depth <= 1) {
-                bytesPerRow =
-                    Align(copySize->width * blockInfo.byteSize, kTextureBytesPerRowAlignment);
-            }
+            ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
             // Skip noop copies.
             if (copySize->width != 0 && copySize->height != 0 && copySize->depth != 0) {
@@ -678,9 +658,9 @@ namespace dawn_native {
                 copy->source.mipLevel = source->mipLevel;
                 copy->source.aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
                 copy->destination.buffer = destination->buffer;
-                copy->destination.offset = destination->layout.offset;
-                copy->destination.bytesPerRow = bytesPerRow;
-                copy->destination.rowsPerImage = defaultedRowsPerImage;
+                copy->destination.offset = dstLayout.offset;
+                copy->destination.bytesPerRow = dstLayout.bytesPerRow;
+                copy->destination.rowsPerImage = dstLayout.rowsPerImage;
                 copy->copySize = *copySize;
             }
 

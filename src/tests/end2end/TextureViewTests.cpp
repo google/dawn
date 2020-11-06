@@ -134,7 +134,7 @@ class TextureViewSamplingTest : public DawnTest {
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(RGBA8), wgpu::BufferUsage::CopySrc);
                 wgpu::BufferCopyView bufferCopyView =
-                    utils::CreateBufferCopyView(stagingBuffer, 0, kTextureBytesPerRowAlignment, 0);
+                    utils::CreateBufferCopyView(stagingBuffer, 0, kTextureBytesPerRowAlignment);
                 wgpu::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(mTexture, level, {0, 0, layer});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};

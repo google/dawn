@@ -30,7 +30,7 @@ struct CopyConfig {
     uint32_t viewMipmapLevel = 0;
     uint32_t bufferOffset = 0;
     uint32_t bytesPerRowAlignment = kTextureBytesPerRowAlignment;
-    uint32_t rowsPerImage = 0;
+    uint32_t rowsPerImage = wgpu::kStrideUndefined;
 };
 
 class CompressedTextureBCFormatTest : public DawnTest {
@@ -60,7 +60,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                               utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
         uint32_t copyRowsPerImage = copyConfig.rowsPerImage;
-        if (copyRowsPerImage == 0) {
+        if (copyRowsPerImage == wgpu::kStrideUndefined) {
             copyRowsPerImage = copyHeightInBlock;
         }
         uint32_t copyBytesPerImage = copyBytesPerRow * copyRowsPerImage;
@@ -1028,6 +1028,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {8, 8, kArrayLayerCount};
+    config.rowsPerImage = 8;
 
     config.copyExtent3D = config.textureDescriptor.size;
     config.copyExtent3D.depth = kArrayLayerCount;
@@ -1054,6 +1055,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {8, 8, kArrayLayerCount};
+    config.rowsPerImage = 8;
 
     constexpr uint32_t kCopyBaseArrayLayer = 1;
     constexpr uint32_t kCopyLayerCount = 2;
@@ -1087,7 +1089,7 @@ TEST_P(CompressedTextureBCFormatTest, UnalignedDynamicUploader) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(buffer, 0, 256, 0);
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(buffer, 0, 256);
     wgpu::Extent3D copyExtent = {4, 4, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

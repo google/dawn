@@ -44,8 +44,12 @@ namespace utils {
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
 
-        uint32_t appliedRowsPerImage = rowsPerImage > 0 ? rowsPerImage : layout.mipSize.height;
-        layout.bytesPerImage = layout.bytesPerRow * appliedRowsPerImage;
+        if (rowsPerImage == wgpu::kStrideUndefined) {
+            rowsPerImage = layout.mipSize.height;
+        }
+        layout.rowsPerImage = rowsPerImage;
+
+        layout.bytesPerImage = layout.bytesPerRow * rowsPerImage;
 
         // TODO(kainino@chromium.org): Remove this intermediate variable.
         // It is currently needed because of an issue in the D3D12 copy splitter
@@ -54,9 +58,9 @@ namespace utils {
         // the actual height.
         wgpu::Extent3D mipSizeWithHeightWorkaround = layout.mipSize;
         mipSizeWithHeightWorkaround.height =
-            appliedRowsPerImage * utils::GetTextureFormatBlockHeight(format);
+            rowsPerImage * utils::GetTextureFormatBlockHeight(format);
 
-        layout.byteLength = RequiredBytesInCopy(layout.bytesPerRow, appliedRowsPerImage,
+        layout.byteLength = RequiredBytesInCopy(layout.bytesPerRow, rowsPerImage,
                                                 mipSizeWithHeightWorkaround, format);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
@@ -120,7 +124,8 @@ namespace utils {
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 0, 0);
+        wgpu::TextureDataLayout textureDataLayout =
+            utils::CreateTextureDataLayout(0, wgpu::kStrideUndefined);
         wgpu::Extent3D copyExtent = {1, 1, 1};
 
         // WriteTexture with exactly 1 byte of data.

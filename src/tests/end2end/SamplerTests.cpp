@@ -104,7 +104,7 @@ class SamplerTest : public DawnTest {
 
         wgpu::Buffer stagingBuffer =
             utils::CreateBufferFromData(device, data, sizeof(data), wgpu::BufferUsage::CopySrc);
-        wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256, 0);
+        wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256);
         wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {2, 2, 1};
 

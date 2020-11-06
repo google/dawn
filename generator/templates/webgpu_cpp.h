@@ -20,6 +20,7 @@
 namespace wgpu {
 
     static constexpr uint64_t kWholeSize = WGPU_WHOLE_SIZE;
+    static constexpr uint32_t kStrideUndefined = WGPU_STRIDE_UNDEFINED;
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {

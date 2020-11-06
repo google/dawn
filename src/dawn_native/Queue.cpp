@@ -441,10 +441,13 @@ namespace dawn_native {
         // copyExtent.height by blockHeight while the divisibility conditions are
         // checked in validating texture copy range.
         DAWN_TRY(ValidateTextureCopyRange(*destination, *writeSize));
-        DAWN_TRY(ValidateLinearTextureData(
-            *dataLayout, dataSize,
-            destination->texture->GetFormat().GetAspectInfo(destination->aspect).block,
-            *writeSize));
+
+        const TexelBlockInfo& blockInfo =
+            destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
+
+        TextureDataLayout layout = FixUpDeprecatedTextureDataLayoutOptions(GetDevice(), *dataLayout,
+                                                                           blockInfo, *writeSize);
+        DAWN_TRY(ValidateLinearTextureData(layout, dataSize, blockInfo, *writeSize));
 
         DAWN_TRY(destination->texture->ValidateCanUseInSubmitNow());
 

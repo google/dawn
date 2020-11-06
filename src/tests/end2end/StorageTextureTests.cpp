@@ -464,7 +464,7 @@ class StorageTextureTests : public DawnTest {
 
         const wgpu::Extent3D copyExtent = {kWidth, kHeight, arrayLayerCount};
         wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(uploadBuffer, 0, kTextureBytesPerRowAlignment, 0);
+            utils::CreateBufferCopyView(uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
         wgpu::TextureCopyView textureCopyView;
         textureCopyView.texture = outputTexture;
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyExtent);
@@ -640,7 +640,7 @@ class StorageTextureTests : public DawnTest {
         wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(writeonlyStorageTexture, 0, {0, 0, 0});
         wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(resultBuffer, 0, kTextureBytesPerRowAlignment, 0);
+            utils::CreateBufferCopyView(resultBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
         encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);

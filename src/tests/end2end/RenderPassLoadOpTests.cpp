@@ -123,7 +123,7 @@ class RenderPassLoadOpTests : public DawnTest {
 
         wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
         wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(buffer, 0, kTextureBytesPerRowAlignment, 0);
+            utils::CreateBufferCopyView(buffer, 0, kTextureBytesPerRowAlignment);
         encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &kTextureSize);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
