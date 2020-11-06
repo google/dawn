@@ -15,7 +15,9 @@
 #ifndef DAWNPLATFORM_TRACING_EVENTTRACER_H_
 #define DAWNPLATFORM_TRACING_EVENTTRACER_H_
 
-#include <stdint.h>
+#include "dawn_platform/dawn_platform_export.h"
+
+#include <cstdint>
 
 namespace dawn_platform {
 
@@ -26,20 +28,22 @@ namespace dawn_platform {
 
         using TraceEventHandle = uint64_t;
 
-        const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform,
-                                                         TraceCategory category);
+        DAWN_PLATFORM_EXPORT const unsigned char* GetTraceCategoryEnabledFlag(
+            Platform* platform,
+            TraceCategory category);
 
         // TODO(enga): Simplify this API.
-        TraceEventHandle AddTraceEvent(Platform* platform,
-                                       char phase,
-                                       const unsigned char* categoryGroupEnabled,
-                                       const char* name,
-                                       uint64_t id,
-                                       int numArgs,
-                                       const char** argNames,
-                                       const unsigned char* argTypes,
-                                       const uint64_t* argValues,
-                                       unsigned char flags);
+        DAWN_PLATFORM_EXPORT TraceEventHandle
+        AddTraceEvent(Platform* platform,
+                      char phase,
+                      const unsigned char* categoryGroupEnabled,
+                      const char* name,
+                      uint64_t id,
+                      int numArgs,
+                      const char** argNames,
+                      const unsigned char* argTypes,
+                      const uint64_t* argValues,
+                      unsigned char flags);
 
     }  // namespace tracing
 }  // namespace dawn_platform

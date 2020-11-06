@@ -14,11 +14,16 @@
 
 import("../../scripts/dawn_overrides_with_defaults.gni")
 
-source_set("dawn_platform") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+import("${dawn_root}/scripts/dawn_component.gni")
+
+dawn_component("dawn_platform") {
+  DEFINE_PREFIX = "DAWN_PLATFORM"
+
+  configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
   sources = [
     "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
+    "${dawn_root}/src/include/dawn_platform/dawn_platform_export.h",
     "DawnPlatform.cpp",
     "tracing/EventTracer.cpp",
     "tracing/EventTracer.h",

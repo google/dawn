@@ -15,9 +15,9 @@
 #ifndef DAWNPLATFORM_DAWNPLATFORM_H_
 #define DAWNPLATFORM_DAWNPLATFORM_H_
 
-#include <dawn_native/dawn_native_export.h>
+#include "dawn_platform/dawn_platform_export.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace dawn_platform {
 
@@ -28,7 +28,7 @@ namespace dawn_platform {
         GPUWork,     // Actual GPU work
     };
 
-    class Platform {
+    class DAWN_PLATFORM_EXPORT Platform {
       public:
         Platform();
         virtual ~Platform();
