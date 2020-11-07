@@ -457,7 +457,6 @@ class InspectorHelper {
 
   /// Generates a DepthTextureType appropriate for the params
   /// @param dim the dimensions of the texture
-  /// @param type the data type of the sampled texture
   /// @returns the generated DepthTextureType
   std::unique_ptr<ast::type::DepthTextureType> MakeDepthTextureType(
       ast::type::TextureDimension dim) {
