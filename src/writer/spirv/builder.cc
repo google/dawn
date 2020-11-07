@@ -277,14 +277,9 @@ Builder::~Builder() = default;
 bool Builder::Build() {
   push_capability(SpvCapabilityShader);
 
-  // TODO(dneto): Stop using the Vulkan memory model. crbug.com/tint/63
-  push_capability(SpvCapabilityVulkanMemoryModel);
-  push_extension(spv::Op::OpExtension,
-                 {Operand::String("SPV_KHR_vulkan_memory_model")});
-
   push_memory_model(spv::Op::OpMemoryModel,
                     {Operand::Int(SpvAddressingModelLogical),
-                     Operand::Int(SpvMemoryModelVulkanKHR)});
+                     Operand::Int(SpvMemoryModelGLSL450)});
 
   for (const auto& var : mod_->global_variables()) {
     if (!GenerateGlobalVariable(var.get())) {

@@ -34,9 +34,7 @@ TEST_F(BuilderTest, InsertsPreamble) {
   Builder b(&m);
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
-OpCapability VulkanMemoryModel
-OpExtension "SPV_KHR_vulkan_memory_model"
-OpMemoryModel Logical Vulkan
+OpMemoryModel Logical GLSL450
 )");
 }
 
