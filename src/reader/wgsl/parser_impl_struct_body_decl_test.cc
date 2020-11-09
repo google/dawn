@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
   auto* p = parser("{a : i32;}");
-  auto m = p->struct_body_decl();
+  auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(m.size(), 1u);
 
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
   auto* p = parser("{}");
-  auto m = p->struct_body_decl();
+  auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(m.size(), 0u);
 }
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
 {
   [[offset(nan)]] a : i32;
 })");
-  auto m = p->struct_body_decl();
+  auto m = p->expect_struct_body_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
             "3:12: expected signed integer literal for offset decoration");
@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
   auto* p = parser("{a : i32;");
-  auto m = p->struct_body_decl();
+  auto m = p->expect_struct_body_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: expected '}' for struct declaration");
 }
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
   a : i32;
   1.23
 } )");
-  auto m = p->struct_body_decl();
+  auto m = p->expect_struct_body_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "4:3: invalid identifier declaration");
 }

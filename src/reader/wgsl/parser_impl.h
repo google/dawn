@@ -155,8 +155,8 @@ class ParserImpl {
 
   /// Parses the `translation_unit` grammar element
   void translation_unit();
-  /// Parses the `global_decl` grammar element
-  void global_decl();
+  /// Parses the `global_decl` grammar element, erroring on parse failure.
+  void expect_global_decl();
   /// Parses a `global_variable_decl` grammar element with the initial
   /// `variable_decoration_list*` provided as |decos|.
   /// @returns the variable parsed or nullptr
@@ -190,14 +190,16 @@ class ParserImpl {
   /// @param decos the list of decorations for the struct declaration.
   std::unique_ptr<ast::type::StructType> struct_decl(
       ast::DecorationList& decos);
-  /// Parses a `struct_body_decl` grammar element
+  /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
-  ast::StructMemberList struct_body_decl();
+  ast::StructMemberList expect_struct_body_decl();
   /// Parses a `struct_member` grammar element with the initial
-  /// `struct_member_decoration_decl+` provided as |decos|.
+  /// `struct_member_decoration_decl+` provided as |decos|, erroring on parse
+  /// failure.
   /// @param decos the list of decorations for the struct member.
   /// @returns the struct member or nullptr
-  std::unique_ptr<ast::StructMember> struct_member(ast::DecorationList& decos);
+  std::unique_ptr<ast::StructMember> expect_struct_member(
+      ast::DecorationList& decos);
   /// Parses a `function_decl` grammar element with the initial
   /// `function_decoration_decl*` provided as |decos|.
   /// @param decos the list of decorations for the function declaration.
@@ -233,9 +235,9 @@ class ParserImpl {
   /// Parses a `function_header` grammar element
   /// @returns the parsed function nullptr otherwise
   std::unique_ptr<ast::Function> function_header();
-  /// Parses a `param_list` grammar element
+  /// Parses a `param_list` grammar element, erroring on parse failure.
   /// @returns the parsed variables
-  ast::VariableList param_list();
+  ast::VariableList expect_param_list();
   /// Parses a `pipeline_stage` grammar element, erroring if the next token does
   /// not match a stage name.
   /// @returns the pipeline stage or PipelineStage::kNone if none matched, along
@@ -246,12 +248,12 @@ class ParserImpl {
   /// @returns the builtin or Builtin::kNone if none matched, along with the
   /// source location for the stage.
   std::pair<ast::Builtin, Source> expect_builtin();
-  /// Parses a `body_stmt` grammar element
+  /// Parses a `body_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed statements
-  std::unique_ptr<ast::BlockStatement> body_stmt();
-  /// Parses a `paren_rhs_stmt` grammar element
+  std::unique_ptr<ast::BlockStatement> expect_body_stmt();
+  /// Parses a `paren_rhs_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed element or nullptr
-  std::unique_ptr<ast::Expression> paren_rhs_stmt();
+  std::unique_ptr<ast::Expression> expect_paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
   std::unique_ptr<ast::BlockStatement> statements();
@@ -297,9 +299,9 @@ class ParserImpl {
   /// Parses a `loop_stmt` grammar element
   /// @returns the parsed loop or nullptr
   std::unique_ptr<ast::LoopStatement> loop_stmt();
-  /// Parses a `for_header` grammar element
+  /// Parses a `for_header` grammar element, erroring on parse failure.
   /// @returns the parsed for header or nullptr
-  std::unique_ptr<ForHeader> for_header();
+  std::unique_ptr<ForHeader> expect_for_header();
   /// Parses a `for_stmt` grammar element
   /// @returns the parsed for loop or nullptr
   std::unique_ptr<ast::Statement> for_stmt();
@@ -309,15 +311,16 @@ class ParserImpl {
   /// Parses a `const_literal` grammar element
   /// @returns the const literal parsed or nullptr if none found
   std::unique_ptr<ast::Literal> const_literal();
-  /// Parses a `const_expr` grammar element
+  /// Parses a `const_expr` grammar element, erroring on parse failure.
   /// @returns the parsed constructor expression or nullptr on error
-  std::unique_ptr<ast::ConstructorExpression> const_expr();
+  std::unique_ptr<ast::ConstructorExpression> expect_const_expr();
   /// Parses a `primary_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> primary_expression();
-  /// Parses a `argument_expression_list` grammar element
+  /// Parses a `argument_expression_list` grammar element, erroring on parse
+  /// failure.
   /// @returns the list of arguments
-  ast::ExpressionList argument_expression_list();
+  ast::ExpressionList expect_argument_expression_list();
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr
@@ -329,82 +332,92 @@ class ParserImpl {
   /// Parses a `unary_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> unary_expression();
-  /// Parses the recursive part of the `multiplicative_expression`
+  /// Parses the recursive part of the `multiplicative_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> multiplicative_expr(
+  std::unique_ptr<ast::Expression> expect_multiplicative_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `multiplicative_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> multiplicative_expression();
-  /// Parses the recursive part of the `additive_expression`
+  /// Parses the recursive part of the `additive_expression`, erroring on parse
+  /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> additive_expr(
+  std::unique_ptr<ast::Expression> expect_additive_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `additive_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> additive_expression();
-  /// Parses the recursive part of the `shift_expression`
+  /// Parses the recursive part of the `shift_expression`, erroring on parse
+  /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> shift_expr(
+  std::unique_ptr<ast::Expression> expect_shift_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `shift_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> shift_expression();
-  /// Parses the recursive part of the `relational_expression`
+  /// Parses the recursive part of the `relational_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> relational_expr(
+  std::unique_ptr<ast::Expression> expect_relational_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `relational_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> relational_expression();
-  /// Parses the recursive part of the `equality_expression`
+  /// Parses the recursive part of the `equality_expression`, erroring on parse
+  /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> equality_expr(
+  std::unique_ptr<ast::Expression> expect_equality_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `equality_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> equality_expression();
-  /// Parses the recursive part of the `and_expression`
+  /// Parses the recursive part of the `and_expression`, erroring on parse
+  /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> and_expr(
+  std::unique_ptr<ast::Expression> expect_and_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `and_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> and_expression();
-  /// Parses the recursive part of the `exclusive_or_expression`
+  /// Parses the recursive part of the `exclusive_or_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> exclusive_or_expr(
+  std::unique_ptr<ast::Expression> expect_exclusive_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `exclusive_or_expression` grammar elememnt
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> exclusive_or_expression();
-  /// Parses the recursive part of the `inclusive_or_expression`
+  /// Parses the recursive part of the `inclusive_or_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> inclusive_or_expr(
+  std::unique_ptr<ast::Expression> expect_inclusive_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `inclusive_or_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> inclusive_or_expression();
-  /// Parses the recursive part of the `logical_and_expression`
+  /// Parses the recursive part of the `logical_and_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> logical_and_expr(
+  std::unique_ptr<ast::Expression> expect_logical_and_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses a `logical_and_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> logical_and_expression();
-  /// Parses the recursive part of the `logical_or_expression`
+  /// Parses the recursive part of the `logical_or_expression`, erroring on
+  /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> logical_or_expr(
+  std::unique_ptr<ast::Expression> expect_logical_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses a `logical_or_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -528,12 +541,12 @@ class ParserImpl {
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  ast::type::Type* type_decl_pointer(Token t);
-  ast::type::Type* type_decl_vector(Token t);
-  ast::type::Type* type_decl_array(ast::ArrayDecorationList decos);
-  ast::type::Type* type_decl_matrix(Token t);
+  ast::type::Type* expect_type_decl_pointer(Token t);
+  ast::type::Type* expect_type_decl_vector(Token t);
+  ast::type::Type* expect_type_decl_array(ast::ArrayDecorationList decos);
+  ast::type::Type* expect_type_decl_matrix(Token t);
 
-  std::unique_ptr<ast::ConstructorExpression> const_expr_internal(
+  std::unique_ptr<ast::ConstructorExpression> expect_const_expr_internal(
       uint32_t depth);
 
   Context& ctx_;

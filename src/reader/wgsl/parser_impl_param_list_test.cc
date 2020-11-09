@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
   auto* p = parser("a : i32");
-  auto e = p->param_list();
+  auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ(e.size(), 1u);
 
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   auto* vec2 = tm()->Get(std::make_unique<ast::type::VectorType>(f32, 2));
 
   auto* p = parser("a : i32, b: f32, c: vec2<f32>");
-  auto e = p->param_list();
+  auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ(e.size(), 3u);
 
@@ -86,14 +86,14 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
 
 TEST_F(ParserImplTest, ParamList_Empty) {
   auto* p = parser("");
-  auto e = p->param_list();
+  auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ(e.size(), 0u);
 }
 
 TEST_F(ParserImplTest, ParamList_HangingComma) {
   auto* p = parser("a : i32,");
-  auto e = p->param_list();
+  auto e = p->expect_param_list();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: found , but no variable declaration");
 }

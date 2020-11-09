@@ -25,13 +25,13 @@ namespace {
 
 TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
   auto* p = parser(";");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   auto* p = parser("var<out> a : vec2<i32> = vec2<i32>(1, 2);");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -43,21 +43,21 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
   auto* p = parser("var<out> a : vec2<invalid>;");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:19: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
   auto* p = parser("var<out> a : vec2<i32>");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:23: expected ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   auto* p = parser("const a : i32 = 2;");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -69,21 +69,21 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
   auto* p = parser("const a : vec2<i32>;");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:20: missing = for const declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
   auto* p = parser("const a : vec2<i32> = vec2<i32>(1, 2)");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:38: expected ';' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   auto* p = parser("type A = i32;");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -97,8 +97,8 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
   a : f32;
 };
 type B = A;)");
-  p->global_decl();
-  p->global_decl();
+  p->expect_global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -115,21 +115,21 @@ type B = A;)");
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
   auto* p = parser("type A = invalid;");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
   auto* p = parser("type A = i32");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:13: expected ';' for type alias");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {
   auto* p = parser("fn main() -> void { return; }");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
   auto* p = parser("[[workgroup_size(2)]] fn main() -> void { return; }");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -149,14 +149,14 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
   auto* p = parser("fn main() -> { return; }");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   auto* p = parser("struct A { b: i32; c: f32;};");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -174,7 +174,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto* p =
       parser("struct A { [[offset(0)]] data: [[stride(4)]] array<f32>; };");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -198,7 +198,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   auto* p = parser("[[block]] struct A { [[offset(0)]] data: f32; };");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto m = p->module();
@@ -216,14 +216,14 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
   auto* p = parser("[[block]] A {};");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:11: expected declaration after decorations");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_StructMissing_Semi) {
   auto* p = parser("[[block]] struct A {}");
-  p->global_decl();
+  p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:22: expected ';' for struct declaration");
 }
