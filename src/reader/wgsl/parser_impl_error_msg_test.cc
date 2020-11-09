@@ -169,14 +169,14 @@ TEST_F(ParserImplErrorTest, ConstructorExprMissingRParen) {
 
 TEST_F(ParserImplErrorTest, ConstVarStmtInvalid) {
   EXPECT("fn f() -> void { const >; }",
-         "test.wgsl:1:24 error: unable to parse variable declaration\n"
+         "test.wgsl:1:24 error: expected identifier for constant declaration\n"
          "fn f() -> void { const >; }\n"
          "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingAssignment) {
   EXPECT("fn f() -> void { const a : i32; }",
-         "test.wgsl:1:31 error: missing = for constant declaration\n"
+         "test.wgsl:1:31 error: expected '=' for constant declaration\n"
          "fn f() -> void { const a : i32; }\n"
          "                              ^\n");
 }
@@ -416,23 +416,23 @@ TEST_F(ParserImplErrorTest, FunctionDeclInvalidReturnType) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissingColon) {
   EXPECT("fn f(x) -> void {}",
-         "test.wgsl:1:7 error: missing : for identifier declaration\n"
+         "test.wgsl:1:7 error: expected ':' for parameter\n"
          "fn f(x) -> void {}\n"
          "      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamInvalidType) {
   EXPECT("fn f(x : 1) -> void {}",
-         "test.wgsl:1:10 error: invalid type for identifier declaration\n"
+         "test.wgsl:1:10 error: invalid type for parameter\n"
          "fn f(x : 1) -> void {}\n"
          "         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissing) {
   EXPECT("fn f(x : i32, ) -> void {}",
-         "test.wgsl:1:13 error: found , but no variable declaration\n"
+         "test.wgsl:1:15 error: expected identifier for parameter\n"
          "fn f(x : i32, ) -> void {}\n"
-         "            ^\n");
+         "              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLBrace) {
@@ -451,7 +451,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
   EXPECT("const ^ : i32 = 1;",
-         "test.wgsl:1:7 error: error parsing constant variable identifier\n"
+         "test.wgsl:1:7 error: expected identifier for constant declaration\n"
          "const ^ : i32 = 1;\n"
          "      ^\n");
 }
@@ -479,7 +479,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingAssignment) {
   EXPECT("const i : vec2<i32>;",
-         "test.wgsl:1:20 error: missing = for const declaration\n"
+         "test.wgsl:1:20 error: expected '=' for constant declaration\n"
          "const i : vec2<i32>;\n"
          "                   ^\n");
 }
@@ -702,7 +702,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberDecoMissingEnd) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberInvalidIdentifier) {
   EXPECT("struct S { 1 : i32; };",
-         "test.wgsl:1:12 error: invalid identifier declaration\n"
+         "test.wgsl:1:12 error: expected identifier for struct member\n"
          "struct S { 1 : i32; };\n"
          "           ^\n");
 }
@@ -988,7 +988,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingSetValue) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarInvalidIdentifier) {
   EXPECT("var ^ : mat4x4;",
-         "test.wgsl:1:5 error: invalid identifier declaration\n"
+         "test.wgsl:1:5 error: expected identifier for variable declaration\n"
          "var ^ : mat4x4;\n"
          "    ^\n");
 }

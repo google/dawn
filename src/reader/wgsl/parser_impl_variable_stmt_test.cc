@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:15: missing = for constant declaration");
+  EXPECT_EQ(p->error(), "1:15: expected '=' for constant declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_MissingConstructor) {

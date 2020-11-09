@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
 TEST_F(ParserImplTest, ParamList_Empty) {
   auto* p = parser("");
   auto e = p->expect_param_list();
-  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(e.size(), 0u);
 }
 
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, ParamList_HangingComma) {
   auto* p = parser("a : i32,");
   auto e = p->expect_param_list();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: found , but no variable declaration");
+  EXPECT_EQ(p->error(), "1:9: expected identifier for parameter");
 }
 
 }  // namespace

@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
 } )");
   auto m = p->expect_struct_body_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "4:3: invalid identifier declaration");
+  EXPECT_EQ(p->error(), "4:3: expected identifier for struct member");
 }
 
 }  // namespace

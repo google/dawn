@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
   auto* p = parser("const a : vec2<i32>;");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:20: missing = for const declaration");
+  EXPECT_EQ(p->error(), "1:20: expected '=' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {

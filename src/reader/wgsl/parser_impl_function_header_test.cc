@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidParamList) {
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p->error(), "1:15: found , but no variable declaration");
+  EXPECT_EQ(p->error(), "1:16: expected identifier for parameter");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {

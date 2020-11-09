@@ -23,7 +23,7 @@ namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   auto* p = parser("my_var : f32");
-  auto decl = p->variable_ident_decl();
+  auto decl = p->expect_variable_ident_decl("test");
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(decl.name, "my_var");
   ASSERT_NE(decl.type, nullptr);
@@ -37,43 +37,35 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
   auto* p = parser(": f32");
-  auto decl = p->variable_ident_decl();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(decl.name, "");
-  ASSERT_EQ(decl.type, nullptr);
-
-  auto t = p->next();
-  ASSERT_TRUE(t.IsColon());
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingColon) {
   auto* p = parser("my_var f32");
-  auto r = p->variable_ident_decl();
+  auto r = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: missing : for identifier declaration");
+  ASSERT_EQ(p->error(), "1:8: expected ':' for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
   auto* p = parser("my_var :");
-  auto r = p->variable_ident_decl();
+  auto r = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:9: invalid type for identifier declaration");
+  ASSERT_EQ(p->error(), "1:9: invalid type for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   auto* p = parser("123 : f32");
-  auto decl = p->variable_ident_decl();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(decl.name, "");
-  ASSERT_EQ(decl.type, nullptr);
-
-  auto t = p->next();
-  ASSERT_TRUE(t.IsSintLiteral());
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   auto* p = parser("my_var : invalid");
-  auto r = p->variable_ident_decl();
+  auto r = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }

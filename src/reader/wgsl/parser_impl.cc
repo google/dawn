@@ -123,7 +123,7 @@ ParserImpl::ParserImpl(Context* ctx, Source::File const* file)
 
 ParserImpl::~ParserImpl() = default;
 
-void ParserImpl::add_error(const Token& t,
+void ParserImpl::add_error(const Source& source,
                            const std::string& err,
                            const std::string& use) {
   std::stringstream msg;
@@ -131,7 +131,7 @@ void ParserImpl::add_error(const Token& t,
   if (!use.empty()) {
     msg << " for " << use;
   }
-  add_error(t, msg.str());
+  add_error(source, msg.str());
 }
 
 void ParserImpl::add_error(const Token& t, const std::string& err) {
@@ -317,27 +317,23 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   if (!match(Token::Type::kConst))
     return nullptr;
 
-  auto decl = variable_ident_decl();
+  const char* use = "constant declaration";
+
+  auto decl = expect_variable_ident_decl(use);
   if (has_error())
     return nullptr;
-  if (decl.name.empty() || decl.type == nullptr) {
-    add_error(peek(), "error parsing constant variable identifier");
-    return nullptr;
-  }
 
   auto var = std::make_unique<ast::Variable>(
       decl.source, decl.name, ast::StorageClass::kNone, decl.type);
   var->set_is_const(true);
 
-  auto t = next();
-  if (!t.IsEqual()) {
-    add_error(t, "missing = for const declaration");
+  if (!expect(use, Token::Type::kEqual))
     return nullptr;
-  }
 
   auto init = expect_const_expr();
   if (has_error())
     return nullptr;
+
   var->set_constructor(std::move(init));
 
   return var;
@@ -351,15 +347,11 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
 
   auto sc = variable_storage_decoration();
   if (has_error())
-    return {};
+    return nullptr;
 
-  auto decl = variable_ident_decl();
+  auto decl = expect_variable_ident_decl("variable declaration");
   if (has_error())
     return nullptr;
-  if (decl.name.empty() || decl.type == nullptr) {
-    add_error(peek(), "invalid identifier declaration");
-    return nullptr;
-  }
 
   return std::make_unique<ast::Variable>(decl.source, decl.name, sc, decl.type);
 }
@@ -753,26 +745,22 @@ ast::type::ImageFormat ParserImpl::image_storage_type() {
 
 // variable_ident_decl
 //   : IDENT COLON type_decl
-ParserImpl::TypedIdentifier ParserImpl::variable_ident_decl() {
+ParserImpl::TypedIdentifier ParserImpl::expect_variable_ident_decl(
+    const std::string& use) {
+  std::string name;
+  Source source;
+  if (!expect_ident(use, &name, &source))
+    return {};
+
+  if (!expect(use, Token::Type::kColon))
+    return {};
+
   auto t = peek();
-  if (!t.IsIdentifier())
-    return {};
-
-  auto name = t.to_str();
-  auto source = t.source();
-  next();  // Consume the peek
-
-  t = next();
-  if (!t.IsColon()) {
-    add_error(t, "missing : for identifier declaration");
-    return {};
-  }
-
   auto* type = type_decl();
   if (has_error())
     return {};
   if (type == nullptr) {
-    add_error(peek(), "invalid type for identifier declaration");
+    add_error(t.source(), "invalid type", use);
     return {};
   }
 
@@ -894,9 +882,8 @@ ast::type::Type* ParserImpl::type_decl() {
   }
 
   auto decos = decoration_list();
-  if (has_error()) {
+  if (has_error())
     return nullptr;
-  }
 
   if (match(Token::Type::kArray)) {
     auto array_decos = cast_decorations<ast::ArrayDecoration>(decos);
@@ -1133,9 +1120,8 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
     return nullptr;
 
   auto body = expect_struct_body_decl();
-  if (has_error()) {
+  if (has_error())
     return nullptr;
-  }
 
   return std::make_unique<ast::type::StructType>(
       name, std::make_unique<ast::Struct>(source, std::move(struct_decos),
@@ -1150,6 +1136,8 @@ ast::StructMemberList ParserImpl::expect_struct_body_decl() {
 
     while (!peek().IsBraceRight() && !peek().IsEof()) {
       auto decos = decoration_list();
+      if (has_error())
+        return ast::StructMemberList{};
 
       auto mem = expect_struct_member(decos);
       if (has_error())
@@ -1166,15 +1154,23 @@ ast::StructMemberList ParserImpl::expect_struct_body_decl() {
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
 std::unique_ptr<ast::StructMember> ParserImpl::expect_struct_member(
     ast::DecorationList& decos) {
-  auto t = peek();
-
-  auto decl = variable_ident_decl();
+  // FUDGE - Abort early if we enter with an error state to avoid accumulating
+  // multiple error messages. This is a work around for the unit tests that
+  // call:
+  //   auto decos = p->decoration_list();
+  //   auto m = p->expect_struct_member(decos);
+  // ... and expect a single error message due to bad decorations.
+  // While expect_struct_body_decl() aborts after checking for decoration parse
+  // errors (and so these tests do not currently reflect full-parse behaviour),
+  // they do test the long-term desired behavior where the parser can
+  // resynchronize at the ']]'.
+  // TODO(ben-clayton) - remove this once resynchronization is implemented.
   if (has_error())
     return nullptr;
-  if (decl.name.empty() || decl.type == nullptr) {
-    add_error(peek(), "invalid identifier declaration");
+
+  auto decl = expect_variable_ident_decl("struct member");
+  if (has_error())
     return nullptr;
-  }
 
   auto member_decos = cast_decorations<ast::StructMemberDecoration>(decos);
 
@@ -1255,16 +1251,14 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 //   :
 //   | (variable_ident_decl COMMA)* variable_ident_decl
 ast::VariableList ParserImpl::expect_param_list() {
-  auto t = peek();
+  if (!peek().IsIdentifier())  // Empty list
+    return ast::VariableList{};
 
-  ast::VariableList ret;
-
-  auto decl = variable_ident_decl();
+  auto decl = expect_variable_ident_decl("parameter");
   if (has_error())
     return {};
-  if (decl.name.empty() || decl.type == nullptr)
-    return {};
 
+  ast::VariableList ret;
   for (;;) {
     auto var = std::make_unique<ast::Variable>(
         decl.source, decl.name, ast::StorageClass::kNone, decl.type);
@@ -1275,19 +1269,12 @@ ast::VariableList ParserImpl::expect_param_list() {
     var->set_is_const(true);
     ret.push_back(std::move(var));
 
-    t = peek();
-    if (!t.IsComma())
+    if (!match(Token::Type::kComma))
       break;
 
-    next();  // Consume the peek
-
-    decl = variable_ident_decl();
+    decl = expect_variable_ident_decl("parameter");
     if (has_error())
       return {};
-    if (decl.name.empty() || decl.type == nullptr) {
-      add_error(t, "found , but no variable declaration");
-      return {};
-    }
   }
 
   return ret;
@@ -1518,19 +1505,12 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
   if (t.IsConst()) {
     next();  // Consume the peek
 
-    auto decl = variable_ident_decl();
+    auto decl = expect_variable_ident_decl("constant declaration");
     if (has_error())
       return nullptr;
-    if (decl.name.empty() || decl.type == nullptr) {
-      add_error(peek(), "unable to parse variable declaration");
-      return nullptr;
-    }
 
-    t = next();
-    if (!t.IsEqual()) {
-      add_error(t, "missing = for constant declaration");
+    if (!expect("constant declaration", Token::Type::kEqual))
       return nullptr;
-    }
 
     auto constructor = logical_or_expression();
     if (has_error())
@@ -2760,9 +2740,9 @@ bool ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
     return false;
   }
 
-  auto t = peek();
-  if (match(Token::Type::kAttrRight)) {
-    add_error(t, "empty decoration list");
+  Source source;
+  if (match(Token::Type::kAttrRight, &source)) {
+    add_error(source, "empty decoration list");
     return false;
   }
 
@@ -2954,7 +2934,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
 bool ParserImpl::expect_sint(const std::string& use, int32_t* out) {
   auto t = next();
   if (!t.IsSintLiteral()) {
-    add_error(t, "expected signed integer literal", use);
+    add_error(t.source(), "expected signed integer literal", use);
     return false;
   }
   *out = t.to_i32();
@@ -2999,7 +2979,7 @@ bool ParserImpl::expect_ident(const std::string& use,
     *source = t.source();
 
   if (!t.IsIdentifier()) {
-    add_error(t, "expected identifier", use);
+    add_error(t.source(), "expected identifier", use);
     return false;
   }
 

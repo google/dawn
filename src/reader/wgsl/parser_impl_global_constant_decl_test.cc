@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
   auto e = p->global_constant_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:14: missing = for const declaration");
+  EXPECT_EQ(p->error(), "1:14: expected '=' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {

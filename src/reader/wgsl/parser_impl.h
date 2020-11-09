@@ -132,11 +132,11 @@ class ParserImpl {
   /// @param msg the error message
   void add_error(const Token& t, const std::string& msg);
   /// Appends an error raised when parsing |use| at |t| with the message |msg|
-  /// @param t the token to associate the error with
+  /// @param source the source to associate the error with
   /// @param msg the error message
   /// @param use a description of what was being parsed when the error was
   /// raised.
-  void add_error(const Token& t,
+  void add_error(const Source& source,
                  const std::string& msg,
                  const std::string& use);
   /// Appends an error at |source| with the message |msg|
@@ -169,9 +169,11 @@ class ParserImpl {
   /// Parses a `variable_decl` grammar element
   /// @returns the parsed variable or nullptr otherwise
   std::unique_ptr<ast::Variable> variable_decl();
-  /// Parses a `variable_ident_decl` grammar element
+  /// Parses a `variable_ident_decl` grammar element, erroring on parse
+  /// failure.
+  /// @param use a description of what was being parsed if an error was raised.
   /// @returns the identifier and type parsed or empty otherwise
-  TypedIdentifier variable_ident_decl();
+  TypedIdentifier expect_variable_ident_decl(const std::string& use);
   /// Parses a `variable_storage_decoration` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
   ast::StorageClass variable_storage_decoration();

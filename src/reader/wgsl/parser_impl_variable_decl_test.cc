@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
   auto v = p->variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(v, nullptr);
-  ASSERT_EQ(p->error(), "1:12: missing : for identifier declaration");
+  ASSERT_EQ(p->error(), "1:12: expected ':' for variable declaration");
 }
 
 TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
