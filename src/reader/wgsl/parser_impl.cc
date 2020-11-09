@@ -773,13 +773,11 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
   if (!match(Token::Type::kLessThan))
     return ast::StorageClass::kNone;
 
-  auto sc = storage_class();
+  const char* use = "variable decoration";
+
+  auto sc = expect_storage_class(use);
   if (has_error())
     return sc;
-  if (sc == ast::StorageClass::kNone) {
-    add_error(peek(), "invalid storage class for variable decoration");
-    return sc;
-  }
 
   auto t = next();
   if (!t.IsGreaterThan()) {
@@ -912,19 +910,17 @@ ast::type::Type* ParserImpl::type_decl() {
 ast::type::Type* ParserImpl::expect_type_decl_pointer(Token t) {
   next();  // Consume the peek
 
+  const char* use = "ptr declaration";
+
   t = next();
   if (!t.IsLessThan()) {
     add_error(t, "missing < for ptr declaration");
     return nullptr;
   }
 
-  auto sc = storage_class();
+  auto sc = expect_storage_class(use);
   if (has_error())
     return nullptr;
-  if (sc == ast::StorageClass::kNone) {
-    add_error(peek(), "missing storage class for ptr declaration");
-    return nullptr;
-  }
 
   t = next();
   if (!t.IsComma()) {
@@ -1062,44 +1058,35 @@ ast::type::Type* ParserImpl::expect_type_decl_matrix(Token t) {
 //  | IMAGE
 //  | PRIVATE
 //  | FUNCTION
-ast::StorageClass ParserImpl::storage_class() {
-  auto t = peek();
-  if (t.IsIn()) {
-    next();  // consume the peek
+ast::StorageClass ParserImpl::expect_storage_class(const std::string& use) {
+  if (match(Token::Type::kIn))
     return ast::StorageClass::kInput;
-  }
-  if (t.IsOut()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kOut))
     return ast::StorageClass::kOutput;
-  }
-  if (t.IsUniform()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kUniform))
     return ast::StorageClass::kUniform;
-  }
-  if (t.IsWorkgroup()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kWorkgroup))
     return ast::StorageClass::kWorkgroup;
-  }
-  if (t.IsUniformConstant()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kUniformConstant))
     return ast::StorageClass::kUniformConstant;
-  }
-  if (t.IsStorageBuffer()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kStorageBuffer))
     return ast::StorageClass::kStorageBuffer;
-  }
-  if (t.IsImage()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kImage))
     return ast::StorageClass::kImage;
-  }
-  if (t.IsPrivate()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kPrivate))
     return ast::StorageClass::kPrivate;
-  }
-  if (t.IsFunction()) {
-    next();  // consume the peek
+
+  if (match(Token::Type::kFunction))
     return ast::StorageClass::kFunction;
-  }
+
+  add_error(peek().source(), "invalid storage class", use);
   return ast::StorageClass::kNone;
 }
 

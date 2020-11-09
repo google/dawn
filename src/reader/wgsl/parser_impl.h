@@ -184,8 +184,9 @@ class ParserImpl {
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* type_decl();
   /// Parses a `storage_class` grammar element
+  /// @param use a description of what was being parsed if an error was raised
   /// @returns the storage class or StorageClass::kNone if none matched
-  ast::StorageClass storage_class();
+  ast::StorageClass expect_storage_class(const std::string& use);
   /// Parses a `struct_decl` grammar element with the initial
   /// `struct_decoration_decl*` provided as |decos|.
   /// @returns the struct type or nullptr on error

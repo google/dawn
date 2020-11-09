@@ -262,7 +262,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
+  ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
@@ -270,7 +270,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
+  ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
@@ -286,7 +286,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
+  ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {

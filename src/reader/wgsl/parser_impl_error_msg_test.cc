@@ -1044,7 +1044,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingComma) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingStorageClass) {
   EXPECT("var i : ptr<meow, u32>;",
-         "test.wgsl:1:13 error: missing storage class for ptr declaration\n"
+         "test.wgsl:1:13 error: invalid storage class for ptr declaration\n"
          "var i : ptr<meow, u32>;\n"
          "            ^^^^\n");
 }
