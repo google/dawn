@@ -32,8 +32,8 @@ TEST_F(ParserImplTest, Statement_Call) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
 
-  ASSERT_TRUE(e.value->IsCall());
-  auto* c = e.value->AsCall()->expr();
+  ASSERT_TRUE(e->IsCall());
+  auto* c = e->AsCall()->expr();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
@@ -50,8 +50,8 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
 
-  ASSERT_TRUE(e.value->IsCall());
-  auto* c = e.value->AsCall()->expr();
+  ASSERT_TRUE(e->IsCall());
+  auto* c = e->AsCall()->expr();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();

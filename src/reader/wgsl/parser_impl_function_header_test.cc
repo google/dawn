@@ -31,11 +31,11 @@ TEST_F(ParserImplTest, FunctionHeader) {
   EXPECT_FALSE(f.errored);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f.value->name(), "main");
-  ASSERT_EQ(f.value->params().size(), 2u);
-  EXPECT_EQ(f.value->params()[0]->name(), "a");
-  EXPECT_EQ(f.value->params()[1]->name(), "b");
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  EXPECT_EQ(f->name(), "main");
+  ASSERT_EQ(f->params().size(), 2u);
+  EXPECT_EQ(f->params()[0]->name(), "a");
+  EXPECT_EQ(f->params()[1]->name(), "b");
+  EXPECT_TRUE(f->return_type()->IsVoid());
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {

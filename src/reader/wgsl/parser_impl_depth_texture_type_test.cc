@@ -36,9 +36,9 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsDepth());
-  EXPECT_EQ(t.value->AsTexture()->dim(), ast::type::TextureDimension::k2d);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsDepth());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -48,9 +48,9 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsDepth());
-  EXPECT_EQ(t.value->AsTexture()->dim(), ast::type::TextureDimension::k2dArray);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsDepth());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -60,9 +60,9 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsDepth());
-  EXPECT_EQ(t.value->AsTexture()->dim(), ast::type::TextureDimension::kCube);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsDepth());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -72,10 +72,9 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsDepth());
-  EXPECT_EQ(t.value->AsTexture()->dim(),
-            ast::type::TextureDimension::kCubeArray);
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsDepth());
+  EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
 }
 

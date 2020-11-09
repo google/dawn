@@ -28,7 +28,7 @@ TEST_F(ParserImplTest, ContinueStmt) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsContinue());
+  ASSERT_TRUE(e->IsContinue());
 }
 
 }  // namespace

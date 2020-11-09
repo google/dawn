@@ -50,6 +50,7 @@
 #include "src/context.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
+#include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 
 namespace tint {
@@ -121,10 +122,13 @@ class ParserImpl {
     /// @return this Expect
     inline Expect& operator=(Expect&&) = default;
 
-    /// @return a pointer to |value|. |errored| must be false to call.
-    inline T* operator->() {
+    /// @return a pointer to the returned value. If T is a pointer or
+    /// std::unique_ptr, operator->() automatically dereferences so that the
+    /// return type will always be a pointer to a non-pointer type. |errored|
+    /// must be false to call.
+    inline typename detail::OperatorArrow<T>::type operator->() {
       assert(!errored);
-      return &value;
+      return detail::OperatorArrow<T>::ptr(value);
     }
 
     /// The expected value of a successful parse.
@@ -161,6 +165,7 @@ class ParserImpl {
     inline Maybe(Failure::NoMatch) {}  // NOLINT
 
     /// Constructor from an Expect.
+    /// @param e the Expect to copy this Maybe from
     template <typename U>
     inline Maybe(const Expect<U>& e)  // NOLINT
         : value(e.value),
@@ -169,6 +174,7 @@ class ParserImpl {
           matched(!e.errored) {}
 
     /// Move from an Expect.
+    /// @param e the Expect to move this Maybe from
     template <typename U>
     inline Maybe(Expect<U>&& e)  // NOLINT
         : value(std::move(e.value)),
@@ -187,10 +193,13 @@ class ParserImpl {
     /// @return this Maybe
     inline Maybe& operator=(Maybe&&) = default;
 
-    /// @return a pointer to |value|. |errored| must be false to call.
-    inline T* operator->() {
+    /// @return a pointer to the returned value. If T is a pointer or
+    /// std::unique_ptr, operator->() automatically dereferences so that the
+    /// return type will always be a pointer to a non-pointer type. |errored|
+    /// must be false to call.
+    inline typename detail::OperatorArrow<T>::type operator->() {
       assert(!errored);
-      return &value;
+      return detail::OperatorArrow<T>::ptr(value);
     }
 
     /// The value of a successful parse.

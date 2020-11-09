@@ -27,8 +27,8 @@ TEST_F(ParserImplTest, ContinuingStmt) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.value->size(), 1u);
-  ASSERT_TRUE(e.value->get(0)->IsDiscard());
+  ASSERT_EQ(e->size(), 1u);
+  ASSERT_TRUE(e->get(0)->IsDiscard());
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {

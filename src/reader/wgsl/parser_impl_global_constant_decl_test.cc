@@ -31,18 +31,18 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_TRUE(e.value->is_const());
-  EXPECT_EQ(e.value->name(), "a");
-  ASSERT_NE(e.value->type(), nullptr);
-  EXPECT_TRUE(e.value->type()->IsF32());
+  EXPECT_TRUE(e->is_const());
+  EXPECT_EQ(e->name(), "a");
+  ASSERT_NE(e->type(), nullptr);
+  EXPECT_TRUE(e->type()->IsF32());
 
-  EXPECT_EQ(e.value->source().range.begin.line, 1u);
-  EXPECT_EQ(e.value->source().range.begin.column, 7u);
-  EXPECT_EQ(e.value->source().range.end.line, 1u);
-  EXPECT_EQ(e.value->source().range.end.column, 8u);
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 7u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 8u);
 
-  ASSERT_NE(e.value->constructor(), nullptr);
-  EXPECT_TRUE(e.value->constructor()->IsConstructor());
+  ASSERT_NE(e->constructor(), nullptr);
+  EXPECT_TRUE(e->constructor()->IsConstructor());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {

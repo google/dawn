@@ -33,8 +33,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -56,8 +56,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kDivide, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -79,8 +79,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kModulo, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -120,7 +120,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_NoOr_ReturnsLHS) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsIdentifier());
+  ASSERT_TRUE(e->IsIdentifier());
 }
 
 }  // namespace

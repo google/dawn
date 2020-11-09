@@ -29,14 +29,14 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_TRUE(var.matched);
   EXPECT_FALSE(var.errored);
   ASSERT_NE(var.value, nullptr);
-  EXPECT_EQ(var.value->name(), "my_var");
-  EXPECT_NE(var.value->type(), nullptr);
-  EXPECT_TRUE(var.value->type()->IsF32());
+  EXPECT_EQ(var->name(), "my_var");
+  EXPECT_NE(var->type(), nullptr);
+  EXPECT_TRUE(var->type()->IsF32());
 
-  EXPECT_EQ(var.value->source().range.begin.line, 1u);
-  EXPECT_EQ(var.value->source().range.begin.column, 5u);
-  EXPECT_EQ(var.value->source().range.end.line, 1u);
-  EXPECT_EQ(var.value->source().range.end.column, 11u);
+  EXPECT_EQ(var->source().range.begin.line, 1u);
+  EXPECT_EQ(var->source().range.begin.column, 5u);
+  EXPECT_EQ(var->source().range.end.line, 1u);
+  EXPECT_EQ(var->source().range.end.column, 11u);
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
@@ -68,14 +68,14 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
   EXPECT_FALSE(v.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(v.value, nullptr);
-  EXPECT_EQ(v.value->name(), "my_var");
-  EXPECT_TRUE(v.value->type()->IsF32());
-  EXPECT_EQ(v.value->storage_class(), ast::StorageClass::kPrivate);
+  EXPECT_EQ(v->name(), "my_var");
+  EXPECT_TRUE(v->type()->IsF32());
+  EXPECT_EQ(v->storage_class(), ast::StorageClass::kPrivate);
 
-  EXPECT_EQ(v.value->source().range.begin.line, 1u);
-  EXPECT_EQ(v.value->source().range.begin.column, 14u);
-  EXPECT_EQ(v.value->source().range.end.line, 1u);
-  EXPECT_EQ(v.value->source().range.end.column, 20u);
+  EXPECT_EQ(v->source().range.begin.line, 1u);
+  EXPECT_EQ(v->source().range.begin.column, 14u);
+  EXPECT_EQ(v->source().range.end.line, 1u);
+  EXPECT_EQ(v->source().range.end.column, 20u);
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {

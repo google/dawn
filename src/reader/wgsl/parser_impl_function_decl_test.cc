@@ -36,18 +36,18 @@ TEST_F(ParserImplTest, FunctionDecl) {
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f.value->name(), "main");
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  EXPECT_EQ(f->name(), "main");
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
 
-  ASSERT_EQ(f.value->params().size(), 2u);
-  EXPECT_EQ(f.value->params()[0]->name(), "a");
-  EXPECT_EQ(f.value->params()[1]->name(), "b");
+  ASSERT_EQ(f->params().size(), 2u);
+  EXPECT_EQ(f->params()[0]->name(), "a");
+  EXPECT_EQ(f->params()[1]->name(), "b");
 
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
 
-  auto* body = f.value->body();
+  auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
   EXPECT_TRUE(body->get(0)->IsReturn());
 }
@@ -64,14 +64,14 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f.value->name(), "main");
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
-  ASSERT_EQ(f.value->params().size(), 0u);
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  EXPECT_EQ(f->name(), "main");
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
+  ASSERT_EQ(f->params().size(), 0u);
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
 
-  auto& decorations = f.value->decorations();
+  auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 1u);
   ASSERT_TRUE(decorations[0]->IsWorkgroup());
 
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   EXPECT_EQ(y, 3u);
   EXPECT_EQ(z, 4u);
 
-  auto* body = f.value->body();
+  auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
   EXPECT_TRUE(body->get(0)->IsReturn());
 }
@@ -102,14 +102,14 @@ fn main() -> void { return; })");
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f.value->name(), "main");
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
-  ASSERT_EQ(f.value->params().size(), 0u);
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  EXPECT_EQ(f->name(), "main");
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
+  ASSERT_EQ(f->params().size(), 0u);
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
 
-  auto& decorations = f.value->decorations();
+  auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 2u);
 
   uint32_t x = 0;
@@ -127,7 +127,7 @@ fn main() -> void { return; })");
   EXPECT_EQ(y, 6u);
   EXPECT_EQ(z, 7u);
 
-  auto* body = f.value->body();
+  auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
   EXPECT_TRUE(body->get(0)->IsReturn());
 }
@@ -147,14 +147,14 @@ fn main() -> void { return; })");
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f.value->name(), "main");
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
-  ASSERT_EQ(f.value->params().size(), 0u);
-  ASSERT_NE(f.value->return_type(), nullptr);
-  EXPECT_TRUE(f.value->return_type()->IsVoid());
+  EXPECT_EQ(f->name(), "main");
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
+  ASSERT_EQ(f->params().size(), 0u);
+  ASSERT_NE(f->return_type(), nullptr);
+  EXPECT_TRUE(f->return_type()->IsVoid());
 
-  auto& decos = f.value->decorations();
+  auto& decos = f->decorations();
   ASSERT_EQ(decos.size(), 2u);
 
   uint32_t x = 0;
@@ -172,7 +172,7 @@ fn main() -> void { return; })");
   EXPECT_EQ(y, 6u);
   EXPECT_EQ(z, 7u);
 
-  auto* body = f.value->body();
+  auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
   EXPECT_TRUE(body->get(0)->IsReturn());
 }

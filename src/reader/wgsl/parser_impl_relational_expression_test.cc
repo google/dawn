@@ -33,8 +33,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kLessThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -56,8 +56,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kGreaterThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -79,8 +79,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kLessThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -102,8 +102,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsBinary());
-  auto* rel = e.value->AsBinary();
+  ASSERT_TRUE(e->IsBinary());
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, RelationalExpression_NoOr_ReturnsLHS) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsIdentifier());
+  ASSERT_TRUE(e->IsIdentifier());
 }
 
 }  // namespace

@@ -35,8 +35,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsAlias());
-  auto* alias = t.value->AsAlias();
+  ASSERT_TRUE(t->IsAlias());
+  auto* alias = t->AsAlias();
   ASSERT_TRUE(alias->type()->IsI32());
   ASSERT_EQ(alias->type(), i32);
 }
@@ -52,8 +52,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t.value->IsAlias());
-  auto* alias = t.value->AsAlias();
+  ASSERT_TRUE(t->IsAlias());
+  auto* alias = t->AsAlias();
   EXPECT_EQ(alias->name(), "a");
   ASSERT_TRUE(alias->type()->IsStruct());
 

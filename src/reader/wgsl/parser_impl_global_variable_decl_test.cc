@@ -34,17 +34,17 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e.value->name(), "a");
-  EXPECT_TRUE(e.value->type()->IsF32());
-  EXPECT_EQ(e.value->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->name(), "a");
+  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  EXPECT_EQ(e.value->source().range.begin.line, 1u);
-  EXPECT_EQ(e.value->source().range.begin.column, 10u);
-  EXPECT_EQ(e.value->source().range.end.line, 1u);
-  EXPECT_EQ(e.value->source().range.end.column, 11u);
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 10u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 11u);
 
-  ASSERT_EQ(e.value->constructor(), nullptr);
-  ASSERT_FALSE(e.value->IsDecorated());
+  ASSERT_EQ(e->constructor(), nullptr);
+  ASSERT_FALSE(e->IsDecorated());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
@@ -58,20 +58,20 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e.value->name(), "a");
-  EXPECT_TRUE(e.value->type()->IsF32());
-  EXPECT_EQ(e.value->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->name(), "a");
+  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  EXPECT_EQ(e.value->source().range.begin.line, 1u);
-  EXPECT_EQ(e.value->source().range.begin.column, 10u);
-  EXPECT_EQ(e.value->source().range.end.line, 1u);
-  EXPECT_EQ(e.value->source().range.end.column, 11u);
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 10u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 11u);
 
-  ASSERT_NE(e.value->constructor(), nullptr);
-  ASSERT_TRUE(e.value->constructor()->IsConstructor());
-  ASSERT_TRUE(e.value->constructor()->AsConstructor()->IsScalarConstructor());
+  ASSERT_NE(e->constructor(), nullptr);
+  ASSERT_TRUE(e->constructor()->IsConstructor());
+  ASSERT_TRUE(e->constructor()->AsConstructor()->IsScalarConstructor());
 
-  ASSERT_FALSE(e.value->IsDecorated());
+  ASSERT_FALSE(e->IsDecorated());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
@@ -84,22 +84,22 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsDecorated());
+  ASSERT_TRUE(e->IsDecorated());
 
-  EXPECT_EQ(e.value->name(), "a");
-  ASSERT_NE(e.value->type(), nullptr);
-  EXPECT_TRUE(e.value->type()->IsF32());
-  EXPECT_EQ(e.value->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->name(), "a");
+  ASSERT_NE(e->type(), nullptr);
+  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  EXPECT_EQ(e.value->source().range.begin.line, 1u);
-  EXPECT_EQ(e.value->source().range.begin.column, 33u);
-  EXPECT_EQ(e.value->source().range.end.line, 1u);
-  EXPECT_EQ(e.value->source().range.end.column, 34u);
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 33u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 34u);
 
-  ASSERT_EQ(e.value->constructor(), nullptr);
+  ASSERT_EQ(e->constructor(), nullptr);
 
-  ASSERT_TRUE(e.value->IsDecorated());
-  auto* v = e.value->AsDecorated();
+  ASSERT_TRUE(e->IsDecorated());
+  auto* v = e->AsDecorated();
 
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);
@@ -118,22 +118,22 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsDecorated());
+  ASSERT_TRUE(e->IsDecorated());
 
-  EXPECT_EQ(e.value->name(), "a");
-  ASSERT_NE(e.value->type(), nullptr);
-  EXPECT_TRUE(e.value->type()->IsF32());
-  EXPECT_EQ(e.value->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->name(), "a");
+  ASSERT_NE(e->type(), nullptr);
+  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  EXPECT_EQ(e.value->source().range.begin.line, 1u);
-  EXPECT_EQ(e.value->source().range.begin.column, 36u);
-  EXPECT_EQ(e.value->source().range.end.line, 1u);
-  EXPECT_EQ(e.value->source().range.end.column, 37u);
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 36u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 37u);
 
-  ASSERT_EQ(e.value->constructor(), nullptr);
+  ASSERT_EQ(e->constructor(), nullptr);
 
-  ASSERT_TRUE(e.value->IsDecorated());
-  auto* v = e.value->AsDecorated();
+  ASSERT_TRUE(e->IsDecorated());
+  auto* v = e->AsDecorated();
 
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);

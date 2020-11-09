@@ -33,10 +33,10 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsSwitch());
-  ASSERT_EQ(e.value->body().size(), 2u);
-  EXPECT_FALSE(e.value->body()[0]->IsDefault());
-  EXPECT_FALSE(e.value->body()[1]->IsDefault());
+  ASSERT_TRUE(e->IsSwitch());
+  ASSERT_EQ(e->body().size(), 2u);
+  EXPECT_FALSE(e->body()[0]->IsDefault());
+  EXPECT_FALSE(e->body()[1]->IsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
@@ -46,8 +46,8 @@ TEST_F(ParserImplTest, SwitchStmt_Empty) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsSwitch());
-  ASSERT_EQ(e.value->body().size(), 0u);
+  ASSERT_TRUE(e->IsSwitch());
+  ASSERT_EQ(e->body().size(), 0u);
 }
 
 TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
@@ -61,12 +61,12 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsSwitch());
+  ASSERT_TRUE(e->IsSwitch());
 
-  ASSERT_EQ(e.value->body().size(), 3u);
-  ASSERT_FALSE(e.value->body()[0]->IsDefault());
-  ASSERT_TRUE(e.value->body()[1]->IsDefault());
-  ASSERT_FALSE(e.value->body()[2]->IsDefault());
+  ASSERT_EQ(e->body().size(), 3u);
+  ASSERT_FALSE(e->body()[0]->IsDefault());
+  ASSERT_TRUE(e->body()[1]->IsDefault());
+  ASSERT_FALSE(e->body()[2]->IsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {

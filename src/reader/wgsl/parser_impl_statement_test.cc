@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, Statement) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsReturn());
+  ASSERT_TRUE(e->IsReturn());
 }
 
 TEST_F(ParserImplTest, Statement_Semicolon) {
@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, Statement_Return_NoValue) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsReturn());
-  auto* ret = e.value->AsReturn();
+  ASSERT_TRUE(e->IsReturn());
+  auto* ret = e->AsReturn();
   ASSERT_EQ(ret->value(), nullptr);
 }
 
@@ -56,8 +56,8 @@ TEST_F(ParserImplTest, Statement_Return_Value) {
 
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsReturn());
-  auto* ret = e.value->AsReturn();
+  ASSERT_TRUE(e->IsReturn());
+  auto* ret = e->AsReturn();
   ASSERT_NE(ret->value(), nullptr);
   EXPECT_TRUE(ret->value()->IsBinary());
 }
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, Statement_If) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsIf());
+  ASSERT_TRUE(e->IsIf());
 }
 
 TEST_F(ParserImplTest, Statement_If_Invalid) {
@@ -107,7 +107,7 @@ TEST_F(ParserImplTest, Statement_Variable) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsVariableDecl());
+  ASSERT_TRUE(e->IsVariableDecl());
 }
 
 TEST_F(ParserImplTest, Statement_Variable_Invalid) {
@@ -136,7 +136,7 @@ TEST_F(ParserImplTest, Statement_Switch) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsSwitch());
+  ASSERT_TRUE(e->IsSwitch());
 }
 
 TEST_F(ParserImplTest, Statement_Switch_Invalid) {
@@ -155,7 +155,7 @@ TEST_F(ParserImplTest, Statement_Loop) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsLoop());
+  ASSERT_TRUE(e->IsLoop());
 }
 
 TEST_F(ParserImplTest, Statement_Loop_Invalid) {
@@ -174,7 +174,7 @@ TEST_F(ParserImplTest, Statement_Assignment) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsAssign());
+  ASSERT_TRUE(e->IsAssign());
 }
 
 TEST_F(ParserImplTest, Statement_Assignment_Invalid) {
@@ -203,7 +203,7 @@ TEST_F(ParserImplTest, Statement_Break) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsBreak());
+  ASSERT_TRUE(e->IsBreak());
 }
 
 TEST_F(ParserImplTest, Statement_Break_MissingSemicolon) {
@@ -222,7 +222,7 @@ TEST_F(ParserImplTest, Statement_Continue) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsContinue());
+  ASSERT_TRUE(e->IsContinue());
 }
 
 TEST_F(ParserImplTest, Statement_Continue_MissingSemicolon) {
@@ -242,7 +242,7 @@ TEST_F(ParserImplTest, Statement_Discard) {
   ASSERT_NE(e.value, nullptr);
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsDiscard());
+  ASSERT_TRUE(e->IsDiscard());
 }
 
 TEST_F(ParserImplTest, Statement_Discard_MissingSemicolon) {
@@ -261,8 +261,8 @@ TEST_F(ParserImplTest, Statement_Body) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsBlock());
-  EXPECT_TRUE(e.value->AsBlock()->get(0)->IsVariableDecl());
+  ASSERT_TRUE(e->IsBlock());
+  EXPECT_TRUE(e->AsBlock()->get(0)->IsVariableDecl());
 }
 
 TEST_F(ParserImplTest, Statement_Body_Invalid) {

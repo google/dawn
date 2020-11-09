@@ -280,6 +280,7 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser.h
     reader/wgsl/parser_impl.cc
     reader/wgsl/parser_impl.h
+    reader/wgsl/parser_impl_detail.h
     reader/wgsl/token.cc
     reader/wgsl/token.h
   )

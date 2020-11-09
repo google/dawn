@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, CaseBody_Empty) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  EXPECT_EQ(e.value->size(), 0u);
+  EXPECT_EQ(e->size(), 0u);
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
@@ -39,9 +39,9 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e.value->size(), 2u);
-  EXPECT_TRUE(e.value->get(0)->IsVariableDecl());
-  EXPECT_TRUE(e.value->get(1)->IsAssign());
+  ASSERT_EQ(e->size(), 2u);
+  EXPECT_TRUE(e->get(0)->IsVariableDecl());
+  EXPECT_TRUE(e->get(1)->IsAssign());
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
@@ -59,8 +59,8 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e.value->size(), 1u);
-  EXPECT_TRUE(e.value->get(0)->IsFallthrough());
+  ASSERT_EQ(e->size(), 1u);
+  EXPECT_TRUE(e->get(0)->IsFallthrough());
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {

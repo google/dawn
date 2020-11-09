@@ -38,10 +38,10 @@ struct S {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s.value->name(), "S");
-  ASSERT_EQ(s.value->impl()->members().size(), 2u);
-  EXPECT_EQ(s.value->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s.value->impl()->members()[1]->name(), "b");
+  ASSERT_EQ(s->name(), "S");
+  ASSERT_EQ(s->impl()->members().size(), 2u);
+  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
+  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
@@ -60,12 +60,12 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s.value->name(), "B");
-  ASSERT_EQ(s.value->impl()->members().size(), 2u);
-  EXPECT_EQ(s.value->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s.value->impl()->members()[1]->name(), "b");
-  ASSERT_EQ(s.value->impl()->decorations().size(), 1u);
-  EXPECT_TRUE(s.value->impl()->decorations()[0]->IsBlock());
+  ASSERT_EQ(s->name(), "B");
+  ASSERT_EQ(s->impl()->members().size(), 2u);
+  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
+  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
+  ASSERT_EQ(s->impl()->decorations().size(), 1u);
+  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
@@ -85,13 +85,13 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s.value->name(), "S");
-  ASSERT_EQ(s.value->impl()->members().size(), 2u);
-  EXPECT_EQ(s.value->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s.value->impl()->members()[1]->name(), "b");
-  ASSERT_EQ(s.value->impl()->decorations().size(), 2u);
-  EXPECT_TRUE(s.value->impl()->decorations()[0]->IsBlock());
-  EXPECT_TRUE(s.value->impl()->decorations()[1]->IsBlock());
+  ASSERT_EQ(s->name(), "S");
+  ASSERT_EQ(s->impl()->members().size(), 2u);
+  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
+  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
+  ASSERT_EQ(s->impl()->decorations().size(), 2u);
+  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
+  EXPECT_TRUE(s->impl()->decorations()[1]->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s.value->impl()->members().size(), 0u);
+  ASSERT_EQ(s->impl()->members().size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingIdent) {

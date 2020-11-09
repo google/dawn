@@ -36,18 +36,18 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsAssign());
-  ASSERT_NE(e.value->lhs(), nullptr);
-  ASSERT_NE(e.value->rhs(), nullptr);
+  ASSERT_TRUE(e->IsAssign());
+  ASSERT_NE(e->lhs(), nullptr);
+  ASSERT_NE(e->rhs(), nullptr);
 
-  ASSERT_TRUE(e.value->lhs()->IsIdentifier());
-  auto* ident = e.value->lhs()->AsIdentifier();
+  ASSERT_TRUE(e->lhs()->IsIdentifier());
+  auto* ident = e->lhs()->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
 
-  ASSERT_TRUE(e.value->rhs()->IsConstructor());
-  ASSERT_TRUE(e.value->rhs()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(e->rhs()->IsConstructor());
+  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
 
-  auto* init = e.value->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsSint());
   EXPECT_EQ(init->literal()->AsSint()->value(), 123);
@@ -61,19 +61,19 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsAssign());
-  ASSERT_NE(e.value->lhs(), nullptr);
-  ASSERT_NE(e.value->rhs(), nullptr);
+  ASSERT_TRUE(e->IsAssign());
+  ASSERT_NE(e->lhs(), nullptr);
+  ASSERT_NE(e->rhs(), nullptr);
 
-  ASSERT_TRUE(e.value->rhs()->IsConstructor());
-  ASSERT_TRUE(e.value->rhs()->AsConstructor()->IsScalarConstructor());
-  auto* init = e.value->rhs()->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(e->rhs()->IsConstructor());
+  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
+  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsSint());
   EXPECT_EQ(init->literal()->AsSint()->value(), 123);
 
-  ASSERT_TRUE(e.value->lhs()->IsMemberAccessor());
-  auto* mem = e.value->lhs()->AsMemberAccessor();
+  ASSERT_TRUE(e->lhs()->IsMemberAccessor());
+  auto* mem = e->lhs()->AsMemberAccessor();
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
   auto* ident = mem->member()->AsIdentifier();

@@ -1156,13 +1156,13 @@ Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_decl(
   if (func_decos.errored)
     return Failure::kErrored;
 
-  f.value->set_decorations(std::move(func_decos.value));
+  f->set_decorations(std::move(func_decos.value));
 
   auto body = expect_body_stmt();
   if (body.errored)
     return Failure::kErrored;
 
-  f.value->set_body(std::move(body.value));
+  f->set_body(std::move(body.value));
   return std::move(f.value);
 }
 
@@ -1491,10 +1491,10 @@ Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
     if (!constructor.matched)
       return add_error(peek(), "missing constructor for variable declaration");
 
-    var.value->set_constructor(std::move(constructor.value));
+    var->set_constructor(std::move(constructor.value));
   }
 
-  return std::make_unique<ast::VariableDeclStatement>(var.value->source(),
+  return std::make_unique<ast::VariableDeclStatement>(var->source(),
                                                       std::move(var.value));
 }
 
@@ -1655,7 +1655,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
       return Failure::kErrored;
     if (!cond.matched)
       break;
-    if (!cond.value->IsInt())
+    if (!cond->IsInt())
       return add_error(t, "invalid case selector must be an integer value");
 
     std::unique_ptr<ast::IntLiteral> selector(cond.value.release()->AsInt());
@@ -1819,11 +1819,11 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
   // The for statement is a syntactic sugar on top of the loop statement.
   // We create corresponding nodes in ast with the exact same behaviour
   // as we would expect from the loop statement.
-  if (header.value->condition != nullptr) {
+  if (header->condition != nullptr) {
     // !condition
     auto not_condition = std::make_unique<ast::UnaryOpExpression>(
-        header.value->condition->source(), ast::UnaryOp::kNot,
-        std::move(header.value->condition));
+        header->condition->source(), ast::UnaryOp::kNot,
+        std::move(header->condition));
     // { break; }
     auto break_stmt =
         std::make_unique<ast::BreakStatement>(not_condition->source());
@@ -1834,22 +1834,22 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
     auto break_if_not_condition = std::make_unique<ast::IfStatement>(
         not_condition->source(), std::move(not_condition),
         std::move(break_body));
-    body.value->insert(0, std::move(break_if_not_condition));
+    body->insert(0, std::move(break_if_not_condition));
   }
 
   std::unique_ptr<ast::BlockStatement> continuing_body = nullptr;
-  if (header.value->continuing != nullptr) {
-    continuing_body = std::make_unique<ast::BlockStatement>(
-        header.value->continuing->source());
-    continuing_body->append(std::move(header.value->continuing));
+  if (header->continuing != nullptr) {
+    continuing_body =
+        std::make_unique<ast::BlockStatement>(header->continuing->source());
+    continuing_body->append(std::move(header->continuing));
   }
 
   auto loop = std::make_unique<ast::LoopStatement>(
       source, std::move(body.value), std::move(continuing_body));
 
-  if (header.value->initializer != nullptr) {
+  if (header->initializer != nullptr) {
     auto result = std::make_unique<ast::BlockStatement>(source);
-    result->append(std::move(header.value->initializer));
+    result->append(std::move(header->initializer));
     result->append(std::move(loop));
     return result;
   }

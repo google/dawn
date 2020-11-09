@@ -31,10 +31,10 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
 
-  auto* t = e.value->AsConstructor()->AsTypeConstructor();
+  auto* t = e->AsConstructor()->AsTypeConstructor();
   ASSERT_TRUE(t->type()->IsVector());
   EXPECT_EQ(t->type()->AsVector()->size(), 2u);
 
@@ -114,9 +114,9 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsScalarConstructor());
-  auto* c = e.value->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
+  auto* c = e->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsBool());
   EXPECT_TRUE(c->literal()->AsBool()->IsTrue());
 }

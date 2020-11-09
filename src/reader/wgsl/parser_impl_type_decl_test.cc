@@ -59,9 +59,9 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, alias_type);
-  ASSERT_TRUE(t.value->IsAlias());
+  ASSERT_TRUE(t->IsAlias());
 
-  auto* alias = t.value->AsAlias();
+  auto* alias = t->AsAlias();
   EXPECT_EQ(alias->name(), "A");
   EXPECT_EQ(alias->type(), int_type);
 }
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, bool_type);
-  ASSERT_TRUE(t.value->IsBool());
+  ASSERT_TRUE(t->IsBool());
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, float_type);
-  ASSERT_TRUE(t.value->IsF32());
+  ASSERT_TRUE(t->IsF32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
@@ -113,7 +113,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, int_type);
-  ASSERT_TRUE(t.value->IsI32());
+  ASSERT_TRUE(t->IsI32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
@@ -126,7 +126,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, uint_type);
-  ASSERT_TRUE(t.value->IsU32());
+  ASSERT_TRUE(t->IsU32());
 }
 
 struct VecData {
@@ -148,8 +148,8 @@ TEST_P(VecTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t.value->IsVector());
-  EXPECT_EQ(t.value->AsVector()->size(), params.count);
+  EXPECT_TRUE(t->IsVector());
+  EXPECT_EQ(t->AsVector()->size(), params.count);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecTest,
@@ -236,9 +236,9 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsPointer());
+  ASSERT_TRUE(t->IsPointer());
 
-  auto* ptr = t.value->AsPointer();
+  auto* ptr = t->AsPointer();
   ASSERT_TRUE(ptr->type()->IsF32());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 }
@@ -250,9 +250,9 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsPointer());
+  ASSERT_TRUE(t->IsPointer());
 
-  auto* ptr = t.value->AsPointer();
+  auto* ptr = t->AsPointer();
   ASSERT_TRUE(ptr->type()->IsVector());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 
@@ -348,9 +348,9 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
@@ -364,9 +364,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
@@ -381,9 +381,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
   ASSERT_TRUE(a->has_array_stride());
@@ -397,9 +397,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
 
@@ -418,9 +418,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
 
@@ -521,9 +521,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t.value->IsArray());
+  ASSERT_TRUE(t->IsArray());
 
-  auto* a = t.value->AsArray();
+  auto* a = t->AsArray();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsU32());
 }
@@ -618,8 +618,8 @@ TEST_P(MatrixTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t.value->IsMatrix());
-  auto* mat = t.value->AsMatrix();
+  EXPECT_TRUE(t->IsMatrix());
+  auto* mat = t->AsMatrix();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
 }
@@ -743,8 +743,8 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t.value->IsSampler());
-  ASSERT_FALSE(t.value->AsSampler()->IsComparison());
+  ASSERT_TRUE(t->IsSampler());
+  ASSERT_FALSE(t->AsSampler()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
@@ -759,9 +759,9 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsSampled());
-  ASSERT_TRUE(t.value->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
@@ -776,9 +776,9 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t.value->IsTexture());
-  ASSERT_TRUE(t.value->AsTexture()->IsSampled());
-  ASSERT_TRUE(t.value->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->IsTexture());
+  ASSERT_TRUE(t->AsTexture()->IsSampled());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
 }
 
 }  // namespace

@@ -29,9 +29,9 @@ TEST_F(ParserImplTest, BodyStmt) {
   auto e = p->expect_body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_EQ(e.value->size(), 2u);
-  EXPECT_TRUE(e.value->get(0)->IsDiscard());
-  EXPECT_TRUE(e.value->get(1)->IsReturn());
+  ASSERT_EQ(e->size(), 2u);
+  EXPECT_TRUE(e->get(0)->IsDiscard());
+  EXPECT_TRUE(e->get(1)->IsReturn());
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, BodyStmt_Empty) {
   auto e = p->expect_body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  EXPECT_EQ(e.value->size(), 0u);
+  EXPECT_EQ(e->size(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {

@@ -38,7 +38,7 @@ class ForStmtTest : public ParserImplTest {
     EXPECT_FALSE(p_for->has_error()) << p_for->error();
     ASSERT_NE(e_for.value, nullptr);
 
-    EXPECT_EQ(e_loop.value->str(), e_for.value->str());
+    EXPECT_EQ(e_loop->str(), e_for->str());
   }
 };
 

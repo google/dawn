@@ -524,6 +524,7 @@ source_set("libtint_wgsl_reader_src") {
     "src/reader/wgsl/parser.h",
     "src/reader/wgsl/parser_impl.cc",
     "src/reader/wgsl/parser_impl.h",
+    "src/reader/wgsl/parser_impl_detail.h",
     "src/reader/wgsl/token.cc",
     "src/reader/wgsl/token.h",
   ]

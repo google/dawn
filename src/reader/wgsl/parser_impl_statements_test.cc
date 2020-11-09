@@ -27,9 +27,9 @@ TEST_F(ParserImplTest, Statements) {
   auto e = p->expect_statements();
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.value->size(), 2u);
-  EXPECT_TRUE(e.value->get(0)->IsDiscard());
-  EXPECT_TRUE(e.value->get(1)->IsReturn());
+  ASSERT_EQ(e->size(), 2u);
+  EXPECT_TRUE(e->get(0)->IsDiscard());
+  EXPECT_TRUE(e->get(1)->IsReturn());
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, Statements_Empty) {
   auto e = p->expect_statements();
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.value->size(), 0u);
+  ASSERT_EQ(e->size(), 0u);
 }
 
 }  // namespace

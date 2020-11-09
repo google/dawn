@@ -36,8 +36,8 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsArrayAccessor());
-  auto* ary = e.value->AsArrayAccessor();
+  ASSERT_TRUE(e->IsArrayAccessor());
+  auto* ary = e->AsArrayAccessor();
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
@@ -58,8 +58,8 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsArrayAccessor());
-  auto* ary = e.value->AsArrayAccessor();
+  ASSERT_TRUE(e->IsArrayAccessor());
+  auto* ary = e->AsArrayAccessor();
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
@@ -106,8 +106,8 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsCall());
-  auto* c = e.value->AsCall();
+  ASSERT_TRUE(e->IsCall());
+  auto* c = e->AsCall();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
@@ -124,8 +124,8 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsCall());
-  auto* c = e.value->AsCall();
+  ASSERT_TRUE(e->IsCall());
+  auto* c = e->AsCall();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
@@ -174,9 +174,9 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsMemberAccessor());
+  ASSERT_TRUE(e->IsMemberAccessor());
 
-  auto* m = e.value->AsMemberAccessor();
+  auto* m = e->AsMemberAccessor();
   ASSERT_TRUE(m->structure()->IsIdentifier());
   EXPECT_EQ(m->structure()->AsIdentifier()->name(), "a");
 
@@ -211,7 +211,7 @@ TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsIdentifier());
+  ASSERT_TRUE(e->IsIdentifier());
 }
 
 }  // namespace

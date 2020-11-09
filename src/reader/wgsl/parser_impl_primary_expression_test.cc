@@ -39,8 +39,8 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsIdentifier());
-  auto* ident = e.value->AsIdentifier();
+  ASSERT_TRUE(e->IsIdentifier());
+  auto* ident = e->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
 }
 
@@ -51,9 +51,9 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
-  auto* ty = e.value->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  auto* ty = e->AsConstructor()->AsTypeConstructor();
 
   ASSERT_EQ(ty->values().size(), 4u);
   const auto& val = ty->values();
@@ -89,9 +89,9 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
-  auto* ty = e.value->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  auto* ty = e->AsConstructor()->AsTypeConstructor();
 
   ASSERT_EQ(ty->values().size(), 0u);
 }
@@ -143,9 +143,9 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsScalarConstructor());
-  auto* init = e.value->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
+  auto* init = e->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   EXPECT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -157,7 +157,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsBinary());
+  ASSERT_TRUE(e->IsBinary());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
@@ -199,10 +199,10 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsConstructor());
-  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
 
-  auto* c = e.value->AsConstructor()->AsTypeConstructor();
+  auto* c = e->AsConstructor()->AsTypeConstructor();
   ASSERT_EQ(c->type(), f32_type);
   ASSERT_EQ(c->values().size(), 1u);
 
@@ -219,9 +219,9 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsBitcast());
+  ASSERT_TRUE(e->IsBitcast());
 
-  auto* c = e.value->AsBitcast();
+  auto* c = e->AsBitcast();
   ASSERT_EQ(c->type(), f32_type);
 
   ASSERT_TRUE(c->expr()->IsConstructor());

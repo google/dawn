@@ -34,8 +34,8 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e.value->IsArrayAccessor());
-  auto* ary = e.value->AsArrayAccessor();
+  ASSERT_TRUE(e->IsArrayAccessor());
+  auto* ary = e->AsArrayAccessor();
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
@@ -54,9 +54,9 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsUnaryOp());
+  ASSERT_TRUE(e->IsUnaryOp());
 
-  auto* u = e.value->AsUnaryOp();
+  auto* u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNegation);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
@@ -84,9 +84,9 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->IsUnaryOp());
+  ASSERT_TRUE(e->IsUnaryOp());
 
-  auto* u = e.value->AsUnaryOp();
+  auto* u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNot);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
