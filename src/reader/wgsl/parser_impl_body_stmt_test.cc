@@ -28,22 +28,25 @@ TEST_F(ParserImplTest, BodyStmt) {
 })");
   auto e = p->expect_body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e->size(), 2u);
-  EXPECT_TRUE(e->get(0)->IsDiscard());
-  EXPECT_TRUE(e->get(1)->IsReturn());
+  ASSERT_FALSE(e.errored);
+  ASSERT_EQ(e.value->size(), 2u);
+  EXPECT_TRUE(e.value->get(0)->IsDiscard());
+  EXPECT_TRUE(e.value->get(1)->IsReturn());
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
   auto* p = parser("{}");
   auto e = p->expect_body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e->size(), 0u);
+  ASSERT_FALSE(e.errored);
+  EXPECT_EQ(e.value->size(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
   auto* p = parser("{fn main() -> void {}}");
   auto e = p->expect_body_stmt();
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
   EXPECT_EQ(p->error(), "1:2: expected '}'");
 }
 
@@ -51,6 +54,7 @@ TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
   auto* p = parser("{return;");
   auto e = p->expect_body_stmt();
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
   EXPECT_EQ(p->error(), "1:9: expected '}'");
 }
 

@@ -15,6 +15,7 @@
 #ifndef SRC_READER_WGSL_PARSER_IMPL_H_
 #define SRC_READER_WGSL_PARSER_IMPL_H_
 
+#include <cassert>
 #include <deque>
 #include <memory>
 #include <string>
@@ -79,7 +80,61 @@ struct ForHeader {
 
 /// ParserImpl for WGSL source data
 class ParserImpl {
+  /// Failure holds enumerator values used for the constructing an Expect in the
+  /// errored state.
+  struct Failure {
+    enum Errored { kErrored };
+  };
+
  public:
+  /// Expect is the return type of the parser methods that are expected to
+  /// return a parsed value of type T, unless there was an parse error.
+  /// In the case of a parse error the called method will have called
+  /// |add_error()| and the Expect will have |errored| set to true.
+  template <typename T>
+  struct Expect {
+    /// An alias to the templated type T.
+    using type = T;
+
+    /// Don't allow an Expect to take a nullptr.
+    inline Expect(std::nullptr_t) = delete;  // NOLINT
+
+    /// Constructor for a successful parse.
+    /// @param val the result value of the parse
+    /// @param s the optional source of the value
+    template <typename U>
+    inline Expect(U&& val, const Source& s = {})  // NOLINT
+        : value(std::forward<U>(val)), source(s) {}
+
+    /// Constructor for parse error.
+    inline Expect(Failure::Errored) : errored(true) {}  // NOLINT
+
+    /// Copy constructor
+    inline Expect(const Expect&) = default;
+    /// Move constructor
+    inline Expect(Expect&&) = default;
+    /// Assignment operator
+    /// @return this Expect
+    inline Expect& operator=(const Expect&) = default;
+    /// Assignment move operator
+    /// @return this Expect
+    inline Expect& operator=(Expect&&) = default;
+
+    /// @return a pointer to |value|. |errored| must be false to call.
+    inline T* operator->() {
+      assert(!errored);
+      return &value;
+    }
+
+    /// The expected value of a successful parse.
+    /// Zero-initialized when there was a parse error.
+    T value{};
+    /// Optional source of the value.
+    Source source;
+    /// True if there was a error parsing.
+    bool errored = false;
+  };
+
   /// TypedIdentifier holds a parsed identifier and type. Returned by
   /// variable_ident_decl().
   struct TypedIdentifier {
@@ -130,19 +185,25 @@ class ParserImpl {
   /// Appends an error at |t| with the message |msg|
   /// @param t the token to associate the error with
   /// @param msg the error message
-  void add_error(const Token& t, const std::string& msg);
+  /// @return |errored| so that you can combine an add_error call and return on
+  /// the same line.
+  Failure::Errored add_error(const Token& t, const std::string& msg);
   /// Appends an error raised when parsing |use| at |t| with the message |msg|
   /// @param source the source to associate the error with
   /// @param msg the error message
   /// @param use a description of what was being parsed when the error was
   /// raised.
-  void add_error(const Source& source,
-                 const std::string& msg,
-                 const std::string& use);
+  /// @return |errored| so that you can combine an add_error call and return on
+  /// the same line.
+  Failure::Errored add_error(const Source& source,
+                             const std::string& msg,
+                             const std::string& use);
   /// Appends an error at |source| with the message |msg|
   /// @param source the source to associate the error with
   /// @param msg the error message
-  void add_error(const Source& source, const std::string& msg);
+  /// @return |errored| so that you can combine an add_error call and return on
+  /// the same line.
+  Failure::Errored add_error(const Source& source, const std::string& msg);
 
   /// Registers a constructed type into the parser
   /// @param name the constructed name
@@ -156,7 +217,8 @@ class ParserImpl {
   /// Parses the `translation_unit` grammar element
   void translation_unit();
   /// Parses the `global_decl` grammar element, erroring on parse failure.
-  void expect_global_decl();
+  /// @return true on parse success, otherwise an error.
+  Expect<bool> expect_global_decl();
   /// Parses a `global_variable_decl` grammar element with the initial
   /// `variable_decoration_list*` provided as |decos|.
   /// @returns the variable parsed or nullptr
@@ -173,7 +235,7 @@ class ParserImpl {
   /// failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the identifier and type parsed or empty otherwise
-  TypedIdentifier expect_variable_ident_decl(const std::string& use);
+  Expect<TypedIdentifier> expect_variable_ident_decl(const std::string& use);
   /// Parses a `variable_storage_decoration` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
   ast::StorageClass variable_storage_decoration();
@@ -183,10 +245,10 @@ class ParserImpl {
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* type_decl();
-  /// Parses a `storage_class` grammar element
-  /// @param use a description of what was being parsed if an error was raised
+  /// Parses a `storage_class` grammar element, erroring on parse failure.
+  /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
-  ast::StorageClass expect_storage_class(const std::string& use);
+  Expect<ast::StorageClass> expect_storage_class(const std::string& use);
   /// Parses a `struct_decl` grammar element with the initial
   /// `struct_decoration_decl*` provided as |decos|.
   /// @returns the struct type or nullptr on error
@@ -195,13 +257,13 @@ class ParserImpl {
       ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
-  ast::StructMemberList expect_struct_body_decl();
+  Expect<ast::StructMemberList> expect_struct_body_decl();
   /// Parses a `struct_member` grammar element with the initial
   /// `struct_member_decoration_decl+` provided as |decos|, erroring on parse
   /// failure.
   /// @param decos the list of decorations for the struct member.
   /// @returns the struct member or nullptr
-  std::unique_ptr<ast::StructMember> expect_struct_member(
+  Expect<std::unique_ptr<ast::StructMember>> expect_struct_member(
       ast::DecorationList& decos);
   /// Parses a `function_decl` grammar element with the initial
   /// `function_decoration_decl*` provided as |decos|.
@@ -230,8 +292,10 @@ class ParserImpl {
   /// @returns the parsed Type or nullptr if none matched.
   ast::type::Type* depth_texture_type();
   /// Parses a `image_storage_type` grammar element
+  /// @param use a description of what was being parsed if an error was raised.
   /// @returns returns the image format or kNone if none matched.
-  ast::type::ImageFormat image_storage_type();
+  Expect<ast::type::ImageFormat> expect_image_storage_type(
+      const std::string& use);
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
   ast::type::Type* function_type_decl();
@@ -240,26 +304,24 @@ class ParserImpl {
   std::unique_ptr<ast::Function> function_header();
   /// Parses a `param_list` grammar element, erroring on parse failure.
   /// @returns the parsed variables
-  ast::VariableList expect_param_list();
+  Expect<ast::VariableList> expect_param_list();
   /// Parses a `pipeline_stage` grammar element, erroring if the next token does
   /// not match a stage name.
-  /// @returns the pipeline stage or PipelineStage::kNone if none matched, along
-  /// with the source location for the stage.
-  std::pair<ast::PipelineStage, Source> expect_pipeline_stage();
+  /// @returns the pipeline stage.
+  Expect<ast::PipelineStage> expect_pipeline_stage();
   /// Parses a builtin identifier, erroring if the next token does not match a
   /// valid builtin name.
-  /// @returns the builtin or Builtin::kNone if none matched, along with the
-  /// source location for the stage.
-  std::pair<ast::Builtin, Source> expect_builtin();
+  /// @returns the parsed builtin.
+  Expect<ast::Builtin> expect_builtin();
   /// Parses a `body_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed statements
-  std::unique_ptr<ast::BlockStatement> expect_body_stmt();
+  Expect<std::unique_ptr<ast::BlockStatement>> expect_body_stmt();
   /// Parses a `paren_rhs_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed element or nullptr
-  std::unique_ptr<ast::Expression> expect_paren_rhs_stmt();
+  Expect<std::unique_ptr<ast::Expression>> expect_paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
-  std::unique_ptr<ast::BlockStatement> statements();
+  Expect<std::unique_ptr<ast::BlockStatement>> expect_statements();
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::Statement> statement();
@@ -292,7 +354,7 @@ class ParserImpl {
   std::unique_ptr<ast::CaseStatement> switch_body();
   /// Parses a `case_selectors` grammar element
   /// @returns the list of literals
-  ast::CaseSelectorList case_selectors();
+  Expect<ast::CaseSelectorList> expect_case_selectors();
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
   std::unique_ptr<ast::BlockStatement> case_body();
@@ -304,7 +366,7 @@ class ParserImpl {
   std::unique_ptr<ast::LoopStatement> loop_stmt();
   /// Parses a `for_header` grammar element, erroring on parse failure.
   /// @returns the parsed for header or nullptr
-  std::unique_ptr<ForHeader> expect_for_header();
+  Expect<std::unique_ptr<ForHeader>> expect_for_header();
   /// Parses a `for_stmt` grammar element
   /// @returns the parsed for loop or nullptr
   std::unique_ptr<ast::Statement> for_stmt();
@@ -316,14 +378,14 @@ class ParserImpl {
   std::unique_ptr<ast::Literal> const_literal();
   /// Parses a `const_expr` grammar element, erroring on parse failure.
   /// @returns the parsed constructor expression or nullptr on error
-  std::unique_ptr<ast::ConstructorExpression> expect_const_expr();
+  Expect<std::unique_ptr<ast::ConstructorExpression>> expect_const_expr();
   /// Parses a `primary_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> primary_expression();
   /// Parses a `argument_expression_list` grammar element, erroring on parse
   /// failure.
   /// @returns the list of arguments
-  ast::ExpressionList expect_argument_expression_list();
+  Expect<ast::ExpressionList> expect_argument_expression_list();
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr
@@ -339,7 +401,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_multiplicative_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_multiplicative_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `multiplicative_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -348,7 +410,7 @@ class ParserImpl {
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_additive_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_additive_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `additive_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -357,7 +419,7 @@ class ParserImpl {
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_shift_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_shift_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `shift_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -366,7 +428,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_relational_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_relational_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `relational_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -375,7 +437,7 @@ class ParserImpl {
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_equality_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_equality_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `equality_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -384,7 +446,7 @@ class ParserImpl {
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_and_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_and_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `and_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -393,7 +455,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_exclusive_or_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_exclusive_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `exclusive_or_expression` grammar elememnt
   /// @returns the parsed expression or nullptr
@@ -402,7 +464,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_inclusive_or_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_inclusive_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses the `inclusive_or_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -411,7 +473,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_logical_and_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_logical_and_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses a `logical_and_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -420,7 +482,7 @@ class ParserImpl {
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  std::unique_ptr<ast::Expression> expect_logical_or_expr(
+  Expect<std::unique_ptr<ast::Expression>> expect_logical_or_expr(
       std::unique_ptr<ast::Expression> lhs);
   /// Parses a `logical_or_expression` grammar element
   /// @returns the parsed expression or nullptr
@@ -449,12 +511,16 @@ class ParserImpl {
   /// represent a decoration.
   /// @see #decoration for the full list of decorations this method parses.
   /// @return the parsed decoration, or nullptr on error.
-  std::unique_ptr<ast::Decoration> expect_decoration();
+  Expect<std::unique_ptr<ast::Decoration>> expect_decoration();
 
  private:
-  /// ResultType resolves to the return type for the function or lambda F.
+  /// ReturnType resolves to the return type for the function or lambda F.
   template <typename F>
-  using ResultType = typename std::result_of<F()>::type;
+  using ReturnType = typename std::result_of<F()>::type;
+
+  /// ResultType resolves to |T| for a |RESULT| of type Expect<T>.
+  template <typename RESULT>
+  using ResultType = typename RESULT::type;
 
   /// @returns true and consumes the next token if it equals |tok|.
   /// @param source if not nullptr, the next token's source is written to this
@@ -470,33 +536,25 @@ class ParserImpl {
   /// next token is not a signed integer.
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised
-  /// @param out the pointer to write the parsed integer to
-  /// @returns true if the signed integer was parsed without error
-  bool expect_sint(const std::string& use, int32_t* out);
+  /// @returns the parsed integer.
+  Expect<int32_t> expect_sint(const std::string& use);
   /// Parses a signed integer from the next token in the stream, erroring if
   /// the next token is not a signed integer or is negative.
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised
-  /// @param out the pointer to write the parsed integer to
-  /// @returns true if the signed integer was parsed without error
-  bool expect_positive_sint(const std::string& use, uint32_t* out);
+  /// @returns the parsed integer.
+  Expect<uint32_t> expect_positive_sint(const std::string& use);
   /// Parses a non-zero signed integer from the next token in the stream,
   /// erroring if the next token is not a signed integer or is less than 1.
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised
-  /// @param out the pointer to write the parsed integer to
-  /// @returns true if the signed integer was parsed without error
-  bool expect_nonzero_positive_sint(const std::string& use, uint32_t* out);
+  /// @returns the parsed integer.
+  Expect<uint32_t> expect_nonzero_positive_sint(const std::string& use);
   /// Errors if the next token is not an identifier.
   /// Always consumes the next token.
   /// @param use a description of what was being parsed if an error was raised
-  /// @param out the pointer to write the parsed identifier to
-  /// @param source if not nullptr, the next token's source is written to this
-  /// pointer, regardless of success or error
-  /// @returns true if the identifier was parsed without error
-  bool expect_ident(const std::string& use,
-                    std::string* out,
-                    Source* source = nullptr);
+  /// @returns the parsed identifier.
+  Expect<std::string> expect_ident(const std::string& use);
   /// Parses a lexical block starting with the token |start| and ending with
   /// the token |end|. |body| is called to parse the lexical block body between
   /// the |start| and |end| tokens.
@@ -508,10 +566,10 @@ class ParserImpl {
   /// @param end the token that ends the lexical block
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature T().
+  /// body, with the signature: `Expect<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// a zero-initialized |T|.
-  template <typename F, typename T = ResultType<F>>
+  template <typename F, typename T = ReturnType<F>>
   T expect_block(Token::Type start,
                  Token::Type end,
                  const std::string& use,
@@ -521,36 +579,53 @@ class ParserImpl {
   /// and |end| arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature T().
+  /// body, with the signature: `Expect<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// a zero-initialized |T|.
-  template <typename F, typename T = ResultType<F>>
+  template <typename F, typename T = ReturnType<F>>
   T expect_paren_block(const std::string& use, F&& body);
   /// A convenience function that calls |expect_block| passing
   /// |Token::Type::kBraceLeft| and |Token::Type::kBraceRight| for the |start|
   /// and |end| arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature T().
+  /// body, with the signature: `Expect<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// a zero-initialized |T|.
-  template <typename F, typename T = ResultType<F>>
+  template <typename F, typename T = ReturnType<F>>
   T expect_brace_block(const std::string& use, F&& body);
+
+  // Versions of expect_block(), expect_paren_block_old(),
+  // expect_brace_block_old() that do not take an Expect for T.
+  // These will be removed in the near future.
+  // TODO(ben-clayton) - migrate remaining uses of these.
+  template <typename F, typename T = ReturnType<F>>
+  T expect_block_old(Token::Type start,
+                     Token::Type end,
+                     const std::string& use,
+                     F&& body);
+  template <typename F, typename T = ReturnType<F>>
+  T expect_paren_block_old(const std::string& use, F&& body);
+  template <typename F, typename T = ReturnType<F>>
+  T expect_brace_block_old(const std::string& use, F&& body);
+
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
   template <typename T>
-  std::vector<std::unique_ptr<T>> cast_decorations(ast::DecorationList& in);
+  Expect<std::vector<std::unique_ptr<T>>> cast_decorations(
+      ast::DecorationList& in);
   /// Reports an error if the decoration list |list| is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  ast::type::Type* expect_type_decl_pointer();
-  ast::type::Type* expect_type_decl_vector(Token t);
-  ast::type::Type* expect_type_decl_array(ast::ArrayDecorationList decos);
-  ast::type::Type* expect_type_decl_matrix(Token t);
+  Expect<ast::type::Type*> expect_type_decl_pointer();
+  Expect<ast::type::Type*> expect_type_decl_vector(Token t);
+  Expect<ast::type::Type*> expect_type_decl_array(
+      ast::ArrayDecorationList decos);
+  Expect<ast::type::Type*> expect_type_decl_matrix(Token t);
 
-  std::unique_ptr<ast::ConstructorExpression> expect_const_expr_internal(
-      uint32_t depth);
+  Expect<std::unique_ptr<ast::ConstructorExpression>>
+  expect_const_expr_internal(uint32_t depth);
 
   Context& ctx_;
   diag::List diags_;

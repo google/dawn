@@ -24,18 +24,20 @@ namespace {
 
 TEST_F(ParserImplTest, Statements) {
   auto* p = parser("discard; return;");
-  auto e = p->statements();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e->size(), 2u);
-  EXPECT_TRUE(e->get(0)->IsDiscard());
-  EXPECT_TRUE(e->get(1)->IsReturn());
+  auto e = p->expect_statements();
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_EQ(e.value->size(), 2u);
+  EXPECT_TRUE(e.value->get(0)->IsDiscard());
+  EXPECT_TRUE(e.value->get(1)->IsReturn());
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
   auto* p = parser("");
-  auto e = p->statements();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e->size(), 0u);
+  auto e = p->expect_statements();
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_EQ(e.value->size(), 0u);
 }
 
 }  // namespace

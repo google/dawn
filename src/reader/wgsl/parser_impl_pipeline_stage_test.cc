@@ -36,15 +36,14 @@ TEST_P(PipelineStageTest, Parses) {
   auto params = GetParam();
   auto* p = parser(params.input);
 
-  ast::PipelineStage stage;
-  Source source;
-  std::tie(stage, source) = p->expect_pipeline_stage();
+  auto stage = p->expect_pipeline_stage();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(stage, params.result);
-  EXPECT_EQ(source.range.begin.line, 1u);
-  EXPECT_EQ(source.range.begin.column, 1u);
-  EXPECT_EQ(source.range.end.line, 1u);
-  EXPECT_EQ(source.range.end.column, 1u + params.input.size());
+  ASSERT_FALSE(stage.errored);
+  EXPECT_EQ(stage.value, params.result);
+  EXPECT_EQ(stage.source.range.begin.line, 1u);
+  EXPECT_EQ(stage.source.range.begin.column, 1u);
+  EXPECT_EQ(stage.source.range.end.line, 1u);
+  EXPECT_EQ(stage.source.range.end.column, 1u + params.input.size());
 
   auto t = p->next();
   EXPECT_TRUE(t.IsEof());
@@ -59,16 +58,10 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(ParserImplTest, PipelineStage_NoMatch) {
   auto* p = parser("not-a-stage");
-  ast::PipelineStage stage;
-  Source source;
-  std::tie(stage, source) = p->expect_pipeline_stage();
+  auto stage = p->expect_pipeline_stage();
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(stage.errored);
   ASSERT_EQ(p->error(), "1:1: invalid value for stage decoration");
-  ASSERT_EQ(stage, ast::PipelineStage::kNone);
-  EXPECT_EQ(source.range.begin.line, 1u);
-  EXPECT_EQ(source.range.begin.column, 1u);
-  EXPECT_EQ(source.range.end.line, 1u);
-  EXPECT_EQ(source.range.end.column, 4u);
 }
 
 }  // namespace

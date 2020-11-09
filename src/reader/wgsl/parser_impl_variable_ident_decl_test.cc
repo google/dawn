@@ -25,34 +25,38 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   auto* p = parser("my_var : f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(decl.name, "my_var");
-  ASSERT_NE(decl.type, nullptr);
-  ASSERT_TRUE(decl.type->IsF32());
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_NE(decl->type, nullptr);
+  ASSERT_TRUE(decl->type->IsF32());
 
-  ASSERT_EQ(decl.source.range.begin.line, 1u);
-  ASSERT_EQ(decl.source.range.begin.column, 1u);
-  ASSERT_EQ(decl.source.range.end.line, 1u);
-  ASSERT_EQ(decl.source.range.end.column, 7u);
+  ASSERT_EQ(decl->source.range.begin.line, 1u);
+  ASSERT_EQ(decl->source.range.begin.column, 1u);
+  ASSERT_EQ(decl->source.range.end.line, 1u);
+  ASSERT_EQ(decl->source.range.end.column, 7u);
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
   auto* p = parser(": f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingColon) {
   auto* p = parser("my_var f32");
-  auto r = p->expect_variable_ident_decl("test");
+  auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:8: expected ':' for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
   auto* p = parser("my_var :");
-  auto r = p->expect_variable_ident_decl("test");
+  auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:9: invalid type for test");
 }
 
@@ -60,13 +64,15 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   auto* p = parser("123 : f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:1: expected identifier for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   auto* p = parser("my_var : invalid");
-  auto r = p->expect_variable_ident_decl("test");
+  auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 

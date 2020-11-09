@@ -30,11 +30,11 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto* p = parser("vec2<f32>(1., 2.)");
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  ASSERT_FALSE(e.errored);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
 
-  auto* t = e->AsConstructor()->AsTypeConstructor();
+  auto* t = e.value->AsConstructor()->AsTypeConstructor();
   ASSERT_TRUE(t->type()->IsVector());
   EXPECT_EQ(t->type()->AsVector()->size(), 2u);
 
@@ -58,7 +58,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
   auto* p = parser("vec2<f32>(1., 2.");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:17: expected ')' for type constructor");
 }
 
@@ -66,7 +67,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
   auto* p = parser("vec2<f32> 1., 2.)");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
@@ -74,7 +76,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
   auto* p = parser("vec2<f32>(1.,)");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:14: unable to parse const literal");
 }
 
@@ -82,7 +85,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
   auto* p = parser("vec2<f32>(1. 2.");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:14: expected ')' for type constructor");
 }
 
@@ -90,7 +94,8 @@ TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
   auto* p = parser("vec2<f32>()");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:11: unable to parse const literal");
 }
 
@@ -98,7 +103,8 @@ TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
   auto* p = parser("vec2<f32>(1., if(a) {})");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
 }
 
@@ -106,10 +112,11 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
   auto* p = parser("true");
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
-  auto* c = e->AsConstructor()->AsScalarConstructor();
+  ASSERT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsScalarConstructor());
+  auto* c = e.value->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsBool());
   EXPECT_TRUE(c->literal()->AsBool()->IsTrue());
 }
@@ -118,7 +125,8 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   auto* p = parser("invalid");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:1: unknown constructed type 'invalid'");
 }
 
@@ -134,7 +142,8 @@ TEST_F(ParserImplTest, ConstExpr_Recursion) {
   auto* p = parser(out.str());
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:517: max const_expr depth reached");
 }
 

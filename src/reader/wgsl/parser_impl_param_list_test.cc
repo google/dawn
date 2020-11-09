@@ -34,16 +34,17 @@ TEST_F(ParserImplTest, ParamList_Single) {
   auto* p = parser("a : i32");
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e.size(), 1u);
+  ASSERT_FALSE(e.errored);
+  EXPECT_EQ(e.value.size(), 1u);
 
-  EXPECT_EQ(e[0]->name(), "a");
-  EXPECT_EQ(e[0]->type(), i32);
-  EXPECT_TRUE(e[0]->is_const());
+  EXPECT_EQ(e.value[0]->name(), "a");
+  EXPECT_EQ(e.value[0]->type(), i32);
+  EXPECT_TRUE(e.value[0]->is_const());
 
-  ASSERT_EQ(e[0]->source().range.begin.line, 1u);
-  ASSERT_EQ(e[0]->source().range.begin.column, 1u);
-  ASSERT_EQ(e[0]->source().range.end.line, 1u);
-  ASSERT_EQ(e[0]->source().range.end.column, 2u);
+  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.begin.column, 1u);
+  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 }
 
 TEST_F(ParserImplTest, ParamList_Multiple) {
@@ -54,47 +55,50 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   auto* p = parser("a : i32, b: f32, c: vec2<f32>");
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e.size(), 3u);
+  ASSERT_FALSE(e.errored);
+  EXPECT_EQ(e.value.size(), 3u);
 
-  EXPECT_EQ(e[0]->name(), "a");
-  EXPECT_EQ(e[0]->type(), i32);
-  EXPECT_TRUE(e[0]->is_const());
+  EXPECT_EQ(e.value[0]->name(), "a");
+  EXPECT_EQ(e.value[0]->type(), i32);
+  EXPECT_TRUE(e.value[0]->is_const());
 
-  ASSERT_EQ(e[0]->source().range.begin.line, 1u);
-  ASSERT_EQ(e[0]->source().range.begin.column, 1u);
-  ASSERT_EQ(e[0]->source().range.end.line, 1u);
-  ASSERT_EQ(e[0]->source().range.end.column, 2u);
+  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.begin.column, 1u);
+  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 
-  EXPECT_EQ(e[1]->name(), "b");
-  EXPECT_EQ(e[1]->type(), f32);
-  EXPECT_TRUE(e[1]->is_const());
+  EXPECT_EQ(e.value[1]->name(), "b");
+  EXPECT_EQ(e.value[1]->type(), f32);
+  EXPECT_TRUE(e.value[1]->is_const());
 
-  ASSERT_EQ(e[1]->source().range.begin.line, 1u);
-  ASSERT_EQ(e[1]->source().range.begin.column, 10u);
-  ASSERT_EQ(e[1]->source().range.end.line, 1u);
-  ASSERT_EQ(e[1]->source().range.end.column, 11u);
+  ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[1]->source().range.begin.column, 10u);
+  ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
 
-  EXPECT_EQ(e[2]->name(), "c");
-  EXPECT_EQ(e[2]->type(), vec2);
-  EXPECT_TRUE(e[2]->is_const());
+  EXPECT_EQ(e.value[2]->name(), "c");
+  EXPECT_EQ(e.value[2]->type(), vec2);
+  EXPECT_TRUE(e.value[2]->is_const());
 
-  ASSERT_EQ(e[2]->source().range.begin.line, 1u);
-  ASSERT_EQ(e[2]->source().range.begin.column, 18u);
-  ASSERT_EQ(e[2]->source().range.end.line, 1u);
-  ASSERT_EQ(e[2]->source().range.end.column, 19u);
+  ASSERT_EQ(e.value[2]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[2]->source().range.begin.column, 18u);
+  ASSERT_EQ(e.value[2]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[2]->source().range.end.column, 19u);
 }
 
 TEST_F(ParserImplTest, ParamList_Empty) {
   auto* p = parser("");
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(e.size(), 0u);
+  ASSERT_FALSE(e.errored);
+  EXPECT_EQ(e.value.size(), 0u);
 }
 
 TEST_F(ParserImplTest, ParamList_HangingComma) {
   auto* p = parser("a : i32,");
   auto e = p->expect_param_list();
   ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
   EXPECT_EQ(p->error(), "1:9: expected identifier for parameter");
 }
 

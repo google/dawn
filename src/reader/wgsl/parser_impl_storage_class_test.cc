@@ -38,8 +38,9 @@ TEST_P(StorageClassTest, Parses) {
   auto* p = parser(params.input);
 
   auto sc = p->expect_storage_class("test");
-  ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(sc, params.result);
+  EXPECT_FALSE(sc.errored);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_EQ(sc.value, params.result);
 
   auto t = p->next();
   EXPECT_TRUE(t.IsEof());
@@ -62,8 +63,8 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ParserImplTest, StorageClass_NoMatch) {
   auto* p = parser("not-a-storage-class");
   auto sc = p->expect_storage_class("test");
-  ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(sc.errored, true);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:1: invalid storage class for test");
 
   auto t = p->next();

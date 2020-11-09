@@ -74,6 +74,9 @@ namespace reader {
 namespace wgsl {
 namespace {
 
+template <typename T>
+using Expect = ParserImpl::Expect<T>;
+
 /// Controls the maximum number of times we'll call into the const_expr function
 /// from itself. This is to guard against stack overflow when there is an
 /// excessive number of type constructors inside the const_expr.
@@ -123,27 +126,32 @@ ParserImpl::ParserImpl(Context* ctx, Source::File const* file)
 
 ParserImpl::~ParserImpl() = default;
 
-void ParserImpl::add_error(const Source& source,
-                           const std::string& err,
-                           const std::string& use) {
+ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
+                                                   const std::string& err,
+                                                   const std::string& use) {
   std::stringstream msg;
   msg << err;
   if (!use.empty()) {
     msg << " for " << use;
   }
   add_error(source, msg.str());
+  return Failure::kErrored;
 }
 
-void ParserImpl::add_error(const Token& t, const std::string& err) {
+ParserImpl::Failure::Errored ParserImpl::add_error(const Token& t,
+                                                   const std::string& err) {
   add_error(t.source(), err);
+  return Failure::kErrored;
 }
 
-void ParserImpl::add_error(const Source& source, const std::string& err) {
+ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
+                                                   const std::string& err) {
   diag::Diagnostic diagnostic;
   diagnostic.severity = diag::Severity::Error;
   diagnostic.message = err;
   diagnostic.source = source;
   diags_.add(std::move(diagnostic));
+  return Failure::kErrored;
 }
 
 Token ParserImpl::next() {
@@ -187,12 +195,9 @@ bool ParserImpl::Parse() {
 // translation_unit
 //  : global_decl* EOF
 void ParserImpl::translation_unit() {
-  for (;;) {
-    expect_global_decl();
-    if (has_error())
-      return;
-
-    if (peek().IsEof())
+  while (!peek().IsEof()) {
+    auto decl = expect_global_decl();
+    if (decl.errored)
       break;
   }
 
@@ -206,84 +211,77 @@ void ParserImpl::translation_unit() {
 //  | type_alias SEMICOLON
 //  | struct_decl SEMICOLON
 //  | function_decl
-void ParserImpl::expect_global_decl() {
-  auto t = peek();
-  if (t.IsEof()) {
-    return;
-  }
-
-  if (t.IsSemicolon()) {
-    next();  // consume the peek
-    return;
-  }
+Expect<bool> ParserImpl::expect_global_decl() {
+  if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF))
+    return true;
 
   auto decos = decoration_list();
 
   auto gv = global_variable_decl(decos);
-  if (has_error()) {
-    return;
-  }
+  if (has_error())
+    return Failure::kErrored;
+
   if (gv != nullptr) {
     if (!expect("variable declaration", Token::Type::kSemicolon))
-      return;
+      return Failure::kErrored;
 
     module_.AddGlobalVariable(std::move(gv));
-    return;
+    return true;
   }
 
   auto gc = global_constant_decl();
-  if (has_error()) {
-    return;
-  }
+  if (has_error())
+    return Failure::kErrored;
+
   if (gc != nullptr) {
     if (!expect("constant declaration", Token::Type::kSemicolon))
-      return;
+      return Failure::kErrored;
 
     module_.AddGlobalVariable(std::move(gc));
-    return;
+    return true;
   }
 
   auto* ta = type_alias();
-  if (has_error()) {
-    return;
-  }
+  if (has_error())
+    return Failure::kErrored;
+
   if (ta != nullptr) {
     if (!expect("type alias", Token::Type::kSemicolon))
-      return;
+      return Failure::kErrored;
 
     module_.AddConstructedType(ta);
-    return;
+    return true;
   }
 
   auto str = struct_decl(decos);
-  if (has_error()) {
-    return;
-  }
+  if (has_error())
+    return Failure::kErrored;
+
   if (str != nullptr) {
     if (!expect("struct declaration", Token::Type::kSemicolon))
-      return;
+      return Failure::kErrored;
 
     auto* type = ctx_.type_mgr().Get(std::move(str));
     register_constructed(type->AsStruct()->name(), type);
     module_.AddConstructedType(type);
-    return;
+    return true;
   }
 
   auto func = function_decl(decos);
-  if (has_error()) {
-    return;
-  }
+  if (has_error())
+    return Failure::kErrored;
+
   if (func != nullptr) {
     module_.AddFunction(std::move(func));
-    return;
+    return true;
   }
 
-  t = peek();
   if (decos.size() > 0) {
-    add_error(t, "expected declaration after decorations");
+    add_error(peek(), "expected declaration after decorations");
   } else {
-    add_error(t, "invalid token");
+    add_error(peek(), "invalid token");
   }
+  return Failure::kErrored;
 }
 
 // global_variable_decl
@@ -296,17 +294,20 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl(
     return nullptr;
 
   auto var_decos = cast_decorations<ast::VariableDecoration>(decos);
-  if (var_decos.size() > 0) {
+  if (var_decos.errored)
+    return nullptr;
+
+  if (var_decos.value.size() > 0) {
     auto dv = std::make_unique<ast::DecoratedVariable>(std::move(var));
-    dv->set_decorations(std::move(var_decos));
+    dv->set_decorations(std::move(var_decos.value));
     var = std::move(dv);
   }
 
   if (match(Token::Type::kEqual)) {
     auto expr = expect_const_expr();
-    if (has_error())
+    if (expr.errored)
       return nullptr;
-    var->set_constructor(std::move(expr));
+    var->set_constructor(std::move(expr.value));
   }
   return var;
 }
@@ -320,21 +321,21 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   const char* use = "constant declaration";
 
   auto decl = expect_variable_ident_decl(use);
-  if (has_error())
+  if (decl.errored)
     return nullptr;
 
   auto var = std::make_unique<ast::Variable>(
-      decl.source, decl.name, ast::StorageClass::kNone, decl.type);
+      decl->source, decl->name, ast::StorageClass::kNone, decl->type);
   var->set_is_const(true);
 
   if (!expect(use, Token::Type::kEqual))
     return nullptr;
 
   auto init = expect_const_expr();
-  if (has_error())
+  if (init.errored)
     return nullptr;
 
-  var->set_constructor(std::move(init));
+  var->set_constructor(std::move(init.value));
 
   return var;
 }
@@ -350,10 +351,11 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
     return nullptr;
 
   auto decl = expect_variable_ident_decl("variable declaration");
-  if (has_error())
+  if (decl.errored)
     return nullptr;
 
-  return std::make_unique<ast::Variable>(decl.source, decl.name, sc, decl.type);
+  return std::make_unique<ast::Variable>(decl->source, decl->name, sc,
+                                         decl->type);
 }
 
 // texture_sampler_types
@@ -426,19 +428,15 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
     if (!expect(use, Token::Type::kLessThan))
       return nullptr;
 
-    auto format = image_storage_type();
-    if (has_error())
+    auto format = expect_image_storage_type(use);
+    if (format.errored)
       return nullptr;
-    if (format == ast::type::ImageFormat::kNone) {
-      add_error(peek().source(), "invalid format", use);
-      return nullptr;
-    }
 
     if (!expect(use, Token::Type::kGreaterThan))
       return nullptr;
 
     return ctx_.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
-        storage_dim, access, format));
+        storage_dim, access, format.value));
   }
 
   return nullptr;
@@ -622,7 +620,8 @@ ast::type::Type* ParserImpl::depth_texture_type() {
 //  | RGBA32UINT
 //  | RGBA32SINT
 //  | RGBA32FLOAT
-ast::type::ImageFormat ParserImpl::image_storage_type() {
+Expect<ast::type::ImageFormat> ParserImpl::expect_image_storage_type(
+    const std::string& use) {
   if (match(Token::Type::kFormatR8Unorm))
     return ast::type::ImageFormat::kR8Unorm;
 
@@ -728,31 +727,31 @@ ast::type::ImageFormat ParserImpl::image_storage_type() {
   if (match(Token::Type::kFormatRgba32Float))
     return ast::type::ImageFormat::kRgba32Float;
 
-  return ast::type::ImageFormat::kNone;
+  return add_error(peek().source(), "invalid format", use);
 }
 
 // variable_ident_decl
 //   : IDENT COLON type_decl
-ParserImpl::TypedIdentifier ParserImpl::expect_variable_ident_decl(
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     const std::string& use) {
-  std::string name;
-  Source source;
-  if (!expect_ident(use, &name, &source))
-    return {};
+  auto ident = expect_ident(use);
+  if (ident.errored)
+    return Failure::kErrored;
 
   if (!expect(use, Token::Type::kColon))
-    return {};
+    return Failure::kErrored;
 
   auto t = peek();
   auto* type = type_decl();
   if (has_error())
-    return {};
+    return Failure::kErrored;
+
   if (type == nullptr) {
     add_error(t.source(), "invalid type", use);
-    return {};
+    return Failure::kErrored;
   }
 
-  return {type, name, source};
+  return TypedIdentifier{type, ident.value, ident.source};
 }
 
 // variable_storage_decoration
@@ -764,13 +763,13 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
   const char* use = "variable decoration";
 
   auto sc = expect_storage_class(use);
-  if (has_error())
-    return sc;
+  if (sc.errored)
+    return ast::StorageClass::kNone;
 
   if (!expect(use, Token::Type::kGreaterThan))
     return ast::StorageClass::kNone;
 
-  return sc;
+  return sc.value;
 }
 
 // type_alias
@@ -784,8 +783,8 @@ ast::type::Type* ParserImpl::type_alias() {
 
   const char* use = "type alias";
 
-  std::string name;
-  if (!expect_ident(use, &name))
+  auto name = expect_ident(use);
+  if (name.errored)
     return nullptr;
 
   if (!expect(use, Token::Type::kEqual))
@@ -799,9 +798,9 @@ ast::type::Type* ParserImpl::type_alias() {
     return nullptr;
   }
 
-  auto* alias =
-      ctx_.type_mgr().Get(std::make_unique<ast::type::AliasType>(name, type));
-  register_constructed(name, alias);
+  auto* alias = ctx_.type_mgr().Get(
+      std::make_unique<ast::type::AliasType>(name.value, type));
+  register_constructed(name.value, alias);
 
   return alias->AsAlias();
 }
@@ -853,11 +852,12 @@ ast::type::Type* ParserImpl::type_decl() {
   if (match(Token::Type::kU32))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
 
-  if (t.IsVec2() || t.IsVec3() || t.IsVec4())
-    return expect_type_decl_vector(t);
+  if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
+    return expect_type_decl_vector(t).value;
+  }
 
   if (match(Token::Type::kPtr))
-    return expect_type_decl_pointer();
+    return expect_type_decl_pointer().value;
 
   auto decos = decoration_list();
   if (has_error())
@@ -865,7 +865,9 @@ ast::type::Type* ParserImpl::type_decl() {
 
   if (match(Token::Type::kArray)) {
     auto array_decos = cast_decorations<ast::ArrayDecoration>(decos);
-    return expect_type_decl_array(std::move(array_decos));
+    if (array_decos.errored)
+      return nullptr;
+    return expect_type_decl_array(std::move(array_decos.value)).value;
   }
 
   expect_decorations_consumed(decos);
@@ -873,7 +875,7 @@ ast::type::Type* ParserImpl::type_decl() {
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
       t.IsMat4x4()) {
-    return expect_type_decl_matrix(t);
+    return expect_type_decl_matrix(t).value;
   }
 
   auto* texture_or_sampler = texture_sampler_types();
@@ -887,35 +889,33 @@ ast::type::Type* ParserImpl::type_decl() {
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::expect_type_decl_pointer() {
+Expect<ast::type::Type*> ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
   if (!expect(use, Token::Type::kLessThan))
-    return nullptr;
+    return Failure::kErrored;
 
   auto sc = expect_storage_class(use);
-  if (has_error())
-    return nullptr;
+  if (sc.errored)
+    return Failure::kErrored;
 
   if (!expect(use, Token::Type::kComma))
-    return nullptr;
+    return Failure::kErrored;
 
   auto* subtype = type_decl();
   if (has_error())
-    return nullptr;
-  if (subtype == nullptr) {
-    add_error(peek(), "missing type for ptr declaration");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (subtype == nullptr)
+    return add_error(peek().source(), "missing type", use);
 
   if (!expect(use, Token::Type::kGreaterThan))
-    return nullptr;
+    return Failure::kErrored;
 
   return ctx_.type_mgr().Get(
-      std::make_unique<ast::type::PointerType>(subtype, sc));
+      std::make_unique<ast::type::PointerType>(subtype, sc.value));
 }
 
-ast::type::Type* ParserImpl::expect_type_decl_vector(Token t) {
+Expect<ast::type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   next();  // Consume the peek
 
   uint32_t count = 2;
@@ -927,53 +927,52 @@ ast::type::Type* ParserImpl::expect_type_decl_vector(Token t) {
   const char* use = "vector";
 
   if (!expect(use, Token::Type::kLessThan))
-    return nullptr;
+    return Failure::kErrored;
 
   auto* subtype = type_decl();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (subtype == nullptr) {
-    add_error(peek().source(), "unable to determine subtype", use);
-    return nullptr;
+    return add_error(peek().source(), "unable to determine subtype", use);
   }
 
   if (!expect(use, Token::Type::kGreaterThan))
-    return nullptr;
+    return Failure::kErrored;
 
   return ctx_.type_mgr().Get(
       std::make_unique<ast::type::VectorType>(subtype, count));
 }
 
-ast::type::Type* ParserImpl::expect_type_decl_array(
+Expect<ast::type::Type*> ParserImpl::expect_type_decl_array(
     ast::ArrayDecorationList decos) {
   const char* use = "array declaration";
 
   if (!expect(use, Token::Type::kLessThan))
-    return nullptr;
+    return Failure::kErrored;
 
   auto* subtype = type_decl();
   if (has_error())
-    return nullptr;
-  if (subtype == nullptr) {
-    add_error(peek(), "invalid type for array declaration");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (subtype == nullptr)
+    return add_error(peek(), "invalid type for array declaration");
 
   uint32_t size = 0;
   if (match(Token::Type::kComma)) {
-    if (!expect_nonzero_positive_sint("array size", &size))
-      return nullptr;
+    auto val = expect_nonzero_positive_sint("array size");
+    if (val.errored)
+      return Failure::kErrored;
+    size = val.value;
   }
 
   if (!expect(use, Token::Type::kGreaterThan))
-    return nullptr;
+    return Failure::kErrored;
 
   auto ty = std::make_unique<ast::type::ArrayType>(subtype, size);
   ty->set_decorations(std::move(decos));
   return ctx_.type_mgr().Get(std::move(ty));
 }
 
-ast::type::Type* ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   next();  // Consume the peek
 
   uint32_t rows = 2;
@@ -990,24 +989,18 @@ ast::type::Type* ParserImpl::expect_type_decl_matrix(Token t) {
   }
 
   t = next();
-  if (!t.IsLessThan()) {
-    add_error(t, "missing < for matrix");
-    return nullptr;
-  }
+  if (!t.IsLessThan())
+    return add_error(t, "missing < for matrix");
 
   auto* subtype = type_decl();
   if (has_error())
-    return nullptr;
-  if (subtype == nullptr) {
-    add_error(peek(), "unable to determine subtype for matrix");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (subtype == nullptr)
+    return add_error(peek(), "unable to determine subtype for matrix");
 
   t = next();
-  if (!t.IsGreaterThan()) {
-    add_error(t, "missing > for matrix");
-    return nullptr;
-  }
+  if (!t.IsGreaterThan())
+    return add_error(t, "missing > for matrix");
 
   return ctx_.type_mgr().Get(
       std::make_unique<ast::type::MatrixType>(subtype, rows, columns));
@@ -1023,7 +1016,8 @@ ast::type::Type* ParserImpl::expect_type_decl_matrix(Token t) {
 //  | IMAGE
 //  | PRIVATE
 //  | FUNCTION
-ast::StorageClass ParserImpl::expect_storage_class(const std::string& use) {
+Expect<ast::StorageClass> ParserImpl::expect_storage_class(
+    const std::string& use) {
   if (match(Token::Type::kIn))
     return ast::StorageClass::kInput;
 
@@ -1051,8 +1045,7 @@ ast::StorageClass ParserImpl::expect_storage_class(const std::string& use) {
   if (match(Token::Type::kFunction))
     return ast::StorageClass::kFunction;
 
-  add_error(peek().source(), "invalid storage class", use);
-  return ast::StorageClass::kNone;
+  return add_error(peek().source(), "invalid storage class", use);
 }
 
 // struct_decl
@@ -1066,45 +1059,49 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl(
     return nullptr;
 
   auto struct_decos = cast_decorations<ast::StructDecoration>(decos);
+  if (struct_decos.errored)
+    return nullptr;
 
-  std::string name;
-  if (!expect_ident("struct declaration", &name))
+  auto name = expect_ident("struct declaration");
+  if (name.errored)
     return nullptr;
 
   auto body = expect_struct_body_decl();
-  if (has_error())
+  if (body.errored)
     return nullptr;
 
   return std::make_unique<ast::type::StructType>(
-      name, std::make_unique<ast::Struct>(source, std::move(struct_decos),
-                                          std::move(body)));
+      name.value,
+      std::make_unique<ast::Struct>(source, std::move(struct_decos.value),
+                                    std::move(body.value)));
 }
 
 // struct_body_decl
 //   : BRACKET_LEFT struct_member* BRACKET_RIGHT
-ast::StructMemberList ParserImpl::expect_struct_body_decl() {
-  return expect_brace_block("struct declaration", [&] {
-    ast::StructMemberList members;
+Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
+  return expect_brace_block(
+      "struct declaration", [&]() -> Expect<ast::StructMemberList> {
+        ast::StructMemberList members;
 
-    while (!peek().IsBraceRight() && !peek().IsEof()) {
-      auto decos = decoration_list();
-      if (has_error())
-        return ast::StructMemberList{};
+        while (!peek().IsBraceRight() && !peek().IsEof()) {
+          auto decos = decoration_list();
+          if (has_error())
+            return Failure::kErrored;
 
-      auto mem = expect_struct_member(decos);
-      if (has_error())
-        return ast::StructMemberList{};
+          auto mem = expect_struct_member(decos);
+          if (mem.errored)
+            return Failure::kErrored;
 
-      members.push_back(std::move(mem));
-    }
+          members.push_back(std::move(mem.value));
+        }
 
-    return members;
-  });
+        return members;
+      });
 }
 
 // struct_member
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
-std::unique_ptr<ast::StructMember> ParserImpl::expect_struct_member(
+Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
     ast::DecorationList& decos) {
   // FUDGE - Abort early if we enter with an error state to avoid accumulating
   // multiple error messages. This is a work around for the unit tests that
@@ -1118,19 +1115,19 @@ std::unique_ptr<ast::StructMember> ParserImpl::expect_struct_member(
   // resynchronize at the ']]'.
   // TODO(ben-clayton) - remove this once resynchronization is implemented.
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
 
   auto decl = expect_variable_ident_decl("struct member");
-  if (has_error())
-    return nullptr;
+  if (decl.errored)
+    return Failure::kErrored;
 
   auto member_decos = cast_decorations<ast::StructMemberDecoration>(decos);
 
   if (!expect("struct member", Token::Type::kSemicolon))
-    return nullptr;
+    return Failure::kErrored;
 
-  return std::make_unique<ast::StructMember>(decl.source, decl.name, decl.type,
-                                             std::move(member_decos));
+  return std::make_unique<ast::StructMember>(
+      decl->source, decl->name, decl->type, std::move(member_decos.value));
 }
 
 // function_decl
@@ -1142,13 +1139,15 @@ std::unique_ptr<ast::Function> ParserImpl::function_decl(
     return nullptr;
 
   auto func_decos = cast_decorations<ast::FunctionDecoration>(decos);
-  f->set_decorations(std::move(func_decos));
+  if (func_decos.errored)
+    return nullptr;
+  f->set_decorations(std::move(func_decos.value));
 
   auto body = expect_body_stmt();
-  if (has_error())
+  if (body.errored)
     return nullptr;
 
-  f->set_body(std::move(body));
+  f->set_body(std::move(body.value));
   return f;
 }
 
@@ -1173,13 +1172,13 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 
   const char* use = "function declaration";
 
-  std::string name;
-  if (!expect_ident(use, &name))
+  auto name = expect_ident(use);
+  if (name.errored)
     return nullptr;
 
   auto params = expect_paren_block(use, [&] { return expect_param_list(); });
 
-  if (has_error())
+  if (params.errored)
     return nullptr;
 
   auto t = next();
@@ -1196,24 +1195,25 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
     return nullptr;
   }
 
-  return std::make_unique<ast::Function>(source, name, std::move(params), type);
+  return std::make_unique<ast::Function>(source, name.value,
+                                         std::move(params.value), type);
 }
 
 // param_list
 //   :
 //   | (variable_ident_decl COMMA)* variable_ident_decl
-ast::VariableList ParserImpl::expect_param_list() {
+Expect<ast::VariableList> ParserImpl::expect_param_list() {
   if (!peek().IsIdentifier())  // Empty list
     return ast::VariableList{};
 
   auto decl = expect_variable_ident_decl("parameter");
-  if (has_error())
-    return {};
+  if (decl.errored)
+    return Failure::kErrored;
 
   ast::VariableList ret;
   for (;;) {
     auto var = std::make_unique<ast::Variable>(
-        decl.source, decl.name, ast::StorageClass::kNone, decl.type);
+        decl->source, decl->name, ast::StorageClass::kNone, decl->type);
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
@@ -1225,8 +1225,8 @@ ast::VariableList ParserImpl::expect_param_list() {
       break;
 
     decl = expect_variable_ident_decl("parameter");
-    if (has_error())
-      return {};
+    if (decl.errored)
+      return Failure::kErrored;
   }
 
   return ret;
@@ -1236,7 +1236,7 @@ ast::VariableList ParserImpl::expect_param_list() {
 //   : VERTEX
 //   | FRAGMENT
 //   | COMPUTE
-std::pair<ast::PipelineStage, Source> ParserImpl::expect_pipeline_stage() {
+Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
   Source source;
   if (match(Token::Type::kVertex, &source))
     return {ast::PipelineStage::kVertex, source};
@@ -1247,57 +1247,53 @@ std::pair<ast::PipelineStage, Source> ParserImpl::expect_pipeline_stage() {
   if (match(Token::Type::kCompute, &source))
     return {ast::PipelineStage::kCompute, source};
 
-  auto t = peek();
-  add_error(t, "invalid value for stage decoration");
-  return {ast::PipelineStage::kNone, t.source()};
+  return add_error(peek(), "invalid value for stage decoration");
 }
 
-std::pair<ast::Builtin, Source> ParserImpl::expect_builtin() {
-  Source source;
-  std::string ident;
+Expect<ast::Builtin> ParserImpl::expect_builtin() {
+  auto ident = expect_ident("builtin");
+  if (ident.errored)
+    return Failure::kErrored;
 
-  if (!expect_ident("builtin", &ident, &source))
-    return {ast::Builtin::kNone, source};
-
-  ast::Builtin builtin = ident_to_builtin(ident);
+  ast::Builtin builtin = ident_to_builtin(ident.value);
   if (builtin == ast::Builtin::kNone)
-    add_error(source, "invalid value for builtin decoration");
+    return add_error(ident.source, "invalid value for builtin decoration");
 
-  return {builtin, source};
+  return {builtin, ident.source};
 }
 
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
-std::unique_ptr<ast::BlockStatement> ParserImpl::expect_body_stmt() {
-  return expect_brace_block("", [&] { return statements(); });
+Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_body_stmt() {
+  return expect_brace_block("", [&] { return expect_statements(); });
 }
 
 // paren_rhs_stmt
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
-std::unique_ptr<ast::Expression> ParserImpl::expect_paren_rhs_stmt() {
-  return expect_paren_block("", [&]() -> std::unique_ptr<ast::Expression> {
-    auto expr = logical_or_expression();
-    if (has_error())
-      return nullptr;
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_paren_rhs_stmt() {
+  return expect_paren_block(
+      "", [&]() -> Expect<std::unique_ptr<ast::Expression>> {
+        auto expr = logical_or_expression();
+        if (has_error())
+          return Failure::kErrored;
 
-    if (expr == nullptr) {
-      add_error(peek(), "unable to parse expression");
-      return nullptr;
-    }
-    return expr;
-  });
+        if (expr == nullptr)
+          return add_error(peek(), "unable to parse expression");
+
+        return expr;
+      });
 }
 
 // statements
 //   : statement*
-std::unique_ptr<ast::BlockStatement> ParserImpl::statements() {
+Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
   auto ret = std::make_unique<ast::BlockStatement>();
 
   for (;;) {
     auto stmt = statement();
     if (has_error())
-      return {};
-    if (stmt == nullptr)
+      return Failure::kErrored;
+    if (!stmt)
       break;
 
     ret->append(std::move(stmt));
@@ -1423,10 +1419,9 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   t = peek();
   if (t.IsBraceLeft()) {
     auto body = expect_body_stmt();
-    if (has_error())
+    if (body.errored)
       return nullptr;
-    if (body != nullptr)
-      return body;
+    return std::move(body.value);
   }
 
   return nullptr;
@@ -1473,11 +1468,11 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
     }
 
     auto var = std::make_unique<ast::Variable>(
-        decl.source, decl.name, ast::StorageClass::kNone, decl.type);
+        decl->source, decl->name, ast::StorageClass::kNone, decl->type);
     var->set_is_const(true);
     var->set_constructor(std::move(constructor));
 
-    return std::make_unique<ast::VariableDeclStatement>(decl.source,
+    return std::make_unique<ast::VariableDeclStatement>(decl->source,
                                                         std::move(var));
   }
 
@@ -1510,11 +1505,11 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
     return nullptr;
 
   auto condition = expect_paren_rhs_stmt();
-  if (has_error())
+  if (condition.errored)
     return nullptr;
 
   auto body = expect_body_stmt();
-  if (has_error())
+  if (body.errored)
     return nullptr;
 
   auto elseif = elseif_stmt();
@@ -1525,8 +1520,8 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   if (has_error())
     return nullptr;
 
-  auto stmt = std::make_unique<ast::IfStatement>(source, std::move(condition),
-                                                 std::move(body));
+  auto stmt = std::make_unique<ast::IfStatement>(
+      source, std::move(condition.value), std::move(body.value));
   if (el != nullptr) {
     elseif.push_back(std::move(el));
   }
@@ -1548,15 +1543,15 @@ ast::ElseStatementList ParserImpl::elseif_stmt() {
     next();  // Consume the peek
 
     auto condition = expect_paren_rhs_stmt();
-    if (has_error())
+    if (condition.errored)
       return {};
 
     auto body = expect_body_stmt();
-    if (has_error())
+    if (body.errored)
       return {};
 
     ret.push_back(std::make_unique<ast::ElseStatement>(
-        source, std::move(condition), std::move(body)));
+        source, std::move(condition.value), std::move(body.value)));
 
     t = peek();
     if (!t.IsElseIf())
@@ -1577,10 +1572,10 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
   next();  // Consume the peek
 
   auto body = expect_body_stmt();
-  if (has_error())
+  if (body.errored)
     return nullptr;
 
-  return std::make_unique<ast::ElseStatement>(source, std::move(body));
+  return std::make_unique<ast::ElseStatement>(source, std::move(body.value));
 }
 
 // switch_stmt
@@ -1591,11 +1586,11 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
     return nullptr;
 
   auto condition = expect_paren_rhs_stmt();
-  if (has_error())
+  if (condition.errored)
     return nullptr;
 
   ast::CaseStatementList body;
-  bool ok = expect_brace_block("switch statement", [&] {
+  bool ok = expect_brace_block_old("switch statement", [&] {
     for (;;) {
       auto stmt = switch_body();
       if (has_error())
@@ -1611,8 +1606,8 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
   if (!ok)
     return nullptr;
 
-  return std::make_unique<ast::SwitchStatement>(source, std::move(condition),
-                                                std::move(body));
+  return std::make_unique<ast::SwitchStatement>(
+      source, std::move(condition.value), std::move(body));
 }
 
 // switch_body
@@ -1629,14 +1624,14 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   auto stmt = std::make_unique<ast::CaseStatement>();
   stmt->set_source(source);
   if (t.IsCase()) {
-    auto selectors = case_selectors();
+    auto selectors = expect_case_selectors();
     if (has_error())
       return nullptr;
-    if (selectors.empty()) {
+    if (selectors.value.empty()) {
       add_error(peek(), "unable to parse case selectors");
       return nullptr;
     }
-    stmt->set_selectors(std::move(selectors));
+    stmt->set_selectors(std::move(selectors.value));
   }
 
   const char* use = "case statement";
@@ -1644,7 +1639,7 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   if (!expect(use, Token::Type::kColon))
     return nullptr;
 
-  auto body = expect_brace_block(use, [&] { return case_body(); });
+  auto body = expect_brace_block_old(use, [&] { return case_body(); });
 
   if (body == nullptr)
     return nullptr;
@@ -1656,24 +1651,25 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
 
 // case_selectors
 //   : const_literal (COMMA const_literal)*
-ast::CaseSelectorList ParserImpl::case_selectors() {
+Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
   ast::CaseSelectorList selectors;
 
   for (;;) {
     auto t = peek();
     auto cond = const_literal();
     if (has_error())
-      return {};
+      return Failure::kErrored;
     if (cond == nullptr)
       break;
-    if (!cond->IsInt()) {
-      add_error(t, "invalid case selector must be an integer value");
-      return {};
-    }
+    if (!cond->IsInt())
+      return add_error(t, "invalid case selector must be an integer value");
 
     std::unique_ptr<ast::IntLiteral> selector(cond.release()->AsInt());
     selectors.push_back(std::move(selector));
   }
+
+  if (selectors.empty())
+    return add_error(peek(), "unable to parse case selectors");
 
   return selectors;
 }
@@ -1716,18 +1712,18 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
   if (!match(Token::Type::kLoop, &source))
     return nullptr;
 
-  return expect_brace_block(
+  return expect_brace_block_old(
       "loop", [&]() -> std::unique_ptr<ast::LoopStatement> {
-        auto body = statements();
-        if (has_error())
+        auto body = expect_statements();
+        if (body.errored)
           return nullptr;
 
         auto continuing = continuing_stmt();
         if (has_error())
           return nullptr;
 
-        return std::make_unique<ast::LoopStatement>(source, std::move(body),
-                                                    std::move(continuing));
+        return std::make_unique<ast::LoopStatement>(
+            source, std::move(body.value), std::move(continuing));
       });
 }
 
@@ -1745,49 +1741,49 @@ ForHeader::~ForHeader() = default;
 //   SEMICOLON
 //      logical_or_expression? SEMICOLON
 //      (assignment_stmt | func_call_stmt)?
-std::unique_ptr<ForHeader> ParserImpl::expect_for_header() {
+Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
   std::unique_ptr<ast::Statement> initializer = nullptr;
   if (initializer == nullptr) {
     initializer = func_call_stmt();
     if (has_error()) {
-      return nullptr;
+      return Failure::kErrored;
     }
   }
   if (initializer == nullptr) {
     initializer = variable_stmt();
     if (has_error()) {
-      return nullptr;
+      return Failure::kErrored;
     }
   }
   if (initializer == nullptr) {
     initializer = assignment_stmt();
     if (has_error()) {
-      return nullptr;
+      return Failure::kErrored;
     }
   }
 
   if (!expect("initializer in for loop", Token::Type::kSemicolon))
-    return nullptr;
+    return Failure::kErrored;
 
   auto condition = logical_or_expression();
   if (has_error()) {
-    return nullptr;
+    return Failure::kErrored;
   }
 
   if (!expect("condition in for loop", Token::Type::kSemicolon))
-    return nullptr;
+    return Failure::kErrored;
 
   std::unique_ptr<ast::Statement> continuing = nullptr;
   if (continuing == nullptr) {
     continuing = func_call_stmt();
     if (has_error()) {
-      return nullptr;
+      return Failure::kErrored;
     }
   }
   if (continuing == nullptr) {
     continuing = assignment_stmt();
     if (has_error()) {
-      return nullptr;
+      return Failure::kErrored;
     }
   }
 
@@ -1804,23 +1800,23 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
 
   auto header =
       expect_paren_block("for loop", [&] { return expect_for_header(); });
-  if (header == nullptr)
+  if (header.errored)
     return nullptr;
 
-  auto body = expect_brace_block("for loop", [&] { return statements(); });
+  auto body =
+      expect_brace_block("for loop", [&] { return expect_statements(); });
 
-  if (body == nullptr)
+  if (body.errored)
     return nullptr;
 
   // The for statement is a syntactic sugar on top of the loop statement.
   // We create corresponding nodes in ast with the exact same behaviour
   // as we would expect from the loop statement.
-
-  if (header->condition != nullptr) {
+  if (header.value->condition != nullptr) {
     // !condition
     auto not_condition = std::make_unique<ast::UnaryOpExpression>(
-        header->condition->source(), ast::UnaryOp::kNot,
-        std::move(header->condition));
+        header.value->condition->source(), ast::UnaryOp::kNot,
+        std::move(header.value->condition));
     // { break; }
     auto break_stmt =
         std::make_unique<ast::BreakStatement>(not_condition->source());
@@ -1831,22 +1827,22 @@ std::unique_ptr<ast::Statement> ParserImpl::for_stmt() {
     auto break_if_not_condition = std::make_unique<ast::IfStatement>(
         not_condition->source(), std::move(not_condition),
         std::move(break_body));
-    body->insert(0, std::move(break_if_not_condition));
+    body.value->insert(0, std::move(break_if_not_condition));
   }
 
   std::unique_ptr<ast::BlockStatement> continuing_body = nullptr;
-  if (header->continuing != nullptr) {
-    continuing_body =
-        std::make_unique<ast::BlockStatement>(header->continuing->source());
-    continuing_body->append(std::move(header->continuing));
+  if (header.value->continuing != nullptr) {
+    continuing_body = std::make_unique<ast::BlockStatement>(
+        header.value->continuing->source());
+    continuing_body->append(std::move(header.value->continuing));
   }
 
-  auto loop = std::make_unique<ast::LoopStatement>(source, std::move(body),
-                                                   std::move(continuing_body));
+  auto loop = std::make_unique<ast::LoopStatement>(
+      source, std::move(body.value), std::move(continuing_body));
 
-  if (header->initializer != nullptr) {
+  if (header.value->initializer != nullptr) {
     auto result = std::make_unique<ast::BlockStatement>(source);
-    result->append(std::move(header->initializer));
+    result->append(std::move(header.value->initializer));
     result->append(std::move(loop));
     return result;
   }
@@ -1869,12 +1865,14 @@ std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
 
   auto name = t.to_str();
 
-  t = peek();
   ast::ExpressionList params;
+
+  t = peek();
   if (!t.IsParenRight() && !t.IsEof()) {
-    params = expect_argument_expression_list();
-    if (has_error())
+    auto list = expect_argument_expression_list();
+    if (list.errored)
       return nullptr;
+    params = std::move(list.value);
   }
 
   if (!expect("call statement", Token::Type::kParenRight))
@@ -1912,7 +1910,7 @@ std::unique_ptr<ast::BlockStatement> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
     return std::make_unique<ast::BlockStatement>();
 
-  return expect_body_stmt();
+  return expect_body_stmt().value;
 }
 
 // primary_expression
@@ -1936,10 +1934,10 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   t = peek();
   if (t.IsParenLeft()) {
     auto paren = expect_paren_rhs_stmt();
-    if (has_error())
+    if (paren.errored)
       return nullptr;
 
-    return paren;
+    return std::move(paren.value);
   }
 
   if (t.IsBitcast()) {
@@ -1968,11 +1966,11 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     }
 
     auto params = expect_paren_rhs_stmt();
-    if (has_error())
+    if (params.errored)
       return nullptr;
 
     return std::make_unique<ast::BitcastExpression>(source, type,
-                                                    std::move(params));
+                                                    std::move(params.value));
   } else if (t.IsIdentifier()) {
     next();  // Consume the peek
 
@@ -1983,24 +1981,26 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (has_error())
     return nullptr;
   if (type != nullptr) {
-    ast::ExpressionList params;
+    auto expr = expect_paren_block(
+        "type constructor",
+        [&]() -> Expect<std::unique_ptr<ast::TypeConstructorExpression>> {
+          t = peek();
+          if (t.IsParenRight() || t.IsEof())
+            return std::make_unique<ast::TypeConstructorExpression>(
+                source, type, ast::ExpressionList{});
 
-    auto ok = expect_paren_block("type constructor", [&] {
-      t = peek();
-      if (!t.IsParenRight() && !t.IsEof()) {
-        params = expect_argument_expression_list();
-        if (has_error())
-          return false;
-      }
-      return true;
-    });
+          auto params = expect_argument_expression_list();
+          if (params.errored)
+            return Failure::kErrored;
 
-    if (!ok) {
+          return std::make_unique<ast::TypeConstructorExpression>(
+              source, type, std::move(params.value));
+        });
+
+    if (expr.errored)
       return nullptr;
-    }
 
-    return std::make_unique<ast::TypeConstructorExpression>(source, type,
-                                                            std::move(params));
+    return std::move(expr.value);
   }
   return nullptr;
 }
@@ -2038,12 +2038,14 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
   } else if (t.IsParenLeft()) {
     next();  // Consume the peek
 
-    t = peek();
     ast::ExpressionList params;
+
+    t = peek();
     if (!t.IsParenRight() && !t.IsEof()) {
-      params = expect_argument_expression_list();
-      if (has_error())
+      auto list = expect_argument_expression_list();
+      if (list.errored)
         return nullptr;
+      params = std::move(list.value);
     }
 
     if (!expect("call expression", Token::Type::kParenRight))
@@ -2054,13 +2056,13 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
   } else if (t.IsPeriod()) {
     next();  // Consume the peek
 
-    std::string ident;
-    if (!expect_ident("member accessor", &ident, &source))
+    auto ident = expect_ident("member accessor");
+    if (ident.errored)
       return nullptr;
 
     expr = std::make_unique<ast::MemberAccessorExpression>(
-        source, std::move(prefix),
-        std::make_unique<ast::IdentifierExpression>(source, ident));
+        ident.source, std::move(prefix),
+        std::make_unique<ast::IdentifierExpression>(ident.source, ident.value));
   } else {
     return prefix;
   }
@@ -2081,14 +2083,12 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expression() {
 
 // argument_expression_list
 //   : (logical_or_expression COMMA)* logical_or_expression
-ast::ExpressionList ParserImpl::expect_argument_expression_list() {
+Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list() {
   auto arg = logical_or_expression();
   if (has_error())
-    return {};
-  if (arg == nullptr) {
-    add_error(peek(), "unable to parse argument expression");
-    return {};
-  }
+    return Failure::kErrored;
+  if (arg == nullptr)
+    return add_error(peek(), "unable to parse argument expression");
 
   ast::ExpressionList ret;
   ret.push_back(std::move(arg));
@@ -2096,10 +2096,10 @@ ast::ExpressionList ParserImpl::expect_argument_expression_list() {
   while (match(Token::Type::kComma)) {
     arg = logical_or_expression();
     if (has_error())
-      return {};
+      return Failure::kErrored;
     if (arg == nullptr) {
-      add_error(peek(), "unable to parse argument expression after comma");
-      return {};
+      return add_error(peek(),
+                       "unable to parse argument expression after comma");
     }
     ret.push_back(std::move(arg));
   }
@@ -2141,7 +2141,7 @@ std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
 //   | STAR unary_expression multiplicative_expr
 //   | FORWARD_SLASH unary_expression multiplicative_expr
 //   | MODULO unary_expression multiplicative_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_multiplicative_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_multiplicative_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
 
@@ -2161,10 +2161,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_multiplicative_expr(
 
   auto rhs = unary_expression();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of " + name + " expression");
-    return nullptr;
+    return add_error(peek(),
+                     "unable to parse right side of " + name + " expression");
   }
   return expect_multiplicative_expr(std::make_unique<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs)));
@@ -2179,14 +2179,14 @@ std::unique_ptr<ast::Expression> ParserImpl::multiplicative_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_multiplicative_expr(std::move(lhs));
+  return expect_multiplicative_expr(std::move(lhs)).value;
 }
 
 // additive_expr
 //   :
 //   | PLUS multiplicative_expression additive_expr
 //   | MINUS multiplicative_expression additive_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_additive_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_additive_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
 
@@ -2203,11 +2203,9 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_additive_expr(
 
   auto rhs = multiplicative_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of + expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of + expression");
   return expect_additive_expr(std::make_unique<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs)));
 }
@@ -2221,14 +2219,14 @@ std::unique_ptr<ast::Expression> ParserImpl::additive_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_additive_expr(std::move(lhs));
+  return expect_additive_expr(std::move(lhs)).value;
 }
 
 // shift_expr
 //   :
 //   | LESS_THAN LESS_THAN additive_expression shift_expr
 //   | GREATER_THAN GREATER_THAN additive_expression shift_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_shift_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_shift_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   auto source = t.source();
@@ -2252,11 +2250,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_shift_expr(
 
   auto rhs = additive_expression();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (rhs == nullptr) {
-    add_error(peek(), std::string("unable to parse right side of ") + name +
-                          " expression");
-    return nullptr;
+    return add_error(peek(), std::string("unable to parse right side of ") +
+                                 name + " expression");
   }
   return expect_shift_expr(std::make_unique<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs)));
@@ -2271,7 +2268,7 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_shift_expr(std::move(lhs));
+  return expect_shift_expr(std::move(lhs)).value;
 }
 
 // relational_expr
@@ -2280,7 +2277,7 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expression() {
 //   | GREATER_THAN shift_expression relational_expr
 //   | LESS_THAN_EQUAL shift_expression relational_expr
 //   | GREATER_THAN_EQUAL shift_expression relational_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_relational_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_relational_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2301,11 +2298,12 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_relational_expr(
 
   auto rhs = shift_expression();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of " + name + " expression");
-    return nullptr;
+    return add_error(peek(),
+                     "unable to parse right side of " + name + " expression");
   }
+
   return expect_relational_expr(std::make_unique<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs)));
 }
@@ -2319,14 +2317,14 @@ std::unique_ptr<ast::Expression> ParserImpl::relational_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_relational_expr(std::move(lhs));
+  return expect_relational_expr(std::move(lhs)).value;
 }
 
 // equality_expr
 //   :
 //   | EQUAL_EQUAL relational_expression equality_expr
 //   | NOT_EQUAL relational_expression equality_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_equality_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_equality_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2343,11 +2341,12 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_equality_expr(
 
   auto rhs = relational_expression();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of " + name + " expression");
-    return nullptr;
+    return add_error(peek(),
+                     "unable to parse right side of " + name + " expression");
   }
+
   return expect_equality_expr(std::make_unique<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs)));
 }
@@ -2361,13 +2360,13 @@ std::unique_ptr<ast::Expression> ParserImpl::equality_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_equality_expr(std::move(lhs));
+  return expect_equality_expr(std::move(lhs)).value;
 }
 
 // and_expr
 //   :
 //   | AND equality_expression and_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_and_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_and_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   if (!t.IsAnd())
@@ -2378,11 +2377,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_and_expr(
 
   auto rhs = equality_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of & expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of & expression");
+
   return expect_and_expr(std::make_unique<ast::BinaryExpression>(
       source, ast::BinaryOp::kAnd, std::move(lhs), std::move(rhs)));
 }
@@ -2396,13 +2394,13 @@ std::unique_ptr<ast::Expression> ParserImpl::and_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_and_expr(std::move(lhs));
+  return expect_and_expr(std::move(lhs)).value;
 }
 
 // exclusive_or_expr
 //   :
 //   | XOR and_expression exclusive_or_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_exclusive_or_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_exclusive_or_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   if (!t.IsXor())
@@ -2413,11 +2411,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_exclusive_or_expr(
 
   auto rhs = and_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of ^ expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of ^ expression");
+
   return expect_exclusive_or_expr(std::make_unique<ast::BinaryExpression>(
       source, ast::BinaryOp::kXor, std::move(lhs), std::move(rhs)));
 }
@@ -2431,13 +2428,13 @@ std::unique_ptr<ast::Expression> ParserImpl::exclusive_or_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_exclusive_or_expr(std::move(lhs));
+  return expect_exclusive_or_expr(std::move(lhs)).value;
 }
 
 // inclusive_or_expr
 //   :
 //   | OR exclusive_or_expression inclusive_or_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_inclusive_or_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_inclusive_or_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   if (!t.IsOr())
@@ -2448,11 +2445,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_inclusive_or_expr(
 
   auto rhs = exclusive_or_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of | expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of | expression");
+
   return expect_inclusive_or_expr(std::make_unique<ast::BinaryExpression>(
       source, ast::BinaryOp::kOr, std::move(lhs), std::move(rhs)));
 }
@@ -2466,13 +2462,13 @@ std::unique_ptr<ast::Expression> ParserImpl::inclusive_or_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_inclusive_or_expr(std::move(lhs));
+  return expect_inclusive_or_expr(std::move(lhs)).value;
 }
 
 // logical_and_expr
 //   :
 //   | AND_AND inclusive_or_expression logical_and_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_logical_and_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_and_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   if (!t.IsAndAnd())
@@ -2483,11 +2479,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_logical_and_expr(
 
   auto rhs = inclusive_or_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of && expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of && expression");
+
   return expect_logical_and_expr(std::make_unique<ast::BinaryExpression>(
       source, ast::BinaryOp::kLogicalAnd, std::move(lhs), std::move(rhs)));
 }
@@ -2501,13 +2496,13 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_and_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_logical_and_expr(std::move(lhs));
+  return expect_logical_and_expr(std::move(lhs)).value;
 }
 
 // logical_or_expr
 //   :
 //   | OR_OR logical_and_expression logical_or_expr
-std::unique_ptr<ast::Expression> ParserImpl::expect_logical_or_expr(
+Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_or_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   if (!t.IsOrOr())
@@ -2518,11 +2513,10 @@ std::unique_ptr<ast::Expression> ParserImpl::expect_logical_or_expr(
 
   auto rhs = logical_and_expression();
   if (has_error())
-    return nullptr;
-  if (rhs == nullptr) {
-    add_error(peek(), "unable to parse right side of || expression");
-    return nullptr;
-  }
+    return Failure::kErrored;
+  if (rhs == nullptr)
+    return add_error(peek(), "unable to parse right side of || expression");
+
   return expect_logical_or_expr(std::make_unique<ast::BinaryExpression>(
       source, ast::BinaryOp::kLogicalOr, std::move(lhs), std::move(rhs)));
 }
@@ -2536,7 +2530,7 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_or_expression() {
   if (lhs == nullptr)
     return nullptr;
 
-  return expect_logical_or_expr(std::move(lhs));
+  return expect_logical_or_expr(std::move(lhs)).value;
 }
 
 // assignment_stmt
@@ -2603,51 +2597,52 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
 // const_expr
 //   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
 //   | const_literal
-std::unique_ptr<ast::ConstructorExpression> ParserImpl::expect_const_expr() {
+Expect<std::unique_ptr<ast::ConstructorExpression>>
+ParserImpl::expect_const_expr() {
   return expect_const_expr_internal(0);
 }
 
-std::unique_ptr<ast::ConstructorExpression>
+Expect<std::unique_ptr<ast::ConstructorExpression>>
 ParserImpl::expect_const_expr_internal(uint32_t depth) {
   auto t = peek();
 
   if (depth > kMaxConstExprDepth) {
-    add_error(t, "max const_expr depth reached");
-    return nullptr;
+    return add_error(t, "max const_expr depth reached");
   }
 
   auto source = t.source();
 
   auto* type = type_decl();
   if (type != nullptr) {
-    ast::ExpressionList params;
-    bool ok = expect_paren_block("type constructor", [&] {
-      auto param = expect_const_expr_internal(depth + 1);
-      if (has_error())
-        return false;
-      params.push_back(std::move(param));
-      while (match(Token::Type::kComma)) {
-        param = expect_const_expr_internal(depth + 1);
-        if (has_error())
-          return false;
-        params.push_back(std::move(param));
-      }
-      return true;
-    });
+    auto params = expect_paren_block(
+        "type constructor", [&]() -> Expect<ast::ExpressionList> {
+          ast::ExpressionList list;
+          auto param = expect_const_expr_internal(depth + 1);
+          if (param.errored)
+            return Failure::kErrored;
+          list.emplace_back(std::move(param.value));
+          while (match(Token::Type::kComma)) {
+            param = expect_const_expr_internal(depth + 1);
+            if (param.errored)
+              return Failure::kErrored;
+            list.emplace_back(std::move(param.value));
+          }
+          return list;
+        });
 
-    if (!ok)
-      return nullptr;
+    if (params.errored)
+      return Failure::kErrored;
 
-    return std::make_unique<ast::TypeConstructorExpression>(source, type,
-                                                            std::move(params));
+    return std::make_unique<ast::TypeConstructorExpression>(
+        source, type, std::move(params.value));
   }
 
   auto lit = const_literal();
   if (has_error())
-    return nullptr;
+    return Failure::kErrored;
   if (lit == nullptr) {
     add_error(peek(), "unable to parse const literal");
-    return nullptr;
+    return Failure::kErrored;
   }
   return std::make_unique<ast::ScalarConstructorExpression>(source,
                                                             std::move(lit));
@@ -2672,11 +2667,11 @@ bool ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   }
 
   while (true) {
-    if (auto deco = expect_decoration()) {
-      decos.emplace_back(std::move(deco));
-    } else {
+    auto deco = expect_decoration();
+    if (deco.errored)
       return false;
-    }
+
+    decos.emplace_back(std::move(deco.value));
 
     if (match(Token::Type::kComma)) {
       continue;
@@ -2694,85 +2689,94 @@ bool ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   }
 }
 
-std::unique_ptr<ast::Decoration> ParserImpl::expect_decoration() {
+Expect<std::unique_ptr<ast::Decoration>> ParserImpl::expect_decoration() {
   auto t = peek();
-  if (auto deco = decoration()) {
-    return deco;
-  }
-  if (!has_error()) {
-    add_error(t, "expected decoration");
-  }
-  return nullptr;
+  auto deco = decoration();
+  if (has_error())
+    return Failure::kErrored;
+  if (deco == nullptr)
+    return add_error(t, "expected decoration");
+  return std::move(deco);
 }
 
 std::unique_ptr<ast::Decoration> ParserImpl::decoration() {
+  using Result = std::unique_ptr<ast::Decoration>;
   auto t = next();
   if (t.IsLocation()) {
     const char* use = "location decoration";
-    return expect_paren_block(use, [&]() {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::LocationDecoration>(val, t.source())
-                : nullptr;
+    return expect_paren_block_old(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return nullptr;
+
+      return std::make_unique<ast::LocationDecoration>(val.value, val.source);
     });
   }
   if (t.IsBinding()) {
     const char* use = "binding decoration";
-    return expect_paren_block(use, [&]() {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::BindingDecoration>(val, t.source())
-                : nullptr;
+    return expect_paren_block_old(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return nullptr;
+
+      return std::make_unique<ast::BindingDecoration>(val.value, val.source);
     });
   }
   if (t.IsSet()) {
     const char* use = "set decoration";
-    return expect_paren_block(use, [&]() {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::SetDecoration>(val, t.source())
-                : nullptr;
+    return expect_paren_block_old(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return nullptr;
+
+      return std::make_unique<ast::SetDecoration>(val.value, val.source);
     });
   }
   if (t.IsBuiltin()) {
-    return expect_paren_block("builtin decoration", [&]() {
-      ast::Builtin builtin;
-      Source source;
-      std::tie(builtin, source) = expect_builtin();
-      return (builtin != ast::Builtin::kNone)
-                 ? std::make_unique<ast::BuiltinDecoration>(builtin, source)
-                 : nullptr;
+    return expect_paren_block_old("builtin decoration", [&]() -> Result {
+      auto builtin = expect_builtin();
+      if (builtin.errored)
+        return nullptr;
+
+      return std::make_unique<ast::BuiltinDecoration>(builtin.value,
+                                                      builtin.source);
     });
   }
   if (t.IsWorkgroupSize()) {
-    return expect_paren_block("workgroup_size decoration", [&]() {
+    return expect_paren_block_old("workgroup_size decoration", [&]() -> Result {
       uint32_t x;
-      if (!expect_nonzero_positive_sint("workgroup_size x parameter", &x)) {
-        return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-      }
       uint32_t y = 1;
       uint32_t z = 1;
+
+      auto val = expect_nonzero_positive_sint("workgroup_size x parameter");
+      if (val.errored)
+        return nullptr;
+      x = val.value;
+
       if (match(Token::Type::kComma)) {
-        if (!expect_nonzero_positive_sint("workgroup_size y parameter", &y)) {
-          return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-        }
+        val = expect_nonzero_positive_sint("workgroup_size y parameter");
+        if (val.errored)
+          return nullptr;
+        y = val.value;
+
         if (match(Token::Type::kComma)) {
-          if (!expect_nonzero_positive_sint("workgroup_size z parameter", &z)) {
-            return std::unique_ptr<ast::WorkgroupDecoration>(nullptr);
-          }
+          val = expect_nonzero_positive_sint("workgroup_size z parameter");
+          if (val.errored)
+            return nullptr;
+          z = val.value;
         }
       }
+
       return std::make_unique<ast::WorkgroupDecoration>(x, y, z, t.source());
     });
   }
   if (t.IsStage()) {
-    return expect_paren_block("stage decoration", [&]() {
-      ast::PipelineStage stage;
-      Source source;
-      std::tie(stage, source) = expect_pipeline_stage();
-      return (stage != ast::PipelineStage::kNone)
-                 ? std::make_unique<ast::StageDecoration>(stage, source)
-                 : nullptr;
+    return expect_paren_block_old("stage decoration", [&]() -> Result {
+      auto stage = expect_pipeline_stage();
+      if (stage.errored)
+        return nullptr;
+
+      return std::make_unique<ast::StageDecoration>(stage.value, stage.source);
     });
   }
   if (t.IsBlock()) {
@@ -2780,29 +2784,32 @@ std::unique_ptr<ast::Decoration> ParserImpl::decoration() {
   }
   if (t.IsStride()) {
     const char* use = "stride decoration";
-    return expect_paren_block(use, [&]() {
-      uint32_t val;
-      bool ok = expect_nonzero_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::StrideDecoration>(val, t.source())
-                : nullptr;
+    return expect_paren_block_old(use, [&]() -> Result {
+      auto val = expect_nonzero_positive_sint(use);
+      if (val.errored)
+        return nullptr;
+
+      return std::make_unique<ast::StrideDecoration>(val.value, t.source());
     });
   }
   if (t.IsOffset()) {
     const char* use = "offset decoration";
-    return expect_paren_block(use, [&]() {
-      uint32_t val;
-      bool ok = expect_positive_sint(use, &val);
-      return ok ? std::make_unique<ast::StructMemberOffsetDecoration>(
-                      val, t.source())
-                : nullptr;
+    return expect_paren_block_old(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return nullptr;
+
+      return std::make_unique<ast::StructMemberOffsetDecoration>(val.value,
+                                                                 t.source());
     });
   }
   return nullptr;
 }
 
 template <typename T>
-std::vector<std::unique_ptr<T>> ParserImpl::cast_decorations(
+Expect<std::vector<std::unique_ptr<T>>> ParserImpl::cast_decorations(
     ast::DecorationList& in) {
+  bool ok = true;
   std::vector<std::unique_ptr<T>> out;
   out.reserve(in.size());
   for (auto& deco : in) {
@@ -2811,6 +2818,7 @@ std::vector<std::unique_ptr<T>> ParserImpl::cast_decorations(
       msg << deco->GetKind() << " decoration type cannot be used for "
           << T::Kind;
       add_error(deco->GetSource(), msg.str());
+      ok = false;
       continue;
     }
     out.emplace_back(ast::As<T>(std::move(deco)));
@@ -2818,6 +2826,10 @@ std::vector<std::unique_ptr<T>> ParserImpl::cast_decorations(
   // clear in so that we can verify decorations were consumed with
   // expect_decorations_consumed()
   in.clear();
+
+  if (!ok)
+    return Failure::kErrored;
+
   return out;
 }
 
@@ -2856,67 +2868,51 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   return true;
 }
 
-bool ParserImpl::expect_sint(const std::string& use, int32_t* out) {
-  auto t = next();
-  if (!t.IsSintLiteral()) {
-    add_error(t.source(), "expected signed integer literal", use);
-    return false;
-  }
-  *out = t.to_i32();
-  return true;
-}
-
-bool ParserImpl::expect_positive_sint(const std::string& use, uint32_t* out) {
-  auto t = peek();
-  int32_t val;
-  if (!expect_sint(use, &val))
-    return false;
-
-  if (val < 0) {
-    add_error(t, use + " must be positive");
-    return false;
-  }
-  *out = static_cast<uint32_t>(val);
-  return true;
-}
-
-bool ParserImpl::expect_nonzero_positive_sint(const std::string& use,
-                                              uint32_t* out) {
-  auto t = peek();
-  int32_t val;
-  if (!expect_sint(use, &val))
-    return false;
-
-  if (val <= 0) {
-    add_error(t, use + " must be greater than 0");
-    return false;
-  }
-  *out = static_cast<uint32_t>(val);
-  return true;
-}
-
-bool ParserImpl::expect_ident(const std::string& use,
-                              std::string* out,
-                              Source* source /* = nullptr */) {
+Expect<int32_t> ParserImpl::expect_sint(const std::string& use) {
   auto t = next();
 
-  if (source != nullptr)
-    *source = t.source();
+  if (!t.IsSintLiteral())
+    return add_error(t.source(), "expected signed integer literal", use);
 
-  if (!t.IsIdentifier()) {
-    add_error(t.source(), "expected identifier", use);
-    return false;
-  }
+  return {t.to_i32(), t.source()};
+}
 
-  *out = t.to_str();
-  return true;
+Expect<uint32_t> ParserImpl::expect_positive_sint(const std::string& use) {
+  auto sint = expect_sint(use);
+  if (sint.errored)
+    return Failure::kErrored;
+
+  if (sint.value < 0)
+    return add_error(sint.source, use + " must be positive");
+
+  return {static_cast<uint32_t>(sint.value), sint.source};
+}
+
+Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(
+    const std::string& use) {
+  auto sint = expect_sint(use);
+  if (sint.errored)
+    return Failure::kErrored;
+
+  if (sint.value <= 0)
+    return add_error(sint.source, use + " must be greater than 0");
+
+  return {static_cast<uint32_t>(sint.value), sint.source};
+}
+
+Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
+  auto t = next();
+  if (!t.IsIdentifier())
+    return add_error(t.source(), "expected identifier", use);
+
+  return {t.to_str(), t.source()};
 }
 
 template <typename F, typename T>
-T ParserImpl::expect_block(Token::Type start,
-                           Token::Type end,
-                           const std::string& use,
-                           F&& body) {
+T ParserImpl::expect_block_old(Token::Type start,
+                               Token::Type end,
+                               const std::string& use,
+                               F&& body) {
   if (!expect(use, start)) {
     return {};
   }
@@ -2928,6 +2924,36 @@ T ParserImpl::expect_block(Token::Type start,
     return {};
   }
   return res;
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_block(Token::Type start,
+                           Token::Type end,
+                           const std::string& use,
+                           F&& body) {
+  if (!expect(use, start)) {
+    return Failure::kErrored;
+  }
+  auto res = body();
+  if (res.errored) {
+    return Failure::kErrored;
+  }
+  if (!expect(use, end)) {
+    return Failure::kErrored;
+  }
+  return res;
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_paren_block_old(const std::string& use, F&& body) {
+  return expect_block_old(Token::Type::kParenLeft, Token::Type::kParenRight,
+                          use, std::forward<F>(body));
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_brace_block_old(const std::string& use, F&& body) {
+  return expect_block_old(Token::Type::kBraceLeft, Token::Type::kBraceRight,
+                          use, std::forward<F>(body));
 }
 
 template <typename F, typename T>

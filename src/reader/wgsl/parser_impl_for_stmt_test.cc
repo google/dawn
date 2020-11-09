@@ -27,16 +27,18 @@ class ForStmtTest : public ParserImplTest {
  public:
   void TestForLoop(std::string loop_str, std::string for_str) {
     auto* p_loop = parser(loop_str);
-    auto e_loop = p_loop->statements();
-    ASSERT_FALSE(p_loop->has_error()) << p_loop->error();
-    ASSERT_NE(e_loop, nullptr);
+    auto e_loop = p_loop->expect_statements();
+    EXPECT_FALSE(e_loop.errored);
+    EXPECT_FALSE(p_loop->has_error()) << p_loop->error();
+    ASSERT_NE(e_loop.value, nullptr);
 
     auto* p_for = parser(for_str);
-    auto e_for = p_for->statements();
-    ASSERT_FALSE(p_for->has_error()) << p_for->error();
-    ASSERT_NE(e_for, nullptr);
+    auto e_for = p_for->expect_statements();
+    EXPECT_FALSE(e_for.errored);
+    EXPECT_FALSE(p_for->has_error()) << p_for->error();
+    ASSERT_NE(e_for.value, nullptr);
 
-    EXPECT_EQ(e_loop->str(), e_for->str());
+    EXPECT_EQ(e_loop.value->str(), e_for.value->str());
   }
 };
 
