@@ -668,12 +668,6 @@ namespace dawn_native {
 
         return result;
     }
-    QueueBase* DeviceBase::CreateQueue() {
-        // TODO(dawn:22): Remove this once users use GetDefaultQueue
-        EmitDeprecationWarning(
-            "Device::CreateQueue is deprecated, use Device::GetDefaultQueue instead");
-        return GetDefaultQueue();
-    }
     SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
 
