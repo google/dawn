@@ -25,9 +25,10 @@ namespace {
 TEST_F(ParserImplTest, ContinueStmt) {
   auto* p = parser("continue");
   auto e = p->continue_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsContinue());
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsContinue());
 }
 
 }  // namespace

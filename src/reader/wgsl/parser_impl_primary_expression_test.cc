@@ -35,21 +35,25 @@ namespace {
 TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   auto* p = parser("a");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsIdentifier());
-  auto* ident = e->AsIdentifier();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsIdentifier());
+  auto* ident = e.value->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   auto* p = parser("vec4<i32>(1, 2, 3, 4))");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
-  auto* ty = e->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
+  auto* ty = e.value->AsConstructor()->AsTypeConstructor();
 
   ASSERT_EQ(ty->values().size(), 4u);
   const auto& val = ty->values();
@@ -81,11 +85,13 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
   auto* p = parser("vec4<i32>()");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
-  auto* ty = e->AsConstructor()->AsTypeConstructor();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
+  auto* ty = e.value->AsConstructor()->AsTypeConstructor();
 
   ASSERT_EQ(ty->values().size(), 0u);
 }
@@ -93,43 +99,53 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
   auto* p = parser("vec4<if>(2., 3., 4., 5.)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:6: unable to determine subtype for vector");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
   auto* p = parser("vec4<f32> 2., 3., 4., 5.)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
   auto* p = parser("vec4<f32>(2., 3., 4., 5.");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:25: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
   auto* p = parser("i32(if(a) {})");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:5: unable to parse argument expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   auto* p = parser("true");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
-  auto* init = e->AsConstructor()->AsScalarConstructor();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsScalarConstructor());
+  auto* init = e.value->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   EXPECT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -137,32 +153,40 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
   auto* p = parser("(a == b)");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsBinary());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsBinary());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
   auto* p = parser("(a == b");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:8: expected ')'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
   auto* p = parser("()");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:2: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
   auto* p = parser("(if (a) {})");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:2: unable to parse expression");
 }
 
@@ -171,12 +195,14 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 
   auto* p = parser("f32(1)");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsConstructor());
+  ASSERT_TRUE(e.value->AsConstructor()->IsTypeConstructor());
 
-  auto* c = e->AsConstructor()->AsTypeConstructor();
+  auto* c = e.value->AsConstructor()->AsTypeConstructor();
   ASSERT_EQ(c->type(), f32_type);
   ASSERT_EQ(c->values().size(), 1u);
 
@@ -189,11 +215,13 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
 
   auto* p = parser("bitcast<f32>(1)");
   auto e = p->primary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsBitcast());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsBitcast());
 
-  auto* c = e->AsBitcast();
+  auto* c = e.value->AsBitcast();
   ASSERT_EQ(c->type(), f32_type);
 
   ASSERT_TRUE(c->expr()->IsConstructor());
@@ -203,56 +231,70 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {
   auto* p = parser("bitcast<f32(1)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing > for bitcast expression");
+  EXPECT_EQ(p->error(), "1:12: expected '>' for bitcast expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
   auto* p = parser("bitcast<>(1)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:9: missing type for bitcast expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
   auto* p = parser("bitcast<invalid>(1)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {
   auto* p = parser("bitcast<f32>1)");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:13: expected '('");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
   auto* p = parser("bitcast<f32>(1");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:15: expected ')'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingExpression) {
   auto* p = parser("bitcast<f32>()");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:14: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_bitcast_InvalidExpression) {
   auto* p = parser("bitcast<f32>(if (a) {})");
   auto e = p->primary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:14: unable to parse expression");
 }
 

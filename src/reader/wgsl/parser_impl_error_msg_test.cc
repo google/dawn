@@ -56,21 +56,21 @@ TEST_F(ParserImplErrorTest, ArrayIndexExprInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, ArrayIndexExprMissingRBracket) {
   EXPECT("fn f() -> void { x = y[1; }",
-         "test.wgsl:1:25 error: missing ] for array accessor\n"
+         "test.wgsl:1:25 error: expected ']' for array accessor\n"
          "fn f() -> void { x = y[1; }\n"
          "                        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment) {
   EXPECT("fn f() -> void { a; }",
-         "test.wgsl:1:19 error: missing = for assignment\n"
+         "test.wgsl:1:19 error: expected '=' for assignment\n"
          "fn f() -> void { a; }\n"
          "                  ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment2) {
   EXPECT("fn f() -> void { a : i32; }",
-         "test.wgsl:1:20 error: missing = for assignment\n"
+         "test.wgsl:1:20 error: expected '=' for assignment\n"
          "fn f() -> void { a : i32; }\n"
          "                   ^\n");
 }
@@ -91,14 +91,14 @@ TEST_F(ParserImplErrorTest, AssignmentStmtInvalidRHS) {
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingLessThan) {
   EXPECT("fn f() -> void { x = bitcast(y); }",
-         "test.wgsl:1:29 error: missing < for bitcast expression\n"
+         "test.wgsl:1:29 error: expected '<' for bitcast expression\n"
          "fn f() -> void { x = bitcast(y); }\n"
          "                            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingGreaterThan) {
   EXPECT("fn f() -> void { x = bitcast<u32(y); }",
-         "test.wgsl:1:33 error: missing > for bitcast expression\n"
+         "test.wgsl:1:33 error: expected '>' for bitcast expression\n"
          "fn f() -> void { x = bitcast<u32(y); }\n"
          "                                ^\n");
 }
@@ -402,7 +402,7 @@ TEST_F(ParserImplErrorTest, FunctionDeclMissingRParen) {
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingArrow) {
   EXPECT("fn f() void {}",
-         "test.wgsl:1:8 error: missing -> for function declaration\n"
+         "test.wgsl:1:8 error: expected '->' for function declaration\n"
          "fn f() void {}\n"
          "       ^^^^\n");
 }
@@ -995,14 +995,14 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarInvalidIdentifier) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingLessThan) {
   EXPECT("var i : mat4x4;",
-         "test.wgsl:1:15 error: missing < for matrix\n"
+         "test.wgsl:1:15 error: expected '<' for matrix\n"
          "var i : mat4x4;\n"
          "              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingGreaterThan) {
   EXPECT("var i : mat4x4<u32;",
-         "test.wgsl:1:19 error: missing > for matrix\n"
+         "test.wgsl:1:19 error: expected '>' for matrix\n"
          "var i : mat4x4<u32;\n"
          "                  ^\n");
 }

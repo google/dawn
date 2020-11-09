@@ -26,52 +26,62 @@ namespace {
 TEST_F(ParserImplTest, GlobalConstantDecl) {
   auto* p = parser("const a : f32 = 1.");
   auto e = p->global_constant_decl();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
 
-  EXPECT_TRUE(e->is_const());
-  EXPECT_EQ(e->name(), "a");
-  ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->IsF32());
+  EXPECT_TRUE(e.value->is_const());
+  EXPECT_EQ(e.value->name(), "a");
+  ASSERT_NE(e.value->type(), nullptr);
+  EXPECT_TRUE(e.value->type()->IsF32());
 
-  EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 7u);
-  EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 8u);
+  EXPECT_EQ(e.value->source().range.begin.line, 1u);
+  EXPECT_EQ(e.value->source().range.begin.column, 7u);
+  EXPECT_EQ(e.value->source().range.end.line, 1u);
+  EXPECT_EQ(e.value->source().range.end.column, 8u);
 
-  ASSERT_NE(e->constructor(), nullptr);
-  EXPECT_TRUE(e->constructor()->IsConstructor());
+  ASSERT_NE(e.value->constructor(), nullptr);
+  EXPECT_TRUE(e.value->constructor()->IsConstructor());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
   auto* p = parser("const a: f32 1.");
   auto e = p->global_constant_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:14: expected '=' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
   auto* p = parser("const a: invalid = 1.");
   auto e = p->global_constant_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
   auto* p = parser("const a: f32 = if (a) {}");
   auto e = p->global_constant_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:16: unable to parse const literal");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
   auto* p = parser("const a: f32 =");
   auto e = p->global_constant_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
 }
 

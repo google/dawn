@@ -28,11 +28,13 @@ namespace {
 TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
   auto* p = parser("a | true");
   auto e = p->inclusive_or_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsBinary());
-  auto* rel = e->AsBinary();
+  ASSERT_TRUE(e.value->IsBinary());
+  auto* rel = e.value->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kOr, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
@@ -49,24 +51,30 @@ TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
 TEST_F(ParserImplTest, InclusiveOrExpression_InvalidLHS) {
   auto* p = parser("if (a) {} | true");
   auto e = p->inclusive_or_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_EQ(e.value, nullptr);
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_InvalidRHS) {
   auto* p = parser("true | if (a) {}");
   auto e = p->inclusive_or_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: unable to parse right side of | expression");
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_NoOr_ReturnsLHS) {
   auto* p = parser("a true");
   auto e = p->inclusive_or_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsIdentifier());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsIdentifier());
 }
 
 }  // namespace

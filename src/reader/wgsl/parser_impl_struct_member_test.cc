@@ -29,8 +29,11 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 
   auto* p = parser("a : i32;");
   auto decos = p->decoration_list();
-  EXPECT_EQ(decos.size(), 0u);
-  auto m = p->expect_struct_member(decos);
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(decos.value.size(), 0u);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -50,8 +53,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
 
   auto* p = parser("[[offset(2)]] a : i32;");
   auto decos = p->decoration_list();
-  EXPECT_EQ(decos.size(), 1u);
-  auto m = p->expect_struct_member(decos);
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  EXPECT_EQ(decos.value.size(), 1u);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -74,8 +80,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   auto* p = parser(R"([[offset(2)]]
 [[offset(4)]] a : i32;)");
   auto decos = p->decoration_list();
-  EXPECT_EQ(decos.size(), 2u);
-  auto m = p->expect_struct_member(decos);
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  EXPECT_EQ(decos.value.size(), 2u);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -97,7 +106,10 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
   auto* p = parser("[[offset(nan)]] a : i32;");
   auto decos = p->decoration_list();
-  auto m = p->expect_struct_member(decos);
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   ASSERT_EQ(m.value, nullptr);
@@ -108,7 +120,10 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
 TEST_F(ParserImplTest, StructMember_InvalidVariable) {
   auto* p = parser("[[offset(4)]] a : B;");
   auto decos = p->decoration_list();
-  auto m = p->expect_struct_member(decos);
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   ASSERT_EQ(m.value, nullptr);
@@ -118,7 +133,10 @@ TEST_F(ParserImplTest, StructMember_InvalidVariable) {
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {
   auto* p = parser("a : i32");
   auto decos = p->decoration_list();
-  auto m = p->expect_struct_member(decos);
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+
+  auto m = p->expect_struct_member(decos.value);
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   ASSERT_EQ(m.value, nullptr);

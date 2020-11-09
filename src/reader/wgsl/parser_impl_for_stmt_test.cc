@@ -161,8 +161,10 @@ class ForStmtErrorTest : public ParserImplTest {
     auto* p_for = parser(for_str);
     auto e_for = p_for->for_stmt();
 
-    ASSERT_TRUE(p_for->has_error());
-    ASSERT_EQ(e_for, nullptr);
+    EXPECT_FALSE(e_for.matched);
+    EXPECT_TRUE(e_for.errored);
+    EXPECT_TRUE(p_for->has_error());
+    ASSERT_EQ(e_for.value, nullptr);
     EXPECT_EQ(p_for->error(), error_str);
   }
 };

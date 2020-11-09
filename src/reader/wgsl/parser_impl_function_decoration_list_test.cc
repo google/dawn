@@ -25,11 +25,13 @@ namespace {
 TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
   auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)]]");
   auto decos = p->decoration_list();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(decos.size(), 2u);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  ASSERT_EQ(decos.value.size(), 2u);
 
-  auto deco_0 = ast::As<ast::FunctionDecoration>(std::move(decos[0]));
-  auto deco_1 = ast::As<ast::FunctionDecoration>(std::move(decos[1]));
+  auto deco_0 = ast::As<ast::FunctionDecoration>(std::move(decos.value[0]));
+  auto deco_1 = ast::As<ast::FunctionDecoration>(std::move(decos.value[1]));
   ASSERT_NE(deco_0, nullptr);
   ASSERT_NE(deco_1, nullptr);
 
@@ -49,47 +51,59 @@ TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
 
 TEST_F(ParserImplTest, FunctionDecorationList_Empty) {
   auto* p = parser("[[]]");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:3: empty decoration list");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:3: empty decoration list");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_Invalid) {
   auto* p = parser("[[invalid]]");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(decos.empty());
-  ASSERT_EQ(p->error(), "1:3: expected decoration");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
+  EXPECT_EQ(p->error(), "1:3: expected decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_ExtraComma) {
   auto* p = parser("[[workgroup_size(2), ]]");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:22: expected decoration");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:22: expected decoration");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingComma) {
   auto* p = parser("[[workgroup_size(2) workgroup_size(2)]]");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:21: expected ',' for decoration list");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:21: expected ',' for decoration list");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
   auto* p = parser("[[workgroup_size()]]");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(
       p->error(),
       "1:18: expected signed integer literal for workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingRightAttr) {
   auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
-  ast::DecorationList decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:45: expected ']]' for decoration list");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:45: expected ']]' for decoration list");
 }
 
 }  // namespace

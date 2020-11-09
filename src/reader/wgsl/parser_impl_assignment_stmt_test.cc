@@ -31,21 +31,23 @@ namespace {
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   auto* p = parser("a = 123");
   auto e = p->assignment_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsAssign());
-  ASSERT_NE(e->lhs(), nullptr);
-  ASSERT_NE(e->rhs(), nullptr);
+  ASSERT_TRUE(e.value->IsAssign());
+  ASSERT_NE(e.value->lhs(), nullptr);
+  ASSERT_NE(e.value->rhs(), nullptr);
 
-  ASSERT_TRUE(e->lhs()->IsIdentifier());
-  auto* ident = e->lhs()->AsIdentifier();
+  ASSERT_TRUE(e.value->lhs()->IsIdentifier());
+  auto* ident = e.value->lhs()->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
 
-  ASSERT_TRUE(e->rhs()->IsConstructor());
-  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(e.value->rhs()->IsConstructor());
+  ASSERT_TRUE(e.value->rhs()->AsConstructor()->IsScalarConstructor());
 
-  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = e.value->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsSint());
   EXPECT_EQ(init->literal()->AsSint()->value(), 123);
@@ -54,22 +56,24 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   auto* p = parser("a.b.c[2].d = 123");
   auto e = p->assignment_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsAssign());
-  ASSERT_NE(e->lhs(), nullptr);
-  ASSERT_NE(e->rhs(), nullptr);
+  ASSERT_TRUE(e.value->IsAssign());
+  ASSERT_NE(e.value->lhs(), nullptr);
+  ASSERT_NE(e.value->rhs(), nullptr);
 
-  ASSERT_TRUE(e->rhs()->IsConstructor());
-  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
-  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(e.value->rhs()->IsConstructor());
+  ASSERT_TRUE(e.value->rhs()->AsConstructor()->IsScalarConstructor());
+  auto* init = e.value->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsSint());
   EXPECT_EQ(init->literal()->AsSint()->value(), 123);
 
-  ASSERT_TRUE(e->lhs()->IsMemberAccessor());
-  auto* mem = e->lhs()->AsMemberAccessor();
+  ASSERT_TRUE(e.value->lhs()->IsMemberAccessor());
+  auto* mem = e.value->lhs()->AsMemberAccessor();
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
   auto* ident = mem->member()->AsIdentifier();
@@ -106,23 +110,29 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
   auto* p = parser("a.b.c[2].d 123");
   auto e = p->assignment_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: missing = for assignment");
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:12: expected '=' for assignment");
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
   auto* p = parser("if (true) {} = 123");
   auto e = p->assignment_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_EQ(e.value, nullptr);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
   auto* p = parser("a.b.c[2].d = if (true) {}");
   auto e = p->assignment_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: unable to parse right side of assignment");
 }
 

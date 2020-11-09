@@ -29,11 +29,13 @@ namespace {
 TEST_F(ParserImplTest, UnaryExpression_Postix) {
   auto* p = parser("a[2]");
   auto e = p->unary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsArrayAccessor());
-  auto* ary = e->AsArrayAccessor();
+  ASSERT_TRUE(e.value->IsArrayAccessor());
+  auto* ary = e.value->AsArrayAccessor();
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
   EXPECT_EQ(ident->name(), "a");
@@ -48,11 +50,13 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
   auto* p = parser("- 1");
   auto e = p->unary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsUnaryOp());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsUnaryOp());
 
-  auto* u = e->AsUnaryOp();
+  auto* u = e.value->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNegation);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
@@ -66,19 +70,23 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
   auto* p = parser("-if(a) {}");
   auto e = p->unary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:2: unable to parse right side of - expression");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang) {
   auto* p = parser("!1");
   auto e = p->unary_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsUnaryOp());
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsUnaryOp());
 
-  auto* u = e->AsUnaryOp();
+  auto* u = e.value->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNot);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
@@ -92,8 +100,10 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
   auto* p = parser("!if (a) {}");
   auto e = p->unary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:2: unable to parse right side of ! expression");
 }
 

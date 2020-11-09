@@ -40,8 +40,10 @@ TEST_P(StructDecorationTest, Parses) {
 
   auto deco = p->decoration();
   ASSERT_FALSE(p->has_error());
-  ASSERT_NE(deco, nullptr);
-  auto struct_deco = ast::As<ast::StructDecoration>(std::move(deco));
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto struct_deco = ast::As<ast::StructDecoration>(std::move(deco.value));
   ASSERT_NE(struct_deco, nullptr);
   EXPECT_EQ(struct_deco->IsBlock(), params.is_block);
 }
@@ -52,7 +54,9 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
   auto* p = parser("not-a-stage");
   auto deco = p->decoration();
-  ASSERT_EQ(deco, nullptr);
+  EXPECT_FALSE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_EQ(deco.value, nullptr);
 }
 
 }  // namespace

@@ -24,25 +24,31 @@ namespace {
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   auto* p = parser("[[block]]");
   auto decos = p->decoration_list();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(decos.size(), 1u);
-  auto struct_deco = ast::As<ast::StructDecoration>(std::move(decos[0]));
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  ASSERT_EQ(decos.value.size(), 1u);
+  auto struct_deco = ast::As<ast::StructDecoration>(std::move(decos.value[0]));
   EXPECT_TRUE(struct_deco->IsBlock());
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
   auto* p = parser("[[block");
   auto decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
   EXPECT_EQ(p->error(), "1:8: expected ']]' for decoration list");
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
   auto* p = parser("[[invalid]]");
   auto decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(decos.size(), 0u);
-  EXPECT_TRUE(decos.empty());
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_TRUE(decos.value.empty());
 }
 
 }  // namespace

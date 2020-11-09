@@ -25,26 +25,32 @@ namespace {
 TEST_F(ParserImplTest, ElseStmt) {
   auto* p = parser("else { a = b; c = d; }");
   auto e = p->else_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsElse());
-  ASSERT_EQ(e->condition(), nullptr);
-  EXPECT_EQ(e->body()->size(), 2u);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e.value->IsElse());
+  ASSERT_EQ(e.value->condition(), nullptr);
+  EXPECT_EQ(e.value->body()->size(), 2u);
 }
 
 TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
   auto* p = parser("else { fn main() -> void {}}");
   auto e = p->else_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: expected '}'");
 }
 
 TEST_F(ParserImplTest, ElseStmt_MissingBody) {
   auto* p = parser("else");
   auto e = p->else_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:5: expected '{'");
 }
 

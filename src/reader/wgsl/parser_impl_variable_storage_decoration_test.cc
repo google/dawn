@@ -39,8 +39,10 @@ TEST_P(VariableStorageTest, Parses) {
   auto* p = parser(std::string("<") + params.input + ">");
 
   auto sc = p->variable_storage_decoration();
-  ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(sc, params.result);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(sc.errored);
+  EXPECT_TRUE(sc.matched);
+  EXPECT_EQ(sc.value, params.result);
 
   auto t = p->next();
   EXPECT_TRUE(t.IsEof());
@@ -64,24 +66,27 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(ParserImplTest, VariableStorageDecoration_NoMatch) {
   auto* p = parser("<not-a-storage-class>");
   auto sc = p->variable_storage_decoration();
-  ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(sc.errored);
+  EXPECT_FALSE(sc.matched);
+  EXPECT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_Empty) {
   auto* p = parser("<>");
   auto sc = p->variable_storage_decoration();
-  ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(sc.errored);
+  EXPECT_FALSE(sc.matched);
+  EXPECT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingLessThan) {
   auto* p = parser("in>");
   auto sc = p->variable_storage_decoration();
-  ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_FALSE(p->has_error());
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(sc.errored);
+  EXPECT_FALSE(sc.matched);
 
   auto t = p->next();
   ASSERT_TRUE(t.IsIn());
@@ -90,9 +95,10 @@ TEST_F(ParserImplTest, VariableStorageDecoration_MissingLessThan) {
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingGreaterThan) {
   auto* p = parser("<in");
   auto sc = p->variable_storage_decoration();
-  ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:4: expected '>' for variable decoration");
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(sc.errored);
+  EXPECT_FALSE(sc.matched);
+  EXPECT_EQ(p->error(), "1:4: expected '>' for variable decoration");
 }
 
 }  // namespace

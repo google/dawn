@@ -28,59 +28,73 @@ namespace {
 TEST_F(ParserImplTest, ConstLiteral_Int) {
   auto* p = parser("-234");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsSint());
-  EXPECT_EQ(c->AsSint()->value(), -234);
+  EXPECT_TRUE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_NE(c.value, nullptr);
+  ASSERT_TRUE(c.value->IsSint());
+  EXPECT_EQ(c.value->AsSint()->value(), -234);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
   auto* p = parser("234u");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsUint());
-  EXPECT_EQ(c->AsUint()->value(), 234u);
+  EXPECT_TRUE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_NE(c.value, nullptr);
+  ASSERT_TRUE(c.value->IsUint());
+  EXPECT_EQ(c.value->AsUint()->value(), 234u);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {
   auto* p = parser("234.e12");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsFloat());
-  EXPECT_FLOAT_EQ(c->AsFloat()->value(), 234e12f);
+  EXPECT_TRUE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_NE(c.value, nullptr);
+  ASSERT_TRUE(c.value->IsFloat());
+  EXPECT_FLOAT_EQ(c.value->AsFloat()->value(), 234e12f);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
   auto* p = parser("1.2e+256");
   auto c = p->const_literal();
-  ASSERT_EQ(c, nullptr);
+  EXPECT_FALSE(c.matched);
+  EXPECT_FALSE(c.errored);
+  ASSERT_EQ(c.value, nullptr);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_True) {
   auto* p = parser("true");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsBool());
-  EXPECT_TRUE(c->AsBool()->IsTrue());
+  EXPECT_TRUE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_NE(c.value, nullptr);
+  ASSERT_TRUE(c.value->IsBool());
+  EXPECT_TRUE(c.value->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_False) {
   auto* p = parser("false");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsBool());
-  EXPECT_TRUE(c->AsBool()->IsFalse());
+  EXPECT_TRUE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_NE(c.value, nullptr);
+  ASSERT_TRUE(c.value->IsBool());
+  EXPECT_TRUE(c.value->AsBool()->IsFalse());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
   auto* p = parser("another-token");
   auto c = p->const_literal();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(c, nullptr);
+  EXPECT_FALSE(c.matched);
+  EXPECT_FALSE(c.errored);
+  EXPECT_FALSE(p->has_error());
+  ASSERT_EQ(c.value, nullptr);
 }
 
 }  // namespace

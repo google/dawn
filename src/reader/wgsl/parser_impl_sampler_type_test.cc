@@ -24,26 +24,32 @@ namespace {
 
 TEST_F(ParserImplTest, SamplerType_Invalid) {
   auto* p = parser("1234");
-  auto* t = p->sampler_type();
-  EXPECT_EQ(t, nullptr);
+  auto t = p->sampler_type();
+  EXPECT_FALSE(t.matched);
+  EXPECT_FALSE(t.errored);
+  EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, SamplerType_Sampler) {
   auto* p = parser("sampler");
-  auto* t = p->sampler_type();
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsSampler());
-  EXPECT_FALSE(t->AsSampler()->IsComparison());
+  auto t = p->sampler_type();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t.value->IsSampler());
+  EXPECT_FALSE(t.value->AsSampler()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
   auto* p = parser("sampler_comparison");
-  auto* t = p->sampler_type();
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsSampler());
-  EXPECT_TRUE(t->AsSampler()->IsComparison());
+  auto t = p->sampler_type();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t.value->IsSampler());
+  EXPECT_TRUE(t.value->AsSampler()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 

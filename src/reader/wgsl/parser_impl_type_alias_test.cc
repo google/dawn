@@ -30,11 +30,13 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
   auto* p = parser("type a = i32");
-  auto* t = p->type_alias();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsAlias());
-  auto* alias = t->AsAlias();
+  auto t = p->type_alias();
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(t.errored);
+  EXPECT_TRUE(t.matched);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t.value->IsAlias());
+  auto* alias = t.value->AsAlias();
   ASSERT_TRUE(alias->type()->IsI32());
   ASSERT_EQ(alias->type(), i32);
 }
@@ -45,11 +47,13 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto* p = parser("type a = B");
   p->register_constructed("B", &str);
 
-  auto* t = p->type_alias();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsAlias());
-  auto* alias = t->AsAlias();
+  auto t = p->type_alias();
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(t.errored);
+  EXPECT_TRUE(t.matched);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t.value->IsAlias());
+  auto* alias = t.value->AsAlias();
   EXPECT_EQ(alias->name(), "a");
   ASSERT_TRUE(alias->type()->IsStruct());
 
@@ -59,33 +63,41 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
   auto* p = parser("type = i32");
-  auto* t = p->type_alias();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(t, nullptr);
+  auto t = p->type_alias();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(t.value, nullptr);
   EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
   auto* p = parser("type 123 = i32");
-  auto* t = p->type_alias();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(t, nullptr);
+  auto t = p->type_alias();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(t.value, nullptr);
   EXPECT_EQ(p->error(), "1:6: expected identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
   auto* p = parser("type a i32");
-  auto* t = p->type_alias();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(t, nullptr);
+  auto t = p->type_alias();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(t.value, nullptr);
   EXPECT_EQ(p->error(), "1:8: expected '=' for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidType) {
   auto* p = parser("type a = B");
-  auto* t = p->type_alias();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(t, nullptr);
+  auto t = p->type_alias();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(t.value, nullptr);
   EXPECT_EQ(p->error(), "1:10: unknown constructed type 'B'");
 }
 

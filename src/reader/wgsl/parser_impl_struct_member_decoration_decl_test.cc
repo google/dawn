@@ -25,40 +25,50 @@ namespace {
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyStr) {
   auto* p = parser("");
   auto decos = p->decoration_list();
-  ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(decos.size(), 0u);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(decos.value.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyBlock) {
   auto* p = parser("[[]]");
   auto decos = p->decoration_list();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(decos.size(), 0u);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(decos.value.size(), 0u);
   EXPECT_EQ(p->error(), "1:3: empty decoration list");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
   auto* p = parser("[[offset(4)]]");
   auto decos = p->decoration_list();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(decos.size(), 1u);
-  auto deco = ast::As<ast::StructMemberDecoration>(std::move(decos[0]));
+  EXPECT_FALSE(p->has_error());
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  ASSERT_EQ(decos.value.size(), 1u);
+  auto deco = ast::As<ast::StructMemberDecoration>(std::move(decos.value[0]));
   ASSERT_NE(deco, nullptr);
   EXPECT_TRUE(deco->IsOffset());
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
   auto* p = parser("[[offset(nan)]]");
-  p->decoration_list();
-  ASSERT_TRUE(p->has_error()) << p->error();
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error()) << p->error();
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
   EXPECT_EQ(p->error(),
             "1:10: expected signed integer literal for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {
   auto* p = parser("[[offset(4)");
-  p->decoration_list();
-  ASSERT_TRUE(p->has_error()) << p->error();
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error()) << p->error();
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
   EXPECT_EQ(p->error(), "1:12: expected ']]' for decoration list");
 }
 
