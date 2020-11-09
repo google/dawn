@@ -534,16 +534,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan_Old) {
   EXPECT("var x : texture_sampled_1d;",
-         "test.wgsl:1:28 error: missing '<' for sampled texture type\n"
+         "test.wgsl:1:27 error: expected '<' for sampled texture type\n"
          "var x : texture_sampled_1d;\n"
-         "                           ^\n");
+         "                          ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan_Old) {
   EXPECT("var x : texture_sampled_1d<f32;",
-         "test.wgsl:1:32 error: missing '>' for sampled texture type\n"
+         "test.wgsl:1:31 error: expected '>' for sampled texture type\n"
          "var x : texture_sampled_1d<f32;\n"
-         "                               ^\n");
+         "                              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype_Old) {
@@ -555,16 +555,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype_Old) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingLessThan) {
   EXPECT("var x : texture_1d;",
-         "test.wgsl:1:20 error: missing '<' for sampled texture type\n"
+         "test.wgsl:1:19 error: expected '<' for sampled texture type\n"
          "var x : texture_1d;\n"
-         "                   ^\n");
+         "                  ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
   EXPECT("var x : texture_1d<f32;",
-         "test.wgsl:1:24 error: missing '>' for sampled texture type\n"
+         "test.wgsl:1:23 error: expected '>' for sampled texture type\n"
          "var x : texture_1d<f32;\n"
-         "                       ^\n");
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
@@ -576,16 +576,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingLessThan) {
   EXPECT("var x : texture_multisampled_2d;",
-         "test.wgsl:1:33 error: missing '<' for multisampled texture type\n"
+         "test.wgsl:1:32 error: expected '<' for multisampled texture type\n"
          "var x : texture_multisampled_2d;\n"
-         "                                ^\n");
+         "                               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingGreaterThan) {
   EXPECT("var x : texture_multisampled_2d<f32;",
-         "test.wgsl:1:37 error: missing '>' for multisampled texture type\n"
+         "test.wgsl:1:36 error: expected '>' for multisampled texture type\n"
          "var x : texture_multisampled_2d<f32;\n"
-         "                                    ^\n");
+         "                                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
@@ -597,16 +597,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan_Old) {
   EXPECT("var x : texture_ro_2d;",
-         "test.wgsl:1:23 error: missing '<' for storage texture type\n"
+         "test.wgsl:1:22 error: expected '<' for storage texture type\n"
          "var x : texture_ro_2d;\n"
-         "                      ^\n");
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan_Old) {
   EXPECT("var x : texture_ro_2d<r8uint;",
-         "test.wgsl:1:30 error: missing '>' for storage texture type\n"
+         "test.wgsl:1:29 error: expected '>' for storage texture type\n"
          "var x : texture_ro_2d<r8uint;\n"
-         "                             ^\n");
+         "                            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype_Old) {
@@ -618,16 +618,16 @@ TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype_Old) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
   EXPECT("var x : texture_storage_ro_2d;",
-         "test.wgsl:1:31 error: missing '<' for storage texture type\n"
+         "test.wgsl:1:30 error: expected '<' for storage texture type\n"
          "var x : texture_storage_ro_2d;\n"
-         "                              ^\n");
+         "                             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
   EXPECT("var x : texture_storage_ro_2d<r8uint;",
-         "test.wgsl:1:38 error: missing '>' for storage texture type\n"
+         "test.wgsl:1:37 error: expected '>' for storage texture type\n"
          "var x : texture_storage_ro_2d<r8uint;\n"
-         "                                     ^\n");
+         "                                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
@@ -1023,21 +1023,21 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarMissingSemicolon) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingLessThan) {
   EXPECT("var i : ptr;",
-         "test.wgsl:1:12 error: missing < for ptr declaration\n"
+         "test.wgsl:1:12 error: expected '<' for ptr declaration\n"
          "var i : ptr;\n"
          "           ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingGreaterThan) {
   EXPECT("var i : ptr<in, u32;",
-         "test.wgsl:1:20 error: missing > for ptr declaration\n"
+         "test.wgsl:1:20 error: expected '>' for ptr declaration\n"
          "var i : ptr<in, u32;\n"
          "                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingComma) {
   EXPECT("var i : ptr<in u32>;",
-         "test.wgsl:1:16 error: missing , for ptr declaration\n"
+         "test.wgsl:1:16 error: expected ',' for ptr declaration\n"
          "var i : ptr<in u32>;\n"
          "               ^^^\n");
 }
@@ -1065,21 +1065,21 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclMissingGThan) {
   EXPECT("var<in i : i32",
-         "test.wgsl:1:8 error: missing > for variable decoration\n"
+         "test.wgsl:1:8 error: expected '>' for variable decoration\n"
          "var<in i : i32\n"
          "       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingLessThan) {
   EXPECT("var i : vec3;",
-         "test.wgsl:1:13 error: missing < for vector\n"
+         "test.wgsl:1:13 error: expected '<' for vector\n"
          "var i : vec3;\n"
          "            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingGreaterThan) {
   EXPECT("var i : vec3<u32;",
-         "test.wgsl:1:17 error: missing > for vector\n"
+         "test.wgsl:1:17 error: expected '>' for vector\n"
          "var i : vec3<u32;\n"
          "                ^\n");
 }

@@ -544,7 +544,7 @@ class ParserImpl {
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  ast::type::Type* expect_type_decl_pointer(Token t);
+  ast::type::Type* expect_type_decl_pointer();
   ast::type::Type* expect_type_decl_vector(Token t);
   ast::type::Type* expect_type_decl_array(ast::ArrayDecorationList decos);
   ast::type::Type* expect_type_decl_matrix(Token t);

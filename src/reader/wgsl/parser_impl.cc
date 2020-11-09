@@ -375,25 +375,21 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
 
   auto dim = sampled_texture_type();
   if (dim != ast::type::TextureDimension::kNone) {
-    auto t = next();
-    if (!t.IsLessThan()) {
-      add_error(peek(), "missing '<' for sampled texture type");
+    const char* use = "sampled texture type";
+
+    if (!expect(use, Token::Type::kLessThan))
       return nullptr;
-    }
 
     auto* subtype = type_decl();
     if (has_error())
       return nullptr;
     if (subtype == nullptr) {
-      add_error(peek(), "invalid subtype for sampled texture type");
+      add_error(peek().source(), "invalid subtype", use);
       return nullptr;
     }
 
-    t = next();
-    if (!t.IsGreaterThan()) {
-      add_error(peek(), "missing '>' for sampled texture type");
+    if (!expect(use, Token::Type::kGreaterThan))
       return nullptr;
-    }
 
     return ctx_.type_mgr().Get(
         std::make_unique<ast::type::SampledTextureType>(dim, subtype));
@@ -401,25 +397,21 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
 
   dim = multisampled_texture_type();
   if (dim != ast::type::TextureDimension::kNone) {
-    auto t = next();
-    if (!t.IsLessThan()) {
-      add_error(peek(), "missing '<' for multisampled texture type");
+    const char* use = "multisampled texture type";
+
+    if (!expect(use, Token::Type::kLessThan))
       return nullptr;
-    }
 
     auto* subtype = type_decl();
     if (has_error())
       return nullptr;
     if (subtype == nullptr) {
-      add_error(peek(), "invalid subtype for multisampled texture type");
+      add_error(peek().source(), "invalid subtype", use);
       return nullptr;
     }
 
-    t = next();
-    if (!t.IsGreaterThan()) {
-      add_error(peek(), "missing '>' for multisampled texture type");
+    if (!expect(use, Token::Type::kGreaterThan))
       return nullptr;
-    }
 
     return ctx_.type_mgr().Get(
         std::make_unique<ast::type::MultisampledTextureType>(dim, subtype));
@@ -429,25 +421,21 @@ ast::type::Type* ParserImpl::texture_sampler_types() {
   ast::AccessControl access;
   std::tie(storage_dim, access) = storage_texture_type();
   if (storage_dim != ast::type::TextureDimension::kNone) {
-    auto t = next();
-    if (!t.IsLessThan()) {
-      add_error(peek(), "missing '<' for storage texture type");
+    const char* use = "storage texture type";
+
+    if (!expect(use, Token::Type::kLessThan))
       return nullptr;
-    }
 
     auto format = image_storage_type();
     if (has_error())
       return nullptr;
     if (format == ast::type::ImageFormat::kNone) {
-      add_error(peek(), "invalid format for storage texture type");
+      add_error(peek().source(), "invalid format", use);
       return nullptr;
     }
 
-    t = next();
-    if (!t.IsGreaterThan()) {
-      add_error(peek(), "missing '>' for storage texture type");
+    if (!expect(use, Token::Type::kGreaterThan))
       return nullptr;
-    }
 
     return ctx_.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
         storage_dim, access, format));
@@ -779,11 +767,8 @@ ast::StorageClass ParserImpl::variable_storage_decoration() {
   if (has_error())
     return sc;
 
-  auto t = next();
-  if (!t.IsGreaterThan()) {
-    add_error(t, "missing > for variable decoration");
+  if (!expect(use, Token::Type::kGreaterThan))
     return ast::StorageClass::kNone;
-  }
 
   return sc;
 }
@@ -847,8 +832,7 @@ ast::type::Type* ParserImpl::type_alias() {
 //   | texture_sampler_types
 ast::type::Type* ParserImpl::type_decl() {
   auto t = peek();
-  if (t.IsIdentifier()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kIdentifier)) {
     auto* ty = get_constructed(t.to_str());
     if (ty == nullptr) {
       add_error(t, "unknown constructed type '" + t.to_str() + "'");
@@ -856,28 +840,24 @@ ast::type::Type* ParserImpl::type_decl() {
     }
     return ty;
   }
-  if (t.IsBool()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kBool))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-  }
-  if (t.IsF32()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kF32))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
-  }
-  if (t.IsI32()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kI32))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-  }
-  if (t.IsU32()) {
-    next();  // Consume the peek
+
+  if (match(Token::Type::kU32))
     return ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-  }
-  if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
+
+  if (t.IsVec2() || t.IsVec3() || t.IsVec4())
     return expect_type_decl_vector(t);
-  }
-  if (t.IsPtr()) {
-    return expect_type_decl_pointer(t);
-  }
+
+  if (match(Token::Type::kPtr))
+    return expect_type_decl_pointer();
 
   auto decos = decoration_list();
   if (has_error())
@@ -907,26 +887,18 @@ ast::type::Type* ParserImpl::type_decl() {
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::expect_type_decl_pointer(Token t) {
-  next();  // Consume the peek
-
+ast::type::Type* ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
-  t = next();
-  if (!t.IsLessThan()) {
-    add_error(t, "missing < for ptr declaration");
+  if (!expect(use, Token::Type::kLessThan))
     return nullptr;
-  }
 
   auto sc = expect_storage_class(use);
   if (has_error())
     return nullptr;
 
-  t = next();
-  if (!t.IsComma()) {
-    add_error(t, "missing , for ptr declaration");
+  if (!expect(use, Token::Type::kComma))
     return nullptr;
-  }
 
   auto* subtype = type_decl();
   if (has_error())
@@ -936,11 +908,8 @@ ast::type::Type* ParserImpl::expect_type_decl_pointer(Token t) {
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsGreaterThan()) {
-    add_error(t, "missing > for ptr declaration");
+  if (!expect(use, Token::Type::kGreaterThan))
     return nullptr;
-  }
 
   return ctx_.type_mgr().Get(
       std::make_unique<ast::type::PointerType>(subtype, sc));
@@ -955,25 +924,21 @@ ast::type::Type* ParserImpl::expect_type_decl_vector(Token t) {
   else if (t.IsVec4())
     count = 4;
 
-  t = next();
-  if (!t.IsLessThan()) {
-    add_error(t, "missing < for vector");
+  const char* use = "vector";
+
+  if (!expect(use, Token::Type::kLessThan))
     return nullptr;
-  }
 
   auto* subtype = type_decl();
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
-    add_error(peek(), "unable to determine subtype for vector");
+    add_error(peek().source(), "unable to determine subtype", use);
     return nullptr;
   }
 
-  t = next();
-  if (!t.IsGreaterThan()) {
-    add_error(t, "missing > for vector");
+  if (!expect(use, Token::Type::kGreaterThan))
     return nullptr;
-  }
 
   return ctx_.type_mgr().Get(
       std::make_unique<ast::type::VectorType>(subtype, count));
@@ -2128,13 +2093,7 @@ ast::ExpressionList ParserImpl::expect_argument_expression_list() {
   ast::ExpressionList ret;
   ret.push_back(std::move(arg));
 
-  for (;;) {
-    auto t = peek();
-    if (!t.IsComma())
-      break;
-
-    next();  // Consume the peek
-
+  while (match(Token::Type::kComma)) {
     arg = logical_or_expression();
     if (has_error())
       return {};
@@ -2618,45 +2577,24 @@ std::unique_ptr<ast::AssignmentStatement> ParserImpl::assignment_stmt() {
 //   | FALSE
 std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   auto t = peek();
-  if (t.IsTrue()) {
-    next();  // Consume the peek
-
+  if (match(Token::Type::kTrue)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    if (!type) {
-      return nullptr;
-    }
     return std::make_unique<ast::BoolLiteral>(type, true);
   }
-  if (t.IsFalse()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kFalse)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    if (!type) {
-      return nullptr;
-    }
     return std::make_unique<ast::BoolLiteral>(type, false);
   }
-  if (t.IsSintLiteral()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kSintLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-    if (!type) {
-      return nullptr;
-    }
     return std::make_unique<ast::SintLiteral>(type, t.to_i32());
   }
-  if (t.IsUintLiteral()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kUintLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-    if (!type) {
-      return nullptr;
-    }
     return std::make_unique<ast::UintLiteral>(type, t.to_u32());
   }
-  if (t.IsFloatLiteral()) {
-    next();  // Consume the peek
+  if (match(Token::Type::kFloatLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
-    if (!type) {
-      return nullptr;
-    }
     return std::make_unique<ast::FloatLiteral>(type, t.to_f32());
   }
   return nullptr;

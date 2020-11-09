@@ -113,7 +113,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan_Old) {
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:19: missing '<' for sampled texture type");
+  EXPECT_EQ(p->error(), "1:19: expected '<' for sampled texture type");
 }
 
 TEST_F(ParserImplTest,
@@ -122,7 +122,7 @@ TEST_F(ParserImplTest,
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:23: missing '>' for sampled texture type");
+  EXPECT_EQ(p->error(), "1:23: expected '>' for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
@@ -179,7 +179,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing '<' for sampled texture type");
+  EXPECT_EQ(p->error(), "1:11: expected '<' for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
@@ -187,7 +187,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
   auto* t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:15: missing '>' for sampled texture type");
+  EXPECT_EQ(p->error(), "1:15: expected '>' for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
@@ -222,7 +222,7 @@ TEST_F(ParserImplTest,
   auto* p = parser("texture_multisampled_2d");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:24: missing '<' for multisampled texture type");
+  EXPECT_EQ(p->error(), "1:24: expected '<' for multisampled texture type");
 }
 
 TEST_F(ParserImplTest,
@@ -230,7 +230,7 @@ TEST_F(ParserImplTest,
   auto* p = parser("texture_multisampled_2d<u32");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:28: missing '>' for multisampled texture type");
+  EXPECT_EQ(p->error(), "1:28: expected '>' for multisampled texture type");
 }
 
 TEST_F(ParserImplTest,
@@ -281,7 +281,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan_Old) {
   auto* p = parser("texture_ro_1d");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:14: missing '<' for storage texture type");
+  EXPECT_EQ(p->error(), "1:14: expected '<' for storage texture type");
 }
 
 TEST_F(ParserImplTest,
@@ -289,7 +289,7 @@ TEST_F(ParserImplTest,
   auto* p = parser("texture_wo_1d<r8unorm");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:22: missing '>' for storage texture type");
+  EXPECT_EQ(p->error(), "1:22: expected '>' for storage texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
@@ -338,14 +338,14 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
   auto* p = parser("texture_storage_ro_1d");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:22: missing '<' for storage texture type");
+  EXPECT_EQ(p->error(), "1:22: expected '<' for storage texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
   auto* p = parser("texture_storage_ro_1d<r8unorm");
   auto* t = p->texture_sampler_types();
   EXPECT_EQ(t, nullptr);
-  EXPECT_EQ(p->error(), "1:30: missing '>' for storage texture type");
+  EXPECT_EQ(p->error(), "1:30: expected '>' for storage texture type");
 }
 
 }  // namespace

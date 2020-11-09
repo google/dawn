@@ -149,7 +149,7 @@ TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:9: missing > for vector");
+  ASSERT_EQ(p->error(), "1:9: expected '>' for vector");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingGreaterThanTest,
@@ -165,7 +165,7 @@ TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: missing < for vector");
+  ASSERT_EQ(p->error(), "1:5: expected '<' for vector");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingLessThanTest,
@@ -238,7 +238,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: missing < for ptr declaration");
+  ASSERT_EQ(p->error(), "1:5: expected '<' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
@@ -246,7 +246,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:18: missing > for ptr declaration");
+  ASSERT_EQ(p->error(), "1:18: expected '>' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
@@ -254,7 +254,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
   auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:14: missing , for ptr declaration");
+  ASSERT_EQ(p->error(), "1:14: expected ',' for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {

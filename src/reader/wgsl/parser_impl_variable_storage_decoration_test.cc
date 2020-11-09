@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, VariableStorageDecoration_MissingGreaterThan) {
   auto sc = p->variable_storage_decoration();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:4: missing > for variable decoration");
+  ASSERT_EQ(p->error(), "1:4: expected '>' for variable decoration");
 }
 
 }  // namespace
