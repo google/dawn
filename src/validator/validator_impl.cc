@@ -154,10 +154,13 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   }
   variable_stack_.pop_scope();
 
-  if (!func->get_last_statement() || !func->get_last_statement()->IsReturn()) {
-    set_error(func->source(),
-              "v-0002: function must end with a return statement");
-    return false;
+  if (!current_function_->return_type()->IsVoid()) {
+    if (!func->get_last_statement() ||
+        !func->get_last_statement()->IsReturn()) {
+      set_error(func->source(),
+                "v-0002: non-void function must end with a return statement");
+      return false;
+    }
   }
   return true;
 }

@@ -35,9 +35,9 @@ namespace {
 class ValidateFunctionTest : public ValidatorTestHelper,
                              public testing::Test {};
 
-TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
+TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
+  // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
-
   ast::type::I32Type i32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
@@ -51,26 +51,69 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
   func->set_body(std::move(body));
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0002: function must end with a return statement");
+  EXPECT_TRUE(v()->Validate(mod()));
 }
 
-TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
+TEST_F(ValidateFunctionTest,
+       VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
+  // [[stage(vertex)]]
   // fn func -> void {}
   ast::type::VoidType void_type;
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>(
       Source{Source::Location{12, 34}}, "func", std::move(params), &void_type);
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(v()->Validate(mod()));
+}
+
+TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
+  // fn func -> int { var a:i32 = 2; }
+
+  ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  ast::VariableList params;
+  ast::type::VoidType void_type;
+  auto func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
+                                              "func", std::move(params), &i32);
+  auto body = std::make_unique<ast::BlockStatement>();
+  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  func->set_body(std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0002: function must end with a return statement");
+  EXPECT_EQ(
+      v()->error(),
+      "12:34: v-0002: non-void function must end with a return statement");
+}
+
+TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
+  // fn func -> int {}
+  ast::type::VoidType void_type;
+  ast::type::I32Type i32;
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
+                                              "func", std::move(params), &i32);
+  mod()->AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(
+      v()->error(),
+      "12:34: v-0002: non-void function must end with a return statement");
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
