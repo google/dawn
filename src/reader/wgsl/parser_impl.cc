@@ -306,11 +306,6 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl(
     auto expr = expect_const_expr();
     if (has_error())
       return nullptr;
-    if (expr == nullptr) {
-      add_error(peek(), "invalid expression");
-      return nullptr;
-    }
-
     var->set_constructor(std::move(expr));
   }
   return var;
@@ -343,10 +338,6 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   auto init = expect_const_expr();
   if (has_error())
     return nullptr;
-  if (init == nullptr) {
-    add_error(peek(), "error parsing scalar constructor");
-    return nullptr;
-  }
   var->set_constructor(std::move(init));
 
   return var;
@@ -1163,10 +1154,6 @@ ast::StructMemberList ParserImpl::expect_struct_body_decl() {
       auto mem = expect_struct_member(decos);
       if (has_error())
         return ast::StructMemberList{};
-      if (mem == nullptr) {
-        add_error(peek(), "invalid struct member");
-        return ast::StructMemberList{};
-      }
 
       members.push_back(std::move(mem));
     }
@@ -1593,10 +1580,6 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   auto condition = expect_paren_rhs_stmt();
   if (has_error())
     return nullptr;
-  if (condition == nullptr) {
-    add_error(peek(), "unable to parse if condition");
-    return nullptr;
-  }
 
   auto body = expect_body_stmt();
   if (has_error())
@@ -1635,10 +1618,6 @@ ast::ElseStatementList ParserImpl::elseif_stmt() {
     auto condition = expect_paren_rhs_stmt();
     if (has_error())
       return {};
-    if (condition == nullptr) {
-      add_error(peek(), "unable to parse condition expression");
-      return {};
-    }
 
     auto body = expect_body_stmt();
     if (has_error())
@@ -1682,10 +1661,6 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
   auto condition = expect_paren_rhs_stmt();
   if (has_error())
     return nullptr;
-  if (condition == nullptr) {
-    add_error(peek(), "unable to parse switch expression");
-    return nullptr;
-  }
 
   ast::CaseStatementList body;
   bool ok = expect_brace_block("switch statement", [&] {
@@ -2063,10 +2038,6 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
     auto params = expect_paren_rhs_stmt();
     if (has_error())
       return nullptr;
-    if (params == nullptr) {
-      add_error(peek(), "unable to parse parameters");
-      return nullptr;
-    }
 
     return std::make_unique<ast::BitcastExpression>(source, type,
                                                     std::move(params));
@@ -2749,19 +2720,11 @@ ParserImpl::expect_const_expr_internal(uint32_t depth) {
       auto param = expect_const_expr_internal(depth + 1);
       if (has_error())
         return false;
-      if (param == nullptr) {
-        add_error(peek(), "unable to parse constant expression");
-        return false;
-      }
       params.push_back(std::move(param));
       while (match(Token::Type::kComma)) {
         param = expect_const_expr_internal(depth + 1);
         if (has_error())
           return false;
-        if (param == nullptr) {
-          add_error(peek(), "unable to parse constant expression");
-          return false;
-        }
         params.push_back(std::move(param));
       }
       return true;
@@ -2807,10 +2770,6 @@ bool ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
     if (auto deco = expect_decoration()) {
       decos.emplace_back(std::move(deco));
     } else {
-      return false;
-    }
-
-    if (has_error()) {
       return false;
     }
 
