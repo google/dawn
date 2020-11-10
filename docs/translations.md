@@ -104,6 +104,43 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | tanh | GLSLstd450Tanh | tanh | tanh |
 | trunc | GLSLstd450Trunc | trunc | trunc |
 
+# Types
+## Sampler Types
+| WGSL | SPIR-V | MSL | HLSL |
+|------|--------|-----|------|
+| sampler | OpTypeSampler | | SamplerState |
+| sampler_comparison | OpTypeSampler | | SamplerComparisonState |
+
+## Texture Types
+| WGSL | SPIR-V | MSL | HLSL |
+|------|--------|-----|------|
+| texture_1d | OpTypeImage | | Texture1D |
+| texture_1d_array | OpTypeImage | | Texture1DArray |
+| texture_2d | OpTypeImage | | Texture2D |
+| texture_2d_array | OpTypeImage | | Texture2DArray |
+| texture_3d | OpTypeImage | | Texture3D |
+| texture_cube | OpTypeImage | | TextureCube |
+| texture_cube_array | OpTypeImage | | TextureCubeArray |
+| | | |
+| texture_multisampled_2d&lt;type&gt; | OpTypeImage | | Texture2D |
+| | | |
+| texture_depth_2d | OpTypeImage | | Texture2D |
+| texture_depth_2d_array | OpTypeImage | | Texture2DArray |
+| texture_depth_cube | OpTypeImage | | TextureCube |
+| texture_depth_cube_array | OpTypeImage | | TextureCubeArray |
+| | | |
+| texture_storage_ro_1d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture1D |
+| texture_storage_ro_1d_array&lt;image_storage_type&gt; | OpTypeImage | | RWTexture1DArray |
+| texture_storage_ro_2d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture2D |
+| texture_storage_ro_2d_array&lt;image_storage_type&gt; | OpTypeImage | | RWTexture2DArray |
+| texture_storage_ro_3d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture3D |
+| | | |
+| texture_storage_wo_1d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture1D |
+| texture_storage_wo_1d_array&lt;image_storage_type&gt; | OpTypeImage | | RWTexture1DArray |
+| texture_storage_wo_2d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture2D |
+| texture_storage_wo_2d_array&lt;image_storage_type&gt; | OpTypeImage | | RWTexture2DArray |
+| texture_storage_wo_3d&lt;image_storage_type&gt; | OpTypeImage | | RWTexture3D|
+
 # Short-circuting
 ## HLSL
 TODO(dsinclair): Nested if's

@@ -44,7 +44,9 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
@@ -1984,8 +1986,49 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
     error_ = "pointers not supported in HLSL";
     return false;
+  } else if (type->IsSampler()) {
+    auto* sampler = type->AsSampler();
+    out << "Sampler";
+    if (sampler->IsComparison()) {
+      out << "Comparison";
+    }
+    out << "State";
   } else if (type->IsStruct()) {
     out << type->AsStruct()->name();
+  } else if (type->IsTexture()) {
+    auto* tex = type->AsTexture();
+    if (tex->IsStorage()) {
+      out << "RW";
+    }
+    out << "Texture";
+
+    switch (tex->dim()) {
+      case ast::type::TextureDimension::k1d:
+        out << "1D";
+        break;
+      case ast::type::TextureDimension::k1dArray:
+        out << "1DArray";
+        break;
+      case ast::type::TextureDimension::k2d:
+        out << "2D";
+        break;
+      case ast::type::TextureDimension::k2dArray:
+        out << "2DArray";
+        break;
+      case ast::type::TextureDimension::k3d:
+        out << "3D";
+        break;
+      case ast::type::TextureDimension::kCube:
+        out << "Cube";
+        break;
+      case ast::type::TextureDimension::kCubeArray:
+        out << "CubeArray";
+        break;
+      default:
+        error_ = "Invalid texture dimensions";
+        return false;
+    }
+
   } else if (type->IsU32()) {
     out << "uint";
   } else if (type->IsVector()) {
