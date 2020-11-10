@@ -214,6 +214,8 @@ set(TINT_LIB_SRCS
   inspector/inspector.h
   inspector/scalar.cc
   inspector/scalar.h
+  namer.cc
+  namer.h
   reader/reader.cc
   reader/reader.h
   scope_stack.h
@@ -400,6 +402,7 @@ set(TINT_TEST_SRCS
   diagnostic/formatter_test.cc
   diagnostic/printer_test.cc
   inspector/inspector_test.cc
+  namer_test.cc
   scope_stack_test.cc
   transform/bound_array_accessors_transform_test.cc
   transform/vertex_pulling_transform_test.cc

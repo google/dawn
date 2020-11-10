@@ -29,6 +29,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/namer.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -470,6 +471,7 @@ class Builder {
 
   ast::Module* mod_;
   std::string error_;
+  Namer namer_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;
   InstructionList capabilities_;

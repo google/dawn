@@ -322,7 +322,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   EXPECT_EQ(id, 1u);
 
   EXPECT_EQ(b.types().size(), 1u);
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_53"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
 )");
@@ -348,8 +348,8 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_struct"
-OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f737472756374"
+OpMemberName %1 0 "tint_61"
 )");
 }
 
@@ -378,8 +378,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_struct"
-OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f737472756374"
+OpMemberName %1 0 "tint_61"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Block
 )");
@@ -413,9 +413,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2 %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_53"
+OpMemberName %1 0 "tint_61"
+OpMemberName %1 1 "tint_62"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 1 Offset 8
@@ -458,10 +458,10 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_53"
+OpMemberName %1 0 "tint_61"
+OpMemberName %1 1 "tint_62"
+OpMemberName %1 2 "tint_63"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), "");
 }
@@ -509,10 +509,10 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_53"
+OpMemberName %1 0 "tint_61"
+OpMemberName %1 1 "tint_62"
+OpMemberName %1 2 "tint_63"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 0 ColMajor
@@ -578,10 +578,10 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
 %7 = OpTypeMatrix %8 4
 %1 = OpTypeStruct %2 %5 %7
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpMemberName %1 2 "c"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_53"
+OpMemberName %1 0 "tint_61"
+OpMemberName %1 1 "tint_62"
+OpMemberName %1 2 "tint_63"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 0 ColMajor

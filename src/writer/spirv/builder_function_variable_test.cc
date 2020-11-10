@@ -53,7 +53,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
   Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
@@ -96,7 +96,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "tint_766172"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -146,7 +146,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %7 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %7 "tint_766172"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2

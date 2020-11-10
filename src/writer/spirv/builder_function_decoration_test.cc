@@ -48,7 +48,8 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.entry_points()), R"(OpEntryPoint Vertex %3 "main"
+  EXPECT_EQ(DumpInstructions(b.entry_points()),
+            R"(OpEntryPoint Vertex %3 "tint_6d61696e"
 )");
 }
 
@@ -116,10 +117,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   mod.AddGlobalVariable(std::move(v_wg));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"
+OpName %4 "tint_6d795f6f7574"
+OpName %7 "tint_6d795f7767"
+OpName %11 "tint_6d61696e"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -133,7 +134,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main"
+            R"(OpEntryPoint Vertex %11 "tint_6d61696e"
 )");
 }
 
@@ -185,10 +186,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   mod.AddGlobalVariable(std::move(v_wg));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"
+OpName %4 "tint_6d795f6f7574"
+OpName %7 "tint_6d795f7767"
+OpName %11 "tint_6d61696e"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -202,7 +203,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main" %4 %1
+            R"(OpEntryPoint Vertex %11 "tint_6d61696e" %4 %1
 )");
 }
 
@@ -269,12 +270,12 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func2)) << b.error();
   EXPECT_EQ(DumpBuilder(b),
-            R"(OpEntryPoint Fragment %3 "main1"
-OpEntryPoint Fragment %5 "main2"
+            R"(OpEntryPoint Fragment %3 "tint_6d61696e31"
+OpEntryPoint Fragment %5 "tint_6d61696e32"
 OpExecutionMode %3 OriginUpperLeft
 OpExecutionMode %5 OriginUpperLeft
-OpName %3 "main1"
-OpName %5 "main2"
+OpName %3 "tint_6d61696e31"
+OpName %5 "tint_6d61696e32"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1

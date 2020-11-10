@@ -53,7 +53,7 @@ TEST_F(BuilderTest, Function_Empty) {
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "a_func"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_615f66756e63"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -96,9 +96,9 @@ TEST_F(BuilderTest, Function_WithParams) {
 
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
-OpName %5 "a"
-OpName %6 "b"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "tint_615f66756e63"
+OpName %5 "tint_61"
+OpName %6 "tint_62"
 %2 = OpTypeFloat 32
 %3 = OpTypeInt 32 1
 %1 = OpTypeFunction %2 %2 %3
@@ -123,7 +123,7 @@ TEST_F(BuilderTest, Function_WithBody) {
   ast::Module mod;
   Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -261,17 +261,17 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %7 "a"
-OpEntryPoint GLCompute %17 "b"
+OpEntryPoint GLCompute %7 "tint_61"
+OpEntryPoint GLCompute %17 "tint_62"
 OpExecutionMode %7 LocalSize 1 1 1
 OpExecutionMode %17 LocalSize 1 1 1
-OpName %3 "Data"
-OpMemberName %3 0 "d"
-OpName %1 "data"
-OpName %7 "a"
-OpName %13 "v"
-OpName %17 "b"
-OpName %20 "v"
+OpName %3 "tint_44617461"
+OpMemberName %3 0 "tint_64"
+OpName %1 "tint_64617461"
+OpName %7 "tint_61"
+OpName %13 "tint_76"
+OpName %17 "tint_62"
+OpName %20 "tint_76"
 OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpDecorate %1 Binding 0
