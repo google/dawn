@@ -18,6 +18,7 @@
 
 #include "src/ast/decorated_variable.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {
@@ -175,6 +176,36 @@ Function::referenced_sampler_variables() const {
 const std::vector<std::pair<Variable*, Function::BindingInfo>>
 Function::referenced_comparison_sampler_variables() const {
   return ReferencedSamplerVariablesImpl(type::SamplerKind::kComparisonSampler);
+}
+
+const std::vector<std::pair<Variable*, Function::BindingInfo>>
+Function::referenced_sampled_texture_variables() const {
+  std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
+
+  for (auto* var : referenced_module_variables()) {
+    auto* unwrapped_type = var->type()->UnwrapIfNeeded();
+    if (!var->IsDecorated() || !unwrapped_type->IsTexture() ||
+        !unwrapped_type->AsTexture()->IsSampled()) {
+      continue;
+    }
+
+    BindingDecoration* binding = nullptr;
+    SetDecoration* set = nullptr;
+    for (const auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsBinding()) {
+        binding = deco->AsBinding();
+      } else if (deco->IsSet()) {
+        set = deco->AsSet();
+      }
+    }
+    if (binding == nullptr || set == nullptr) {
+      continue;
+    }
+
+    ret.push_back({var, BindingInfo{binding, set}});
+  }
+
+  return ret;
 }
 
 void Function::add_ancestor_entry_point(const std::string& ep) {

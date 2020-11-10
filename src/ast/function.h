@@ -129,26 +129,31 @@ class Function : public Node {
   /// @returns the <variable, decoration> pair.
   const std::vector<std::pair<Variable*, BuiltinDecoration*>>
   referenced_builtin_variables() const;
-  /// Retrieves any referenced uniform variables. Note, the uniform must be
+  /// Retrieves any referenced uniform variables. Note, the variables must be
   /// decorated with both binding and set decorations.
   /// @returns the referenced uniforms
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_uniform_variables() const;
-  /// Retrieves any referenced storagebuffer variables. Note, the storagebuffer
+  /// Retrieves any referenced storagebuffer variables. Note, the variables
   /// must be decorated with both binding and set decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_storagebuffer_variables() const;
   /// Retrieves any referenced regular Sampler variables. Note, the
-  /// storagebuffer must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and set decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_sampler_variables() const;
   /// Retrieves any referenced comparison Sampler variables. Note, the
-  /// storagebuffer must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and set decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_comparison_sampler_variables() const;
+  /// Retrieves any referenced sampled textures variables. Note, the
+  /// variables must be decorated with both binding and set decorations.
+  /// @returns the referenced sampled textures
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_sampled_texture_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor

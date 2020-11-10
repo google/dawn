@@ -28,6 +28,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/uint_literal.h"
 #include "src/namer.h"
@@ -231,6 +232,56 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
 
+    result.push_back(std::move(entry));
+  }
+
+  return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+
+  for (auto& rcs : func->referenced_sampled_texture_variables()) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = rcs;
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+
+    switch (var->type()->UnwrapIfNeeded()->AsTexture()->dim()) {
+      case ast::type::TextureDimension::k1d:
+        entry.dim = ResourceBinding::TextureDimension::k1d;
+        break;
+      case ast::type::TextureDimension::k1dArray:
+        entry.dim = ResourceBinding::TextureDimension::k1dArray;
+        break;
+      case ast::type::TextureDimension::k2d:
+        entry.dim = ResourceBinding::TextureDimension::k2d;
+        break;
+      case ast::type::TextureDimension::k2dArray:
+        entry.dim = ResourceBinding::TextureDimension::k2dArray;
+        break;
+      case ast::type::TextureDimension::k3d:
+        entry.dim = ResourceBinding::TextureDimension::k3d;
+        break;
+      case ast::type::TextureDimension::kCube:
+        entry.dim = ResourceBinding::TextureDimension::kCube;
+        break;
+      case ast::type::TextureDimension::kCubeArray:
+        entry.dim = ResourceBinding::TextureDimension::kCubeArray;
+        break;
+      default:
+        entry.dim = ResourceBinding::TextureDimension::kNone;
+        break;
+    }
     result.push_back(std::move(entry));
   }
 

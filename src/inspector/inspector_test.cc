@@ -480,6 +480,11 @@ class InspectorHelper {
         name, ast::StorageClass::kUniformConstant, f32_type()));
   }
 
+  void AddF32Vec(const std::string& name, uint32_t count) {
+    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
+        name, ast::StorageClass::kUniformConstant, f32_vec_type(count)));
+  }
+
   /// Adds a depth texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
@@ -504,7 +509,7 @@ class InspectorHelper {
     auto body = std::make_unique<ast::BlockStatement>();
 
     auto call_result = std::make_unique<ast::Variable>(
-        "sampler_result", ast::StorageClass::kFunction, f32_type());
+        "sampler_result", ast::StorageClass::kFunction, f32_vec_type(4));
     body->append(
         std::make_unique<ast::VariableDeclStatement>(std::move(call_result)));
 
@@ -577,6 +582,22 @@ class InspectorHelper {
     return func;
   }
 
+  /// Gets an appropriate type for the coords parameter depending the the
+  /// dimensionality of the texture being sampled.
+  /// @param dim dimensionality of the texture being sampled.
+  /// @returns a pointer to a type appropriate for the coord param
+  ast::type::Type* GetCoordsType(ast::type::TextureDimension dim) {
+    if (dim == ast::type::TextureDimension::k1d) {
+      f32_type();
+    } else if (dim == ast::type::TextureDimension::k1dArray ||
+               dim == ast::type::TextureDimension::k2d) {
+      return f32_vec_type(2);
+    } else if (dim == ast::type::TextureDimension::kCubeArray) {
+      return f32_vec_type(4);
+    }
+    return f32_vec_type(3);
+  }
+
   ast::Module* mod() { return &mod_; }
   TypeDeterminer* td() { return td_.get(); }
   Inspector* inspector() { return inspector_.get(); }
@@ -594,6 +615,13 @@ class InspectorHelper {
       array_type_memo_[count]->set_decorations(std::move(decos));
     }
     return array_type_memo_[count].get();
+  }
+  ast::type::VectorType* f32_vec_type(uint32_t count) {
+    if (vector_type_memo_.find(count) == vector_type_memo_.end()) {
+      vector_type_memo_[count] =
+          std::make_unique<ast::type::VectorType>(u32_type(), count);
+    }
+    return vector_type_memo_[count].get();
   }
   ast::type::VoidType* void_type() { return &void_type_; }
   ast::type::SamplerType* sampler_type() { return &sampler_type_; }
@@ -615,19 +643,35 @@ class InspectorHelper {
   ast::type::SamplerType sampler_type_;
   ast::type::SamplerType comparison_sampler_type_;
   std::map<uint32_t, std::unique_ptr<ast::type::ArrayType>> array_type_memo_;
+  std::map<uint32_t, std::unique_ptr<ast::type::VectorType>> vector_type_memo_;
 };
 
-class InspectorTest : public InspectorHelper, public testing::Test {};
-
-class InspectorGetEntryPointTest : public InspectorTest {};
-class InspectorGetConstantIDsTest : public InspectorTest {};
-class InspectorGetUniformBufferResourceBindingsTest : public InspectorTest {};
-class InspectorGetStorageBufferResourceBindingsTest : public InspectorTest {};
+class InspectorGetEntryPointTest : public InspectorHelper,
+                                   public testing::Test {};
+class InspectorGetConstantIDsTest : public InspectorHelper,
+                                    public testing::Test {};
+class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
+                                                      public testing::Test {};
+class InspectorGetStorageBufferResourceBindingsTest : public InspectorHelper,
+                                                      public testing::Test {};
 class InspectorGetReadOnlyStorageBufferResourceBindingsTest
-    : public InspectorTest {};
-class InspectorGetSamplerResourceBindingsTest : public InspectorTest {};
-class InspectorGetComparisonSamplerResourceBindingsTest : public InspectorTest {
+    : public InspectorHelper,
+      public testing::Test {};
+class InspectorGetSamplerResourceBindingsTest : public InspectorHelper,
+                                                public testing::Test {};
+class InspectorGetComparisonSamplerResourceBindingsTest
+    : public InspectorHelper,
+      public testing::Test {};
+
+class InspectorGetSampledTextureResourceBindingsTest : public InspectorHelper,
+                                                       public testing::Test {};
+struct GetSampledTextureTestParams {
+  ast::type::TextureDimension type_dim;
+  inspector::ResourceBinding::TextureDimension inspector_dim;
 };
+class InspectorGetSampledTextureResourceBindingsTestWithParam
+    : public InspectorHelper,
+      public testing::TestWithParam<GetSampledTextureTestParams> {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   auto result = inspector()->GetEntryPoints();
@@ -1815,6 +1859,57 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 
   ASSERT_EQ(0u, result.size());
 }
+
+TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, Simple) {
+  auto* coord_type = GetCoordsType(GetParam().type_dim);
+  auto sampled_texture_type =
+      MakeSampledTextureType(GetParam().type_dim, coord_type);
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddF32("foo_coords");
+
+  auto func = MakeSamplerReferenceBodyFunction("ep", "foo_texture",
+                                               "foo_sampler", "foo_coords");
+  func->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(func));
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetSampledTextureResourceBindingsTest,
+    InspectorGetSampledTextureResourceBindingsTestWithParam,
+    testing::Values(
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k1d,
+            inspector::ResourceBinding::TextureDimension::k1d},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k2d,
+            inspector::ResourceBinding::TextureDimension::k2d},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k2dArray,
+            inspector::ResourceBinding::TextureDimension::k2dArray},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k3d,
+            inspector::ResourceBinding::TextureDimension::k3d},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::kCube,
+            inspector::ResourceBinding::TextureDimension::kCube},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::kCubeArray,
+            inspector::ResourceBinding::TextureDimension::kCubeArray}));
 
 }  // namespace
 }  // namespace inspector
