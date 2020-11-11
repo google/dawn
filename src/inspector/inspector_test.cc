@@ -480,11 +480,6 @@ class InspectorHelper {
         name, ast::StorageClass::kUniformConstant, f32_type()));
   }
 
-  void AddF32Vec(const std::string& name, uint32_t count) {
-    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
-        name, ast::StorageClass::kUniformConstant, f32_vec_type(count)));
-  }
-
   /// Adds a depth texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
