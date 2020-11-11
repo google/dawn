@@ -320,7 +320,7 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_variable_decl(
       return Failure::kErrored;
     var->set_constructor(std::move(expr.value));
   }
-  return std::move(var);
+  return var;
 }
 
 // global_constant_decl
@@ -1550,7 +1550,7 @@ Maybe<std::unique_ptr<ast::SwitchStatement>> ParserImpl::switch_stmt() {
 
                                      list.push_back(std::move(stmt.value));
                                    }
-                                   return std::move(list);
+                                   return list;
                                  });
 
   if (body.errored)
