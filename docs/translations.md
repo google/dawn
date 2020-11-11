@@ -114,32 +114,32 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 ## Texture Types
 | WGSL | SPIR-V | MSL | HLSL |
 |------|--------|-----|------|
-| texture_1d&lt;type&gt; | OpTypeImage | texture1d&lt;type, access::sample&gt; | Texture1D |
-| texture_1d_array&lt;type&gt; | OpTypeImage | texture1d_array&lt;type, access::sample&gt; | Texture1DArray |
-| texture_2d&lt;type&gt; | OpTypeImage | texture2d&lt;type, access::sample&gt; | Texture2D |
-| texture_2d_array&lt;type&gt; | OpTypeImage | texture2d_array&lt;type, access::sample&gt; | Texture2DArray |
-| texture_3d&lt;type&gt; | OpTypeImage | texture3d&lt;type, access::sample&gt; | Texture3D |
-| texture_cube&lt;type&gt; | OpTypeImage | texturecube&lt;type, access::sample&gt; | TextureCube |
-| texture_cube_array&lt;type&gt; | OpTypeImage | texturecube_array&lt;type, access::sample&gt; | TextureCubeArray |
+| texture_1d&lt;type&gt; | OpTypeImage 1D Sampled=1 | texture1d&lt;type, access::sample&gt; | Texture1D |
+| texture_1d_array&lt;type&gt; | OpTypeImage 1D Arrayed=1 Sampled=1 | texture1d_array&lt;type, access::sample&gt; | Texture1DArray |
+| texture_2d&lt;type&gt; | OpTypeImage 2D Sampled=1 | texture2d&lt;type, access::sample&gt; | Texture2D |
+| texture_2d_array&lt;type&gt; | OpTypeImage 2D Arrayed=1 Sampled=1 | texture2d_array&lt;type, access::sample&gt; | Texture2DArray |
+| texture_3d&lt;type&gt; | OpTypeImage 3D Sampled=1 | texture3d&lt;type, access::sample&gt; | Texture3D |
+| texture_cube&lt;type&gt; | OpTypeImage Cube Sampled=1 | texturecube&lt;type, access::sample&gt; | TextureCube |
+| texture_cube_array&lt;type&gt; | OpTypeImage Cube Arrayed=1 Sampled=1 | texturecube_array&lt;type, access::sample&gt; | TextureCubeArray |
 | | | |
-| texture_multisampled_2d&lt;type&gt; | OpTypeImage | texture2d_ms&lt;type, access::sample&gt; | Texture2D |
+| texture_multisampled_2d&lt;type&gt; | OpTypeImage 2D MS=1 Sampled=1 | texture2d_ms&lt;type, access::sample&gt; | Texture2D |
 | | | |
-| texture_depth_2d | OpTypeImage | depth2d&lt;float, access::sample&gt;| Texture2D |
-| texture_depth_2d_array | OpTypeImage | depth2d_array&lt;float, access::sample&gt; | Texture2DArray |
-| texture_depth_cube | OpTypeImage | depthcube&lt;float, access::sample&gt; | TextureCube |
-| texture_depth_cube_array | OpTypeImage | depthcube_array&lt;float, access::sample&gt; | TextureCubeArray |
+| texture_depth_2d | OpTypeImage 2D Depth=1 Sampled=1 | depth2d&lt;float, access::sample&gt;| Texture2D |
+| texture_depth_2d_array | OpTypeImage 2D Depth=1 Arrayed=1 Sampled=1 | depth2d_array&lt;float, access::sample&gt; | Texture2DArray |
+| texture_depth_cube | OpTypeImage Cube Depth=1 Sampled=1 | depthcube&lt;float, access::sample&gt; | TextureCube |
+| texture_depth_cube_array | OpTypeImage Cube Depth=1 Arrayed=1 Sampled=1 | depthcube_array&lt;float, access::sample&gt; | TextureCubeArray |
 | | | |
-| texture_storage_ro_1d&lt;image_storage_type&gt; | OpTypeImage | texture1d&lt;type, access::read&gt; | RWTexture1D |
-| texture_storage_ro_1d_array&lt;image_storage_type&gt; | OpTypeImage | texture1d_array&lt;type, access::read&gt; | RWTexture1DArray |
-| texture_storage_ro_2d&lt;image_storage_type&gt; | OpTypeImage | texture2d&lt;type, access::read&gt; | RWTexture2D |
-| texture_storage_ro_2d_array&lt;image_storage_type&gt; | OpTypeImage | texture2d_array&lt;type, access::read&gt; | RWTexture2DArray |
-| texture_storage_ro_3d&lt;image_storage_type&gt; | OpTypeImage | texture3d&lt;type, access::read&gt; | RWTexture3D |
+| texture_storage_ro_1d&lt;image_storage_type&gt; | OpTypeImage 1D Sampled=2| texture1d&lt;type, access::read&gt; | RWTexture1D |
+| texture_storage_ro_1d_array&lt;image_storage_type&gt; | OpTypeImage 1D Arrayed=1 Sampled=2 | texture1d_array&lt;type, access::read&gt; | RWTexture1DArray |
+| texture_storage_ro_2d&lt;image_storage_type&gt; | OpTypeImage 2D Sampled=2 | texture2d&lt;type, access::read&gt; | RWTexture2D |
+| texture_storage_ro_2d_array&lt;image_storage_type&gt; | OpTypeImage 2D Arrayed=1 Sampled=2 | texture2d_array&lt;type, access::read&gt; | RWTexture2DArray |
+| texture_storage_ro_3d&lt;image_storage_type&gt; | OpTypeImage 3D Sampled=2 | texture3d&lt;type, access::read&gt; | RWTexture3D |
 | | | |
-| texture_storage_wo_1d&lt;image_storage_type&gt; | OpTypeImage | texture1d&lt;type, access::write&gt; | RWTexture1D |
-| texture_storage_wo_1d_array&lt;image_storage_type&gt; | OpTypeImage | texture1d_array&lt;type, access::write&gt; | RWTexture1DArray |
-| texture_storage_wo_2d&lt;image_storage_type&gt; | OpTypeImage | texture2d&lt;type, access::write&gt; | RWTexture2D |
-| texture_storage_wo_2d_array&lt;image_storage_type&gt; | OpTypeImage | texture2d_array&lt;type, access::write&gt; | RWTexture2DArray |
-| texture_storage_wo_3d&lt;image_storage_type&gt; | OpTypeImage | texture3d&lt;type, access::write&gt; | RWTexture3D|
+| texture_storage_wo_1d&lt;image_storage_type&gt; | OpTypeImage 1D Sampled=2 | texture1d&lt;type, access::write&gt; | RWTexture1D |
+| texture_storage_wo_1d_array&lt;image_storage_type&gt; | OpTypeImage 1D Arrayed=1 Sampled=2 | texture1d_array&lt;type, access::write&gt; | RWTexture1DArray |
+| texture_storage_wo_2d&lt;image_storage_type&gt; | OpTypeImage 2D Sampled=1 | texture2d&lt;type, access::write&gt; | RWTexture2D |
+| texture_storage_wo_2d_array&lt;image_storage_type&gt; | OpTypeImage 2D Arrayed=1 Sampled=2 | texture2d_array&lt;type, access::write&gt; | RWTexture2DArray |
+| texture_storage_wo_3d&lt;image_storage_type&gt; | OpTypeImage 3D Sampled=2 | texture3d&lt;type, access::write&gt; | RWTexture3D|
 
 # Short-circuting
 ## HLSL
