@@ -50,7 +50,36 @@ namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+class IntrinsicBuilderTest : public testing::Test {
+ protected:
+  std::unique_ptr<ast::IdentifierExpression> make_ident(
+      const std::string& str) {
+    return std::make_unique<ast::IdentifierExpression>(str);
+  }
+
+  std::unique_ptr<ast::Variable> make_var(const std::string& name,
+                                          ast::StorageClass storage,
+                                          ast::type::Type* type) {
+    auto var = std::make_unique<ast::Variable>(name, storage, type);
+    td.RegisterVariableForTesting(var.get());
+    return var;
+  }
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td{&ctx, &mod};
+  Builder b{&mod};
+
+  ast::type::VoidType void_type;
+  ast::type::BoolType bool_type;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+  ast::type::U32Type u32;
+};
+
+template <typename T>
+class IntrinsicBuilderTestWithParam : public IntrinsicBuilderTest,
+                                      public testing::WithParamInterface<T> {};
 
 struct IntrinsicData {
   std::string name;
@@ -61,30 +90,20 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   return out;
 }
 
-using IntrinsicBoolTest = testing::TestWithParam<IntrinsicData>;
+using IntrinsicBoolTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto param = GetParam();
 
-  ast::type::BoolType bool_type;
   ast::type::VectorType vec3(&bool_type, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -100,34 +119,23 @@ TEST_P(IntrinsicBoolTest, Call_Bool) {
 %6 = )" + param.op +
                 " %4 %7\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          IntrinsicBoolTest,
                          testing::Values(IntrinsicData{"any", "OpAny"},
                                          IntrinsicData{"all", "OpAll"}));
 
-using IntrinsicFloatTest = testing::TestWithParam<IntrinsicData>;
+using IntrinsicFloatTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &f32);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &f32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -147,26 +155,16 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
 TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -184,34 +182,23 @@ TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
 %6 = )" + param.op +
                 " %7 %9\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          IntrinsicFloatTest,
                          testing::Values(IntrinsicData{"isNan", "OpIsNan"},
                                          IntrinsicData{"isInf", "OpIsInf"}));
 
-using IntrinsicIntTest = testing::TestWithParam<IntrinsicData>;
+using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
-
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &i32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -230,26 +217,16 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
   ast::type::VectorType vec3(&i32, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -269,25 +246,14 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
 TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
-
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &u32);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &u32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -306,26 +272,16 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
   ast::type::VectorType vec3(&u32, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -342,32 +298,23 @@ TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
                 " %3 %7\n");
 }
 INSTANTIATE_TEST_SUITE_P(
-    BuilderTest,
+    IntrinsicBuilderTest,
     IntrinsicIntTest,
     testing::Values(IntrinsicData{"countOneBits", "OpBitCount"},
                     IntrinsicData{"reverseBits", "OpBitReverse"}));
 
-TEST_F(BuilderTest, Call_Dot) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_Dot) {
   ast::type::VectorType vec3(&f32, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("dot"),
-                           std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident("dot"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -385,29 +332,18 @@ TEST_F(BuilderTest, Call_Dot) {
 )");
 }
 
-using IntrinsicDeriveTest = testing::TestWithParam<IntrinsicData>;
+using IntrinsicDeriveTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &f32);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &f32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -426,26 +362,16 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &vec3);
+  auto var = make_var("v", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(var.get());
+  params.push_back(make_ident("v"));
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -469,7 +395,7 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
                 " %3 %7\n");
 }
 INSTANTIATE_TEST_SUITE_P(
-    BuilderTest,
+    IntrinsicBuilderTest,
     IntrinsicDeriveTest,
     testing::Values(IntrinsicData{"dpdx", "OpDPdx"},
                     IntrinsicData{"dpdxFine", "OpDPdxFine"},
@@ -481,33 +407,21 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"fwidthFine", "OpFwidthFine"},
                     IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
-TEST_F(BuilderTest, Call_OuterProduct) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat(&f32, 2, 3);
 
-  auto v2 =
-      std::make_unique<ast::Variable>("v2", ast::StorageClass::kPrivate, &vec2);
-  auto v3 =
-      std::make_unique<ast::Variable>("v3", ast::StorageClass::kPrivate, &vec3);
+  auto v2 = make_var("v2", ast::StorageClass::kPrivate, &vec2);
+  auto v3 = make_var("v3", ast::StorageClass::kPrivate, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("outerProduct"),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(v2.get());
-  td.RegisterVariableForTesting(v3.get());
+  params.push_back(make_ident("v2"));
+  params.push_back(make_ident("v3"));
+  ast::CallExpression expr(make_ident("outerProduct"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(v2.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(v3.get())) << b.error();
@@ -532,33 +446,21 @@ TEST_F(BuilderTest, Call_OuterProduct) {
 )");
 }
 
-TEST_F(BuilderTest, Call_Select) {
-  ast::type::F32Type f32;
-  ast::type::BoolType bool_type;
+TEST_F(IntrinsicBuilderTest, Call_Select) {
   ast::type::VectorType bool_vec3(&bool_type, 3);
   ast::type::VectorType vec3(&f32, 3);
 
-  auto v3 =
-      std::make_unique<ast::Variable>("v3", ast::StorageClass::kPrivate, &vec3);
-  auto bool_v3 = std::make_unique<ast::Variable>(
-      "bool_v3", ast::StorageClass::kPrivate, &bool_vec3);
+  auto v3 = make_var("v3", ast::StorageClass::kPrivate, &vec3);
+  auto bool_v3 = make_var("bool_v3", ast::StorageClass::kPrivate, &bool_vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("bool_v3"));
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("select"), std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  td.RegisterVariableForTesting(v3.get());
-  td.RegisterVariableForTesting(bool_v3.get());
+  params.push_back(make_ident("v3"));
+  params.push_back(make_ident("v3"));
+  params.push_back(make_ident("bool_v3"));
+  ast::CallExpression expr(make_ident("select"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(v3.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3.get())) << b.error();
@@ -584,17 +486,10 @@ TEST_F(BuilderTest, Call_Select) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_1d) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_1d) {
   ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
                                   ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
 
@@ -605,15 +500,13 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_1d) {
   ASSERT_TRUE(b.GenerateGlobalVariable(&tex)) << b.error();
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(make_ident("texture"));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureLoad"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureLoad"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -635,18 +528,11 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_1d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_2d) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::StorageTextureType s(ast::type::TextureDimension::k2d,
                                   ast::AccessControl::kReadOnly,
                                   ast::type::ImageFormat::kR16Float);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
 
@@ -663,15 +549,13 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(make_ident("texture"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureLoad"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureLoad"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -696,15 +580,8 @@ TEST_F(BuilderTest, Call_TextureLoad_Storage_RO_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureLoad_Sampled_1d) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
   ast::type::SampledTextureType s(ast::type::TextureDimension::k1d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -713,15 +590,13 @@ TEST_F(BuilderTest, Call_TextureLoad_Sampled_1d) {
   ASSERT_TRUE(b.GenerateGlobalVariable(&tex)) << b.error();
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(make_ident("texture"));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureLoad"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureLoad"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -743,16 +618,9 @@ TEST_F(BuilderTest, Call_TextureLoad_Sampled_1d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureLoad_Sampled_2d) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::SampledTextureType s(ast::type::TextureDimension::k2d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -767,15 +635,13 @@ TEST_F(BuilderTest, Call_TextureLoad_Sampled_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(make_ident("texture"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureLoad"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureLoad"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -800,16 +666,9 @@ TEST_F(BuilderTest, Call_TextureLoad_Sampled_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureLoad_Multisampled_2d) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Multisampled_2d) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -824,15 +683,13 @@ TEST_F(BuilderTest, Call_TextureLoad_Multisampled_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
+  call_params.push_back(make_ident("texture"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureLoad"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureLoad"), std::move(call_params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -857,16 +714,9 @@ TEST_F(BuilderTest, Call_TextureLoad_Multisampled_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSample_1d) {
-  ast::type::F32Type f32;
-
+TEST_F(IntrinsicBuilderTest, Call_TextureSample_1d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, &s);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -879,14 +729,12 @@ TEST_F(BuilderTest, Call_TextureSample_1d) {
   ASSERT_TRUE(b.GenerateGlobalVariable(&sampler)) << b.error();
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSample"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSample"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 7u) << b.error();
@@ -911,17 +759,11 @@ TEST_F(BuilderTest, Call_TextureSample_1d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSample_2d) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_TextureSample_2d) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k2d, &s);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -940,14 +782,12 @@ TEST_F(BuilderTest, Call_TextureSample_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSample"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSample"), std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 7u) << b.error();
@@ -975,16 +815,9 @@ TEST_F(BuilderTest, Call_TextureSample_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSampleLevel_1d) {
-  ast::type::F32Type f32;
-
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_1d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -997,16 +830,15 @@ TEST_F(BuilderTest, Call_TextureSampleLevel_1d) {
   ASSERT_TRUE(b.GenerateGlobalVariable(&sampler)) << b.error();
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSampleLevel"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSampleLevel"),
+                           std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -1033,17 +865,11 @@ TEST_F(BuilderTest, Call_TextureSampleLevel_1d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSampleLevel_2d) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_2d) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k2d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -1062,16 +888,15 @@ TEST_F(BuilderTest, Call_TextureSampleLevel_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSampleLevel"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSampleLevel"),
+                           std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -1100,16 +925,9 @@ TEST_F(BuilderTest, Call_TextureSampleLevel_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSampleBias_1d) {
-  ast::type::F32Type f32;
-
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_1d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -1122,16 +940,15 @@ TEST_F(BuilderTest, Call_TextureSampleBias_1d) {
   ASSERT_TRUE(b.GenerateGlobalVariable(&sampler)) << b.error();
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSampleBias"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSampleBias"),
+                           std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -1158,17 +975,11 @@ TEST_F(BuilderTest, Call_TextureSampleBias_1d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSampleBias_2d) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_2d) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
   ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, &f32);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -1187,16 +998,15 @@ TEST_F(BuilderTest, Call_TextureSampleBias_2d) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSampleBias"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSampleBias"),
+                           std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -1225,17 +1035,11 @@ TEST_F(BuilderTest, Call_TextureSampleBias_2d) {
 )");
 }
 
-TEST_F(BuilderTest, Call_TextureSampleCompare) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::type::SamplerType s(ast::type::SamplerKind::kComparisonSampler);
   ast::type::DepthTextureType t(ast::type::TextureDimension::k2d);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -1254,16 +1058,15 @@ TEST_F(BuilderTest, Call_TextureSampleCompare) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
-      std::move(call_params));
+  ast::CallExpression expr(make_ident("textureSampleCompare"),
+                           std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -1292,17 +1095,11 @@ TEST_F(BuilderTest, Call_TextureSampleCompare) {
 }
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
-TEST_F(BuilderTest, Call_TextureSampleCompare_Twice) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::type::SamplerType s(ast::type::SamplerKind::kComparisonSampler);
   ast::type::DepthTextureType t(ast::type::TextureDimension::k2d);
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-  Builder b(&mod);
 
   b.push_function(Function{});
 
@@ -1321,32 +1118,30 @@ TEST_F(BuilderTest, Call_TextureSampleCompare_Twice) {
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr1(
-      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
-      std::move(call_params));
+  ast::CallExpression expr1(make_ident("textureSampleCompare"),
+                            std::move(call_params));
 
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("texture"));
-  call_params.push_back(std::make_unique<ast::IdentifierExpression>("sampler"));
+  call_params.push_back(make_ident("texture"));
+  call_params.push_back(make_ident("sampler"));
   call_params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals)));
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::CallExpression expr2(
-      std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
-      std::move(call_params));
+  ast::CallExpression expr2(make_ident("textureSampleCompare"),
+                            std::move(call_params));
 
   EXPECT_TRUE(td.DetermineResultType(&expr1)) << td.error();
   EXPECT_TRUE(td.DetermineResultType(&expr2)) << td.error();
@@ -1381,29 +1176,20 @@ TEST_F(BuilderTest, Call_TextureSampleCompare_Twice) {
 )");
 }
 
-TEST_F(BuilderTest, Call_GLSLMethod_WithLoad) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
-
-  auto var = std::make_unique<ast::Variable>("ident",
-                                             ast::StorageClass::kPrivate, &f32);
+TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
+  auto var = make_var("ident", ast::StorageClass::kPrivate, &f32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+  params.push_back(make_ident("ident"));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("round"),
-                           std::move(params));
+  ast::CallExpression expr(make_ident("round"), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1426,30 +1212,20 @@ OpFunctionEnd
 }
 
 using Intrinsic_Builtin_SingleParam_Float_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1470,9 +1246,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1484,19 +1258,12 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1515,7 +1282,7 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_SingleParam_Float_Test,
                          testing::Values(IntrinsicData{"abs", "FAbs"},
                                          IntrinsicData{"acos", "Acos"},
@@ -1541,26 +1308,17 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
                                          IntrinsicData{"tanh", "Tanh"},
                                          IntrinsicData{"trunc", "Trunc"}));
 
-TEST_F(BuilderTest, Call_Length_Scalar) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
-
+TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("length"), std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("length"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1577,10 +1335,8 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Call_Length_Vector) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1592,18 +1348,12 @@ TEST_F(BuilderTest, Call_Length_Vector) {
   params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("length"), std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("length"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1622,10 +1372,8 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Call_Normalize) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_Normalize) {
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1637,19 +1385,12 @@ TEST_F(BuilderTest, Call_Normalize) {
   params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("normalize"),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("normalize"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1669,12 +1410,9 @@ OpFunctionEnd
 }
 
 using Intrinsic_Builtin_DualParam_Float_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1682,19 +1420,12 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1715,9 +1446,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1737,19 +1466,12 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1768,7 +1490,7 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_DualParam_Float_Test,
                          testing::Values(IntrinsicData{"atan2", "Atan2"},
                                          IntrinsicData{"max", "NMax"},
@@ -1777,29 +1499,19 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
                                          IntrinsicData{"reflect", "Reflect"},
                                          IntrinsicData{"step", "Step"}));
 
-TEST_F(BuilderTest, Call_Distance_Scalar) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
-
+TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("distance"),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("distance"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1816,10 +1528,8 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Call_Distance_Vector) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1839,19 +1549,12 @@ TEST_F(BuilderTest, Call_Distance_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("distance"),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("distance"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1870,10 +1573,8 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Call_Cross) {
-  ast::type::F32Type f32;
+TEST_F(IntrinsicBuilderTest, Call_Cross) {
   ast::type::VectorType vec(&f32, 3);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1897,18 +1598,12 @@ TEST_F(BuilderTest, Call_Cross) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_2)));
 
-  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("cross"),
-                           std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident("cross"), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1928,12 +1623,9 @@ OpFunctionEnd
 }
 
 using Intrinsic_Builtin_ThreeParam_Float_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1943,19 +1635,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -1976,9 +1661,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2006,19 +1689,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_3)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2038,7 +1714,7 @@ OpFunctionEnd
 )");
 }
 INSTANTIATE_TEST_SUITE_P(
-    BuilderTest,
+    IntrinsicBuilderTest,
     Intrinsic_Builtin_ThreeParam_Float_Test,
     testing::Values(IntrinsicData{"clamp", "NClamp"},
                     IntrinsicData{"faceForward", "FaceForward"},
@@ -2048,30 +1724,20 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"smoothStep", "SmoothStep"}));
 
 using Intrinsic_Builtin_SingleParam_Sint_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::I32Type i32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2092,9 +1758,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
   ast::type::VectorType vec(&i32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2106,19 +1770,12 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2137,35 +1794,25 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_SingleParam_Sint_Test,
                          testing::Values(IntrinsicData{"abs", "SAbs"}));
 
 using Intrinsic_Builtin_SingleParam_Uint_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::U32Type u32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::UintLiteral>(&u32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2186,9 +1833,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
   ast::type::VectorType vec(&u32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2200,19 +1845,12 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   params.push_back(
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2231,17 +1869,14 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_SingleParam_Uint_Test,
                          testing::Values(IntrinsicData{"abs", "SAbs"}));
 
 using Intrinsic_Builtin_DualParam_SInt_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::I32Type i32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2249,19 +1884,12 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2282,9 +1910,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
   ast::type::VectorType vec(&i32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2304,19 +1930,12 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2335,18 +1954,15 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_DualParam_SInt_Test,
                          testing::Values(IntrinsicData{"max", "SMax"},
                                          IntrinsicData{"min", "SMin"}));
 
 using Intrinsic_Builtin_DualParam_UInt_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::U32Type u32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2354,19 +1970,12 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::UintLiteral>(&u32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2387,9 +1996,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
   ast::type::VectorType vec(&u32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2409,19 +2016,12 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2440,18 +2040,15 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_DualParam_UInt_Test,
                          testing::Values(IntrinsicData{"max", "UMax"},
                                          IntrinsicData{"min", "UMin"}));
 
 using Intrinsic_Builtin_ThreeParam_Sint_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::I32Type i32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2461,19 +2058,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2494,9 +2084,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
   ast::type::VectorType vec(&i32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2524,19 +2112,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_3)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2555,17 +2136,14 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_ThreeParam_Sint_Test,
                          testing::Values(IntrinsicData{"clamp", "SClamp"}));
 
 using Intrinsic_Builtin_ThreeParam_Uint_Test =
-    testing::TestWithParam<IntrinsicData>;
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
-
-  ast::type::U32Type u32;
-  ast::type::VoidType void_type;
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2575,19 +2153,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::UintLiteral>(&u32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2608,9 +2179,7 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
   ast::type::VectorType vec(&u32, 2);
-  ast::type::VoidType void_type;
 
   ast::ExpressionList vals_1;
   vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -2638,19 +2207,12 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
   params.push_back(std::make_unique<ast::TypeConstructorExpression>(
       &vec, std::move(vals_3)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
+  ast::CallExpression expr(make_ident(param.name), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
@@ -2669,35 +2231,26 @@ OpName %3 "tint_615f66756e63"
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_ThreeParam_Uint_Test,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
 
-TEST_F(BuilderTest, Call_Determinant) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+TEST_F(IntrinsicBuilderTest, Call_Determinant) {
   ast::type::MatrixType mat(&f32, 3, 3);
 
-  auto var =
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kPrivate, &mat);
+  auto var = make_var("var", ast::StorageClass::kPrivate, &mat);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+  params.push_back(make_ident("var"));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("determinant"),
-      std::move(params));
+  ast::CallExpression expr(make_ident("determinant"), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
@@ -2722,9 +2275,7 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Call_ArrayLength) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   ast::type::ArrayType ary(&f32);
 
   ast::StructMemberDecorationList decos;
@@ -2735,28 +2286,20 @@ TEST_F(BuilderTest, Call_ArrayLength) {
   auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
-                                             &s_type);
+  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("b"),
-      std::make_unique<ast::IdentifierExpression>("a")));
+      make_ident("b"), make_ident("a")));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("arrayLength"),
-      std::move(params));
+  ast::CallExpression expr(make_ident("arrayLength"), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
@@ -2778,9 +2321,7 @@ TEST_F(BuilderTest, Call_ArrayLength) {
 )");
 }
 
-TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::type::ArrayType ary(&f32);
 
   ast::StructMemberDecorationList decos;
@@ -2793,28 +2334,20 @@ TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
-                                             &s_type);
+  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("b"),
-      std::make_unique<ast::IdentifierExpression>("a")));
+      make_ident("b"), make_ident("a")));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("arrayLength"),
-      std::move(params));
+  ast::CallExpression expr(make_ident("arrayLength"), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
@@ -2837,9 +2370,7 @@ TEST_F(BuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 }
 
 // TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
-TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   ast::type::ArrayType ary(&f32);
   ast::type::PointerType ptr(&ary, ast::StorageClass::kStorageBuffer);
 
@@ -2853,25 +2384,17 @@ TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   auto s = std::make_unique<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = std::make_unique<ast::Variable>("b", ast::StorageClass::kPrivate,
-                                             &s_type);
+  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto ptr_var = std::make_unique<ast::Variable>(
-      "ptr_var", ast::StorageClass::kPrivate, &ptr);
+  auto ptr_var = make_var("ptr_var", ast::StorageClass::kPrivate, &ptr);
   ptr_var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("b"),
-      std::make_unique<ast::IdentifierExpression>("a")));
+      make_ident("b"), make_ident("a")));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("ptr_var"));
+  params.push_back(make_ident("ptr_var"));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("arrayLength"),
-      std::move(params));
+  ast::CallExpression expr(make_ident("arrayLength"), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   td.RegisterVariableForTesting(ptr_var.get());
 
@@ -2879,7 +2402,6 @@ TEST_F(BuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
