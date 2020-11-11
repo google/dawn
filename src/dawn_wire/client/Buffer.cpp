@@ -110,6 +110,15 @@ namespace dawn_wire { namespace client {
         mRequests.clear();
     }
 
+    void Buffer::CancelCallbacksForDisconnect() {
+        for (auto& it : mRequests) {
+            if (it.second.callback) {
+                it.second.callback(WGPUBufferMapAsyncStatus_DeviceLost, it.second.userdata);
+            }
+        }
+        mRequests.clear();
+    }
+
     void Buffer::MapAsync(WGPUMapModeFlags mode,
                           size_t offset,
                           size_t size,

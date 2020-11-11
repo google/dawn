@@ -86,6 +86,7 @@ namespace dawn_wire { namespace client {
         mSerializer = ChunkedCommandSerializer(NoopCommandSerializer::GetInstance());
         if (mDevice != nullptr) {
             mDevice->HandleDeviceLost("GPU connection lost");
+            mDevice->CancelCallbacksForDisconnect();
         }
     }
 

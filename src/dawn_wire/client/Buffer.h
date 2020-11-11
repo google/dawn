@@ -24,7 +24,7 @@
 
 namespace dawn_wire { namespace client {
 
-    class Buffer : public ObjectBase {
+    class Buffer final : public ObjectBase {
       public:
         using ObjectBase::ObjectBase;
 
@@ -49,6 +49,8 @@ namespace dawn_wire { namespace client {
         void Destroy();
 
       private:
+        void CancelCallbacksForDisconnect() override;
+
         bool IsMappedForReading() const;
         bool IsMappedForWriting() const;
         bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;

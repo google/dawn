@@ -24,7 +24,7 @@
 
 namespace dawn_wire { namespace client {
 
-    class Queue : public ObjectBase {
+    class Queue final : public ObjectBase {
       public:
         using ObjectBase::ObjectBase;
 

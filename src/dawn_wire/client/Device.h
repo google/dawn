@@ -29,7 +29,7 @@ namespace dawn_wire { namespace client {
     class Client;
     class Queue;
 
-    class Device : public ObjectBase {
+    class Device final : public ObjectBase {
       public:
         Device(Client* client, uint32_t refcount, uint32_t id);
         ~Device();
@@ -67,6 +67,8 @@ namespace dawn_wire { namespace client {
         void TrackObject(T* object) {
             mObjects[ObjectTypeToTypeEnum<T>].Append(object);
         }
+
+        void CancelCallbacksForDisconnect() override;
 
       private:
         void DestroyAllObjects();

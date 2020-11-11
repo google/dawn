@@ -91,6 +91,36 @@ namespace dawn_wire { namespace client {
         }
     }
 
+    void Device::CancelCallbacksForDisconnect() {
+        for (auto& it : mCreateReadyPipelineRequests) {
+            ASSERT((it.second.createReadyComputePipelineCallback != nullptr) ^
+                   (it.second.createReadyRenderPipelineCallback != nullptr));
+            if (it.second.createReadyRenderPipelineCallback) {
+                it.second.createReadyRenderPipelineCallback(
+                    WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, "Device lost",
+                    it.second.userdata);
+            } else {
+                it.second.createReadyComputePipelineCallback(
+                    WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, "Device lost",
+                    it.second.userdata);
+            }
+        }
+        mCreateReadyPipelineRequests.clear();
+
+        for (auto& it : mErrorScopes) {
+            it.second.callback(WGPUErrorType_DeviceLost, "Device lost", it.second.userdata);
+        }
+        mErrorScopes.clear();
+
+        for (auto& objectList : mObjects) {
+            LinkNode<ObjectBase>* object = objectList.head();
+            while (object != objectList.end()) {
+                object->value()->CancelCallbacksForDisconnect();
+                object = object->next();
+            }
+        }
+    }
+
     void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {
         mErrorCallback = errorCallback;
         mErrorUserdata = errorUserdata;

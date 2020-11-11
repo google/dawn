@@ -23,7 +23,7 @@
 namespace dawn_wire { namespace client {
 
     class Queue;
-    class Fence : public ObjectBase {
+    class Fence final : public ObjectBase {
       public:
         using ObjectBase::ObjectBase;
         ~Fence();
@@ -38,6 +38,8 @@ namespace dawn_wire { namespace client {
         Queue* GetQueue() const;
 
       private:
+        void CancelCallbacksForDisconnect() override;
+
         struct OnCompletionData {
             WGPUFenceOnCompletionCallback callback = nullptr;
             void* userdata = nullptr;

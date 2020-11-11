@@ -38,6 +38,9 @@ namespace dawn_wire { namespace client {
             RemoveFromList();
         }
 
+        virtual void CancelCallbacksForDisconnect() {
+        }
+
         Device* const device;
         uint32_t refcount;
         const uint32_t id;

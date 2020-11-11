@@ -30,6 +30,15 @@ namespace dawn_wire { namespace client {
         mOnCompletionRequests.clear();
     }
 
+    void Fence::CancelCallbacksForDisconnect() {
+        for (auto& it : mOnCompletionRequests) {
+            if (it.second.callback) {
+                it.second.callback(WGPUFenceCompletionStatus_DeviceLost, it.second.userdata);
+            }
+        }
+        mOnCompletionRequests.clear();
+    }
+
     void Fence::Initialize(Queue* queue, const WGPUFenceDescriptor* descriptor) {
         mQueue = queue;
 
