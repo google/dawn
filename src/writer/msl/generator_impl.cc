@@ -47,10 +47,15 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -1733,10 +1738,82 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       return false;
     }
     out_ << "*";
+  } else if (type->IsSampler()) {
+    out_ << "sampler";
   } else if (type->IsStruct()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
     out_ << type->AsStruct()->name();
+  } else if (type->IsTexture()) {
+    auto* tex = type->AsTexture();
+
+    if (tex->IsDepth()) {
+      out_ << "depth";
+    } else {
+      out_ << "texture";
+    }
+
+    switch (tex->dim()) {
+      case ast::type::TextureDimension::k1d:
+        out_ << "1d";
+        break;
+      case ast::type::TextureDimension::k1dArray:
+        out_ << "1d_array";
+        break;
+      case ast::type::TextureDimension::k2d:
+        out_ << "2d";
+        break;
+      case ast::type::TextureDimension::k2dArray:
+        out_ << "2d_array";
+        break;
+      case ast::type::TextureDimension::k3d:
+        out_ << "3d";
+        break;
+      case ast::type::TextureDimension::kCube:
+        out_ << "cube";
+        break;
+      case ast::type::TextureDimension::kCubeArray:
+        out_ << "cube_array";
+        break;
+      default:
+        error_ = "Invalid texture dimensions";
+        return false;
+    }
+    if (tex->IsMultisampled()) {
+      out_ << "_ms";
+    }
+    out_ << "<";
+    if (tex->IsDepth()) {
+      out_ << "float, access::sample";
+    } else if (tex->IsStorage()) {
+      auto* storage = tex->AsStorage();
+      if (!EmitType(storage->type(), "")) {
+        return false;
+      }
+      out_ << ", access::";
+      if (storage->access() == ast::AccessControl::kReadOnly) {
+        out_ << "read";
+      } else if (storage->access() == ast::AccessControl::kWriteOnly) {
+        out_ << "write";
+      } else {
+        error_ = "Invalid access control for storage texture";
+        return false;
+      }
+    } else if (tex->IsMultisampled()) {
+      if (!EmitType(tex->AsMultisampled()->type(), "")) {
+        return false;
+      }
+      out_ << ", access::sample";
+    } else if (tex->IsSampled()) {
+      if (!EmitType(tex->AsSampled()->type(), "")) {
+        return false;
+      }
+      out_ << ", access::sample";
+    } else {
+      error_ = "invalid texture type";
+      return false;
+    }
+    out_ << ">";
 
   } else if (type->IsU32()) {
     out_ << "uint";
