@@ -1262,7 +1262,7 @@ TEST_F(ParserImplErrorTest, UnaryInvalidExpr) {
 
 TEST_F(ParserImplErrorTest, UnexpectedToken) {
   EXPECT("unexpected",
-         "test.wgsl:1:1 error: invalid token\n"
+         "test.wgsl:1:1 error: unexpected token\n"
          "unexpected\n"
          "^^^^^^^^^^\n");
 }

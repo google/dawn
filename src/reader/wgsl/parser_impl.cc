@@ -286,7 +286,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (decos.value.size() > 0) {
     add_error(peek(), "expected declaration after decorations");
   } else {
-    add_error(peek(), "invalid token");
+    add_error(peek(), "unexpected token");
   }
   return Failure::kErrored;
 }
