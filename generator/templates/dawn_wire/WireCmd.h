@@ -17,6 +17,8 @@
 
 #include <dawn/webgpu.h>
 
+#include "dawn_wire/ObjectType_autogen.h"
+
 namespace dawn_wire {
 
     using ObjectId = uint32_t;
@@ -70,12 +72,6 @@ namespace dawn_wire {
                 virtual ObjectId GetId({{as_cType(type.name)}} object) const = 0;
                 virtual ObjectId GetOptionalId({{as_cType(type.name)}} object) const = 0;
             {% endfor %}
-    };
-
-    enum class ObjectType : uint32_t {
-        {% for type in by_category["object"] %}
-            {{type.name.CamelCase()}},
-        {% endfor %}
     };
 
     //* Enum used as a prefix to each command on the wire format.

@@ -17,7 +17,9 @@
 
 #include <dawn/webgpu.h>
 
+#include "common/LinkedList.h"
 #include "dawn_wire/WireCmd_autogen.h"
+#include "dawn_wire/client/ApiObjects_autogen.h"
 #include "dawn_wire/client/ObjectBase.h"
 
 #include <map>
@@ -61,7 +63,14 @@ namespace dawn_wire { namespace client {
 
         WGPUQueue GetDefaultQueue();
 
+        template <typename T>
+        void TrackObject(T* object) {
+            mObjects[ObjectTypeToTypeEnum<T>].Append(object);
+        }
+
       private:
+        void DestroyAllObjects();
+
         struct ErrorScopeData {
             WGPUErrorCallback callback = nullptr;
             void* userdata = nullptr;
@@ -87,6 +96,8 @@ namespace dawn_wire { namespace client {
         void* mDeviceLostUserdata = nullptr;
 
         Queue* mDefaultQueue = nullptr;
+
+        PerObjectType<LinkedList<ObjectBase>> mObjects;
     };
 
 }}  // namespace dawn_wire::client

@@ -26,7 +26,6 @@ namespace dawn_wire { namespace client {
     class Fence : public ObjectBase {
       public:
         using ObjectBase::ObjectBase;
-
         ~Fence();
         void Initialize(Queue* queue, const WGPUFenceDescriptor* descriptor);
 

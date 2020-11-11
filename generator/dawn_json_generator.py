@@ -763,6 +763,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                 }, additional_params
             ]
             renders.append(
+                FileRender('dawn_wire/ObjectType.h',
+                           'src/dawn_wire/ObjectType_autogen.h', wire_params))
+            renders.append(
                 FileRender('dawn_wire/WireCmd.h',
                            'src/dawn_wire/WireCmd_autogen.h', wire_params))
             renders.append(

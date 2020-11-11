@@ -24,11 +24,8 @@ namespace dawn_wire { namespace client {
 
     class ClientBase : public ChunkedCommandHandler, public ObjectIdProvider {
       public:
-        ClientBase() {
-        }
-
-        virtual ~ClientBase() {
-        }
+        ClientBase() = default;
+        virtual ~ClientBase() = default;
 
         {% for type in by_category["object"] %}
             const ObjectAllocator<{{type.name.CamelCase()}}>& {{type.name.CamelCase()}}Allocator() const {
@@ -38,6 +35,16 @@ namespace dawn_wire { namespace client {
                 return m{{type.name.CamelCase()}}Allocator;
             }
         {% endfor %}
+
+        void FreeObject(ObjectType objectType, ObjectBase* obj) {
+            switch (objectType) {
+                {% for type in by_category["object"] %}
+                    case ObjectType::{{type.name.CamelCase()}}:
+                        m{{type.name.CamelCase()}}Allocator.Free(static_cast<{{type.name.CamelCase()}}*>(obj));
+                        break;
+                {% endfor %}
+            }
+        }
 
       private:
         // Implementation of the ObjectIdProvider interface

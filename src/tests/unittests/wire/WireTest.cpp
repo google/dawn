@@ -113,6 +113,10 @@ void WireTest::DeleteServer() {
     mWireServer = nullptr;
 }
 
+void WireTest::DeleteClient() {
+    mWireClient = nullptr;
+}
+
 void WireTest::SetupIgnoredCallExpectations() {
     EXPECT_CALL(api, DeviceTick(_)).Times(AnyNumber());
 }

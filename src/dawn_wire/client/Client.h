@@ -18,6 +18,7 @@
 #include <dawn/webgpu.h>
 #include <dawn_wire/Wire.h>
 
+#include "common/LinkedList.h"
 #include "dawn_wire/ChunkedCommandSerializer.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireCmd_autogen.h"
@@ -60,7 +61,11 @@ namespace dawn_wire { namespace client {
 
         void Disconnect();
 
+        void TrackObject(Device* device);
+
       private:
+        void DestroyAllObjects();
+
 #include "dawn_wire/client/ClientPrototypes_autogen.inc"
 
         Device* mDevice = nullptr;
@@ -68,6 +73,8 @@ namespace dawn_wire { namespace client {
         WireDeserializeAllocator mAllocator;
         MemoryTransferService* mMemoryTransferService = nullptr;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
+
+        LinkedList<ObjectBase> mDevices;
     };
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();

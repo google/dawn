@@ -126,3 +126,27 @@ TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
     EXPECT_CALL(mockDeviceLostCallback, Call(_, _)).Times(Exactly(0));
     FlushServer();
 }
+
+// Test that client objects are all destroyed if the WireClient is destroyed.
+TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
+    WGPUSamplerDescriptor desc = {};
+    wgpuDeviceCreateCommandEncoder(device, nullptr);
+    wgpuDeviceCreateSampler(device, &desc);
+
+    WGPUCommandEncoder apiCommandEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+        .WillOnce(Return(apiCommandEncoder));
+
+    WGPUSampler apiSampler = api.GetNewSampler();
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, _)).WillOnce(Return(apiSampler));
+
+    FlushClient();
+
+    DeleteClient();
+
+    // Expect release on all objects created by the client.
+    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
+    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1);
+    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1);
+    FlushClient();
+}

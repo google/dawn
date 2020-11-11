@@ -23,10 +23,8 @@ namespace dawn_wire { namespace client {
 
     Device::Device(Client* client, uint32_t initialRefcount, uint32_t initialId)
         : ObjectBase(this, initialRefcount, initialId), mClient(client) {
-        this->device = this;
-
         // Get the default queue for this device.
-        ObjectAllocator<Queue>::ObjectAndSerial* allocation = mClient->QueueAllocator().New(this);
+        auto* allocation = mClient->QueueAllocator().New(this);
         mDefaultQueue = allocation->object.get();
 
         DeviceGetDefaultQueueCmd cmd;
@@ -58,14 +56,22 @@ namespace dawn_wire { namespace client {
             }
         }
 
-        // Destroy the default queue
-        DestroyObjectCmd cmd;
-        cmd.objectType = ObjectType::Queue;
-        cmd.objectId = mDefaultQueue->id;
+        DestroyAllObjects();
+    }
 
-        mClient->SerializeCommand(cmd);
+    void Device::DestroyAllObjects() {
+        for (auto& objectList : mObjects) {
+            ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.begin());
+            while (!objectList.empty()) {
+                ObjectBase* object = objectList.head()->value();
 
-        mClient->QueueAllocator().Free(mDefaultQueue);
+                DestroyObjectCmd cmd;
+                cmd.objectType = objectType;
+                cmd.objectId = object->id;
+                mClient->SerializeCommand(cmd);
+                mClient->FreeObject(objectType, object);
+            }
+        }
     }
 
     Client* Device::GetClient() {
@@ -273,4 +279,5 @@ namespace dawn_wire { namespace client {
 
         return true;
     }
+
 }}  // namespace dawn_wire::client

@@ -133,6 +133,7 @@ class WireTest : public testing::Test {
     dawn_wire::WireClient* GetWireClient();
 
     void DeleteServer();
+    void DeleteClient();
 
   private:
     void SetupIgnoredCallExpectations();
