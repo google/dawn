@@ -238,9 +238,9 @@ TEST_F(ParserImplErrorTest, ForLoopMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLBrace) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) } }",
+  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) }",
          "test.wgsl:1:54 error: expected '{' for for loop\n"
-         "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) } }\n"
+         "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) }\n"
          "                                                     ^\n");
 }
 
@@ -715,31 +715,31 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberMissingSemicolon) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetMissingLParen) {
-  EXPECT("struct S { [[offset 1)]] i : i32 };",
+  EXPECT("struct S { [[offset 1)]] i : i32; };",
          "test.wgsl:1:21 error: expected '(' for offset decoration\n"
-         "struct S { [[offset 1)]] i : i32 };\n"
+         "struct S { [[offset 1)]] i : i32; };\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetMissingRParen) {
-  EXPECT("struct S { [[offset(1]] i : i32 };",
+  EXPECT("struct S { [[offset(1]] i : i32; };",
          "test.wgsl:1:22 error: expected ')' for offset decoration\n"
-         "struct S { [[offset(1]] i : i32 };\n"
+         "struct S { [[offset(1]] i : i32; };\n"
          "                     ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetInvaldValue) {
-  EXPECT("struct S { [[offset(x)]] i : i32 };",
+  EXPECT("struct S { [[offset(x)]] i : i32; };",
          "test.wgsl:1:21 error: expected signed integer literal for offset "
          "decoration\n"
-         "struct S { [[offset(x)]] i : i32 };\n"
+         "struct S { [[offset(x)]] i : i32; };\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetNegativeValue) {
-  EXPECT("struct S { [[offset(-2)]] i : i32 };",
+  EXPECT("struct S { [[offset(-2)]] i : i32; };",
          "test.wgsl:1:21 error: offset decoration must be positive\n"
-         "struct S { [[offset(-2)]] i : i32 };\n"
+         "struct S { [[offset(-2)]] i : i32; };\n"
          "                    ^^\n");
 }
 
@@ -1127,9 +1127,9 @@ TEST_F(ParserImplErrorTest, LogicalOrInvalidExpr) {
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingLBrace) {
-  EXPECT("fn f() -> void { loop } }",
+  EXPECT("fn f() -> void { loop }",
          "test.wgsl:1:23 error: expected '{' for loop\n"
-         "fn f() -> void { loop } }\n"
+         "fn f() -> void { loop }\n"
          "                      ^\n");
 }
 
@@ -1219,9 +1219,9 @@ TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingColon) {
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
-  EXPECT("fn f() -> void { switch(1) { case 1: } } }",
+  EXPECT("fn f() -> void { switch(1) { case 1: } }",
          "test.wgsl:1:38 error: expected '{' for case statement\n"
-         "fn f() -> void { switch(1) { case 1: } } }\n"
+         "fn f() -> void { switch(1) { case 1: } }\n"
          "                                     ^\n");
 }
 

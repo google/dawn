@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {
-  auto* p = parser("fn () ->");
+  auto* p = parser("fn () -> void");
   auto f = p->function_header();
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(f.errored);
