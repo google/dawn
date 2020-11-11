@@ -36,6 +36,8 @@ typedef struct EntryPoint {
 
   /// The entry point name
   std::string name;
+  /// Remapped entry point name in the backend
+  std::string remapped_name;
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
   /// The workgroup x size

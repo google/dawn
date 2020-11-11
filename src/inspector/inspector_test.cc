@@ -643,6 +643,8 @@ class InspectorHelper {
 
 class InspectorGetEntryPointTest : public InspectorHelper,
                                    public testing::Test {};
+class InspectorGetRemappedNamedForEntryPointTest : public InspectorHelper,
+                                                   public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
                                     public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
@@ -694,7 +696,8 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
-  EXPECT_EQ("tint_666f6f", result[0].name);
+  EXPECT_EQ("foo", result[0].name);
+  EXPECT_EQ("tint_666f6f", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
 }
 
@@ -713,9 +716,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
-  EXPECT_EQ("tint_666f6f", result[0].name);
+  EXPECT_EQ("foo", result[0].name);
+  EXPECT_EQ("tint_666f6f", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
-  EXPECT_EQ("tint_626172", result[1].name);
+  EXPECT_EQ("bar", result[1].name);
+  EXPECT_EQ("tint_626172", result[1].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kCompute, result[1].stage);
 }
 
@@ -737,9 +742,11 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   EXPECT_FALSE(inspector()->has_error());
 
   ASSERT_EQ(2u, result.size());
-  EXPECT_EQ("tint_666f6f", result[0].name);
+  EXPECT_EQ("foo", result[0].name);
+  EXPECT_EQ("tint_666f6f", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
-  EXPECT_EQ("tint_626172", result[1].name);
+  EXPECT_EQ("bar", result[1].name);
+  EXPECT_EQ("tint_626172", result[1].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kFragment, result[1].stage);
 }
 
@@ -937,13 +944,15 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 
   ASSERT_EQ(2u, result.size());
 
-  ASSERT_EQ("tint_666f6f", result[0].name);
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("tint_666f6f", result[0].remapped_name);
   ASSERT_EQ(1u, result[0].input_variables.size());
   EXPECT_EQ("in_var", result[0].input_variables[0]);
   ASSERT_EQ(1u, result[0].output_variables.size());
   EXPECT_EQ("out2_var", result[0].output_variables[0]);
 
-  ASSERT_EQ("tint_626172", result[1].name);
+  ASSERT_EQ("bar", result[1].name);
+  ASSERT_EQ("tint_626172", result[1].remapped_name);
   ASSERT_EQ(1u, result[1].input_variables.size());
   EXPECT_EQ("in2_var", result[1].input_variables[0]);
   ASSERT_EQ(1u, result[1].output_variables.size());
@@ -974,7 +983,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   ASSERT_EQ(2u, result.size());
 
-  ASSERT_EQ("tint_666f6f", result[0].name);
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("tint_666f6f", result[0].remapped_name);
   EXPECT_EQ(2u, result[0].input_variables.size());
   EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
   EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
@@ -982,11 +992,63 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
   EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
 
-  ASSERT_EQ("tint_626172", result[1].name);
+  ASSERT_EQ("bar", result[1].name);
+  ASSERT_EQ("tint_626172", result[1].remapped_name);
   EXPECT_EQ(1u, result[1].input_variables.size());
   EXPECT_EQ("in2_var", result[1].input_variables[0]);
   EXPECT_EQ(1u, result[1].output_variables.size());
   EXPECT_EQ("out2_var", result[1].output_variables[0]);
+}
+
+TEST_F(InspectorGetRemappedNamedForEntryPointTest, NoFunctions) {
+  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+  ASSERT_TRUE(inspector()->has_error());
+
+  EXPECT_EQ("", result);
+}
+
+TEST_F(InspectorGetRemappedNamedForEntryPointTest, NoEntryPoints) {
+  mod()->AddFunction(MakeEmptyBodyFunction("foo"));
+
+  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+  ASSERT_TRUE(inspector()->has_error());
+
+  EXPECT_EQ("", result);
+}
+
+TEST_F(InspectorGetRemappedNamedForEntryPointTest, OneEntryPoint) {
+  auto foo = MakeEmptyBodyFunction("foo");
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(foo));
+
+  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  EXPECT_EQ("tint_666f6f", result);
+}
+
+TEST_F(InspectorGetRemappedNamedForEntryPointTest, MultipleEntryPoints) {
+  auto foo = MakeEmptyBodyFunction("foo");
+  foo->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(std::move(foo));
+
+  auto bar = MakeEmptyBodyFunction("bar");
+  bar->add_decoration(std::make_unique<ast::StageDecoration>(
+      ast::PipelineStage::kCompute, Source{}));
+  mod()->AddFunction(std::move(bar));
+
+  {
+    auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+    ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+    EXPECT_EQ("tint_666f6f", result);
+  }
+  {
+    auto result = inspector()->GetRemappedNamedForEntryPoint("bar");
+    ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+    EXPECT_EQ("tint_626172", result);
+  }
 }
 
 TEST_F(InspectorGetConstantIDsTest, Bool) {

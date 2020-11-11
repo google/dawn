@@ -25,6 +25,7 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
+#include "src/namer.h"
 
 namespace tint {
 namespace inspector {
@@ -77,6 +78,11 @@ class Inspector {
   /// @returns vector of entry point information
   std::vector<EntryPoint> GetEntryPoints();
 
+  /// @param entry_point name of the entry point to get the remapped version of
+  /// @returns the remapped name of the entry point, or the empty string if it
+  ///          isn't a known entry point.
+  std::string GetRemappedNamedForEntryPoint(const std::string& entry_point);
+
   /// @returns map of const_id to initial value
   std::map<uint32_t, Scalar> GetConstantIDs();
 
@@ -113,6 +119,7 @@ class Inspector {
  private:
   const ast::Module& module_;
   std::string error_;
+  tint::Namer namer_;
 
   /// @param name name of the entry point to find
   /// @returns a pointer to the entry point if it exists, otherwise returns

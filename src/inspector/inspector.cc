@@ -48,9 +48,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       continue;
     }
 
-    Namer namer;
     EntryPoint entry_point;
-    entry_point.name = namer.NameFor(func->name());
+    entry_point.name = func->name();
+    entry_point.remapped_name = namer_.NameFor(func->name());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
@@ -66,6 +66,15 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
   }
 
   return result;
+}
+
+std::string Inspector::GetRemappedNamedForEntryPoint(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+  return namer_.NameFor(entry_point);
 }
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
