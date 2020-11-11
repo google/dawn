@@ -18,6 +18,8 @@ namespace tint {
 namespace ast {
 
 std::ostream& operator<<(std::ostream& out, Intrinsic i) {
+  /// The emitted name matches the spelling in the WGSL spec.
+  /// including case.
   switch (i) {
     case Intrinsic::kAbs:
       out << "abs";

@@ -93,6 +93,8 @@ enum class Intrinsic {
   kTrunc
 };
 
+/// Emits the name of the intrinsic function. The spelling,
+/// including case, matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, Intrinsic i);
 
 namespace intrinsic {
