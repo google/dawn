@@ -316,65 +316,27 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
             "'vtx_func'");
 }
 
-TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Fail) {
-  // [[stage(vertex)]]
-  // fn main() -> void { return ;}
-  // [[stage(vertex)]]
-  // fn main() -> void { return; }
-  ast::type::VoidType void_type;
-  ast::VariableList params;
-  auto func = std::make_unique<ast::Function>(
-      Source{Source::Location{5, 6}}, "main", std::move(params), &void_type);
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
-  mod()->AddFunction(std::move(func));
-
-  func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
-                                         "main", std::move(params), &void_type);
-  body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
-  mod()->AddFunction(std::move(func));
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(),
-            "12:34: v-0020: The pair of <entry point name, pipeline stage> "
-            "must be unique");
-}
-
-TEST_F(ValidateFunctionTest, PipelineStageNamePair_MustBeUnique_Pass) {
-  // [[stage(vertex)]]
-  // fn main() -> void { return; }
+TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
+  // [[stage(vertex)]]
   // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>(
-      Source{Source::Location{5, 6}}, "main", std::move(params), &void_type);
+      Source{Source::Location{12, 34}}, "main", std::move(params), &void_type);
   auto body = std::make_unique<ast::BlockStatement>();
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
   func->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kVertex, Source{}));
-  mod()->AddFunction(std::move(func));
-
-  func = std::make_unique<ast::Function>(Source{Source::Location{12, 34}},
-                                         "main", std::move(params), &void_type);
-  body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>());
-  func->set_body(std::move(body));
   func->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(func));
-
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(
+      v()->error(),
+      "12:34: v-0020: only one stage decoration permitted per entry point");
 }
 
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {

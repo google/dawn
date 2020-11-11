@@ -51,7 +51,9 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!ValidateFunctions(module->functions())) {
     return false;
   }
-
+  if (!ValidateEntryPoint(module->functions())) {
+    return false;
+  }
   function_stack_.pop_scope();
 
   return true;
@@ -82,47 +84,11 @@ bool ValidatorImpl::ValidateGlobalVariables(
 }
 
 bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
-  ScopeStack<ast::PipelineStage> entry_point_map;
-  entry_point_map.push_scope();
-
-  size_t pipeline_count = 0;
   for (const auto& func : funcs) {
-    // The entry points will be checked later to see if their duplicated
-    if (function_stack_.has(func->name()) &&
-        !entry_point_map.has(func->name())) {
+    if (function_stack_.has(func->name())) {
       set_error(func->source(),
                 "v-0016: function names must be unique '" + func->name() + "'");
       return false;
-    }
-
-    if (func->IsEntryPoint()) {
-      pipeline_count++;
-
-      if (!func->return_type()->IsVoid()) {
-        set_error(func->source(),
-                  "v-0024: Entry point function must return void: '" +
-                      func->name() + "'");
-        return false;
-      }
-
-      if (func->params().size() != 0) {
-        set_error(func->source(),
-                  "v-0023: Entry point function must accept no parameters: '" +
-                      func->name() + "'");
-        return false;
-      }
-
-      ast::PipelineStage pipeline_stage;
-      if (entry_point_map.get(func->name(), &pipeline_stage)) {
-        if (pipeline_stage == func->pipeline_stage()) {
-          set_error(
-              func->source(),
-              "v-0020: The pair of <entry point name, pipeline stage> must "
-              "be unique");
-          return false;
-        }
-      }
-      entry_point_map.set(func->name(), func->pipeline_stage());
     }
 
     function_stack_.set(func->name(), func.get());
@@ -133,13 +99,47 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
     current_function_ = nullptr;
   }
 
-  if (pipeline_count == 0) {
+  return true;
+}
+
+bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
+  auto shader_is_present = false;
+  for (const auto& func : funcs) {
+    if (func->IsEntryPoint()) {
+      shader_is_present = true;
+      if (!func->params().empty()) {
+        set_error(func->source(),
+                  "v-0023: Entry point function must accept no parameters: '" +
+                      func->name() + "'");
+        return false;
+      }
+
+      if (!func->return_type()->IsVoid()) {
+        set_error(func->source(),
+                  "v-0024: Entry point function must return void: '" +
+                      func->name() + "'");
+        return false;
+      }
+      auto stage_deco_count = 0;
+      for (const auto& deco : func->decorations()) {
+        if (deco->IsStage()) {
+          stage_deco_count++;
+        }
+      }
+      if (stage_deco_count > 1) {
+        set_error(
+            func->source(),
+            "v-0020: only one stage decoration permitted per entry point");
+        return false;
+      }
+    }
+  }
+  if (!shader_is_present) {
     set_error(Source{},
               "v-0003: At least one of vertex, fragment or compute shader must "
               "be present");
     return false;
   }
-
   return true;
 }
 

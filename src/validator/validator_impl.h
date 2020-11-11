@@ -113,6 +113,10 @@ class ValidatorImpl {
   /// @param c the case statement to check
   /// @returns true if the valdiation was successful
   bool ValidateCase(const ast::CaseStatement* c);
+  /// Validates entry points
+  /// @param funcs the functions to check
+  /// @returns true if the valdiation was successful
+  bool ValidateEntryPoint(const ast::FunctionList& funcs);
 
  private:
   std::string error_;

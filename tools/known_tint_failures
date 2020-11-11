@@ -1,6 +1,5 @@
 break-outside-for-or-switch.fail.wgsl
 continue-outside-for.fail.wgsl
-duplicate-entry-point.fail.wgsl
 duplicate-stuct-name-v2.fail.wgsl
 duplicate-stuct-name.fail.wgsl
 duplicate-var-name-within-func.fail.wgsl
