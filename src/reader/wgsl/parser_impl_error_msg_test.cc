@@ -105,7 +105,7 @@ TEST_F(ParserImplErrorTest, BitcastExprMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingType) {
   EXPECT("fn f() -> void { x = bitcast<>(y); }",
-         "test.wgsl:1:30 error: missing type for bitcast expression\n"
+         "test.wgsl:1:30 error: invalid type for bitcast expression\n"
          "fn f() -> void { x = bitcast<>(y); }\n"
          "                             ^\n");
 }
@@ -548,7 +548,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan_Old) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype_Old) {
   EXPECT("var x : texture_sampled_1d<1>;",
-         "test.wgsl:1:28 error: invalid subtype for sampled texture type\n"
+         "test.wgsl:1:28 error: invalid type for sampled texture type\n"
          "var x : texture_sampled_1d<1>;\n"
          "                           ^\n");
 }
@@ -569,7 +569,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclSampledTextureInvalidSubtype) {
   EXPECT("var x : texture_1d<1>;",
-         "test.wgsl:1:20 error: invalid subtype for sampled texture type\n"
+         "test.wgsl:1:20 error: invalid type for sampled texture type\n"
          "var x : texture_1d<1>;\n"
          "                   ^\n");
 }
@@ -590,7 +590,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
   EXPECT("var x : texture_multisampled_2d<1>;",
-         "test.wgsl:1:33 error: invalid subtype for multisampled texture type\n"
+         "test.wgsl:1:33 error: invalid type for multisampled texture type\n"
          "var x : texture_multisampled_2d<1>;\n"
          "                                ^\n");
 }
@@ -1009,7 +1009,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarMatrixMissingType) {
   EXPECT("var i : mat4x4<1>;",
-         "test.wgsl:1:16 error: unable to determine subtype for matrix\n"
+         "test.wgsl:1:16 error: invalid type for matrix\n"
          "var i : mat4x4<1>;\n"
          "               ^\n");
 }
@@ -1051,7 +1051,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingStorageClass) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingType) {
   EXPECT("var i : ptr<in, 1>;",
-         "test.wgsl:1:17 error: missing type for ptr declaration\n"
+         "test.wgsl:1:17 error: invalid type for ptr declaration\n"
          "var i : ptr<in, 1>;\n"
          "                ^\n");
 }
@@ -1086,7 +1086,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingGreaterThan) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingType) {
   EXPECT("var i : vec3<1>;",
-         "test.wgsl:1:14 error: unable to determine subtype for vector\n"
+         "test.wgsl:1:14 error: invalid type for vector\n"
          "var i : vec3<1>;\n"
          "             ^\n");
 }

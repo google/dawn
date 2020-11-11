@@ -645,7 +645,7 @@ class ParserImpl {
   /// @param end the token that ends the lexical block
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature: `Expect<Result>()`.
+  /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
@@ -658,7 +658,7 @@ class ParserImpl {
   /// and |end| arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature: `Expect<Result>()`.
+  /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
@@ -668,11 +668,21 @@ class ParserImpl {
   /// and |end| arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
-  /// body, with the signature: `Expect<Result>()`.
+  /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
   /// @return the value returned by |body| if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
   T expect_brace_block(const std::string& use, F&& body);
+  /// A convenience function that calls |expect_block| passing
+  /// |Token::Type::kLessThan| and |Token::Type::kGreaterThan| for the |start|
+  /// and |end| arguments, respectively.
+  /// @param use a description of what was being parsed if an error was raised
+  /// @param body a function or lambda that is called to parse the lexical block
+  /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
+  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// an Expect with error state.
+  template <typename F, typename T = ReturnType<F>>
+  T expect_lt_gt_block(const std::string& use, F&& body);
 
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
@@ -691,6 +701,8 @@ class ParserImpl {
 
   Expect<std::unique_ptr<ast::ConstructorExpression>>
   expect_const_expr_internal(uint32_t depth);
+
+  Expect<ast::type::Type*> expect_type(const std::string& use);
 
   Maybe<std::unique_ptr<ast::Statement>> for_header_initializer();
   Maybe<std::unique_ptr<ast::Statement>> for_header_continuing();

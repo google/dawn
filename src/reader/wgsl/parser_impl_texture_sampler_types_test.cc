@@ -123,7 +123,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType_Old) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:20: invalid subtype for sampled texture type");
+  EXPECT_EQ(p->error(), "1:20: invalid type for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan_Old) {
@@ -203,7 +203,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:12: invalid subtype for sampled texture type");
+  EXPECT_EQ(p->error(), "1:12: invalid type for sampled texture type");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
@@ -256,7 +256,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:25: invalid subtype for multisampled texture type");
+  EXPECT_EQ(p->error(), "1:25: invalid type for multisampled texture type");
 }
 
 TEST_F(ParserImplTest,

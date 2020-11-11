@@ -221,7 +221,7 @@ TEST_P(VecMissingType, Handles_Missing_Type) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:6: unable to determine subtype for vector");
+  ASSERT_EQ(p->error(), "1:6: invalid type for vector");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingType,
@@ -318,7 +318,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:14: missing type for ptr declaration");
+  ASSERT_EQ(p->error(), "1:14: invalid type for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
@@ -718,7 +718,7 @@ TEST_P(MatrixMissingType, Handles_Missing_Type) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: unable to determine subtype for matrix");
+  ASSERT_EQ(p->error(), "1:8: invalid type for matrix");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingType,

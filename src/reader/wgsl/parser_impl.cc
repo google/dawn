@@ -389,16 +389,8 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
   if (dim.matched) {
     const char* use = "sampled texture type";
 
-    if (!expect(use, Token::Type::kLessThan))
-      return Failure::kErrored;
-
-    auto subtype = type_decl();
+    auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
     if (subtype.errored)
-      return Failure::kErrored;
-    if (!subtype.matched)
-      return add_error(peek().source(), "invalid subtype", use);
-
-    if (!expect(use, Token::Type::kGreaterThan))
       return Failure::kErrored;
 
     return ctx_.type_mgr().Get(std::make_unique<ast::type::SampledTextureType>(
@@ -409,16 +401,8 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
   if (ms_dim.matched) {
     const char* use = "multisampled texture type";
 
-    if (!expect(use, Token::Type::kLessThan))
-      return Failure::kErrored;
-
-    auto subtype = type_decl();
+    auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
     if (subtype.errored)
-      return Failure::kErrored;
-    if (!subtype.matched)
-      return add_error(peek().source(), "invalid subtype", use);
-
-    if (!expect(use, Token::Type::kGreaterThan))
       return Failure::kErrored;
 
     return ctx_.type_mgr().Get(
@@ -430,14 +414,10 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
   if (storage.matched) {
     const char* use = "storage texture type";
 
-    if (!expect(use, Token::Type::kLessThan))
-      return Failure::kErrored;
+    auto format =
+        expect_lt_gt_block(use, [&] { return expect_image_storage_type(use); });
 
-    auto format = expect_image_storage_type(use);
     if (format.errored)
-      return Failure::kErrored;
-
-    if (!expect(use, Token::Type::kGreaterThan))
       return Failure::kErrored;
 
     return ctx_.type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
@@ -773,16 +753,14 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
 // variable_storage_decoration
 //   : LESS_THAN storage_class GREATER_THAN
 Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
-  if (!match(Token::Type::kLessThan))
+  if (!peek().IsLessThan())
     return Failure::kNoMatch;
 
   const char* use = "variable decoration";
 
-  auto sc = expect_storage_class(use);
-  if (sc.errored)
-    return Failure::kErrored;
+  auto sc = expect_lt_gt_block(use, [&] { return expect_storage_class(use); });
 
-  if (!expect(use, Token::Type::kGreaterThan))
+  if (sc.errored)
     return Failure::kErrored;
 
   return sc.value;
@@ -904,30 +882,33 @@ Maybe<ast::type::Type*> ParserImpl::type_decl() {
   return Failure::kNoMatch;
 }
 
+Expect<ast::type::Type*> ParserImpl::expect_type(const std::string& use) {
+  auto type = type_decl();
+  if (type.errored)
+    return Failure::kErrored;
+  if (!type.matched)
+    return add_error(peek().source(), "invalid type", use);
+  return type.value;
+}
+
 Expect<ast::type::Type*> ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
-  if (!expect(use, Token::Type::kLessThan))
-    return Failure::kErrored;
+  return expect_lt_gt_block(use, [&]() -> Expect<ast::type::Type*> {
+    auto sc = expect_storage_class(use);
+    if (sc.errored)
+      return Failure::kErrored;
 
-  auto sc = expect_storage_class(use);
-  if (sc.errored)
-    return Failure::kErrored;
+    if (!expect(use, Token::Type::kComma))
+      return Failure::kErrored;
 
-  if (!expect(use, Token::Type::kComma))
-    return Failure::kErrored;
+    auto subtype = expect_type(use);
+    if (subtype.errored)
+      return Failure::kErrored;
 
-  auto subtype = type_decl();
-  if (subtype.errored)
-    return Failure::kErrored;
-  if (!subtype.matched)
-    return add_error(peek().source(), "missing type", use);
-
-  if (!expect(use, Token::Type::kGreaterThan))
-    return Failure::kErrored;
-
-  return ctx_.type_mgr().Get(
-      std::make_unique<ast::type::PointerType>(subtype.value, sc.value));
+    return ctx_.type_mgr().Get(
+        std::make_unique<ast::type::PointerType>(subtype.value, sc.value));
+  });
 }
 
 Expect<ast::type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
@@ -939,16 +920,8 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
 
   const char* use = "vector";
 
-  if (!expect(use, Token::Type::kLessThan))
-    return Failure::kErrored;
-
-  auto subtype = type_decl();
+  auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
   if (subtype.errored)
-    return Failure::kErrored;
-  if (!subtype.matched)
-    return add_error(peek().source(), "unable to determine subtype", use);
-
-  if (!expect(use, Token::Type::kGreaterThan))
     return Failure::kErrored;
 
   return ctx_.type_mgr().Get(
@@ -959,29 +932,23 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_array(
     ast::ArrayDecorationList decos) {
   const char* use = "array declaration";
 
-  if (!expect(use, Token::Type::kLessThan))
-    return Failure::kErrored;
-
-  auto subtype = type_decl();
-  if (subtype.errored)
-    return Failure::kErrored;
-  if (!subtype.matched)
-    return add_error(peek(), "invalid type for array declaration");
-
-  uint32_t size = 0;
-  if (match(Token::Type::kComma)) {
-    auto val = expect_nonzero_positive_sint("array size");
-    if (val.errored)
+  return expect_lt_gt_block(use, [&]() -> Expect<ast::type::Type*> {
+    auto subtype = expect_type(use);
+    if (subtype.errored)
       return Failure::kErrored;
-    size = val.value;
-  }
 
-  if (!expect(use, Token::Type::kGreaterThan))
-    return Failure::kErrored;
+    uint32_t size = 0;
+    if (match(Token::Type::kComma)) {
+      auto val = expect_nonzero_positive_sint("array size");
+      if (val.errored)
+        return Failure::kErrored;
+      size = val.value;
+    }
 
-  auto ty = std::make_unique<ast::type::ArrayType>(subtype.value, size);
-  ty->set_decorations(std::move(decos));
-  return ctx_.type_mgr().Get(std::move(ty));
+    auto ty = std::make_unique<ast::type::ArrayType>(subtype.value, size);
+    ty->set_decorations(std::move(decos));
+    return ctx_.type_mgr().Get(std::move(ty));
+  });
 }
 
 Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
@@ -1000,16 +967,8 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 
   const char* use = "matrix";
 
-  if (!expect(use, Token::Type::kLessThan))
-    return Failure::kErrored;
-
-  auto subtype = type_decl();
+  auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
   if (subtype.errored)
-    return Failure::kErrored;
-  if (!subtype.matched)
-    return add_error(peek().source(), "unable to determine subtype", use);
-
-  if (!expect(use, Token::Type::kGreaterThan))
     return Failure::kErrored;
 
   return ctx_.type_mgr().Get(
@@ -1948,16 +1907,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
   if (match(Token::Type::kBitcast)) {
     const char* use = "bitcast expression";
 
-    if (!expect(use, Token::Type::kLessThan))
-      return Failure::kErrored;
-
-    auto type = type_decl();
+    auto type = expect_lt_gt_block(use, [&] { return expect_type(use); });
     if (type.errored)
-      return Failure::kErrored;
-    if (!type.matched)
-      return add_error(peek().source(), "missing type", use);
-
-    if (!expect(use, Token::Type::kGreaterThan))
       return Failure::kErrored;
 
     auto params = expect_paren_rhs_stmt();
@@ -2924,6 +2875,12 @@ T ParserImpl::expect_paren_block(const std::string& use, F&& body) {
 template <typename F, typename T>
 T ParserImpl::expect_brace_block(const std::string& use, F&& body) {
   return expect_block(Token::Type::kBraceLeft, Token::Type::kBraceRight, use,
+                      std::forward<F>(body));
+}
+
+template <typename F, typename T>
+T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
+  return expect_block(Token::Type::kLessThan, Token::Type::kGreaterThan, use,
                       std::forward<F>(body));
 }
 

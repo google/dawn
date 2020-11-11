@@ -103,7 +103,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: unable to determine subtype for vector");
+  EXPECT_EQ(p->error(), "1:6: invalid type for vector");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
@@ -245,7 +245,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: missing type for bitcast expression");
+  EXPECT_EQ(p->error(), "1:9: invalid type for bitcast expression");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
