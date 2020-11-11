@@ -83,7 +83,11 @@ using Maybe = ParserImpl::Maybe<T>;
 /// Controls the maximum number of times we'll call into the const_expr function
 /// from itself. This is to guard against stack overflow when there is an
 /// excessive number of type constructors inside the const_expr.
-uint32_t kMaxConstExprDepth = 128;
+constexpr uint32_t kMaxConstExprDepth = 128;
+
+/// The maximum number of tokens to look ahead to try and sync the
+/// parser on error.
+constexpr size_t const kMaxResynchronizeLookahead = 32;
 
 ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
@@ -121,6 +125,38 @@ bool is_decoration(Token t) {
          t.IsWorkgroupSize() || t.IsStage() || t.IsBlock() || t.IsStride() ||
          t.IsOffset();
 }
+
+/// Enter-exit counters for block token types.
+/// Used by sync_to() to skip over closing block tokens that were opened during
+/// the forward scan.
+struct BlockCounters {
+  int attrs = 0;    // [[ ]]
+  int brace = 0;    // {   }
+  int bracket = 0;  // [   ]
+  int paren = 0;    // (   )
+
+  /// @return the current enter-exit depth for the given block token type. If
+  /// |t| is not a block token type, then 0 is always returned.
+  int consume(const Token& t) {
+    if (t.Is(Token::Type::kAttrLeft))
+      return attrs++;
+    if (t.Is(Token::Type::kAttrRight))
+      return attrs--;
+    if (t.Is(Token::Type::kBraceLeft))
+      return brace++;
+    if (t.Is(Token::Type::kBraceRight))
+      return brace--;
+    if (t.Is(Token::Type::kBracketLeft))
+      return bracket++;
+    if (t.Is(Token::Type::kBracketRight))
+      return bracket--;
+    if (t.Is(Token::Type::kParenLeft))
+      return paren++;
+    if (t.Is(Token::Type::kParenRight))
+      return paren--;
+    return 0;
+  }
+};
 
 }  // namespace
 
@@ -198,10 +234,8 @@ bool ParserImpl::Parse() {
 // translation_unit
 //  : global_decl* EOF
 void ParserImpl::translation_unit() {
-  while (!peek().IsEof()) {
-    auto decl = expect_global_decl();
-    if (decl.errored)
-      break;
+  while (!peek().IsEof() && synchronized_) {
+    expect_global_decl();
   }
 
   assert(module_.IsValid());
@@ -218,75 +252,87 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF))
     return true;
 
+  bool errored = false;
+
   auto decos = decoration_list();
-
-  // FUDGE - Abort early if we enter with an error state to avoid accumulating
-  // multiple error messages.
-  // TODO(ben-clayton) - remove this once resynchronization is implemented.
-  if (has_error())
+  if (decos.errored)
+    errored = true;
+  if (!synchronized_)
     return Failure::kErrored;
 
-  auto gv = global_variable_decl(decos.value);
-  if (gv.errored)
-    return Failure::kErrored;
-  if (gv.matched) {
-    if (!expect("variable declaration", Token::Type::kSemicolon))
+  auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
+    auto gv = global_variable_decl(decos.value);
+    if (gv.errored)
+      return Failure::kErrored;
+    if (gv.matched) {
+      if (!expect("variable declaration", Token::Type::kSemicolon))
+        return Failure::kErrored;
+
+      module_.AddGlobalVariable(std::move(gv.value));
+      return true;
+    }
+
+    auto gc = global_constant_decl();
+    if (gc.errored)
       return Failure::kErrored;
 
-    module_.AddGlobalVariable(std::move(gv.value));
-    return true;
-  }
+    if (gc.matched) {
+      if (!expect("constant declaration", Token::Type::kSemicolon))
+        return Failure::kErrored;
 
-  auto gc = global_constant_decl();
-  if (gc.errored) {
-    return Failure::kErrored;
-  }
-  if (gc.matched) {
-    if (!expect("constant declaration", Token::Type::kSemicolon))
+      module_.AddGlobalVariable(std::move(gc.value));
+      return true;
+    }
+
+    auto ta = type_alias();
+    if (ta.errored)
       return Failure::kErrored;
 
-    module_.AddGlobalVariable(std::move(gc.value));
-    return true;
-  }
+    if (ta.matched) {
+      if (!expect("type alias", Token::Type::kSemicolon))
+        return Failure::kErrored;
 
-  auto ta = type_alias();
-  if (ta.errored)
-    return Failure::kErrored;
+      module_.AddConstructedType(ta.value);
+      return true;
+    }
 
-  if (ta.matched) {
-    if (!expect("type alias", Token::Type::kSemicolon))
+    auto str = struct_decl(decos.value);
+    if (str.errored)
       return Failure::kErrored;
 
-    module_.AddConstructedType(ta.value);
+    if (str.matched) {
+      if (!expect("struct declaration", Token::Type::kSemicolon))
+        return Failure::kErrored;
+
+      auto* type = ctx_.type_mgr().Get(std::move(str.value));
+      register_constructed(type->AsStruct()->name(), type);
+      module_.AddConstructedType(type);
+      return true;
+    }
+
+    return Failure::kNoMatch;
+  });
+
+  if (decl.errored)
+    errored = true;
+  if (decl.matched)
     return true;
-  }
-
-  auto str = struct_decl(decos.value);
-  if (str.errored)
-    return Failure::kErrored;
-
-  if (str.matched) {
-    if (!expect("struct declaration", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    auto* type = ctx_.type_mgr().Get(std::move(str.value));
-    register_constructed(type->AsStruct()->name(), type);
-    module_.AddConstructedType(type);
-    return true;
-  }
 
   auto func = function_decl(decos.value);
   if (func.errored)
-    return Failure::kErrored;
+    errored = true;
   if (func.matched) {
     module_.AddFunction(std::move(func.value));
     return true;
   }
 
+  if (errored)
+    return Failure::kErrored;
+
   if (decos.value.size() > 0) {
-    add_error(peek(), "expected declaration after decorations");
+    add_error(next(), "expected declaration after decorations");
   } else {
-    add_error(peek(), "unexpected token");
+    add_error(next(), "unexpected token");
   }
   return Failure::kErrored;
 }
@@ -1027,16 +1073,16 @@ Maybe<std::unique_ptr<ast::type::StructType>> ParserImpl::struct_decl(
   if (!match(Token::Type::kStruct))
     return Failure::kNoMatch;
 
-  auto struct_decos = cast_decorations<ast::StructDecoration>(decos);
-  if (struct_decos.errored)
-    return Failure::kErrored;
-
   auto name = expect_ident("struct declaration");
   if (name.errored)
     return Failure::kErrored;
 
   auto body = expect_struct_body_decl();
   if (body.errored)
+    return Failure::kErrored;
+
+  auto struct_decos = cast_decorations<ast::StructDecoration>(decos);
+  if (struct_decos.errored)
     return Failure::kErrored;
 
   return std::make_unique<ast::type::StructType>(
@@ -1050,19 +1096,31 @@ Maybe<std::unique_ptr<ast::type::StructType>> ParserImpl::struct_decl(
 Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
   return expect_brace_block(
       "struct declaration", [&]() -> Expect<ast::StructMemberList> {
+        bool errored = false;
+
         ast::StructMemberList members;
 
-        while (!peek().IsBraceRight() && !peek().IsEof()) {
-          auto decos = decoration_list();
-          if (decos.errored)
-            return Failure::kErrored;
+        while (synchronized_ && !peek().IsBraceRight() && !peek().IsEof()) {
+          auto member =
+              sync(Token::Type::kSemicolon,
+                   [&]() -> Expect<std::unique_ptr<ast::StructMember>> {
+                     auto decos = decoration_list();
+                     if (decos.errored)
+                       errored = true;
+                     if (!synchronized_)
+                       return Failure::kErrored;
+                     return expect_struct_member(decos.value);
+                   });
 
-          auto mem = expect_struct_member(decos.value);
-          if (mem.errored)
-            return Failure::kErrored;
-
-          members.push_back(std::move(mem.value));
+          if (member.errored) {
+            errored = true;
+          } else {
+            members.push_back(std::move(member.value));
+          }
         }
+
+        if (errored)
+          return Failure::kErrored;
 
         return members;
       });
@@ -1072,20 +1130,6 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
 Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
     ast::DecorationList& decos) {
-  // FUDGE - Abort early if we enter with an error state to avoid accumulating
-  // multiple error messages. This is a work around for the unit tests that
-  // call:
-  //   auto decos = p->decoration_list();
-  //   auto m = p->expect_struct_member(decos);
-  // ... and expect a single error message due to bad decorations.
-  // While expect_struct_body_decl() aborts after checking for decoration parse
-  // errors (and so these tests do not currently reflect full-parse behaviour),
-  // they do test the long-term desired behavior where the parser can
-  // resynchronize at the ']]'.
-  // TODO(ben-clayton) - remove this once resynchronization is implemented.
-  if (has_error())
-    return Failure::kErrored;
-
   auto decl = expect_variable_ident_decl("struct member");
   if (decl.errored)
     return Failure::kErrored;
@@ -1106,19 +1150,34 @@ Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
 Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_decl(
     ast::DecorationList& decos) {
   auto f = function_header();
-  if (f.errored)
+  if (f.errored) {
+    if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
+      // There were errors in the function header, but the parser has managed to
+      // resynchronize with the opening brace. As there's no outer
+      // synchronization token for function declarations, attempt to parse the
+      // function body. The AST isn't used as we've already errored, but this
+      // catches any errors inside the body, and can help keep the parser in
+      // sync.
+      expect_body_stmt();
+    }
     return Failure::kErrored;
+  }
   if (!f.matched)
     return Failure::kNoMatch;
 
+  bool errored = false;
+
   auto func_decos = cast_decorations<ast::FunctionDecoration>(decos);
   if (func_decos.errored)
-    return Failure::kErrored;
+    errored = true;
 
   f->set_decorations(std::move(func_decos.value));
 
   auto body = expect_body_stmt();
   if (body.errored)
+    errored = true;
+
+  if (errored)
     return Failure::kErrored;
 
   f->set_body(std::move(body.value));
@@ -1143,23 +1202,34 @@ Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_header() {
     return Failure::kNoMatch;
 
   const char* use = "function declaration";
+  bool errored = false;
 
   auto name = expect_ident(use);
-  if (name.errored)
-    return Failure::kErrored;
+  if (name.errored) {
+    errored = true;
+    if (!sync_to(Token::Type::kParenLeft, /* consume: */ false))
+      return Failure::kErrored;
+  }
 
   auto params = expect_paren_block(use, [&] { return expect_param_list(); });
-  if (params.errored)
-    return Failure::kErrored;
+  if (params.errored) {
+    errored = true;
+    if (!synchronized_)
+      return Failure::kErrored;
+  }
 
   if (!expect(use, Token::Type::kArrow))
     return Failure::kErrored;
 
   auto type = function_type_decl();
-  if (type.errored)
-    return Failure::kErrored;
-  if (!type.matched)
+  if (type.errored) {
+    errored = true;
+  } else if (!type.matched) {
     return add_error(peek(), "unable to determine function return type");
+  }
+
+  if (errored)
+    return Failure::kErrored;
 
   return std::make_unique<ast::Function>(source, name.value,
                                          std::move(params.value), type.value);
@@ -1252,17 +1322,22 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_paren_rhs_stmt() {
 // statements
 //   : statement*
 Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
+  bool errored = false;
   auto ret = std::make_unique<ast::BlockStatement>();
 
-  for (;;) {
+  while (synchronized_) {
     auto stmt = statement();
-    if (stmt.errored)
-      return Failure::kErrored;
-    if (!stmt.matched)
+    if (stmt.errored) {
+      errored = true;
+    } else if (stmt.matched) {
+      ret->append(std::move(stmt.value));
+    } else {
       break;
-
-    ret->append(std::move(stmt.value));
+    }
   }
+
+  if (errored)
+    return Failure::kErrored;
 
   return ret;
 }
@@ -1287,9 +1362,10 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
     // Skip empty statements
   }
 
-  // Non-block statments all end in a semi-colon.
-  // TODO(bclayton): We can use this property to synchronize on error.
-  auto stmt = non_block_statement();
+  // Non-block statments that error can resynchronize on semicolon.
+  auto stmt =
+      sync(Token::Type::kSemicolon, [&] { return non_block_statement(); });
+
   if (stmt.errored)
     return Failure::kErrored;
   if (stmt.matched)
@@ -1401,6 +1477,7 @@ Maybe<std::unique_ptr<ast::ReturnStatement>> ParserImpl::return_stmt() {
   auto expr = logical_or_expression();
   if (expr.errored)
     return Failure::kErrored;
+
   // TODO(bclayton): Check matched?
   return std::make_unique<ast::ReturnStatement>(source, std::move(expr.value));
 }
@@ -1540,16 +1617,20 @@ Maybe<std::unique_ptr<ast::SwitchStatement>> ParserImpl::switch_stmt() {
 
   auto body = expect_brace_block("switch statement",
                                  [&]() -> Expect<ast::CaseStatementList> {
+                                   bool errored = false;
                                    ast::CaseStatementList list;
-                                   for (;;) {
+                                   while (synchronized_) {
                                      auto stmt = switch_body();
-                                     if (stmt.errored)
-                                       return Failure::kErrored;
+                                     if (stmt.errored) {
+                                       errored = true;
+                                       continue;
+                                     }
                                      if (!stmt.matched)
                                        break;
-
                                      list.push_back(std::move(stmt.value));
                                    }
+                                   if (errored)
+                                     return Failure::kErrored;
                                    return list;
                                  });
 
@@ -1630,11 +1711,8 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::case_body() {
   auto ret = std::make_unique<ast::BlockStatement>();
   for (;;) {
-    auto t = peek();
-    if (t.IsFallthrough()) {
-      auto source = t.source();
-      next();  // Consume the peek
-
+    Source source;
+    if (match(Token::Type::kFallthrough, &source)) {
       if (!expect("fallthrough statement", Token::Type::kSemicolon))
         return Failure::kErrored;
 
@@ -2571,18 +2649,22 @@ ParserImpl::expect_const_expr_internal(uint32_t depth) {
 }
 
 Maybe<ast::DecorationList> ParserImpl::decoration_list() {
+  bool errored = false;
   bool matched = false;
   ast::DecorationList decos;
 
-  while (true) {
+  while (synchronized_) {
     auto list = decoration_bracketed_list(decos);
     if (list.errored)
-      return Failure::kErrored;
+      errored = true;
     if (!list.matched)
       break;
 
     matched = true;
   }
+
+  if (errored)
+    return Failure::kErrored;
 
   if (!matched)
     return Failure::kNoMatch;
@@ -2591,6 +2673,8 @@ Maybe<ast::DecorationList> ParserImpl::decoration_list() {
 }
 
 Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
+  const char* use = "decoration list";
+
   if (!match(Token::Type::kAttrLeft)) {
     return Failure::kNoMatch;
   }
@@ -2599,30 +2683,37 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   if (match(Token::Type::kAttrRight, &source))
     return add_error(source, "empty decoration list");
 
-  while (true) {
-    auto deco = expect_decoration();
-    if (deco.errored)
-      return Failure::kErrored;
+  return sync(Token::Type::kAttrRight, [&]() -> Expect<bool> {
+    bool errored = false;
 
-    decos.emplace_back(std::move(deco.value));
+    while (synchronized_) {
+      auto deco = expect_decoration();
+      if (deco.errored)
+        errored = true;
+      decos.emplace_back(std::move(deco.value));
 
-    if (match(Token::Type::kComma)) {
-      continue;
+      if (match(Token::Type::kComma))
+        continue;
+
+      if (is_decoration(peek())) {
+        // We have two decorations in a bracket without a separating comma.
+        // e.g. [[location(1) set(2)]]
+        //                    ^^^ expected comma
+        expect(use, Token::Type::kComma);
+        return Failure::kErrored;
+      }
+
+      break;
     }
 
-    if (is_decoration(peek())) {
-      // We have two decorations in a bracket without a separating comma.
-      // e.g. [[location(1) set(2)]]
-      //                    ^^^ expected comma
-      expect("decoration list", Token::Type::kComma);
+    if (errored)
       return Failure::kErrored;
-    }
 
-    if (!expect("decoration list", Token::Type::kAttrRight))
+    if (!expect(use, Token::Type::kAttrRight))
       return Failure::kErrored;
 
     return true;
-  }
+  });
 }
 
 Expect<std::unique_ptr<ast::Decoration>> ParserImpl::expect_decoration() {
@@ -2791,25 +2882,29 @@ bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {
 }
 
 bool ParserImpl::expect(const std::string& use, Token::Type tok) {
-  auto t = next();
-  if (!t.Is(tok)) {
-    std::stringstream err;
-    err << "expected '" << Token::TypeToName(tok) << "'";
-    if (!use.empty()) {
-      err << " for " << use;
-    }
-    add_error(t, err.str());
-    return false;
+  auto t = peek();
+  if (t.Is(tok)) {
+    next();
+    synchronized_ = true;
+    return true;
   }
-  return true;
+
+  std::stringstream err;
+  err << "expected '" << Token::TypeToName(tok) << "'";
+  if (!use.empty()) {
+    err << " for " << use;
+  }
+  add_error(t, err.str());
+  synchronized_ = false;
+  return false;
 }
 
 Expect<int32_t> ParserImpl::expect_sint(const std::string& use) {
-  auto t = next();
-
+  auto t = peek();
   if (!t.IsSintLiteral())
     return add_error(t.source(), "expected signed integer literal", use);
 
+  next();
   return {t.to_i32(), t.source()};
 }
 
@@ -2837,11 +2932,14 @@ Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(
 }
 
 Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
-  auto t = next();
-  if (!t.IsIdentifier())
-    return add_error(t.source(), "expected identifier", use);
-
-  return {t.to_str(), t.source()};
+  auto t = peek();
+  if (t.IsIdentifier()) {
+    synchronized_ = true;
+    next();
+    return {t.to_str(), t.source()};
+  }
+  synchronized_ = false;
+  return add_error(t.source(), "expected identifier", use);
 }
 
 template <typename F, typename T>
@@ -2852,14 +2950,18 @@ T ParserImpl::expect_block(Token::Type start,
   if (!expect(use, start)) {
     return Failure::kErrored;
   }
-  auto res = body();
-  if (res.errored) {
-    return Failure::kErrored;
-  }
-  if (!expect(use, end)) {
-    return Failure::kErrored;
-  }
-  return res;
+
+  return sync(end, [&]() -> T {
+    auto res = body();
+
+    if (res.errored)
+      return Failure::kErrored;
+
+    if (!expect(use, end))
+      return Failure::kErrored;
+
+    return res;
+  });
 }
 
 template <typename F, typename T>
@@ -2878,6 +2980,64 @@ template <typename F, typename T>
 T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
   return expect_block(Token::Type::kLessThan, Token::Type::kGreaterThan, use,
                       std::forward<F>(body));
+}
+
+template <typename F, typename T>
+T ParserImpl::sync(Token::Type tok, F&& body) {
+  sync_tokens_.push_back(tok);
+
+  auto result = body();
+
+  assert(sync_tokens_.back() == tok);
+  sync_tokens_.pop_back();
+
+  if (result.errored) {
+    sync_to(tok, /* consume: */ true);
+  }
+
+  return result;
+}
+
+bool ParserImpl::sync_to(Token::Type tok, bool consume) {
+  // Clear the synchronized state - gets set to true again on success.
+  synchronized_ = false;
+
+  BlockCounters counters;
+
+  for (size_t i = 0; i < kMaxResynchronizeLookahead; i++) {
+    auto t = peek(i);
+    if (counters.consume(t) > 0)
+      continue;  // Nested block
+    if (!t.Is(tok) && !is_sync_token(t))
+      continue;  // Not a synchronization point
+
+    // Synchronization point found.
+
+    // Skip any tokens we don't understand, bringing us to just before the
+    // resync point.
+    while (i-- > 0) {
+      next();
+    }
+
+    // Is this synchronization token |tok|?
+    if (t.Is(tok)) {
+      if (consume)
+        next();
+      synchronized_ = true;
+      return true;
+    }
+    break;
+  }
+
+  return false;
+}
+
+bool ParserImpl::is_sync_token(const Token& t) const {
+  for (auto r : sync_tokens_) {
+    if (t.Is(r))
+      return true;
+  }
+  return false;
 }
 
 }  // namespace wgsl

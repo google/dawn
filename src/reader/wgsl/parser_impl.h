@@ -606,31 +606,35 @@ class ParserImpl {
   /// pointer, regardless of success or error
   bool match(Token::Type tok, Source* source = nullptr);
   /// Errors if the next token is not equal to |tok|.
-  /// Always consumes the next token.
+  /// Consumes the next token on match.
+  /// expect() also updates |synchronized_|, setting it to `true` if the next
+  /// token is equal to |tok|, otherwise `false`.
   /// @param use a description of what was being parsed if an error was raised.
   /// @param tok the token to test against
   /// @returns true if the next token equals |tok|.
   bool expect(const std::string& use, Token::Type tok);
   /// Parses a signed integer from the next token in the stream, erroring if the
   /// next token is not a signed integer.
-  /// Always consumes the next token.
+  /// Consumes the next token on match.
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
   Expect<int32_t> expect_sint(const std::string& use);
   /// Parses a signed integer from the next token in the stream, erroring if
   /// the next token is not a signed integer or is negative.
-  /// Always consumes the next token.
+  /// Consumes the next token if it is a signed integer (not necessarily
+  /// negative).
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
   Expect<uint32_t> expect_positive_sint(const std::string& use);
   /// Parses a non-zero signed integer from the next token in the stream,
   /// erroring if the next token is not a signed integer or is less than 1.
-  /// Always consumes the next token.
+  /// Consumes the next token if it is a signed integer (not necessarily
+  /// >= 1).
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed integer.
   Expect<uint32_t> expect_nonzero_positive_sint(const std::string& use);
   /// Errors if the next token is not an identifier.
-  /// Always consumes the next token.
+  /// Consumes the next token on match.
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed identifier.
   Expect<std::string> expect_ident(const std::string& use);
@@ -684,6 +688,45 @@ class ParserImpl {
   template <typename F, typename T = ReturnType<F>>
   T expect_lt_gt_block(const std::string& use, F&& body);
 
+  /// sync() calls the function |func|, and attempts to resynchronize the parser
+  /// to the next found resynchronization token if |func| fails.
+  /// If the next found resynchronization token is |tok|, then sync will also
+  /// consume |tok|.
+  ///
+  /// sync() will transiently add |tok| to the parser's stack of synchronization
+  /// tokens for the duration of the call to |func|. Once |func| returns, |tok|
+  /// is removed from the stack of resynchronization tokens. sync calls may be
+  /// nested, and so the number of resynchronization tokens is equal to the
+  /// number of |sync| calls in the current stack frame.
+  ///
+  /// sync() updates |synchronized_|, setting it to `true` if the next
+  /// resynchronization token found was |tok|, otherwise `false`.
+  ///
+  /// @param tok the token to attempt to synchronize the parser to if |func|
+  /// fails.
+  /// @param func a function or lambda with the signature: `Expect<Result>()` or
+  /// `Maybe<Result>()`.
+  /// @return the value returned by |func|.
+  template <typename F, typename T = ReturnType<F>>
+  T sync(Token::Type tok, F&& func);
+  /// sync_to() attempts to resynchronize the parser to the next found
+  /// resynchronization token or |tok| (whichever comes first).
+  ///
+  /// Synchronization tokens are transiently defined by calls to |sync|.
+  ///
+  /// sync_to() updates |synchronized_|, setting it to `true` if a
+  /// resynchronization token was found and it was |tok|, otherwise `false`.
+  ///
+  /// @param tok the token to attempt to synchronize the parser to.
+  /// @param consume if true and the next found resynchronization token is
+  /// |tok| then sync_to() will also consume |tok|.
+  /// @return the state of |synchronized_|.
+  /// @see sync().
+  bool sync_to(Token::Type tok, bool consume);
+  /// @return true if |t| is in the stack of resynchronization tokens.
+  /// @see sync().
+  bool is_sync_token(const Token& t) const;
+
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
   template <typename T>
@@ -712,6 +755,8 @@ class ParserImpl {
   diag::List diags_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
+  bool synchronized_ = true;
+  std::vector<Token::Type> sync_tokens_;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
 };

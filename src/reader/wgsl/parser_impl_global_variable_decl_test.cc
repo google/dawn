@@ -149,8 +149,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 
   auto e = p->global_variable_decl(decos.value);
   EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_NE(e.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),

@@ -165,8 +165,8 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
 
   auto s = p->struct_decl(decos.value);
   EXPECT_FALSE(s.errored);
-  EXPECT_FALSE(s.matched);
-  EXPECT_EQ(s.value, nullptr);
+  EXPECT_TRUE(s.matched);
+  EXPECT_NE(s.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: expected ']]' for decoration list");

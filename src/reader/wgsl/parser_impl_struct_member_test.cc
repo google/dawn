@@ -110,9 +110,10 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
   EXPECT_FALSE(decos.matched);
 
   auto m = p->expect_struct_member(decos.value);
+  ASSERT_FALSE(m.errored);
+  ASSERT_NE(m.value, nullptr);
+
   ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  ASSERT_EQ(m.value, nullptr);
   EXPECT_EQ(p->error(),
             "1:10: expected signed integer literal for offset decoration");
 }
