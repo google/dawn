@@ -689,6 +689,12 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitFunctionCall(const spvtools::opt::Instruction& inst);
 
+  /// Returns an expression for a SPIR-V instruction that maps to a WGSL
+  /// intrinsic function call.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  TypedExpression MakeIntrinsicCall(const spvtools::opt::Instruction& inst);
+
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return
   /// an expression with a null owned expression

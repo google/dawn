@@ -42,6 +42,7 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -333,6 +334,20 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       break;
   }
   return "";
+}
+
+// Returns the WGSL standard library function instrinsic for the
+// given instruction, or ast::Intrinsic::kNone
+ast::Intrinsic GetIntrinsic(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpDot:
+      return ast::Intrinsic::kDot;
+    case SpvOpOuterProduct:
+      return ast::Intrinsic::kOuterProduct;
+    default:
+      break;
+  }
+  return ast::Intrinsic::kNone;
 }
 
 // @returns the merge block ID for the given basic block, or 0 if there is none.
@@ -2715,6 +2730,11 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
                 std::move(params))};
   }
 
+  const auto intrinsic = GetIntrinsic(opcode);
+  if (intrinsic != ast::Intrinsic::kNone) {
+    return MakeIntrinsicCall(inst);
+  }
+
   if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
     return MakeAccessChain(inst);
   }
@@ -3503,6 +3523,29 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
 
   return EmitConstDefOrWriteToHoistedVar(inst,
                                          {result_type, std::move(call_expr)});
+}
+
+TypedExpression FunctionEmitter::MakeIntrinsicCall(
+    const spvtools::opt::Instruction& inst) {
+  const auto intrinsic = GetIntrinsic(inst.opcode());
+  std::ostringstream ss;
+  ss << intrinsic;
+  auto ident = std::make_unique<ast::IdentifierExpression>(ss.str());
+  ident->set_intrinsic(intrinsic);
+
+  ast::ExpressionList params;
+  for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
+    params.emplace_back(MakeOperand(inst, iarg).expr);
+  }
+  auto call_expr = std::make_unique<ast::CallExpression>(std::move(ident),
+                                                         std::move(params));
+  auto* result_type = parser_impl_.ConvertType(inst.type_id());
+  if (!result_type) {
+    Fail() << "internal error: no mapped type result of call: "
+           << inst.PrettyPrint();
+    return {};
+  }
+  return {result_type, std::move(call_expr)};
 }
 
 TypedExpression FunctionEmitter::MakeSimpleSelect(

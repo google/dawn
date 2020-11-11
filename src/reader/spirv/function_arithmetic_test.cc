@@ -1053,14 +1053,74 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvBinaryArithTestBasic, Dot) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2float %v2float_50_60
+     %2 = OpCopyObject %v2float %v2float_60_50
+     %3 = OpDot %float %1 %2
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
+    x_3
+    none
+    __f32
+    {
+      Call{
+        Identifier{dot}
+        (
+          Identifier{x_1}
+          Identifier{x_2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2float %v2float_50_60
+     %2 = OpCopyObject %v2float %v2float_60_50
+     %3 = OpOuterProduct %m2v2float %1 %2
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableConst{
+    x_3
+    none
+    __mat_2_2__f32
+    {
+      Call{
+        Identifier{outerProduct}
+        (
+          Identifier{x_1}
+          Identifier{x_2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 // TODO(dneto): OpSRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702
 
 // TODO(dneto): OpFRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702
 
-// TODO(dneto): OpOuterProduct
-// TODO(dneto): OpDot
 // TODO(dneto): OpIAddCarry
 // TODO(dneto): OpISubBorrow
 // TODO(dneto): OpIMulExtended
