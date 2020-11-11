@@ -72,6 +72,9 @@ class Statement : public Node {
   /// @returns true if this is an variable statement
   virtual bool IsVariableDecl() const;
 
+  /// @returns the human readable name for the statement type.
+  const char* Name() const;
+
   /// @returns the statement as a const assign statement
   const AssignmentStatement* AsAssign() const;
   /// @returns the statement as a const block statement

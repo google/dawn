@@ -1269,33 +1269,31 @@ Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
 
 // statement
 //   : SEMICOLON
-//   | return_stmt SEMICOLON
+//   | body_stmt?
 //   | if_stmt
 //   | switch_stmt
 //   | loop_stmt
 //   | for_stmt
-//   | func_call_stmt SEMICOLON
-//   | variable_stmt SEMICOLON
-//   | break_stmt SEMICOLON
-//   | continue_stmt SEMICOLON
-//   | DISCARD SEMICOLON
-//   | assignment_stmt SEMICOLON
-//   | body_stmt?
+//   | non_block_statement
+//      : return_stmt SEMICOLON
+//      | func_call_stmt SEMICOLON
+//      | variable_stmt SEMICOLON
+//      | break_stmt SEMICOLON
+//      | continue_stmt SEMICOLON
+//      | DISCARD SEMICOLON
+//      | assignment_stmt SEMICOLON
 Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
   while (match(Token::Type::kSemicolon)) {
     // Skip empty statements
   }
 
-  auto t = peek();
-  auto ret_stmt = return_stmt();
-  if (ret_stmt.errored)
+  // Non-block statments all end in a semi-colon.
+  // TODO(bclayton): We can use this property to synchronize on error.
+  auto stmt = non_block_statement();
+  if (stmt.errored)
     return Failure::kErrored;
-  if (ret_stmt.matched) {
-    if (!expect("return statement", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(ret_stmt.value);
-  }
+  if (stmt.matched)
+    return stmt;
 
   auto stmt_if = if_stmt();
   if (stmt_if.errored)
@@ -1321,68 +1319,7 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
   if (stmt_for.matched)
     return std::move(stmt_for.value);
 
-  auto func = func_call_stmt();
-  if (func.errored)
-    return Failure::kErrored;
-  if (func.matched) {
-    if (!expect("function call", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(func.value);
-  }
-
-  auto var = variable_stmt();
-  if (var.errored)
-    return Failure::kErrored;
-  if (var.matched) {
-    if (!expect("variable declaration", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(var.value);
-  }
-
-  auto b = break_stmt();
-  if (b.errored)
-    return Failure::kErrored;
-  if (b.matched) {
-    if (!expect("break statement", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(b.value);
-  }
-
-  auto cont = continue_stmt();
-  if (cont.errored)
-    return Failure::kErrored;
-  if (cont.matched) {
-    if (!expect("continue statement", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(cont.value);
-  }
-
-  if (t.IsDiscard()) {
-    auto source = t.source();
-    next();  // Consume the peek
-
-    if (!expect("discard statement", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::make_unique<ast::DiscardStatement>(source);
-  }
-
-  auto assign = assignment_stmt();
-  if (assign.errored)
-    return Failure::kErrored;
-  if (assign.matched) {
-    if (!expect("assignment statement", Token::Type::kSemicolon))
-      return Failure::kErrored;
-
-    return std::move(assign.value);
-  }
-
-  t = peek();
-  if (t.IsBraceLeft()) {
+  if (peek().IsBraceLeft()) {
     auto body = expect_body_stmt();
     if (body.errored)
       return Failure::kErrored;
@@ -1390,6 +1327,65 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
   }
 
   return Failure::kNoMatch;
+}
+
+// statement (continued)
+//   : return_stmt SEMICOLON
+//   | func_call_stmt SEMICOLON
+//   | variable_stmt SEMICOLON
+//   | break_stmt SEMICOLON
+//   | continue_stmt SEMICOLON
+//   | DISCARD SEMICOLON
+//   | assignment_stmt SEMICOLON
+Maybe<std::unique_ptr<ast::Statement>> ParserImpl::non_block_statement() {
+  auto stmt = [&]() -> Maybe<std::unique_ptr<ast::Statement>> {
+    auto ret_stmt = return_stmt();
+    if (ret_stmt.errored)
+      return Failure::kErrored;
+    if (ret_stmt.matched)
+      return std::move(ret_stmt.value);
+
+    auto func = func_call_stmt();
+    if (func.errored)
+      return Failure::kErrored;
+    if (func.matched)
+      return std::move(func.value);
+
+    auto var = variable_stmt();
+    if (var.errored)
+      return Failure::kErrored;
+    if (var.matched)
+      return std::move(var.value);
+
+    auto b = break_stmt();
+    if (b.errored)
+      return Failure::kErrored;
+    if (b.matched)
+      return std::move(b.value);
+
+    auto cont = continue_stmt();
+    if (cont.errored)
+      return Failure::kErrored;
+    if (cont.matched)
+      return std::move(cont.value);
+
+    auto assign = assignment_stmt();
+    if (assign.errored)
+      return Failure::kErrored;
+    if (assign.matched)
+      return std::move(assign.value);
+
+    Source source;
+    if (match(Token::Type::kDiscard, &source))
+      return std::make_unique<ast::DiscardStatement>(source);
+
+    return Failure::kNoMatch;
+  }();
+
+  if (stmt.matched && !expect(stmt->Name(), Token::Type::kSemicolon))
+    return Failure::kErrored;
+
+  return stmt;
 }
 
 // return_stmt

@@ -98,6 +98,52 @@ bool Statement::IsVariableDecl() const {
   return false;
 }
 
+const char* Statement::Name() const {
+  if (IsAssign()) {
+    return "assignment statement";
+  }
+  if (IsBlock()) {
+    return "block statement";
+  }
+  if (IsBreak()) {
+    return "break statement";
+  }
+  if (IsCase()) {
+    return "case statement";
+  }
+  if (IsCall()) {
+    return "function call";
+  }
+  if (IsContinue()) {
+    return "continue statement";
+  }
+  if (IsDiscard()) {
+    return "discard statement";
+  }
+  if (IsElse()) {
+    return "else statement";
+  }
+  if (IsFallthrough()) {
+    return "fallthrough statement";
+  }
+  if (IsIf()) {
+    return "if statement";
+  }
+  if (IsLoop()) {
+    return "loop statement";
+  }
+  if (IsReturn()) {
+    return "return statement";
+  }
+  if (IsSwitch()) {
+    return "switch statement";
+  }
+  if (IsVariableDecl()) {
+    return "variable declaration";
+  }
+  return "statement";
+}
+
 const AssignmentStatement* Statement::AsAssign() const {
   assert(IsAssign());
   return static_cast<const AssignmentStatement*>(this);

@@ -704,6 +704,7 @@ class ParserImpl {
 
   Expect<ast::type::Type*> expect_type(const std::string& use);
 
+  Maybe<std::unique_ptr<ast::Statement>> non_block_statement();
   Maybe<std::unique_ptr<ast::Statement>> for_header_initializer();
   Maybe<std::unique_ptr<ast::Statement>> for_header_continuing();
 
