@@ -169,6 +169,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "Math.h",
       "PlacementAllocated.h",
       "Platform.h",
+      "RefBase.h",
       "RefCounted.cpp",
       "RefCounted.h",
       "Result.cpp",

@@ -15,6 +15,8 @@
 #ifndef COMMON_REFCOUNTED_H_
 #define COMMON_REFCOUNTED_H_
 
+#include "common/RefBase.h"
+
 #include <atomic>
 #include <cstdint>
 
@@ -39,146 +41,21 @@ class RefCounted {
 };
 
 template <typename T>
-class Ref {
+struct RefCountedTraits {
+    using PointedType = T;
+    static constexpr T* kNullValue = nullptr;
+    static void Reference(T* value) {
+        value->Reference();
+    }
+    static void Release(T* value) {
+        value->Release();
+    }
+};
+
+template <typename T>
+class Ref : public RefBase<T*, RefCountedTraits<T>> {
   public:
-    Ref() = default;
-
-    constexpr Ref(std::nullptr_t) {
-    }
-
-    Ref& operator=(std::nullptr_t) {
-        Release();
-        mPointee = nullptr;
-        return *this;
-    }
-
-    template <typename U>
-    Ref(U* p) : mPointee(p) {
-        static_assert(std::is_convertible<U*, T*>::value, "");
-        Reference();
-    }
-
-    Ref(const Ref<T>& other) : mPointee(other.mPointee) {
-        Reference();
-    }
-    template <typename U>
-    Ref(const Ref<U>& other) : mPointee(other.mPointee) {
-        static_assert(std::is_convertible<U*, T*>::value, "");
-        Reference();
-    }
-
-    Ref<T>& operator=(const Ref<T>& other) {
-        if (&other == this)
-            return *this;
-
-        other.Reference();
-        Release();
-        mPointee = other.mPointee;
-
-        return *this;
-    }
-
-    template <typename U>
-    Ref<T>& operator=(const Ref<U>& other) {
-        static_assert(std::is_convertible<U*, T*>::value, "");
-
-        other.Reference();
-        Release();
-        mPointee = other.mPointee;
-
-        return *this;
-    }
-
-    template <typename U>
-    Ref(Ref<U>&& other) {
-        static_assert(std::is_convertible<U*, T*>::value, "");
-        mPointee = other.mPointee;
-        other.mPointee = nullptr;
-    }
-
-    Ref<T>& operator=(Ref<T>&& other) {
-        if (&other == this)
-            return *this;
-
-        Release();
-        mPointee = other.mPointee;
-        other.mPointee = nullptr;
-
-        return *this;
-    }
-    template <typename U>
-    Ref<T>& operator=(Ref<U>&& other) {
-        static_assert(std::is_convertible<U*, T*>::value, "");
-
-        Release();
-        mPointee = other.mPointee;
-        other.mPointee = nullptr;
-
-        return *this;
-    }
-
-    ~Ref() {
-        Release();
-        mPointee = nullptr;
-    }
-
-    bool operator==(const T* other) const {
-        return mPointee == other;
-    }
-
-    bool operator!=(const T* other) const {
-        return mPointee != other;
-    }
-
-    operator bool() {
-        return mPointee != nullptr;
-    }
-
-    const T& operator*() const {
-        return *mPointee;
-    }
-    T& operator*() {
-        return *mPointee;
-    }
-
-    const T* operator->() const {
-        return mPointee;
-    }
-    T* operator->() {
-        return mPointee;
-    }
-
-    const T* Get() const {
-        return mPointee;
-    }
-    T* Get() {
-        return mPointee;
-    }
-
-    T* Detach() {
-        T* pointee = mPointee;
-        mPointee = nullptr;
-        return pointee;
-    }
-
-  private:
-    // Friend is needed so that instances of Ref<U> can assign mPointee
-    // members of Ref<T>.
-    template <typename U>
-    friend class Ref;
-
-    void Reference() const {
-        if (mPointee != nullptr) {
-            mPointee->Reference();
-        }
-    }
-    void Release() const {
-        if (mPointee != nullptr) {
-            mPointee->Release();
-        }
-    }
-
-    T* mPointee = nullptr;
+    using RefBase<T*, RefCountedTraits<T>>::RefBase;
 };
 
 template <typename T>

@@ -43,14 +43,7 @@ class RCTest : public RefCounted {
 };
 
 struct RCTestDerived : public RCTest {
-    RCTestDerived() : RCTest() {
-    }
-
-    RCTestDerived(uint64_t payload) : RCTest(payload) {
-    }
-
-    RCTestDerived(bool* deleted) : RCTest(deleted) {
-    }
+    using RCTest::RCTest;
 };
 
 // Test that RCs start with one ref, and removing it destroys the object.

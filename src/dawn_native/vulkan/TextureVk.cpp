@@ -483,7 +483,7 @@ namespace dawn_native { namespace vulkan {
         Ref<Texture> texture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
         texture->InitializeForSwapChain(nativeImage);
-        return std::move(texture);
+        return texture;
     }
 
     MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
