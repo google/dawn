@@ -68,13 +68,17 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
   return result;
 }
 
-std::string Inspector::GetRemappedNamedForEntryPoint(
+std::string Inspector::GetRemappedNameForEntryPoint(
     const std::string& entry_point) {
-  auto* func = FindEntryPointByName(entry_point);
-  if (!func) {
-    return {};
-  }
-  return namer_.NameFor(entry_point);
+  // TODO(rharrison): Reenable once all of the backends are using the renamed
+  //                  entry points.
+
+  //  auto* func = FindEntryPointByName(entry_point);
+  //  if (!func) {
+  //    return {};
+  //  }
+  //  return namer_.NameFor(entry_point);
+  return entry_point;
 }
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {

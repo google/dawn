@@ -643,8 +643,8 @@ class InspectorHelper {
 
 class InspectorGetEntryPointTest : public InspectorHelper,
                                    public testing::Test {};
-class InspectorGetRemappedNamedForEntryPointTest : public InspectorHelper,
-                                                   public testing::Test {};
+class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
+                                                  public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
                                     public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
@@ -1000,35 +1000,44 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   EXPECT_EQ("out2_var", result[1].output_variables[0]);
 }
 
-TEST_F(InspectorGetRemappedNamedForEntryPointTest, NoFunctions) {
-  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
+  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_TRUE(inspector()->has_error());
 
   EXPECT_EQ("", result);
 }
 
-TEST_F(InspectorGetRemappedNamedForEntryPointTest, NoEntryPoints) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
   mod()->AddFunction(MakeEmptyBodyFunction("foo"));
 
-  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_TRUE(inspector()->has_error());
 
   EXPECT_EQ("", result);
 }
 
-TEST_F(InspectorGetRemappedNamedForEntryPointTest, OneEntryPoint) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
   auto foo = MakeEmptyBodyFunction("foo");
   foo->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
-  auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   EXPECT_EQ("tint_666f6f", result);
 }
 
-TEST_F(InspectorGetRemappedNamedForEntryPointTest, MultipleEntryPoints) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest,
+       DISABLED_MultipleEntryPoints) {
   auto foo = MakeEmptyBodyFunction("foo");
   foo->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kVertex, Source{}));
@@ -1040,12 +1049,12 @@ TEST_F(InspectorGetRemappedNamedForEntryPointTest, MultipleEntryPoints) {
   mod()->AddFunction(std::move(bar));
 
   {
-    auto result = inspector()->GetRemappedNamedForEntryPoint("foo");
+    auto result = inspector()->GetRemappedNameForEntryPoint("foo");
     ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
     EXPECT_EQ("tint_666f6f", result);
   }
   {
-    auto result = inspector()->GetRemappedNamedForEntryPoint("bar");
+    auto result = inspector()->GetRemappedNameForEntryPoint("bar");
     ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
     EXPECT_EQ("tint_626172", result);
   }

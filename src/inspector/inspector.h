@@ -81,7 +81,7 @@ class Inspector {
   /// @param entry_point name of the entry point to get the remapped version of
   /// @returns the remapped name of the entry point, or the empty string if it
   ///          isn't a known entry point.
-  std::string GetRemappedNamedForEntryPoint(const std::string& entry_point);
+  std::string GetRemappedNameForEntryPoint(const std::string& entry_point);
 
   /// @returns map of const_id to initial value
   std::map<uint32_t, Scalar> GetConstantIDs();
