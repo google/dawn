@@ -313,10 +313,13 @@ namespace dawn_native { namespace d3d12 {
         for (auto stage : IterateStages(renderStages)) {
             std::string hlslSource;
             const char* entryPoint = GetStage(stage).entryPoint.c_str();
+            std::string remappedEntryPoint;
 
             if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                 DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithTint(
-                                                entryPoint, stage, ToBackend(GetLayout())));
+                                                entryPoint, stage, ToBackend(GetLayout()),
+                                                &remappedEntryPoint));
+                entryPoint = remappedEntryPoint.c_str();
 
             } else {
                 DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithSPIRVCross(

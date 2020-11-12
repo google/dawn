@@ -180,9 +180,11 @@ namespace dawn_native { namespace d3d12 {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(const char* entryPointName,
-                                                                     SingleShaderStage stage,
-                                                                     PipelineLayout* layout) const {
+    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(
+        const char* entryPointName,
+        SingleShaderStage stage,
+        PipelineLayout* layout,
+        std::string* remappedEntryPointName) const {
         ASSERT(!IsError());
 
 #ifdef DAWN_ENABLE_WGSL
@@ -222,6 +224,10 @@ namespace dawn_native { namespace d3d12 {
                         << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
+
+        ASSERT(remappedEntryPointName != nullptr);
+        tint::inspector::Inspector inspector(module);
+        *remappedEntryPointName = inspector.GetRemappedNameForEntryPoint(entryPointName);
 
         tint::writer::hlsl::Generator generator(std::move(module));
         // TODO: Switch to GenerateEntryPoint once HLSL writer supports it.

@@ -44,11 +44,14 @@ namespace dawn_native { namespace d3d12 {
         ShaderModule* module = ToBackend(descriptor->computeStage.module);
 
         const char* entryPoint = descriptor->computeStage.entryPoint;
+        std::string remappedEntryPoint;
         std::string hlslSource;
         if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(hlslSource,
-                            module->TranslateToHLSLWithTint(entryPoint, SingleShaderStage::Compute,
-                                                            ToBackend(GetLayout())));
+            DAWN_TRY_ASSIGN(hlslSource, module->TranslateToHLSLWithTint(
+                                            entryPoint, SingleShaderStage::Compute,
+                                            ToBackend(GetLayout()), &remappedEntryPoint));
+            entryPoint = remappedEntryPoint.c_str();
+
         } else {
             DAWN_TRY_ASSIGN(hlslSource,
                             module->TranslateToHLSLWithSPIRVCross(
