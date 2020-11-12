@@ -154,6 +154,11 @@ class Function : public Node {
   /// @returns the referenced sampled textures
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_sampled_texture_variables() const;
+  /// Retrieves any referenced multisampled textures variables. Note, the
+  /// variables must be decorated with both binding and set decorations.
+  /// @returns the referenced sampled textures
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_multisampled_texture_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor
@@ -201,6 +206,8 @@ class Function : public Node {
   Function(const Function&) = delete;
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
   std::string name_;
   VariableList params_;

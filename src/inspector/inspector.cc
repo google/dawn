@@ -27,9 +27,14 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/access_control_type.h"
+#include "src/ast/type/array_type.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
+#include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/namer.h"
 
@@ -253,52 +258,12 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
 
 std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindings(
     const std::string& entry_point) {
-  auto* func = FindEntryPointByName(entry_point);
-  if (!func) {
-    return {};
-  }
+  return GetSampledTextureResourceBindingsImpl(entry_point, false);
+}
 
-  std::vector<ResourceBinding> result;
-
-  for (auto& rcs : func->referenced_sampled_texture_variables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = rcs;
-
-    entry.bind_group = binding_info.set->value();
-    entry.binding = binding_info.binding->value();
-
-    switch (var->type()->UnwrapIfNeeded()->AsTexture()->dim()) {
-      case ast::type::TextureDimension::k1d:
-        entry.dim = ResourceBinding::TextureDimension::k1d;
-        break;
-      case ast::type::TextureDimension::k1dArray:
-        entry.dim = ResourceBinding::TextureDimension::k1dArray;
-        break;
-      case ast::type::TextureDimension::k2d:
-        entry.dim = ResourceBinding::TextureDimension::k2d;
-        break;
-      case ast::type::TextureDimension::k2dArray:
-        entry.dim = ResourceBinding::TextureDimension::k2dArray;
-        break;
-      case ast::type::TextureDimension::k3d:
-        entry.dim = ResourceBinding::TextureDimension::k3d;
-        break;
-      case ast::type::TextureDimension::kCube:
-        entry.dim = ResourceBinding::TextureDimension::kCube;
-        break;
-      case ast::type::TextureDimension::kCubeArray:
-        entry.dim = ResourceBinding::TextureDimension::kCubeArray;
-        break;
-      default:
-        entry.dim = ResourceBinding::TextureDimension::kNone;
-        break;
-    }
-    result.push_back(std::move(entry));
-  }
-
-  return result;
+std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
+    const std::string& entry_point) {
+  return GetSampledTextureResourceBindingsImpl(entry_point, true);
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
@@ -347,6 +312,86 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
         ast::type::MemoryLayout::kStorageBuffer);
+
+    result.push_back(std::move(entry));
+  }
+
+  return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
+    const std::string& entry_point,
+    bool multisampled_only) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+  auto& referenced_variables =
+      multisampled_only ? func->referenced_multisampled_texture_variables()
+                        : func->referenced_sampled_texture_variables();
+  for (auto& ref : referenced_variables) {
+    ResourceBinding entry;
+    ast::Variable* var = nullptr;
+    ast::Function::BindingInfo binding_info;
+    std::tie(var, binding_info) = ref;
+
+    entry.bind_group = binding_info.set->value();
+    entry.binding = binding_info.binding->value();
+
+    auto* texture_type = var->type()->UnwrapIfNeeded()->AsTexture();
+    switch (texture_type->dim()) {
+      case ast::type::TextureDimension::k1d:
+        entry.dim = ResourceBinding::TextureDimension::k1d;
+        break;
+      case ast::type::TextureDimension::k1dArray:
+        entry.dim = ResourceBinding::TextureDimension::k1dArray;
+        break;
+      case ast::type::TextureDimension::k2d:
+        entry.dim = ResourceBinding::TextureDimension::k2d;
+        break;
+      case ast::type::TextureDimension::k2dArray:
+        entry.dim = ResourceBinding::TextureDimension::k2dArray;
+        break;
+      case ast::type::TextureDimension::k3d:
+        entry.dim = ResourceBinding::TextureDimension::k3d;
+        break;
+      case ast::type::TextureDimension::kCube:
+        entry.dim = ResourceBinding::TextureDimension::kCube;
+        break;
+      case ast::type::TextureDimension::kCubeArray:
+        entry.dim = ResourceBinding::TextureDimension::kCubeArray;
+        break;
+      default:
+        entry.dim = ResourceBinding::TextureDimension::kNone;
+        break;
+    }
+
+    ast::type::Type* base_type = nullptr;
+    if (multisampled_only) {
+      base_type = texture_type->AsMultisampled()->type()->UnwrapIfNeeded();
+    } else {
+      base_type = texture_type->AsSampled()->type()->UnwrapIfNeeded();
+    }
+
+    if (base_type->IsArray()) {
+      base_type = base_type->AsArray()->type();
+    } else if (base_type->IsMatrix()) {
+      base_type = base_type->AsMatrix()->type();
+    } else if (base_type->IsVector()) {
+      base_type = base_type->AsVector()->type();
+    }
+
+    if (base_type->IsF32()) {
+      entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
+    } else if (base_type->IsU32()) {
+      entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
+    } else if (base_type->IsI32()) {
+      entry.sampled_kind = ResourceBinding::SampledKind::kSInt;
+    } else {
+      entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;
+    }
 
     result.push_back(std::move(entry));
   }

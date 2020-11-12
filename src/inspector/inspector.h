@@ -52,6 +52,10 @@ struct ResourceBinding {
     kCubeArray,
   };
 
+  /// Component type of the texture's data. Same as the Sampled Type parameter
+  /// in SPIR-V OpTypeImage.
+  enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
+
   /// Bind group the binding belongs
   uint32_t bind_group;
   /// Identifier to identify this binding within the bind group
@@ -60,6 +64,8 @@ struct ResourceBinding {
   uint64_t min_buffer_binding_size;
   /// Dimensionality of this binding, if defined.
   TextureDimension dim;
+  /// Kind of data being sampled, if defined.
+  SampledKind sampled_kind;
 };
 
 /// Extracts information from a module
@@ -116,6 +122,11 @@ class Inspector {
   std::vector<ResourceBinding> GetSampledTextureResourceBindings(
       const std::string& entry_point);
 
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for multisampled textures.
+  std::vector<ResourceBinding> GetMultisampledTextureResourceBindings(
+      const std::string& entry_point);
+
  private:
   const ast::Module& module_;
   std::string error_;
@@ -133,6 +144,14 @@ class Inspector {
   std::vector<ResourceBinding> GetStorageBufferResourceBindingsImpl(
       const std::string& entry_point,
       bool read_only);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @param multisampled_only only get multisampled textures if true, otherwise
+  ///                          only get sampled textures.
+  /// @returns vector of all of the bindings for the request storage buffers.
+  std::vector<ResourceBinding> GetSampledTextureResourceBindingsImpl(
+      const std::string& entry_point,
+      bool multisampled_only);
 };
 
 }  // namespace inspector
