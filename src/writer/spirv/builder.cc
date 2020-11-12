@@ -419,8 +419,14 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
     return false;
   }
 
+  // TODO(dsinclair): This should be using the namer to update the entry point
+  // name to a non-user provided string. Disable for now until we can update
+  // the inspector and land the same change in MSL / HLSL to all roll into Dawn
+  // at the same time.
+  // OperandList operands = {Operand::Int(stage), Operand::Int(id),
+  //                         Operand::String(namer_.NameFor(func->name()))};
   OperandList operands = {Operand::Int(stage), Operand::Int(id),
-                          Operand::String(namer_.NameFor(func->name()))};
+                          Operand::String(func->name())};
 
   for (const auto* var : func->referenced_module_variables()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to

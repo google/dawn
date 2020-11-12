@@ -261,8 +261,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %7 "tint_61"
-OpEntryPoint GLCompute %17 "tint_62"
+OpEntryPoint GLCompute %7 "a"
+OpEntryPoint GLCompute %17 "b"
 OpExecutionMode %7 LocalSize 1 1 1
 OpExecutionMode %17 LocalSize 1 1 1
 OpName %3 "tint_44617461"
