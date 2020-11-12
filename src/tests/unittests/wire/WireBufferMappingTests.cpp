@@ -692,3 +692,12 @@ TEST_F(WireBufferMappingTests, MapThenDisconnect) {
     EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
     GetWireClient()->Disconnect();
 }
+
+// Test that registering a callback after wire disconnect calls the callback with
+// DeviceLost.
+TEST_F(WireBufferMappingTests, MapAfterDisconnect) {
+    GetWireClient()->Disconnect();
+
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
+    wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
+}

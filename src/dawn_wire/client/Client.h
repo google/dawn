@@ -60,6 +60,7 @@ namespace dawn_wire { namespace client {
         }
 
         void Disconnect();
+        bool IsDisconnected() const;
 
         void TrackObject(Device* device);
 
@@ -75,6 +76,7 @@ namespace dawn_wire { namespace client {
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
 
         LinkedList<ObjectBase> mDevices;
+        bool mDisconnected = false;
     };
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();

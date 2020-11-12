@@ -48,6 +48,10 @@ namespace dawn_wire { namespace client {
     void Fence::OnCompletion(uint64_t value,
                              WGPUFenceOnCompletionCallback callback,
                              void* userdata) {
+        if (device->GetClient()->IsDisconnected()) {
+            return callback(WGPUFenceCompletionStatus_DeviceLost, userdata);
+        }
+
         uint32_t serial = mOnCompletionRequestSerial++;
         ASSERT(mOnCompletionRequests.find(serial) == mOnCompletionRequests.end());
 

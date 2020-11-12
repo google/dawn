@@ -124,6 +124,10 @@ namespace dawn_wire { namespace client {
                           size_t size,
                           WGPUBufferMapCallback callback,
                           void* userdata) {
+        if (device->GetClient()->IsDisconnected()) {
+            return callback(WGPUBufferMapAsyncStatus_DeviceLost, userdata);
+        }
+
         // Handle the defaulting of size required by WebGPU.
         if (size == 0 && offset < mSize) {
             size = mSize - offset;

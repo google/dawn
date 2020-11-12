@@ -83,6 +83,7 @@ namespace dawn_wire { namespace client {
     }
 
     void Client::Disconnect() {
+        mDisconnected = true;
         mSerializer = ChunkedCommandSerializer(NoopCommandSerializer::GetInstance());
         if (mDevice != nullptr) {
             mDevice->HandleDeviceLost("GPU connection lost");
@@ -92,6 +93,10 @@ namespace dawn_wire { namespace client {
 
     void Client::TrackObject(Device* device) {
         mDevices.Append(device);
+    }
+
+    bool Client::IsDisconnected() const {
+        return mDisconnected;
     }
 
 }}  // namespace dawn_wire::client

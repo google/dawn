@@ -276,3 +276,55 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineThenDisconnect) {
         .Times(1);
     GetWireClient()->Disconnect();
 }
+
+// Test that registering a callback after wire disconnect calls the callback with
+// DeviceLost.
+TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineAfterDisconnect) {
+    WGPUShaderModuleDescriptor vertexDescriptor = {};
+    WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
+    WGPUShaderModule apiVsModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
+
+    WGPUProgrammableStageDescriptor fragmentStage = {};
+    fragmentStage.module = vsModule;
+    fragmentStage.entryPoint = "main";
+
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
+    pipelineDescriptor.vertexStage.module = vsModule;
+    pipelineDescriptor.vertexStage.entryPoint = "main";
+    pipelineDescriptor.fragmentStage = &fragmentStage;
+
+    FlushClient();
+
+    GetWireClient()->Disconnect();
+
+    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
+                Call(WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, _, this))
+        .Times(1);
+    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
+                                        ToMockCreateReadyRenderPipelineCallback, this);
+}
+
+// Test that registering a callback after wire disconnect calls the callback with
+// DeviceLost.
+TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineAfterDisconnect) {
+    WGPUShaderModuleDescriptor csDescriptor{};
+    WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
+    WGPUShaderModule apiCsModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
+
+    WGPUComputePipelineDescriptor descriptor{};
+    descriptor.computeStage.module = csModule;
+    descriptor.computeStage.entryPoint = "main";
+
+    FlushClient();
+
+    GetWireClient()->Disconnect();
+
+    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
+                Call(WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, _, this))
+        .Times(1);
+
+    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
+                                         ToMockCreateReadyComputePipelineCallback, this);
+}
