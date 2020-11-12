@@ -58,6 +58,8 @@ set(TINT_LIB_SRCS
   ast/bool_literal.cc
   ast/break_statement.cc
   ast/break_statement.h
+  ast/builder.cc
+  ast/builder.h
   ast/builtin.cc
   ast/builtin.h
   ast/builtin_decoration.cc

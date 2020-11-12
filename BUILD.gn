@@ -237,6 +237,8 @@ source_set("libtint_core_src") {
     "src/ast/bool_literal.h",
     "src/ast/break_statement.cc",
     "src/ast/break_statement.h",
+    "src/ast/builder.cc",
+    "src/ast/builder.h",
     "src/ast/builtin.cc",
     "src/ast/builtin.h",
     "src/ast/builtin_decoration.cc",
