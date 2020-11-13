@@ -238,6 +238,8 @@ namespace dawn_native {
         // still check if we have pending work to take care of, rather than hanging and never
         // reaching the serial the work will be executed on.
         void AddFutureSerial(ExecutionSerial serial);
+        // Check for passed fences and set the new completed serial
+        void CheckPassedSerials();
 
         virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
         virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
@@ -251,8 +253,6 @@ namespace dawn_native {
 
         // Incrememt mLastSubmittedSerial when we submit the next serial
         void IncrementLastSubmittedCommandSerial();
-        // Check for passed fences and set the new completed serial
-        void CheckPassedSerials();
 
       private:
         virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(

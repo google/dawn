@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "dawn_native/Device.h"
 #include "dawn_native/Toggles.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
@@ -230,13 +231,16 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
 
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
 
-    // Allocate + Tick() up to |kFrameDepth| and ensure heaps are always unique.
+    // Allocate + increment internal serials up to |kFrameDepth| and ensure heaps are always unique.
     for (uint32_t i = 0; i < kFrameDepth; i++) {
         EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
         ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.push_back(heap);
-        mD3DDevice->Tick();
+        // CheckPassedSerials() will update the last internally completed serial.
+        mD3DDevice->CheckPassedSerials();
+        // NextSerial() will increment the last internally submitted serial.
+        EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
 
     // Repeat up to |kFrameDepth| again but ensure heaps are the same in the expected order
@@ -247,7 +251,8 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(heaps.front() == heap);
         heaps.pop_front();
-        mD3DDevice->Tick();
+        mD3DDevice->CheckPassedSerials();
+        EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
 
     EXPECT_TRUE(heaps.empty());
