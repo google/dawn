@@ -24,8 +24,8 @@ namespace {
 using ArrayAccessorExpressionTest = TestHelper;
 
 TEST_F(ArrayAccessorExpressionTest, Create) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto ary = create<IdentifierExpression>("ary");
+  auto idx = create<IdentifierExpression>("idx");
 
   auto* ary_ptr = ary.get();
   auto* idx_ptr = idx.get();
@@ -35,8 +35,8 @@ TEST_F(ArrayAccessorExpressionTest, Create) {
   ASSERT_EQ(exp.idx_expr(), idx_ptr);
 }
 TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto ary = create<IdentifierExpression>("ary");
+  auto idx = create<IdentifierExpression>("idx");
 
   ArrayAccessorExpression exp(Source{Source::Location{20, 2}}, std::move(ary),
                               std::move(idx));
@@ -51,15 +51,15 @@ TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto ary = create<IdentifierExpression>("ary");
+  auto idx = create<IdentifierExpression>("idx");
 
   ArrayAccessorExpression exp(std::move(ary), std::move(idx));
   EXPECT_TRUE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto idx = create<IdentifierExpression>("idx");
 
   ArrayAccessorExpression exp;
   exp.set_idx_expr(std::move(idx));
@@ -67,7 +67,7 @@ TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
+  auto ary = create<IdentifierExpression>("ary");
 
   ArrayAccessorExpression exp;
   exp.set_array(std::move(ary));
@@ -75,22 +75,22 @@ TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidArray) {
-  auto ary = std::make_unique<IdentifierExpression>("");
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto ary = create<IdentifierExpression>("");
+  auto idx = create<IdentifierExpression>("idx");
   ArrayAccessorExpression exp(std::move(ary), std::move(idx));
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidIndex) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
-  auto idx = std::make_unique<IdentifierExpression>("");
+  auto ary = create<IdentifierExpression>("ary");
+  auto idx = create<IdentifierExpression>("");
   ArrayAccessorExpression exp(std::move(ary), std::move(idx));
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, ToStr) {
-  auto ary = std::make_unique<IdentifierExpression>("ary");
-  auto idx = std::make_unique<IdentifierExpression>("idx");
+  auto ary = create<IdentifierExpression>("ary");
+  auto idx = create<IdentifierExpression>("idx");
 
   ArrayAccessorExpression exp(std::move(ary), std::move(idx));
   std::ostringstream out;

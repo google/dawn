@@ -24,8 +24,8 @@ namespace {
 using AssignmentStatementTest = TestHelper;
 
 TEST_F(AssignmentStatementTest, Creation) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   auto* lhs_ptr = lhs.get();
   auto* rhs_ptr = rhs.get();
@@ -36,8 +36,8 @@ TEST_F(AssignmentStatementTest, Creation) {
 }
 
 TEST_F(AssignmentStatementTest, CreationWithSource) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(Source{Source::Location{20, 2}}, std::move(lhs),
                            std::move(rhs));
@@ -47,23 +47,23 @@ TEST_F(AssignmentStatementTest, CreationWithSource) {
 }
 
 TEST_F(AssignmentStatementTest, IsAssign) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   EXPECT_TRUE(stmt.IsAssign());
 }
 
 TEST_F(AssignmentStatementTest, IsValid) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt;
   stmt.set_rhs(std::move(rhs));
@@ -71,7 +71,7 @@ TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
 
   AssignmentStatement stmt;
   stmt.set_lhs(std::move(lhs));
@@ -79,22 +79,22 @@ TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidLHS) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidRHS) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("");
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, ToStr) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   std::ostringstream out;

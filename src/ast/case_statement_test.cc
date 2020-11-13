@@ -32,10 +32,10 @@ TEST_F(CaseStatementTest, Creation_i32) {
   ast::type::I32Type i32;
 
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   auto* int_ptr = b.back().get();
   auto* discard_ptr = body->get(0);
@@ -51,10 +51,10 @@ TEST_F(CaseStatementTest, Creation_u32) {
   ast::type::U32Type u32;
 
   CaseSelectorList b;
-  b.push_back(std::make_unique<UintLiteral>(&u32, 2));
+  b.push_back(create<UintLiteral>(&u32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   auto* int_ptr = b.back().get();
   auto* discard_ptr = body->get(0);
@@ -69,10 +69,10 @@ TEST_F(CaseStatementTest, Creation_u32) {
 TEST_F(CaseStatementTest, Creation_WithSource) {
   ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   CaseStatement c(Source{Source::Location{20, 2}}, std::move(b),
                   std::move(body));
@@ -82,8 +82,8 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   CaseStatement c;
   c.set_body(std::move(body));
@@ -93,7 +93,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
   CaseStatement c;
   c.set_selectors(std::move(b));
@@ -113,10 +113,10 @@ TEST_F(CaseStatementTest, IsValid) {
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   body->append(nullptr);
 
   CaseStatement c(std::move(b), std::move(body));
@@ -126,10 +126,10 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<IfStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<IfStatement>());
 
   CaseStatement c({std::move(b)}, std::move(body));
   EXPECT_FALSE(c.IsValid());
@@ -138,10 +138,10 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
 TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
   ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, -2));
+  b.push_back(create<SintLiteral>(&i32, -2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(body));
 
   std::ostringstream out;
@@ -155,10 +155,10 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
 TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   ast::type::U32Type u32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<UintLiteral>(&u32, 2));
+  b.push_back(create<UintLiteral>(&u32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(body));
 
   std::ostringstream out;
@@ -173,11 +173,11 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   ast::type::I32Type i32;
 
   CaseSelectorList b;
-  b.push_back(std::make_unique<SintLiteral>(&i32, 1));
-  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  b.push_back(create<SintLiteral>(&i32, 1));
+  b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   CaseStatement c(std::move(b), std::move(body));
 
   std::ostringstream out;
@@ -189,8 +189,8 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   CaseStatement c(CaseSelectorList{}, std::move(body));
 
   std::ostringstream out;

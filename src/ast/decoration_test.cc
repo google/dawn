@@ -42,7 +42,7 @@ TEST_F(DecorationTest, AsIncorrectType) {
 }
 
 TEST_F(DecorationTest, Is) {
-  auto decoration = std::make_unique<ConstantIdDecoration>(1, Source{});
+  auto decoration = create<ConstantIdDecoration>(1, Source{});
   EXPECT_TRUE(decoration->Is<VariableDecoration>());
   EXPECT_FALSE(decoration->Is<ArrayDecoration>());
 }

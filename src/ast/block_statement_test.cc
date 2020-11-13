@@ -28,7 +28,7 @@ namespace {
 using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
-  auto d = std::make_unique<DiscardStatement>();
+  auto d = create<DiscardStatement>();
   auto* ptr = d.get();
 
   BlockStatement b;
@@ -39,9 +39,9 @@ TEST_F(BlockStatementTest, Creation) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithInsert) {
-  auto s1 = std::make_unique<DiscardStatement>();
-  auto s2 = std::make_unique<DiscardStatement>();
-  auto s3 = std::make_unique<DiscardStatement>();
+  auto s1 = create<DiscardStatement>();
+  auto s2 = create<DiscardStatement>();
+  auto s3 = create<DiscardStatement>();
   auto* p1 = s1.get();
   auto* p2 = s2.get();
   auto* p3 = s3.get();
@@ -73,7 +73,7 @@ TEST_F(BlockStatementTest, IsBlock) {
 
 TEST_F(BlockStatementTest, IsValid) {
   BlockStatement b;
-  b.append(std::make_unique<DiscardStatement>());
+  b.append(create<DiscardStatement>());
   EXPECT_TRUE(b.IsValid());
 }
 
@@ -84,20 +84,20 @@ TEST_F(BlockStatementTest, IsValid_Empty) {
 
 TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
   BlockStatement b;
-  b.append(std::make_unique<DiscardStatement>());
+  b.append(create<DiscardStatement>());
   b.append(nullptr);
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
   BlockStatement b;
-  b.append(std::make_unique<IfStatement>());
+  b.append(create<IfStatement>());
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, ToStr) {
   BlockStatement b;
-  b.append(std::make_unique<DiscardStatement>());
+  b.append(create<DiscardStatement>());
 
   std::ostringstream out;
   b.to_str(out, 2);

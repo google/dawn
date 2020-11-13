@@ -115,58 +115,55 @@ class Builder {
   /// @return an IdentifierExpression with the given name
   std::unique_ptr<ast::IdentifierExpression> make_expr(
       const std::string& name) {
-    return std::make_unique<ast::IdentifierExpression>(name);
+    return create<ast::IdentifierExpression>(name);
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   std::unique_ptr<ast::IdentifierExpression> make_expr(const char* name) {
-    return std::make_unique<ast::IdentifierExpression>(name);
+    return create<ast::IdentifierExpression>(name);
   }
 
   /// @param value the float value
   /// @return a Scalar constructor for the given value
   std::unique_ptr<ast::ScalarConstructorExpression> make_expr(float value) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        make_literal(value));
+    return create<ast::ScalarConstructorExpression>(make_literal(value));
   }
 
   /// @param value the int value
   /// @return a Scalar constructor for the given value
   std::unique_ptr<ast::ScalarConstructorExpression> make_expr(int32_t value) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        make_literal(value));
+    return create<ast::ScalarConstructorExpression>(make_literal(value));
   }
 
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
   std::unique_ptr<ast::ScalarConstructorExpression> make_expr(uint32_t value) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        make_literal(value));
+    return create<ast::ScalarConstructorExpression>(make_literal(value));
   }
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
   std::unique_ptr<ast::BoolLiteral> make_literal(bool val) {
-    return std::make_unique<ast::BoolLiteral>(bool_type(), val);
+    return create<ast::BoolLiteral>(bool_type(), val);
   }
 
   /// @param val the float value
   /// @return a float literal with the given value
   std::unique_ptr<ast::FloatLiteral> make_literal(float val) {
-    return std::make_unique<ast::FloatLiteral>(f32(), val);
+    return create<ast::FloatLiteral>(f32(), val);
   }
 
   /// @param val the unsigned int value
   /// @return a UintLiteral with the given value
   std::unique_ptr<ast::UintLiteral> make_literal(uint32_t val) {
-    return std::make_unique<ast::UintLiteral>(u32(), val);
+    return create<ast::UintLiteral>(u32(), val);
   }
 
   /// @param val the integer value
   /// @return the SintLiteral with the given value
   std::unique_ptr<ast::SintLiteral> make_literal(int32_t val) {
-    return std::make_unique<ast::SintLiteral>(i32(), val);
+    return create<ast::SintLiteral>(i32(), val);
   }
 
   /// Converts `arg` to an `ast::Expression` using `make_expr()`, then appends
@@ -198,8 +195,7 @@ class Builder {
                                                             ARGS&&... args) {
     ast::ExpressionList vals;
     append_expr(vals, std::forward<ARGS>(args)...);
-    return std::make_unique<ast::TypeConstructorExpression>(ty,
-                                                            std::move(vals));
+    return create<ast::TypeConstructorExpression>(ty, std::move(vals));
   }
 
   /// @param name the variable name
@@ -219,6 +215,13 @@ class Builder {
     ast::ExpressionList params;
     append_expr(params, std::forward<ARGS>(args)...);
     return ast::CallExpression{make_expr(func), std::move(params)};
+  }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
   }
 
  private:

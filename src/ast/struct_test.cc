@@ -33,7 +33,7 @@ TEST_F(StructTest, Creation) {
   type::I32Type i32;
   StructMemberList members;
   members.push_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
@@ -49,10 +49,10 @@ TEST_F(StructTest, Creation_WithDecorations) {
 
   StructMemberList members;
   members.push_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>(Source{}));
 
   Struct s{std::move(decos), std::move(members)};
   EXPECT_EQ(s.members().size(), 1u);
@@ -69,10 +69,10 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
 
   StructMemberList members;
   members.emplace_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>(Source{}));
 
   Struct s{
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
@@ -96,7 +96,7 @@ TEST_F(StructTest, IsValid_Null_StructMember) {
 
   StructMemberList members;
   members.push_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", &i32, StructMemberDecorationList()));
   members.push_back(nullptr);
 
   Struct s{std::move(members)};
@@ -108,7 +108,7 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
 
   StructMemberList members;
   members.push_back(
-      std::make_unique<StructMember>("", &i32, StructMemberDecorationList()));
+      create<StructMember>("", &i32, StructMemberDecorationList()));
 
   Struct s{std::move(members)};
   EXPECT_FALSE(s.IsValid());
@@ -119,10 +119,10 @@ TEST_F(StructTest, ToStr) {
 
   StructMemberList members;
   members.emplace_back(
-      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
-  decos.push_back(std::make_unique<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>(Source{}));
 
   Struct s{std::move(decos), std::move(members)};
 

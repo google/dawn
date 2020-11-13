@@ -80,7 +80,7 @@ TEST_F(VariableTest, IsValid) {
 TEST_F(VariableTest, IsValid_WithConstructor) {
   type::I32Type t;
   Variable v{"my_var", StorageClass::kNone, &t};
-  v.set_constructor(std::make_unique<IdentifierExpression>("ident"));
+  v.set_constructor(create<IdentifierExpression>("ident"));
   EXPECT_TRUE(v.IsValid());
 }
 
@@ -103,7 +103,7 @@ TEST_F(VariableTest, IsValid_MissingBoth) {
 TEST_F(VariableTest, IsValid_InvalidConstructor) {
   type::I32Type t;
   Variable v{"my_var", StorageClass::kNone, &t};
-  v.set_constructor(std::make_unique<IdentifierExpression>(""));
+  v.set_constructor(create<IdentifierExpression>(""));
   EXPECT_FALSE(v.IsValid());
 }
 

@@ -25,8 +25,8 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-  auto expr = std::make_unique<ast::CallExpression>(
-      std::make_unique<ast::IdentifierExpression>("func"), ExpressionList{});
+  auto expr = create<ast::CallExpression>(
+      create<ast::IdentifierExpression>("func"), ExpressionList{});
   auto* expr_ptr = expr.get();
 
   CallStatement c(std::move(expr));
@@ -39,8 +39,8 @@ TEST_F(CallStatementTest, IsCall) {
 }
 
 TEST_F(CallStatementTest, IsValid) {
-  CallStatement c(std::make_unique<ast::CallExpression>(
-      std::make_unique<ast::IdentifierExpression>("func"), ExpressionList{}));
+  CallStatement c(create<ast::CallExpression>(
+      create<ast::IdentifierExpression>("func"), ExpressionList{}));
   EXPECT_TRUE(c.IsValid());
 }
 
@@ -50,13 +50,13 @@ TEST_F(CallStatementTest, IsValid_MissingExpr) {
 }
 
 TEST_F(CallStatementTest, IsValid_InvalidExpr) {
-  CallStatement c(std::make_unique<ast::CallExpression>());
+  CallStatement c(create<ast::CallExpression>());
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CallStatementTest, ToStr) {
-  CallStatement c(std::make_unique<ast::CallExpression>(
-      std::make_unique<ast::IdentifierExpression>("func"), ExpressionList{}));
+  CallStatement c(create<ast::CallExpression>(
+      create<ast::IdentifierExpression>("func"), ExpressionList{}));
 
   std::ostringstream out;
   c.to_str(out, 2);

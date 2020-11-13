@@ -29,10 +29,10 @@ using ElseStatementTest = TestHelper;
 
 TEST_F(ElseStatementTest, Creation) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ScalarConstructorExpression>(
-      std::make_unique<BoolLiteral>(&bool_type, true));
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto cond = create<ScalarConstructorExpression>(
+      create<BoolLiteral>(&bool_type, true));
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   auto* cond_ptr = cond.get();
   auto* discard_ptr = body->get(0);
@@ -44,8 +44,7 @@ TEST_F(ElseStatementTest, Creation) {
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
-  ElseStatement e(Source{Source::Location{20, 2}},
-                  std::make_unique<BlockStatement>());
+  ElseStatement e(Source{Source::Location{20, 2}}, create<BlockStatement>());
   auto src = e.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -58,9 +57,9 @@ TEST_F(ElseStatementTest, IsElse) {
 
 TEST_F(ElseStatementTest, HasCondition) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ScalarConstructorExpression>(
-      std::make_unique<BoolLiteral>(&bool_type, true));
-  ElseStatement e(std::move(cond), std::make_unique<BlockStatement>());
+  auto cond = create<ScalarConstructorExpression>(
+      create<BoolLiteral>(&bool_type, true));
+  ElseStatement e(std::move(cond), create<BlockStatement>());
   EXPECT_TRUE(e.HasCondition());
 }
 
@@ -75,16 +74,16 @@ TEST_F(ElseStatementTest, IsValid) {
 }
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(body));
   EXPECT_TRUE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
   body->append(nullptr);
 
   ElseStatement e(std::move(body));
@@ -92,14 +91,14 @@ TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
-  auto cond = std::make_unique<ScalarConstructorExpression>();
-  ElseStatement e(std::move(cond), std::make_unique<BlockStatement>());
+  auto cond = create<ScalarConstructorExpression>();
+  ElseStatement e(std::move(cond), create<BlockStatement>());
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<IfStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<IfStatement>());
 
   ElseStatement e(std::move(body));
   EXPECT_FALSE(e.IsValid());
@@ -107,10 +106,10 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(ElseStatementTest, ToStr) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ScalarConstructorExpression>(
-      std::make_unique<BoolLiteral>(&bool_type, true));
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto cond = create<ScalarConstructorExpression>(
+      create<BoolLiteral>(&bool_type, true));
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(cond), std::move(body));
   std::ostringstream out;
@@ -127,8 +126,8 @@ TEST_F(ElseStatementTest, ToStr) {
 }
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  auto body = std::make_unique<BlockStatement>();
-  body->append(std::make_unique<DiscardStatement>());
+  auto body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(body));
   std::ostringstream out;

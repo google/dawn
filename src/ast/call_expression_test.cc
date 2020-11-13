@@ -24,10 +24,10 @@ namespace {
 using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, Creation) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   ExpressionList params;
-  params.push_back(std::make_unique<IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<IdentifierExpression>("param2"));
+  params.push_back(create<IdentifierExpression>("param1"));
+  params.push_back(create<IdentifierExpression>("param2"));
 
   auto* func_ptr = func.get();
   auto* param1_ptr = params[0].get();
@@ -43,7 +43,7 @@ TEST_F(CallExpressionTest, Creation) {
 }
 
 TEST_F(CallExpressionTest, Creation_WithSource) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   CallExpression stmt(Source{Source::Location{20, 2}}, std::move(func), {});
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -51,13 +51,13 @@ TEST_F(CallExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(CallExpressionTest, IsCall) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   EXPECT_TRUE(stmt.IsCall());
 }
 
 TEST_F(CallExpressionTest, IsValid) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   EXPECT_TRUE(stmt.IsValid());
 }
@@ -68,36 +68,36 @@ TEST_F(CallExpressionTest, IsValid_MissingFunction) {
 }
 
 TEST_F(CallExpressionTest, IsValid_NullParam) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   ExpressionList params;
-  params.push_back(std::make_unique<IdentifierExpression>("param1"));
+  params.push_back(create<IdentifierExpression>("param1"));
   params.push_back(nullptr);
-  params.push_back(std::make_unique<IdentifierExpression>("param2"));
+  params.push_back(create<IdentifierExpression>("param2"));
 
   CallExpression stmt(std::move(func), std::move(params));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
-  auto func = std::make_unique<IdentifierExpression>("");
+  auto func = create<IdentifierExpression>("");
   ExpressionList params;
-  params.push_back(std::make_unique<IdentifierExpression>("param1"));
+  params.push_back(create<IdentifierExpression>("param1"));
 
   CallExpression stmt(std::move(func), std::move(params));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidParam) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   ExpressionList params;
-  params.push_back(std::make_unique<IdentifierExpression>(""));
+  params.push_back(create<IdentifierExpression>(""));
 
   CallExpression stmt(std::move(func), std::move(params));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(CallExpressionTest, ToStr_NoParams) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   std::ostringstream out;
   stmt.to_str(out, 2);
@@ -110,10 +110,10 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
 }
 
 TEST_F(CallExpressionTest, ToStr_WithParams) {
-  auto func = std::make_unique<IdentifierExpression>("func");
+  auto func = create<IdentifierExpression>("func");
   ExpressionList params;
-  params.push_back(std::make_unique<IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<IdentifierExpression>("param2"));
+  params.push_back(create<IdentifierExpression>("param1"));
+  params.push_back(create<IdentifierExpression>("param2"));
 
   CallExpression stmt(std::move(func), std::move(params));
   std::ostringstream out;

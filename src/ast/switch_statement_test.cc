@@ -32,12 +32,12 @@ TEST_F(SwitchStatementTest, Creation) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 1));
+  lit.push_back(create<SintLiteral>(&i32, 1));
 
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
   auto* ident_ptr = ident.get();
   auto* case_ptr = body[0].get();
@@ -49,7 +49,7 @@ TEST_F(SwitchStatementTest, Creation) {
 }
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
 
   SwitchStatement stmt(Source{Source::Location{20, 2}}, std::move(ident),
                        CaseStatementList());
@@ -67,12 +67,12 @@ TEST_F(SwitchStatementTest, IsValid) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_TRUE(stmt.IsValid());
@@ -82,11 +82,11 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(&i32, 2));
 
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
   SwitchStatement stmt;
   stmt.set_body(std::move(body));
@@ -97,12 +97,12 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = std::make_unique<IdentifierExpression>("");
+  auto ident = create<IdentifierExpression>("");
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -112,12 +112,12 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
   body.push_back(nullptr);
 
   SwitchStatement stmt(std::move(ident), std::move(body));
@@ -125,21 +125,21 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
 
-  auto case_body = std::make_unique<ast::BlockStatement>();
+  auto case_body = create<ast::BlockStatement>();
   case_body->append(nullptr);
 
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(CaseSelectorList{},
-                                                 std::move(case_body)));
+  body.push_back(
+      create<CaseStatement>(CaseSelectorList{}, std::move(case_body)));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(SwitchStatementTest, ToStr_Empty) {
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
 
   SwitchStatement stmt(std::move(ident), {});
   std::ostringstream out;
@@ -156,12 +156,12 @@ TEST_F(SwitchStatementTest, ToStr) {
   ast::type::I32Type i32;
 
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = std::make_unique<IdentifierExpression>("ident");
+  auto ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::make_unique<ast::BlockStatement>()));
+  body.push_back(
+      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   std::ostringstream out;

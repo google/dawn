@@ -37,8 +37,7 @@ TEST_F(FunctionTest, Creation) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
   auto* var_ptr = params[0].get();
 
   Function f("func", std::move(params), &void_type);
@@ -53,8 +52,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
   Function f(Source{Source::Location{20, 2}}, "func", std::move(params),
              &void_type);
@@ -89,25 +87,25 @@ TEST_F(FunctionTest, GetReferenceLocations) {
 
   VariableDecorationList decos;
   DecoratedVariable loc1(
-      std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
+      create<ast::Variable>("loc1", StorageClass::kInput, &i32));
+  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   loc1.set_decorations(std::move(decos));
 
   DecoratedVariable loc2(
-      std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
+      create<ast::Variable>("loc2", StorageClass::kInput, &i32));
+  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   loc2.set_decorations(std::move(decos));
 
   DecoratedVariable builtin1(
-      std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-      ast::Builtin::kPosition, Source{}));
+      create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+  decos.push_back(
+      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
   builtin1.set_decorations(std::move(decos));
 
   DecoratedVariable builtin2(
-      std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-      ast::Builtin::kFragDepth, Source{}));
+      create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+  decos.push_back(
+      create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   builtin2.set_decorations(std::move(decos));
 
   Function f("func", VariableList{}, &void_type);
@@ -132,25 +130,25 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
 
   VariableDecorationList decos;
   DecoratedVariable loc1(
-      std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
+      create<ast::Variable>("loc1", StorageClass::kInput, &i32));
+  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   loc1.set_decorations(std::move(decos));
 
   DecoratedVariable loc2(
-      std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
+      create<ast::Variable>("loc2", StorageClass::kInput, &i32));
+  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   loc2.set_decorations(std::move(decos));
 
   DecoratedVariable builtin1(
-      std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-      ast::Builtin::kPosition, Source{}));
+      create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+  decos.push_back(
+      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
   builtin1.set_decorations(std::move(decos));
 
   DecoratedVariable builtin2(
-      std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-      ast::Builtin::kFragDepth, Source{}));
+      create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+  decos.push_back(
+      create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   builtin2.set_decorations(std::move(decos));
 
   Function f("func", VariableList{}, &void_type);
@@ -187,11 +185,10 @@ TEST_F(FunctionTest, IsValid) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
   f.set_body(std::move(block));
@@ -203,8 +200,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
   Function f("", std::move(params), &void_type);
   EXPECT_FALSE(f.IsValid());
@@ -214,8 +210,7 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
   Function f("func", std::move(params), nullptr);
   EXPECT_FALSE(f.IsValid());
@@ -226,8 +221,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
   params.push_back(nullptr);
 
   Function f("func", std::move(params), &void_type);
@@ -238,8 +232,7 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
   type::VoidType void_type;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, nullptr));
+  params.push_back(create<Variable>("var", StorageClass::kNone, nullptr));
 
   Function f("func", std::move(params), &void_type);
   EXPECT_FALSE(f.IsValid());
@@ -250,11 +243,10 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
   block->append(nullptr);
 
   Function f("func", std::move(params), &void_type);
@@ -267,11 +259,10 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
   block->append(nullptr);
 
   Function f("func", std::move(params), &void_type);
@@ -283,8 +274,8 @@ TEST_F(FunctionTest, ToStr) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type);
   f.set_body(std::move(block));
@@ -303,12 +294,12 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type);
   f.set_body(std::move(block));
-  f.add_decoration(std::make_unique<WorkgroupDecoration>(2, 4, 6, Source{}));
+  f.add_decoration(create<WorkgroupDecoration>(2, 4, 6, Source{}));
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -326,11 +317,10 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   type::I32Type i32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<DiscardStatement>());
+  auto block = create<ast::BlockStatement>();
+  block->append(create<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type);
   f.set_body(std::move(block));
@@ -364,10 +354,8 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   type::F32Type f32;
 
   VariableList params;
-  params.push_back(
-      std::make_unique<Variable>("var1", StorageClass::kNone, &i32));
-  params.push_back(
-      std::make_unique<Variable>("var2", StorageClass::kNone, &f32));
+  params.push_back(create<Variable>("var1", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>("var2", StorageClass::kNone, &f32));
 
   Function f("func", std::move(params), &void_type);
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
@@ -377,8 +365,8 @@ TEST_F(FunctionTest, GetLastStatement) {
   type::VoidType void_type;
 
   VariableList params;
-  auto body = std::make_unique<ast::BlockStatement>();
-  auto stmt = std::make_unique<DiscardStatement>();
+  auto body = create<ast::BlockStatement>();
+  auto stmt = create<DiscardStatement>();
   auto* stmt_ptr = stmt.get();
   body->append(std::move(stmt));
   Function f("func", std::move(params), &void_type);
@@ -391,7 +379,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
   type::VoidType void_type;
 
   VariableList params;
-  auto body = std::make_unique<ast::BlockStatement>();
+  auto body = create<ast::BlockStatement>();
   Function f("func", std::move(params), &void_type);
   f.set_body(std::move(body));
 
@@ -413,7 +401,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 TEST_F(FunctionTest, WorkgroupSize) {
   type::VoidType void_type;
   Function f("f", {}, &void_type);
-  f.add_decoration(std::make_unique<WorkgroupDecoration>(2u, 4u, 6u, Source{}));
+  f.add_decoration(create<WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
   uint32_t x = 0;
   uint32_t y = 0;

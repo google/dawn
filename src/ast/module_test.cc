@@ -48,7 +48,7 @@ TEST_F(ModuleTest, LookupFunction) {
   type::F32Type f32;
   Module m;
 
-  auto func = std::make_unique<Function>("main", VariableList{}, &f32);
+  auto func = create<Function>("main", VariableList{}, &f32);
   auto* func_ptr = func.get();
   m.AddFunction(std::move(func));
   EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
@@ -66,7 +66,7 @@ TEST_F(ModuleTest, IsValid_Empty) {
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("var", StorageClass::kInput, &f32);
+  auto var = create<Variable>("var", StorageClass::kInput, &f32);
 
   Module m;
   m.AddGlobalVariable(std::move(var));
@@ -80,7 +80,7 @@ TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  auto var = std::make_unique<Variable>("var", StorageClass::kInput, nullptr);
+  auto var = create<Variable>("var", StorageClass::kInput, nullptr);
 
   Module m;
   m.AddGlobalVariable(std::move(var));
@@ -124,7 +124,7 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 
 TEST_F(ModuleTest, IsValid_Function) {
   type::F32Type f32;
-  auto func = std::make_unique<Function>("main", VariableList(), &f32);
+  auto func = create<Function>("main", VariableList(), &f32);
 
   Module m;
   m.AddFunction(std::move(func));
@@ -138,7 +138,7 @@ TEST_F(ModuleTest, IsValid_Null_Function) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_Function) {
-  auto func = std::make_unique<Function>();
+  auto func = create<Function>();
 
   Module m;
   m.AddFunction(std::move(func));

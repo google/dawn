@@ -32,7 +32,7 @@ using TypeConstructorExpressionTest = TestHelper;
 TEST_F(TypeConstructorExpressionTest, Creation) {
   type::F32Type f32;
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr"));
+  expr.push_back(create<IdentifierExpression>("expr"));
   auto* expr_ptr = expr[0].get();
 
   TypeConstructorExpression t(&f32, std::move(expr));
@@ -44,7 +44,7 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
 TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
   type::F32Type f32;
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr"));
+  expr.push_back(create<IdentifierExpression>("expr"));
 
   TypeConstructorExpression t(Source{Source::Location{20, 2}}, &f32,
                               std::move(expr));
@@ -61,7 +61,7 @@ TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
 TEST_F(TypeConstructorExpressionTest, IsValid) {
   type::F32Type f32;
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr"));
+  expr.push_back(create<IdentifierExpression>("expr"));
 
   TypeConstructorExpression t(&f32, std::move(expr));
   EXPECT_TRUE(t.IsValid());
@@ -77,7 +77,7 @@ TEST_F(TypeConstructorExpressionTest, IsValid_EmptyValue) {
 
 TEST_F(TypeConstructorExpressionTest, IsValid_NullType) {
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr"));
+  expr.push_back(create<IdentifierExpression>("expr"));
 
   TypeConstructorExpression t;
   t.set_values(std::move(expr));
@@ -87,7 +87,7 @@ TEST_F(TypeConstructorExpressionTest, IsValid_NullType) {
 TEST_F(TypeConstructorExpressionTest, IsValid_NullValue) {
   type::F32Type f32;
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr"));
+  expr.push_back(create<IdentifierExpression>("expr"));
   expr.push_back(nullptr);
 
   TypeConstructorExpression t(&f32, std::move(expr));
@@ -97,7 +97,7 @@ TEST_F(TypeConstructorExpressionTest, IsValid_NullValue) {
 TEST_F(TypeConstructorExpressionTest, IsValid_InvalidValue) {
   type::F32Type f32;
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>(""));
+  expr.push_back(create<IdentifierExpression>(""));
 
   TypeConstructorExpression t(&f32, std::move(expr));
   EXPECT_FALSE(t.IsValid());
@@ -107,9 +107,9 @@ TEST_F(TypeConstructorExpressionTest, ToStr) {
   type::F32Type f32;
   type::VectorType vec(&f32, 3);
   ExpressionList expr;
-  expr.push_back(std::make_unique<IdentifierExpression>("expr_1"));
-  expr.push_back(std::make_unique<IdentifierExpression>("expr_2"));
-  expr.push_back(std::make_unique<IdentifierExpression>("expr_3"));
+  expr.push_back(create<IdentifierExpression>("expr_1"));
+  expr.push_back(create<IdentifierExpression>("expr_2"));
+  expr.push_back(create<IdentifierExpression>("expr_3"));
 
   TypeConstructorExpression t(&vec, std::move(expr));
   std::ostringstream out;

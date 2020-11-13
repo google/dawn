@@ -26,7 +26,7 @@ using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
+  auto var = create<Variable>("a", StorageClass::kNone, &f32);
   auto* var_ptr = var.get();
 
   VariableDeclStatement stmt(std::move(var));
@@ -35,7 +35,7 @@ TEST_F(VariableDeclStatementTest, Creation) {
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
+  auto var = create<Variable>("a", StorageClass::kNone, &f32);
 
   VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
   auto src = stmt.source();
@@ -50,14 +50,14 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
 
 TEST_F(VariableDeclStatementTest, IsValid) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
+  auto var = create<Variable>("a", StorageClass::kNone, &f32);
   VariableDeclStatement stmt(std::move(var));
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("", StorageClass::kNone, &f32);
+  auto var = create<Variable>("", StorageClass::kNone, &f32);
   VariableDeclStatement stmt(std::move(var));
   EXPECT_FALSE(stmt.IsValid());
 }
@@ -69,7 +69,7 @@ TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
 
 TEST_F(VariableDeclStatementTest, ToStr) {
   type::F32Type f32;
-  auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
+  auto var = create<Variable>("a", StorageClass::kNone, &f32);
 
   VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
   std::ostringstream out;
