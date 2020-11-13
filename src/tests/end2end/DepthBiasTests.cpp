@@ -36,35 +36,50 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::Flat:
                 // Draw a square at z = 0.25
                 vertexSource = R"(
-    #version 450
-    void main() {
-        const vec2 pos[6] = vec2[6](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f,  1.f),
-                                    vec2(-1.f,  1.f), vec2(1.f, -1.f), vec2( 1.f,  1.f));
-        gl_Position = vec4(pos[gl_VertexIndex], 0.25f, 1.f);
+    [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
+    [[builtin(position)]] var<out> Position : vec4<f32>;
+    [[stage(vertex)]]
+    fn main() -> void {
+        const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            vec2<f32>(-1.0, -1.0),
+            vec2<f32>( 1.0, -1.0),
+            vec2<f32>(-1.0,  1.0),
+            vec2<f32>(-1.0,  1.0),
+            vec2<f32>( 1.0, -1.0),
+            vec2<f32>( 1.0,  1.0));
+        Position = vec4<f32>(pos[VertexIndex], 0.25, 1.0);
+        return;
     })";
                 break;
 
             case QuadAngle::TiltedX:
                 // Draw a square ranging from 0 to 0.5, bottom to top
                 vertexSource = R"(
-    #version 450
-    void main() {
-        const vec3 pos[6] = vec3[6](vec3(-1.f, -1.f, 0.f ), vec3(1.f, -1.f, 0.f), vec3(-1.f,  1.f, 0.5f),
-                                    vec3(-1.f,  1.f, 0.5f), vec3(1.f, -1.f, 0.f), vec3( 1.f,  1.f, 0.5f));
-        gl_Position = vec4(pos[gl_VertexIndex], 1.f);
+    [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
+    [[builtin(position)]] var<out> Position : vec4<f32>;
+    [[stage(vertex)]]
+    fn main() -> void {
+        const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
+            vec3<f32>(-1.0, -1.0, 0.0),
+            vec3<f32>( 1.0, -1.0, 0.0),
+            vec3<f32>(-1.0,  1.0, 0.5),
+            vec3<f32>(-1.0,  1.0, 0.5),
+            vec3<f32>( 1.0, -1.0, 0.0),
+            vec3<f32>( 1.0,  1.0, 0.5));
+        Position = vec4<f32>(pos[VertexIndex], 1.0);
+        return;
     })";
                 break;
         }
 
-        wgpu::ShaderModule vertexModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexSource);
+        wgpu::ShaderModule vertexModule = utils::CreateShaderModuleFromWGSL(device, vertexSource);
 
-        wgpu::ShaderModule fragmentModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-    #version 450
-    layout(location = 0) out vec4 fragColor;
-    void main() {
-        fragColor = vec4(1.f, 0.f, 0.f, 1.f);
+        wgpu::ShaderModule fragmentModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    [[location(0)]] var<out> fragColor : vec4<f32>;;
+    [[stage(fragment)]]
+    fn main() -> void {
+        fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        return;
     })");
 
         {
