@@ -34,8 +34,8 @@ namespace {
 using HlslGeneratorImplTest_Loop = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
   gen.increment_indent();
@@ -48,11 +48,11 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
 
-  auto continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::ReturnStatement>());
+  auto continuing = create<ast::BlockStatement>();
+  continuing->append(create<ast::ReturnStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
   gen.increment_indent();
@@ -75,24 +75,24 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
 
-  auto continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::ReturnStatement>());
+  auto continuing = create<ast::BlockStatement>();
+  continuing->append(create<ast::ReturnStatement>());
 
-  auto inner = std::make_unique<ast::LoopStatement>(std::move(body),
-                                                    std::move(continuing));
+  auto inner =
+      create<ast::LoopStatement>(std::move(body), std::move(continuing));
 
-  body = std::make_unique<ast::BlockStatement>();
+  body = create<ast::BlockStatement>();
   body->append(std::move(inner));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
-  continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::AssignmentStatement>(
-      std::move(lhs), std::move(rhs)));
+  continuing = create<ast::BlockStatement>();
+  continuing->append(
+      create<ast::AssignmentStatement>(std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
   gen.increment_indent();
@@ -146,23 +146,21 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
   ast::type::F32Type f32;
 
-  auto var = std::make_unique<ast::Variable>(
-      "lhs", ast::StorageClass::kFunction, &f32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  auto var = create<ast::Variable>("lhs", ast::StorageClass::kFunction, &f32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.4)));
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  body->append(std::make_unique<ast::VariableDeclStatement>(
-      std::make_unique<ast::Variable>("other", ast::StorageClass::kFunction,
-                                      &f32)));
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>("other", ast::StorageClass::kFunction, &f32)));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
 
-  auto continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::AssignmentStatement>(
-      std::move(lhs), std::move(rhs)));
+  auto continuing = create<ast::BlockStatement>();
+  continuing->append(
+      create<ast::AssignmentStatement>(std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
   gen.increment_indent();

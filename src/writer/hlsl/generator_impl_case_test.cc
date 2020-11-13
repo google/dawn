@@ -33,11 +33,11 @@ using HlslGeneratorImplTest_Case = TestHelper;
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   ast::type::I32Type i32;
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::BreakStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
   gen.increment_indent();
@@ -53,8 +53,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
   ast::type::I32Type i32;
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
-  ast::CaseStatement c(std::move(lit), std::make_unique<ast::BlockStatement>());
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  ast::CaseStatement c(std::move(lit), create<ast::BlockStatement>());
 
   gen.increment_indent();
 
@@ -68,11 +68,11 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   ast::type::I32Type i32;
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::FallthroughStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::FallthroughStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
   gen.increment_indent();
@@ -87,12 +87,12 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::BreakStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
-  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 6));
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(&i32, 6));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
   gen.increment_indent();
@@ -108,8 +108,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
   ast::CaseStatement c;
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::BreakStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::BreakStatement>());
   c.set_body(std::move(body));
 
   gen.increment_indent();

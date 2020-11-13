@@ -29,8 +29,7 @@ using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
-  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                              &void_type);
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();

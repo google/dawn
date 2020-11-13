@@ -28,8 +28,8 @@ namespace {
 using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
+  auto lhs = create<ast::IdentifierExpression>("lhs");
+  auto rhs = create<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
   gen.increment_indent();

@@ -32,7 +32,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+  params.push_back(create<ast::IdentifierExpression>("id"));
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
@@ -45,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+  params.push_back(create<ast::IdentifierExpression>("id"));
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 

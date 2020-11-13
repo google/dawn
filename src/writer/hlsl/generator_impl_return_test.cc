@@ -36,7 +36,7 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
 }
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
+  auto expr = create<ast::IdentifierExpression>("expr");
   ast::ReturnStatement r(std::move(expr));
   gen.increment_indent();
 

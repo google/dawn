@@ -15,8 +15,10 @@
 #ifndef SRC_WRITER_HLSL_TEST_HELPER_H_
 #define SRC_WRITER_HLSL_TEST_HELPER_H_
 
+#include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
@@ -29,8 +31,8 @@ namespace writer {
 namespace hlsl {
 
 /// Helper class for testing
-template <typename T>
-class TestHelperBase : public T {
+template <typename BODY>
+class TestHelperBase : public BODY {
  public:
   TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
   ~TestHelperBase() = default;
@@ -40,6 +42,13 @@ class TestHelperBase : public T {
 
   /// @returns the pre result string
   std::string pre_result() const { return pre.str(); }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
   /// The context
   Context ctx;

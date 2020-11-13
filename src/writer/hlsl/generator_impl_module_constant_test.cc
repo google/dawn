@@ -38,18 +38,17 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   ast::type::ArrayType ary(&f32, 3);
 
   ast::ExpressionList exprs;
-  exprs.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  exprs.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
-  exprs.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  exprs.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  exprs.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0f)));
+  exprs.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto var =
-      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
+  auto var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
   var->set_is_const(true);
   var->set_constructor(
-      std::make_unique<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
+      create<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
   EXPECT_EQ(
@@ -61,14 +60,14 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
-  auto var = std::make_unique<ast::DecoratedVariable>(
-      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+  auto var = create<ast::DecoratedVariable>(
+      create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
@@ -83,10 +82,10 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(23, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
-  auto var = std::make_unique<ast::DecoratedVariable>(
-      std::make_unique<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+  auto var = create<ast::DecoratedVariable>(
+      create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
 

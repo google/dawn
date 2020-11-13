@@ -31,9 +31,9 @@ using HlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
   ast::type::I32Type i32;
-  auto lit = std::make_unique<ast::SintLiteral>(&i32, 5);
-  auto idx = std::make_unique<ast::ScalarConstructorExpression>(std::move(lit));
-  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
+  auto lit = create<ast::SintLiteral>(&i32, 5);
+  auto idx = create<ast::ScalarConstructorExpression>(std::move(lit));
+  auto ary = create<ast::IdentifierExpression>("ary");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
@@ -42,8 +42,8 @@ TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
 }
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
-  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
-  auto idx = std::make_unique<ast::IdentifierExpression>("idx");
+  auto ary = create<ast::IdentifierExpression>("ary");
+  auto idx = create<ast::IdentifierExpression>("idx");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 

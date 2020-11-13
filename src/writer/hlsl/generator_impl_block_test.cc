@@ -27,7 +27,7 @@ using HlslGeneratorImplTest_Block = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
   ast::BlockStatement b;
-  b.append(std::make_unique<ast::DiscardStatement>());
+  b.append(create<ast::DiscardStatement>());
 
   gen.increment_indent();
 
@@ -40,7 +40,7 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
   ast::BlockStatement b;
-  b.append(std::make_unique<ast::DiscardStatement>());
+  b.append(create<ast::DiscardStatement>());
 
   gen.increment_indent();
 

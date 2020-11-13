@@ -54,10 +54,10 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto ident = std::make_unique<ast::IdentifierExpression>(param.name);
+  auto ident = create<ast::IdentifierExpression>(param.name);
   ast::CallExpression expr(std::move(ident), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -99,12 +99,11 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -121,14 +120,13 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -153,29 +151,28 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList type_params;
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-      &vec, std::move(type_params)));
+  params.push_back(
+      create<ast::TypeConstructorExpression>(&vec, std::move(type_params)));
 
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 4.f)));
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 5.f)));
-  type_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 6.f)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-      &vec, std::move(type_params)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 4.f)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 5.f)));
+  type_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 6.f)));
+  params.push_back(
+      create<ast::TypeConstructorExpression>(&vec, std::move(type_params)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -195,14 +192,13 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -220,16 +216,15 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -255,16 +250,15 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 3)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 3)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>(param.name),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+                           std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -278,15 +272,13 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "var", ast::StorageClass::kFunction, &mat);
+  auto var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+  params.push_back(create<ast::IdentifierExpression>("var"));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("determinant"),
-      std::move(params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>("determinant"),
+                           std::move(params));
 
   mod.AddGlobalVariable(std::move(var));
 
