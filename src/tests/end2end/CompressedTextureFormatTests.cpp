@@ -139,29 +139,34 @@ class CompressedTextureBCFormatTest : public DawnTest {
         ASSERT(IsBCFormatSupported());
 
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            layout(location=0) out vec2 texCoord;
-            void main() {
-                const vec2 pos[3] = vec2[3](
-                    vec2(-3.0f,  1.0f),
-                    vec2( 3.0f,  1.0f),
-                    vec2( 0.0f, -2.0f)
-                );
-                gl_Position = vec4(pos[gl_VertexIndex], 0.0f, 1.0f);
-                texCoord = vec2(gl_Position.x / 2.0f, -gl_Position.y / 2.0f) + vec2(0.5f);
-            })");
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2D texture0;
-            layout(location = 0) in vec2 texCoord;
-            layout(location = 0) out vec4 fragColor;
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[location(0)]] var<out> texCoord : vec2 <f32>;
 
-            void main() {
-                fragColor = texture(sampler2D(texture0, sampler0), texCoord);
+            [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
+
+            [[stage(vertex)]]
+            fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-3.0,  1.0),
+                    vec2<f32>( 3.0,  1.0),
+                    vec2<f32>( 0.0, -2.0)
+                );
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                texCoord = vec2<f32>(Position.x / 2.0, -Position.y / 2.0) + vec2<f32>(0.5, 0.5);
+                return;
+            })");
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
+            [[set(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
+
+            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+
+            [[stage(fragment)]]
+            fn main() -> void {
+                fragColor = textureSample(texture0, sampler0, texCoord);
+                return;
             })");
         renderPipelineDescriptor.vertexStage.module = vsModule;
         renderPipelineDescriptor.cFragmentStage.module = fsModule;
