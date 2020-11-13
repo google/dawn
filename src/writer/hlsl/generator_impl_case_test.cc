@@ -40,9 +40,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitCase(out, &c)) << gen.error();
   EXPECT_EQ(result(), R"(  case 5: {
     break;
   }
@@ -56,9 +56,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::make_unique<ast::BlockStatement>());
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitCase(out, &c)) << gen.error();
   EXPECT_EQ(result(), R"(  case 5: {
     break;
   }
@@ -75,9 +75,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitCase(out, &c)) << gen.error();
   EXPECT_EQ(result(), R"(  case 5: {
     /* fallthrough */
   }
@@ -95,9 +95,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 6));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitCase(out, &c)) << gen.error();
   EXPECT_EQ(result(), R"(  case 5:
   case 6: {
     break;
@@ -112,9 +112,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
   body->append(std::make_unique<ast::BreakStatement>());
   c.set_body(std::move(body));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitCase(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitCase(out, &c)) << gen.error();
   EXPECT_EQ(result(), R"(  default: {
     break;
   }

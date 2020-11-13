@@ -32,9 +32,9 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &assign)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
   EXPECT_EQ(result(), "  lhs = rhs;\n");
 }
 

@@ -26,8 +26,13 @@ namespace writer {
 class Text : public Writer {
  public:
   /// Constructor
+  /// DEPRECATED
   /// @param module the module to convert
   explicit Text(ast::Module module);
+  /// Constructor
+  /// @param ctx the context object, must be non-null
+  /// @param module the module to convert
+  Text(Context* ctx, ast::Module module);
   ~Text() override;
 
   /// @returns the result data

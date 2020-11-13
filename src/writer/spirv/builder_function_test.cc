@@ -37,22 +37,20 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
   ast::type::VoidType void_type;
   ast::Function func("a_func", {}, &void_type);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
-
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_615f66756e63"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
@@ -87,14 +85,10 @@ TEST_F(BuilderTest, Function_WithParams) {
       std::make_unique<ast::IdentifierExpression>("a")));
   func.set_body(std::move(body));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(func.params()[0].get());
   td.RegisterVariableForTesting(func.params()[1].get());
   EXPECT_TRUE(td.DetermineFunction(&func));
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "tint_615f66756e63"
 OpName %5 "tint_61"
@@ -120,8 +114,6 @@ TEST_F(BuilderTest, Function_WithBody) {
   ast::Function func("a_func", {}, &void_type);
   func.set_body(std::move(body));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
 %2 = OpTypeVoid
@@ -137,8 +129,6 @@ TEST_F(BuilderTest, FunctionType) {
   ast::type::VoidType void_type;
   ast::Function func("a_func", {}, &void_type);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -150,8 +140,6 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   ast::Function func1("a_func", {}, &void_type);
   ast::Function func2("b_func", {}, &void_type);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func1));
   ASSERT_TRUE(b.GenerateFunction(&func2));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
@@ -204,10 +192,6 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   mod.AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var.get());
@@ -257,7 +241,6 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  Builder b(&mod);
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450

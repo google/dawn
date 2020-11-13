@@ -22,22 +22,21 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef float a;
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(typedef float a;
 )");
 }
 
@@ -45,10 +44,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("float", &f32);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef float float_tint_0;
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
 )");
 }
 
@@ -71,10 +68,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 
   ast::type::StructType s("a", std::move(str));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructedType(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct a {
+  ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct a {
   float a;
   int b;
 };
@@ -101,10 +96,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   ast::type::StructType s("b", std::move(str));
   ast::type::AliasType alias("a", &s);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(typedef b a;
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(typedef b a;
 )");
 }
 

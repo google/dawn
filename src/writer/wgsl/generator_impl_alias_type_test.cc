@@ -21,21 +21,21 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAliasType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(type a = f32;
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(type a = f32;
 )");
 }
 
@@ -59,10 +59,9 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   ast::type::StructType s("A", std::move(str));
   ast::type::AliasType alias("B", &s);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructedType(&s)) << g.error();
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct A {
+  ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct A {
   a : f32;
   [[offset(4)]]
   b : i32;
@@ -91,9 +90,8 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_ToStruct) {
   ast::type::StructType s("A", std::move(str));
   ast::type::AliasType alias("B", &s);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructedType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), R"(type B = A;
+  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(type B = A;
 )");
 }
 

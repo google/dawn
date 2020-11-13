@@ -31,13 +31,14 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
@@ -46,12 +47,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
@@ -62,12 +61,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  const float a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  const float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
@@ -79,12 +76,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a[5] = {0.0f};\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float a[5] = {0.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
@@ -109,12 +104,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(  S a = {};
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  S a = {};
 )");
 }
 
@@ -127,12 +120,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float2 a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
@@ -143,12 +134,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float3x2 a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float3x2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
@@ -158,12 +147,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  float a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
@@ -176,10 +163,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(float a = initializer;
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float a = initializer;
 )");
 }
 
@@ -197,10 +182,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), R"(float3 a = float3(0.0f);
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
 )");
 }
 

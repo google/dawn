@@ -18,23 +18,23 @@
 #include "src/ast/block_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Block) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen.EmitStatement(&b)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  {
     discard;
   }
 )");
@@ -44,11 +44,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitBlock(&b)) << g.error();
-  EXPECT_EQ(g.result(), R"({
+  ASSERT_TRUE(gen.EmitBlock(&b)) << gen.error();
+  EXPECT_EQ(gen.result(), R"({
     discard;
   })");
 }

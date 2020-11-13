@@ -25,6 +25,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/context.h"
 #include "src/scope_stack.h"
 #include "src/writer/hlsl/namer.h"
 
@@ -36,8 +37,9 @@ namespace hlsl {
 class GeneratorImpl {
  public:
   /// Constructor
+  /// @param ctx the context object, must be non-null
   /// @param module the module to generate
-  explicit GeneratorImpl(ast::Module* module);
+  GeneratorImpl(Context* ctx, ast::Module* module);
   ~GeneratorImpl();
 
   /// Increment the emitter indent level
@@ -371,6 +373,7 @@ class GeneratorImpl {
   size_t indent_ = 0;
 
   Namer namer_;
+  Context* ctx_ = nullptr;
   ast::Module* module_ = nullptr;
   std::string current_ep_name_;
   bool generating_entry_point_ = false;

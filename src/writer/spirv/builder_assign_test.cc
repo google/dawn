@@ -33,13 +33,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
   ast::type::F32Type f32;
@@ -52,14 +53,10 @@ TEST_F(BuilderTest, Assign_Var) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -91,14 +88,10 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -142,13 +135,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   ast::AssignmentStatement assign(
       std::make_unique<ast::IdentifierExpression>("var"), std::move(init));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -195,13 +184,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   ast::AssignmentStatement assign(
       std::make_unique<ast::IdentifierExpression>("var"), std::move(init));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -254,14 +239,10 @@ TEST_F(BuilderTest, Assign_StructMember) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -306,14 +287,10 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -351,14 +328,10 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -401,14 +374,10 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();

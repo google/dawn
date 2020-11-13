@@ -31,13 +31,14 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   // [[location 0]] var<in> foo : f32;
@@ -63,9 +64,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -92,9 +90,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct vtx_main_in {
+  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
   int bar [[attribute(1)]];
 };
@@ -126,9 +123,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -155,9 +149,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct vtx_main_out {
+  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct vtx_main_out {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
 };
@@ -189,9 +182,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -217,9 +207,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct main_in {
+  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct main_in {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
 };
@@ -251,9 +240,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -279,9 +265,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct main_out {
+  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct main_out {
   float foo [[color(0)]];
   int bar [[color(1)]];
 };
@@ -310,9 +295,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -338,9 +320,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_FALSE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
+  ASSERT_FALSE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
@@ -364,9 +345,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -392,9 +370,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_FALSE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
+  ASSERT_FALSE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
@@ -428,9 +405,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
   td.RegisterVariableForTesting(depth_var.get());
 
@@ -456,9 +430,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitEntryPointData(func_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct main_out {
+  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct main_out {
   float depth [[depth(any)]];
 };
 

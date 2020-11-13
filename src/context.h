@@ -15,6 +15,9 @@
 #ifndef SRC_CONTEXT_H_
 #define SRC_CONTEXT_H_
 
+#include <memory>
+
+#include "src/namer.h"
 #include "src/type_manager.h"
 
 namespace tint {
@@ -23,8 +26,11 @@ namespace tint {
 /// the system.
 class Context {
  public:
-  /// Constructs a context with an empty type manager.
+  /// Constructor
   Context();
+  /// Constructor
+  /// @param namer the namer to set into the context
+  explicit Context(std::unique_ptr<Namer> namer);
   /// Destructor
   ~Context();
   /// Resets the state of this context.
@@ -33,8 +39,12 @@ class Context {
   /// @returns the Type Manager
   TypeManager& type_mgr() { return type_mgr_; }
 
+  /// @returns the namer object
+  Namer* namer() const { return namer_.get(); }
+
  private:
   TypeManager type_mgr_;
+  std::unique_ptr<Namer> namer_;
 };
 
 }  // namespace tint

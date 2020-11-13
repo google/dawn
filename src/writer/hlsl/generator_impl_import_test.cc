@@ -47,8 +47,7 @@ inline std::ostream& operator<<(std::ostream& out, HlslImportData data) {
   return out;
 }
 
-using HlslImportData_SingleParamTest =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_SingleParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -61,8 +60,8 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto ident = std::make_unique<ast::IdentifierExpression>(param.name);
   ast::CallExpression expr(std::move(ident), std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
@@ -93,8 +92,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"tanh", "tanh"},
                                          HlslImportData{"trunc", "trunc"}));
 
-using HlslImportData_SingleIntParamTest =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_SingleIntParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto param = GetParam();
 
@@ -108,16 +106,15 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleIntParamTest,
                          testing::Values(HlslImportData{"abs", "abs"}));
 
-using HlslImportData_DualParamTest =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_DualParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -133,8 +130,8 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
             std::string(param.hlsl_name) + "(1.00000000f, 2.00000000f)");
 }
@@ -148,8 +145,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"reflect", "reflect"},
                                          HlslImportData{"step", "step"}));
 
-using HlslImportData_DualParam_VectorTest =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_DualParam_VectorTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
@@ -181,8 +177,8 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
             std::string(param.hlsl_name) +
                 "(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f), "
@@ -192,8 +188,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_VectorTest,
                          testing::Values(HlslImportData{"cross", "cross"}));
 
-using HlslImportData_DualParam_Int_Test =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_DualParam_Int_Test = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -209,8 +204,8 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
@@ -218,8 +213,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"max", "max"},
                                          HlslImportData{"min", "min"}));
 
-using HlslImportData_TripleParamTest =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_TripleParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -237,8 +231,8 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) +
                           "(1.00000000f, 2.00000000f, 3.00000000f)");
 }
@@ -254,8 +248,7 @@ TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
   FAIL();
 }
 
-using HlslImportData_TripleParam_Int_Test =
-    TestHelperBase<testing::TestWithParam<HlslImportData>>;
+using HlslImportData_TripleParam_Int_Test = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -273,8 +266,8 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
@@ -295,12 +288,12 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
       std::make_unique<ast::IdentifierExpression>("determinant"),
       std::move(params));
 
-  mod()->AddGlobalVariable(std::move(var));
+  mod.AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(td().DetermineResultType(&expr)) << td().error();
-  ASSERT_TRUE(gen().EmitCall(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), std::string("determinant(var)"));
 }
 

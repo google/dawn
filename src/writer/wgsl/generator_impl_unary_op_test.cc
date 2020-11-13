@@ -19,6 +19,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -33,16 +34,15 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
   out << data.op;
   return out;
 }
-using WgslUnaryOpTest = testing::TestWithParam<UnaryOpData>;
+using WgslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(WgslUnaryOpTest, Emit) {
   auto params = GetParam();
 
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::UnaryOpExpression op(params.op, std::move(expr));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&op)) << g.error();
-  EXPECT_EQ(g.result(), std::string(params.name) + "(expr)");
+  ASSERT_TRUE(gen.EmitExpression(&op)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }
 INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          WgslUnaryOpTest,

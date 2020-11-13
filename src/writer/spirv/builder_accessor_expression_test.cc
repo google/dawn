@@ -37,13 +37,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, ArrayAccessor) {
   ast::type::I32Type i32;
@@ -61,13 +62,9 @@ TEST_F(BuilderTest, ArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -106,14 +103,10 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   td.RegisterVariableForTesting(&idx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   ASSERT_TRUE(b.GenerateFunctionVariable(&idx)) << b.error();
@@ -159,13 +152,9 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
                           std::make_unique<ast::ScalarConstructorExpression>(
                               std::make_unique<ast::SintLiteral>(&i32, 2))));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -208,13 +197,9 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 2)));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -258,13 +243,9 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
               std::make_unique<ast::SintLiteral>(&i32, 2))),
       std::make_unique<ast::IdentifierExpression>("xy"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   EXPECT_EQ(b.GenerateAccessorExpression(&expr), 15u);
@@ -317,13 +298,9 @@ TEST_F(BuilderTest, MemberAccessor) {
       std::make_unique<ast::IdentifierExpression>("ident"),
       std::make_unique<ast::IdentifierExpression>("b"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -382,13 +359,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
           std::make_unique<ast::IdentifierExpression>("inner")),
       std::make_unique<ast::IdentifierExpression>("a"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -451,13 +424,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
           std::make_unique<ast::IdentifierExpression>("inner")),
       std::make_unique<ast::IdentifierExpression>("a"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -523,13 +492,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -597,14 +562,10 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   td.RegisterVariableForTesting(&store);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   ASSERT_TRUE(b.GenerateFunctionVariable(&store)) << b.error();
@@ -644,13 +605,9 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
       std::make_unique<ast::IdentifierExpression>("ident"),
       std::make_unique<ast::IdentifierExpression>("y"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -684,13 +641,9 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
       std::make_unique<ast::IdentifierExpression>("ident"),
       std::make_unique<ast::IdentifierExpression>("yx"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -725,13 +678,9 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
           std::make_unique<ast::IdentifierExpression>("yxz")),
       std::make_unique<ast::IdentifierExpression>("xz"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -767,13 +716,9 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
           std::make_unique<ast::IdentifierExpression>("yxz")),
       std::make_unique<ast::IdentifierExpression>("x"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -810,13 +755,9 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::SintLiteral>(&i32, 1)));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -895,13 +836,9 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
           std::make_unique<ast::IdentifierExpression>("baz")),
       std::make_unique<ast::IdentifierExpression>("yx"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
@@ -982,14 +919,10 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::UintLiteral>(&u32, 1)));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   EXPECT_EQ(b.GenerateAccessorExpression(&expr), 18u) << b.error();

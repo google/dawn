@@ -19,24 +19,45 @@
 namespace tint {
 namespace {
 
-using NamerTest = testing::Test;
+using Namer_HashingNamer_Test = testing::Test;
 
-TEST_F(NamerTest, ReturnsName) {
-  Namer n;
+TEST_F(Namer_HashingNamer_Test, ReturnsName) {
+  HashingNamer n;
   EXPECT_EQ("tint_6d795f6e616d65", n.NameFor("my_name"));
 }
 
-TEST_F(NamerTest, ReturnsSameValueForSameName) {
-  Namer n;
+TEST_F(Namer_HashingNamer_Test, ReturnsSameValueForSameName) {
+  HashingNamer n;
   EXPECT_EQ("tint_6e616d6531", n.NameFor("name1"));
   EXPECT_EQ("tint_6e616d6532", n.NameFor("name2"));
   EXPECT_EQ("tint_6e616d6531", n.NameFor("name1"));
 }
 
-TEST_F(NamerTest, IsMapped) {
-  Namer n;
+TEST_F(Namer_HashingNamer_Test, IsMapped) {
+  HashingNamer n;
   EXPECT_FALSE(n.IsMapped("my_name"));
   EXPECT_EQ("tint_6d795f6e616d65", n.NameFor("my_name"));
+  EXPECT_TRUE(n.IsMapped("my_name"));
+}
+
+using Namer_NoopNamer_Test = testing::Test;
+
+TEST_F(Namer_NoopNamer_Test, ReturnsName) {
+  NoopNamer n;
+  EXPECT_EQ("my_name", n.NameFor("my_name"));
+}
+
+TEST_F(Namer_NoopNamer_Test, ReturnsSameValueForSameName) {
+  NoopNamer n;
+  EXPECT_EQ("name1", n.NameFor("name1"));
+  EXPECT_EQ("name2", n.NameFor("name2"));
+  EXPECT_EQ("name1", n.NameFor("name1"));
+}
+
+TEST_F(Namer_NoopNamer_Test, IsMapped) {
+  NoopNamer n;
+  EXPECT_FALSE(n.IsMapped("my_name"));
+  EXPECT_EQ("my_name", n.NameFor("my_name"));
   EXPECT_TRUE(n.IsMapped("my_name"));
 }
 

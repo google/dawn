@@ -21,13 +21,14 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
@@ -36,11 +37,10 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  var a : f32;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
@@ -53,11 +53,10 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  var a : f32;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
@@ -67,11 +66,10 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
-  EXPECT_EQ(g.result(), "  var<private> a : f32;\n");
+  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
 }
 
 }  // namespace

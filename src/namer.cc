@@ -24,7 +24,16 @@ Namer::Namer() = default;
 
 Namer::~Namer() = default;
 
-std::string Namer::NameFor(const std::string& name) {
+bool Namer::IsMapped(const std::string& name) {
+  auto it = name_map_.find(name);
+  return it != name_map_.end();
+}
+
+HashingNamer::HashingNamer() = default;
+
+HashingNamer::~HashingNamer() = default;
+
+std::string HashingNamer::NameFor(const std::string& name) {
   auto it = name_map_.find(name);
   if (it != name_map_.end()) {
     return it->second;
@@ -42,9 +51,13 @@ std::string Namer::NameFor(const std::string& name) {
   return ret_name.str();
 }
 
-bool Namer::IsMapped(const std::string& name) {
-  auto it = name_map_.find(name);
-  return it != name_map_.end();
+NoopNamer::NoopNamer() = default;
+
+NoopNamer::~NoopNamer() = default;
+
+std::string NoopNamer::NameFor(const std::string& name) {
+  name_map_[name] = name;
+  return name;
 }
 
 }  // namespace tint

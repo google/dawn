@@ -31,9 +31,9 @@ TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void my_func() {
 }
 
@@ -41,22 +41,22 @@ TEST_F(HlslGeneratorImplTest, Generate) {
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName) {
-  ASSERT_EQ(gen().generate_name("func_main_in"), "func_main_in");
+  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
   // Register the struct name as existing.
-  auto* namer = gen().namer_for_testing();
+  auto* namer = gen.namer_for_testing();
   namer->NameFor("func_main_out");
 
-  ASSERT_EQ(gen().generate_name("func_main_out"), "func_main_out_0");
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_0");
 }
 
 TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
-  ASSERT_EQ(gen().generate_name("func_main_in"), "func_main_in");
+  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
 
   ast::IdentifierExpression ident("func_main_in");
-  ASSERT_TRUE(gen().EmitIdentifier(pre(), out(), &ident));
+  ASSERT_TRUE(gen.EmitIdentifier(pre, out, &ident));
   EXPECT_EQ(result(), "func_main_in_0");
 }
 
@@ -68,11 +68,10 @@ inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
   out << data.builtin;
   return out;
 }
-using HlslBuiltinConversionTest =
-    TestHelperBase<testing::TestWithParam<HlslBuiltinData>>;
+using HlslBuiltinConversionTest = TestParamHelper<HlslBuiltinData>;
 TEST_P(HlslBuiltinConversionTest, Emit) {
   auto params = GetParam();
-  EXPECT_EQ(gen().builtin_to_attribute(params.builtin),
+  EXPECT_EQ(gen.builtin_to_attribute(params.builtin),
             std::string(params.attribute_name));
 }
 INSTANTIATE_TEST_SUITE_P(

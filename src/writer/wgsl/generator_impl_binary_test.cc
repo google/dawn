@@ -18,6 +18,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -32,7 +33,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   out << data.op;
   return out;
 }
-using WgslBinaryTest = testing::TestWithParam<BinaryData>;
+using WgslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(WgslBinaryTest, Emit) {
   auto params = GetParam();
 
@@ -41,9 +42,8 @@ TEST_P(WgslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), params.result);
+  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,

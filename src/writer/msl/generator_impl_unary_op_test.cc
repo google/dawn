@@ -20,6 +20,7 @@
 #include "src/ast/module.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -34,17 +35,15 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
   out << data.op;
   return out;
 }
-using MslUnaryOpTest = testing::TestWithParam<UnaryOpData>;
+using MslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
 
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::UnaryOpExpression op(params.op, std::move(expr));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&op)) << g.error();
-  EXPECT_EQ(g.result(), std::string(params.name) + "(expr)");
+  ASSERT_TRUE(gen.EmitExpression(&op)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslUnaryOpTest,

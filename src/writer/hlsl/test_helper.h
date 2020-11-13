@@ -32,39 +32,33 @@ namespace hlsl {
 template <typename T>
 class TestHelperBase : public T {
  public:
-  TestHelperBase() : td_(&ctx_, &mod_), impl_(&mod_) {}
+  TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
   ~TestHelperBase() = default;
 
-  /// @returns the generator implementation
-  GeneratorImpl& gen() { return impl_; }
-
-  /// @returns the module
-  ast::Module* mod() { return &mod_; }
-
-  /// @returns the type determiner
-  TypeDeterminer& td() { return td_; }
-
-  /// @returns the output stream
-  std::ostream& out() { return out_; }
-
-  /// @returns the pre stream
-  std::ostream& pre() { return pre_; }
-
   /// @returns the result string
-  std::string result() const { return out_.str(); }
+  std::string result() const { return out.str(); }
 
   /// @returns the pre result string
-  std::string pre_result() const { return pre_.str(); }
+  std::string pre_result() const { return pre.str(); }
 
- private:
-  Context ctx_;
-  ast::Module mod_;
-  TypeDeterminer td_;
-  GeneratorImpl impl_;
-  std::ostringstream out_;
-  std::ostringstream pre_;
+  /// The context
+  Context ctx;
+  /// The module
+  ast::Module mod;
+  /// The type determiner
+  TypeDeterminer td;
+  /// The generator
+  GeneratorImpl gen;
+
+  /// The output stream
+  std::ostringstream out;
+  /// The pre-output stream
+  std::ostringstream pre;
 };
 using TestHelper = TestHelperBase<testing::Test>;
+
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace hlsl
 }  // namespace writer

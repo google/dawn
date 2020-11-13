@@ -36,30 +36,29 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("alias", &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&alias)) << g.error();
-  EXPECT_EQ(g.result(), "alias");
+  ASSERT_TRUE(gen.EmitType(&alias)) << gen.error();
+  EXPECT_EQ(gen.result(), "alias");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&a)) << g.error();
-  EXPECT_EQ(g.result(), "array<bool, 4>");
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
@@ -70,9 +69,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   ast::type::ArrayType a(&b, 4);
   a.set_decorations(std::move(decos));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&a)) << g.error();
-  EXPECT_EQ(g.result(), "[[stride(16)]] array<bool, 4>");
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "[[stride(16)]] array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
@@ -84,60 +82,53 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
   ast::type::ArrayType a(&b, 4);
   a.set_decorations(std::move(decos));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&a)) << g.error();
-  EXPECT_EQ(g.result(), "[[stride(16)]] [[stride(32)]] array<bool, 4>");
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "[[stride(16)]] [[stride(32)]] array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&a)) << g.error();
-  EXPECT_EQ(g.result(), "array<bool>");
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "array<bool>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
   ast::type::BoolType b;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&b)) << g.error();
-  EXPECT_EQ(g.result(), "bool");
+  ASSERT_TRUE(gen.EmitType(&b)) << gen.error();
+  EXPECT_EQ(gen.result(), "bool");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_F32) {
   ast::type::F32Type f32;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&f32)) << g.error();
-  EXPECT_EQ(g.result(), "f32");
+  ASSERT_TRUE(gen.EmitType(&f32)) << gen.error();
+  EXPECT_EQ(gen.result(), "f32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
   ast::type::I32Type i32;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&i32)) << g.error();
-  EXPECT_EQ(g.result(), "i32");
+  ASSERT_TRUE(gen.EmitType(&i32)) << gen.error();
+  EXPECT_EQ(gen.result(), "i32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType m(&f32, 3, 2);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&m)) << g.error();
-  EXPECT_EQ(g.result(), "mat2x3<f32>");
+  ASSERT_TRUE(gen.EmitType(&m)) << gen.error();
+  EXPECT_EQ(gen.result(), "mat2x3<f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
   ast::type::F32Type f32;
   ast::type::PointerType p(&f32, ast::StorageClass::kWorkgroup);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&p)) << g.error();
-  EXPECT_EQ(g.result(), "ptr<workgroup, f32>");
+  ASSERT_TRUE(gen.EmitType(&p)) << gen.error();
+  EXPECT_EQ(gen.result(), "ptr<workgroup, f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
@@ -159,9 +150,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
   ast::type::StructType s("S", std::move(str));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&s)) << g.error();
-  EXPECT_EQ(g.result(), "S");
+  ASSERT_TRUE(gen.EmitType(&s)) << gen.error();
+  EXPECT_EQ(gen.result(), "S");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
@@ -183,9 +173,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
 
   ast::type::StructType s("S", std::move(str));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct S {
+  ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
   a : i32;
   [[offset(4)]]
   b : f32;
@@ -215,9 +204,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
 
   ast::type::StructType s("S", std::move(str));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitStructType(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"([[block]]
+  ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[block]]
 struct S {
   a : i32;
   [[offset(4)]]
@@ -229,26 +217,23 @@ struct S {
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   ast::type::U32Type u32;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&u32)) << g.error();
-  EXPECT_EQ(g.result(), "u32");
+  ASSERT_TRUE(gen.EmitType(&u32)) << gen.error();
+  EXPECT_EQ(gen.result(), "u32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType v(&f32, 3);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&v)) << g.error();
-  EXPECT_EQ(g.result(), "vec3<f32>");
+  ASSERT_TRUE(gen.EmitType(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), "vec3<f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Void) {
   ast::type::VoidType v;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&v)) << g.error();
-  EXPECT_EQ(g.result(), "void");
+  ASSERT_TRUE(gen.EmitType(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), "void");
 }
 
 struct TextureData {
@@ -259,16 +244,15 @@ inline std::ostream& operator<<(std::ostream& out, TextureData data) {
   out << data.name;
   return out;
 }
-using WgslGenerator_DepthTextureTest = testing::TestWithParam<TextureData>;
+using WgslGenerator_DepthTextureTest = TestParamHelper<TextureData>;
 
 TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
   auto param = GetParam();
 
   ast::type::DepthTextureType d(param.dim);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&d)) << g.error();
-  EXPECT_EQ(g.result(), param.name);
+  ASSERT_TRUE(gen.EmitType(&d)) << gen.error();
+  EXPECT_EQ(gen.result(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -281,16 +265,15 @@ INSTANTIATE_TEST_SUITE_P(
         TextureData{ast::type::TextureDimension::kCubeArray,
                     "texture_depth_cube_array"}));
 
-using WgslGenerator_SampledTextureTest = testing::TestWithParam<TextureData>;
+using WgslGenerator_SampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
   auto param = GetParam();
 
   ast::type::F32Type f32;
   ast::type::SampledTextureType t(param.dim, &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<f32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<f32>");
 }
 
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
@@ -299,9 +282,8 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
   ast::type::I32Type i32;
   ast::type::SampledTextureType t(param.dim, &i32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<i32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<i32>");
 }
 
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
@@ -310,9 +292,8 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
   ast::type::U32Type u32;
   ast::type::SampledTextureType t(param.dim, &u32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<u32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<u32>");
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -327,17 +308,15 @@ INSTANTIATE_TEST_SUITE_P(
         TextureData{ast::type::TextureDimension::kCubeArray,
                     "texture_cube_array"}));
 
-using WgslGenerator_MultiampledTextureTest =
-    testing::TestWithParam<TextureData>;
+using WgslGenerator_MultiampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
   auto param = GetParam();
 
   ast::type::F32Type f32;
   ast::type::MultisampledTextureType t(param.dim, &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<f32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<f32>");
 }
 
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
@@ -346,9 +325,8 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
   ast::type::I32Type i32;
   ast::type::MultisampledTextureType t(param.dim, &i32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<i32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<i32>");
 }
 
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
@@ -357,9 +335,8 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
   ast::type::U32Type u32;
   ast::type::MultisampledTextureType t(param.dim, &u32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), std::string(param.name) + "<u32>");
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string(param.name) + "<u32>");
 }
 INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          WgslGenerator_MultiampledTextureTest,
@@ -377,16 +354,14 @@ inline std::ostream& operator<<(std::ostream& out, StorageTextureData data) {
   out << data.name;
   return out;
 }
-using WgslGenerator_StorageTextureTest =
-    testing::TestWithParam<StorageTextureData>;
+using WgslGenerator_StorageTextureTest = TestParamHelper<StorageTextureData>;
 TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
   ast::type::StorageTextureType t(param.dim, param.access, param.fmt);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&t)) << g.error();
-  EXPECT_EQ(g.result(), param.name);
+  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  EXPECT_EQ(gen.result(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -435,13 +410,12 @@ inline std::ostream& operator<<(std::ostream& out, ImageFormatData data) {
   out << data.name;
   return out;
 }
-using WgslGenerator_ImageFormatTest = testing::TestWithParam<ImageFormatData>;
+using WgslGenerator_ImageFormatTest = TestParamHelper<ImageFormatData>;
 TEST_P(WgslGenerator_ImageFormatTest, EmitType_StorageTexture_ImageFormat) {
   auto param = GetParam();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitImageFormat(param.fmt)) << g.error();
-  EXPECT_EQ(g.result(), param.name);
+  ASSERT_TRUE(gen.EmitImageFormat(param.fmt)) << gen.error();
+  EXPECT_EQ(gen.result(), param.name);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -489,17 +463,15 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
   ast::type::SamplerType sampler(ast::type::SamplerKind::kSampler);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&sampler)) << g.error();
-  EXPECT_EQ(g.result(), "sampler");
+  ASSERT_TRUE(gen.EmitType(&sampler)) << gen.error();
+  EXPECT_EQ(gen.result(), "sampler");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
   ast::type::SamplerType sampler(ast::type::SamplerKind::kComparisonSampler);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitType(&sampler)) << g.error();
-  EXPECT_EQ(g.result(), "sampler_comparison");
+  ASSERT_TRUE(gen.EmitType(&sampler)) << gen.error();
+  EXPECT_EQ(gen.result(), "sampler_comparison");
 }
 
 }  // namespace

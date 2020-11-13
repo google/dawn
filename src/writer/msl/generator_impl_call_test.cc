@@ -22,13 +22,14 @@
 #include "src/ast/module.h"
 #include "src/ast/type/void_type.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;
@@ -38,13 +39,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
+  mod.AddFunction(std::move(func));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func()");
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "my_func()");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
@@ -58,13 +56,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
+  mod.AddFunction(std::move(func));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func(param1, param2)");
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "my_func(param1, param2)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
@@ -79,14 +74,11 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
+  mod.AddFunction(std::move(func));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
-
-  GeneratorImpl g(&m);
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitStatement(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  my_func(param1, param2);\n");
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace

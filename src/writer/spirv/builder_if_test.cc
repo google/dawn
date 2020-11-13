@@ -32,13 +32,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, If_Empty) {
   ast::type::BoolType bool_type;
@@ -51,12 +52,8 @@ TEST_F(BuilderTest, If_Empty) {
   ast::IfStatement expr(std::move(cond),
                         std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
@@ -93,13 +90,9 @@ TEST_F(BuilderTest, If_WithStatements) {
 
   ast::IfStatement expr(std::move(cond), std::move(body));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -156,14 +149,10 @@ TEST_F(BuilderTest, If_WithElse) {
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -227,14 +216,10 @@ TEST_F(BuilderTest, If_WithElseIf) {
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -322,14 +307,10 @@ TEST_F(BuilderTest, If_WithMultiple) {
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -397,13 +378,8 @@ TEST_F(BuilderTest, If_WithBreak) {
   ast::LoopStatement expr(std::move(loop_body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -456,13 +432,8 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   ast::LoopStatement expr(std::move(loop_body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -511,13 +482,8 @@ TEST_F(BuilderTest, If_WithContinue) {
   ast::LoopStatement expr(std::move(loop_body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -570,13 +536,8 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   ast::LoopStatement expr(std::move(loop_body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -616,13 +577,8 @@ TEST_F(BuilderTest, If_WithReturn) {
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
@@ -653,13 +609,8 @@ TEST_F(BuilderTest, If_WithReturnValue) {
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();

@@ -12,43 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
+#ifndef SRC_WRITER_MSL_TEST_HELPER_H_
+#define SRC_WRITER_MSL_TEST_HELPER_H_
 
 #include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
-#include "src/ast/return_statement.h"
-#include "src/writer/msl/generator_impl.h"
-#include "src/writer/msl/test_helper.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
+#include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
-namespace {
 
-using MslGeneratorImplTest = TestHelper;
+/// Helper class for testing
+template <typename T>
+class TestHelperBase : public T {
+ public:
+  TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
+  ~TestHelperBase() = default;
 
-TEST_F(MslGeneratorImplTest, Emit_Return) {
-  ast::ReturnStatement r;
+  /// The context
+  Context ctx;
+  /// The module
+  ast::Module mod;
+  /// The type determiner
+  TypeDeterminer td;
+  /// The generator
+  GeneratorImpl gen;
+};
+using TestHelper = TestHelperBase<testing::Test>;
 
-  gen.increment_indent();
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-  ASSERT_TRUE(gen.EmitStatement(&r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return;\n");
-}
-
-TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  ast::ReturnStatement r(std::move(expr));
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(&r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return expr;\n");
-}
-
-}  // namespace
 }  // namespace msl
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_MSL_TEST_HELPER_H_

@@ -21,13 +21,14 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 struct IntrinsicData {
   ast::Intrinsic intrinsic;
@@ -37,13 +38,10 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.msl_name;
   return out;
 }
-using MslIntrinsicTest = testing::TestWithParam<IntrinsicData>;
+using MslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(MslIntrinsicTest, Emit) {
   auto param = GetParam();
-
-  ast::Module m;
-  GeneratorImpl g(&m);
-  EXPECT_EQ(g.generate_intrinsic_name(param.intrinsic), param.msl_name);
+  EXPECT_EQ(gen.generate_intrinsic_name(param.intrinsic), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -86,29 +84,22 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
       std::make_unique<ast::IdentifierExpression>("outer_product"),
       std::move(params));
 
-  Context ctx;
-  ast::Module m;
-  TypeDeterminer td(&ctx, &m);
   td.RegisterVariableForTesting(a.get());
   td.RegisterVariableForTesting(b.get());
 
-  m.AddGlobalVariable(std::move(a));
-  m.AddGlobalVariable(std::move(b));
+  mod.AddGlobalVariable(std::move(a));
+  mod.AddGlobalVariable(std::move(b));
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
-  GeneratorImpl g(&m);
-
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Bad_Name) {
-  ast::Module m;
-  GeneratorImpl g(&m);
-  EXPECT_EQ(g.generate_intrinsic_name(ast::Intrinsic::kNone), "");
+  EXPECT_EQ(gen.generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
@@ -122,10 +113,6 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   ast::CallExpression call(std::make_unique<ast::IdentifierExpression>("dot"),
                            std::move(params));
 
-  Context ctx;
-  ast::Module m;
-  TypeDeterminer td(&ctx, &m);
-
   ast::Variable v1("param1", ast::StorageClass::kFunction, &vec);
   ast::Variable v2("param2", ast::StorageClass::kFunction, &vec);
 
@@ -134,10 +121,9 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  dot(param1, param2)");
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  dot(param1, param2)");
 }
 
 }  // namespace

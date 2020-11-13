@@ -37,7 +37,7 @@ TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "ary[5]");
 }
 
@@ -47,7 +47,7 @@ TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "ary[idx]");
 }
 

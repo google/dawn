@@ -36,10 +36,10 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.hlsl_name;
   return out;
 }
-using HlslIntrinsicTest = TestHelperBase<testing::TestWithParam<IntrinsicData>>;
+using HlslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
-  EXPECT_EQ(gen().generate_intrinsic_name(param.intrinsic), param.hlsl_name);
+  EXPECT_EQ(gen.generate_intrinsic_name(param.intrinsic), param.hlsl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Intrinsic,
@@ -89,22 +89,22 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
       std::make_unique<ast::IdentifierExpression>("outer_product"),
       std::move(params));
 
-  td().RegisterVariableForTesting(a.get());
-  td().RegisterVariableForTesting(b.get());
+  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(b.get());
 
-  mod()->AddGlobalVariable(std::move(a));
-  mod()->AddGlobalVariable(std::move(b));
+  mod.AddGlobalVariable(std::move(a));
+  mod.AddGlobalVariable(std::move(b));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(td().DetermineResultType(&call)) << td().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
-  gen().increment_indent();
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
   EXPECT_EQ(result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
-  EXPECT_EQ(gen().generate_intrinsic_name(ast::Intrinsic::kNone), "");
+  EXPECT_EQ(gen.generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
@@ -121,13 +121,13 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   ast::Variable v1("param1", ast::StorageClass::kFunction, &vec);
   ast::Variable v2("param2", ast::StorageClass::kFunction, &vec);
 
-  td().RegisterVariableForTesting(&v1);
-  td().RegisterVariableForTesting(&v2);
+  td.RegisterVariableForTesting(&v1);
+  td.RegisterVariableForTesting(&v2);
 
-  ASSERT_TRUE(td().DetermineResultType(&call)) << td().error();
+  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
-  gen().increment_indent();
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
   EXPECT_EQ(result(), "  dot(param1, param2)");
 }
 

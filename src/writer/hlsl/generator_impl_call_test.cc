@@ -37,9 +37,9 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
   EXPECT_EQ(result(), "my_func()");
 }
 
@@ -54,9 +54,9 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &call)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
   EXPECT_EQ(result(), "my_func(param1, param2)");
 }
 
@@ -72,9 +72,9 @@ TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
 
   auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
                                               &void_type);
-  mod()->AddFunction(std::move(func));
-  gen().increment_indent();
-  ASSERT_TRUE(gen().EmitStatement(out(), &call)) << gen().error();
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitStatement(out, &call)) << gen.error();
   EXPECT_EQ(result(), "  my_func(param1, param2);\n");
 }
 

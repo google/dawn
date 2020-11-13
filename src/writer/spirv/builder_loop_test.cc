@@ -27,13 +27,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Loop_Empty) {
   // loop {
@@ -41,12 +42,7 @@ TEST_F(BuilderTest, Loop_Empty) {
 
   ast::LoopStatement expr;
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -81,13 +77,9 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   ast::LoopStatement expr(std::move(body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -137,13 +129,9 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
           std::make_unique<ast::SintLiteral>(&i32, 3))));
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -180,12 +168,8 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   ast::LoopStatement expr(std::move(body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -212,12 +196,8 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   ast::LoopStatement expr(std::move(body),
                           std::make_unique<ast::BlockStatement>());
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();

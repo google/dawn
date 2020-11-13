@@ -29,13 +29,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   ast::type::F32Type f32;
@@ -52,9 +53,6 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
@@ -63,7 +61,6 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -84,12 +81,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -120,9 +113,6 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
@@ -130,7 +120,6 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -150,12 +139,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -178,10 +163,6 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 TEST_F(BuilderTest, IdentifierExpression_Load) {
   ast::type::I32Type i32;
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ast::Variable var("var", ast::StorageClass::kPrivate, &i32);
 
   td.RegisterVariableForTesting(&var);
@@ -194,7 +175,6 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
@@ -214,10 +194,6 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   ast::type::I32Type i32;
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
   var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 2)));
@@ -233,7 +209,6 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 

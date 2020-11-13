@@ -26,13 +26,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Block) {
   ast::type::F32Type f32;
@@ -64,12 +65,8 @@ TEST_F(BuilderTest, Block) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f))));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_FALSE(b.has_error()) << b.error();
 

@@ -26,22 +26,22 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<ast::BoolLiteral>(&bool_type, false);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "false");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "false");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
@@ -49,9 +49,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
   auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "-12345");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "-12345");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
@@ -59,9 +58,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 56779);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "56779u");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "56779u");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
@@ -71,9 +69,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
       &f32, static_cast<float>((1 << 30) - 4));
   ast::ScalarConstructorExpression expr(std::move(lit));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "1.07374182e+09");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "1.07374182e+09");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
@@ -86,9 +83,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
 
   ast::TypeConstructorExpression expr(&f32, std::move(values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "f32(-1.20000004e-05)");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "f32(-1.20000004e-05)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -101,9 +97,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
 
   ast::TypeConstructorExpression expr(&b, std::move(values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "bool(true)");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "bool(true)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
@@ -116,9 +111,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
 
   ast::TypeConstructorExpression expr(&i32, std::move(values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "i32(-12345)");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "i32(-12345)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
@@ -131,9 +125,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
 
   ast::TypeConstructorExpression expr(&u32, std::move(values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "u32(12345u)");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "u32(12345u)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
@@ -153,9 +146,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
 
   ast::TypeConstructorExpression expr(&vec, std::move(values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "vec3<f32>(1.00000000, 2.00000000, 3.00000000)");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "vec3<f32>(1.00000000, 2.00000000, 3.00000000)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
@@ -184,9 +176,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
 
   ast::TypeConstructorExpression expr(&mat, std::move(mat_values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(),
             std::string("mat2x3<f32>(vec2<f32>(1.00000000, 2.00000000), ") +
                 "vec2<f32>(3.00000000, 4.00000000), " +
                 "vec2<f32>(5.00000000, 6.00000000))");
@@ -221,12 +212,12 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
 
   ast::TypeConstructorExpression expr(&ary, std::move(ary_values));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("array<vec3<f32>, 3>(") +
-                            "vec3<f32>(1.00000000, 2.00000000, 3.00000000), " +
-                            "vec3<f32>(4.00000000, 5.00000000, 6.00000000), " +
-                            "vec3<f32>(7.00000000, 8.00000000, 9.00000000))");
+  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(),
+            std::string("array<vec3<f32>, 3>(") +
+                "vec3<f32>(1.00000000, 2.00000000, 3.00000000), " +
+                "vec3<f32>(4.00000000, 5.00000000, 6.00000000), " +
+                "vec3<f32>(7.00000000, 8.00000000, 9.00000000))");
 }
 
 }  // namespace

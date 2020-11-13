@@ -30,13 +30,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::type::VoidType void_type;
@@ -45,8 +46,6 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
   func.add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kVertex, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
             R"(OpEntryPoint Vertex %3 "main"
@@ -61,7 +60,7 @@ inline std::ostream& operator<<(std::ostream& out, FunctionStageData data) {
   out << data.stage;
   return out;
 }
-using FunctionDecoration_StageTest = testing::TestWithParam<FunctionStageData>;
+using FunctionDecoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(FunctionDecoration_StageTest, Emit) {
   auto params = GetParam();
 
@@ -71,8 +70,6 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
   func.add_decoration(
       std::make_unique<ast::StageDecoration>(params.stage, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   auto preamble = b.entry_points();
@@ -106,8 +103,6 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   auto v_wg = std::make_unique<ast::Variable>(
       "my_wg", ast::StorageClass::kWorkgroup, &f32);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in.get())) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out.get())) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_wg.get())) << b.error();
@@ -166,16 +161,11 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   auto v_wg = std::make_unique<ast::Variable>(
       "my_wg", ast::StorageClass::kWorkgroup, &f32);
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v_in.get());
   td.RegisterVariableForTesting(v_out.get());
   td.RegisterVariableForTesting(v_wg.get());
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
-
-  Builder b(&mod);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in.get())) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out.get())) << b.error();
@@ -214,8 +204,6 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   func.add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kFragment, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 OriginUpperLeft
@@ -229,8 +217,6 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
   func.add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kCompute, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 1 1 1
@@ -246,8 +232,6 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
   func.add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kCompute, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 2 4 6
@@ -265,8 +249,6 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   func2.add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kFragment, Source{}));
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func2)) << b.error();
   EXPECT_EQ(DumpBuilder(b),

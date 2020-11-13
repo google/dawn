@@ -104,7 +104,10 @@ uint32_t convert_swizzle_to_index(const std::string& swizzle) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
+GeneratorImpl::GeneratorImpl(Context* ctx, ast::Module* module)
+    : ctx_(ctx), module_(module) {
+  assert(ctx);
+}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

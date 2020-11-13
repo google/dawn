@@ -19,13 +19,14 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::type::F32Type f32;
@@ -35,9 +36,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&cast)) << g.error();
-  EXPECT_EQ(g.result(), "f32(id)");
+  ASSERT_TRUE(gen.EmitExpression(&cast)) << gen.error();
+  EXPECT_EQ(gen.result(), "f32(id)");
 }
 
 }  // namespace

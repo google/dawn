@@ -37,8 +37,9 @@ namespace msl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
+  /// @param ctx the context, must be non-null
   /// @param module the module to generate
-  explicit GeneratorImpl(ast::Module* module);
+  GeneratorImpl(Context* ctx, ast::Module* module);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise
@@ -245,7 +246,7 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
-  /// @returns the namer for testing
+  /// @returns the namer for testing purposes
   Namer* namer_for_testing() { return &namer_; }
 
  private:

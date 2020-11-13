@@ -20,25 +20,24 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), "  lhs = rhs;\n");
+  ASSERT_TRUE(gen.EmitStatement(&assign)) << gen.error();
+  EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

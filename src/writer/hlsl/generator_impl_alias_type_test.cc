@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -33,7 +32,7 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
-  ASSERT_TRUE(gen().EmitConstructedType(out(), &alias)) << gen().error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
 )");
 }
@@ -42,7 +41,7 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("float", &f32);
 
-  ASSERT_TRUE(gen().EmitConstructedType(out(), &alias)) << gen().error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
 )");
 }
@@ -67,9 +66,7 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
   ast::type::StructType s("A", std::move(str));
   ast::type::AliasType alias("B", &s);
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(gen().EmitConstructedType(out(), &alias)) << gen().error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
   float a;
   int b;

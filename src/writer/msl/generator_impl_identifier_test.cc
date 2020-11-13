@@ -16,30 +16,27 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
   ast::IdentifierExpression i("foo");
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "foo");
+  ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), "foo");
 }
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
   ast::IdentifierExpression i("virtual");
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "virtual_tint_0");
+  ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), "virtual_tint_0");
 }
 
 }  // namespace

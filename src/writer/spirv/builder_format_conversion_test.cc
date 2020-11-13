@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -30,13 +31,10 @@ inline std::ostream& operator<<(std::ostream& out, TestData data) {
   out << data.ast_format;
   return out;
 }
-using ImageFormatConversionTest = testing::TestWithParam<TestData>;
+using ImageFormatConversionTest = TestParamHelper<TestData>;
 
 TEST_P(ImageFormatConversionTest, ImageFormatConversion) {
   auto param = GetParam();
-
-  ast::Module mod;
-  Builder b(&mod);
 
   EXPECT_EQ(b.convert_image_format_to_spv(param.ast_format), param.spv_format);
 

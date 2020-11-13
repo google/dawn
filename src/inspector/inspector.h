@@ -23,9 +23,9 @@
 
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/context.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
-#include "src/namer.h"
 
 namespace tint {
 namespace inspector {
@@ -72,8 +72,13 @@ struct ResourceBinding {
 class Inspector {
  public:
   /// Constructor
+  /// DEPRECATED
   /// @param module Shader module to extract information from.
   explicit Inspector(const ast::Module& module);
+  /// Constructor
+  /// @param ctx the context, must be non-null
+  /// @param module Shader module to extract information from.
+  Inspector(Context* ctx, const ast::Module& module);
   ~Inspector();
 
   /// @returns error messages from the Inspector
@@ -128,9 +133,10 @@ class Inspector {
       const std::string& entry_point);
 
  private:
+  Context* ctx_ = nullptr;
+  bool context_is_owned_ = false;
   const ast::Module& module_;
   std::string error_;
-  tint::Namer namer_;
 
   /// @param name name of the entry point to find
   /// @returns a pointer to the entry point if it exists, otherwise returns

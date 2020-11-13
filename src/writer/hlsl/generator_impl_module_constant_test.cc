@@ -51,8 +51,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   var->set_constructor(
       std::make_unique<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
-      << gen().error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
   EXPECT_EQ(
       result(),
       "static const float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
@@ -71,8 +70,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
-      << gen().error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #define WGSL_SPEC_CONSTANT_23 3.00000000f
 #endif
@@ -92,8 +90,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
 
-  ASSERT_TRUE(gen().EmitProgramConstVariable(out(), var.get()))
-      << gen().error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #error spec constant required for constant id 23
 #endif

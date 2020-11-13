@@ -19,13 +19,14 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto str = std::make_unique<ast::IdentifierExpression>("str");
@@ -33,10 +34,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
   ast::MemberAccessorExpression expr(std::move(str), std::move(mem));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "str.mem");
+  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "str.mem");
 }
 
 }  // namespace

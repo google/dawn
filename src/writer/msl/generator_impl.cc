@@ -92,7 +92,8 @@ uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
+GeneratorImpl::GeneratorImpl(Context* ctx, ast::Module* module)
+    : TextGenerator(ctx), module_(module) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

@@ -31,13 +31,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Switch_Empty) {
   ast::type::I32Type i32;
@@ -49,12 +50,8 @@ TEST_F(BuilderTest, Switch_Empty) {
 
   ast::SwitchStatement expr(std::move(cond), ast::CaseStatementList{});
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -112,16 +109,12 @@ TEST_F(BuilderTest, Switch_WithCase) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -183,16 +176,12 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -275,16 +264,12 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -376,16 +361,12 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -454,16 +435,12 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -513,16 +490,12 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(v.get());
   td.RegisterVariableForTesting(a.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32);
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();

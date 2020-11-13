@@ -14,12 +14,16 @@
 
 #include "src/writer/text_generator.h"
 
+#include <assert.h>
+
 #include <utility>
 
 namespace tint {
 namespace writer {
 
-TextGenerator::TextGenerator() = default;
+TextGenerator::TextGenerator(Context* ctx) : ctx_(ctx) {
+  assert(ctx_);
+}
 
 TextGenerator::~TextGenerator() = default;
 

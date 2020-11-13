@@ -44,7 +44,7 @@ class Variable;
 class TypeDeterminer {
  public:
   /// Constructor
-  /// @param ctx the tint context
+  /// @param ctx the tint context, must be non-null
   /// @param mod the module to update with typing information
   TypeDeterminer(Context* ctx, ast::Module* mod);
   ~TypeDeterminer();

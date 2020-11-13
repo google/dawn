@@ -48,13 +48,14 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::type::VoidType void_type;
@@ -66,14 +67,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
   void my_func() {
     return;
@@ -92,14 +90,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
   void main_tint_0() {
     return;
@@ -126,14 +121,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
-
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
   void my_func(float a, int b) {
     return;
@@ -158,9 +150,6 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
 
@@ -184,9 +173,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct frag_main_in {
   float foo [[user(locn0)]];
@@ -227,9 +215,6 @@ TEST_F(MslGeneratorImplTest,
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
   td.RegisterVariableForTesting(depth_var.get());
 
@@ -255,9 +240,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct frag_main_out {
   float depth [[depth(any)]];
@@ -286,9 +270,6 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
 
   mod.AddGlobalVariable(std::move(coord_var));
@@ -314,9 +295,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 fragment void frag_main(constant float4& coord [[buffer(0)]]) {
   float v = coord.x;
@@ -331,7 +311,6 @@ TEST_F(MslGeneratorImplTest,
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
-  ast::Module mod;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -363,8 +342,6 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
 
   mod.AddGlobalVariable(std::move(coord_var));
@@ -389,10 +366,8 @@ TEST_F(MslGeneratorImplTest,
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct Data {
   int a;
@@ -412,7 +387,6 @@ TEST_F(MslGeneratorImplTest,
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
-  ast::Module mod;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -444,8 +418,6 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
 
   mod.AddGlobalVariable(std::move(coord_var));
@@ -471,9 +443,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct Data {
   int a;
@@ -511,9 +482,6 @@ TEST_F(
   decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   val_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(foo_var.get());
   td.RegisterVariableForTesting(bar_var.get());
   td.RegisterVariableForTesting(val_var.get());
@@ -563,9 +531,8 @@ TEST_F(
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct ep_1_in {
   float foo [[user(locn0)]];
@@ -606,9 +573,6 @@ TEST_F(MslGeneratorImplTest,
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(depth_var.get());
 
   mod.AddGlobalVariable(std::move(depth_var));
@@ -648,9 +612,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct ep_1_out {
   float depth [[depth(any)]];
@@ -692,9 +655,6 @@ TEST_F(
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
   td.RegisterVariableForTesting(depth_var.get());
 
@@ -740,10 +700,8 @@ TEST_F(
   mod.AddFunction(std::move(func_1));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct ep_1_out {
   float depth [[depth(any)]];
@@ -778,9 +736,6 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
 
   mod.AddGlobalVariable(std::move(coord_var));
@@ -823,10 +778,8 @@ TEST_F(MslGeneratorImplTest,
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 float sub_func(constant float4& coord, float param) {
   return coord.x;
@@ -845,7 +798,6 @@ TEST_F(MslGeneratorImplTest,
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
-  ast::Module mod;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -877,10 +829,7 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
-
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
@@ -922,9 +871,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct Data {
   int a;
@@ -948,7 +896,6 @@ TEST_F(MslGeneratorImplTest,
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
-  ast::Module mod;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -980,10 +927,7 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(coord_var.get());
-
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
@@ -1025,9 +969,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct Data {
   int a;
@@ -1058,9 +1001,6 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(bar_var.get());
   mod.AddGlobalVariable(std::move(bar_var));
 
@@ -1094,10 +1034,8 @@ TEST_F(MslGeneratorImplTest,
   mod.AddFunction(std::move(func_1));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct ep_1_out {
   float bar [[color(1)]];
@@ -1124,12 +1062,10 @@ TEST_F(MslGeneratorImplTest,
   func->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kCompute, Source{}));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 kernel void main_tint_0() {
 }
@@ -1153,14 +1089,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  ast::Module m;
-  m.AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
   void my_func(float a[5]) {
     return;
@@ -1215,10 +1149,6 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   mod.AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var.get());
@@ -1268,9 +1198,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.Generate()) << g.error();
-  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 struct Data {
   float d;

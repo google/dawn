@@ -32,9 +32,9 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
   body->append(std::make_unique<ast::ReturnStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   }
@@ -57,9 +57,9 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {
@@ -84,9 +84,9 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {
@@ -116,9 +116,9 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &i)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {

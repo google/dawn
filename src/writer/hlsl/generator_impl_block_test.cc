@@ -29,9 +29,9 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &b)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &b)) << gen.error();
   EXPECT_EQ(result(), R"(  {
     discard;
   }
@@ -42,9 +42,9 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
   ast::BlockStatement b;
   b.append(std::make_unique<ast::DiscardStatement>());
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitBlock(out(), &b)) << gen().error();
+  ASSERT_TRUE(gen.EmitBlock(out, &b)) << gen.error();
   EXPECT_EQ(result(), R"({
     discard;
   })");

@@ -38,9 +38,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
@@ -51,9 +51,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   var->set_is_const(true);
 
   ast::VariableDeclStatement stmt(std::move(var));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  const float a;\n");
 }
 
@@ -65,9 +65,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
   ast::VariableDeclStatement stmt(std::move(var));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a[5];\n");
 }
 
@@ -78,9 +78,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
       std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
@@ -90,9 +90,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
@@ -106,7 +106,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   var->set_constructor(std::move(ident));
 
   ast::VariableDeclStatement stmt(std::move(var));
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float a = initializer;
 )");
 }
@@ -125,7 +125,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   var->set_constructor(std::move(zero_vec));
 
   ast::VariableDeclStatement stmt(std::move(var));
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
 )");
 }
@@ -144,7 +144,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   var->set_constructor(std::move(zero_mat));
 
   ast::VariableDeclStatement stmt(std::move(var));
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(
       result(),
       R"(matrix<float, 3, 2> a = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

@@ -47,7 +47,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("alias", &f32);
 
-  ASSERT_TRUE(gen().EmitType(out(), &alias, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
   EXPECT_EQ(result(), "alias");
 }
 
@@ -55,7 +55,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("bool", &f32);
 
-  ASSERT_TRUE(gen().EmitType(out(), &alias, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
   EXPECT_EQ(result(), "bool_tint_0");
 }
 
@@ -63,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  ASSERT_TRUE(gen().EmitType(out(), &a, "ary")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[4]");
 }
 
@@ -72,7 +72,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
   ast::type::ArrayType a(&b, 4);
   ast::type::ArrayType c(&a, 5);
 
-  ASSERT_TRUE(gen().EmitType(out(), &c, "ary")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4]");
 }
 
@@ -84,7 +84,7 @@ TEST_F(HlslGeneratorImplTest_Type,
   ast::type::ArrayType c(&a, 5);
   ast::type::ArrayType d(&c);
 
-  ASSERT_TRUE(gen().EmitType(out(), &c, "ary")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4][1]");
 }
 
@@ -94,7 +94,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   ast::type::ArrayType c(&a, 5);
   ast::type::ArrayType d(&c, 6);
 
-  ASSERT_TRUE(gen().EmitType(out(), &d, "ary")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &d, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[6][5][4]");
 }
 
@@ -102,7 +102,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_NameCollision) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  ASSERT_TRUE(gen().EmitType(out(), &a, "bool")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &a, "bool")) << gen.error();
   EXPECT_EQ(result(), "bool bool_tint_0[4]");
 }
 
@@ -110,7 +110,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  ASSERT_TRUE(gen().EmitType(out(), &a, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &a, "")) << gen.error();
   EXPECT_EQ(result(), "bool[4]");
 }
 
@@ -118,7 +118,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
-  ASSERT_TRUE(gen().EmitType(out(), &a, "ary")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
 }
 
@@ -127,28 +127,28 @@ TEST_F(HlslGeneratorImplTest_Type,
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
-  ASSERT_TRUE(gen().EmitType(out(), &a, "double")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &a, "double")) << gen.error();
   EXPECT_EQ(result(), "bool double_tint_0[]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
   ast::type::BoolType b;
 
-  ASSERT_TRUE(gen().EmitType(out(), &b, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &b, "")) << gen.error();
   EXPECT_EQ(result(), "bool");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
   ast::type::F32Type f32;
 
-  ASSERT_TRUE(gen().EmitType(out(), &f32, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &f32, "")) << gen.error();
   EXPECT_EQ(result(), "float");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
   ast::type::I32Type i32;
 
-  ASSERT_TRUE(gen().EmitType(out(), &i32, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &i32, "")) << gen.error();
   EXPECT_EQ(result(), "int");
 }
 
@@ -156,7 +156,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType m(&f32, 3, 2);
 
-  ASSERT_TRUE(gen().EmitType(out(), &m, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &m, "")) << gen.error();
   EXPECT_EQ(result(), "matrix<float, 3, 2>");
 }
 
@@ -165,7 +165,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
   ast::type::F32Type f32;
   ast::type::PointerType p(&f32, ast::StorageClass::kWorkgroup);
 
-  ASSERT_TRUE(gen().EmitType(out(), &p, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &p, "")) << gen.error();
   EXPECT_EQ(result(), "float*");
 }
 
@@ -188,7 +188,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s, "S")) << gen().error();
+  ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
   int a;
   float b;
@@ -215,7 +215,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "S");
 }
 
@@ -246,7 +246,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), R"(struct {
   int8_t pad_0[4];
   int a;
@@ -274,7 +274,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s, "S")) << gen().error();
+  ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
   int double_tint_0;
   float float_tint_0;
@@ -305,7 +305,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::type::StructType s("S", std::move(str));
 
-  ASSERT_TRUE(gen().EmitStructType(out(), &s, "B")) << gen().error();
+  ASSERT_TRUE(gen.EmitStructType(out, &s, "B")) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
   int a;
   float b;
@@ -315,7 +315,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
   ast::type::U32Type u32;
 
-  ASSERT_TRUE(gen().EmitType(out(), &u32, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &u32, "")) << gen.error();
   EXPECT_EQ(result(), "uint");
 }
 
@@ -323,28 +323,28 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType v(&f32, 3);
 
-  ASSERT_TRUE(gen().EmitType(out(), &v, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &v, "")) << gen.error();
   EXPECT_EQ(result(), "vector<float, 3>");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
   ast::type::VoidType v;
 
-  ASSERT_TRUE(gen().EmitType(out(), &v, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &v, "")) << gen.error();
   EXPECT_EQ(result(), "void");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
   ast::type::SamplerType sampler(ast::type::SamplerKind::kSampler);
 
-  ASSERT_TRUE(gen().EmitType(out(), &sampler, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &sampler, "")) << gen.error();
   EXPECT_EQ(result(), "SamplerState");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
   ast::type::SamplerType sampler(ast::type::SamplerKind::kComparisonSampler);
 
-  ASSERT_TRUE(gen().EmitType(out(), &sampler, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &sampler, "")) << gen.error();
   EXPECT_EQ(result(), "SamplerComparisonState");
 }
 
@@ -356,14 +356,13 @@ inline std::ostream& operator<<(std::ostream& out, HlslDepthTextureData data) {
   out << data.dim;
   return out;
 }
-using HlslDepthtexturesTest =
-    TestHelperBase<testing::TestWithParam<HlslDepthTextureData>>;
+using HlslDepthtexturesTest = TestParamHelper<HlslDepthTextureData>;
 TEST_P(HlslDepthtexturesTest, Emit) {
   auto params = GetParam();
 
   ast::type::DepthTextureType s(params.dim);
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -385,15 +384,14 @@ inline std::ostream& operator<<(std::ostream& out, HlslTextureData data) {
   out << data.dim;
   return out;
 }
-using HlslSampledtexturesTest =
-    TestHelperBase<testing::TestWithParam<HlslTextureData>>;
+using HlslSampledtexturesTest = TestParamHelper<HlslTextureData>;
 TEST_P(HlslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
   ast::type::F32Type f32;
   ast::type::SampledTextureType s(params.dim, &f32);
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -415,7 +413,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
   ast::type::F32Type f32;
   ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d, &f32);
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "Texture2D");
 }
 
@@ -429,8 +427,7 @@ inline std::ostream& operator<<(std::ostream& out,
   out << data.dim << (data.ro ? "ReadOnly" : "WriteOnly");
   return out;
 }
-using HlslStoragetexturesTest =
-    TestHelperBase<testing::TestWithParam<HlslStorageTextureData>>;
+using HlslStoragetexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStoragetexturesTest, Emit) {
   auto params = GetParam();
 
@@ -439,7 +436,7 @@ TEST_P(HlslStoragetexturesTest, Emit) {
                                             : ast::AccessControl::kWriteOnly,
                                   ast::type::ImageFormat::kR16Float);
 
-  ASSERT_TRUE(gen().EmitType(out(), &s, "")) << gen().error();
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

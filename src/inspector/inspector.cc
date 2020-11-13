@@ -36,14 +36,22 @@
 #include "src/ast/type/type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
-#include "src/namer.h"
 
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(const ast::Module& module) : module_(module) {}
+Inspector::Inspector(const ast::Module& module)
+    : ctx_(new Context()), context_is_owned_(true), module_(module) {}
 
-Inspector::~Inspector() = default;
+Inspector::Inspector(Context* ctx, const ast::Module& module)
+    : ctx_(ctx), context_is_owned_(false), module_(module) {
+  assert(ctx);
+}
+
+Inspector::~Inspector() {
+  if (context_is_owned_)
+    delete ctx_;
+}
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
@@ -55,7 +63,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
     EntryPoint entry_point;
     entry_point.name = func->name();
-    entry_point.remapped_name = namer_.NameFor(func->name());
+    entry_point.remapped_name = ctx_->namer()->NameFor(func->name());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
@@ -82,7 +90,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
   //  if (!func) {
   //    return {};
   //  }
-  //  return namer_.NameFor(entry_point);
+  //  return ctx_->namer()->NameFor(entry_point);
   return entry_point;
 }
 

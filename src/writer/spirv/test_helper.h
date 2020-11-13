@@ -12,28 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_WRITER_SPIRV_TEST_HELPER_H_
+#define SRC_WRITER_SPIRV_TEST_HELPER_H_
+
 #include "gtest/gtest.h"
-#include "src/ast/discard_statement.h"
+#include "src/ast/module.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
-#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
-namespace {
+namespace spirv {
 
-using WgslGeneratorImplTest = TestHelper;
+/// Helper class for testing
+template <typename T>
+class TestHelperBase : public T {
+ public:
+  TestHelperBase() : td(&ctx, &mod), b(&ctx, &mod) {}
+  ~TestHelperBase() = default;
 
-TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement k;
+  /// The context
+  Context ctx;
+  /// The module
+  ast::Module mod;
+  /// The type determiner
+  TypeDeterminer td;
+  /// The generator
+  Builder b;
+};
+using TestHelper = TestHelperBase<testing::Test>;
 
-  gen.increment_indent();
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-  ASSERT_TRUE(gen.EmitStatement(&k)) << gen.error();
-  EXPECT_EQ(gen.result(), "  discard;\n");
-}
-
-}  // namespace
-}  // namespace wgsl
+}  // namespace spirv
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_SPIRV_TEST_HELPER_H_

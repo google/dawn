@@ -904,6 +904,7 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/operand_test.cc",
     "src/writer/spirv/spv_dump.cc",
     "src/writer/spirv/spv_dump.h",
+    "src/writer/spirv/test_helper.h",
   ]
 
   configs += [
@@ -1049,6 +1050,7 @@ source_set("tint_unittests_wgsl_writer_src") {
     "src/writer/wgsl/generator_impl_unary_op_test.cc",
     "src/writer/wgsl/generator_impl_variable_decl_statement_test.cc",
     "src/writer/wgsl/generator_impl_variable_test.cc",
+    "src/writer/wgsl/test_helper.h",
   ]
 
   configs += [
@@ -1101,6 +1103,7 @@ source_set("tint_unittests_msl_writer_src") {
     "src/writer/msl/generator_impl_unary_op_test.cc",
     "src/writer/msl/generator_impl_variable_decl_statement_test.cc",
     "src/writer/msl/namer_test.cc",
+    "src/writer/msl/test_helper.h",
   ]
 
   configs += [

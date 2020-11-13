@@ -12,28 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_WRITER_WGSL_TEST_HELPER_H_
+#define SRC_WRITER_WGSL_TEST_HELPER_H_
+
 #include "gtest/gtest.h"
-#include "src/ast/discard_statement.h"
+#include "src/ast/module.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
-#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
-namespace {
 
-using WgslGeneratorImplTest = TestHelper;
+/// Helper class for testing
+template <typename T>
+class TestHelperBase : public T {
+ public:
+  TestHelperBase() : td(&ctx, &mod), gen(&ctx) {}
 
-TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement k;
+  ~TestHelperBase() = default;
 
-  gen.increment_indent();
+  /// The context
+  Context ctx;
+  /// The module
+  ast::Module mod;
+  /// The type determiner
+  TypeDeterminer td;
+  /// The generator
+  GeneratorImpl gen;
+};
+using TestHelper = TestHelperBase<testing::Test>;
 
-  ASSERT_TRUE(gen.EmitStatement(&k)) << gen.error();
-  EXPECT_EQ(gen.result(), "  discard;\n");
-}
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace
 }  // namespace wgsl
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_WGSL_TEST_HELPER_H_

@@ -25,19 +25,18 @@
 #include "src/ast/uint_literal.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Literal_Bool_True) {
   ast::type::BoolType bool_type;
   ast::BoolLiteral b_true(&bool_type, true);
 
-  ast::Module mod;
-  Builder b(&mod);
   auto id = b.GenerateLiteralIfNeeded(nullptr, &b_true);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -51,8 +50,6 @@ TEST_F(BuilderTest, Literal_Bool_False) {
   ast::type::BoolType bool_type;
   ast::BoolLiteral b_false(&bool_type, false);
 
-  ast::Module mod;
-  Builder b(&mod);
   auto id = b.GenerateLiteralIfNeeded(nullptr, &b_false);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -67,8 +64,6 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
   ast::BoolLiteral b_true(&bool_type, true);
   ast::BoolLiteral b_false(&bool_type, false);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &b_true), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &b_false), 0u);
@@ -86,8 +81,6 @@ TEST_F(BuilderTest, Literal_I32) {
   ast::type::I32Type i32;
   ast::SintLiteral i(&i32, -23);
 
-  ast::Module mod;
-  Builder b(&mod);
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -102,8 +95,6 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
   ast::SintLiteral i1(&i32, -23);
   ast::SintLiteral i2(&i32, -23);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -117,8 +108,6 @@ TEST_F(BuilderTest, Literal_U32) {
   ast::type::U32Type u32;
   ast::UintLiteral i(&u32, 23);
 
-  ast::Module mod;
-  Builder b(&mod);
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -133,8 +122,6 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
   ast::UintLiteral i1(&u32, 23);
   ast::UintLiteral i2(&u32, 23);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -148,8 +135,6 @@ TEST_F(BuilderTest, Literal_F32) {
   ast::type::F32Type f32;
   ast::FloatLiteral i(&f32, 23.245f);
 
-  ast::Module mod;
-  Builder b(&mod);
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -164,8 +149,6 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
   ast::FloatLiteral i1(&f32, 23.245f);
   ast::FloatLiteral i2(&f32, 23.245f);
 
-  ast::Module mod;
-  Builder b(&mod);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();

@@ -22,6 +22,7 @@
 #include "src/context.h"
 #include "src/diagnostic/printer.h"
 #include "src/inspector/inspector.h"
+#include "src/namer.h"
 #include "src/reader/reader.h"
 #include "src/transform/bound_array_accessors_transform.h"
 #include "src/transform/manager.h"

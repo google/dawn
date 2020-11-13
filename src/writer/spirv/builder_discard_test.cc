@@ -18,19 +18,18 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Discard) {
   ast::DiscardStatement expr;
 
-  ast::Module mod;
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateStatement(&expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpKill

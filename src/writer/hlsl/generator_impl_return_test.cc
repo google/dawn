@@ -29,18 +29,18 @@ using HlslGeneratorImplTest_Return = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
   ast::ReturnStatement r;
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &r)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &r)) << gen.error();
   EXPECT_EQ(result(), "  return;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::ReturnStatement r(std::move(expr));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &r)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &r)) << gen.error();
   EXPECT_EQ(result(), "  return expr;\n");
 }
 

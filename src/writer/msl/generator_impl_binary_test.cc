@@ -19,6 +19,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -33,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   out << data.op;
   return out;
 }
-using MslBinaryTest = testing::TestWithParam<BinaryData>;
+using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
@@ -42,10 +43,8 @@ TEST_P(MslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), params.result);
+  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,

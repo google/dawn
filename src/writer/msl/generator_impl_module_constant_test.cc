@@ -26,13 +26,14 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   ast::type::F32Type f32;
@@ -52,11 +53,9 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   var->set_constructor(
       std::make_unique<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitProgramConstVariable(var.get())) << g.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(var.get())) << gen.error();
   EXPECT_EQ(
-      g.result(),
+      gen.result(),
       "constant float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
 }
 
@@ -73,10 +72,8 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  ASSERT_TRUE(g.EmitProgramConstVariable(var.get())) << g.error();
-  EXPECT_EQ(g.result(), "constant float pos [[function_constant(23)]];\n");
+  ASSERT_TRUE(gen.EmitProgramConstVariable(var.get())) << gen.error();
+  EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
 }
 
 }  // namespace

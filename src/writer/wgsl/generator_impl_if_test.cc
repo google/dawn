@@ -18,13 +18,14 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
@@ -33,11 +34,10 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 
   ast::IfStatement i(std::move(cond), std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     discard;
   }
 )");
@@ -59,11 +59,10 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     discard;
   } elseif (else_cond) {
     discard;
@@ -85,11 +84,10 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     discard;
   } else {
     discard;
@@ -118,11 +116,10 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     discard;
   } elseif (else_cond) {
     discard;

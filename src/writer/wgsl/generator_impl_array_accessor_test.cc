@@ -21,13 +21,14 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   ast::type::I32Type i32;
@@ -37,9 +38,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "ary[5]");
+  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "ary[5]");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitArrayAccessor) {
@@ -48,9 +48,8 @@ TEST_F(WgslGeneratorImplTest, EmitArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitArrayAccessor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), "ary[idx]");
+  ASSERT_TRUE(gen.EmitArrayAccessor(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "ary[idx]");
 }
 
 }  // namespace

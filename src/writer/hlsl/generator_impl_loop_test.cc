@@ -38,9 +38,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   body->append(std::make_unique<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &l)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &l)) << gen.error();
   EXPECT_EQ(result(), R"(  for(;;) {
     discard;
   }
@@ -55,9 +55,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   continuing->append(std::make_unique<ast::ReturnStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &l)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &l)) << gen.error();
   EXPECT_EQ(result(), R"(  {
     bool tint_hlsl_is_first_1 = true;
     for(;;) {
@@ -95,9 +95,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &outer)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &outer)) << gen.error();
   EXPECT_EQ(result(), R"(  {
     bool tint_hlsl_is_first_1 = true;
     for(;;) {
@@ -165,9 +165,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       std::move(lhs), std::move(rhs)));
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &outer)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &outer)) << gen.error();
   EXPECT_EQ(result(), R"(  {
     bool tint_hlsl_is_first_1 = true;
     float lhs;

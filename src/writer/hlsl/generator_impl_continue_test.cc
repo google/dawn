@@ -29,9 +29,9 @@ using HlslGeneratorImplTest_Continue = TestHelper;
 TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
   ast::ContinueStatement c;
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &c)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &c)) << gen.error();
   EXPECT_EQ(result(), "  continue;\n");
 }
 

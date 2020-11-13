@@ -20,25 +20,23 @@
 #include "src/ast/function.h"
 #include "src/ast/module.h"
 #include "src/ast/type/void_type.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
 
-  ast::Module m;
-  m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                                &void_type));
+  mod.AddFunction(std::make_unique<ast::Function>(
+      "my_func", ast::VariableList{}, &void_type));
 
-  GeneratorImpl g;
-
-  ASSERT_TRUE(g.Generate(m)) << g.error();
-  EXPECT_EQ(g.result(), R"(fn my_func() -> void {
+  ASSERT_TRUE(gen.Generate(mod)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(fn my_func() -> void {
 }
 
 )");

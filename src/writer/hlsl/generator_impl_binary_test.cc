@@ -50,7 +50,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   return out;
 }
 
-using HlslBinaryTest = TestHelperBase<testing::TestWithParam<BinaryData>>;
+using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit) {
   auto params = GetParam();
 
@@ -59,7 +59,7 @@ TEST_P(HlslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -90,7 +90,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(left),
                              std::move(right));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (_tint_tmp) {
@@ -113,7 +113,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
       std::make_unique<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                               std::move(c), std::move(d)));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
@@ -137,7 +137,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(left),
                              std::move(right));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (!_tint_tmp) {
@@ -190,7 +190,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
                         std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;
@@ -223,7 +223,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
                                               std::move(a), std::move(b)),
       std::move(c)));
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;
@@ -251,7 +251,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
                                                   std::move(b), std::move(c)),
           std::move(d)));
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (!_tint_tmp) {
   _tint_tmp = c;
@@ -282,7 +282,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
 
   ast::VariableDeclStatement expr(std::move(var));
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (_tint_tmp) {
   _tint_tmp = c;
@@ -309,7 +309,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
                 std::make_unique<ast::BinaryExpression>(
                     ast::BinaryOp::kLogicalOr, std::move(b), std::move(c))));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   bool _tint_tmp_0 = b;
@@ -329,7 +329,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   auto func =
       std::make_unique<ast::Function>("foo", ast::VariableList{}, &void_type);
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::BinaryExpression>(
@@ -354,7 +354,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   ast::CallStatement expr(std::make_unique<ast::CallExpression>(
       std::make_unique<ast::IdentifierExpression>("foo"), std::move(params)));
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &expr)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;

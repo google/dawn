@@ -22,13 +22,14 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();
@@ -53,11 +54,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&s)) << g.error();
-  EXPECT_EQ(g.result(), R"(  switch(cond) {
+  ASSERT_TRUE(gen.EmitStatement(&s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
     }

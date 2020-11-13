@@ -14,20 +14,20 @@
 
 #include "gtest/gtest.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
   ast::IdentifierExpression i("glsl");
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
-  EXPECT_EQ(g.result(), "glsl");
+  ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), "glsl");
 }
 
 }  // namespace

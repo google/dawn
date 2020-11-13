@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&f32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &bitcast)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &bitcast)) << gen.error();
   EXPECT_EQ(result(), "asfloat(id)");
 }
 
@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&i32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &bitcast)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &bitcast)) << gen.error();
   EXPECT_EQ(result(), "asint(id)");
 }
 
@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&u32, std::move(id));
 
-  ASSERT_TRUE(gen().EmitExpression(pre(), out(), &bitcast)) << gen().error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, &bitcast)) << gen.error();
   EXPECT_EQ(result(), "asuint(id)");
 }
 

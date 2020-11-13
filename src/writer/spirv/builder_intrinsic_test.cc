@@ -45,6 +45,7 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -66,7 +67,7 @@ class IntrinsicBuilderTest : public ast::Builder, public testing::Test {
   Context ctx;
   ast::Module mod;
   TypeDeterminer td{&ctx, &mod};
-  spirv::Builder b{&mod};
+  spirv::Builder b{&ctx, &mod};
 };
 
 template <typename T>

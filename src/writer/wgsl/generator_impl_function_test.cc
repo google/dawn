@@ -33,13 +33,14 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
   auto body = std::make_unique<ast::BlockStatement>();
@@ -50,11 +51,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   ast::Function func("my_func", {}, &void_type);
   func.set_body(std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitFunction(&func));
-  EXPECT_EQ(g.result(), R"(  fn my_func() -> void {
+  ASSERT_TRUE(gen.EmitFunction(&func));
+  EXPECT_EQ(gen.result(), R"(  fn my_func() -> void {
     discard;
     return;
   }
@@ -78,11 +78,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   ast::Function func("my_func", std::move(params), &void_type);
   func.set_body(std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitFunction(&func));
-  EXPECT_EQ(g.result(), R"(  fn my_func(a : f32, b : i32) -> void {
+  ASSERT_TRUE(gen.EmitFunction(&func));
+  EXPECT_EQ(gen.result(), R"(  fn my_func(a : f32, b : i32) -> void {
     discard;
     return;
   }
@@ -100,11 +99,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
       std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitFunction(&func));
-  EXPECT_EQ(g.result(), R"(  [[workgroup_size(2, 4, 6)]]
+  ASSERT_TRUE(gen.EmitFunction(&func));
+  EXPECT_EQ(gen.result(), R"(  [[workgroup_size(2, 4, 6)]]
   fn my_func() -> void {
     discard;
     return;
@@ -123,11 +121,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
       ast::PipelineStage::kFragment, Source{}));
   func.set_body(std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitFunction(&func));
-  EXPECT_EQ(g.result(), R"(  [[stage(fragment)]]
+  ASSERT_TRUE(gen.EmitFunction(&func));
+  EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
   fn my_func() -> void {
     discard;
     return;
@@ -148,11 +145,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
       std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
-  GeneratorImpl g;
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitFunction(&func));
-  EXPECT_EQ(g.result(), R"(  [[stage(fragment)]]
+  ASSERT_TRUE(gen.EmitFunction(&func));
+  EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
   [[workgroup_size(2, 4, 6)]]
   fn my_func() -> void {
     discard;
@@ -207,10 +203,6 @@ TEST_F(WgslGeneratorImplTest,
   decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(std::move(decos));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   mod.AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var.get());
@@ -260,9 +252,8 @@ TEST_F(WgslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
-  EXPECT_EQ(g.result(), R"([[block]]
+  ASSERT_TRUE(gen.Generate(mod)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
   [[offset(0)]]
   d : f32;

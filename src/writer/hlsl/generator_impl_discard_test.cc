@@ -26,9 +26,9 @@ using HlslGeneratorImplTest_Discard = TestHelper;
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
   ast::DiscardStatement stmt;
 
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &stmt)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), "  discard;\n");
 }
 

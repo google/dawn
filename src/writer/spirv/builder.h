@@ -29,7 +29,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/namer.h"
+#include "src/context.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -61,8 +61,9 @@ class Builder {
   };
 
   /// Constructor
+  /// @param ctx the context, must be non-null
   /// @param mod the module to generate from
-  explicit Builder(ast::Module* mod);
+  Builder(Context* ctx, ast::Module* mod);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given module
@@ -469,9 +470,9 @@ class Builder {
     return func_name_to_id_[name];
   }
 
+  Context* ctx_ = nullptr;
   ast::Module* mod_;
   std::string error_;
-  Namer namer_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;
   InstructionList capabilities_;

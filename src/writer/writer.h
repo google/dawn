@@ -19,6 +19,7 @@
 
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/context.h"
 
 namespace tint {
 namespace writer {
@@ -49,8 +50,14 @@ class Writer {
 
  protected:
   /// Constructor
+  /// DEPRECATED
   /// @param module the tint module to convert
   explicit Writer(ast::Module module);
+
+  /// Constructor
+  /// @param ctx the context object, must be non-null
+  /// @param module the tint module to convert
+  Writer(Context* ctx, ast::Module module);
 
   /// Sets the error string
   /// @param msg the error message
@@ -58,6 +65,10 @@ class Writer {
 
   /// An error message, if an error was encountered
   std::string error_;
+  /// The context
+  Context* ctx_ = nullptr;
+  /// Tracks if we own the context
+  bool context_is_owned_ = false;
   /// The module being converted
   ast::Module module_;
 };

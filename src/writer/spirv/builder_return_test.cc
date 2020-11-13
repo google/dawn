@@ -26,19 +26,18 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Return) {
   ast::ReturnStatement ret;
 
-  ast::Module mod;
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -64,12 +63,8 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   ast::ReturnStatement ret(std::move(val));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -93,13 +88,9 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
   ast::ReturnStatement ret(
       std::make_unique<ast::IdentifierExpression>("param"));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   EXPECT_TRUE(b.GenerateReturnStatement(&ret)) << b.error();

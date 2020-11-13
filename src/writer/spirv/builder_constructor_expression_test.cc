@@ -41,21 +41,20 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Constructor_Const) {
   ast::type::F32Type f32;
   auto fl = std::make_unique<ast::FloatLiteral>(&f32, 42.2f);
   ast::ScalarConstructorExpression c(std::move(fl));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -78,12 +77,8 @@ TEST_F(BuilderTest, Constructor_Type) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -115,12 +110,8 @@ TEST_F(BuilderTest, Constructor_Type_WithCasts) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 7u);
@@ -153,12 +144,8 @@ TEST_F(BuilderTest, Constructor_Type_WithAlias) {
 
   ast::TypeConstructorExpression cast(&alias, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -185,13 +172,9 @@ TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var.get())) << b.error();
 
@@ -227,12 +210,8 @@ TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 7u);
@@ -268,12 +247,8 @@ TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
@@ -288,12 +263,8 @@ TEST_F(BuilderTest, Constructor_Type_Bool_With_Bool) {
 
   ast::TypeConstructorExpression t(&bool_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 1u);
@@ -316,12 +287,8 @@ TEST_F(BuilderTest, Constructor_Type_I32_With_I32) {
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -342,12 +309,8 @@ TEST_F(BuilderTest, Constructor_Type_U32_With_U32) {
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -368,12 +331,8 @@ TEST_F(BuilderTest, Constructor_Type_F32_With_F32) {
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -397,12 +356,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec2_With_F32_F32) {
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 4u);
 
@@ -427,12 +382,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_F32_F32) {
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 4u);
 
@@ -462,12 +413,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -503,12 +450,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_Vec2_F32) {
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -541,12 +484,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_F32_F32) {
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 4u);
 
@@ -578,12 +517,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -621,12 +556,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec2_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -664,12 +595,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_F32_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -711,12 +638,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 10u);
 
@@ -756,12 +679,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec3) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 9u);
 
@@ -800,12 +719,8 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec3_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 9u);
 
@@ -842,12 +757,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
@@ -884,12 +795,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
@@ -928,12 +835,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
@@ -972,12 +875,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
@@ -1016,12 +915,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
 
@@ -1064,12 +959,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
@@ -1110,12 +1001,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
@@ -1156,12 +1043,8 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
 
@@ -1206,12 +1089,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1257,12 +1136,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1316,12 +1191,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1363,12 +1234,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1420,12 +1287,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1487,12 +1350,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1538,12 +1397,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1601,12 +1456,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1676,12 +1527,8 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1712,12 +1559,8 @@ TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
 
   ast::TypeConstructorExpression cast(&ary, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 6u);
 
@@ -1759,12 +1602,8 @@ TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
 
   ast::TypeConstructorExpression cast(&ary, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 8u);
 
@@ -1809,12 +1648,8 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 6u);
@@ -1835,12 +1670,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_F32) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&f32, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 2u);
@@ -1857,12 +1688,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_I32) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&i32, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 2u);
@@ -1879,12 +1706,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_U32) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&u32, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 2u);
@@ -1901,12 +1724,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Bool) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&bool_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 2u);
@@ -1924,12 +1743,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Vector) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 3u);
@@ -1948,12 +1763,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Matrix) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&mat, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 4u);
@@ -1973,12 +1784,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Array) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&ary, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 5u);
@@ -2006,12 +1813,8 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
   ast::ExpressionList vals;
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(&t), 3u);
@@ -2033,12 +1836,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_I32) {
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2061,12 +1860,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_U32) {
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2089,12 +1884,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_I32) {
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2117,12 +1908,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_U32) {
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2145,12 +1932,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_F32) {
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2173,12 +1956,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_F32) {
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(&cast), 1u);
 
@@ -2205,13 +1984,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_I32) {
 
   ast::TypeConstructorExpression cast(&ivec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2244,13 +2019,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_I32) {
 
   ast::TypeConstructorExpression cast(&ivec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2283,13 +2054,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_U32) {
 
   ast::TypeConstructorExpression cast(&uvec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2322,13 +2089,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_U32) {
 
   ast::TypeConstructorExpression cast(&uvec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2361,13 +2124,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_F32) {
 
   ast::TypeConstructorExpression cast(&fvec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2400,13 +2159,9 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
 
   ast::TypeConstructorExpression cast(&fvec3, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
-  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
@@ -2439,12 +2194,8 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
       std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_TRUE(b.is_constructor_const(&t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -2460,10 +2211,6 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
   params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
@@ -2473,7 +2220,6 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, true));
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), "constructor must be a constant expression");
@@ -2510,12 +2256,8 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
   ary_params.push_back(std::move(second));
   ast::TypeConstructorExpression t(&ary, std::move(ary_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_TRUE(b.is_constructor_const(&t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -2541,12 +2283,8 @@ TEST_F(BuilderTest,
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -2572,12 +2310,8 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalWithTypeCastConstructor) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -2596,12 +2330,8 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWithAllConstConstructors) {
       std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_TRUE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2617,10 +2347,6 @@ TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
   params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
@@ -2630,7 +2356,6 @@ TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2666,12 +2391,8 @@ TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
   ary_params.push_back(std::move(second));
   ast::TypeConstructorExpression t(&ary, std::move(ary_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_TRUE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2697,12 +2418,8 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWith_TypeCastConstConstructors) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2728,12 +2445,8 @@ TEST_F(BuilderTest, IsConstructorConst_WithTypeCastConstructor) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2751,12 +2464,8 @@ TEST_F(BuilderTest, IsConstructorConst_BitCastScalars) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2791,12 +2500,8 @@ TEST_F(BuilderTest, IsConstructorConst_Struct) {
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_TRUE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -2830,10 +2535,6 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
   td.RegisterVariableForTesting(&var_a);
@@ -2841,7 +2542,6 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
-  Builder b(&mod);
   EXPECT_FALSE(b.is_constructor_const(&t, false));
   EXPECT_FALSE(b.has_error());
 }

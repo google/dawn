@@ -52,9 +52,9 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
-  gen().increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().EmitStatement(out(), &s)) << gen().error();
+  ASSERT_TRUE(gen.EmitStatement(out, &s)) << gen.error();
   EXPECT_EQ(result(), R"(  switch(cond) {
     case 5: {
       break;

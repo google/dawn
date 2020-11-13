@@ -19,13 +19,14 @@
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
@@ -34,12 +35,10 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 
   ast::IfStatement i(std::move(cond), std::move(body));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   }
 )");
@@ -61,12 +60,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else if (else_cond) {
     return;
@@ -88,12 +85,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -122,12 +117,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
-  EXPECT_EQ(g.result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else if (else_cond) {
     return;

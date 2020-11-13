@@ -16,11 +16,14 @@
 
 #include <utility>
 
+#include "src/namer.h"
 #include "src/type_manager.h"
 
 namespace tint {
 
-Context::Context() = default;
+Context::Context() : namer_(std::make_unique<HashingNamer>()) {}
+
+Context::Context(std::unique_ptr<Namer> namer) : namer_(std::move(namer)) {}
 
 Context::~Context() = default;
 

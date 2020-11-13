@@ -42,20 +42,19 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -70,8 +69,6 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -86,8 +83,6 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kInput, &f32);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -112,16 +107,12 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -152,9 +143,6 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
@@ -162,7 +150,6 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -190,9 +177,6 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
@@ -200,7 +184,6 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -233,9 +216,6 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
@@ -243,7 +223,6 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -273,8 +252,6 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -298,8 +275,6 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -324,8 +299,6 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -350,8 +323,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
   v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true)));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
 )");
@@ -374,8 +345,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
       "var", ast::StorageClass::kNone, &bool_type));
   v.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -400,8 +369,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
 )");
@@ -424,8 +391,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
   v.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -448,8 +413,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32));
   v.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -472,8 +435,6 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &u32));
   v.set_decorations(std::move(decos));
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
 )");
@@ -494,12 +455,9 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
   out << data.builtin;
   return out;
 }
-using BuiltinDataTest = testing::TestWithParam<BuiltinData>;
+using BuiltinDataTest = TestParamHelper<BuiltinData>;
 TEST_P(BuiltinDataTest, Convert) {
   auto params = GetParam();
-
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_EQ(b.ConvertBuiltin(params.builtin), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -544,8 +502,6 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -584,8 +540,6 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -622,8 +576,6 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &B);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -661,8 +613,6 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   ast::Variable var_b("b", ast::StorageClass::kStorageBuffer, &read);
   ast::Variable var_c("c", ast::StorageClass::kStorageBuffer, &rw);
 
-  ast::Module mod;
-  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&var_b)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(&var_c)) << b.error();
 

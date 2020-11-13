@@ -26,13 +26,14 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
   auto body = std::make_unique<ast::BlockStatement>();
@@ -40,12 +41,10 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
   ast::LoopStatement l(std::move(body), {});
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
-  EXPECT_EQ(g.result(), R"(  for(;;) {
+  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  for(;;) {
     discard_fragment();
   }
 )");
@@ -60,12 +59,10 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     for(;;) {
       if (!tint_msl_is_first_1) {
@@ -103,12 +100,10 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen.EmitStatement(&outer)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     for(;;) {
       if (!tint_msl_is_first_1) {
@@ -174,14 +169,12 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   continuing->append(std::make_unique<ast::AssignmentStatement>(
       std::move(lhs), std::move(rhs)));
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
 
-  ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
-  EXPECT_EQ(g.result(), R"(  {
+  ASSERT_TRUE(gen.EmitStatement(&outer)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     float lhs;
     float other;

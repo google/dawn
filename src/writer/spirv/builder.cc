@@ -270,7 +270,10 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
 
-Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
+Builder::Builder(Context* ctx, ast::Module* mod)
+    : ctx_(ctx), mod_(mod), scope_stack_({}) {
+  assert(ctx_);
+}
 
 Builder::~Builder() = default;
 
@@ -424,7 +427,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
   // the inspector and land the same change in MSL / HLSL to all roll into Dawn
   // at the same time.
   // OperandList operands = {Operand::Int(stage), Operand::Int(id),
-  //                         Operand::String(namer_.NameFor(func->name()))};
+  //                         Operand::String(ctx_.namer()->NameFor(func->name()))};
   OperandList operands = {Operand::Int(stage), Operand::Int(id),
                           Operand::String(func->name())};
 
@@ -508,8 +511,9 @@ bool Builder::GenerateFunction(ast::Function* func) {
   auto func_op = result_op();
   auto func_id = func_op.to_i();
 
-  push_debug(spv::Op::OpName, {Operand::Int(func_id),
-                               Operand::String(namer_.NameFor(func->name()))});
+  push_debug(spv::Op::OpName,
+             {Operand::Int(func_id),
+              Operand::String(ctx_->namer()->NameFor(func->name()))});
 
   auto ret_id = GenerateTypeIfNeeded(func->return_type());
   if (ret_id == 0) {
@@ -535,7 +539,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
     push_debug(spv::Op::OpName,
                {Operand::Int(param_id),
-                Operand::String(namer_.NameFor(param->name()))});
+                Operand::String(ctx_->namer()->NameFor(param->name()))});
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
@@ -624,8 +628,9 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
     return false;
   }
 
-  push_debug(spv::Op::OpName, {Operand::Int(var_id),
-                               Operand::String(namer_.NameFor(var->name()))});
+  push_debug(spv::Op::OpName,
+             {Operand::Int(var_id),
+              Operand::String(ctx_->namer()->NameFor(var->name()))});
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
@@ -673,8 +678,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-    push_debug(spv::Op::OpName, {Operand::Int(init_id),
-                                 Operand::String(namer_.NameFor(var->name()))});
+    push_debug(spv::Op::OpName,
+               {Operand::Int(init_id),
+                Operand::String(ctx_->namer()->NameFor(var->name()))});
 
     scope_stack_.set_global(var->name(), init_id);
     spirv_id_to_variable_[init_id] = var;
@@ -694,8 +700,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  push_debug(spv::Op::OpName, {Operand::Int(var_id),
-                               Operand::String(namer_.NameFor(var->name()))});
+  push_debug(spv::Op::OpName,
+             {Operand::Int(var_id),
+              Operand::String(ctx_->namer()->NameFor(var->name()))});
 
   auto* type = var->type()->UnwrapAll();
 
@@ -2474,7 +2481,7 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
   if (!struct_type->name().empty()) {
     push_debug(spv::Op::OpName,
                {Operand::Int(struct_id),
-                Operand::String(namer_.NameFor(struct_type->name()))});
+                Operand::String(ctx_->namer()->NameFor(struct_type->name()))});
   }
 
   OperandList ops;
@@ -2517,7 +2524,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        ast::StructMember* member) {
   push_debug(spv::Op::OpMemberName,
              {Operand::Int(struct_id), Operand::Int(idx),
-              Operand::String(namer_.NameFor(member->name()))});
+              Operand::String(ctx_->namer()->NameFor(member->name()))});
 
   bool has_layout = false;
   for (const auto& deco : member->decorations()) {

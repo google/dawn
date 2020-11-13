@@ -568,6 +568,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/operand_test.cc
     writer/spirv/spv_dump.cc
     writer/spirv/spv_dump.h
+    writer/spirv/test_helper.h
   )
 endif()
 
@@ -599,6 +600,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_unary_op_test.cc
     writer/wgsl/generator_impl_variable_decl_statement_test.cc
     writer/wgsl/generator_impl_variable_test.cc
+    writer/wgsl/test_helper.h
   )
 endif()
 
@@ -633,6 +635,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_unary_op_test.cc
     writer/msl/generator_impl_variable_decl_statement_test.cc
     writer/msl/namer_test.cc
+    writer/msl/test_helper.h
   )
 endif()
 

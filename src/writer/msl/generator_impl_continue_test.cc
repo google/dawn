@@ -19,23 +19,22 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
   ast::ContinueStatement c;
 
-  ast::Module m;
-  GeneratorImpl g(&m);
-  g.increment_indent();
+  gen.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&c)) << g.error();
-  EXPECT_EQ(g.result(), "  continue;\n");
+  ASSERT_TRUE(gen.EmitStatement(&c)) << gen.error();
+  EXPECT_EQ(gen.result(), "  continue;\n");
 }
 
 }  // namespace

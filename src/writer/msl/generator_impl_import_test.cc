@@ -31,13 +31,14 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
 namespace {
 
-using MslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = TestHelper;
 
 struct MslImportData {
   const char* name;
@@ -47,7 +48,7 @@ inline std::ostream& operator<<(std::ostream& out, MslImportData data) {
   out << data.name;
   return out;
 }
-using MslImportData_SingleParamTest = testing::TestWithParam<MslImportData>;
+using MslImportData_SingleParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -62,15 +63,10 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
 
   ast::CallExpression call(std::move(ident), std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   // The call type determination will set the intrinsic data for the ident
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_EQ(g.generate_builtin_name(ident_ptr),
+  ASSERT_EQ(gen.generate_builtin_name(ident_ptr),
             std::string("metal::") + param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -109,18 +105,13 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
   ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("abs"),
                            std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), R"(metal::abs(1))");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(metal::abs(1))");
 }
 
-using MslImportData_DualParamTest = testing::TestWithParam<MslImportData>;
+using MslImportData_DualParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -136,16 +127,10 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name +
-                            "(1.00000000f, 2.00000000f)");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
+                              "(1.00000000f, 2.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParamTest,
@@ -157,8 +142,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"reflect", "reflect"},
                                          MslImportData{"step", "step"}));
 
-using MslImportData_DualParam_VectorTest =
-    testing::TestWithParam<MslImportData>;
+using MslImportData_DualParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
@@ -190,23 +174,17 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name +
-                            "(float3(1.00000000f, 2.00000000f, 3.00000000f), "
-                            "float3(4.00000000f, 5.00000000f, 6.00000000f))");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
+                              "(float3(1.00000000f, 2.00000000f, 3.00000000f), "
+                              "float3(4.00000000f, 5.00000000f, 6.00000000f))");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_VectorTest,
                          testing::Values(MslImportData{"cross", "cross"}));
 
-using MslImportData_DualParam_Int_Test = testing::TestWithParam<MslImportData>;
+using MslImportData_DualParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -222,22 +200,16 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name + "(1, 2)");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_Int_Test,
                          testing::Values(MslImportData{"max", "max"},
                                          MslImportData{"min", "min"}));
 
-using MslImportData_TripleParamTest = testing::TestWithParam<MslImportData>;
+using MslImportData_TripleParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
@@ -255,16 +227,10 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name +
-                            "(1.00000000f, 2.00000000f, 3.00000000f)");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
+                              "(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -275,8 +241,7 @@ INSTANTIATE_TEST_SUITE_P(
                     MslImportData{"clamp", "clamp"},
                     MslImportData{"smoothStep", "smoothstep"}));
 
-using MslImportData_TripleParam_Int_Test =
-    testing::TestWithParam<MslImportData>;
+using MslImportData_TripleParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
@@ -294,15 +259,10 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
       std::make_unique<ast::IdentifierExpression>(param.name),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::") + param.msl_name + "(1, 2, 3)");
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(),
+            std::string("metal::") + param.msl_name + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_TripleParam_Int_Test,
@@ -323,18 +283,13 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
       std::make_unique<ast::IdentifierExpression>("determinant"),
       std::move(params));
 
-  Context ctx;
-  ast::Module mod;
   mod.AddGlobalVariable(std::move(var));
 
-  TypeDeterminer td(&ctx, &mod);
   // Register the global
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  GeneratorImpl g(&mod);
-  ASSERT_TRUE(g.EmitCall(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("metal::determinant(var)"));
+  ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
+  EXPECT_EQ(gen.result(), std::string("metal::determinant(var)"));
 }
 
 }  // namespace

@@ -30,13 +30,14 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = testing::Test;
+using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
   ast::type::F32Type f32;
@@ -69,14 +70,10 @@ TEST_F(BuilderTest, Expression_Call) {
       std::make_unique<ast::IdentifierExpression>("a_func"),
       std::move(call_params));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -137,14 +134,10 @@ TEST_F(BuilderTest, Statement_Call) {
       std::make_unique<ast::IdentifierExpression>("a_func"),
       std::move(call_params)));
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 

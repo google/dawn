@@ -24,21 +24,21 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable_decoration.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&v)) << g.error();
-  EXPECT_EQ(g.result(), R"(var a : f32;
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(var a : f32;
 )");
 }
 
@@ -46,9 +46,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kInput, &f32);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&v)) << g.error();
-  EXPECT_EQ(g.result(), R"(var<in> a : f32;
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(var<in> a : f32;
 )");
 }
 
@@ -63,9 +62,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   dv.set_type(&f32);
   dv.set_decorations(std::move(decos));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&dv)) << g.error();
-  EXPECT_EQ(g.result(), R"([[location(2)]] var a : f32;
+  ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[location(2)]] var a : f32;
 )");
 }
 
@@ -85,10 +83,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   dv.set_type(&f32);
   dv.set_decorations(std::move(decos));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&dv)) << g.error();
+  ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
   EXPECT_EQ(
-      g.result(),
+      gen.result(),
       R"([[builtin(position), binding(0), set(1), location(2), constant_id(42)]] var a : f32;
 )");
 }
@@ -100,9 +97,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
   v.set_constructor(std::move(ident));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&v)) << g.error();
-  EXPECT_EQ(g.result(), R"(var a : f32 = initializer;
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
 )");
 }
 
@@ -114,9 +110,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   v.set_constructor(std::move(ident));
   v.set_is_const(true);
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitVariable(&v)) << g.error();
-  EXPECT_EQ(g.result(), R"(const a : f32 = initializer;
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(const a : f32 = initializer;
 )");
 }
 

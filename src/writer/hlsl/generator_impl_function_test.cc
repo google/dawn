@@ -64,10 +64,10 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
-  gen().increment_indent();
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(  void my_func() {
     return;
   }
@@ -85,10 +85,10 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
-  gen().increment_indent();
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(  void GeometryShader_tint_0() {
     return;
   }
@@ -114,10 +114,10 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
-  gen().increment_indent();
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(  void my_func(float a, int b) {
     return;
   }
@@ -142,11 +142,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(foo_var.get());
-  td().RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var.get());
+  td.RegisterVariableForTesting(bar_var.get());
 
-  mod()->AddGlobalVariable(std::move(foo_var));
-  mod()->AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(std::move(foo_var));
+  mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -161,10 +161,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct frag_main_in {
   float foo : TEXCOORD0;
 };
@@ -204,11 +204,11 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  td().RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(depth_var.get());
 
-  mod()->AddGlobalVariable(std::move(coord_var));
-  mod()->AddGlobalVariable(std::move(depth_var));
+  mod.AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -225,10 +225,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct frag_main_in {
   vector<float, 4> coord : SV_Position;
 };
@@ -261,8 +261,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  mod()->AddGlobalVariable(std::move(coord_var));
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -281,10 +281,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer : register(b0) {
   vector<float, 4> coord;
 };
@@ -316,15 +316,15 @@ TEST_F(HlslGeneratorImplTest_Function,
       std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
           "uniforms", ast::StorageClass::kUniform, &s));
 
-  mod()->AddConstructedType(&s);
+  mod.AddConstructedType(&s);
 
   ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  mod()->AddGlobalVariable(std::move(coord_var));
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -345,10 +345,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Uniforms {
   vector<float, 4> coord;
 };
@@ -397,8 +397,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  mod()->AddGlobalVariable(std::move(coord_var));
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -417,10 +417,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
@@ -465,8 +465,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  mod()->AddGlobalVariable(std::move(coord_var));
+  td.RegisterVariableForTesting(coord_var.get());
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -485,10 +485,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(u0);
 
 void frag_main() {
@@ -533,9 +533,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var.get());
 
-  mod()->AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
@@ -555,10 +555,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
@@ -592,13 +592,13 @@ TEST_F(
   decos.push_back(std::make_unique<ast::LocationDecoration>(0, Source{}));
   val_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(foo_var.get());
-  td().RegisterVariableForTesting(bar_var.get());
-  td().RegisterVariableForTesting(val_var.get());
+  td.RegisterVariableForTesting(foo_var.get());
+  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(val_var.get());
 
-  mod()->AddGlobalVariable(std::move(foo_var));
-  mod()->AddGlobalVariable(std::move(bar_var));
-  mod()->AddGlobalVariable(std::move(val_var));
+  mod.AddGlobalVariable(std::move(foo_var));
+  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(std::move(val_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -617,7 +617,7 @@ TEST_F(
       std::make_unique<ast::IdentifierExpression>("foo")));
   sub_func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(sub_func));
+  mod.AddFunction(std::move(sub_func));
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
@@ -637,10 +637,10 @@ TEST_F(
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func_1));
+  mod.AddFunction(std::move(func_1));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_in {
   float foo : TEXCOORD0;
 };
@@ -680,9 +680,9 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(depth_var.get());
 
-  mod()->AddGlobalVariable(std::move(depth_var));
+  mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -695,7 +695,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(sub_func));
+  mod.AddFunction(std::move(sub_func));
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
@@ -715,10 +715,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func_1));
+  mod.AddFunction(std::move(func_1));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_out {
   float depth : SV_Depth;
 };
@@ -759,11 +759,11 @@ TEST_F(
       ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
-  td().RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(depth_var.get());
 
-  mod()->AddGlobalVariable(std::move(coord_var));
-  mod()->AddGlobalVariable(std::move(depth_var));
+  mod.AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -781,7 +781,7 @@ TEST_F(
       std::make_unique<ast::IdentifierExpression>("param")));
   sub_func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(sub_func));
+  mod.AddFunction(std::move(sub_func));
 
   auto func_1 =
       std::make_unique<ast::Function>("ep_1", std::move(params), &void_type);
@@ -801,10 +801,10 @@ TEST_F(
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func_1));
+  mod.AddFunction(std::move(func_1));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_in {
   vector<float, 4> coord : SV_Position;
 };
@@ -842,9 +842,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var.get());
 
-  mod()->AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -859,7 +859,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           std::make_unique<ast::IdentifierExpression>("x"))));
   sub_func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(sub_func));
+  mod.AddFunction(std::move(sub_func));
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
@@ -881,10 +881,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer : register(b0) {
   vector<float, 4> coord;
 };
@@ -916,9 +916,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var.get());
 
-  mod()->AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(std::make_unique<ast::Variable>(
@@ -933,7 +933,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           std::make_unique<ast::IdentifierExpression>("x"))));
   sub_func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(sub_func));
+  mod.AddFunction(std::move(sub_func));
 
   auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
                                               &void_type);
@@ -955,10 +955,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 float sub_func(float param) {
@@ -985,8 +985,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td().RegisterVariableForTesting(bar_var.get());
-  mod()->AddGlobalVariable(std::move(bar_var));
+  td.RegisterVariableForTesting(bar_var.get());
+  mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
   auto func_1 =
@@ -1015,10 +1015,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func_1->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func_1));
+  mod.AddFunction(std::move(func_1));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_out {
   float bar : SV_Target1;
 };
@@ -1044,9 +1044,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   func->add_decoration(std::make_unique<ast::StageDecoration>(
       ast::PipelineStage::kFragment, Source{}));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
 }
 
@@ -1067,10 +1067,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
 void main() {
   return;
@@ -1095,10 +1095,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
+  mod.AddFunction(std::move(func));
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
 void main() {
   return;
@@ -1123,10 +1123,10 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   body->append(std::make_unique<ast::ReturnStatement>());
   func->set_body(std::move(body));
 
-  mod()->AddFunction(std::move(func));
-  gen().increment_indent();
+  mod.AddFunction(std::move(func));
+  gen.increment_indent();
 
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(  void my_func(float a[5]) {
     return;
   }
@@ -1180,9 +1180,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(std::move(decos));
 
-  mod()->AddConstructedType(&s);
-  td().RegisterVariableForTesting(data_var.get());
-  mod()->AddGlobalVariable(std::move(data_var));
+  mod.AddConstructedType(&s);
+  td.RegisterVariableForTesting(data_var.get());
+  mod.AddGlobalVariable(std::move(data_var));
 
   {
     ast::VariableList params;
@@ -1202,7 +1202,7 @@ TEST_F(HlslGeneratorImplTest_Function,
     body->append(std::make_unique<ast::ReturnStatement>());
     func->set_body(std::move(body));
 
-    mod()->AddFunction(std::move(func));
+    mod.AddFunction(std::move(func));
   }
 
   {
@@ -1223,11 +1223,11 @@ TEST_F(HlslGeneratorImplTest_Function,
     body->append(std::make_unique<ast::ReturnStatement>());
     func->set_body(std::move(body));
 
-    mod()->AddFunction(std::move(func));
+    mod.AddFunction(std::move(func));
   }
 
-  ASSERT_TRUE(td().Determine()) << td().error();
-  ASSERT_TRUE(gen().Generate(out())) << gen().error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Data {
   float d;
 };

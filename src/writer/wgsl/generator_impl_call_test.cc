@@ -19,21 +19,21 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(std::move(id), {});
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func()");
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "my_func()");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
@@ -43,9 +43,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
   params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(std::move(id), std::move(params));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
-  EXPECT_EQ(g.result(), "my_func(param1, param2)");
+  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "my_func(param1, param2)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
@@ -57,10 +56,9 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
   ast::CallStatement call(
       std::make_unique<ast::CallExpression>(std::move(id), std::move(params)));
 
-  GeneratorImpl g;
-  g.increment_indent();
-  ASSERT_TRUE(g.EmitStatement(&call)) << g.error();
-  EXPECT_EQ(g.result(), "  my_func(param1, param2);\n");
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace
