@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/ast/node.h"
 #include "src/ast/type/type.h"
 
 namespace tint {
@@ -30,9 +31,9 @@ class IntLiteral;
 class UintLiteral;
 
 /// Base class for a literal value
-class Literal {
+class Literal : public Node {
  public:
-  virtual ~Literal();
+  ~Literal() override;
 
   /// @returns true if this is a bool literal
   virtual bool IsBool() const;
@@ -62,6 +63,14 @@ class Literal {
 
   /// @returns the type of the literal
   ast::type::Type* type() const { return type_; }
+
+  /// @returns true if the node is valid
+  bool IsValid() const override;
+
+  /// Writes a representation of the node to the output stream
+  /// @param out the stream to write to
+  /// @param indent number of spaces to indent the node when writing
+  void to_str(std::ostream& out, size_t indent) const override;
 
   /// @returns the literal as a string
   virtual std::string to_str() const = 0;

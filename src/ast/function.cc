@@ -233,8 +233,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
       << std::endl;
 
   for (const auto& deco : decorations()) {
-    make_indent(out, indent);
-    deco->to_str(out);
+    deco->to_str(out, indent);
   }
 
   make_indent(out, indent);

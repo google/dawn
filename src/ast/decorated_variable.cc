@@ -86,8 +86,7 @@ void DecoratedVariable::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << "Decorations{" << std::endl;
   for (const auto& deco : decorations_) {
-    make_indent(out, indent + 4);
-    deco->to_str(out);
+    deco->to_str(out, indent + 4);
   }
 
   make_indent(out, indent + 2);

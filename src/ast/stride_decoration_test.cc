@@ -35,10 +35,10 @@ TEST_F(StrideDecorationTest, Is) {
 TEST_F(StrideDecorationTest, Source) {
   StrideDecoration d{
       2, Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}};
-  EXPECT_EQ(d.GetSource().range.begin.line, 1u);
-  EXPECT_EQ(d.GetSource().range.begin.column, 2u);
-  EXPECT_EQ(d.GetSource().range.end.line, 3u);
-  EXPECT_EQ(d.GetSource().range.end.column, 4u);
+  EXPECT_EQ(d.source().range.begin.line, 1u);
+  EXPECT_EQ(d.source().range.begin.column, 2u);
+  EXPECT_EQ(d.source().range.end.line, 3u);
+  EXPECT_EQ(d.source().range.end.column, 4u);
 }
 
 }  // namespace

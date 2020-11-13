@@ -26,7 +26,8 @@ bool SetDecoration::IsSet() const {
   return true;
 }
 
-void SetDecoration::to_str(std::ostream& out) const {
+void SetDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
   out << "SetDecoration{" << value_ << "}" << std::endl;
 }
 

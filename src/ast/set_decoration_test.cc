@@ -39,7 +39,7 @@ TEST_F(SetDecorationTest, Is) {
 TEST_F(SetDecorationTest, ToStr) {
   SetDecoration d{2, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(SetDecoration{2}
 )");
 }

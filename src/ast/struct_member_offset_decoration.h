@@ -39,8 +39,10 @@ class StructMemberOffsetDecoration : public StructMemberDecoration {
   /// @returns the offset value
   uint32_t offset() const { return offset_; }
 
-  /// @returns the decoration as a string
-  std::string to_str() const override;
+  /// Outputs the decoration to the given stream
+  /// @param out the stream to write to
+  /// @param indent number of spaces to indent the node when writing
+  void to_str(std::ostream& out, size_t indent) const override;
 
  private:
   uint32_t offset_;

@@ -1856,7 +1856,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
         }
         current_offset = offset;
       } else {
-        error_ = "unsupported member decoration: " + deco->to_str();
+        error_ = "unsupported member decoration: " + deco->str();
         return false;
       }
     }

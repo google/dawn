@@ -26,7 +26,8 @@ bool ConstantIdDecoration::IsConstantId() const {
   return true;
 }
 
-void ConstantIdDecoration::to_str(std::ostream& out) const {
+void ConstantIdDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
   out << "ConstantIdDecoration{" << value_ << "}" << std::endl;
 }
 

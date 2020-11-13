@@ -39,7 +39,7 @@ TEST_F(BuiltinDecorationTest, Is) {
 TEST_F(BuiltinDecorationTest, ToStr) {
   BuiltinDecoration d{Builtin::kFragDepth, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(BuiltinDecoration{frag_depth}
 )");
 }

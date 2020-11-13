@@ -38,8 +38,9 @@ class LocationDecoration : public VariableDecoration {
   uint32_t value() const { return value_; }
 
   /// Outputs the decoration to the given stream
-  /// @param out the stream to output too
-  void to_str(std::ostream& out) const override;
+  /// @param out the stream to write to
+  /// @param indent number of spaces to indent the node when writing
+  void to_str(std::ostream& out, size_t indent) const override;
 
  private:
   uint32_t value_;

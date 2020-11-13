@@ -39,7 +39,7 @@ TEST_F(BindingDecorationTest, Is) {
 TEST_F(BindingDecorationTest, ToStr) {
   BindingDecoration d{2, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(BindingDecoration{2}
 )");
 }

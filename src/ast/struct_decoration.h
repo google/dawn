@@ -35,10 +35,6 @@ class StructDecoration : public Decoration {
   /// @returns true if this is a block struct
   virtual bool IsBlock() const = 0;
 
-  /// Outputs the decoration to the given stream
-  /// @param out the stream to output too
-  virtual void to_str(std::ostream& out) const = 0;
-
  protected:
   /// Constructor
   /// @param source the source of this decoration

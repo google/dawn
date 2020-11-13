@@ -45,10 +45,6 @@ class FunctionDecoration : public Decoration {
   /// @returns the decoration as a workgroup decoration
   const WorkgroupDecoration* AsWorkgroup() const;
 
-  /// Outputs the function decoration to the given stream
-  /// @param out the stream to output too
-  virtual void to_str(std::ostream& out) const = 0;
-
  protected:
   /// Constructor
   /// @param source the source of this decoration

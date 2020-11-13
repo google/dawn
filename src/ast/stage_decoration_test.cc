@@ -38,7 +38,7 @@ TEST_F(StageDecorationTest, Is) {
 TEST_F(StageDecorationTest, ToStr) {
   StageDecoration d{ast::PipelineStage::kFragment, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(StageDecoration{fragment}
 )");
 }

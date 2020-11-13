@@ -2844,7 +2844,7 @@ Expect<std::vector<std::unique_ptr<T>>> ParserImpl::cast_decorations(
       std::stringstream msg;
       msg << deco->GetKind() << " decoration type cannot be used for "
           << T::Kind;
-      add_error(deco->GetSource(), msg.str());
+      add_error(deco->source(), msg.str());
       ok = false;
       continue;
     }
@@ -2864,7 +2864,7 @@ bool ParserImpl::expect_decorations_consumed(const ast::DecorationList& in) {
   if (in.empty()) {
     return true;
   }
-  add_error(in[0]->GetSource(), "unexpected decorations");
+  add_error(in[0]->source(), "unexpected decorations");
   return false;
 }
 

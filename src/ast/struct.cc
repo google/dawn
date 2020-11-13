@@ -73,7 +73,7 @@ void Struct::to_str(std::ostream& out, size_t indent) const {
   for (auto& deco : decorations_) {
     make_indent(out, indent + 2);
     out << "[[";
-    deco->to_str(out);
+    deco->to_str(out, 0);
     out << "]]" << std::endl;
   }
   for (const auto& member : members_) {

@@ -27,8 +27,10 @@ bool StructMemberOffsetDecoration::IsOffset() const {
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
-std::string StructMemberOffsetDecoration::to_str() const {
-  return "offset " + std::to_string(offset_);
+void StructMemberOffsetDecoration::to_str(std::ostream& out,
+                                          size_t indent) const {
+  make_indent(out, indent);
+  out << "offset " << std::to_string(offset_);
 }
 
 }  // namespace ast

@@ -26,7 +26,8 @@ bool StageDecoration::IsStage() const {
   return true;
 }
 
-void StageDecoration::to_str(std::ostream& out) const {
+void StageDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
   out << "StageDecoration{" << stage_ << "}" << std::endl;
 }
 

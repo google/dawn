@@ -19,6 +19,7 @@
 #include <ostream>
 #include <vector>
 
+#include "src/ast/node.h"
 #include "src/source.h"
 
 namespace tint {
@@ -36,9 +37,9 @@ enum class DecorationKind {
 std::ostream& operator<<(std::ostream& out, DecorationKind data);
 
 /// The base class for all decorations
-class Decoration {
+class Decoration : public Node {
  public:
-  virtual ~Decoration();
+  ~Decoration() override;
 
   /// @return the decoration kind
   DecorationKind GetKind() const { return kind_; }
@@ -49,19 +50,18 @@ class Decoration {
     return GetKind() == TO::Kind;
   }
 
-  /// @return the source of this decoration
-  const Source& GetSource() { return source_; }
+  /// @returns true if the node is valid
+  bool IsValid() const override;
 
  protected:
   /// Constructor
   /// @param kind represents the derived type
   /// @param source the source of this decoration
   Decoration(DecorationKind kind, const Source& source)
-      : kind_(kind), source_(source) {}
+      : Node(source), kind_(kind) {}
 
  private:
   DecorationKind const kind_;
-  Source const source_;
 };
 
 /// As dynamically casts |deco| to the target type |TO|.

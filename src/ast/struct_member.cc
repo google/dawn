@@ -75,7 +75,7 @@ void StructMember::to_str(std::ostream& out, size_t indent) const {
   if (decorations_.size() > 0) {
     out << "[[ ";
     for (const auto& deco : decorations_)
-      out << deco->to_str() << " ";
+      out << deco->str() << " ";
     out << "]] ";
   }
 

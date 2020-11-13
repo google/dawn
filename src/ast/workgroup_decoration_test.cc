@@ -65,7 +65,7 @@ TEST_F(WorkgroupDecorationTest, Is) {
 TEST_F(WorkgroupDecorationTest, ToStr) {
   WorkgroupDecoration d{2, 4, 6, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(WorkgroupDecoration{2 4 6}
 )");
 }

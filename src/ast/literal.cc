@@ -84,5 +84,14 @@ UintLiteral* Literal::AsUint() {
   return static_cast<UintLiteral*>(this);
 }
 
+bool Literal::IsValid() const {
+  return true;
+}
+
+void Literal::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
+  out << to_str();
+}
+
 }  // namespace ast
 }  // namespace tint

@@ -40,9 +40,6 @@ class ArrayDecoration : public Decoration {
   /// @returns the decoration as a stride decoration
   StrideDecoration* AsStride();
 
-  /// @returns the decoration as a string
-  virtual std::string to_str() const = 0;
-
  protected:
   /// Constructor
   /// @param source the source of this decoration

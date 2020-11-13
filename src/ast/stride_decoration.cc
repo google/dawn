@@ -26,8 +26,9 @@ bool StrideDecoration::IsStride() const {
 
 StrideDecoration::~StrideDecoration() = default;
 
-std::string StrideDecoration::to_str() const {
-  return "stride " + std::to_string(stride_);
+void StrideDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
+  out << "stride " << stride_;
 }
 
 }  // namespace ast

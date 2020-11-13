@@ -37,7 +37,8 @@ bool WorkgroupDecoration::IsWorkgroup() const {
   return true;
 }
 
-void WorkgroupDecoration::to_str(std::ostream& out) const {
+void WorkgroupDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
   out << "WorkgroupDecoration{" << x_ << " " << y_ << " " << z_ << "}"
       << std::endl;
 }

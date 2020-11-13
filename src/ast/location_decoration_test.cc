@@ -41,7 +41,7 @@ TEST_F(LocationDecorationTest, Is) {
 TEST_F(LocationDecorationTest, ToStr) {
   LocationDecoration d{2, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(LocationDecoration{2}
 )");
 }

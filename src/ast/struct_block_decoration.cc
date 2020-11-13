@@ -26,7 +26,8 @@ bool StructBlockDecoration::IsBlock() const {
   return true;
 }
 
-void StructBlockDecoration::to_str(std::ostream& out) const {
+void StructBlockDecoration::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
   out << "block";
 }
 

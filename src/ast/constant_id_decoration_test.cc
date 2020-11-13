@@ -39,7 +39,7 @@ TEST_F(ConstantIdDecorationTest, Is) {
 TEST_F(ConstantIdDecorationTest, ToStr) {
   ConstantIdDecoration d{1200, Source{}};
   std::ostringstream out;
-  d.to_str(out);
+  d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(ConstantIdDecoration{1200}
 )");
 }
