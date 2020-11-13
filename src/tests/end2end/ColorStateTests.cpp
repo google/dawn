@@ -29,11 +29,18 @@ class ColorStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
-                    const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(3.f, -1.f), vec2(-1.f, 3.f));
-                    gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
+                [[builtin(position)]] var<out> Position : vec4<f32>;
+
+                [[stage(vertex)]]
+                fn main() -> void {
+                    const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                        vec2<f32>(-1.0, -1.0),
+                        vec2<f32>(3.0, -1.0),
+                        vec2<f32>(-1.0, 3.0));
+                    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                    return;
                 }
             )");
 
@@ -48,17 +55,19 @@ class ColorStateTest : public DawnTest {
     // Set up basePipeline and testPipeline. testPipeline has the given blend state on the first
     // attachment. basePipeline has no blending
     void SetupSingleSourcePipelines(wgpu::ColorStateDescriptor colorStateDescriptor) {
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform myBlock {
-                    vec4 color;
-                } myUbo;
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[block]] struct MyBlock {
+                    [[offset(0)]] color : vec4<f32>;
+                };
 
-                layout(location = 0) out vec4 fragColor;
+                [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
-                void main() {
+                [[location(0)]] var<out> fragColor : vec4<f32>;
+
+                [[stage(fragment)]]
+                fn main() -> void {
                     fragColor = myUbo.color;
+                    return;
                 }
             )");
 
@@ -761,26 +770,28 @@ TEST_P(ColorStateTest, IndependentColorState) {
     utils::ComboRenderPassDescriptor renderPass(
         {renderTargetViews[0], renderTargetViews[1], renderTargetViews[2], renderTargetViews[3]});
 
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform myBlock {
-            vec4 color0;
-            vec4 color1;
-            vec4 color2;
-            vec4 color3;
-        } myUbo;
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct MyBlock {
+            [[offset(0)]] color0 : vec4<f32>;
+            [[offset(16)]] color1 : vec4<f32>;
+            [[offset(32)]] color2 : vec4<f32>;
+            [[offset(48)]] color3 : vec4<f32>;
+        };
 
-        layout(location = 0) out vec4 fragColor0;
-        layout(location = 1) out vec4 fragColor1;
-        layout(location = 2) out vec4 fragColor2;
-        layout(location = 3) out vec4 fragColor3;
+        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
-        void main() {
+        [[location(0)]] var<out> fragColor0 : vec4<f32>;
+        [[location(1)]] var<out> fragColor1 : vec4<f32>;
+        [[location(2)]] var<out> fragColor2 : vec4<f32>;
+        [[location(3)]] var<out> fragColor3 : vec4<f32>;
+
+        [[stage(fragment)]]
+        fn main() -> void {
             fragColor0 = myUbo.color0;
             fragColor1 = myUbo.color1;
             fragColor2 = myUbo.color2;
             fragColor3 = myUbo.color3;
+            return;
         }
     )");
 
@@ -870,17 +881,19 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
 // Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(ColorStateTest, DefaultBlendColor) {
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform myBlock {
-            vec4 color;
-        } myUbo;
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct MyBlock {
+            [[offset(0)]] color : vec4<f32>;
+        };
 
-        layout(location = 0) out vec4 fragColor;
+        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
-        void main() {
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+
+        [[stage(fragment)]]
+        fn main() -> void {
             fragColor = myUbo.color;
+            return;
         }
     )");
 
@@ -992,17 +1005,19 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 // persisted and prevented a render pass loadOp from fully clearing the output
 // attachment.
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform myBlock {
-            vec4 color;
-        } myUbo;
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct MyBlock {
+            [[offset(0)]] color : vec4<f32>;
+        };
 
-        layout(location = 0) out vec4 fragColor;
+        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
-        void main() {
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+
+        [[stage(fragment)]]
+        fn main() -> void {
             fragColor = myUbo.color;
+            return;
         }
     )");
 
