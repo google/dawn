@@ -20,7 +20,7 @@
 #include "dawn_wire/WireCmd_autogen.h"
 
 #include <cstdint>
-#include <vector>
+#include <memory>
 
 namespace dawn_wire {
 
@@ -48,8 +48,7 @@ namespace dawn_wire {
             }
             size_t commandSize = static_cast<size_t>(commandSize64);
             if (size < commandSize) {
-                BeginChunkedCommandData(commands, commandSize, size);
-                return ChunkedCommandsResult::Consumed;
+                return BeginChunkedCommandData(commands, commandSize, size);
             }
             return ChunkedCommandsResult::Passthrough;
         }
@@ -58,12 +57,13 @@ namespace dawn_wire {
         virtual const volatile char* HandleCommandsImpl(const volatile char* commands,
                                                         size_t size) = 0;
 
-        void BeginChunkedCommandData(const volatile char* commands,
-                                     size_t commandSize,
-                                     size_t initialSize);
+        ChunkedCommandsResult BeginChunkedCommandData(const volatile char* commands,
+                                                      size_t commandSize,
+                                                      size_t initialSize);
 
         size_t mChunkedCommandRemainingSize = 0;
-        std::vector<char> mChunkedCommandData;
+        size_t mChunkedCommandPutOffset = 0;
+        std::unique_ptr<char[]> mChunkedCommandData;
     };
 
 }  // namespace dawn_wire
