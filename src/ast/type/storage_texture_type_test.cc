@@ -16,8 +16,8 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -25,7 +25,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using StorageTextureTypeTest = testing::Test;
+using StorageTextureTypeTest = TestHelper;
 
 TEST_F(StorageTextureTypeTest, Is) {
   StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,

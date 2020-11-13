@@ -14,14 +14,14 @@
 
 #include "src/ast/type/u32_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using U32TypeTest = testing::Test;
+using U32TypeTest = TestHelper;
 
 TEST_F(U32TypeTest, Is) {
   U32Type u;

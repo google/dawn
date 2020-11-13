@@ -15,6 +15,7 @@
 #include "src/type_manager.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
 

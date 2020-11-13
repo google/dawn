@@ -14,7 +14,7 @@
 
 #include "src/ast/type/sampled_texture_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 
 namespace tint {
@@ -22,7 +22,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using SampledTextureTypeTest = testing::Test;
+using SampledTextureTypeTest = TestHelper;
 
 TEST_F(SampledTextureTypeTest, Is) {
   F32Type f32;

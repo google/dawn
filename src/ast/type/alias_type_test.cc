@@ -17,12 +17,12 @@
 #include <memory>
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
@@ -35,7 +35,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using AliasTypeTest = testing::Test;
+using AliasTypeTest = TestHelper;
 
 TEST_F(AliasTypeTest, Create) {
   U32Type u32;

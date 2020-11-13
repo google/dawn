@@ -16,11 +16,11 @@
 
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
@@ -31,7 +31,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using StructTypeTest = testing::Test;
+using StructTypeTest = TestHelper;
 
 TEST_F(StructTypeTest, Creation) {
   auto impl = std::make_unique<Struct>();

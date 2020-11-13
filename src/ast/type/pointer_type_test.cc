@@ -14,7 +14,7 @@
 
 #include "src/ast/type/pointer_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
@@ -22,7 +22,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using PointerTypeTest = testing::Test;
+using PointerTypeTest = TestHelper;
 
 TEST_F(PointerTypeTest, Creation) {
   I32Type i32;

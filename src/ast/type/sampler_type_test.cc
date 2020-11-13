@@ -14,14 +14,14 @@
 
 #include "src/ast/type/sampler_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using SamplerTypeTest = testing::Test;
+using SamplerTypeTest = TestHelper;
 
 TEST_F(SamplerTypeTest, Creation) {
   SamplerType s{SamplerKind::kSampler};

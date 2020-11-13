@@ -14,14 +14,14 @@
 
 #include "src/ast/type/bool_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using BoolTypeTest = testing::Test;
+using BoolTypeTest = TestHelper;
 
 TEST_F(BoolTypeTest, Is) {
   BoolType b;

@@ -14,7 +14,7 @@
 
 #include "src/ast/type/matrix_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
@@ -22,7 +22,7 @@ namespace ast {
 namespace type {
 namespace {
 
-using MatrixTypeTest = testing::Test;
+using MatrixTypeTest = TestHelper;
 
 TEST_F(MatrixTypeTest, Creation) {
   I32Type i32;

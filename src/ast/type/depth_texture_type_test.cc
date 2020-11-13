@@ -14,14 +14,14 @@
 
 #include "src/ast/type/depth_texture_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using DepthTextureTypeTest = testing::Test;
+using DepthTextureTypeTest = TestHelper;
 
 TEST_F(DepthTextureTypeTest, Is) {
   DepthTextureType d(TextureDimension::kCube);

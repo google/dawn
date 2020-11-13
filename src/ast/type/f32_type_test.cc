@@ -14,14 +14,14 @@
 
 #include "src/ast/type/f32_type.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace type {
 namespace {
 
-using F32TypeTest = testing::Test;
+using F32TypeTest = TestHelper;
 
 TEST_F(F32TypeTest, Is) {
   F32Type f;
