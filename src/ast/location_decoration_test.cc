@@ -16,13 +16,13 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using LocationDecorationTest = testing::Test;
+using LocationDecorationTest = TestHelper;
 
 TEST_F(LocationDecorationTest, Creation) {
   LocationDecoration d{2, Source{}};

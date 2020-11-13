@@ -14,13 +14,13 @@
 
 #include "src/ast/set_decoration.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using SetDecorationTest = testing::Test;
+using SetDecorationTest = TestHelper;
 
 TEST_F(SetDecorationTest, Creation) {
   SetDecoration d{2, Source{}};

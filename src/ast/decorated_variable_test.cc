@@ -14,13 +14,13 @@
 
 #include "src/ast/decorated_variable.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/variable.h"
@@ -30,7 +30,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using DecoratedVariableTest = testing::Test;
+using DecoratedVariableTest = TestHelper;
 
 TEST_F(DecoratedVariableTest, Creation) {
   type::I32Type t;

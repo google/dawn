@@ -14,15 +14,15 @@
 
 #include "src/ast/call_statement.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using CallStatementTest = testing::Test;
+using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
   auto expr = std::make_unique<ast::CallExpression>(

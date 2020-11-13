@@ -14,15 +14,15 @@
 
 #include "src/ast/scalar_constructor_expression.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ScalarConstructorExpressionTest = testing::Test;
+using ScalarConstructorExpressionTest = TestHelper;
 
 TEST_F(ScalarConstructorExpressionTest, Creation) {
   ast::type::BoolType bool_type;

@@ -17,15 +17,15 @@
 #include <memory>
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using BlockStatementTest = testing::Test;
+using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
   auto d = std::make_unique<DiscardStatement>();

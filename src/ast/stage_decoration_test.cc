@@ -16,13 +16,13 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using StageDecorationTest = testing::Test;
+using StageDecorationTest = TestHelper;
 
 TEST_F(StageDecorationTest, Creation_1param) {
   StageDecoration d{ast::PipelineStage::kFragment, Source{}};

@@ -14,14 +14,14 @@
 
 #include "src/ast/float_literal.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using FloatLiteralTest = testing::Test;
+using FloatLiteralTest = TestHelper;
 
 TEST_F(FloatLiteralTest, Value) {
   ast::type::F32Type f32;

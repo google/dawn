@@ -14,14 +14,14 @@
 
 #include "src/ast/call_expression.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using CallExpressionTest = testing::Test;
+using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, Creation) {
   auto func = std::make_unique<IdentifierExpression>("func");

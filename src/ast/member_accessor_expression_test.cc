@@ -16,14 +16,14 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using MemberAccessorExpressionTest = testing::Test;
+using MemberAccessorExpressionTest = TestHelper;
 
 TEST_F(MemberAccessorExpressionTest, Creation) {
   auto str = std::make_unique<IdentifierExpression>("structure");

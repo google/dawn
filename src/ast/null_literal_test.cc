@@ -14,14 +14,14 @@
 
 #include "src/ast/null_literal.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using NullLiteralTest = testing::Test;
+using NullLiteralTest = TestHelper;
 
 TEST_F(NullLiteralTest, Is) {
   ast::type::I32Type i32;

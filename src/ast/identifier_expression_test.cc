@@ -14,13 +14,13 @@
 
 #include "src/ast/identifier_expression.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using IdentifierExpressionTest = testing::Test;
+using IdentifierExpressionTest = TestHelper;
 
 TEST_F(IdentifierExpressionTest, Creation) {
   IdentifierExpression i("ident");

@@ -14,7 +14,7 @@
 
 #include "src/ast/expression.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/i32_type.h"
 
@@ -30,7 +30,7 @@ class Expr : public Expression {
   void to_str(std::ostream&, size_t) const override {}
 };
 
-using ExpressionTest = testing::Test;
+using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, set_result_type) {
   type::I32Type i32;

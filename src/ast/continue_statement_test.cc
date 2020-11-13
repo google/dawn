@@ -14,13 +14,13 @@
 
 #include "src/ast/continue_statement.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ContinueStatementTest = testing::Test;
+using ContinueStatementTest = TestHelper;
 
 TEST_F(ContinueStatementTest, Creation_WithSource) {
   ContinueStatement stmt(Source{Source::Location{20, 2}});

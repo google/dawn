@@ -12,38 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/binding_decoration.h"
+#ifndef SRC_AST_TEST_HELPER_H_
+#define SRC_AST_TEST_HELPER_H_
 
-#include "src/ast/test_helper.h"
+#include "gtest/gtest.h"
 
 namespace tint {
 namespace ast {
-namespace {
 
-using BindingDecorationTest = TestHelper;
+/// Helper class for testing
+template <typename BASE>
+class TestHelperBase : public BASE {
+ public:
+  TestHelperBase() {}
+  ~TestHelperBase() = default;
+};
+using TestHelper = TestHelperBase<testing::Test>;
 
-TEST_F(BindingDecorationTest, Creation) {
-  BindingDecoration d{2, Source{}};
-  EXPECT_EQ(2u, d.value());
-}
+template <typename T>
+using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-TEST_F(BindingDecorationTest, Is) {
-  BindingDecoration d{2, Source{}};
-  EXPECT_TRUE(d.IsBinding());
-  EXPECT_FALSE(d.IsBuiltin());
-  EXPECT_FALSE(d.IsConstantId());
-  EXPECT_FALSE(d.IsLocation());
-  EXPECT_FALSE(d.IsSet());
-}
-
-TEST_F(BindingDecorationTest, ToStr) {
-  BindingDecoration d{2, Source{}};
-  std::ostringstream out;
-  d.to_str(out, 0);
-  EXPECT_EQ(out.str(), R"(BindingDecoration{2}
-)");
-}
-
-}  // namespace
 }  // namespace ast
 }  // namespace tint
+
+#endif  // SRC_AST_TEST_HELPER_H_

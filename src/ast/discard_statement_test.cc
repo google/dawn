@@ -16,13 +16,13 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using DiscardStatementTest = testing::Test;
+using DiscardStatementTest = TestHelper;
 
 TEST_F(DiscardStatementTest, Creation) {
   DiscardStatement stmt;

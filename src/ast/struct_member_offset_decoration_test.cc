@@ -14,13 +14,13 @@
 
 #include "src/ast/struct_member_offset_decoration.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using StructMemberOffsetDecorationTest = testing::Test;
+using StructMemberOffsetDecorationTest = TestHelper;
 
 TEST_F(StructMemberOffsetDecorationTest, Creation) {
   StructMemberOffsetDecoration d{2, Source{}};

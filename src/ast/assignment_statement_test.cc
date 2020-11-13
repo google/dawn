@@ -14,14 +14,14 @@
 
 #include "src/ast/assignment_statement.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using AssignmentStatementTest = testing::Test;
+using AssignmentStatementTest = TestHelper;
 
 TEST_F(AssignmentStatementTest, Creation) {
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");

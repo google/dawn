@@ -17,9 +17,9 @@
 #include <memory>
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
 
@@ -27,7 +27,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using TypeConstructorExpressionTest = testing::Test;
+using TypeConstructorExpressionTest = TestHelper;
 
 TEST_F(TypeConstructorExpressionTest, Creation) {
   type::F32Type f32;

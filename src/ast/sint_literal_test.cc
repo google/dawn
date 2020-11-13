@@ -14,7 +14,7 @@
 
 #include "src/ast/sint_literal.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
 
@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using SintLiteralTest = testing::Test;
+using SintLiteralTest = TestHelper;
 
 TEST_F(SintLiteralTest, Value) {
   ast::type::I32Type i32;

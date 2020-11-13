@@ -14,10 +14,10 @@
 
 #include "src/ast/case_statement.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/uint_literal.h"
@@ -26,7 +26,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using CaseStatementTest = testing::Test;
+using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
   ast::type::I32Type i32;

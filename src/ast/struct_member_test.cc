@@ -17,15 +17,15 @@
 #include <sstream>
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using StructMemberTest = testing::Test;
+using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
   type::I32Type i32;

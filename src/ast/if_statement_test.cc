@@ -14,15 +14,15 @@
 
 #include "src/ast/if_statement.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using IfStatementTest = testing::Test;
+using IfStatementTest = TestHelper;
 
 TEST_F(IfStatementTest, Creation) {
   auto cond = std::make_unique<IdentifierExpression>("cond");

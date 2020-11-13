@@ -14,14 +14,14 @@
 
 #include "src/ast/uint_literal.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/u32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using UintLiteralTest = testing::Test;
+using UintLiteralTest = TestHelper;
 
 TEST_F(UintLiteralTest, Value) {
   ast::type::U32Type u32;

@@ -14,8 +14,8 @@
 
 #include "src/ast/variable.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 
@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using VariableTest = testing::Test;
+using VariableTest = TestHelper;
 
 TEST_F(VariableTest, Creation) {
   type::I32Type t;

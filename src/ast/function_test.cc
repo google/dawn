@@ -14,12 +14,12 @@
 
 #include "src/ast/function.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
@@ -30,7 +30,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using FunctionTest = testing::Test;
+using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation) {
   type::VoidType void_type;

@@ -769,6 +769,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/struct_member_test.cc",
     "src/ast/struct_test.cc",
     "src/ast/switch_statement_test.cc",
+    "src/ast/test_helper.h",
     "src/ast/type/access_control_type_test.cc",
     "src/ast/type/alias_type_test.cc",
     "src/ast/type/array_type_test.cc",

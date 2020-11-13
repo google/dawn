@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/function.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/struct_type.h"
@@ -28,7 +29,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using ModuleTest = testing::Test;
+using ModuleTest = TestHelper;
 
 TEST_F(ModuleTest, Creation) {
   Module m;

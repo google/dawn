@@ -17,16 +17,15 @@
 #include <sstream>
 #include <utility>
 
-#include "gtest/gtest.h"
-
 #include "src/ast/array_decoration.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using DecorationTest = testing::Test;
+using DecorationTest = TestHelper;
 
 TEST_F(DecorationTest, AsCorrectType) {
   auto* decoration = new ConstantIdDecoration(1, Source{});

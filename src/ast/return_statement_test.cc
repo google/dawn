@@ -16,14 +16,14 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ReturnStatementTest = testing::Test;
+using ReturnStatementTest = TestHelper;
 
 TEST_F(ReturnStatementTest, Creation) {
   auto expr = std::make_unique<IdentifierExpression>("expr");

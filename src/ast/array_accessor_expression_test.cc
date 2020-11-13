@@ -14,14 +14,14 @@
 
 #include "src/ast/array_accessor_expression.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ArrayAccessorExpressionTest = testing::Test;
+using ArrayAccessorExpressionTest = TestHelper;
 
 TEST_F(ArrayAccessorExpressionTest, Create) {
   auto ary = std::make_unique<IdentifierExpression>("ary");

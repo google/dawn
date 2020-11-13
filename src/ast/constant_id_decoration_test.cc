@@ -14,13 +14,13 @@
 
 #include "src/ast/constant_id_decoration.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ConstantIdDecorationTest = testing::Test;
+using ConstantIdDecorationTest = TestHelper;
 
 TEST_F(ConstantIdDecorationTest, Creation) {
   ConstantIdDecoration d{12, Source{}};

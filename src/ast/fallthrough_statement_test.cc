@@ -14,13 +14,13 @@
 
 #include "src/ast/fallthrough_statement.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using FallthroughStatementTest = testing::Test;
+using FallthroughStatementTest = TestHelper;
 
 TEST_F(FallthroughStatementTest, Creation) {
   FallthroughStatement stmt;

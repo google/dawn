@@ -14,18 +14,18 @@
 
 #include "src/ast/else_statement.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using ElseStatementTest = testing::Test;
+using ElseStatementTest = TestHelper;
 
 TEST_F(ElseStatementTest, Creation) {
   ast::type::BoolType bool_type;

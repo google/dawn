@@ -16,14 +16,14 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using UnaryOpExpressionTest = testing::Test;
+using UnaryOpExpressionTest = TestHelper;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");

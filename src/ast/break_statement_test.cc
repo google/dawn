@@ -14,13 +14,13 @@
 
 #include "src/ast/break_statement.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using BreakStatementTest = testing::Test;
+using BreakStatementTest = TestHelper;
 
 TEST_F(BreakStatementTest, Creation_WithSource) {
   BreakStatement stmt(Source{Source::Location{20, 2}});

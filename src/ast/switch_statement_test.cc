@@ -16,17 +16,17 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using SwitchStatementTest = testing::Test;
+using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
   ast::type::I32Type i32;

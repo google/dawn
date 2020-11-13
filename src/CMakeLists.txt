@@ -379,6 +379,7 @@ set(TINT_TEST_SRCS
   ast/struct_member_offset_decoration_test.cc
   ast/struct_test.cc
   ast/switch_statement_test.cc
+  ast/test_helper.h
   ast/type/access_control_type_test.cc
   ast/type/alias_type_test.cc
   ast/type/array_type_test.cc

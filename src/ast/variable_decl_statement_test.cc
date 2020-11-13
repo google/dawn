@@ -14,7 +14,7 @@
 
 #include "src/ast/variable_decl_statement.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 
@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 namespace {
 
-using VariableDeclStatementTest = testing::Test;
+using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
   type::F32Type f32;

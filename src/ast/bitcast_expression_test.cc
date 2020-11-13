@@ -14,15 +14,15 @@
 
 #include "src/ast/bitcast_expression.h"
 
-#include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using BitcastExpressionTest = testing::Test;
+using BitcastExpressionTest = TestHelper;
 
 TEST_F(BitcastExpressionTest, Create) {
   type::F32Type f32;

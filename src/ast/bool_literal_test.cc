@@ -14,14 +14,14 @@
 
 #include "src/ast/bool_literal.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using BoolLiteralTest = testing::Test;
+using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
   ast::type::BoolType bool_type;

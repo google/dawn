@@ -18,16 +18,16 @@
 #include <sstream>
 #include <utility>
 
-#include "gtest/gtest.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using StructTest = testing::Test;
+using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
   type::I32Type i32;

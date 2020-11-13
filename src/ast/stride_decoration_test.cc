@@ -14,13 +14,13 @@
 
 #include "src/ast/stride_decoration.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using StrideDecorationTest = testing::Test;
+using StrideDecorationTest = TestHelper;
 
 TEST_F(StrideDecorationTest, Creation) {
   StrideDecoration d{2, Source{}};

@@ -16,13 +16,13 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using WorkgroupDecorationTest = testing::Test;
+using WorkgroupDecorationTest = TestHelper;
 
 TEST_F(WorkgroupDecorationTest, Creation_1param) {
   WorkgroupDecoration d{2, Source{}};

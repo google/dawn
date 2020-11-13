@@ -14,13 +14,13 @@
 
 #include "src/ast/builtin_decoration.h"
 
-#include "gtest/gtest.h"
+#include "src/ast/test_helper.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using BuiltinDecorationTest = testing::Test;
+using BuiltinDecorationTest = TestHelper;
 
 TEST_F(BuiltinDecorationTest, Creation) {
   BuiltinDecoration d{Builtin::kFragDepth, Source{}};
