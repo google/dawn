@@ -50,10 +50,9 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
 
-  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                              &void_type);
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -157,24 +156,18 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   ast::type::F32Type f32;
 
   ast::StructMemberDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(128, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("c", &f32, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
+  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
 
-  auto str = std::make_unique<ast::Struct>();
+  auto str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -188,44 +181,32 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   ast::type::VectorType fvec(&f32, 3);
 
   ast::StructMemberDecorationList decos;
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &fvec, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
+  members.push_back(create<ast::StructMember>("b", &fvec, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("c", &f32, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
 
-  auto inner_str = std::make_unique<ast::Struct>();
+  auto inner_str = create<ast::Struct>();
   inner_str->set_members(std::move(members));
 
   ast::type::StructType inner_s("Inner", std::move(inner_str));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("d", &f32, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  members.push_back(create<ast::StructMember>("d", &f32, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("e", &inner_s, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  members.push_back(create<ast::StructMember>("e", &inner_s, std::move(decos)));
 
-  decos.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(64, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("f", &f32, std::move(decos)));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(64, Source{}));
+  members.push_back(create<ast::StructMember>("f", &f32, std::move(decos)));
 
-  auto outer_str = std::make_unique<ast::Struct>();
+  auto outer_str = create<ast::Struct>();
   outer_str->set_members(std::move(members));
 
   ast::type::StructType outer_s("Outer", std::move(outer_str));

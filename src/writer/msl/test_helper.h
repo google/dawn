@@ -15,6 +15,9 @@
 #ifndef SRC_WRITER_MSL_TEST_HELPER_H_
 #define SRC_WRITER_MSL_TEST_HELPER_H_
 
+#include <memory>
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
 #include "src/context.h"
@@ -26,11 +29,18 @@ namespace writer {
 namespace msl {
 
 /// Helper class for testing
-template <typename T>
-class TestHelperBase : public T {
+template <typename BASE>
+class TestHelperBase : public BASE {
  public:
   TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
   ~TestHelperBase() = default;
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
   /// The context
   Context ctx;

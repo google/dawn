@@ -42,8 +42,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -55,8 +54,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
   ast::VariableDeclStatement stmt(std::move(var));
@@ -71,8 +69,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   ast::type::F32Type f32;
   ast::type::ArrayType ary(&f32, 5);
 
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &ary);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -86,21 +83,19 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   ast::type::F32Type f32;
 
   ast::StructMemberList members;
-  members.push_back(std::make_unique<ast::StructMember>(
-      "a", &f32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>("a", &f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = std::make_unique<ast::Struct>();
+  auto str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
 
-  auto var = std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &s);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &s);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -115,8 +110,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kFunction, &vec);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -129,8 +123,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 2, 3);
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kFunction, &mat);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -142,8 +135,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
   ast::VariableDeclStatement stmt(std::move(var));
 
@@ -154,11 +146,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-  auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
+  auto ident = create<ast::IdentifierExpression>("initializer");
 
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(std::move(ident));
 
   ast::VariableDeclStatement stmt(std::move(var));
@@ -174,10 +165,9 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
 
   ast::ExpressionList values;
   auto zero_vec =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(values));
+      create<ast::TypeConstructorExpression>(&vec, std::move(values));
 
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &vec);
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &vec);
   var->set_constructor(std::move(zero_vec));
 
   ast::VariableDeclStatement stmt(std::move(var));

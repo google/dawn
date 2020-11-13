@@ -71,18 +71,15 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::VectorType vec3(&f32, 3);
 
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &vec2);
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kNone, &vec3);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kNone, &vec2);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kNone, &vec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("a"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("b"));
+  params.push_back(create<ast::IdentifierExpression>("a"));
+  params.push_back(create<ast::IdentifierExpression>("b"));
 
-  ast::CallExpression call(
-      std::make_unique<ast::IdentifierExpression>("outer_product"),
-      std::move(params));
+  ast::CallExpression call(create<ast::IdentifierExpression>("outer_product"),
+                           std::move(params));
 
   td.RegisterVariableForTesting(a.get());
   td.RegisterVariableForTesting(b.get());
@@ -107,10 +104,10 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>("param1"));
+  params.push_back(create<ast::IdentifierExpression>("param2"));
 
-  ast::CallExpression call(std::make_unique<ast::IdentifierExpression>("dot"),
+  ast::CallExpression call(create<ast::IdentifierExpression>("dot"),
                            std::move(params));
 
   ast::Variable v1("param1", ast::StorageClass::kFunction, &vec);

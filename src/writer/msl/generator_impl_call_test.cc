@@ -34,11 +34,10 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;
 
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(std::move(id), {});
 
-  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                              &void_type);
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -48,14 +47,13 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::type::VoidType void_type;
 
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>("param1"));
+  params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(std::move(id), std::move(params));
 
-  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                              &void_type);
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -65,15 +63,14 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
 TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   ast::type::VoidType void_type;
 
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>("param1"));
+  params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallStatement call(
-      std::make_unique<ast::CallExpression>(std::move(id), std::move(params)));
+      create<ast::CallExpression>(std::move(id), std::move(params)));
 
-  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
-                                              &void_type);
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
   mod.AddFunction(std::move(func));
 
   gen.increment_indent();
