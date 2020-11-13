@@ -21,32 +21,35 @@
 
 class ComputeIndirectTests : public DawnTest {
   public:
-    // Write into the output buffer if we saw the biggest dispatch
-    // This is a workaround since D3D12 doesn't have gl_NumWorkGroups
-    const char* shaderSource = R"(
-        #version 450
-        layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-        layout(std140, set = 0, binding = 0) uniform inputBuf {
-            uvec3 expectedDispatch;
-        };
-        layout(std140, set = 0, binding = 1) buffer outputBuf {
-            uvec3 workGroups;
-        };
-
-        void main() {
-            if (gl_GlobalInvocationID == expectedDispatch - uvec3(1, 1, 1)) {
-                workGroups = expectedDispatch;
-            }
-        })";
-
     void BasicTest(std::initializer_list<uint32_t> buffer, uint64_t indirectOffset);
 };
 
 void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
                                      uint64_t indirectOffset) {
     // Set up shader and pipeline
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shaderSource);
+
+    // Write into the output buffer if we saw the biggest dispatch
+    // This is a workaround since D3D12 doesn't have gl_NumWorkGroups
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct InputBuf {
+            [[offset(0)]] expectedDispatch : vec3<u32>;
+        };
+        [[block]] struct OutputBuf {
+            [[offset(0)]] workGroups : vec3<u32>;
+        };
+
+        [[set(0), binding(0)]] var<uniform> input : InputBuf;
+        [[set(0), binding(1)]] var<storage_buffer> output : OutputBuf;
+
+        [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
+
+        [[stage(compute), workgroup_size(1, 1, 1)]]
+        fn main() -> void {
+            if (all(GlobalInvocationID == input.expectedDispatch - vec3<u32>(1u, 1u, 1u))) {
+                output.workGroups = input.expectedDispatch;
+            }
+            return;
+        })");
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = module;
