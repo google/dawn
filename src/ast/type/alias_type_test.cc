@@ -165,7 +165,7 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
+  decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -175,7 +175,7 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
+  decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -187,20 +187,17 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
-    members.push_back(
-        std::make_unique<StructMember>("foo", &u32, std::move(deco)));
+    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    members.push_back(create<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
-    members.push_back(
-        std::make_unique<StructMember>("bar", &u32, std::move(deco)));
+    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    members.push_back(create<StructMember>("bar", &u32, std::move(deco)));
   }
   ast::StructDecorationList decos;
 
-  auto str =
-      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  auto str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AliasType alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -217,7 +214,7 @@ TEST_F(AliasTypeTest, BaseAlignmentArray) {
   U32Type u32;
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
+  decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -227,7 +224,7 @@ TEST_F(AliasTypeTest, BaseAlignmentRuntimeArray) {
   U32Type u32;
   ArrayType array(&u32);
   ArrayDecorationList decos;
-  decos.push_back(std::make_unique<StrideDecoration>(4, Source{}));
+  decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(std::move(decos));
   AliasType alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -239,20 +236,17 @@ TEST_F(AliasTypeTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(0, Source{}));
-    members.push_back(
-        std::make_unique<StructMember>("foo", &u32, std::move(deco)));
+    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    members.push_back(create<StructMember>("foo", &u32, std::move(deco)));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(std::make_unique<StructMemberOffsetDecoration>(4, Source{}));
-    members.push_back(
-        std::make_unique<StructMember>("bar", &u32, std::move(deco)));
+    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    members.push_back(create<StructMember>("bar", &u32, std::move(deco)));
   }
   ast::StructDecorationList decos;
 
-  auto str =
-      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  auto str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AliasType alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
