@@ -16,6 +16,7 @@
 #define SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 
 #include <memory>
+#include <utility>
 
 #include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
@@ -39,6 +40,13 @@ class ValidatorTestHelper {
   /// A handle to the created module
   /// @return a pointer to the test module
   ast::Module* mod() { return &mod_; }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
  private:
   std::unique_ptr<ValidatorImpl> v_;

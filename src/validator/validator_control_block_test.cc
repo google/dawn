@@ -43,23 +43,21 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   //   default: {}
   // }
   ast::type::F32Type f32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&f32, 3.14f)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&f32, 3.14f)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>(
-      Source{Source::Location{12, 34}}, "a");
+  auto cond =
+      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
+  auto block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;
-  body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                            std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(
-      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -74,22 +72,21 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   //   case 1: {}
   // }
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList csl;
-  csl.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  csl.push_back(create<ast::SintLiteral>(&i32, 1));
   ast::CaseStatementList body;
-  body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(csl), std::make_unique<ast::BlockStatement>()));
+  body.push_back(create<ast::CaseStatement>(std::move(csl),
+                                            create<ast::BlockStatement>()));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(
-      Source{Source::Location{12, 34}}, std::move(cond), std::move(body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(Source{Source::Location{12, 34}},
+                                             std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -106,35 +103,34 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   default: {}
   // }
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::CaseStatementList switch_body;
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
 
   ast::CaseSelectorList default_csl_1;
-  auto block_default_1 = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl_1), std::move(block_default_1)));
+  auto block_default_1 = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl_1),
+                                                   std::move(block_default_1)));
 
   ast::CaseSelectorList csl_case_1;
-  csl_case_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
-  auto block_case_1 = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(csl_case_1), std::move(block_case_1)));
+  csl_case_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  auto block_case_1 = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(csl_case_1),
+                                                   std::move(block_case_1)));
 
   ast::CaseSelectorList default_csl_2;
-  auto block_default_2 = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl_2), std::move(block_default_2)));
+  auto block_default_2 = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl_2),
+                                                   std::move(block_default_2)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(
-      Source{Source::Location{12, 34}}, std::move(cond),
-      std::move(switch_body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(Source{Source::Location{12, 34}},
+                                             std::move(cond),
+                                             std::move(switch_body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -152,29 +148,28 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32Type u32;
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::CaseStatementList switch_body;
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
 
   ast::CaseSelectorList csl;
-  csl.push_back(std::make_unique<ast::UintLiteral>(&u32, 1));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+  csl.push_back(create<ast::UintLiteral>(&u32, 1));
+  switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, std::move(csl),
-      std::make_unique<ast::BlockStatement>()));
+      create<ast::BlockStatement>()));
 
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  auto block_default = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                                   std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(std::move(cond),
-                                                       std::move(switch_body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(
+      create<ast::SwitchStatement>(std::move(cond), std::move(switch_body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -192,29 +187,28 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32Type u32;
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &u32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 2)));
 
   ast::CaseStatementList switch_body;
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
 
   ast::CaseSelectorList csl;
-  csl.push_back(std::make_unique<ast::SintLiteral>(&i32, -1));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+  csl.push_back(create<ast::SintLiteral>(&i32, -1));
+  switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, std::move(csl),
-      std::make_unique<ast::BlockStatement>()));
+      create<ast::BlockStatement>()));
 
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  auto block_default = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                                   std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(std::move(cond),
-                                                       std::move(switch_body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(
+      create<ast::SwitchStatement>(std::move(cond), std::move(switch_body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -231,35 +225,34 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   default: {}
   // }
   ast::type::U32Type u32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &u32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 3)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 3)));
 
   ast::CaseStatementList switch_body;
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
 
   ast::CaseSelectorList csl_1;
-  csl_1.push_back(std::make_unique<ast::UintLiteral>(&u32, 0));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(csl_1), std::make_unique<ast::BlockStatement>()));
+  csl_1.push_back(create<ast::UintLiteral>(&u32, 0));
+  switch_body.push_back(create<ast::CaseStatement>(
+      std::move(csl_1), create<ast::BlockStatement>()));
 
   ast::CaseSelectorList csl_2;
-  csl_2.push_back(std::make_unique<ast::UintLiteral>(&u32, 2));
-  csl_2.push_back(std::make_unique<ast::UintLiteral>(&u32, 2));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+  csl_2.push_back(create<ast::UintLiteral>(&u32, 2));
+  csl_2.push_back(create<ast::UintLiteral>(&u32, 2));
+  switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, std::move(csl_2),
-      std::make_unique<ast::BlockStatement>()));
+      create<ast::BlockStatement>()));
 
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  auto block_default = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                                   std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(std::move(cond),
-                                                       std::move(switch_body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(
+      create<ast::SwitchStatement>(std::move(cond), std::move(switch_body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -276,37 +269,36 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   default: {}
   // }
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::CaseStatementList switch_body;
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
 
   ast::CaseSelectorList csl_1;
-  csl_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 10));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(csl_1), std::make_unique<ast::BlockStatement>()));
+  csl_1.push_back(create<ast::SintLiteral>(&i32, 10));
+  switch_body.push_back(create<ast::CaseStatement>(
+      std::move(csl_1), create<ast::BlockStatement>()));
 
   ast::CaseSelectorList csl_2;
-  csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 0));
-  csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
-  csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
-  csl_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 10));
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
+  csl_2.push_back(create<ast::SintLiteral>(&i32, 0));
+  csl_2.push_back(create<ast::SintLiteral>(&i32, 1));
+  csl_2.push_back(create<ast::SintLiteral>(&i32, 2));
+  csl_2.push_back(create<ast::SintLiteral>(&i32, 10));
+  switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, std::move(csl_2),
-      std::make_unique<ast::BlockStatement>()));
+      create<ast::BlockStatement>()));
 
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
-  switch_body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  auto block_default = create<ast::BlockStatement>();
+  switch_body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                                   std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(std::make_unique<ast::SwitchStatement>(std::move(cond),
-                                                       std::move(switch_body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(
+      create<ast::SwitchStatement>(std::move(cond), std::move(switch_body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -321,24 +313,22 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   //   default: { fallthrough; }
   // }
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
-  block_default->append(std::make_unique<ast::FallthroughStatement>(
-      Source{Source::Location{12, 34}}));
+  auto block_default = create<ast::BlockStatement>();
+  block_default->append(
+      create<ast::FallthroughStatement>(Source{Source::Location{12, 34}}));
   ast::CaseStatementList body;
-  body.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(default_csl), std::move(block_default)));
+  body.push_back(create<ast::CaseStatement>(std::move(default_csl),
+                                            std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(
-      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block.get()));
@@ -354,28 +344,26 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   case 5: {}
   // }
   ast::type::I32Type i32;
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
+  auto block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;
-  body.push_back(std::make_unique<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, std::move(default_csl),
-      std::move(block_default)));
+  body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
+                                            std::move(default_csl),
+                                            std::move(block_default)));
   ast::CaseSelectorList case_csl;
-  case_csl.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
-  auto block_case = std::make_unique<ast::BlockStatement>();
-  body.push_back(std::make_unique<ast::CaseStatement>(std::move(case_csl),
-                                                      std::move(block_case)));
+  case_csl.push_back(create<ast::SintLiteral>(&i32, 5));
+  auto block_case = create<ast::BlockStatement>();
+  body.push_back(
+      create<ast::CaseStatement>(std::move(case_csl), std::move(block_case)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(
-      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
   EXPECT_TRUE(td()->DetermineStatements(block.get())) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block.get())) << v()->error();
@@ -391,23 +379,21 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   ast::type::U32Type u32;
   ast::type::AliasType my_int{"MyInt", &u32};
 
-  auto var =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &my_int);
-  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&u32, 2)));
+  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &my_int);
+  var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&u32, 2)));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("a");
+  auto cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
-  auto block_default = std::make_unique<ast::BlockStatement>();
+  auto block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;
-  body.push_back(std::make_unique<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, std::move(default_csl),
-      std::move(block_default)));
+  body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
+                                            std::move(default_csl),
+                                            std::move(block_default)));
 
-  auto block = std::make_unique<ast::BlockStatement>();
-  block->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-  block->append(
-      std::make_unique<ast::SwitchStatement>(std::move(cond), std::move(body)));
+  auto block = create<ast::BlockStatement>();
+  block->append(create<ast::VariableDeclStatement>(std::move(var)));
+  block->append(create<ast::SwitchStatement>(std::move(cond), std::move(body)));
 
   mod()->AddConstructedType(&my_int);
 
