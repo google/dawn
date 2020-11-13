@@ -1998,6 +1998,7 @@ bool Builder::GenerateConditionalBlock(
   if (cond_id == 0) {
     return false;
   }
+  cond_id = GenerateLoadIfNeeded(cond->result_type(), cond_id);
 
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();

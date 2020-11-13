@@ -627,6 +627,39 @@ OpReturnValue %5
 )");
 }
 
+TEST_F(BuilderTest, If_WithLoad_Bug327) {
+  // var a : bool;
+  // if (a) {
+  // }
+
+  ast::type::BoolType bool_type;
+  auto var = std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction,
+                                             &bool_type);
+  td.RegisterVariableForTesting(var.get());
+
+  ast::IfStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+                        std::make_unique<ast::BlockStatement>());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+%2 = OpTypePointer Function %3
+%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%4 = OpLoad %3 %1
+OpSelectionMerge %5 None
+OpBranchConditional %4 %6 %5
+%6 = OpLabel
+OpBranch %5
+%5 = OpLabel
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
