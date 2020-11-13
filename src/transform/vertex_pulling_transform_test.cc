@@ -35,17 +35,17 @@ namespace {
 class VertexPullingTransformHelper {
  public:
   VertexPullingTransformHelper() {
-    mod_ = std::make_unique<ast::Module>();
+    mod_ = create<ast::Module>();
     transform_ = std::make_unique<VertexPullingTransform>(&ctx_, mod_.get());
   }
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    auto func = std::make_unique<ast::Function>(
+    auto func = create<ast::Function>(
         "main", ast::VariableList{},
         ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
-    func->add_decoration(std::make_unique<ast::StageDecoration>(
-        ast::PipelineStage ::kVertex, Source{}));
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage ::kVertex, Source{}));
     mod()->AddFunction(std::move(func));
   }
 
@@ -65,12 +65,11 @@ class VertexPullingTransformHelper {
   void AddVertexInputVariable(uint32_t location,
                               std::string name,
                               ast::type::Type* type) {
-    auto var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>(name, ast::StorageClass::kInput, type));
+    auto var = create<ast::DecoratedVariable>(
+        create<ast::Variable>(name, ast::StorageClass::kInput, type));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(
-        std::make_unique<ast::LocationDecoration>(location, Source{}));
+    decorations.push_back(create<ast::LocationDecoration>(location, Source{}));
 
     var->set_decorations(std::move(decorations));
     mod_->AddGlobalVariable(std::move(var));
@@ -79,6 +78,13 @@ class VertexPullingTransformHelper {
   Context* ctx() { return &ctx_; }
   ast::Module* mod() { return mod_.get(); }
   VertexPullingTransform* transform() { return transform_.get(); }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
  private:
   Context ctx_;
@@ -110,11 +116,11 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
-  auto func = std::make_unique<ast::Function>(
+  auto func = create<ast::Function>(
       "main", ast::VariableList{},
       ctx()->type_mgr().Get(std::make_unique<ast::type::VoidType>()));
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(func));
 
   InitTransform({});
@@ -392,26 +398,26 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
 
   ast::type::I32Type i32;
   {
-    auto vertex_index_var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>("custom_vertex_index",
-                                        ast::StorageClass::kInput, &i32));
+    auto vertex_index_var =
+        create<ast::DecoratedVariable>(create<ast::Variable>(
+            "custom_vertex_index", ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
-        ast::Builtin::kVertexIdx, Source{}));
+    decorations.push_back(
+        create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}));
 
     vertex_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(vertex_index_var));
   }
 
   {
-    auto instance_index_var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>("custom_instance_index",
-                                        ast::StorageClass::kInput, &i32));
+    auto instance_index_var =
+        create<ast::DecoratedVariable>(create<ast::Variable>(
+            "custom_instance_index", ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
-    decorations.push_back(std::make_unique<ast::BuiltinDecoration>(
-        ast::Builtin::kInstanceIdx, Source{}));
+    decorations.push_back(
+        create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}));
 
     instance_index_var->set_decorations(std::move(decorations));
     mod()->AddGlobalVariable(std::move(instance_index_var));

@@ -52,9 +52,8 @@ class BoundArrayAccessorsTest : public testing::Test {
   BoundArrayAccessorsTest() : td_(&ctx_, &mod_), transform_(&ctx_, &mod_) {}
 
   ast::BlockStatement* SetupFunctionAndBody() {
-    auto func = std::make_unique<ast::Function>("func", ast::VariableList{},
-                                                &void_type_);
-    auto block = std::make_unique<ast::BlockStatement>();
+    auto func = create<ast::Function>("func", ast::VariableList{}, &void_type_);
+    auto block = create<ast::BlockStatement>();
     body_ = block.get();
     func->set_body(std::move(block));
     mod_.AddFunction(std::move(func));
@@ -63,12 +62,19 @@ class BoundArrayAccessorsTest : public testing::Test {
 
   void DeclareVariable(std::unique_ptr<ast::Variable> var) {
     ASSERT_NE(body_, nullptr);
-    body_->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    body_->append(create<ast::VariableDeclStatement>(std::move(var)));
   }
 
   TypeDeterminer* td() { return &td_; }
 
   BoundArrayAccessorsTransform* transform() { return &transform_; }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
  private:
   Context ctx_;
@@ -93,22 +99,20 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
 
-  auto c_var =
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &u32);
+  auto c_var = create<ast::Variable>("c", ast::StorageClass::kFunction, &u32);
   c_var->set_is_const(true);
   DeclareVariable(std::move(c_var));
 
-  auto access_idx = std::make_unique<ast::IdentifierExpression>("c");
+  auto access_idx = create<ast::IdentifierExpression>("c");
   auto* access_ptr = access_idx.get();
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"), std::move(access_idx));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"), std::move(access_idx));
   auto* ptr = accessor.get();
 
-  auto b = std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction,
-                                           &ptr_type);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &ptr_type);
   b->set_constructor(std::move(accessor));
   b->set_is_const(true);
   DeclareVariable(std::move(b));
@@ -156,27 +160,24 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ast::type::ArrayType ary5(&f32, 5);
 
   SetupFunctionAndBody();
-  DeclareVariable(std::make_unique<ast::Variable>(
-      "a", ast::StorageClass::kFunction, &ary3));
-  DeclareVariable(std::make_unique<ast::Variable>(
-      "b", ast::StorageClass::kFunction, &ary5));
   DeclareVariable(
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kFunction, &u32));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary3));
+  DeclareVariable(
+      create<ast::Variable>("b", ast::StorageClass::kFunction, &ary5));
+  DeclareVariable(
+      create<ast::Variable>("i", ast::StorageClass::kFunction, &u32));
 
-  auto b_access_idx = std::make_unique<ast::IdentifierExpression>("i");
+  auto b_access_idx = create<ast::IdentifierExpression>("i");
   auto* b_access_ptr = b_access_idx.get();
 
-  auto a_access_idx = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("b"),
-      std::move(b_access_idx));
+  auto a_access_idx = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("b"), std::move(b_access_idx));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::move(a_access_idx));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"), std::move(a_access_idx));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("c", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -241,16 +242,15 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -282,26 +282,24 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
   DeclareVariable(
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
 
-  auto access_idx = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("c"),
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kSubtract,
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2)),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 3))));
+  auto access_idx = create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
+      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 2)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 3))));
   auto* access_ptr = access_idx.get();
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"), std::move(access_idx));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"), std::move(access_idx));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -346,16 +344,15 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, -1)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, -1)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -386,16 +383,15 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 3u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 3u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -426,16 +422,15 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -467,26 +462,24 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
   DeclareVariable(
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
 
-  auto access_idx = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("c"),
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kSubtract,
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2)),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 3))));
+  auto access_idx = create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
+      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 2)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 3))));
   auto* access_ptr = access_idx.get();
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"), std::move(access_idx));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"), std::move(access_idx));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -530,16 +523,15 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, -1)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, -1)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -570,16 +562,15 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::IdentifierExpression>("a"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 3u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::IdentifierExpression>("a"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 3u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -610,19 +601,18 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2u))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::UintLiteral>(&u32, 2u))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -667,30 +657,27 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
   DeclareVariable(
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
 
-  auto access_idx = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("c"),
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kSubtract,
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2)),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 3))));
+  auto access_idx = create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
+      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 2)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 3))));
   auto* access_ptr = access_idx.get();
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::move(access_idx)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"), std::move(access_idx)),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -749,30 +736,28 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
   DeclareVariable(
-      std::make_unique<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
 
-  auto access_idx = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("c"),
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kSubtract,
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2)),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 3))));
+  auto access_idx = create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
+      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 2)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 3))));
   auto* access_ptr = access_idx.get();
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 1u))),
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::UintLiteral>(&u32, 1u))),
       std::move(access_idx));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -829,19 +814,18 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::SintLiteral>(&i32, -1))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(&i32, -1))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 1)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -884,19 +868,18 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::SintLiteral>(&i32, 2))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, -1)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(&i32, 2))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, -1)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -940,19 +923,18 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 5u))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::UintLiteral>(&u32, 5u))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
@@ -996,19 +978,18 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
 
   SetupFunctionAndBody();
   DeclareVariable(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
 
-  auto accessor = std::make_unique<ast::ArrayAccessorExpression>(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(&u32, 2u))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 5u)));
+  auto accessor = create<ast::ArrayAccessorExpression>(
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("a"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::UintLiteral>(&u32, 2u))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 5u)));
   auto* ptr = accessor.get();
 
-  auto b =
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
+  auto b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
   b->set_constructor(std::move(accessor));
   DeclareVariable(std::move(b));
 
