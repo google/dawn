@@ -79,10 +79,10 @@ class InspectorHelper {
   /// @param name name of the function created
   /// @returns a function object
   std::unique_ptr<ast::Function> MakeEmptyBodyFunction(std::string name) {
-    auto body = std::make_unique<ast::BlockStatement>();
-    body->append(std::make_unique<ast::ReturnStatement>());
+    auto body = create<ast::BlockStatement>();
+    body->append(create<ast::ReturnStatement>());
     std::unique_ptr<ast::Function> func =
-        std::make_unique<ast::Function>(name, ast::VariableList(), void_type());
+        create<ast::Function>(name, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -93,14 +93,14 @@ class InspectorHelper {
   /// @returns a function object
   std::unique_ptr<ast::Function> MakeCallerBodyFunction(std::string caller,
                                                         std::string callee) {
-    auto body = std::make_unique<ast::BlockStatement>();
-    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::move(ident_expr), ast::ExpressionList());
-    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
-    body->append(std::make_unique<ast::ReturnStatement>());
-    std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
-        caller, ast::VariableList(), void_type());
+    auto body = create<ast::BlockStatement>();
+    auto ident_expr = create<ast::IdentifierExpression>(callee);
+    auto call_expr = create<ast::CallExpression>(std::move(ident_expr),
+                                                 ast::ExpressionList());
+    body->append(create<ast::CallStatement>(std::move(call_expr)));
+    body->append(create<ast::ReturnStatement>());
+    std::unique_ptr<ast::Function> func =
+        create<ast::Function>(caller, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -113,10 +113,10 @@ class InspectorHelper {
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      auto in_var = std::make_unique<ast::Variable>(
-          in, ast::StorageClass::kInput, u32_type());
-      auto out_var = std::make_unique<ast::Variable>(
-          out, ast::StorageClass::kOutput, u32_type());
+      auto in_var =
+          create<ast::Variable>(in, ast::StorageClass::kInput, u32_type());
+      auto out_var =
+          create<ast::Variable>(out, ast::StorageClass::kOutput, u32_type());
       mod()->AddGlobalVariable(std::move(in_var));
       mod()->AddGlobalVariable(std::move(out_var));
     }
@@ -130,17 +130,16 @@ class InspectorHelper {
   std::unique_ptr<ast::Function> MakeInOutVariableBodyFunction(
       std::string name,
       std::vector<std::tuple<std::string, std::string>> inout_vars) {
-    auto body = std::make_unique<ast::BlockStatement>();
+    auto body = create<ast::BlockStatement>();
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      body->append(std::make_unique<ast::AssignmentStatement>(
-          std::make_unique<ast::IdentifierExpression>(out),
-          std::make_unique<ast::IdentifierExpression>(in)));
+      body->append(create<ast::AssignmentStatement>(
+          create<ast::IdentifierExpression>(out),
+          create<ast::IdentifierExpression>(in)));
     }
-    body->append(std::make_unique<ast::ReturnStatement>());
-    auto func =
-        std::make_unique<ast::Function>(name, ast::VariableList(), void_type());
+    body->append(create<ast::ReturnStatement>());
+    auto func = create<ast::Function>(name, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -156,21 +155,20 @@ class InspectorHelper {
       std::string caller,
       std::string callee,
       std::vector<std::tuple<std::string, std::string>> inout_vars) {
-    auto body = std::make_unique<ast::BlockStatement>();
+    auto body = create<ast::BlockStatement>();
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      body->append(std::make_unique<ast::AssignmentStatement>(
-          std::make_unique<ast::IdentifierExpression>(out),
-          std::make_unique<ast::IdentifierExpression>(in)));
+      body->append(create<ast::AssignmentStatement>(
+          create<ast::IdentifierExpression>(out),
+          create<ast::IdentifierExpression>(in)));
     }
-    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::move(ident_expr), ast::ExpressionList());
-    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
-    body->append(std::make_unique<ast::ReturnStatement>());
-    auto func = std::make_unique<ast::Function>(caller, ast::VariableList(),
-                                                void_type());
+    auto ident_expr = create<ast::IdentifierExpression>(callee);
+    auto call_expr = create<ast::CallExpression>(std::move(ident_expr),
+                                                 ast::ExpressionList());
+    body->append(create<ast::CallStatement>(std::move(call_expr)));
+    body->append(create<ast::ReturnStatement>());
+    auto func = create<ast::Function>(caller, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -186,15 +184,15 @@ class InspectorHelper {
                      uint32_t id,
                      ast::type::Type* type,
                      T* val) {
-    auto dvar = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>(name, ast::StorageClass::kNone, type));
+    auto dvar = create<ast::DecoratedVariable>(
+        create<ast::Variable>(name, ast::StorageClass::kNone, type));
     dvar->set_is_const(true);
     ast::VariableDecorationList decos;
-    decos.push_back(std::make_unique<ast::ConstantIdDecoration>(id, Source{}));
+    decos.push_back(create<ast::ConstantIdDecoration>(id, Source{}));
     dvar->set_decorations(std::move(decos));
     if (val) {
-      dvar->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-          MakeLiteral(type, val)));
+      dvar->set_constructor(
+          create<ast::ScalarConstructorExpression>(MakeLiteral(type, val)));
     }
     mod()->AddGlobalVariable(std::move(dvar));
   }
@@ -203,7 +201,7 @@ class InspectorHelper {
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type, bool* val) {
-    return std::make_unique<ast::BoolLiteral>(type, *val);
+    return create<ast::BoolLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to UIntLiteral
@@ -211,7 +209,7 @@ class InspectorHelper {
   /// @returns a Literal of the expected type and value
   std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type,
                                             uint32_t* val) {
-    return std::make_unique<ast::UintLiteral>(type, *val);
+    return create<ast::UintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to IntLiteral
@@ -219,14 +217,14 @@ class InspectorHelper {
   /// @returns a Literal of the expected type and value
   std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type,
                                             int32_t* val) {
-    return std::make_unique<ast::SintLiteral>(type, *val);
+    return create<ast::SintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to FloattLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   std::unique_ptr<ast::Literal> MakeLiteral(ast::type::Type* type, float* val) {
-    return std::make_unique<ast::FloatLiteral>(type, *val);
+    return create<ast::FloatLiteral>(type, *val);
   }
 
   /// @param vec Vector of strings to be searched
@@ -267,20 +265,19 @@ class InspectorHelper {
       std::tie(type, offset) = member_info;
 
       ast::StructMemberDecorationList deco;
-      deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(
-          offset, Source{}));
+      deco.push_back(
+          create<ast::StructMemberOffsetDecoration>(offset, Source{}));
 
-      members.push_back(std::make_unique<ast::StructMember>(
+      members.push_back(create<ast::StructMember>(
           StructMemberName(members.size(), type), type, std::move(deco)));
     }
 
     ast::StructDecorationList decos;
     if (is_block) {
-      decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
+      decos.push_back(create<ast::StructBlockDecoration>(Source{}));
     }
 
-    auto str =
-        std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+    auto str = create<ast::Struct>(std::move(decos), std::move(members));
 
     return std::make_unique<ast::type::StructType>(name, std::move(str));
   }
@@ -350,13 +347,12 @@ class InspectorHelper {
                   ast::StorageClass storage_class,
                   uint32_t set,
                   uint32_t binding) {
-    auto var = std::make_unique<ast::DecoratedVariable>(
-        std::make_unique<ast::Variable>(name, storage_class, type));
+    auto var = create<ast::DecoratedVariable>(
+        create<ast::Variable>(name, storage_class, type));
     ast::VariableDecorationList decorations;
 
-    decorations.push_back(
-        std::make_unique<ast::BindingDecoration>(binding, Source{}));
-    decorations.push_back(std::make_unique<ast::SetDecoration>(set, Source{}));
+    decorations.push_back(create<ast::BindingDecoration>(binding, Source{}));
+    decorations.push_back(create<ast::SetDecoration>(set, Source{}));
     var->set_decorations(std::move(decorations));
 
     mod()->AddGlobalVariable(std::move(var));
@@ -395,16 +391,15 @@ class InspectorHelper {
       std::string func_name,
       std::string struct_name,
       std::vector<std::tuple<size_t, ast::type::Type*>> members) {
-    auto body = std::make_unique<ast::BlockStatement>();
+    auto body = create<ast::BlockStatement>();
 
     for (auto member : members) {
       size_t member_idx;
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(std::make_unique<ast::VariableDeclStatement>(
-          std::make_unique<ast::Variable>(
-              "local" + member_name, ast::StorageClass::kNone, member_type)));
+      body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
+          "local" + member_name, ast::StorageClass::kNone, member_type)));
     }
 
     for (auto member : members) {
@@ -412,16 +407,16 @@ class InspectorHelper {
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(std::make_unique<ast::AssignmentStatement>(
-          std::make_unique<ast::IdentifierExpression>("local" + member_name),
-          std::make_unique<ast::MemberAccessorExpression>(
-              std::make_unique<ast::IdentifierExpression>(struct_name),
-              std::make_unique<ast::IdentifierExpression>(member_name))));
+      body->append(create<ast::AssignmentStatement>(
+          create<ast::IdentifierExpression>("local" + member_name),
+          create<ast::MemberAccessorExpression>(
+              create<ast::IdentifierExpression>(struct_name),
+              create<ast::IdentifierExpression>(member_name))));
     }
 
-    body->append(std::make_unique<ast::ReturnStatement>());
-    auto func = std::make_unique<ast::Function>(func_name, ast::VariableList(),
-                                                void_type());
+    body->append(create<ast::ReturnStatement>());
+    auto func =
+        create<ast::Function>(func_name, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -499,16 +494,16 @@ class InspectorHelper {
   }
 
   void AddGlobalVariable(const std::string& name, ast::type::Type* type) {
-    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
-        name, ast::StorageClass::kUniformConstant, type));
+    mod()->AddGlobalVariable(
+        create<ast::Variable>(name, ast::StorageClass::kUniformConstant, type));
   }
 
   /// Adds a depth texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, ast::type::Type* type) {
-    mod()->AddGlobalVariable(std::make_unique<ast::Variable>(
-        name, ast::StorageClass::kUniformConstant, type));
+    mod()->AddGlobalVariable(
+        create<ast::Variable>(name, ast::StorageClass::kUniformConstant, type));
   }
 
   /// Generates a function that references a specific sampler variable
@@ -525,31 +520,27 @@ class InspectorHelper {
       ast::type::Type* base_type) {
     std::string result_name = "sampler_result";
 
-    auto body = std::make_unique<ast::BlockStatement>();
+    auto body = create<ast::BlockStatement>();
 
-    auto call_result = std::make_unique<ast::Variable>(
+    auto call_result = create<ast::Variable>(
         "sampler_result", ast::StorageClass::kFunction, vec_type(base_type, 4));
-    body->append(
-        std::make_unique<ast::VariableDeclStatement>(std::move(call_result)));
+    body->append(create<ast::VariableDeclStatement>(std::move(call_result)));
 
     ast::ExpressionList call_params;
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(texture_name));
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(sampler_name));
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(coords_name));
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::make_unique<ast::IdentifierExpression>("textureSample"),
+    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
+    auto call_expr = create<ast::CallExpression>(
+        create<ast::IdentifierExpression>("textureSample"),
         std::move(call_params));
 
-    body->append(std::make_unique<ast::AssignmentStatement>(
-        std::make_unique<ast::IdentifierExpression>("sampler_result"),
+    body->append(create<ast::AssignmentStatement>(
+        create<ast::IdentifierExpression>("sampler_result"),
         std::move(call_expr)));
-    body->append(std::make_unique<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>());
 
-    auto func = std::make_unique<ast::Function>(func_name, ast::VariableList(),
-                                                void_type());
+    auto func =
+        create<ast::Function>(func_name, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -571,33 +562,28 @@ class InspectorHelper {
       ast::type::Type* base_type) {
     std::string result_name = "sampler_result";
 
-    auto body = std::make_unique<ast::BlockStatement>();
+    auto body = create<ast::BlockStatement>();
 
-    auto call_result = std::make_unique<ast::Variable>(
+    auto call_result = create<ast::Variable>(
         "sampler_result", ast::StorageClass::kFunction, base_type);
-    body->append(
-        std::make_unique<ast::VariableDeclStatement>(std::move(call_result)));
+    body->append(create<ast::VariableDeclStatement>(std::move(call_result)));
 
     ast::ExpressionList call_params;
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(texture_name));
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(sampler_name));
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(coords_name));
-    call_params.push_back(
-        std::make_unique<ast::IdentifierExpression>(depth_name));
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::make_unique<ast::IdentifierExpression>("textureSampleCompare"),
+    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
+    call_params.push_back(create<ast::IdentifierExpression>(depth_name));
+    auto call_expr = create<ast::CallExpression>(
+        create<ast::IdentifierExpression>("textureSampleCompare"),
         std::move(call_params));
 
-    body->append(std::make_unique<ast::AssignmentStatement>(
-        std::make_unique<ast::IdentifierExpression>("sampler_result"),
+    body->append(create<ast::AssignmentStatement>(
+        create<ast::IdentifierExpression>("sampler_result"),
         std::move(call_expr)));
-    body->append(std::make_unique<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>());
 
-    auto func = std::make_unique<ast::Function>(func_name, ast::VariableList(),
-                                                void_type());
+    auto func =
+        create<ast::Function>(func_name, ast::VariableList(), void_type());
     func->set_body(std::move(body));
     return func;
   }
@@ -650,7 +636,7 @@ class InspectorHelper {
       array_type_memo_[count] =
           std::make_unique<ast::type::ArrayType>(u32_type(), count);
       ast::ArrayDecorationList decos;
-      decos.push_back(std::make_unique<ast::StrideDecoration>(4, Source{}));
+      decos.push_back(create<ast::StrideDecoration>(4, Source{}));
       array_type_memo_[count]->set_decorations(std::move(decos));
     }
     return array_type_memo_[count].get();
@@ -667,6 +653,13 @@ class InspectorHelper {
   ast::type::SamplerType* sampler_type() { return &sampler_type_; }
   ast::type::SamplerType* comparison_sampler_type() {
     return &comparison_sampler_type_;
+  }
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
   }
 
  private:
@@ -743,8 +736,8 @@ TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
 
 TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -758,13 +751,13 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeEmptyBodyFunction("bar");
-  bar->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  bar->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   auto result = inspector()->GetEntryPoints();
@@ -784,13 +777,13 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeCallerBodyFunction("bar", "func");
-  bar->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  bar->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(std::move(bar));
 
   auto result = inspector()->GetEntryPoints();
@@ -807,8 +800,8 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -824,10 +817,9 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
   foo->add_decoration(
-      std::make_unique<ast::WorkgroupDecoration>(8u, 2u, 1u, Source{}));
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+  foo->add_decoration(create<ast::WorkgroupDecoration>(8u, 2u, 1u, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -846,8 +838,8 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetEntryPoints();
@@ -862,8 +854,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}});
 
   auto foo = MakeInOutVariableBodyFunction("foo", {{"in_var", "out_var"}});
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -886,8 +878,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -911,8 +903,8 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
 
   auto foo = MakeInOutVariableCallerBodyFunction("foo", "func",
                                                  {{"in_var", "out_var"}});
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -933,8 +925,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
 
   auto foo = MakeInOutVariableBodyFunction(
       "foo", {{"in_var", "out_var"}, {"in2_var", "out2_var"}});
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -960,8 +952,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   mod()->AddFunction(std::move(func));
 
   auto foo = MakeCallerBodyFunction("foo", "func");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -983,13 +975,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   auto foo = MakeInOutVariableBodyFunction("foo", {{"in_var", "out2_var"}});
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeInOutVariableBodyFunction("bar", {{"in2_var", "out_var"}});
-  bar->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  bar->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1022,13 +1014,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   auto foo = MakeInOutVariableCallerBodyFunction("foo", "func",
                                                  {{"in_var", "out_var"}});
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeCallerBodyFunction("bar", "func");
-  bar->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  bar->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1079,8 +1071,8 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
@@ -1094,13 +1086,13 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
 TEST_F(InspectorGetRemappedNameForEntryPointTest,
        DISABLED_MultipleEntryPoints) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto bar = MakeEmptyBodyFunction("bar");
-  bar->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  bar->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod()->AddFunction(std::move(bar));
 
   {
@@ -1222,8 +1214,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1236,17 +1228,15 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
+  deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
 
-  members.push_back(std::make_unique<ast::StructMember>(
-      StructMemberName(members.size(), i32_type()), i32_type(),
-      std::move(deco)));
+  members.push_back(
+      create<ast::StructMember>(StructMemberName(members.size(), i32_type()),
+                                i32_type(), std::move(deco)));
 
   ast::StructDecorationList decos;
 
-  auto str =
-      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  auto str = create<ast::Struct>(std::move(decos), std::move(members));
   auto foo_type =
       std::make_unique<ast::type::StructType>("foo_type", std::move(str));
 
@@ -1257,8 +1247,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1280,8 +1270,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1307,8 +1297,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1342,25 +1332,25 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   AddReferenceFunc("ub_bar_func", "ub_bar");
   AddReferenceFunc("ub_baz_func", "ub_baz");
 
-  auto AddFuncCall = [](ast::BlockStatement* body, const std::string& callee) {
-    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::move(ident_expr), ast::ExpressionList());
-    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+    auto ident_expr = create<ast::IdentifierExpression>(callee);
+    auto call_expr = create<ast::CallExpression>(std::move(ident_expr),
+                                                 ast::ExpressionList());
+    body->append(create<ast::CallStatement>(std::move(call_expr)));
   };
-  auto body = std::make_unique<ast::BlockStatement>();
+  auto body = create<ast::BlockStatement>();
 
   AddFuncCall(body.get(), "ub_foo_func");
   AddFuncCall(body.get(), "ub_bar_func");
   AddFuncCall(body.get(), "ub_baz_func");
 
-  body->append(std::make_unique<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
-      "ep_func", ast::VariableList(), void_type());
+  body->append(create<ast::ReturnStatement>());
+  std::unique_ptr<ast::Function> func =
+      create<ast::Function>("ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1394,8 +1384,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   mod()->AddFunction(std::move(ub_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "ub_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1421,8 +1411,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1448,8 +1438,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1483,25 +1473,25 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   AddReferenceFunc("sb_bar_func", "sb_bar");
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
-  auto AddFuncCall = [](ast::BlockStatement* body, const std::string& callee) {
-    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::move(ident_expr), ast::ExpressionList());
-    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+    auto ident_expr = create<ast::IdentifierExpression>(callee);
+    auto call_expr = create<ast::CallExpression>(std::move(ident_expr),
+                                                 ast::ExpressionList());
+    body->append(create<ast::CallStatement>(std::move(call_expr)));
   };
-  auto body = std::make_unique<ast::BlockStatement>();
+  auto body = create<ast::BlockStatement>();
 
   AddFuncCall(body.get(), "sb_foo_func");
   AddFuncCall(body.get(), "sb_bar_func");
   AddFuncCall(body.get(), "sb_baz_func");
 
-  body->append(std::make_unique<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
-      "ep_func", ast::VariableList(), void_type());
+  body->append(create<ast::ReturnStatement>());
+  std::unique_ptr<ast::Function> func =
+      create<ast::Function>("ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1535,8 +1525,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1562,8 +1552,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1589,8 +1579,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1612,8 +1602,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1649,25 +1639,25 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   AddReferenceFunc("sb_bar_func", "sb_bar");
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
-  auto AddFuncCall = [](ast::BlockStatement* body, const std::string& callee) {
-    auto ident_expr = std::make_unique<ast::IdentifierExpression>(callee);
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::move(ident_expr), ast::ExpressionList());
-    body->append(std::make_unique<ast::CallStatement>(std::move(call_expr)));
+  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+    auto ident_expr = create<ast::IdentifierExpression>(callee);
+    auto call_expr = create<ast::CallExpression>(std::move(ident_expr),
+                                                 ast::ExpressionList());
+    body->append(create<ast::CallStatement>(std::move(call_expr)));
   };
-  auto body = std::make_unique<ast::BlockStatement>();
+  auto body = create<ast::BlockStatement>();
 
   AddFuncCall(body.get(), "sb_foo_func");
   AddFuncCall(body.get(), "sb_bar_func");
   AddFuncCall(body.get(), "sb_baz_func");
 
-  body->append(std::make_unique<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func = std::make_unique<ast::Function>(
-      "ep_func", ast::VariableList(), void_type());
+  body->append(create<ast::ReturnStatement>());
+  std::unique_ptr<ast::Function> func =
+      create<ast::Function>("ep_func", ast::VariableList(), void_type());
   func->set_body(std::move(body));
 
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1702,8 +1692,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1731,8 +1721,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1759,8 +1749,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
   mod()->AddFunction(std::move(sb_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "sb_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1780,8 +1770,8 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 
   auto func = MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1796,8 +1786,8 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
   auto func = MakeEmptyBodyFunction("ep_func");
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1820,8 +1810,8 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
   mod()->AddFunction(std::move(foo_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "foo_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1843,8 +1833,8 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 
   auto func = MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1864,8 +1854,8 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
   auto func = MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth",
       f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1887,8 +1877,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
   auto func = MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth",
       f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1903,8 +1893,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
   auto func = MakeEmptyBodyFunction("ep_func");
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1929,8 +1919,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
   mod()->AddFunction(std::move(foo_func));
 
   auto ep_func = MakeCallerBodyFunction("ep_func", "foo_func");
-  ep_func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  ep_func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(ep_func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1954,8 +1944,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
   auto func = MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth",
       f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1973,8 +1963,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 
   auto func = MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", f32_type());
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1987,8 +1977,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 
 TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetSampledTextureResourceBindings("foo");
@@ -2009,8 +1999,8 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
   auto func = MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords",
       GetBaseType(GetParam().sampled_kind));
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -2116,8 +2106,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(InspectorGetMultisampledTextureResourceBindingsTest, Empty) {
   auto foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(foo));
 
   auto result = inspector()->GetSampledTextureResourceBindings("foo");
@@ -2139,8 +2129,8 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   auto func = MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords",
       GetBaseType(GetParam().sampled_kind));
-  func->add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
