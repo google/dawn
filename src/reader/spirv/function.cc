@@ -2207,7 +2207,10 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 }
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
-  auto* loop = AddStatement(std::make_unique<ast::LoopStatement>())->AsLoop();
+  auto* loop = AddStatement(std::make_unique<ast::LoopStatement>(
+                                std::make_unique<ast::BlockStatement>(),
+                                std::make_unique<ast::BlockStatement>()))
+                   ->AsLoop();
   PushNewStatementBlock(
       construct, construct->end_id,
       [loop](StatementBlock* s) { loop->set_body(std::move(s->statements_)); });

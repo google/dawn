@@ -17,11 +17,6 @@
 namespace tint {
 namespace ast {
 
-LoopStatement::LoopStatement()
-    : Statement(),
-      body_(std::make_unique<BlockStatement>()),
-      continuing_(std::make_unique<BlockStatement>()) {}
-
 LoopStatement::LoopStatement(std::unique_ptr<BlockStatement> body,
                              std::unique_ptr<BlockStatement> continuing)
     : Statement(), body_(std::move(body)), continuing_(std::move(continuing)) {}

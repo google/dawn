@@ -40,7 +40,8 @@ TEST_F(BuilderTest, Loop_Empty) {
   // loop {
   // }
 
-  ast::LoopStatement expr;
+  ast::LoopStatement expr(create<ast::BlockStatement>(),
+                          create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   b.push_function(Function{});
