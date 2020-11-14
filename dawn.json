@@ -357,6 +357,13 @@
                 ]
             },
             {
+                "name": "inject validation error",
+                "args": [
+                    {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+                ],
+                "TODO": "enga@: Make this a Dawn extension"
+            },
+            {
                 "name": "insert debug marker",
                 "args": [
                     {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}

@@ -180,3 +180,10 @@ TEST_F(CommandBufferValidationTest, CallsAfterAFailedFinish) {
 
     ASSERT_DEVICE_ERROR(encoder.CopyBufferToBuffer(copyBuffer, 0, copyBuffer, 0, 0));
 }
+
+// Test that calling inject validation error produces an error.
+TEST_F(CommandBufferValidationTest, InjectValidationError) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.InjectValidationError("my error");
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}

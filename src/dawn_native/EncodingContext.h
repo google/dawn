@@ -53,8 +53,7 @@ namespace dawn_native {
             return false;
         }
 
-        template <typename EncodeFunction>
-        inline bool TryEncode(const ObjectBase* encoder, EncodeFunction&& encodeFunction) {
+        inline bool CheckCurrentEncoder(const ObjectBase* encoder) {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
                     // The top level encoder was used when a pass encoder was current.
@@ -64,6 +63,14 @@ namespace dawn_native {
                     HandleError(InternalErrorType::Validation,
                                 "Recording in an error or already ended pass encoder");
                 }
+                return false;
+            }
+            return true;
+        }
+
+        template <typename EncodeFunction>
+        inline bool TryEncode(const ObjectBase* encoder, EncodeFunction&& encodeFunction) {
+            if (!CheckCurrentEncoder(encoder)) {
                 return false;
             }
             ASSERT(!mWasMovedToIterator);

@@ -55,6 +55,8 @@ namespace dawn_native {
 
     void EncodingContext::HandleError(InternalErrorType type, const char* message) {
         if (!IsFinished()) {
+            // Encoding should only generate validation errors.
+            ASSERT(type == InternalErrorType::Validation);
             // If the encoding context is not finished, errors are deferred until
             // Finish() is called.
             if (!mGotError) {

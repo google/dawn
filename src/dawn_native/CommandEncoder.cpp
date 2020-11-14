@@ -712,6 +712,12 @@ namespace dawn_native {
         });
     }
 
+    void CommandEncoder::InjectValidationError(const char* message) {
+        if (mEncodingContext.CheckCurrentEncoder(this)) {
+            mEncodingContext.HandleError(InternalErrorType::Validation, message);
+        }
+    }
+
     void CommandEncoder::InsertDebugMarker(const char* groupLabel) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =

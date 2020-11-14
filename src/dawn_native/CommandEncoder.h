@@ -61,6 +61,7 @@ namespace dawn_native {
                                   const TextureCopyView* destination,
                                   const Extent3D* copySize);
 
+        void InjectValidationError(const char* message);
         void InsertDebugMarker(const char* groupLabel);
         void PopDebugGroup();
         void PushDebugGroup(const char* groupLabel);
