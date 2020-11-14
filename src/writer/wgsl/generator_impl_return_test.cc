@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Return) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
+  auto expr = create<ast::IdentifierExpression>("expr");
   ast::ReturnStatement r(std::move(expr));
 
   gen.increment_indent();

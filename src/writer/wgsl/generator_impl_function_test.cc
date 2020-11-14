@@ -43,9 +43,9 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
-  body->append(std::make_unique<ast::ReturnStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+  body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
@@ -62,17 +62,15 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
-  body->append(std::make_unique<ast::ReturnStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+  body->append(create<ast::ReturnStatement>());
 
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::VariableList params;
-  params.push_back(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32));
-  params.push_back(
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kNone, &i32));
+  params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
+  params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", std::move(params), &void_type);
@@ -89,14 +87,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
-  body->append(std::make_unique<ast::ReturnStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+  body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
-  func.add_decoration(
-      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
+  func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
   gen.increment_indent();
@@ -111,14 +108,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
-  body->append(std::make_unique<ast::ReturnStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+  body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   func.set_body(std::move(body));
 
   gen.increment_indent();
@@ -133,16 +130,15 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
-  body->append(std::make_unique<ast::ReturnStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+  body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
   ast::Function func("my_func", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
   func.add_decoration(
-      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.set_body(std::move(body));
 
   gen.increment_indent();
@@ -180,27 +176,23 @@ TEST_F(WgslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("d", &f32, std::move(a_deco)));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  members.push_back(create<ast::StructMember>("d", &f32, std::move(a_deco)));
 
   ast::StructDecorationList s_decos;
-  s_decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
+  s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto str =
-      std::make_unique<ast::Struct>(std::move(s_decos), std::move(members));
+  auto str = create<ast::Struct>(std::move(s_decos), std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
   ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
-  auto data_var =
-      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
-          "data", ast::StorageClass::kStorageBuffer, &ac));
+  auto data_var = create<ast::DecoratedVariable>(
+      create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(0, Source{}));
-  decos.push_back(std::make_unique<ast::SetDecoration>(0, Source{}));
+  decos.push_back(create<ast::BindingDecoration>(0, Source{}));
+  decos.push_back(create<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(std::move(decos));
 
   mod.AddConstructedType(&s);
@@ -210,20 +202,18 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto func =
-        std::make_unique<ast::Function>("a", std::move(params), &void_type);
-    func->add_decoration(std::make_unique<ast::StageDecoration>(
-        ast::PipelineStage::kCompute, Source{}));
+    auto func = create<ast::Function>("a", std::move(params), &void_type);
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    auto var = std::make_unique<ast::Variable>(
-        "v", ast::StorageClass::kFunction, &f32);
-    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
-        std::make_unique<ast::IdentifierExpression>("data"),
-        std::make_unique<ast::IdentifierExpression>("d")));
+    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(create<ast::MemberAccessorExpression>(
+        create<ast::IdentifierExpression>("data"),
+        create<ast::IdentifierExpression>("d")));
 
-    auto body = std::make_unique<ast::BlockStatement>();
-    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-    body->append(std::make_unique<ast::ReturnStatement>());
+    auto body = create<ast::BlockStatement>();
+    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::ReturnStatement>());
     func->set_body(std::move(body));
 
     mod.AddFunction(std::move(func));
@@ -231,20 +221,18 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto func =
-        std::make_unique<ast::Function>("b", std::move(params), &void_type);
-    func->add_decoration(std::make_unique<ast::StageDecoration>(
-        ast::PipelineStage::kCompute, Source{}));
+    auto func = create<ast::Function>("b", std::move(params), &void_type);
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    auto var = std::make_unique<ast::Variable>(
-        "v", ast::StorageClass::kFunction, &f32);
-    var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
-        std::make_unique<ast::IdentifierExpression>("data"),
-        std::make_unique<ast::IdentifierExpression>("d")));
+    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    var->set_constructor(create<ast::MemberAccessorExpression>(
+        create<ast::IdentifierExpression>("data"),
+        create<ast::IdentifierExpression>("d")));
 
-    auto body = std::make_unique<ast::BlockStatement>();
-    body->append(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
-    body->append(std::make_unique<ast::ReturnStatement>());
+    auto body = create<ast::BlockStatement>();
+    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::ReturnStatement>());
     func->set_body(std::move(body));
 
     mod.AddFunction(std::move(func));

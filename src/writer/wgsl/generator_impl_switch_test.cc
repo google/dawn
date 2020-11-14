@@ -32,26 +32,26 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Switch) {
-  auto def = std::make_unique<ast::CaseStatement>();
-  auto def_body = std::make_unique<ast::BlockStatement>();
-  def_body->append(std::make_unique<ast::BreakStatement>());
+  auto def = create<ast::CaseStatement>();
+  auto def_body = create<ast::BlockStatement>();
+  def_body->append(create<ast::BreakStatement>());
   def->set_body(std::move(def_body));
 
   ast::type::I32Type i32;
   ast::CaseSelectorList case_val;
-  case_val.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
+  case_val.push_back(create<ast::SintLiteral>(&i32, 5));
 
-  auto case_body = std::make_unique<ast::BlockStatement>();
-  case_body->append(std::make_unique<ast::BreakStatement>());
+  auto case_body = create<ast::BlockStatement>();
+  case_body->append(create<ast::BreakStatement>());
 
-  auto case_stmt = std::make_unique<ast::CaseStatement>(std::move(case_val),
-                                                        std::move(case_body));
+  auto case_stmt =
+      create<ast::CaseStatement>(std::move(case_val), std::move(case_body));
 
   ast::CaseStatementList body;
   body.push_back(std::move(case_stmt));
   body.push_back(std::move(def));
 
-  auto cond = std::make_unique<ast::IdentifierExpression>("cond");
+  auto cond = create<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
 
   gen.increment_indent();

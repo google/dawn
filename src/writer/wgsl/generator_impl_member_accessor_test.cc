@@ -28,8 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  auto str = std::make_unique<ast::IdentifierExpression>("str");
-  auto mem = std::make_unique<ast::IdentifierExpression>("mem");
+  auto str = create<ast::IdentifierExpression>("str");
+  auto mem = create<ast::IdentifierExpression>("mem");
 
   ast::MemberAccessorExpression expr(std::move(str), std::move(mem));
 

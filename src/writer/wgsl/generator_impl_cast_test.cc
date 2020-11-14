@@ -32,7 +32,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("id"));
+  params.push_back(create<ast::IdentifierExpression>("id"));
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 

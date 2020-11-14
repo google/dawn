@@ -38,7 +38,7 @@ using WgslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(WgslUnaryOpTest, Emit) {
   auto params = GetParam();
 
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
+  auto expr = create<ast::IdentifierExpression>("expr");
   ast::UnaryOpExpression op(params.op, std::move(expr));
 
   ASSERT_TRUE(gen.EmitExpression(&op)) << gen.error();

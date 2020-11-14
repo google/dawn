@@ -29,7 +29,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(std::move(id), {});
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -37,10 +37,10 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>("param1"));
+  params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(std::move(id), std::move(params));
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -48,13 +48,13 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
-  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  auto id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>("param1"));
+  params.push_back(create<ast::IdentifierExpression>("param2"));
 
   ast::CallStatement call(
-      std::make_unique<ast::CallExpression>(std::move(id), std::move(params)));
+      create<ast::CallExpression>(std::move(id), std::move(params)));
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

@@ -28,8 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
   ast::LoopStatement l(std::move(body), {});
 
   gen.increment_indent();
@@ -42,11 +42,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::DiscardStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
 
-  auto continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::DiscardStatement>());
+  auto continuing = create<ast::BlockStatement>();
+  continuing->append(create<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 

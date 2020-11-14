@@ -29,7 +29,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Block) {
   ast::BlockStatement b;
-  b.append(std::make_unique<ast::DiscardStatement>());
+  b.append(create<ast::DiscardStatement>());
 
   gen.increment_indent();
 
@@ -42,7 +42,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Block) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
   ast::BlockStatement b;
-  b.append(std::make_unique<ast::DiscardStatement>());
+  b.append(create<ast::DiscardStatement>());
 
   gen.increment_indent();
 

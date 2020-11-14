@@ -64,7 +64,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   ast::type::BoolType b;
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(16u, Source{}));
+  decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
 
   ast::type::ArrayType a(&b, 4);
   a.set_decorations(std::move(decos));
@@ -76,8 +76,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
   ast::type::BoolType b;
   ast::ArrayDecorationList decos;
-  decos.push_back(std::make_unique<ast::StrideDecoration>(16u, Source{}));
-  decos.push_back(std::make_unique<ast::StrideDecoration>(32u, Source{}));
+  decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
+  decos.push_back(create<ast::StrideDecoration>(32u, Source{}));
 
   ast::type::ArrayType a(&b, 4);
   a.set_decorations(std::move(decos));
@@ -136,16 +136,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   ast::type::F32Type f32;
 
   ast::StructMemberList members;
-  members.push_back(std::make_unique<ast::StructMember>(
-      "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>("a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = std::make_unique<ast::Struct>();
+  auto str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -159,16 +157,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
   ast::type::F32Type f32;
 
   ast::StructMemberList members;
-  members.push_back(std::make_unique<ast::StructMember>(
-      "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>("a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = std::make_unique<ast::Struct>();
+  auto str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -187,20 +183,17 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::type::F32Type f32;
 
   ast::StructMemberList members;
-  members.push_back(std::make_unique<ast::StructMember>(
-      "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>("a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(
-      std::make_unique<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
   ast::StructDecorationList decos;
-  decos.push_back(std::make_unique<ast::StructBlockDecoration>(Source{}));
+  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto str =
-      std::make_unique<ast::Struct>(std::move(decos), std::move(members));
+  auto str = create<ast::Struct>(std::move(decos), std::move(members));
 
   ast::type::StructType s("S", std::move(str));
 
