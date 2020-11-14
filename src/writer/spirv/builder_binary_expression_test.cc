@@ -57,10 +57,10 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
 
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 3));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 4));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 3));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -83,23 +83,21 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
   ast::type::VectorType vec3(&i32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -123,8 +121,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
 
   ast::Variable var("param", ast::StorageClass::kFunction, &i32);
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("param");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("param");
+  auto lhs = create<ast::IdentifierExpression>("param");
+  auto rhs = create<ast::IdentifierExpression>("param");
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -171,10 +169,10 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
 
   ast::type::U32Type u32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 3));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 4));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 3));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -197,23 +195,21 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
   ast::type::VectorType vec3(&u32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -251,10 +247,10 @@ TEST_P(BinaryArithFloatTest, Scalar) {
 
   ast::type::F32Type f32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.2f));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 4.5f));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.2f));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 4.5f));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -277,23 +273,21 @@ TEST_P(BinaryArithFloatTest, Vector) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -325,10 +319,10 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 
   ast::type::U32Type u32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 3));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 4));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 3));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -353,23 +347,21 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
   ast::type::VectorType vec3(&u32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 1)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 1)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -405,10 +397,10 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 3));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 4));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 3));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -433,23 +425,21 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   ast::type::VectorType vec3(&i32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -485,10 +475,10 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 
   ast::type::F32Type f32;
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.2f));
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 4.5f));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.2f));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 4.5f));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -513,23 +503,21 @@ TEST_P(BinaryCompareFloatTest, Vector) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -564,17 +552,16 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f));
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -597,18 +584,17 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f));
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -631,11 +617,10 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = std::make_unique<ast::IdentifierExpression>("mat");
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f));
+  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto lhs = create<ast::IdentifierExpression>("mat");
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f));
 
   td.RegisterVariableForTesting(var.get());
 
@@ -665,11 +650,10 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f));
-  auto rhs = std::make_unique<ast::IdentifierExpression>("mat");
+  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto lhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f));
+  auto rhs = create<ast::IdentifierExpression>("mat");
 
   td.RegisterVariableForTesting(var.get());
 
@@ -700,19 +684,17 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = std::make_unique<ast::IdentifierExpression>("mat");
+  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto lhs = create<ast::IdentifierExpression>("mat");
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   td.RegisterVariableForTesting(var.get());
 
@@ -744,20 +726,18 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "mat", ast::StorageClass::kFunction, &mat3);
+  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  auto rhs = std::make_unique<ast::IdentifierExpression>("mat");
+  auto rhs = create<ast::IdentifierExpression>("mat");
 
   td.RegisterVariableForTesting(var.get());
 
@@ -789,10 +769,9 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = std::make_unique<ast::Variable>(
-      "mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = std::make_unique<ast::IdentifierExpression>("mat");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("mat");
+  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto lhs = create<ast::IdentifierExpression>("mat");
+  auto rhs = create<ast::IdentifierExpression>("mat");
 
   td.RegisterVariableForTesting(var.get());
 
@@ -821,19 +800,19 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 TEST_F(BuilderTest, Binary_LogicalAnd) {
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto lhs =
+      create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 1)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 2)));
 
-  auto rhs = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 4)));
+  auto rhs =
+      create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 3)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 4)));
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(lhs),
                              std::move(rhs));
@@ -867,17 +846,17 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   ast::type::BoolType bool_type;
 
-  auto a_var = std::make_unique<ast::Variable>(
-      "a", ast::StorageClass::kFunction, &bool_type);
-  a_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
-  auto b_var = std::make_unique<ast::Variable>(
-      "b", ast::StorageClass::kFunction, &bool_type);
-  b_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, false)));
+  auto a_var =
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
+  a_var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, true)));
+  auto b_var =
+      create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
+  b_var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("b");
+  auto lhs = create<ast::IdentifierExpression>("a");
+  auto rhs = create<ast::IdentifierExpression>("b");
 
   td.RegisterVariableForTesting(a_var.get());
   td.RegisterVariableForTesting(b_var.get());
@@ -917,19 +896,19 @@ OpBranch %9
 TEST_F(BuilderTest, Binary_LogicalOr) {
   ast::type::I32Type i32;
 
-  auto lhs = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto lhs =
+      create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 1)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 2)));
 
-  auto rhs = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 4)));
+  auto rhs =
+      create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 3)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 4)));
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(lhs),
                              std::move(rhs));
@@ -963,17 +942,17 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   ast::type::BoolType bool_type;
 
-  auto a_var = std::make_unique<ast::Variable>(
-      "a", ast::StorageClass::kFunction, &bool_type);
-  a_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
-  auto b_var = std::make_unique<ast::Variable>(
-      "b", ast::StorageClass::kFunction, &bool_type);
-  b_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, false)));
+  auto a_var =
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
+  a_var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, true)));
+  auto b_var =
+      create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
+  b_var->set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("b");
+  auto lhs = create<ast::IdentifierExpression>("a");
+  auto rhs = create<ast::IdentifierExpression>("b");
 
   td.RegisterVariableForTesting(a_var.get());
   td.RegisterVariableForTesting(b_var.get());

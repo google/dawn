@@ -64,6 +64,13 @@ class IntrinsicBuilderTest : public ast::Builder, public testing::Test {
     return var;
   }
 
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
+
   Context ctx;
   ast::Module mod;
   TypeDeterminer td{&ctx, &mod};
@@ -1706,17 +1713,15 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto expr =
-      call_expr("arrayLength", std::make_unique<ast::MemberAccessorExpression>(
-                                   make_expr("b"), make_expr("a")));
+  auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
+                                           make_expr("b"), make_expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1748,18 +1753,15 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("z", f32(), std::move(decos)));
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
-  auto expr =
-      call_expr("arrayLength", std::make_unique<ast::MemberAccessorExpression>(
-                                   make_expr("b"), make_expr("a")));
+  auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
+                                           make_expr("b"), make_expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1793,19 +1795,17 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("z", f32(), std::move(decos)));
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
   auto ptr_var = make_var("ptr_var", ast::StorageClass::kPrivate, &ptr);
-  ptr_var->set_constructor(std::make_unique<ast::MemberAccessorExpression>(
-      make_expr("b"), make_expr("a")));
+  ptr_var->set_constructor(
+      create<ast::MemberAccessorExpression>(make_expr("b"), make_expr("a")));
 
   auto expr = call_expr("arrayLength", "ptr_var");
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();

@@ -97,15 +97,14 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -133,15 +132,14 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -168,14 +166,13 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
+  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -202,19 +199,17 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   ast::type::VectorType vec2(&f32, 2);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
-  auto first =
-      std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0f)));
+  auto first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
 
   vals.push_back(std::move(first));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -244,10 +239,9 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::type::F32Type f32;
-  auto v =
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::LocationDecoration>(5, Source{}));
+  decos.push_back(create<ast::LocationDecoration>(5, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -266,11 +260,10 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   ast::type::F32Type f32;
-  auto v =
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BindingDecoration>(2, Source{}));
-  decos.push_back(std::make_unique<ast::SetDecoration>(3, Source{}));
+  decos.push_back(create<ast::BindingDecoration>(2, Source{}));
+  decos.push_back(create<ast::SetDecoration>(3, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -290,11 +283,10 @@ OpDecorate %1 DescriptorSet 3
 
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   ast::type::F32Type f32;
-  auto v =
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-      ast::Builtin::kPosition, Source{}));
+  decos.push_back(
+      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
 
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
@@ -315,13 +307,13 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
   ast::type::BoolType bool_type;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(1200, Source{}));
 
-  ast::DecoratedVariable v(std::make_unique<ast::Variable>(
-      "var", ast::StorageClass::kNone, &bool_type));
+  ast::DecoratedVariable v(
+      create<ast::Variable>("var", ast::StorageClass::kNone, &bool_type));
   v.set_decorations(std::move(decos));
-  v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
+  v.set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, true)));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
@@ -339,10 +331,10 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   ast::type::BoolType bool_type;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(1200, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(1200, Source{}));
 
-  ast::DecoratedVariable v(std::make_unique<ast::Variable>(
-      "var", ast::StorageClass::kNone, &bool_type));
+  ast::DecoratedVariable v(
+      create<ast::Variable>("var", ast::StorageClass::kNone, &bool_type));
   v.set_decorations(std::move(decos));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -361,13 +353,13 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
+      create<ast::Variable>("var", ast::StorageClass::kNone, &f32));
   v.set_decorations(std::move(decos));
-  v.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  v.set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
@@ -385,10 +377,10 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &f32));
+      create<ast::Variable>("var", ast::StorageClass::kNone, &f32));
   v.set_decorations(std::move(decos));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -407,10 +399,10 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   ast::type::I32Type i32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32));
+      create<ast::Variable>("var", ast::StorageClass::kNone, &i32));
   v.set_decorations(std::move(decos));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -429,10 +421,10 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   ast::type::U32Type u32;
 
   ast::VariableDecorationList decos;
-  decos.push_back(std::make_unique<ast::ConstantIdDecoration>(0, Source{}));
+  decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
 
   ast::DecoratedVariable v(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &u32));
+      create<ast::Variable>("var", ast::StorageClass::kNone, &u32));
   v.set_decorations(std::move(decos));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -491,13 +483,10 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("b", &i32, std::move(decos)));
 
-  ast::type::StructType A("A",
-                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
@@ -530,11 +519,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
 
-  ast::type::StructType A("A",
-                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
   ast::type::AliasType B("B", &A);
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &B};
 
@@ -566,11 +553,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
 
-  ast::type::StructType A("A",
-                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
   ast::type::AliasType B("B", &ac);
 
@@ -602,11 +587,9 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
 
-  ast::type::StructType A("A",
-                          std::make_unique<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
   ast::type::AccessControlType read{ast::AccessControl::kReadOnly, &A};
   ast::type::AccessControlType rw{ast::AccessControl::kReadWrite, &A};
 

@@ -45,8 +45,8 @@ TEST_F(BuilderTest, Switch_Empty) {
 
   // switch (1) {
   // }
-  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1));
+  auto cond = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1));
 
   ast::SwitchStatement expr(std::move(cond), ast::CaseStatementList{});
 
@@ -77,36 +77,34 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = std::make_unique<ast::BlockStatement>();
-  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
+  auto case_1_body = create<ast::BlockStatement>();
+  case_1_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
 
-  auto case_2_body = std::make_unique<ast::BlockStatement>();
-  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2))));
+  auto case_2_body = create<ast::BlockStatement>();
+  case_2_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 2))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
-                                                       std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
-                                                       std::move(case_2_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
+                                             std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
+                                             std::move(case_2_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());
@@ -158,22 +156,19 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //     v = 1;
   //  }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto default_body = std::make_unique<ast::BlockStatement>();
-  default_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
+  auto default_body = create<ast::BlockStatement>();
+  default_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
 
   ast::CaseStatementList cases;
-  cases.push_back(
-      std::make_unique<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());
@@ -223,45 +218,42 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = std::make_unique<ast::BlockStatement>();
-  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
+  auto case_1_body = create<ast::BlockStatement>();
+  case_1_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
 
-  auto case_2_body = std::make_unique<ast::BlockStatement>();
-  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2))));
+  auto case_2_body = create<ast::BlockStatement>();
+  case_2_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 2))));
 
-  auto default_body = std::make_unique<ast::BlockStatement>();
-  default_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3))));
+  auto default_body = create<ast::BlockStatement>();
+  default_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
-  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));
+  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(&i32, 3));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
-                                                       std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
-                                                       std::move(case_2_body)));
-  cases.push_back(
-      std::make_unique<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
+                                             std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
+                                             std::move(case_2_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());
@@ -320,45 +312,42 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = std::make_unique<ast::BlockStatement>();
-  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
-  case_1_body->append(std::make_unique<ast::FallthroughStatement>());
+  auto case_1_body = create<ast::BlockStatement>();
+  case_1_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
+  case_1_body->append(create<ast::FallthroughStatement>());
 
-  auto case_2_body = std::make_unique<ast::BlockStatement>();
-  case_2_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2))));
+  auto case_2_body = create<ast::BlockStatement>();
+  case_2_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 2))));
 
-  auto default_body = std::make_unique<ast::BlockStatement>();
-  default_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3))));
+  auto default_body = create<ast::BlockStatement>();
+  default_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
-                                                       std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
-                                                       std::move(case_2_body)));
-  cases.push_back(
-      std::make_unique<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
+                                             std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
+                                             std::move(case_2_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());
@@ -413,26 +402,24 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //      fallthrough;
   //  }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = std::make_unique<ast::BlockStatement>();
-  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
-  case_1_body->append(std::make_unique<ast::FallthroughStatement>());
+  auto case_1_body = create<ast::BlockStatement>();
+  case_1_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
+  case_1_body->append(create<ast::FallthroughStatement>());
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
-                                                       std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
+                                             std::move(case_1_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());
@@ -461,33 +448,31 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto v =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a =
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto if_body = std::make_unique<ast::BlockStatement>();
-  if_body->append(std::make_unique<ast::BreakStatement>());
+  auto if_body = create<ast::BlockStatement>();
+  if_body->append(create<ast::BreakStatement>());
 
-  auto case_1_body = std::make_unique<ast::BlockStatement>();
-  case_1_body->append(std::make_unique<ast::IfStatement>(
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::BoolLiteral>(&bool_type, true)),
-      std::move(if_body)));
+  auto case_1_body = create<ast::BlockStatement>();
+  case_1_body->append(
+      create<ast::IfStatement>(create<ast::ScalarConstructorExpression>(
+                                   create<ast::BoolLiteral>(&bool_type, true)),
+                               std::move(if_body)));
 
-  case_1_body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1))));
+  case_1_body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 1))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
-                                                       std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
+                                             std::move(case_1_body)));
 
-  ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
   td.RegisterVariableForTesting(v.get());

@@ -43,8 +43,8 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
@@ -67,8 +67,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(
-      std::make_unique<ast::StageDecoration>(params.stage, Source{}));
+  func.add_decoration(create<ast::StageDecoration>(params.stage, Source{}));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -94,14 +93,13 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
-  auto v_in =
-      std::make_unique<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto v_out = std::make_unique<ast::Variable>(
-      "my_out", ast::StorageClass::kOutput, &f32);
-  auto v_wg = std::make_unique<ast::Variable>(
-      "my_wg", ast::StorageClass::kWorkgroup, &f32);
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
+  auto v_out =
+      create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
+  auto v_wg =
+      create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in.get())) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out.get())) << b.error();
@@ -138,28 +136,27 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kVertex, Source{}));
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("my_out"),
-      std::make_unique<ast::IdentifierExpression>("my_in")));
-  body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("my_wg"),
-      std::make_unique<ast::IdentifierExpression>("my_wg")));
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("my_out"),
+      create<ast::IdentifierExpression>("my_in")));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("my_wg"),
+      create<ast::IdentifierExpression>("my_wg")));
   // Add duplicate usages so we show they don't get output multiple times.
-  body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("my_out"),
-      std::make_unique<ast::IdentifierExpression>("my_in")));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("my_out"),
+      create<ast::IdentifierExpression>("my_in")));
   func.set_body(std::move(body));
 
-  auto v_in =
-      std::make_unique<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto v_out = std::make_unique<ast::Variable>(
-      "my_out", ast::StorageClass::kOutput, &f32);
-  auto v_wg = std::make_unique<ast::Variable>(
-      "my_wg", ast::StorageClass::kWorkgroup, &f32);
+  auto v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
+  auto v_out =
+      create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
+  auto v_wg =
+      create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
 
   td.RegisterVariableForTesting(v_in.get());
   td.RegisterVariableForTesting(v_out.get());
@@ -201,8 +198,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
@@ -214,8 +211,8 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+  func.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
@@ -227,10 +224,9 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
   ast::type::VoidType void_type;
 
   ast::Function func("main", {}, &void_type);
+  func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.add_decoration(
-      std::make_unique<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
-  func.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kCompute, Source{}));
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
@@ -242,12 +238,12 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   ast::type::VoidType void_type;
 
   ast::Function func1("main1", {}, &void_type);
-  func1.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  func1.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
   ast::Function func2("main2", {}, &void_type);
-  func2.add_decoration(std::make_unique<ast::StageDecoration>(
-      ast::PipelineStage::kFragment, Source{}));
+  func2.add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
   ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func2)) << b.error();

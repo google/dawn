@@ -51,15 +51,14 @@ TEST_F(BuilderTest, Return_WithValue) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto val =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto val = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::ReturnStatement ret(std::move(val));
 
@@ -85,8 +84,7 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
 
   ast::Variable var("param", ast::StorageClass::kFunction, &f32);
 
-  ast::ReturnStatement ret(
-      std::make_unique<ast::IdentifierExpression>("param"));
+  ast::ReturnStatement ret(create<ast::IdentifierExpression>("param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();

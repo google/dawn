@@ -52,7 +52,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Constructor_Const) {
   ast::type::F32Type f32;
-  auto fl = std::make_unique<ast::FloatLiteral>(&f32, 42.2f);
+  auto fl = create<ast::FloatLiteral>(&f32, 42.2f);
   ast::ScalarConstructorExpression c(std::move(fl));
 
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &c, true), 2u);
@@ -68,12 +68,12 @@ TEST_F(BuilderTest, Constructor_Type) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
@@ -96,16 +96,16 @@ TEST_F(BuilderTest, Constructor_Type_WithCasts) {
   ast::type::VectorType vec(&f32, 2);
 
   ast::ExpressionList type_vals;
-  type_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  type_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  vals.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(type_vals)));
 
-  type_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  type_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(type_vals)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
@@ -139,8 +139,8 @@ TEST_F(BuilderTest, Constructor_Type_WithAlias) {
   ast::type::AliasType alias("Int", &i32);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.3)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.3)));
 
   ast::TypeConstructorExpression cast(&alias, std::move(params));
 
@@ -162,13 +162,13 @@ TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
-  auto var = std::make_unique<ast::Variable>(
+  auto var = create<ast::Variable>(
       "ident", ast::StorageClass::kFunction, &f32);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::IdentifierExpression>("ident"));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
@@ -203,10 +203,10 @@ TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
   ast::type::VectorType vec(&u32, 2);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
@@ -233,16 +233,16 @@ TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
 TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
-  auto rel = std::make_unique<ast::BinaryExpression>(
+  auto rel = create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 3.0f)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.0f)),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.0f)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::move(rel));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
@@ -258,8 +258,8 @@ TEST_F(BuilderTest, Constructor_Type_Bool_With_Bool) {
   ast::type::BoolType bool_type;
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, true)));
 
   ast::TypeConstructorExpression t(&bool_type, std::move(vals));
 
@@ -282,8 +282,8 @@ TEST_F(BuilderTest, Constructor_Type_I32_With_I32) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
@@ -304,8 +304,8 @@ TEST_F(BuilderTest, Constructor_Type_U32_With_U32) {
   ast::type::U32Type u32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 2)));
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
@@ -326,8 +326,8 @@ TEST_F(BuilderTest, Constructor_Type_F32_With_F32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
@@ -349,10 +349,10 @@ TEST_F(BuilderTest, Constructor_Type_Vec2_With_F32_F32) {
   ast::type::VectorType vec(&f32, 2);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
@@ -373,12 +373,12 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_F32_F32) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
@@ -400,15 +400,15 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_Vec2) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
@@ -437,16 +437,16 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_Vec2_F32) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
@@ -473,14 +473,14 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_F32_F32) {
   ast::type::VectorType vec(&f32, 4);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec, std::move(params));
 
@@ -502,17 +502,17 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_Vec2) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -541,18 +541,18 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec2_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -580,18 +580,18 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_F32_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -619,21 +619,21 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_Vec2) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -664,17 +664,17 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec3) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec3, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -704,18 +704,18 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec3_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec3, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -744,15 +744,15 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
@@ -782,16 +782,16 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
   ast::type::VectorType vec3(&f32, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec3, std::move(params));
 
@@ -820,17 +820,17 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -860,18 +860,18 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -900,18 +900,18 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -940,21 +940,21 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec2, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -986,17 +986,17 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec3, std::move(vec_params)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
@@ -1028,18 +1028,18 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
   ast::type::VectorType vec4(&f32, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec3, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&vec4, std::move(params));
 
@@ -1070,21 +1070,21 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
   ast::type::MatrixType mat(&f32, 2, 2);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1109,29 +1109,29 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
   ast::type::MatrixType mat(&f32, 2, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1156,37 +1156,37 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
   ast::type::MatrixType mat(&f32, 2, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec4_params;
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec4_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1211,25 +1211,25 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
   ast::type::MatrixType mat(&f32, 3, 2);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1254,35 +1254,35 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
   ast::type::MatrixType mat(&f32, 3, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1307,45 +1307,45 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
   ast::type::MatrixType mat(&f32, 3, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec4_params;
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec4_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1370,29 +1370,29 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
   ast::type::MatrixType mat(&f32, 4, 2);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1417,41 +1417,41 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
   ast::type::MatrixType mat(&f32, 4, 3);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1476,53 +1476,53 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
   ast::type::MatrixType mat(&f32, 4, 4);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec3_params;
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec4_params;
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec3_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec4_params)));
 
   ast::TypeConstructorExpression cast(&mat, std::move(params));
@@ -1546,16 +1546,16 @@ TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
   ast::type::ArrayType ary(&f32, 5);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::TypeConstructorExpression cast(&ary, std::move(params));
 
@@ -1579,25 +1579,25 @@ TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
   ast::type::ArrayType ary(&vec, 2);
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList vec2_params;
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_params)));
-  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec2_params)));
 
   ast::TypeConstructorExpression cast(&ary, std::move(params));
@@ -1625,25 +1625,25 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   members.push_back(
-      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+      create<ast::StructMember>("b", &vec, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_vals)));
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
@@ -1805,9 +1805,9 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vals;
@@ -1831,8 +1831,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_I32) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 2)));
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
@@ -1855,8 +1855,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_U32) {
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
@@ -1879,8 +1879,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_I32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.4)));
 
   ast::TypeConstructorExpression cast(&i32, std::move(params));
 
@@ -1903,8 +1903,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_U32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.4)));
 
   ast::TypeConstructorExpression cast(&u32, std::move(params));
 
@@ -1927,8 +1927,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_F32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
@@ -1951,8 +1951,8 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_F32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::UintLiteral>(&u32, 2)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::UintLiteral>(&u32, 2)));
 
   ast::TypeConstructorExpression cast(&f32, std::move(params));
 
@@ -1977,10 +1977,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_I32) {
   ast::type::VectorType ivec3(&i32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&ivec3, std::move(params));
 
@@ -2012,10 +2012,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_I32) {
   ast::type::VectorType fvec3(&f32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&ivec3, std::move(params));
 
@@ -2047,10 +2047,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_U32) {
   ast::type::VectorType ivec3(&i32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&uvec3, std::move(params));
 
@@ -2082,10 +2082,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_U32) {
   ast::type::VectorType fvec3(&f32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&uvec3, std::move(params));
 
@@ -2117,10 +2117,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_F32) {
   ast::type::VectorType fvec3(&f32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&fvec3, std::move(params));
 
@@ -2152,10 +2152,10 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
   ast::type::VectorType fvec3(&f32, 3);
 
   auto var =
-      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+      create<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("i"));
+  params.push_back(create<ast::IdentifierExpression>("i"));
 
   ast::TypeConstructorExpression cast(&fvec3, std::move(params));
 
@@ -2186,12 +2186,12 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
@@ -2206,9 +2206,9 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("a"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("b"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
+  params.push_back(create<ast::IdentifierExpression>("a"));
+  params.push_back(create<ast::IdentifierExpression>("b"));
+  params.push_back(create<ast::IdentifierExpression>("c"));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
@@ -2233,23 +2233,23 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
   ast::type::ArrayType ary(&vec, 2);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   auto first =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+      create<ast::TypeConstructorExpression>(&vec, std::move(params));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   auto second =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+      create<ast::TypeConstructorExpression>(&vec, std::move(params));
 
   ast::ExpressionList ary_params;
   ary_params.push_back(std::move(first));
@@ -2271,14 +2271,14 @@ TEST_F(BuilderTest,
   ast::ExpressionList vec_params;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.0)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
@@ -2298,14 +2298,14 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalWithTypeCastConstructor) {
   ast::ExpressionList vec_params;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
@@ -2322,12 +2322,12 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWithAllConstConstructors) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
@@ -2342,9 +2342,9 @@ TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("a"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("b"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("c"));
+  params.push_back(create<ast::IdentifierExpression>("a"));
+  params.push_back(create<ast::IdentifierExpression>("b"));
+  params.push_back(create<ast::IdentifierExpression>("c"));
   ast::TypeConstructorExpression t(&vec, std::move(params));
 
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
@@ -2368,23 +2368,23 @@ TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
   ast::type::ArrayType ary(&vec, 2);
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   auto first =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+      create<ast::TypeConstructorExpression>(&vec, std::move(params));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.f)));
   auto second =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(params));
+      create<ast::TypeConstructorExpression>(&vec, std::move(params));
 
   ast::ExpressionList ary_params;
   ary_params.push_back(std::move(first));
@@ -2406,14 +2406,14 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWith_TypeCastConstConstructors) {
   ast::ExpressionList vec_params;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
@@ -2433,14 +2433,14 @@ TEST_F(BuilderTest, IsConstructorConst_WithTypeCastConstructor) {
   ast::ExpressionList vec_params;
 
   ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
-  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(
       &f32, std::move(params)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vec_params));
@@ -2457,10 +2457,10 @@ TEST_F(BuilderTest, IsConstructorConst_BitCastScalars) {
   ast::type::VectorType vec(&u32, 2);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1)));
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
@@ -2477,25 +2477,25 @@ TEST_F(BuilderTest, IsConstructorConst_Struct) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   members.push_back(
-      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+      create<ast::StructMember>("b", &vec, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_vals)));
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));
@@ -2513,24 +2513,24 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   members.push_back(
-      std::make_unique<ast::StructMember>("b", &vec, std::move(decos)));
+      create<ast::StructMember>("b", &vec, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::ExpressionList vec_vals;
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(std::make_unique<ast::IdentifierExpression>("a"));
-  vec_vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vec_vals.push_back(create<ast::IdentifierExpression>("a"));
+  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(std::make_unique<ast::TypeConstructorExpression>(
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2)));
+  vals.push_back(create<ast::TypeConstructorExpression>(
       &vec, std::move(vec_vals)));
 
   ast::TypeConstructorExpression t(&s_type, std::move(vals));

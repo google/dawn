@@ -36,9 +36,9 @@ TEST_F(BuilderTest, Bitcast) {
   ast::type::U32Type u32;
   ast::type::F32Type f32;
 
-  ast::BitcastExpression bitcast(
-      &u32, std::make_unique<ast::ScalarConstructorExpression>(
-                std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  ast::BitcastExpression bitcast(&u32,
+                                 create<ast::ScalarConstructorExpression>(
+                                     create<ast::FloatLiteral>(&f32, 2.4)));
 
   ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
 
@@ -57,9 +57,9 @@ TEST_F(BuilderTest, Bitcast) {
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
   ast::type::F32Type f32;
 
-  ast::BitcastExpression bitcast(
-      &f32, std::make_unique<ast::ScalarConstructorExpression>(
-                std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+  ast::BitcastExpression bitcast(&f32,
+                                 create<ast::ScalarConstructorExpression>(
+                                     create<ast::FloatLiteral>(&f32, 2.4)));
 
   ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
 

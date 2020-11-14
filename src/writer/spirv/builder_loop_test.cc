@@ -65,17 +65,15 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   // loop {
   //   v = 2;
   // }
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2))));
+  auto body = create<ast::BlockStatement>();
+  body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 2))));
 
-  ast::LoopStatement expr(std::move(body),
-                          std::make_unique<ast::BlockStatement>());
+  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
 
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -113,20 +111,19 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto var =
-      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2))));
+  auto body = create<ast::BlockStatement>();
+  body->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 2))));
 
-  auto continuing = std::make_unique<ast::BlockStatement>();
-  continuing->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("v"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3))));
+  auto continuing = create<ast::BlockStatement>();
+  continuing->append(
+      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
+                                       create<ast::ScalarConstructorExpression>(
+                                           create<ast::SintLiteral>(&i32, 3))));
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
   td.RegisterVariableForTesting(var.get());
@@ -162,11 +159,10 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ContinueStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::ContinueStatement>());
 
-  ast::LoopStatement expr(std::move(body),
-                          std::make_unique<ast::BlockStatement>());
+  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -190,11 +186,10 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::BreakStatement>());
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::BreakStatement>());
 
-  ast::LoopStatement expr(std::move(body),
-                          std::make_unique<ast::BlockStatement>());
+  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

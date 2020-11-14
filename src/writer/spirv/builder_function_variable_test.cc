@@ -70,15 +70,14 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -112,20 +111,19 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
-  auto rel = std::make_unique<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 3.0f)),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  auto rel =
+      create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::FloatLiteral>(&f32, 3.0f)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::FloatLiteral>(&f32, 3.0f)));
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::move(rel));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -170,15 +168,14 @@ TEST_F(BuilderTest, FunctionVar_Const) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 

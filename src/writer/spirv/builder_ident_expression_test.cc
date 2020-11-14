@@ -43,15 +43,14 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -103,15 +102,14 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList vals;
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init =
-      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
 
@@ -167,8 +165,8 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("var");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("var");
+  auto lhs = create<ast::IdentifierExpression>("var");
+  auto rhs = create<ast::IdentifierExpression>("var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
                              std::move(rhs));
@@ -195,14 +193,14 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   ast::type::I32Type i32;
 
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
-  var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  var.set_constructor(create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 2)));
   var.set_is_const(true);
 
   td.RegisterVariableForTesting(&var);
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("var");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("var");
+  auto lhs = create<ast::IdentifierExpression>("var");
+  auto rhs = create<ast::IdentifierExpression>("var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
                              std::move(rhs));

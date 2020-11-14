@@ -42,28 +42,26 @@ TEST_F(BuilderTest, Block) {
   // serves to prove the block code is pushing new scopes as needed.
   ast::BlockStatement outer;
 
-  outer.append(std::make_unique<ast::VariableDeclStatement>(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kFunction,
-                                      &f32)));
-  outer.append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("var"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 1.0f))));
+  outer.append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>("var", ast::StorageClass::kFunction, &f32)));
+  outer.append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("var"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 1.0f))));
 
-  auto inner = std::make_unique<ast::BlockStatement>();
-  inner->append(std::make_unique<ast::VariableDeclStatement>(
-      std::make_unique<ast::Variable>("var", ast::StorageClass::kFunction,
-                                      &f32)));
-  inner->append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("var"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 2.0f))));
+  auto inner = create<ast::BlockStatement>();
+  inner->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>("var", ast::StorageClass::kFunction, &f32)));
+  inner->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("var"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0f))));
 
   outer.append(std::move(inner));
-  outer.append(std::make_unique<ast::AssignmentStatement>(
-      std::make_unique<ast::IdentifierExpression>("var"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 3.0f))));
+  outer.append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>("var"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.0f))));
 
   ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
 

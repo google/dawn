@@ -56,9 +56,9 @@ TEST_F(BuilderTest, ArrayAccessor) {
 
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
 
-  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
-  auto idx_expr = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 1));
+  auto ary = create<ast::IdentifierExpression>("ary");
+  auto idx_expr = create<ast::ScalarConstructorExpression>(
+      create<ast::SintLiteral>(&i32, 1));
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
@@ -98,8 +98,8 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
   ast::Variable idx("idx", ast::StorageClass::kFunction, &i32);
 
-  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
-  auto idx_expr = std::make_unique<ast::IdentifierExpression>("idx");
+  auto ary = create<ast::IdentifierExpression>("ary");
+  auto idx_expr = create<ast::IdentifierExpression>("idx");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
@@ -142,15 +142,15 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
 
-  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
+  auto ary = create<ast::IdentifierExpression>("ary");
 
   ast::ArrayAccessorExpression expr(
-      std::move(ary), std::make_unique<ast::BinaryExpression>(
-                          ast::BinaryOp::kAdd,
-                          std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::SintLiteral>(&i32, 1)),
-                          std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::SintLiteral>(&i32, 2))));
+      std::move(ary),
+      create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 1)),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::SintLiteral>(&i32, 2))));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -190,12 +190,12 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   ast::Variable var("ary", ast::StorageClass::kFunction, &ary4);
 
   ast::ArrayAccessorExpression expr(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ary"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::SintLiteral>(&i32, 3))),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 2)));
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("ary"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(&i32, 3))),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -237,11 +237,11 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   ast::Variable var("ary", ast::StorageClass::kFunction, &ary4);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::ArrayAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ary"),
-          std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::SintLiteral>(&i32, 2))),
-      std::make_unique<ast::IdentifierExpression>("xy"));
+      create<ast::ArrayAccessorExpression>(
+          create<ast::IdentifierExpression>("ary"),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(&i32, 2))),
+      create<ast::IdentifierExpression>("xy"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -284,19 +284,16 @@ TEST_F(BuilderTest, MemberAccessor) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
-  members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
 
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
-  ast::MemberAccessorExpression expr(
-      std::make_unique<ast::IdentifierExpression>("ident"),
-      std::make_unique<ast::IdentifierExpression>("b"));
+  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
+                                     create<ast::IdentifierExpression>("b"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -337,27 +334,27 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+      create<ast::StructMember>("b", &f32, std::move(decos)));
 
   ast::type::StructType inner_struct(
-      "Inner", std::make_unique<ast::Struct>(std::move(inner_members)));
+      "Inner", create<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(std::make_unique<ast::StructMember>(
-      "inner", &inner_struct, std::move(decos)));
+  outer_members.push_back(
+      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(
-      "my_struct", std::make_unique<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct",
+                               create<ast::Struct>(std::move(outer_members)));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("inner")),
-      std::make_unique<ast::IdentifierExpression>("a"));
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("inner")),
+      create<ast::IdentifierExpression>("a"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -400,29 +397,29 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+      create<ast::StructMember>("b", &f32, std::move(decos)));
 
   ast::type::StructType inner_struct(
-      "Inner", std::make_unique<ast::Struct>(std::move(inner_members)));
+      "Inner", create<ast::Struct>(std::move(inner_members)));
 
   ast::type::AliasType alias("Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      std::make_unique<ast::StructMember>("inner", &alias, std::move(decos)));
+      create<ast::StructMember>("inner", &alias, std::move(decos)));
 
-  ast::type::StructType s_type(
-      "Outer", std::make_unique<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("Outer",
+                               create<ast::Struct>(std::move(outer_members)));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("inner")),
-      std::make_unique<ast::IdentifierExpression>("a"));
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("inner")),
+      create<ast::IdentifierExpression>("a"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -465,30 +462,30 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+      create<ast::StructMember>("b", &f32, std::move(decos)));
 
   ast::type::StructType inner_struct(
-      "Inner", std::make_unique<ast::Struct>(std::move(inner_members)));
+      "Inner", create<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(std::make_unique<ast::StructMember>(
-      "inner", &inner_struct, std::move(decos)));
+  outer_members.push_back(
+      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(
-      "my_struct", std::make_unique<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct",
+                               create<ast::Struct>(std::move(outer_members)));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto lhs = std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("inner")),
-      std::make_unique<ast::IdentifierExpression>("a"));
+  auto lhs = create<ast::MemberAccessorExpression>(
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("inner")),
+      create<ast::IdentifierExpression>("a"));
 
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.f));
+  auto rhs = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 2.f));
 
   ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
 
@@ -535,30 +532,30 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+      create<ast::StructMember>("a", &f32, std::move(decos)));
   inner_members.push_back(
-      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+      create<ast::StructMember>("b", &f32, std::move(decos)));
 
   ast::type::StructType inner_struct(
-      "Inner", std::make_unique<ast::Struct>(std::move(inner_members)));
+      "Inner", create<ast::Struct>(std::move(inner_members)));
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(std::make_unique<ast::StructMember>(
-      "inner", &inner_struct, std::move(decos)));
+  outer_members.push_back(
+      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
 
-  ast::type::StructType s_type(
-      "my_struct", std::make_unique<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct",
+                               create<ast::Struct>(std::move(outer_members)));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
   ast::Variable store("store", ast::StorageClass::kFunction, &f32);
 
-  auto lhs = std::make_unique<ast::IdentifierExpression>("store");
+  auto lhs = create<ast::IdentifierExpression>("store");
 
-  auto rhs = std::make_unique<ast::MemberAccessorExpression>(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("inner")),
-      std::make_unique<ast::IdentifierExpression>("a"));
+  auto rhs = create<ast::MemberAccessorExpression>(
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("inner")),
+      create<ast::IdentifierExpression>("a"));
 
   ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
 
@@ -601,9 +598,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
 
-  ast::MemberAccessorExpression expr(
-      std::make_unique<ast::IdentifierExpression>("ident"),
-      std::make_unique<ast::IdentifierExpression>("y"));
+  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
+                                     create<ast::IdentifierExpression>("y"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -637,9 +633,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
 
-  ast::MemberAccessorExpression expr(
-      std::make_unique<ast::IdentifierExpression>("ident"),
-      std::make_unique<ast::IdentifierExpression>("yx"));
+  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
+                                     create<ast::IdentifierExpression>("yx"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -673,10 +668,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
   ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("yxz")),
-      std::make_unique<ast::IdentifierExpression>("xz"));
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("yxz")),
+      create<ast::IdentifierExpression>("xz"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -711,10 +706,10 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("yxz")),
-      std::make_unique<ast::IdentifierExpression>("x"));
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("yxz")),
+      create<ast::IdentifierExpression>("x"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -749,11 +744,11 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
 
   ast::ArrayAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::IdentifierExpression>("ident"),
-          std::make_unique<ast::IdentifierExpression>("yxz")),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1)));
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>("ident"),
+          create<ast::IdentifierExpression>("yxz")),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 1)));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -799,21 +794,20 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(
-      std::make_unique<ast::StructMember>("baz", &vec3, std::move(decos)));
-  auto s = std::make_unique<ast::Struct>(std::move(members));
+  members.push_back(create<ast::StructMember>("baz", &vec3, std::move(decos)));
+  auto s = create<ast::Struct>(std::move(members));
   ast::type::StructType c_type("C", std::move(s));
 
   members.push_back(
-      std::make_unique<ast::StructMember>("bar", &c_type, std::move(decos)));
-  s = std::make_unique<ast::Struct>(std::move(members));
+      create<ast::StructMember>("bar", &c_type, std::move(decos)));
+  s = create<ast::Struct>(std::move(members));
   ast::type::StructType b_type("B", std::move(s));
 
   ast::type::ArrayType b_ary_type(&b_type, 3);
 
-  members.push_back(std::make_unique<ast::StructMember>("foo", &b_ary_type,
-                                                        std::move(decos)));
-  s = std::make_unique<ast::Struct>(std::move(members));
+  members.push_back(
+      create<ast::StructMember>("foo", &b_ary_type, std::move(decos)));
+  s = create<ast::Struct>(std::move(members));
   ast::type::StructType a_type("A", std::move(s));
 
   ast::type::ArrayType a_ary_type(&a_type, 2);
@@ -821,20 +815,20 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   ast::Variable var("index", ast::StorageClass::kFunction, &a_ary_type);
 
   ast::MemberAccessorExpression expr(
-      std::make_unique<ast::MemberAccessorExpression>(
-          std::make_unique<ast::MemberAccessorExpression>(
-              std::make_unique<ast::ArrayAccessorExpression>(
-                  std::make_unique<ast::MemberAccessorExpression>(
-                      std::make_unique<ast::ArrayAccessorExpression>(
-                          std::make_unique<ast::IdentifierExpression>("index"),
-                          std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::SintLiteral>(&i32, 0))),
-                      std::make_unique<ast::IdentifierExpression>("foo")),
-                  std::make_unique<ast::ScalarConstructorExpression>(
-                      std::make_unique<ast::SintLiteral>(&i32, 2))),
-              std::make_unique<ast::IdentifierExpression>("bar")),
-          std::make_unique<ast::IdentifierExpression>("baz")),
-      std::make_unique<ast::IdentifierExpression>("yx"));
+      create<ast::MemberAccessorExpression>(
+          create<ast::MemberAccessorExpression>(
+              create<ast::ArrayAccessorExpression>(
+                  create<ast::MemberAccessorExpression>(
+                      create<ast::ArrayAccessorExpression>(
+                          create<ast::IdentifierExpression>("index"),
+                          create<ast::ScalarConstructorExpression>(
+                              create<ast::SintLiteral>(&i32, 0))),
+                      create<ast::IdentifierExpression>("foo")),
+                  create<ast::ScalarConstructorExpression>(
+                      create<ast::SintLiteral>(&i32, 2))),
+              create<ast::IdentifierExpression>("bar")),
+          create<ast::IdentifierExpression>("baz")),
+      create<ast::IdentifierExpression>("yx"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -888,36 +882,35 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   ast::ExpressionList ary_params;
 
   ast::ExpressionList vec_params;
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 0.0)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 0.5)));
-  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-      &vec, std::move(vec_params)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 0.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 0.5)));
+  ary_params.push_back(
+      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
 
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
-  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-      &vec, std::move(vec_params)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, -0.5)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, -0.5)));
+  ary_params.push_back(
+      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
 
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 0.5)));
-  vec_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, -0.5)));
-  ary_params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-      &vec, std::move(vec_params)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 0.5)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, -0.5)));
+  ary_params.push_back(
+      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
 
   ast::Variable var("pos", ast::StorageClass::kPrivate, &arr);
   var.set_is_const(true);
-  var.set_constructor(std::make_unique<ast::TypeConstructorExpression>(
-      &arr, std::move(ary_params)));
+  var.set_constructor(
+      create<ast::TypeConstructorExpression>(&arr, std::move(ary_params)));
 
-  ast::ArrayAccessorExpression expr(
-      std::make_unique<ast::IdentifierExpression>("pos"),
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::UintLiteral>(&u32, 1)));
+  ast::ArrayAccessorExpression expr(create<ast::IdentifierExpression>("pos"),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 1)));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();

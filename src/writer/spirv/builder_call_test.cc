@@ -45,30 +45,28 @@ TEST_F(BuilderTest, Expression_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
   func_params.push_back(
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
   ast::Function a_func("a_func", std::move(func_params), &f32);
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>(
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::IdentifierExpression>("b"))));
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
+      create<ast::IdentifierExpression>("b"))));
   a_func.set_body(std::move(body));
 
   ast::Function func("main", {}, &void_type);
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  call_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  call_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(
-      std::make_unique<ast::IdentifierExpression>("a_func"),
-      std::move(call_params));
+  ast::CallExpression expr(create<ast::IdentifierExpression>("a_func"),
+                           std::move(call_params));
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
@@ -109,30 +107,28 @@ TEST_F(BuilderTest, Statement_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
   func_params.push_back(
-      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
   ast::Function a_func("a_func", std::move(func_params), &void_type);
 
-  auto body = std::make_unique<ast::BlockStatement>();
-  body->append(std::make_unique<ast::ReturnStatement>(
-      std::make_unique<ast::BinaryExpression>(
-          ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("a"),
-          std::make_unique<ast::IdentifierExpression>("b"))));
+  auto body = create<ast::BlockStatement>();
+  body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
+      create<ast::IdentifierExpression>("b"))));
   a_func.set_body(std::move(body));
 
   ast::Function func("main", {}, &void_type);
 
   ast::ExpressionList call_params;
-  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  call_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
+  call_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallStatement expr(std::make_unique<ast::CallExpression>(
-      std::make_unique<ast::IdentifierExpression>("a_func"),
-      std::move(call_params)));
+  ast::CallStatement expr(create<ast::CallExpression>(
+      create<ast::IdentifierExpression>("a_func"), std::move(call_params)));
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();

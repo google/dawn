@@ -41,10 +41,9 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
   ast::type::I32Type i32;
 
-  ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNegation,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 1)));
+  ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
+                              create<ast::ScalarConstructorExpression>(
+                                  create<ast::SintLiteral>(&i32, 1)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -61,10 +60,9 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
   ast::type::F32Type f32;
 
-  ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNegation,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::FloatLiteral>(&f32, 1)));
+  ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
+                              create<ast::ScalarConstructorExpression>(
+                                  create<ast::FloatLiteral>(&f32, 1)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -81,10 +79,9 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 TEST_F(BuilderTest, UnaryOp_Not) {
   ast::type::BoolType bool_type;
 
-  ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNot,
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::BoolLiteral>(&bool_type, false)));
+  ast::UnaryOpExpression expr(ast::UnaryOp::kNot,
+                              create<ast::ScalarConstructorExpression>(
+                                  create<ast::BoolLiteral>(&bool_type, false)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -104,9 +101,8 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
 
   ast::Variable var("param", ast::StorageClass::kFunction, &vec);
 
-  ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNegation,
-      std::make_unique<ast::IdentifierExpression>("param"));
+  ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
+                              create<ast::IdentifierExpression>("param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
