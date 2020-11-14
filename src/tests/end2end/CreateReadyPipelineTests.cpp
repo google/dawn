@@ -98,7 +98,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
 // CreateReadyComputePipeline() any error won't be forwarded to the error scope / unhandled error
 // callback.
 TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
-    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     const char* computeShader = R"(
         #version 450
@@ -210,7 +210,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
 // CreateReadyRenderPipeline() any error won't be forwarded to the error scope / unhandled error
 // callback.
 TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
-    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 

@@ -28,7 +28,7 @@ class DeprecationTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         // Skip when validation is off because warnings might be emitted during validation calls
-        DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
     }
 };
 

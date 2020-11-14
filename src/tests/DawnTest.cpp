@@ -203,7 +203,7 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     ASSERT(instance);
 
     SelectPreferredAdapterProperties(instance.get());
-    PrintTestConfigurationAndAdapterInfo();
+    PrintTestConfigurationAndAdapterInfo(instance.get());
 }
 
 DawnTestEnvironment::~DawnTestEnvironment() = default;
@@ -227,7 +227,29 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         }
 
         if (strcmp("--skip-validation", argv[i]) == 0) {
-            mSkipDawnValidation = true;
+            mEnabledToggles.push_back("skip_validation");
+            continue;
+        }
+
+        constexpr const char kEnableTogglesSwitch[] = "--enable-toggles=";
+        argLen = sizeof(kEnableTogglesSwitch) - 1;
+        if (strncmp(argv[i], kEnableTogglesSwitch, argLen) == 0) {
+            std::string toggle;
+            std::stringstream toggles(argv[i] + argLen);
+            while (getline(toggles, toggle, ',')) {
+                mEnabledToggles.push_back(toggle);
+            }
+            continue;
+        }
+
+        constexpr const char kDisableTogglesSwitch[] = "--disable-toggles=";
+        argLen = sizeof(kDisableTogglesSwitch) - 1;
+        if (strncmp(argv[i], kDisableTogglesSwitch, argLen) == 0) {
+            std::string toggle;
+            std::stringstream toggles(argv[i] + argLen);
+            while (getline(toggles, toggle, ',')) {
+                mDisabledToggles.push_back(toggle);
+            }
             continue;
         }
 
@@ -283,14 +305,19 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             dawn::InfoLog()
                 << "\n\nUsage: " << argv[0]
-                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--adapter-vendor-id=x]"
-                   " [--exclusive-device-type-preference=integrated,cpu,discrete]\n"
+                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--skip-validation]\n"
+                   "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
+                   "    [--adapter-vendor-id=x]"
+                   " [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
                    "  -d, --enable-backend-validation: Enable backend validation (defaults"
                    " to disabled)\n"
                    "  -c, --begin-capture-on-startup: Begin debug capture on startup "
                    "(defaults to no capture)\n"
                    "  --skip-validation: Skip Dawn validation\n"
+                   "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
+                   "      ex.) skip_validation,use_tint,disable_robustness,turn_off_vsync\n"
+                   "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"
                    "  --exclusive-device-type-preference: Comma-delimited list of preferred device "
@@ -414,7 +441,8 @@ std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParams
     return testParams;
 }
 
-void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
+void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
+    dawn_native::Instance* instance) const {
     dawn::LogMessage log = dawn::InfoLog();
     log << "Testing configuration\n"
            "---------------------\n"
@@ -422,11 +450,29 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
         << (mUseWire ? "true" : "false")
         << "\n"
            "EnableBackendValidation: "
-        << (mEnableBackendValidation ? "true" : "false")
-        << "\n"
-           "SkipDawnValidation: "
-        << (mSkipDawnValidation ? "true" : "false")
-        << "\n"
+        << (mEnableBackendValidation ? "true" : "false");
+
+    if (GetEnabledToggles().size() > 0) {
+        log << "\n"
+               "Enabled Toggles\n";
+        for (const std::string& toggle : GetEnabledToggles()) {
+            const dawn_native::ToggleInfo* info = instance->GetToggleInfo(toggle.c_str());
+            ASSERT(info != nullptr);
+            log << " - " << info->name << ": " << info->description << "\n";
+        }
+    }
+
+    if (GetDisabledToggles().size() > 0) {
+        log << "\n"
+               "Disabled Toggles\n";
+        for (const std::string& toggle : GetDisabledToggles()) {
+            const dawn_native::ToggleInfo* info = instance->GetToggleInfo(toggle.c_str());
+            ASSERT(info != nullptr);
+            log << " - " << info->name << ": " << info->description << "\n";
+        }
+    }
+
+    log << "\n"
            "BeginCaptureOnStartup: "
         << (mBeginCaptureOnStartup ? "true" : "false")
         << "\n"
@@ -472,10 +518,6 @@ bool DawnTestEnvironment::IsBackendValidationEnabled() const {
     return mEnableBackendValidation;
 }
 
-bool DawnTestEnvironment::IsDawnValidationSkipped() const {
-    return mSkipDawnValidation;
-}
-
 dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
     return mInstance.get();
 }
@@ -493,6 +535,14 @@ const char* DawnTestEnvironment::GetWireTraceDir() const {
         return nullptr;
     }
     return mWireTraceDir.c_str();
+}
+
+const std::vector<std::string>& DawnTestEnvironment::GetEnabledToggles() const {
+    return mEnabledToggles;
+}
+
+const std::vector<std::string>& DawnTestEnvironment::GetDisabledToggles() const {
+    return mDisabledToggles;
 }
 
 class WireServerTraceLayer : public dawn_wire::CommandHandler {
@@ -617,10 +667,6 @@ bool DawnTestBase::IsBackendValidationEnabled() const {
     return gTestEnv->IsBackendValidationEnabled();
 }
 
-bool DawnTestBase::IsDawnValidationSkipped() const {
-    return gTestEnv->IsDawnValidationSkipped();
-}
-
 bool DawnTestBase::HasWGSL() const {
 #ifdef DAWN_ENABLE_WGSL
     return true;
@@ -638,12 +684,10 @@ bool DawnTestBase::IsAsan() const {
 }
 
 bool DawnTestBase::HasToggleEnabled(const char* toggle) const {
-    for (const char* toggleEnabled : mParam.forceEnabledWorkarounds) {
-        if (strcmp(toggle, toggleEnabled) == 0) {
-            return true;
-        }
-    }
-    return false;
+    auto toggles = dawn_native::GetTogglesUsed(device.Get());
+    return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {
+               return strcmp(toggle, name) == 0;
+           }) != toggles.end();
 }
 
 bool DawnTestBase::HasVendorIdFilter() const {
@@ -718,10 +762,18 @@ void DawnTestBase::SetUp() {
     deviceDescriptor.forceDisabledToggles = mParam.forceDisabledWorkarounds;
     deviceDescriptor.requiredExtensions = GetRequiredExtensions();
 
-    static constexpr char kSkipValidationToggle[] = "skip_validation";
-    if (gTestEnv->IsDawnValidationSkipped()) {
-        ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kSkipValidationToggle) != nullptr);
-        deviceDescriptor.forceEnabledToggles.push_back(kSkipValidationToggle);
+    for (const std::string& toggle : gTestEnv->GetEnabledToggles()) {
+        const dawn_native::ToggleInfo* info =
+            gTestEnv->GetInstance()->GetToggleInfo(toggle.c_str());
+        ASSERT(info != nullptr);
+        deviceDescriptor.forceEnabledToggles.push_back(info->name);
+    }
+
+    for (const std::string& toggle : gTestEnv->GetDisabledToggles()) {
+        const dawn_native::ToggleInfo* info =
+            gTestEnv->GetInstance()->GetToggleInfo(toggle.c_str());
+        ASSERT(info != nullptr);
+        deviceDescriptor.forceDisabledToggles.push_back(info->name);
     }
 
     backendDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);

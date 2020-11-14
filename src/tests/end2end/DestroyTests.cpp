@@ -23,7 +23,7 @@ class DestroyTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

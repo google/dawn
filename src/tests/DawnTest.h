@@ -190,11 +190,13 @@ class DawnTestEnvironment : public testing::Environment {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
-    bool IsDawnValidationSkipped() const;
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
     const char* GetWireTraceDir() const;
+
+    const std::vector<std::string>& GetEnabledToggles() const;
+    const std::vector<std::string>& GetDisabledToggles() const;
 
   protected:
     std::unique_ptr<dawn_native::Instance> mInstance;
@@ -203,15 +205,17 @@ class DawnTestEnvironment : public testing::Environment {
     void ParseArgs(int argc, char** argv);
     std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters() const;
     void SelectPreferredAdapterProperties(const dawn_native::Instance* instance);
-    void PrintTestConfigurationAndAdapterInfo() const;
+    void PrintTestConfigurationAndAdapterInfo(dawn_native::Instance* instance) const;
 
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
-    bool mSkipDawnValidation = false;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
     std::string mWireTraceDir;
+
+    std::vector<std::string> mEnabledToggles;
+    std::vector<std::string> mDisabledToggles;
     std::vector<dawn_native::DeviceType> mDevicePreferences;
     std::vector<TestAdapterProperties> mAdapterProperties;
 
@@ -249,7 +253,6 @@ class DawnTestBase {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
-    bool IsDawnValidationSkipped() const;
     bool HasWGSL() const;
 
     bool IsAsan() const;
@@ -423,7 +426,7 @@ class DawnTestBase {
             size_t warningsAfter =                                               \
                 dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
             EXPECT_EQ(mLastWarningCount, warningsBefore);                        \
-            if (!IsDawnValidationSkipped()) {                                    \
+            if (!HasToggleEnabled("skip_validation")) {                          \
                 EXPECT_EQ(warningsAfter, warningsBefore + 1);                    \
             }                                                                    \
             mLastWarningCount = warningsAfter;                                   \

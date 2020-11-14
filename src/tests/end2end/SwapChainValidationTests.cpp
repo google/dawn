@@ -27,7 +27,7 @@ class SwapChainValidationTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
-        DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
         glfwSetErrorCallback([](int code, const char* message) {
             dawn::ErrorLog() << "GLFW error " << code << " " << message;

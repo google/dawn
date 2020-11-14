@@ -648,7 +648,7 @@ TEST_P(BufferMappedAtCreationTests, ZeroSizedMappableBuffer) {
 
 // Test that creating a zero-sized error buffer mapped. (it is a different code path)
 TEST_P(BufferMappedAtCreationTests, ZeroSizedErrorBuffer) {
-    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 0;

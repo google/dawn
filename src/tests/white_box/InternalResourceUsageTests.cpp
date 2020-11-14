@@ -21,7 +21,7 @@ class InternalResourceUsageTests : public DawnTest {};
 // Verify it is an error to create a buffer with a buffer usage that should only be used
 // internally.
 TEST_P(InternalResourceUsageTests, InternalBufferUsage) {
-    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
@@ -33,7 +33,7 @@ TEST_P(InternalResourceUsageTests, InternalBufferUsage) {
 // Verify it is an error to create a texture with a texture usage that should only be used
 // internally.
 TEST_P(InternalResourceUsageTests, InternalTextureUsage) {
-    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::TextureDescriptor descriptor;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
