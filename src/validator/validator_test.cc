@@ -297,12 +297,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       create<ast::FloatLiteral>(&f32, 3.14f));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
-  func->set_body(std::move(body));
+
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_FALSE(v()->Validate(mod()));
@@ -329,13 +329,13 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       create<ast::FloatLiteral>(&f32, 3.14f));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &void_type);
 
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
   body->append(create<ast::ReturnStatement>());
-  func->set_body(std::move(body));
+  auto func = create<ast::Function>("my_func", std::move(params), &void_type,
+                                    std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
@@ -507,11 +507,11 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &void_type);
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, std::move(var)));
-  func->set_body(std::move(body));
+  auto func = create<ast::Function>("my_func", std::move(params), &void_type,
+                                    std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
 
@@ -538,12 +538,12 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
       create<ast::FloatLiteral>(&f32, 0.1)));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &void_type);
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, std::move(var_a_float)));
-  func->set_body(std::move(body));
+  auto func = create<ast::Function>("my_func", std::move(params), &void_type,
+                                    std::move(body));
   auto* func_ptr = func.get();
   mod()->AddFunction(std::move(func));
 
@@ -631,20 +631,20 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       create<ast::FloatLiteral>(&f32, 1.0)));
 
   ast::VariableList params0;
-  auto func0 = create<ast::Function>("func0", std::move(params0), &void_type);
   auto body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, std::move(var0)));
   body0->append(create<ast::ReturnStatement>());
-  func0->set_body(std::move(body0));
+  auto func0 = create<ast::Function>("func0", std::move(params0), &void_type,
+                                     std::move(body0));
 
   ast::VariableList params1;
-  auto func1 = create<ast::Function>("func1", std::move(params1), &void_type);
   auto body1 = create<ast::BlockStatement>();
   body1->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{13, 34}}, std::move(var1)));
   body1->append(create<ast::ReturnStatement>());
-  func1->set_body(std::move(body1));
+  auto func1 = create<ast::Function>("func1", std::move(params1), &void_type,
+                                     std::move(body1));
   func1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 

@@ -50,7 +50,8 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
 
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type);
+  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                    create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
   mod.AddFunction(std::move(func));

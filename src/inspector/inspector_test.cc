@@ -81,10 +81,8 @@ class InspectorHelper {
   std::unique_ptr<ast::Function> MakeEmptyBodyFunction(std::string name) {
     auto body = create<ast::BlockStatement>();
     body->append(create<ast::ReturnStatement>());
-    std::unique_ptr<ast::Function> func =
-        create<ast::Function>(name, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(name, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Generates a function that calls another
@@ -99,10 +97,8 @@ class InspectorHelper {
                                                  ast::ExpressionList());
     body->append(create<ast::CallStatement>(std::move(call_expr)));
     body->append(create<ast::ReturnStatement>());
-    std::unique_ptr<ast::Function> func =
-        create<ast::Function>(caller, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(caller, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Add In/Out variables to the global variables
@@ -139,9 +135,8 @@ class InspectorHelper {
           create<ast::IdentifierExpression>(in)));
     }
     body->append(create<ast::ReturnStatement>());
-    auto func = create<ast::Function>(name, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(name, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Generates a function that references in/out variables and calls another
@@ -168,9 +163,8 @@ class InspectorHelper {
                                                  ast::ExpressionList());
     body->append(create<ast::CallStatement>(std::move(call_expr)));
     body->append(create<ast::ReturnStatement>());
-    auto func = create<ast::Function>(caller, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(caller, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Add a Constant ID to the global variables.
@@ -415,10 +409,8 @@ class InspectorHelper {
     }
 
     body->append(create<ast::ReturnStatement>());
-    auto func =
-        create<ast::Function>(func_name, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(func_name, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Adds a regular sampler variable to the module
@@ -539,10 +531,8 @@ class InspectorHelper {
         std::move(call_expr)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func =
-        create<ast::Function>(func_name, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(func_name, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Generates a function that references a specific comparison sampler
@@ -582,10 +572,8 @@ class InspectorHelper {
         std::move(call_expr)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func =
-        create<ast::Function>(func_name, ast::VariableList(), void_type());
-    func->set_body(std::move(body));
-    return func;
+    return create<ast::Function>(func_name, ast::VariableList(), void_type(),
+                                 std::move(body));
   }
 
   /// Gets an appropriate type for the data in a given texture type.
@@ -1345,9 +1333,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   AddFuncCall(body.get(), "ub_baz_func");
 
   body->append(create<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func =
-      create<ast::Function>("ep_func", ast::VariableList(), void_type());
-  func->set_body(std::move(body));
+  std::unique_ptr<ast::Function> func = create<ast::Function>(
+      "ep_func", ast::VariableList(), void_type(), std::move(body));
 
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
@@ -1486,9 +1473,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   AddFuncCall(body.get(), "sb_baz_func");
 
   body->append(create<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func =
-      create<ast::Function>("ep_func", ast::VariableList(), void_type());
-  func->set_body(std::move(body));
+  std::unique_ptr<ast::Function> func = create<ast::Function>(
+      "ep_func", ast::VariableList(), void_type(), std::move(body));
 
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
@@ -1652,9 +1638,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   AddFuncCall(body.get(), "sb_baz_func");
 
   body->append(create<ast::ReturnStatement>());
-  std::unique_ptr<ast::Function> func =
-      create<ast::Function>("ep_func", ast::VariableList(), void_type());
-  func->set_body(std::move(body));
+  std::unique_ptr<ast::Function> func = create<ast::Function>(
+      "ep_func", ast::VariableList(), void_type(), std::move(body));
 
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));

@@ -381,7 +381,8 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::type::F32Type f32;
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    create<ast::BlockStatement>());
   mod()->AddFunction(std::move(func));
 
   // Register the function
@@ -408,17 +409,17 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
                                       Source{Source::Location{12, 34}}, "func"),
                                   std::move(call_params));
   ast::VariableList params0;
-  auto func_main = create<ast::Function>("main", std::move(params0), &f32);
   auto main_body = create<ast::BlockStatement>();
   main_body->append(create<ast::CallStatement>(std::move(call_expr)));
   main_body->append(create<ast::ReturnStatement>());
-  func_main->set_body(std::move(main_body));
+  auto func_main = create<ast::Function>("main", std::move(params0), &f32,
+                                         std::move(main_body));
   mod()->AddFunction(std::move(func_main));
 
-  auto func = create<ast::Function>("func", std::move(params0), &f32);
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  func->set_body(std::move(body));
+  auto func =
+      create<ast::Function>("func", std::move(params0), &f32, std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_FALSE(td()->Determine()) << td()->error();
@@ -625,7 +626,8 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   ast::type::F32Type f32;
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    create<ast::BlockStatement>());
   mod()->AddFunction(std::move(func));
 
   // Register the function
@@ -643,7 +645,8 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::type::F32Type f32;
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    create<ast::BlockStatement>());
   mod()->AddFunction(std::move(func));
 
   // Register the function
@@ -769,8 +772,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   body->append(create<ast::AssignmentStatement>(
       std::move(my_var), create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32);
-  f.set_body(std::move(body));
+  ast::Function f("my_func", {}, &f32, std::move(body));
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -791,8 +793,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   body->append(create<ast::AssignmentStatement>(
       std::move(my_var), create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32);
-  f.set_body(std::move(body));
+  ast::Function f("my_func", {}, &f32, std::move(body));
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -815,8 +816,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   body->append(create<ast::AssignmentStatement>(
       std::move(my_var), create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32);
-  f.set_body(std::move(body));
+  ast::Function f("my_func", {}, &f32, std::move(body));
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -829,7 +829,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::type::F32Type f32;
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    create<ast::BlockStatement>());
   mod()->AddFunction(std::move(func));
 
   // Register the function
@@ -873,9 +874,6 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   mod()->AddGlobalVariable(std::move(priv_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("out_var"),
@@ -889,7 +887,9 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("priv_var"),
       create<ast::IdentifierExpression>("priv_var")));
-  func->set_body(std::move(body));
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    std::move(body));
+  auto* func_ptr = func.get();
 
   mod()->AddFunction(std::move(func));
 
@@ -931,9 +931,6 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   mod()->AddGlobalVariable(std::move(wg_var));
   mod()->AddGlobalVariable(std::move(priv_var));
 
-  ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("out_var"),
@@ -947,19 +944,20 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("priv_var"),
       create<ast::IdentifierExpression>("priv_var")));
-  func->set_body(std::move(body));
+  ast::VariableList params;
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    std::move(body));
 
   mod()->AddFunction(std::move(func));
-
-  auto func2 = create<ast::Function>("func", std::move(params), &f32);
-  auto* func2_ptr = func2.get();
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("out_var"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("my_func"),
                                   ast::ExpressionList{})));
-  func2->set_body(std::move(body));
+  auto func2 =
+      create<ast::Function>("func", std::move(params), &f32, std::move(body));
+  auto* func2_ptr = func2.get();
 
   mod()->AddFunction(std::move(func2));
 
@@ -981,17 +979,17 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   auto var =
       create<ast::Variable>("in_var", ast::StorageClass::kFunction, &f32);
 
-  ast::VariableList params;
-  auto func = create<ast::Function>("my_func", std::move(params), &f32);
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.f))));
-  func->set_body(std::move(body));
+
+  ast::VariableList params;
+  auto func = create<ast::Function>("my_func", std::move(params), &f32,
+                                    std::move(body));
+  auto* func_ptr = func.get();
 
   mod()->AddFunction(std::move(func));
 
@@ -2339,11 +2337,10 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
   auto* var_ptr = var.get();
   auto stmt = create<ast::VariableDeclStatement>(std::move(var));
 
-  auto func = create<ast::Function>("func", ast::VariableList{}, &i32);
-
   auto body = create<ast::BlockStatement>();
   body->append(std::move(stmt));
-  func->set_body(std::move(body));
+  auto func =
+      create<ast::Function>("func", ast::VariableList{}, &i32, std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -2359,11 +2356,10 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
   auto* var_ptr = var.get();
   auto stmt = create<ast::VariableDeclStatement>(std::move(var));
 
-  auto func = create<ast::Function>("func", ast::VariableList{}, &i32);
-
   auto body = create<ast::BlockStatement>();
   body->append(std::move(stmt));
-  func->set_body(std::move(body));
+  auto func =
+      create<ast::Function>("func", ast::VariableList{}, &i32, std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -2377,11 +2373,10 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   auto var = create<ast::Variable>("var", ast::StorageClass::kWorkgroup, &i32);
   auto stmt = create<ast::VariableDeclStatement>(std::move(var));
 
-  auto func = create<ast::Function>("func", ast::VariableList{}, &i32);
-
   auto body = create<ast::BlockStatement>();
   body->append(std::move(stmt));
-  func->set_body(std::move(body));
+  auto func =
+      create<ast::Function>("func", ast::VariableList{}, &i32, std::move(body));
 
   mod()->AddFunction(std::move(func));
 
@@ -4583,36 +4578,28 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   // ep_2 -> {}
 
   ast::VariableList params;
-  auto func_b = create<ast::Function>("b", std::move(params), &f32);
-  auto* func_b_ptr = func_b.get();
-
   auto body = create<ast::BlockStatement>();
-  func_b->set_body(std::move(body));
-
-  auto func_c = create<ast::Function>("c", std::move(params), &f32);
-  auto* func_c_ptr = func_c.get();
+  auto func_b =
+      create<ast::Function>("b", std::move(params), &f32, std::move(body));
+  auto* func_b_ptr = func_b.get();
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("second"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
                                   ast::ExpressionList{})));
-  func_c->set_body(std::move(body));
-
-  auto func_a = create<ast::Function>("a", std::move(params), &f32);
-  auto* func_a_ptr = func_a.get();
+  auto func_c =
+      create<ast::Function>("c", std::move(params), &f32, std::move(body));
+  auto* func_c_ptr = func_c.get();
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("first"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
                                   ast::ExpressionList{})));
-  func_a->set_body(std::move(body));
-
-  auto ep_1 = create<ast::Function>("ep_1", std::move(params), &f32);
-  ep_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* ep_1_ptr = ep_1.get();
+  auto func_a =
+      create<ast::Function>("a", std::move(params), &f32, std::move(body));
+  auto* func_a_ptr = func_a.get();
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -4623,19 +4610,22 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
       create<ast::IdentifierExpression>("call_b"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
                                   ast::ExpressionList{})));
-  ep_1->set_body(std::move(body));
-
-  auto ep_2 = create<ast::Function>("ep_2", std::move(params), &f32);
-  ep_2->add_decoration(
+  auto ep_1 =
+      create<ast::Function>("ep_1", std::move(params), &f32, std::move(body));
+  ep_1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* ep_2_ptr = ep_2.get();
+  auto* ep_1_ptr = ep_1.get();
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("call_c"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
                                   ast::ExpressionList{})));
-  ep_2->set_body(std::move(body));
+  auto ep_2 =
+      create<ast::Function>("ep_2", std::move(params), &f32, std::move(body));
+  ep_2->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* ep_2_ptr = ep_2.get();
 
   mod()->AddFunction(std::move(func_b));
   mod()->AddFunction(std::move(func_c));

@@ -56,18 +56,22 @@ class Function : public Node {
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
+  /// @param body the function body
   Function(const std::string& name,
            VariableList params,
-           type::Type* return_type);
+           type::Type* return_type,
+           std::unique_ptr<BlockStatement> body);
   /// Create a function
   /// @param source the variable source
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
+  /// @param body the function body
   Function(const Source& source,
            const std::string& name,
            VariableList params,
-           type::Type* return_type);
+           type::Type* return_type,
+           std::unique_ptr<BlockStatement> body);
   /// Move constructor
   Function(Function&&);
 

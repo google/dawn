@@ -28,22 +28,24 @@ Function::Function() = default;
 
 Function::Function(const std::string& name,
                    VariableList params,
-                   type::Type* return_type)
+                   type::Type* return_type,
+                   std::unique_ptr<BlockStatement> body)
     : Node(),
       name_(name),
       params_(std::move(params)),
       return_type_(return_type),
-      body_(std::make_unique<BlockStatement>()) {}
+      body_(std::move(body)) {}
 
 Function::Function(const Source& source,
                    const std::string& name,
                    VariableList params,
-                   type::Type* return_type)
+                   type::Type* return_type,
+                   std::unique_ptr<BlockStatement> body)
     : Node(source),
       name_(name),
       params_(std::move(params)),
       return_type_(return_type),
-      body_(std::make_unique<BlockStatement>()) {}
+      body_(std::move(body)) {}
 
 Function::Function(Function&&) = default;
 

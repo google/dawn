@@ -326,7 +326,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   ast::type::VoidType void_type;
 
-  auto func = create<ast::Function>("foo", ast::VariableList{}, &void_type);
+  auto func = create<ast::Function>("foo", ast::VariableList{}, &void_type,
+                                    create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
 
   ast::ExpressionList params;

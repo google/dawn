@@ -71,11 +71,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("vtx_main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -83,7 +78,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+
+  auto func = create<ast::Function>("vtx_main", std::move(params), &f32,
+                                    std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -129,11 +129,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("vtx_main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -141,7 +136,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+
+  auto func = create<ast::Function>("vtx_main", std::move(params), &f32,
+                                    std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -187,11 +187,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -199,7 +194,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+  auto func =
+      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -245,11 +244,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -257,7 +251,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+
+  auto func =
+      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -300,11 +299,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -312,7 +306,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+
+  auto func =
+      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -350,11 +349,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("main", std::move(params), &f32);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func.get();
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
@@ -362,7 +356,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  func->set_body(std::move(body));
+
+  auto func =
+      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 
@@ -408,10 +407,6 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
-  auto func = create<ast::Function>("main", std::move(params), &void_type);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func.get();
 
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -419,7 +414,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  func->set_body(std::move(body));
+
+  auto func = create<ast::Function>("main", std::move(params), &void_type,
+                                    std::move(body));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_ptr = func.get();
 
   mod.AddFunction(std::move(func));
 

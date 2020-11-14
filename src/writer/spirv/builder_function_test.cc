@@ -48,7 +48,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
   ast::type::VoidType void_type;
-  ast::Function func("a_func", {}, &void_type);
+  ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_615f66756e63"
@@ -76,12 +76,10 @@ TEST_F(BuilderTest, Function_WithParams) {
   var_b->set_is_const(true);
   params.push_back(std::move(var_b));
 
-  ast::Function func("a_func", std::move(params), &f32);
-
   auto body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("a")));
-  func.set_body(std::move(body));
+  ast::Function func("a_func", std::move(params), &f32, std::move(body));
 
   td.RegisterVariableForTesting(func.params()[0].get());
   td.RegisterVariableForTesting(func.params()[1].get());
@@ -109,8 +107,7 @@ TEST_F(BuilderTest, Function_WithBody) {
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
 
-  ast::Function func("a_func", {}, &void_type);
-  func.set_body(std::move(body));
+  ast::Function func("a_func", {}, &void_type, std::move(body));
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
@@ -125,7 +122,7 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, FunctionType) {
   ast::type::VoidType void_type;
-  ast::Function func("a_func", {}, &void_type);
+  ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
@@ -135,8 +132,8 @@ TEST_F(BuilderTest, FunctionType) {
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   ast::type::VoidType void_type;
-  ast::Function func1("a_func", {}, &void_type);
-  ast::Function func2("b_func", {}, &void_type);
+  ast::Function func1("a_func", {}, &void_type, create<ast::BlockStatement>());
+  ast::Function func2("b_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func1));
   ASSERT_TRUE(b.GenerateFunction(&func2));
@@ -193,10 +190,6 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   {
     ast::VariableList params;
-    auto func = create<ast::Function>("a", std::move(params), &void_type);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-
     auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
@@ -205,17 +198,17 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
-    func->set_body(std::move(body));
+
+    auto func = create<ast::Function>("a", std::move(params), &void_type,
+                                      std::move(body));
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
     mod.AddFunction(std::move(func));
   }
 
   {
     ast::VariableList params;
-    auto func = create<ast::Function>("b", std::move(params), &void_type);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-
     auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
@@ -224,7 +217,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
-    func->set_body(std::move(body));
+
+    auto func = create<ast::Function>("b", std::move(params), &void_type,
+                                      std::move(body));
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
     mod.AddFunction(std::move(func));
   }

@@ -48,8 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type);
-  func.set_body(std::move(body));
+  ast::Function func("my_func", {}, &void_type, std::move(body));
 
   gen.increment_indent();
 
@@ -73,8 +72,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", std::move(params), &void_type);
-  func.set_body(std::move(body));
+  ast::Function func("my_func", std::move(params), &void_type, std::move(body));
 
   gen.increment_indent();
 
@@ -92,9 +90,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type);
+  ast::Function func("my_func", {}, &void_type, std::move(body));
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
-  func.set_body(std::move(body));
 
   gen.increment_indent();
 
@@ -113,10 +110,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type);
+  ast::Function func("my_func", {}, &void_type, std::move(body));
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  func.set_body(std::move(body));
 
   gen.increment_indent();
 
@@ -135,11 +131,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type);
+  ast::Function func("my_func", {}, &void_type, std::move(body));
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
-  func.set_body(std::move(body));
 
   gen.increment_indent();
 
@@ -202,10 +197,6 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto func = create<ast::Function>("a", std::move(params), &void_type);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-
     auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
@@ -214,17 +205,17 @@ TEST_F(WgslGeneratorImplTest,
     auto body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
-    func->set_body(std::move(body));
+
+    auto func = create<ast::Function>("a", std::move(params), &void_type,
+                                      std::move(body));
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
     mod.AddFunction(std::move(func));
   }
 
   {
     ast::VariableList params;
-    auto func = create<ast::Function>("b", std::move(params), &void_type);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-
     auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
@@ -233,7 +224,11 @@ TEST_F(WgslGeneratorImplTest,
     auto body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
-    func->set_body(std::move(body));
+
+    auto func = create<ast::Function>("b", std::move(params), &void_type,
+                                      std::move(body));
+    func->add_decoration(
+        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
     mod.AddFunction(std::move(func));
   }

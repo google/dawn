@@ -32,8 +32,9 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
 
-  mod.AddFunction(
-      create<ast::Function>("my_func", ast::VariableList{}, &void_type));
+  mod.AddFunction(create<ast::Function>("my_func", ast::VariableList{},
+                                        &void_type,
+                                        create<ast::BlockStatement>()));
 
   ASSERT_TRUE(gen.Generate(mod)) << gen.error();
   EXPECT_EQ(gen.result(), R"(fn my_func() -> void {

@@ -48,7 +48,8 @@ TEST_F(ModuleTest, LookupFunction) {
   type::F32Type f32;
   Module m;
 
-  auto func = create<Function>("main", VariableList{}, &f32);
+  auto func = create<Function>("main", VariableList{}, &f32,
+                               create<ast::BlockStatement>());
   auto* func_ptr = func.get();
   m.AddFunction(std::move(func));
   EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
@@ -124,7 +125,8 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 
 TEST_F(ModuleTest, IsValid_Function) {
   type::F32Type f32;
-  auto func = create<Function>("main", VariableList(), &f32);
+  auto func = create<Function>("main", VariableList(), &f32,
+                               create<ast::BlockStatement>());
 
   Module m;
   m.AddFunction(std::move(func));

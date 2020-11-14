@@ -42,7 +42,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
@@ -66,7 +66,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
 
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(create<ast::StageDecoration>(params.stage, Source{}));
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -92,7 +92,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::type::F32Type f32;
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   auto v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
@@ -135,7 +135,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::type::F32Type f32;
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
@@ -197,7 +197,7 @@ OpName %11 "tint_6d61696e"
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -210,7 +210,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
@@ -223,7 +223,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
 TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
   ast::type::VoidType void_type;
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
@@ -237,11 +237,11 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   ast::type::VoidType void_type;
 
-  ast::Function func1("main1", {}, &void_type);
+  ast::Function func1("main1", {}, &void_type, create<ast::BlockStatement>());
   func1.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
-  ast::Function func2("main2", {}, &void_type);
+  ast::Function func2("main2", {}, &void_type, create<ast::BlockStatement>());
   func2.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 

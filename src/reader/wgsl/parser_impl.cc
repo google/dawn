@@ -1231,8 +1231,9 @@ Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_header() {
   if (errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::Function>(source, name.value,
-                                         std::move(params.value), type.value);
+  return std::make_unique<ast::Function>(
+      source, name.value, std::move(params.value), type.value,
+      std::make_unique<ast::BlockStatement>());
 }
 
 // param_list

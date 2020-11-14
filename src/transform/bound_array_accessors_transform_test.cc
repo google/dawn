@@ -52,10 +52,10 @@ class BoundArrayAccessorsTest : public testing::Test {
   BoundArrayAccessorsTest() : td_(&ctx_, &mod_), transform_(&ctx_, &mod_) {}
 
   ast::BlockStatement* SetupFunctionAndBody() {
-    auto func = create<ast::Function>("func", ast::VariableList{}, &void_type_);
     auto block = create<ast::BlockStatement>();
     body_ = block.get();
-    func->set_body(std::move(block));
+    auto func = create<ast::Function>("func", ast::VariableList{}, &void_type_,
+                                      std::move(block));
     mod_.AddFunction(std::move(func));
     return body_;
   }

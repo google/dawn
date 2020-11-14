@@ -49,15 +49,13 @@ TEST_F(BuilderTest, Expression_Call) {
   func_params.push_back(
       create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
-  ast::Function a_func("a_func", std::move(func_params), &f32);
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
-  a_func.set_body(std::move(body));
+  ast::Function a_func("a_func", std::move(func_params), &f32, std::move(body));
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(
@@ -111,15 +109,15 @@ TEST_F(BuilderTest, Statement_Call) {
   func_params.push_back(
       create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
-  ast::Function a_func("a_func", std::move(func_params), &void_type);
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
-  a_func.set_body(std::move(body));
 
-  ast::Function func("main", {}, &void_type);
+  ast::Function a_func("a_func", std::move(func_params), &void_type,
+                       std::move(body));
+
+  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(

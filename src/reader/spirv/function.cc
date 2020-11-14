@@ -646,7 +646,8 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
   }
 
   auto ast_fn =
-      std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty);
+      std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty,
+                                      std::make_unique<ast::BlockStatement>());
 
   if (ep_info_ != nullptr) {
     ast_fn->add_decoration(
