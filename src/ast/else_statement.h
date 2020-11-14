@@ -30,8 +30,6 @@ namespace ast {
 class ElseStatement : public Statement {
  public:
   /// Constructor
-  ElseStatement();
-  /// Constructor
   /// @param body the else body
   explicit ElseStatement(std::unique_ptr<BlockStatement> body);
   /// Constructor

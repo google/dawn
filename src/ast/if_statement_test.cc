@@ -70,9 +70,9 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>("Ident"));
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
 
   IfStatement stmt(std::move(cond), std::move(body));
   stmt.set_else_statements(std::move(else_stmts));
@@ -122,9 +122,9 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>("Ident"));
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts.push_back(nullptr);
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -138,7 +138,7 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>(""));
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -152,8 +152,8 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
 
   IfStatement stmt(std::move(cond), std::move(body));
   stmt.set_else_statements(std::move(else_stmts));
@@ -166,8 +166,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[1]->set_condition(create<IdentifierExpression>("ident"));
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -208,10 +208,10 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   else_body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>("ident"));
   else_stmts[0]->set_body(std::move(else_if_body));
-  else_stmts.push_back(create<ElseStatement>());
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[1]->set_body(std::move(else_body));
 
   IfStatement stmt(std::move(cond), std::move(body));

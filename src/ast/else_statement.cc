@@ -17,9 +17,6 @@
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement()
-    : Statement(), body_(std::make_unique<ast::BlockStatement>()) {}
-
 ElseStatement::ElseStatement(std::unique_ptr<BlockStatement> body)
     : Statement(), body_(std::move(body)) {}
 

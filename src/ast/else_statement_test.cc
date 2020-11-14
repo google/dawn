@@ -51,7 +51,7 @@ TEST_F(ElseStatementTest, Creation_WithSource) {
 }
 
 TEST_F(ElseStatementTest, IsElse) {
-  ElseStatement e;
+  ElseStatement e(create<BlockStatement>());
   EXPECT_TRUE(e.IsElse());
 }
 
@@ -64,12 +64,12 @@ TEST_F(ElseStatementTest, HasCondition) {
 }
 
 TEST_F(ElseStatementTest, HasContition_NullCondition) {
-  ElseStatement e;
+  ElseStatement e(create<BlockStatement>());
   EXPECT_FALSE(e.HasCondition());
 }
 
 TEST_F(ElseStatementTest, IsValid) {
-  ElseStatement e;
+  ElseStatement e(create<BlockStatement>());
   EXPECT_TRUE(e.IsValid());
 }
 
