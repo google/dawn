@@ -355,7 +355,7 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_variable_decl(
     return Failure::kErrored;
 
   if (var_decos.value.size() > 0) {
-    auto dv = std::make_unique<ast::DecoratedVariable>(std::move(var));
+    auto dv = create<ast::DecoratedVariable>(std::move(var));
     dv->set_decorations(std::move(var_decos.value));
     var = std::move(dv);
   }
@@ -381,8 +381,8 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_constant_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  auto var = std::make_unique<ast::Variable>(
-      decl->source, decl->name, ast::StorageClass::kNone, decl->type);
+  auto var = create<ast::Variable>(decl->source, decl->name,
+                                   ast::StorageClass::kNone, decl->type);
   var->set_is_const(true);
 
   if (!expect(use, Token::Type::kEqual))
@@ -411,9 +411,9 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::Variable>(
-      decl->source, decl->name,
-      sc.matched ? sc.value : ast::StorageClass::kNone, decl->type);
+  return create<ast::Variable>(decl->source, decl->name,
+                               sc.matched ? sc.value : ast::StorageClass::kNone,
+                               decl->type);
 }
 
 // texture_sampler_types
@@ -1086,9 +1086,8 @@ Maybe<std::unique_ptr<ast::type::StructType>> ParserImpl::struct_decl(
     return Failure::kErrored;
 
   return std::make_unique<ast::type::StructType>(
-      name.value,
-      std::make_unique<ast::Struct>(source, std::move(struct_decos.value),
-                                    std::move(body.value)));
+      name.value, create<ast::Struct>(source, std::move(struct_decos.value),
+                                      std::move(body.value)));
 }
 
 // struct_body_decl
@@ -1141,8 +1140,8 @@ Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
   if (!expect("struct member", Token::Type::kSemicolon))
     return Failure::kErrored;
 
-  return std::make_unique<ast::StructMember>(
-      decl->source, decl->name, decl->type, std::move(member_decos.value));
+  return create<ast::StructMember>(decl->source, decl->name, decl->type,
+                                   std::move(member_decos.value));
 }
 
 // function_decl
@@ -1231,9 +1230,8 @@ Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_header() {
   if (errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::Function>(
-      source, name.value, std::move(params.value), type.value,
-      std::make_unique<ast::BlockStatement>());
+  return create<ast::Function>(source, name.value, std::move(params.value),
+                               type.value, create<ast::BlockStatement>());
 }
 
 // param_list
@@ -1249,8 +1247,8 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 
   ast::VariableList ret;
   for (;;) {
-    auto var = std::make_unique<ast::Variable>(
-        decl->source, decl->name, ast::StorageClass::kNone, decl->type);
+    auto var = create<ast::Variable>(decl->source, decl->name,
+                                     ast::StorageClass::kNone, decl->type);
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
@@ -1324,7 +1322,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_paren_rhs_stmt() {
 //   : statement*
 Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
   bool errored = false;
-  auto ret = std::make_unique<ast::BlockStatement>();
+  auto ret = create<ast::BlockStatement>();
 
   while (synchronized_) {
     auto stmt = statement();
@@ -1454,7 +1452,7 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::non_block_statement() {
 
     Source source;
     if (match(Token::Type::kDiscard, &source))
-      return std::make_unique<ast::DiscardStatement>(source);
+      return create<ast::DiscardStatement>(source);
 
     return Failure::kNoMatch;
   }();
@@ -1473,14 +1471,14 @@ Maybe<std::unique_ptr<ast::ReturnStatement>> ParserImpl::return_stmt() {
     return Failure::kNoMatch;
 
   if (peek().IsSemicolon())
-    return std::make_unique<ast::ReturnStatement>(source, nullptr);
+    return create<ast::ReturnStatement>(source, nullptr);
 
   auto expr = logical_or_expression();
   if (expr.errored)
     return Failure::kErrored;
 
   // TODO(bclayton): Check matched?
-  return std::make_unique<ast::ReturnStatement>(source, std::move(expr.value));
+  return create<ast::ReturnStatement>(source, std::move(expr.value));
 }
 
 // variable_stmt
@@ -1502,13 +1500,12 @@ Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
     if (!constructor.matched)
       return add_error(peek(), "missing constructor for const declaration");
 
-    auto var = std::make_unique<ast::Variable>(
-        decl->source, decl->name, ast::StorageClass::kNone, decl->type);
+    auto var = create<ast::Variable>(decl->source, decl->name,
+                                     ast::StorageClass::kNone, decl->type);
     var->set_is_const(true);
     var->set_constructor(std::move(constructor.value));
 
-    return std::make_unique<ast::VariableDeclStatement>(decl->source,
-                                                        std::move(var));
+    return create<ast::VariableDeclStatement>(decl->source, std::move(var));
   }
 
   auto var = variable_decl();
@@ -1527,8 +1524,8 @@ Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
     var->set_constructor(std::move(constructor.value));
   }
 
-  return std::make_unique<ast::VariableDeclStatement>(var->source(),
-                                                      std::move(var.value));
+  return create<ast::VariableDeclStatement>(var->source(),
+                                            std::move(var.value));
 }
 
 // if_stmt
@@ -1554,8 +1551,8 @@ Maybe<std::unique_ptr<ast::IfStatement>> ParserImpl::if_stmt() {
   if (el.errored)
     return Failure::kErrored;
 
-  auto stmt = std::make_unique<ast::IfStatement>(
-      source, std::move(condition.value), std::move(body.value));
+  auto stmt = create<ast::IfStatement>(source, std::move(condition.value),
+                                       std::move(body.value));
   if (el.matched) {
     elseif.value.push_back(std::move(el.value));
   }
@@ -1581,8 +1578,8 @@ Maybe<ast::ElseStatementList> ParserImpl::elseif_stmt() {
     if (body.errored)
       return Failure::kErrored;
 
-    ret.push_back(std::make_unique<ast::ElseStatement>(
-        source, std::move(condition.value), std::move(body.value)));
+    ret.push_back(create<ast::ElseStatement>(source, std::move(condition.value),
+                                             std::move(body.value)));
 
     if (!match(Token::Type::kElseIf, &source))
       break;
@@ -1602,7 +1599,7 @@ Maybe<std::unique_ptr<ast::ElseStatement>> ParserImpl::else_stmt() {
   if (body.errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::ElseStatement>(source, std::move(body.value));
+  return create<ast::ElseStatement>(source, std::move(body.value));
 }
 
 // switch_stmt
@@ -1638,8 +1635,8 @@ Maybe<std::unique_ptr<ast::SwitchStatement>> ParserImpl::switch_stmt() {
   if (body.errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::SwitchStatement>(
-      source, std::move(condition.value), std::move(body.value));
+  return create<ast::SwitchStatement>(source, std::move(condition.value),
+                                      std::move(body.value));
 }
 
 // switch_body
@@ -1653,8 +1650,7 @@ Maybe<std::unique_ptr<ast::CaseStatement>> ParserImpl::switch_body() {
   auto source = t.source();
   next();  // Consume the peek
 
-  auto stmt = std::make_unique<ast::CaseStatement>(
-      std::make_unique<ast::BlockStatement>());
+  auto stmt = create<ast::CaseStatement>(create<ast::BlockStatement>());
   stmt->set_source(source);
   if (t.IsCase()) {
     auto selectors = expect_case_selectors();
@@ -1711,14 +1707,14 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
 Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::case_body() {
-  auto ret = std::make_unique<ast::BlockStatement>();
+  auto ret = create<ast::BlockStatement>();
   for (;;) {
     Source source;
     if (match(Token::Type::kFallthrough, &source)) {
       if (!expect("fallthrough statement", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      ret->append(std::make_unique<ast::FallthroughStatement>(source));
+      ret->append(create<ast::FallthroughStatement>(source));
       break;
     }
 
@@ -1751,8 +1747,8 @@ Maybe<std::unique_ptr<ast::LoopStatement>> ParserImpl::loop_stmt() {
         if (continuing.errored)
           return Failure::kErrored;
 
-        return std::make_unique<ast::LoopStatement>(
-            source, std::move(body.value), std::move(continuing.value));
+        return create<ast::LoopStatement>(source, std::move(body.value),
+                                          std::move(continuing.value));
       });
 }
 
@@ -1829,9 +1825,9 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
   if (continuing.errored)
     return Failure::kErrored;
 
-  return std::make_unique<ForHeader>(std::move(initializer.value),
-                                     std::move(condition.value),
-                                     std::move(continuing.value));
+  return create<ForHeader>(std::move(initializer.value),
+                           std::move(condition.value),
+                           std::move(continuing.value));
 }
 
 // for_statement
@@ -1856,17 +1852,15 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
   // as we would expect from the loop statement.
   if (header->condition != nullptr) {
     // !condition
-    auto not_condition = std::make_unique<ast::UnaryOpExpression>(
+    auto not_condition = create<ast::UnaryOpExpression>(
         header->condition->source(), ast::UnaryOp::kNot,
         std::move(header->condition));
     // { break; }
-    auto break_stmt =
-        std::make_unique<ast::BreakStatement>(not_condition->source());
-    auto break_body =
-        std::make_unique<ast::BlockStatement>(not_condition->source());
+    auto break_stmt = create<ast::BreakStatement>(not_condition->source());
+    auto break_body = create<ast::BlockStatement>(not_condition->source());
     break_body->append(std::move(break_stmt));
     // if (!condition) { break; }
-    auto break_if_not_condition = std::make_unique<ast::IfStatement>(
+    auto break_if_not_condition = create<ast::IfStatement>(
         not_condition->source(), std::move(not_condition),
         std::move(break_body));
     body->insert(0, std::move(break_if_not_condition));
@@ -1874,16 +1868,15 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
 
   std::unique_ptr<ast::BlockStatement> continuing_body = nullptr;
   if (header->continuing != nullptr) {
-    continuing_body =
-        std::make_unique<ast::BlockStatement>(header->continuing->source());
+    continuing_body = create<ast::BlockStatement>(header->continuing->source());
     continuing_body->append(std::move(header->continuing));
   }
 
-  auto loop = std::make_unique<ast::LoopStatement>(
-      source, std::move(body.value), std::move(continuing_body));
+  auto loop = create<ast::LoopStatement>(source, std::move(body.value),
+                                         std::move(continuing_body));
 
   if (header->initializer != nullptr) {
-    auto result = std::make_unique<ast::BlockStatement>(source);
+    auto result = create<ast::BlockStatement>(source);
     result->append(std::move(header->initializer));
     result->append(std::move(loop));
     return result;
@@ -1920,10 +1913,8 @@ Maybe<std::unique_ptr<ast::CallStatement>> ParserImpl::func_call_stmt() {
   if (!expect("call statement", Token::Type::kParenRight))
     return Failure::kErrored;
 
-  return std::make_unique<ast::CallStatement>(
-      std::make_unique<ast::CallExpression>(
-          source, std::make_unique<ast::IdentifierExpression>(name),
-          std::move(params)));
+  return create<ast::CallStatement>(create<ast::CallExpression>(
+      source, create<ast::IdentifierExpression>(name), std::move(params)));
 }
 
 // break_stmt
@@ -1933,7 +1924,7 @@ Maybe<std::unique_ptr<ast::BreakStatement>> ParserImpl::break_stmt() {
   if (!match(Token::Type::kBreak, &source))
     return Failure::kNoMatch;
 
-  return std::make_unique<ast::BreakStatement>(source);
+  return create<ast::BreakStatement>(source);
 }
 
 // continue_stmt
@@ -1943,14 +1934,14 @@ Maybe<std::unique_ptr<ast::ContinueStatement>> ParserImpl::continue_stmt() {
   if (!match(Token::Type::kContinue, &source))
     return Failure::kNoMatch;
 
-  return std::make_unique<ast::ContinueStatement>(source);
+  return create<ast::ContinueStatement>(source);
 }
 
 // continuing_stmt
 //   : CONTINUING body_stmt
 Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
-    return std::make_unique<ast::BlockStatement>();
+    return create<ast::BlockStatement>();
 
   return expect_body_stmt();
 }
@@ -1969,8 +1960,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
   if (lit.errored)
     return Failure::kErrored;
   if (lit.matched)
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        source, std::move(lit.value));
+    return create<ast::ScalarConstructorExpression>(source,
+                                                    std::move(lit.value));
 
   if (t.IsParenLeft()) {
     auto paren = expect_paren_rhs_stmt();
@@ -1991,12 +1982,12 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
     if (params.errored)
       return Failure::kErrored;
 
-    return std::make_unique<ast::BitcastExpression>(source, type.value,
-                                                    std::move(params.value));
+    return create<ast::BitcastExpression>(source, type.value,
+                                          std::move(params.value));
   }
 
   if (match(Token::Type::kIdentifier))
-    return std::make_unique<ast::IdentifierExpression>(t.source(), t.to_str());
+    return create<ast::IdentifierExpression>(t.source(), t.to_str());
 
   auto type = type_decl();
   if (type.errored)
@@ -2007,14 +1998,14 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
         [&]() -> Expect<std::unique_ptr<ast::TypeConstructorExpression>> {
           t = peek();
           if (t.IsParenRight() || t.IsEof())
-            return std::make_unique<ast::TypeConstructorExpression>(
+            return create<ast::TypeConstructorExpression>(
                 source, type.value, ast::ExpressionList{});
 
           auto params = expect_argument_expression_list();
           if (params.errored)
             return Failure::kErrored;
 
-          return std::make_unique<ast::TypeConstructorExpression>(
+          return create<ast::TypeConstructorExpression>(
               source, type.value, std::move(params.value));
         });
 
@@ -2045,7 +2036,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expr(
     if (!expect("array accessor", Token::Type::kBracketRight))
       return Failure::kErrored;
 
-    return postfix_expr(std::make_unique<ast::ArrayAccessorExpression>(
+    return postfix_expr(create<ast::ArrayAccessorExpression>(
         source, std::move(prefix), std::move(param.value)));
   }
 
@@ -2063,8 +2054,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expr(
     if (!expect("call expression", Token::Type::kParenRight))
       return Failure::kErrored;
 
-    return postfix_expr(std::make_unique<ast::CallExpression>(
-        source, std::move(prefix), std::move(params)));
+    return postfix_expr(create<ast::CallExpression>(source, std::move(prefix),
+                                                    std::move(params)));
   }
 
   if (match(Token::Type::kPeriod)) {
@@ -2072,10 +2063,9 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expr(
     if (ident.errored)
       return Failure::kErrored;
 
-    return postfix_expr(std::make_unique<ast::MemberAccessorExpression>(
+    return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, std::move(prefix),
-        std::make_unique<ast::IdentifierExpression>(ident.source,
-                                                    ident.value)));
+        create<ast::IdentifierExpression>(ident.source, ident.value)));
   }
 
   return prefix;
@@ -2141,8 +2131,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::unary_expression() {
       return add_error(peek(),
                        "unable to parse right side of " + name + " expression");
 
-    return std::make_unique<ast::UnaryOpExpression>(source, op,
-                                                    std::move(expr.value));
+    return create<ast::UnaryOpExpression>(source, op, std::move(expr.value));
   }
   return postfix_expression();
 }
@@ -2178,7 +2167,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_multiplicative_expr(
                      "unable to parse right side of " + name + " expression");
   }
 
-  return expect_multiplicative_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_multiplicative_expr(create<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2220,7 +2209,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_additive_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of + expression");
 
-  return expect_additive_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_additive_expr(create<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2269,7 +2258,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_shift_expr(
     return add_error(peek(), std::string("unable to parse right side of ") +
                                  name + " expression");
   }
-  return expect_shift_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_shift_expr(create<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs.value)));
 }  // namespace wgsl
 
@@ -2318,7 +2307,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_relational_expr(
                      "unable to parse right side of " + name + " expression");
   }
 
-  return expect_relational_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_relational_expr(create<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2361,7 +2350,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_equality_expr(
                      "unable to parse right side of " + name + " expression");
   }
 
-  return expect_equality_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_equality_expr(create<ast::BinaryExpression>(
       source, op, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2395,7 +2384,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_and_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of & expression");
 
-  return expect_and_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_and_expr(create<ast::BinaryExpression>(
       source, ast::BinaryOp::kAnd, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2426,7 +2415,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_exclusive_or_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of ^ expression");
 
-  return expect_exclusive_or_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_exclusive_or_expr(create<ast::BinaryExpression>(
       source, ast::BinaryOp::kXor, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2457,7 +2446,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_inclusive_or_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of | expression");
 
-  return expect_inclusive_or_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_inclusive_or_expr(create<ast::BinaryExpression>(
       source, ast::BinaryOp::kOr, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2491,9 +2480,9 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_and_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of && expression");
 
-  return expect_logical_and_expr(std::make_unique<ast::BinaryExpression>(
-      source, ast::BinaryOp::kLogicalAnd, std::move(lhs),
-      std::move(rhs.value)));
+  return expect_logical_and_expr(
+      create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalAnd,
+                                    std::move(lhs), std::move(rhs.value)));
 }
 
 // logical_and_expression
@@ -2523,7 +2512,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_or_expr(
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of || expression");
 
-  return expect_logical_or_expr(std::make_unique<ast::BinaryExpression>(
+  return expect_logical_or_expr(create<ast::BinaryExpression>(
       source, ast::BinaryOp::kLogicalOr, std::move(lhs), std::move(rhs.value)));
 }
 
@@ -2560,8 +2549,8 @@ Maybe<std::unique_ptr<ast::AssignmentStatement>> ParserImpl::assignment_stmt() {
   if (!rhs.matched)
     return add_error(peek(), "unable to parse right side of assignment");
 
-  return std::make_unique<ast::AssignmentStatement>(
-      source, std::move(lhs.value), std::move(rhs.value));
+  return create<ast::AssignmentStatement>(source, std::move(lhs.value),
+                                          std::move(rhs.value));
 }
 
 // const_literal
@@ -2574,23 +2563,23 @@ Maybe<std::unique_ptr<ast::Literal>> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    return std::make_unique<ast::BoolLiteral>(type, true);
+    return create<ast::BoolLiteral>(type, true);
   }
   if (match(Token::Type::kFalse)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    return std::make_unique<ast::BoolLiteral>(type, false);
+    return create<ast::BoolLiteral>(type, false);
   }
   if (match(Token::Type::kSintLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-    return std::make_unique<ast::SintLiteral>(type, t.to_i32());
+    return create<ast::SintLiteral>(type, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-    return std::make_unique<ast::UintLiteral>(type, t.to_u32());
+    return create<ast::UintLiteral>(type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
-    return std::make_unique<ast::FloatLiteral>(type, t.to_f32());
+    return create<ast::FloatLiteral>(type, t.to_f32());
   }
   return Failure::kNoMatch;
 }
@@ -2636,8 +2625,8 @@ ParserImpl::expect_const_expr_internal(uint32_t depth) {
     if (params.errored)
       return Failure::kErrored;
 
-    return std::make_unique<ast::TypeConstructorExpression>(
-        source, type.value, std::move(params.value));
+    return create<ast::TypeConstructorExpression>(source, type.value,
+                                                  std::move(params.value));
   }
 
   auto lit = const_literal();
@@ -2646,8 +2635,7 @@ ParserImpl::expect_const_expr_internal(uint32_t depth) {
   if (!lit.matched)
     return add_error(peek(), "unable to parse const literal");
 
-  return std::make_unique<ast::ScalarConstructorExpression>(
-      source, std::move(lit.value));
+  return create<ast::ScalarConstructorExpression>(source, std::move(lit.value));
 }
 
 Maybe<ast::DecorationList> ParserImpl::decoration_list() {
@@ -2738,7 +2726,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::LocationDecoration>(val.value, val.source);
+      return create<ast::LocationDecoration>(val.value, val.source);
     });
   }
   if (t.IsBinding()) {
@@ -2748,7 +2736,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::BindingDecoration>(val.value, val.source);
+      return create<ast::BindingDecoration>(val.value, val.source);
     });
   }
   if (t.IsSet()) {
@@ -2758,7 +2746,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::SetDecoration>(val.value, val.source);
+      return create<ast::SetDecoration>(val.value, val.source);
     });
   }
   if (t.IsBuiltin()) {
@@ -2767,8 +2755,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (builtin.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::BuiltinDecoration>(builtin.value,
-                                                      builtin.source);
+      return create<ast::BuiltinDecoration>(builtin.value, builtin.source);
     });
   }
   if (t.IsWorkgroupSize()) {
@@ -2796,7 +2783,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
         }
       }
 
-      return std::make_unique<ast::WorkgroupDecoration>(x, y, z, t.source());
+      return create<ast::WorkgroupDecoration>(x, y, z, t.source());
     });
   }
   if (t.IsStage()) {
@@ -2805,11 +2792,11 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (stage.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::StageDecoration>(stage.value, stage.source);
+      return create<ast::StageDecoration>(stage.value, stage.source);
     });
   }
   if (t.IsBlock()) {
-    return std::make_unique<ast::StructBlockDecoration>(t.source());
+    return create<ast::StructBlockDecoration>(t.source());
   }
   if (t.IsStride()) {
     const char* use = "stride decoration";
@@ -2818,7 +2805,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::StrideDecoration>(val.value, t.source());
+      return create<ast::StrideDecoration>(val.value, t.source());
     });
   }
   if (t.IsOffset()) {
@@ -2828,8 +2815,7 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return std::make_unique<ast::StructMemberOffsetDecoration>(val.value,
-                                                                 t.source());
+      return create<ast::StructMemberOffsetDecoration>(val.value, t.source());
     });
   }
   return Failure::kNoMatch;
