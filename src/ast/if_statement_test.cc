@@ -27,15 +27,13 @@ using IfStatementTest = TestHelper;
 TEST_F(IfStatementTest, Creation) {
   auto* cond = create<IdentifierExpression>("cond");
   auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* discard = create<DiscardStatement>();
+  body->append(discard);
 
-  auto* cond_ptr = cond;
-  auto* stmt_ptr = body->get(0);
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  EXPECT_EQ(stmt.condition(), cond_ptr);
+  IfStatement stmt(cond, body);
+  EXPECT_EQ(stmt.condition(), cond);
   ASSERT_EQ(stmt.body()->size(), 1u);
-  EXPECT_EQ(stmt.body()->get(0), stmt_ptr);
+  EXPECT_EQ(stmt.body()->get(0), discard);
 }
 
 TEST_F(IfStatementTest, Creation_WithSource) {
@@ -43,8 +41,7 @@ TEST_F(IfStatementTest, Creation_WithSource) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(Source{Source::Location{20, 2}}, std::move(cond),
-                   std::move(body));
+  IfStatement stmt(Source{Source::Location{20, 2}}, cond, body);
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -60,7 +57,7 @@ TEST_F(IfStatementTest, IsValid) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(std::move(cond), std::move(body));
+  IfStatement stmt(cond, body);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -74,8 +71,8 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   else_stmts[0]->set_condition(create<IdentifierExpression>("Ident"));
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -83,7 +80,7 @@ TEST_F(IfStatementTest, IsValid_MissingCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(nullptr, std::move(body));
+  IfStatement stmt(nullptr, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -92,7 +89,7 @@ TEST_F(IfStatementTest, IsValid_InvalidCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(std::move(cond), std::move(body));
+  IfStatement stmt(cond, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -102,7 +99,7 @@ TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
-  IfStatement stmt(std::move(cond), std::move(body));
+  IfStatement stmt(cond, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -112,7 +109,7 @@ TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
   body->append(create<DiscardStatement>());
   body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
-  IfStatement stmt(std::move(cond), std::move(body));
+  IfStatement stmt(cond, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -127,8 +124,8 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts.push_back(nullptr);
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -141,8 +138,8 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>(""));
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -155,8 +152,8 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -170,8 +167,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[1]->set_condition(create<IdentifierExpression>("ident"));
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -180,7 +177,7 @@ TEST_F(IfStatementTest, ToStr) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(std::move(cond), std::move(body));
+  IfStatement stmt(cond, body);
 
   std::ostringstream out;
   stmt.to_str(out, 2);
@@ -210,12 +207,12 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   ElseStatementList else_stmts;
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts[0]->set_condition(create<IdentifierExpression>("ident"));
-  else_stmts[0]->set_body(std::move(else_if_body));
+  else_stmts[0]->set_body(else_if_body);
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-  else_stmts[1]->set_body(std::move(else_body));
+  else_stmts[1]->set_body(else_body);
 
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
+  IfStatement stmt(cond, body);
+  stmt.set_else_statements(else_stmts);
 
   std::ostringstream out;
   stmt.to_str(out, 2);

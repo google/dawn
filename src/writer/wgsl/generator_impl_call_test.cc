@@ -30,7 +30,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto* id = create<ast::IdentifierExpression>("my_func");
-  ast::CallExpression call(std::move(id), {});
+  ast::CallExpression call(id, {});
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func()");
@@ -41,7 +41,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
-  ast::CallExpression call(std::move(id), std::move(params));
+  ast::CallExpression call(id, params);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func(param1, param2)");
@@ -53,8 +53,7 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
 
-  ast::CallStatement call(
-      create<ast::CallExpression>(std::move(id), std::move(params)));
+  ast::CallStatement call(create<ast::CallExpression>(id, params));
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

@@ -50,12 +50,12 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
 
   td.RegisterVariableForTesting(&v);
@@ -109,12 +109,12 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
@@ -168,8 +168,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
   auto* lhs = create<ast::IdentifierExpression>("var");
   auto* rhs = create<ast::IdentifierExpression>("var");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -202,8 +201,7 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   auto* lhs = create<ast::IdentifierExpression>("var");
   auto* rhs = create<ast::IdentifierExpression>("var");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

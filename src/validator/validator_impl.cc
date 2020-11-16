@@ -271,21 +271,19 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
     }
 
     for (auto* selector : case_stmt->selectors()) {
-      auto* selector_ptr = selector;
-      if (cond_type != selector_ptr->type()) {
+      if (cond_type != selector->type()) {
         set_error(case_stmt->source(),
                   "v-0026: the case selector values must have the same "
                   "type as the selector expression.");
         return false;
       }
 
-      auto v = static_cast<int32_t>(selector_ptr->type()->IsU32()
-                                        ? selector_ptr->AsUint()->value()
-                                        : selector_ptr->AsSint()->value());
+      auto v = static_cast<int32_t>(selector->type()->IsU32()
+                                        ? selector->AsUint()->value()
+                                        : selector->AsSint()->value());
       if (selector_set.count(v)) {
-        auto v_str = selector_ptr->type()->IsU32()
-                         ? selector_ptr->AsUint()->to_str()
-                         : selector_ptr->AsSint()->to_str();
+        auto v_str = selector->type()->IsU32() ? selector->AsUint()->to_str()
+                                               : selector->AsSint()->to_str();
         set_error(case_stmt->source(),
                   "v-0027: a literal value must not appear more than once in "
                   "the case selectors for a switch statement: '" +

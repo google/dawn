@@ -103,7 +103,7 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeArray) {
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(std::move(decos));
+  array.set_decorations(decos);
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -113,7 +113,7 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeRuntimeArray) {
   ArrayType array(&u32);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(std::move(decos));
+  array.set_decorations(decos);
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -124,16 +124,16 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeStruct) {
 
   StructMemberDecorationList deco;
   deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<StructMember>("foo", &u32, std::move(deco)));
+  members.push_back(create<StructMember>("foo", &u32, deco));
 
   deco = StructMemberDecorationList();
   deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<StructMember>("bar", &u32, std::move(deco)));
+  members.push_back(create<StructMember>("bar", &u32, deco));
 
   ast::StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
-  StructType struct_type("struct_type", std::move(str));
+  auto* str = create<ast::Struct>(decos, members);
+  StructType struct_type("struct_type", str);
   AccessControlType at{AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, at.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -150,7 +150,7 @@ TEST_F(AccessControlTypeTest, BaseAlignmentArray) {
   ArrayType array(&u32, 4);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(std::move(decos));
+  array.set_decorations(decos);
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
@@ -160,7 +160,7 @@ TEST_F(AccessControlTypeTest, BaseAlignmentRuntimeArray) {
   ArrayType array(&u32);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(std::move(decos));
+  array.set_decorations(decos);
   AccessControlType at{AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
@@ -172,17 +172,17 @@ TEST_F(AccessControlTypeTest, BaseAlignmentStruct) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
-    members.push_back(create<StructMember>("foo", &u32, std::move(deco)));
+    members.push_back(create<StructMember>("foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
-    members.push_back(create<StructMember>("bar", &u32, std::move(deco)));
+    members.push_back(create<StructMember>("bar", &u32, deco));
   }
   ast::StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
-  StructType struct_type("struct_type", std::move(str));
+  auto* str = create<ast::Struct>(decos, members);
+  StructType struct_type("struct_type", str);
   AccessControlType at{AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, at.BaseAlignment(MemoryLayout::kStorageBuffer));

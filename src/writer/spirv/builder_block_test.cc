@@ -57,7 +57,7 @@ TEST_F(BuilderTest, Block) {
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 2.0f))));
 
-  outer.append(std::move(inner));
+  outer.append(inner);
   outer.append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("var"),
       create<ast::ScalarConstructorExpression>(

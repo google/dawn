@@ -59,12 +59,12 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &i32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &i32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("a", std::move(str));
+  ast::type::StructType s("a", str);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct a {
@@ -84,12 +84,12 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &i32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &i32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("b", std::move(str));
+  ast::type::StructType s("b", str);
   ast::type::AliasType alias("a", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();

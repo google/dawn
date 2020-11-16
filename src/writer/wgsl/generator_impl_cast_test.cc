@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(gen.EmitExpression(&cast)) << gen.error();
   EXPECT_EQ(gen.result(), "f32(id)");

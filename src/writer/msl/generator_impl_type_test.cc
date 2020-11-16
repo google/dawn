@@ -181,12 +181,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), "S");
@@ -202,12 +202,12 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -221,22 +221,23 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  ast::StructMemberDecorationList decos;
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
-
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
-
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
-
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members({
+      create<ast::StructMember>(
+          "a", &i32,
+          ast::StructMemberDecorationList{
+              create<ast::StructMemberOffsetDecoration>(4, Source{})}),
+      create<ast::StructMember>(
+          "b", &f32,
+          ast::StructMemberDecorationList{
+              create<ast::StructMemberOffsetDecoration>(32, Source{})}),
+      create<ast::StructMember>(
+          "c", &f32,
+          ast::StructMemberDecorationList{
+              create<ast::StructMemberOffsetDecoration>(128, Source{})}),
+  });
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -259,13 +260,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
       "main", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  members.push_back(
-      create<ast::StructMember>("float", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("float", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -286,13 +286,13 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(decos, members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct {

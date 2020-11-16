@@ -27,17 +27,16 @@ using VariableDeclStatementTest = TestHelper;
 TEST_F(VariableDeclStatementTest, Creation) {
   type::F32Type f32;
   auto* var = create<Variable>("a", StorageClass::kNone, &f32);
-  auto* var_ptr = var;
 
-  VariableDeclStatement stmt(std::move(var));
-  EXPECT_EQ(stmt.variable(), var_ptr);
+  VariableDeclStatement stmt(var);
+  EXPECT_EQ(stmt.variable(), var);
 }
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
   type::F32Type f32;
   auto* var = create<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
+  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, var);
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -51,14 +50,14 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
 TEST_F(VariableDeclStatementTest, IsValid) {
   type::F32Type f32;
   auto* var = create<Variable>("a", StorageClass::kNone, &f32);
-  VariableDeclStatement stmt(std::move(var));
+  VariableDeclStatement stmt(var);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
   type::F32Type f32;
   auto* var = create<Variable>("", StorageClass::kNone, &f32);
-  VariableDeclStatement stmt(std::move(var));
+  VariableDeclStatement stmt(var);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -71,7 +70,7 @@ TEST_F(VariableDeclStatementTest, ToStr) {
   type::F32Type f32;
   auto* var = create<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, std::move(var));
+  VariableDeclStatement stmt(Source{Source::Location{20, 2}}, var);
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  VariableDeclStatement{

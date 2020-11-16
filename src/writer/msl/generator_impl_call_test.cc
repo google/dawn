@@ -35,11 +35,11 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;
 
   auto* id = create<ast::IdentifierExpression>("my_func");
-  ast::CallExpression call(std::move(id), {});
+  ast::CallExpression call(id, {});
 
   auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func()");
@@ -52,11 +52,11 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
-  ast::CallExpression call(std::move(id), std::move(params));
+  ast::CallExpression call(id, params);
 
   auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func(param1, param2)");
@@ -69,12 +69,11 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
-  ast::CallStatement call(
-      create<ast::CallExpression>(std::move(id), std::move(params)));
+  ast::CallStatement call(create<ast::CallExpression>(id, params));
 
   auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

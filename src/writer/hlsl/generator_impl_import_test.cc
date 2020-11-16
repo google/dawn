@@ -58,7 +58,7 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
       create<ast::FloatLiteral>(&f32, 1.f)));
 
   auto* ident = create<ast::IdentifierExpression>(param.name);
-  ast::CallExpression expr(std::move(ident), std::move(params));
+  ast::CallExpression expr(ident, params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -103,7 +103,7 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
       create<ast::SintLiteral>(&i32, 1)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -126,7 +126,7 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
       create<ast::FloatLiteral>(&f32, 2.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -150,29 +150,29 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  ast::ExpressionList type_params;
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(type_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(
+      &vec, ast::ExpressionList{
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 1.f)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 2.f)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 3.f)),
+            }));
 
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 4.f)));
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 5.f)));
-  type_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 6.f)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(type_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(
+      &vec, ast::ExpressionList{
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 4.f)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 5.f)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 6.f)),
+            }));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -198,7 +198,7 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
       create<ast::SintLiteral>(&i32, 2)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -224,7 +224,7 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
       create<ast::FloatLiteral>(&f32, 3.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -258,7 +258,7 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
       create<ast::SintLiteral>(&i32, 3)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
-                           std::move(params));
+                           params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -278,9 +278,9 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   params.push_back(create<ast::IdentifierExpression>("var"));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>("determinant"),
-                           std::move(params));
+                           params);
 
-  mod.AddGlobalVariable(std::move(var));
+  mod.AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td.Determine()) << td.error();

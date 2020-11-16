@@ -54,21 +54,17 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -79,17 +75,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto* func = create<ast::Function>("vtx_main", std::move(params), &f32,
-                                     std::move(body));
+  auto* func = create<ast::Function>("vtx_main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
   int bar [[attribute(1)]];
@@ -112,21 +106,17 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -137,17 +127,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto* func = create<ast::Function>("vtx_main", std::move(params), &f32,
-                                     std::move(body));
+  auto* func = create<ast::Function>("vtx_main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_out {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
@@ -170,21 +158,17 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -194,17 +178,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
-  auto* func =
-      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  auto* func = create<ast::Function>("main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_in {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
@@ -227,21 +209,17 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -252,17 +230,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto* func =
-      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  auto* func = create<ast::Function>("main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {
   float foo [[color(0)]];
   int bar [[color(1)]];
@@ -285,18 +261,18 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations(decos);
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations(decos);
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -307,17 +283,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto* func =
-      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  auto* func = create<ast::Function>("main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_FALSE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
 
@@ -335,18 +309,18 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(std::move(decos));
+  foo_var->set_decorations(decos);
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(std::move(decos));
+  bar_var->set_decorations(decos);
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(std::move(foo_var));
-  mod.AddGlobalVariable(std::move(bar_var));
+  mod.AddGlobalVariable(foo_var);
+  mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -357,17 +331,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto* func =
-      create<ast::Function>("main", std::move(params), &f32, std::move(body));
+  auto* func = create<ast::Function>("main", params, &f32, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_FALSE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
 
@@ -388,23 +360,19 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}));
-  coord_var->set_decorations(std::move(decos));
+  coord_var->set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{})});
 
   auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
-  depth_var->set_decorations(std::move(decos));
+  depth_var->set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod.AddGlobalVariable(std::move(coord_var));
-  mod.AddGlobalVariable(std::move(depth_var));
+  mod.AddGlobalVariable(coord_var);
+  mod.AddGlobalVariable(depth_var);
 
   ast::VariableList params;
 
@@ -415,17 +383,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
 
-  auto* func = create<ast::Function>("main", std::move(params), &void_type,
-                                     std::move(body));
+  auto* func = create<ast::Function>("main", params, &void_type, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func;
 
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.EmitEntryPointData(func_ptr)) << gen.error();
+  ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {
   float depth [[depth(any)]];
 };

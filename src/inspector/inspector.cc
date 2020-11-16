@@ -199,7 +199,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
         ast::type::MemoryLayout::kUniformBuffer);
 
-    result.push_back(std::move(entry));
+    result.push_back(entry);
   }
 
   return result;
@@ -234,7 +234,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
 
-    result.push_back(std::move(entry));
+    result.push_back(entry);
   }
 
   return result;
@@ -258,7 +258,7 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
 
-    result.push_back(std::move(entry));
+    result.push_back(entry);
   }
 
   return result;
@@ -321,7 +321,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
         ast::type::MemoryLayout::kStorageBuffer);
 
-    result.push_back(std::move(entry));
+    result.push_back(entry);
   }
 
   return result;
@@ -401,7 +401,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;
     }
 
-    result.push_back(std::move(entry));
+    result.push_back(entry);
   }
 
   return result;

@@ -39,7 +39,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::LoopStatement l(std::move(body), {});
+  ast::LoopStatement l(body, {});
 
   gen.increment_indent();
 
@@ -57,7 +57,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::ReturnStatement>());
 
-  ast::LoopStatement l(std::move(body), std::move(continuing));
+  ast::LoopStatement l(body, continuing);
 
   gen.increment_indent();
 
@@ -85,20 +85,18 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::ReturnStatement>());
 
-  auto* inner =
-      create<ast::LoopStatement>(std::move(body), std::move(continuing));
+  auto* inner = create<ast::LoopStatement>(body, continuing);
 
   body = create<ast::BlockStatement>();
-  body->append(std::move(inner));
+  body->append(inner);
 
   auto* lhs = create<ast::IdentifierExpression>("lhs");
   auto* rhs = create<ast::IdentifierExpression>("rhs");
 
   continuing = create<ast::BlockStatement>();
-  continuing->append(
-      create<ast::AssignmentStatement>(std::move(lhs), std::move(rhs)));
+  continuing->append(create<ast::AssignmentStatement>(lhs, rhs));
 
-  ast::LoopStatement outer(std::move(body), std::move(continuing));
+  ast::LoopStatement outer(body, continuing);
 
   gen.increment_indent();
 
@@ -156,7 +154,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
       create<ast::FloatLiteral>(&f32, 2.4)));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::VariableDeclStatement>(
       create<ast::Variable>("other", ast::StorageClass::kFunction, &f32)));
 
@@ -164,12 +162,11 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   auto* rhs = create<ast::IdentifierExpression>("rhs");
 
   auto* continuing = create<ast::BlockStatement>();
-  continuing->append(
-      create<ast::AssignmentStatement>(std::move(lhs), std::move(rhs)));
+  continuing->append(create<ast::AssignmentStatement>(lhs, rhs));
 
   gen.increment_indent();
 
-  ast::LoopStatement outer(std::move(body), std::move(continuing));
+  ast::LoopStatement outer(body, continuing);
 
   ASSERT_TRUE(gen.EmitStatement(&outer)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {

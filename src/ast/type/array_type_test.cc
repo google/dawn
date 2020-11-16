@@ -84,7 +84,7 @@ TEST_F(ArrayTypeTest, TypeName_WithStride) {
   decos.push_back(create<StrideDecoration>(16, Source{}));
 
   ArrayType arr{&i32, 3};
-  arr.set_decorations(std::move(decos));
+  arr.set_decorations(decos);
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
@@ -100,7 +100,7 @@ TEST_F(ArrayTypeTest, MinBufferBindingSizeArray) {
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32, 4);
-  arr.set_decorations(std::move(decos));
+  arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
@@ -110,7 +110,7 @@ TEST_F(ArrayTypeTest, MinBufferBindingSizeRuntimeArray) {
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32);
-  arr.set_decorations(std::move(decos));
+  arr.set_decorations(decos);
   EXPECT_EQ(4u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
@@ -120,7 +120,7 @@ TEST_F(ArrayTypeTest, BaseAlignmentArray) {
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32, 4);
-  arr.set_decorations(std::move(decos));
+  arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
@@ -131,7 +131,7 @@ TEST_F(ArrayTypeTest, BaseAlignmentRuntimeArray) {
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
   ArrayType arr(&u32);
-  arr.set_decorations(std::move(decos));
+  arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

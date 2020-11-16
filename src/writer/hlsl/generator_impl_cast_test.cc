@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &cast)) << gen.error();
   EXPECT_EQ(result(), "float(id)");
@@ -47,7 +47,7 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &cast)) << gen.error();
   EXPECT_EQ(result(), "vector<float, 3>(id)");

@@ -47,7 +47,7 @@ class VertexPullingTransformHelper {
         create<ast::BlockStatement>());
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-    mod()->AddFunction(std::move(func));
+    mod()->AddFunction(func);
   }
 
   // Set up the transformation, after building the module
@@ -58,7 +58,7 @@ class VertexPullingTransformHelper {
     EXPECT_TRUE(td.Determine());
 
     transform_->SetVertexState(
-        std::make_unique<VertexStateDescriptor>(std::move(vertex_state)));
+        std::make_unique<VertexStateDescriptor>(vertex_state));
     transform_->SetEntryPoint("main");
   }
 
@@ -72,8 +72,8 @@ class VertexPullingTransformHelper {
     ast::VariableDecorationList decorations;
     decorations.push_back(create<ast::LocationDecoration>(location, Source{}));
 
-    var->set_decorations(std::move(decorations));
-    mod_->AddGlobalVariable(std::move(var));
+    var->set_decorations(decorations);
+    mod_->AddGlobalVariable(var);
   }
 
   Context* ctx() { return &ctx_; }
@@ -125,7 +125,7 @@ TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
       create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  mod()->AddFunction(std::move(func));
+  mod()->AddFunction(func);
 
   InitTransform({});
   EXPECT_FALSE(transform()->Run());
@@ -410,8 +410,8 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
     decorations.push_back(
         create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}));
 
-    vertex_index_var->set_decorations(std::move(decorations));
-    mod()->AddGlobalVariable(std::move(vertex_index_var));
+    vertex_index_var->set_decorations(decorations);
+    mod()->AddGlobalVariable(vertex_index_var);
   }
 
   {
@@ -423,8 +423,8 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
     decorations.push_back(
         create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}));
 
-    instance_index_var->set_decorations(std::move(decorations));
-    mod()->AddGlobalVariable(std::move(instance_index_var));
+    instance_index_var->set_decorations(decorations);
+    mod()->AddGlobalVariable(instance_index_var);
   }
 
   InitTransform(

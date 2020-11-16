@@ -32,38 +32,36 @@ TEST_F(CaseStatementTest, Creation_i32) {
   ast::type::I32Type i32;
 
   CaseSelectorList b;
-  b.push_back(create<SintLiteral>(&i32, 2));
+  auto* selector = create<SintLiteral>(&i32, 2);
+  b.push_back(selector);
 
   auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* discard = create<DiscardStatement>();
+  body->append(discard);
 
-  auto* int_ptr = b.back();
-  auto* discard_ptr = body->get(0);
-
-  CaseStatement c(std::move(b), std::move(body));
+  CaseStatement c(b, body);
   ASSERT_EQ(c.selectors().size(), 1u);
-  EXPECT_EQ(c.selectors()[0], int_ptr);
+  EXPECT_EQ(c.selectors()[0], selector);
   ASSERT_EQ(c.body()->size(), 1u);
-  EXPECT_EQ(c.body()->get(0), discard_ptr);
+  EXPECT_EQ(c.body()->get(0), discard);
 }
 
 TEST_F(CaseStatementTest, Creation_u32) {
   ast::type::U32Type u32;
 
   CaseSelectorList b;
-  b.push_back(create<UintLiteral>(&u32, 2));
+  auto* selector = create<SintLiteral>(&u32, 2);
+  b.push_back(selector);
 
   auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* discard = create<DiscardStatement>();
+  body->append(discard);
 
-  auto* int_ptr = b.back();
-  auto* discard_ptr = body->get(0);
-
-  CaseStatement c(std::move(b), std::move(body));
+  CaseStatement c(b, body);
   ASSERT_EQ(c.selectors().size(), 1u);
-  EXPECT_EQ(c.selectors()[0], int_ptr);
+  EXPECT_EQ(c.selectors()[0], selector);
   ASSERT_EQ(c.body()->size(), 1u);
-  EXPECT_EQ(c.body()->get(0), discard_ptr);
+  EXPECT_EQ(c.body()->get(0), discard);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
@@ -74,8 +72,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  CaseStatement c(Source{Source::Location{20, 2}}, std::move(b),
-                  std::move(body));
+  CaseStatement c(Source{Source::Location{20, 2}}, b, body);
   auto src = c.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -86,7 +83,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   body->append(create<DiscardStatement>());
 
   CaseStatement c(create<ast::BlockStatement>());
-  c.set_body(std::move(body));
+  c.set_body(body);
   EXPECT_TRUE(c.IsDefault());
 }
 
@@ -96,7 +93,7 @@ TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   b.push_back(create<SintLiteral>(&i32, 2));
 
   CaseStatement c(create<ast::BlockStatement>());
-  c.set_selectors(std::move(b));
+  c.set_selectors(b);
   EXPECT_FALSE(c.IsDefault());
 }
 
@@ -119,7 +116,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
-  CaseStatement c(std::move(b), std::move(body));
+  CaseStatement c(b, body);
   EXPECT_FALSE(c.IsValid());
 }
 
@@ -131,7 +128,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>();
   body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
-  CaseStatement c({std::move(b)}, std::move(body));
+  CaseStatement c({b}, body);
   EXPECT_FALSE(c.IsValid());
 }
 
@@ -142,7 +139,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  CaseStatement c({std::move(b)}, std::move(body));
+  CaseStatement c({b}, body);
 
   std::ostringstream out;
   c.to_str(out, 2);
@@ -159,7 +156,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  CaseStatement c({std::move(b)}, std::move(body));
+  CaseStatement c({b}, body);
 
   std::ostringstream out;
   c.to_str(out, 2);
@@ -178,7 +175,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  CaseStatement c(std::move(b), std::move(body));
+  CaseStatement c(b, body);
 
   std::ostringstream out;
   c.to_str(out, 2);
@@ -191,7 +188,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
 TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  CaseStatement c(CaseSelectorList{}, std::move(body));
+  CaseStatement c(CaseSelectorList{}, body);
 
   std::ostringstream out;
   c.to_str(out, 2);

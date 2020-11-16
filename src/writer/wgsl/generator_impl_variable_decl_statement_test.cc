@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -49,7 +49,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -61,7 +61,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 

@@ -31,7 +31,7 @@ TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
   auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void my_func() {

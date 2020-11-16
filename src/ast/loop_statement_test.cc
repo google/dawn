@@ -30,17 +30,16 @@ using LoopStatementTest = TestHelper;
 TEST_F(LoopStatementTest, Creation) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  auto* b_ptr = body->last();
+  auto* b = body->last();
 
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
-  auto* c_ptr = continuing->last();
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   ASSERT_EQ(l.body()->size(), 1u);
-  EXPECT_EQ(l.body()->get(0), b_ptr);
+  EXPECT_EQ(l.body()->get(0), b);
   ASSERT_EQ(l.continuing()->size(), 1u);
-  EXPECT_EQ(l.continuing()->get(0), c_ptr);
+  EXPECT_EQ(l.continuing()->get(0), continuing->last());
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
@@ -50,8 +49,7 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(Source{Source::Location{20, 2}}, std::move(body),
-                  std::move(continuing));
+  LoopStatement l(Source{Source::Location{20, 2}}, body, continuing);
   auto src = l.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -66,7 +64,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), {});
+  LoopStatement l(body, {});
   EXPECT_FALSE(l.has_continuing());
 }
 
@@ -77,7 +75,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_TRUE(l.has_continuing());
 }
 
@@ -88,7 +86,7 @@ TEST_F(LoopStatementTest, IsValid) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_TRUE(l.IsValid());
 }
 
@@ -96,7 +94,7 @@ TEST_F(LoopStatementTest, IsValid_WithoutContinuing) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), create<BlockStatement>());
+  LoopStatement l(body, create<BlockStatement>());
   EXPECT_TRUE(l.IsValid());
 }
 
@@ -113,7 +111,7 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_FALSE(l.IsValid());
 }
 
@@ -125,7 +123,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_FALSE(l.IsValid());
 }
 
@@ -137,7 +135,7 @@ TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
   continuing->append(create<DiscardStatement>());
   continuing->append(nullptr);
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_FALSE(l.IsValid());
 }
 
@@ -149,7 +147,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
   continuing->append(create<DiscardStatement>());
   continuing->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   EXPECT_FALSE(l.IsValid());
 }
 
@@ -157,7 +155,7 @@ TEST_F(LoopStatementTest, ToStr) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), {});
+  LoopStatement l(body, {});
   std::ostringstream out;
   l.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{
@@ -173,7 +171,7 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
-  LoopStatement l(std::move(body), std::move(continuing));
+  LoopStatement l(body, continuing);
   std::ostringstream out;
   l.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{

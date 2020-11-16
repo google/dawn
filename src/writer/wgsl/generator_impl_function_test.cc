@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type, std::move(body));
+  ast::Function func("my_func", {}, &void_type, body);
 
   gen.increment_indent();
 
@@ -72,7 +72,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", std::move(params), &void_type, std::move(body));
+  ast::Function func("my_func", params, &void_type, body);
 
   gen.increment_indent();
 
@@ -90,7 +90,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type, std::move(body));
+  ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
   gen.increment_indent();
@@ -110,7 +110,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type, std::move(body));
+  ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -131,7 +131,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   body->append(create<ast::ReturnStatement>());
 
   ast::type::VoidType void_type;
-  ast::Function func("my_func", {}, &void_type, std::move(body));
+  ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
@@ -172,14 +172,14 @@ TEST_F(WgslGeneratorImplTest,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("d", &f32, std::move(a_deco)));
+  members.push_back(create<ast::StructMember>("d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(std::move(s_decos), std::move(members));
+  auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", std::move(str));
+  ast::type::StructType s("Data", str);
   ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
@@ -188,12 +188,12 @@ TEST_F(WgslGeneratorImplTest,
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
   decos.push_back(create<ast::SetDecoration>(0, Source{}));
-  data_var->set_decorations(std::move(decos));
+  data_var->set_decorations(decos);
 
   mod.AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var);
-  mod.AddGlobalVariable(std::move(data_var));
+  mod.AddGlobalVariable(data_var);
 
   {
     ast::VariableList params;
@@ -203,15 +203,14 @@ TEST_F(WgslGeneratorImplTest,
         create<ast::IdentifierExpression>("d")));
 
     auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
 
-    auto* func = create<ast::Function>("a", std::move(params), &void_type,
-                                       std::move(body));
+    auto* func = create<ast::Function>("a", params, &void_type, body);
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(std::move(func));
+    mod.AddFunction(func);
   }
 
   {
@@ -222,15 +221,14 @@ TEST_F(WgslGeneratorImplTest,
         create<ast::IdentifierExpression>("d")));
 
     auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
 
-    auto* func = create<ast::Function>("b", std::move(params), &void_type,
-                                       std::move(body));
+    auto* func = create<ast::Function>("b", params, &void_type, body);
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(std::move(func));
+    mod.AddFunction(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

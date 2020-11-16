@@ -40,7 +40,7 @@ TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
 
   auto* expr = create<ast::IdentifierExpression>("expr");
-  ast::UnaryOpExpression op(params.op, std::move(expr));
+  ast::UnaryOpExpression op(params.op, expr);
 
   ASSERT_TRUE(gen.EmitExpression(&op)) << gen.error();
   EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");

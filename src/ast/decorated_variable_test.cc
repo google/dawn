@@ -35,7 +35,7 @@ using DecoratedVariableTest = TestHelper;
 TEST_F(DecoratedVariableTest, Creation) {
   type::I32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
 
   EXPECT_EQ(dv.name(), "my_var");
   EXPECT_EQ(dv.storage_class(), StorageClass::kFunction);
@@ -50,7 +50,7 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
   Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}};
   type::F32Type t;
   auto* var = create<Variable>(s, "i", StorageClass::kPrivate, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
 
   EXPECT_EQ(dv.name(), "i");
   EXPECT_EQ(dv.storage_class(), StorageClass::kPrivate);
@@ -64,7 +64,7 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
 TEST_F(DecoratedVariableTest, NoDecorations) {
   type::I32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
   EXPECT_FALSE(dv.HasLocationDecoration());
   EXPECT_FALSE(dv.HasBuiltinDecoration());
   EXPECT_FALSE(dv.HasConstantIdDecoration());
@@ -73,14 +73,14 @@ TEST_F(DecoratedVariableTest, NoDecorations) {
 TEST_F(DecoratedVariableTest, WithDecorations) {
   type::F32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
 
   VariableDecorationList decos;
   decos.push_back(create<LocationDecoration>(1, Source{}));
   decos.push_back(create<BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
   decos.push_back(create<ConstantIdDecoration>(1200, Source{}));
 
-  dv.set_decorations(std::move(decos));
+  dv.set_decorations(decos);
 
   EXPECT_TRUE(dv.HasLocationDecoration());
   EXPECT_TRUE(dv.HasBuiltinDecoration());
@@ -90,11 +90,11 @@ TEST_F(DecoratedVariableTest, WithDecorations) {
 TEST_F(DecoratedVariableTest, ConstantId) {
   type::F32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
 
   VariableDecorationList decos;
   decos.push_back(create<ConstantIdDecoration>(1200, Source{}));
-  dv.set_decorations(std::move(decos));
+  dv.set_decorations(decos);
 
   EXPECT_EQ(dv.constant_id(), 1200u);
 }
@@ -102,7 +102,7 @@ TEST_F(DecoratedVariableTest, ConstantId) {
 TEST_F(DecoratedVariableTest, IsValid) {
   type::I32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kNone, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
   EXPECT_TRUE(dv.IsValid());
 }
 
@@ -114,14 +114,14 @@ TEST_F(DecoratedVariableTest, IsDecorated) {
 TEST_F(DecoratedVariableTest, to_str) {
   type::F32Type t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
-  DecoratedVariable dv(std::move(var));
+  DecoratedVariable dv(var);
   dv.set_constructor(create<IdentifierExpression>("expr"));
 
   VariableDecorationList decos;
   decos.push_back(create<BindingDecoration>(2, Source{}));
   decos.push_back(create<SetDecoration>(1, Source{}));
 
-  dv.set_decorations(std::move(decos));
+  dv.set_decorations(decos);
   std::ostringstream out;
   dv.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  DecoratedVariable{

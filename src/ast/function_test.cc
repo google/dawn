@@ -38,14 +38,13 @@ TEST_F(FunctionTest, Creation) {
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
-  auto* var_ptr = params[0];
+  auto* var = params[0];
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
   EXPECT_EQ(f.name(), "func");
   ASSERT_EQ(f.params().size(), 1u);
   EXPECT_EQ(f.return_type(), &void_type);
-  EXPECT_EQ(f.params()[0], var_ptr);
+  EXPECT_EQ(f.params()[0], var);
 }
 
 TEST_F(FunctionTest, Creation_WithSource) {
@@ -55,8 +54,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f(Source{Source::Location{20, 2}}, "func", std::move(params),
-             &void_type, create<ast::BlockStatement>());
+  Function f(Source{Source::Location{20, 2}}, "func", params, &void_type,
+             create<ast::BlockStatement>());
   auto src = f.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -86,28 +85,23 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  VariableDecorationList decos;
   DecoratedVariable loc1(
       create<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  loc1.set_decorations(std::move(decos));
+  loc1.set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   DecoratedVariable loc2(
       create<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  loc2.set_decorations(std::move(decos));
+  loc2.set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   DecoratedVariable builtin1(
       create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
-  builtin1.set_decorations(std::move(decos));
+  builtin1.set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{})});
 
   DecoratedVariable builtin2(
       create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
-  builtin2.set_decorations(std::move(decos));
+  builtin2.set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 
   Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
 
@@ -129,28 +123,23 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  VariableDecorationList decos;
   DecoratedVariable loc1(
       create<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  loc1.set_decorations(std::move(decos));
+  loc1.set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   DecoratedVariable loc2(
       create<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  loc2.set_decorations(std::move(decos));
+  loc2.set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   DecoratedVariable builtin1(
       create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
-  builtin1.set_decorations(std::move(decos));
+  builtin1.set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{})});
 
   DecoratedVariable builtin2(
       create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
-  builtin2.set_decorations(std::move(decos));
+  builtin2.set_decorations(
+      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 
   Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
 
@@ -191,9 +180,8 @@ TEST_F(FunctionTest, IsValid) {
   auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(block);
   EXPECT_TRUE(f.IsValid());
 }
 
@@ -204,7 +192,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f("", std::move(params), &void_type, create<ast::BlockStatement>());
+  Function f("", params, &void_type, create<ast::BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -214,7 +202,7 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f("func", std::move(params), nullptr, create<ast::BlockStatement>());
+  Function f("func", params, nullptr, create<ast::BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -226,8 +214,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
   params.push_back(nullptr);
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -237,8 +224,7 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, nullptr));
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -253,9 +239,8 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(block);
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -270,9 +255,8 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(block);
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -284,7 +268,7 @@ TEST_F(FunctionTest, ToStr) {
   block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type, create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  f.set_body(block);
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -304,7 +288,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type, create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  f.set_body(block);
   f.add_decoration(create<WorkgroupDecoration>(2, 4, 6, Source{}));
 
   std::ostringstream out;
@@ -328,9 +312,8 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(block));
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(block);
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -364,8 +347,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   params.push_back(create<Variable>("var1", StorageClass::kNone, &i32));
   params.push_back(create<Variable>("var2", StorageClass::kNone, &f32));
 
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
@@ -375,13 +357,11 @@ TEST_F(FunctionTest, GetLastStatement) {
   VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* stmt = create<DiscardStatement>();
-  auto* stmt_ptr = stmt;
-  body->append(std::move(stmt));
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(body));
+  body->append(stmt);
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(body);
 
-  EXPECT_EQ(f.get_last_statement(), stmt_ptr);
+  EXPECT_EQ(f.get_last_statement(), stmt);
 }
 
 TEST_F(FunctionTest, GetLastStatement_nullptr) {
@@ -389,9 +369,8 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 
   VariableList params;
   auto* body = create<ast::BlockStatement>();
-  Function f("func", std::move(params), &void_type,
-             create<ast::BlockStatement>());
-  f.set_body(std::move(body));
+  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  f.set_body(body);
 
   EXPECT_EQ(f.get_last_statement(), nullptr);
 }

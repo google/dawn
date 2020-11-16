@@ -27,17 +27,15 @@ using UnaryOpExpressionTest = TestHelper;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
   auto* ident = create<IdentifierExpression>("ident");
-  auto* ident_ptr = ident;
 
-  UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
+  UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_EQ(u.op(), UnaryOp::kNot);
-  EXPECT_EQ(u.expr(), ident_ptr);
+  EXPECT_EQ(u.expr(), ident);
 }
 
 TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
   auto* ident = create<IdentifierExpression>("ident");
-  UnaryOpExpression u(Source{Source::Location{20, 2}}, UnaryOp::kNot,
-                      std::move(ident));
+  UnaryOpExpression u(Source{Source::Location{20, 2}}, UnaryOp::kNot, ident);
   auto src = u.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -50,7 +48,7 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
 
 TEST_F(UnaryOpExpressionTest, IsValid) {
   auto* ident = create<IdentifierExpression>("ident");
-  UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
+  UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_TRUE(u.IsValid());
 }
 
@@ -62,13 +60,13 @@ TEST_F(UnaryOpExpressionTest, IsValid_NullExpression) {
 
 TEST_F(UnaryOpExpressionTest, IsValid_InvalidExpression) {
   auto* ident = create<IdentifierExpression>("");
-  UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
+  UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_FALSE(u.IsValid());
 }
 
 TEST_F(UnaryOpExpressionTest, ToStr) {
   auto* ident = create<IdentifierExpression>("ident");
-  UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
+  UnaryOpExpression u(UnaryOp::kNot, ident);
   std::ostringstream out;
   u.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  UnaryOp[not set]{

@@ -49,7 +49,7 @@ TEST_F(BuilderTest, If_Empty) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), create<ast::BlockStatement>());
+  ast::IfStatement expr(cond, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -86,7 +86,7 @@ TEST_F(BuilderTest, If_WithStatements) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), std::move(body));
+  ast::IfStatement expr(cond, body);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -137,13 +137,13 @@ TEST_F(BuilderTest, If_WithElse) {
                                            create<ast::SintLiteral>(&i32, 3))));
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
+  else_stmts.push_back(create<ast::ElseStatement>(else_body));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), std::move(body));
-  expr.set_else_statements(std::move(else_stmts));
+  ast::IfStatement expr(cond, body);
+  expr.set_else_statements(else_stmts);
 
   td.RegisterVariableForTesting(var);
 
@@ -202,14 +202,13 @@ TEST_F(BuilderTest, If_WithElseIf) {
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(
-      create<ast::ElseStatement>(std::move(else_cond), std::move(else_body)));
+  else_stmts.push_back(create<ast::ElseStatement>(else_cond, else_body));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), std::move(body));
-  expr.set_else_statements(std::move(else_stmts));
+  ast::IfStatement expr(cond, body);
+  expr.set_else_statements(else_stmts);
 
   td.RegisterVariableForTesting(var);
 
@@ -288,17 +287,17 @@ TEST_F(BuilderTest, If_WithMultiple) {
       create<ast::BoolLiteral>(&bool_type, false));
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(elseif_1_cond),
-                                                  std::move(elseif_1_body)));
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(elseif_2_cond),
-                                                  std::move(elseif_2_body)));
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
+  else_stmts.push_back(
+      create<ast::ElseStatement>(elseif_1_cond, elseif_1_body));
+  else_stmts.push_back(
+      create<ast::ElseStatement>(elseif_2_cond, elseif_2_body));
+  else_stmts.push_back(create<ast::ElseStatement>(else_body));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(std::move(cond), std::move(body));
-  expr.set_else_statements(std::move(else_stmts));
+  ast::IfStatement expr(cond, body);
+  expr.set_else_statements(else_stmts);
 
   td.RegisterVariableForTesting(var);
 
@@ -362,12 +361,12 @@ TEST_F(BuilderTest, If_WithBreak) {
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());
 
-  auto* if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto* if_stmt = create<ast::IfStatement>(cond, if_body);
 
   auto* loop_body = create<ast::BlockStatement>();
-  loop_body->append(std::move(if_stmt));
+  loop_body->append(if_stmt);
 
-  ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(loop_body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -410,16 +409,15 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   else_body->append(create<ast::BreakStatement>());
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
+  else_stmts.push_back(create<ast::ElseStatement>(else_body));
 
-  auto* if_stmt =
-      create<ast::IfStatement>(std::move(cond), create<ast::BlockStatement>());
-  if_stmt->set_else_statements(std::move(else_stmts));
+  auto* if_stmt = create<ast::IfStatement>(cond, create<ast::BlockStatement>());
+  if_stmt->set_else_statements(else_stmts);
 
   auto* loop_body = create<ast::BlockStatement>();
-  loop_body->append(std::move(if_stmt));
+  loop_body->append(if_stmt);
 
-  ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(loop_body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -462,12 +460,12 @@ TEST_F(BuilderTest, If_WithContinue) {
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ContinueStatement>());
 
-  auto* if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto* if_stmt = create<ast::IfStatement>(cond, if_body);
 
   auto* loop_body = create<ast::BlockStatement>();
-  loop_body->append(std::move(if_stmt));
+  loop_body->append(if_stmt);
 
-  ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(loop_body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -510,16 +508,15 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   else_body->append(create<ast::ContinueStatement>());
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
+  else_stmts.push_back(create<ast::ElseStatement>(else_body));
 
-  auto* if_stmt =
-      create<ast::IfStatement>(std::move(cond), create<ast::BlockStatement>());
-  if_stmt->set_else_statements(std::move(else_stmts));
+  auto* if_stmt = create<ast::IfStatement>(cond, create<ast::BlockStatement>());
+  if_stmt->set_else_statements(else_stmts);
 
   auto* loop_body = create<ast::BlockStatement>();
-  loop_body->append(std::move(if_stmt));
+  loop_body->append(if_stmt);
 
-  ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(loop_body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -560,7 +557,7 @@ TEST_F(BuilderTest, If_WithReturn) {
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ReturnStatement>());
 
-  ast::IfStatement expr(std::move(cond), std::move(if_body));
+  ast::IfStatement expr(cond, if_body);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -590,9 +587,9 @@ TEST_F(BuilderTest, If_WithReturnValue) {
       create<ast::BoolLiteral>(&bool_type, false));
 
   auto* if_body = create<ast::BlockStatement>();
-  if_body->append(create<ast::ReturnStatement>(std::move(cond2)));
+  if_body->append(create<ast::ReturnStatement>(cond2));
 
-  ast::IfStatement expr(std::move(cond), std::move(if_body));
+  ast::IfStatement expr(cond, if_body);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

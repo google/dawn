@@ -28,7 +28,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 1u);
-  auto* struct_deco = ast::As<ast::StructDecoration>(std::move(decos.value[0]));
+  auto* struct_deco = ast::As<ast::StructDecoration>(decos.value[0]);
   EXPECT_TRUE(struct_deco->IsBlock());
 }
 

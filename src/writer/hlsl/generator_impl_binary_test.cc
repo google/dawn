@@ -57,7 +57,7 @@ TEST_P(HlslBinaryTest, Emit) {
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
 
-  ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
+  ast::BinaryExpression expr(params.op, left, right);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -87,8 +87,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(left),
-                             std::move(right));
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, left, right);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
@@ -108,10 +107,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, std::move(a),
-                                    std::move(b)),
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, std::move(c),
-                                    std::move(d)));
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b),
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, c, d));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
@@ -134,8 +131,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(left),
-                             std::move(right));
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, left, right);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
@@ -161,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   body->append(
       create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 3))));
-  auto* else_stmt = create<ast::ElseStatement>(std::move(body));
+  auto* else_stmt = create<ast::ElseStatement>(body);
 
   body = create<ast::BlockStatement>();
   body->append(
@@ -171,11 +167,11 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                     create<ast::IdentifierExpression>("b"),
                                     create<ast::IdentifierExpression>("c")),
-      std::move(body));
+      body);
 
   ast::ElseStatementList else_stmts;
-  else_stmts.push_back(std::move(else_if_stmt));
-  else_stmts.push_back(std::move(else_stmt));
+  else_stmts.push_back(else_if_stmt);
+  else_stmts.push_back(else_stmt);
 
   body = create<ast::BlockStatement>();
   body->append(
@@ -186,8 +182,8 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                     create<ast::IdentifierExpression>("a"),
                                     create<ast::IdentifierExpression>("b")),
-      std::move(body));
-  expr.set_else_statements(std::move(else_stmts));
+      body);
+  expr.set_else_statements(else_stmts);
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
@@ -218,9 +214,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
 
   ast::ReturnStatement expr(create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, std::move(a),
-                                    std::move(b)),
-      std::move(c)));
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
@@ -243,12 +237,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   auto* d = create<ast::IdentifierExpression>("d");
 
   ast::AssignmentStatement expr(
-      std::move(a),
+      a,
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalAnd,
-          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, std::move(b),
-                                        std::move(c)),
-          std::move(d)));
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c), d));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
@@ -275,11 +267,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   var->set_constructor(create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, std::move(b),
-                                    std::move(c)),
-      std::move(d)));
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d));
 
-  ast::VariableDeclStatement expr(std::move(var));
+  ast::VariableDeclStatement expr(var);
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
@@ -302,11 +292,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   auto* b = create<ast::IdentifierExpression>("b");
   auto* c = create<ast::IdentifierExpression>("c");
 
-  ast::BitcastExpression expr(
-      &i32, create<ast::BinaryExpression>(
-                ast::BinaryOp::kLogicalAnd, std::move(a),
-                create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
-                                              std::move(b), std::move(c))));
+  ast::BitcastExpression expr(&i32, create<ast::BinaryExpression>(
+                                        ast::BinaryOp::kLogicalAnd, a,
+                                        create<ast::BinaryExpression>(
+                                            ast::BinaryOp::kLogicalOr, b, c)));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
@@ -328,7 +317,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   auto* func = create<ast::Function>("foo", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(
@@ -347,7 +336,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
                                     create<ast::IdentifierExpression>("d"))));
 
   ast::CallStatement expr(create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("foo"), std::move(params)));
+      create<ast::IdentifierExpression>("foo"), params));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;

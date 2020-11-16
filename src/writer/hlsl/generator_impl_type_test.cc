@@ -179,12 +179,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
@@ -204,12 +204,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "S");
@@ -223,18 +223,18 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("b", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("c", &f32, decos));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), R"(struct {
@@ -256,13 +256,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
       "double", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  members.push_back(
-      create<ast::StructMember>("float", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("float", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
@@ -283,14 +282,14 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(decos, members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "B")) << gen.error();
   EXPECT_EQ(result(), R"(struct B {

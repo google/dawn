@@ -74,7 +74,7 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(body, create<ast::BlockStatement>());
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -125,7 +125,7 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 3))));
-  ast::LoopStatement expr(std::move(body), std::move(continuing));
+  ast::LoopStatement expr(body, continuing);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -163,7 +163,7 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ContinueStatement>());
 
-  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -190,7 +190,7 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
 
-  ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
+  ast::LoopStatement expr(body, create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

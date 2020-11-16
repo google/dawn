@@ -1706,10 +1706,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &ary, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
@@ -1746,11 +1746,11 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
-  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("z", f32(), decos));
+  members.push_back(create<ast::StructMember>("a", &ary, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
   auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
@@ -1788,11 +1788,11 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
-  members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
+  members.push_back(create<ast::StructMember>("z", f32(), decos));
+  members.push_back(create<ast::StructMember>("a", &ary, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 

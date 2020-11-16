@@ -67,8 +67,7 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
   auto* rhs = create<ast::IdentifierExpression>("my_var");
-  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
-                                  std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
 
   // TODO(sarahM0): Invalidate assignment to scalar.
   ASSERT_TRUE(v()->has_error());
@@ -85,7 +84,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* assign = create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs));
+      Source{Source::Location{12, 34}}, lhs, rhs);
 
   EXPECT_FALSE(td()->DetermineResultType(assign));
   EXPECT_EQ(td()->error(),
@@ -105,7 +104,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_FALSE(td()->DetermineStatements(body));
   EXPECT_EQ(td()->error(),
@@ -121,17 +120,14 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
       create<ast::SintLiteral>(&i32, 2)));
 
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* rhs_ptr = rhs;
 
-  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
-                                  std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
   td()->RegisterVariableForTesting(var);
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(v()->ValidateResultTypes(&assign));
 }
 
@@ -147,17 +143,14 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
-  auto* rhs_ptr = rhs;
 
-  ast::AssignmentStatement assign(Source{Source::Location{12, 34}},
-                                  std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
   td()->RegisterVariableForTesting(var);
   EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_FALSE(v()->ValidateResultTypes(&assign));
   ASSERT_TRUE(v()->has_error());
@@ -177,19 +170,17 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
       create<ast::SintLiteral>(&i32, 2)));
 
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* rhs_ptr = rhs;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_TRUE(v()->ValidateStatements(body)) << v()->error();
 }
@@ -206,19 +197,17 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
-  auto* rhs_ptr = rhs;
 
   ast::BlockStatement block;
-  block.append(create<ast::VariableDeclStatement>(std::move(var)));
+  block.append(create<ast::VariableDeclStatement>(var));
   block.append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_TRUE(td()->DetermineStatements(&block)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_FALSE(v()->ValidateStatements(&block));
   ASSERT_TRUE(v()->has_error());
@@ -233,7 +222,7 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kInput, &f32);
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
   EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
       << v()->error();
 }
@@ -244,7 +233,7 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
@@ -258,7 +247,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
                             ast::StorageClass::kInput, &f32);
   global_var->set_is_const(true);
 
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(
@@ -274,7 +263,7 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
                             ast::StorageClass::kNone, &f32);
   global_var->set_is_const(true);
 
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod())) << v()->error();
 }
@@ -289,7 +278,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.1)));
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, "not_global_var");
@@ -299,11 +288,10 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
-  auto* func = create<ast::Function>("my_func", std::move(params), &f32,
-                                     std::move(body));
-  mod()->AddFunction(std::move(func));
+  auto* func = create<ast::Function>("my_func", params, &f32, body);
+  mod()->AddFunction(func);
 
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(), "12:34: v-0006: 'not_global_var' is not declared");
@@ -322,7 +310,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.1)));
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
 
   auto* lhs = create<ast::IdentifierExpression>("global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -332,13 +320,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("my_func", std::move(params), &void_type,
-                                     std::move(body));
+  auto* func = create<ast::Function>("my_func", params, &void_type, body);
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  mod()->AddFunction(std::move(func));
+  mod()->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
@@ -358,24 +345,21 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
 
   auto* lhs =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
-  auto* rhs_ptr = rhs;
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(
-      create<ast::IfStatement>(std::move(cond), std::move(body)));
+  outer_body->append(create<ast::IfStatement>(cond, body));
   outer_body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_FALSE(v()->ValidateStatements(outer_body));
   EXPECT_EQ(v()->error(), "12:34: v-0006: 'a' is not declared");
 }
@@ -392,24 +376,22 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
 
   auto* lhs =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
-  auto* rhs_ptr = rhs;
+
   ast::type::BoolType bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(create<ast::VariableDeclStatement>(std::move(var)));
-  outer_body->append(
-      create<ast::IfStatement>(std::move(cond), std::move(body)));
+  outer_body->append(create<ast::VariableDeclStatement>(var));
+  outer_body->append(create<ast::IfStatement>(cond, body));
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(v()->ValidateStatements(outer_body)) << v()->error();
 }
 
@@ -422,14 +404,14 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
       create<ast::Variable>("global_var0", ast::StorageClass::kPrivate, &f32);
   var0->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 0.1)));
-  mod()->AddGlobalVariable(std::move(var0));
+  mod()->AddGlobalVariable(var0);
 
   auto* var1 =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var1",
                             ast::StorageClass::kPrivate, &f32);
   var1->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 0)));
-  mod()->AddGlobalVariable(std::move(var1));
+  mod()->AddGlobalVariable(var1);
 
   EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
       << v()->error();
@@ -444,14 +426,14 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
   var0->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 0.1)));
-  mod()->AddGlobalVariable(std::move(var0));
+  mod()->AddGlobalVariable(var0);
 
   auto* var1 =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kPrivate, &f32);
   var1->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 0)));
-  mod()->AddGlobalVariable(std::move(var1));
+  mod()->AddGlobalVariable(var1);
 
   EXPECT_FALSE(v()->ValidateGlobalVariables(mod()->global_variables()));
   EXPECT_EQ(v()->error(),
@@ -470,19 +452,17 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   var->set_is_const(true);
 
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* rhs_ptr = rhs;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_FALSE(v()->ValidateStatements(body));
   EXPECT_EQ(v()->error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
@@ -501,7 +481,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
       create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.1)));
-  mod()->AddGlobalVariable(std::move(global_var));
+  mod()->AddGlobalVariable(global_var);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -509,14 +489,13 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, std::move(var)));
-  auto* func = create<ast::Function>("my_func", std::move(params), &void_type,
-                                     std::move(body));
-  auto* func_ptr = func;
-  mod()->AddFunction(std::move(func));
+      Source{Source::Location{12, 34}}, var));
+  auto* func = create<ast::Function>("my_func", params, &void_type, body);
+
+  mod()->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
+  EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
   EXPECT_FALSE(v()->Validate(mod())) << v()->error();
   EXPECT_EQ(v()->error(), "12:34: v-0013: redeclared identifier 'a'");
 }
@@ -540,16 +519,15 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, std::move(var_a_float)));
-  auto* func = create<ast::Function>("my_func", std::move(params), &void_type,
-                                     std::move(body));
-  auto* func_ptr = func;
-  mod()->AddFunction(std::move(func));
+      Source{Source::Location{12, 34}}, var_a_float));
+  auto* func = create<ast::Function>("my_func", params, &void_type, body);
+
+  mod()->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->DetermineFunction(func_ptr)) << td()->error();
+  EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(), "12:34: v-0014: redeclared identifier 'a'");
 }
@@ -568,7 +546,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
 
   auto* var_a_float =
       create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
@@ -576,10 +554,9 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       create<ast::FloatLiteral>(&f32, 3.14)));
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(
-      create<ast::IfStatement>(std::move(cond), std::move(body)));
+  outer_body->append(create<ast::IfStatement>(cond, body));
   outer_body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, std::move(var_a_float)));
+      Source{Source::Location{12, 34}}, var_a_float));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(outer_body)) << v()->error();
@@ -607,13 +584,11 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, std::move(var)));
+      Source{Source::Location{12, 34}}, var));
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(
-      create<ast::VariableDeclStatement>(std::move(var_a_float)));
-  outer_body->append(
-      create<ast::IfStatement>(std::move(cond), std::move(body)));
+  outer_body->append(create<ast::VariableDeclStatement>(var_a_float));
+  outer_body->append(create<ast::IfStatement>(cond, body));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(outer_body));
@@ -636,23 +611,21 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   ast::VariableList params0;
   auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, std::move(var0)));
+      Source{Source::Location{12, 34}}, var0));
   body0->append(create<ast::ReturnStatement>());
-  auto* func0 = create<ast::Function>("func0", std::move(params0), &void_type,
-                                      std::move(body0));
+  auto* func0 = create<ast::Function>("func0", params0, &void_type, body0);
 
   ast::VariableList params1;
   auto* body1 = create<ast::BlockStatement>();
   body1->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{13, 34}}, std::move(var1)));
+      Source{Source::Location{13, 34}}, var1));
   body1->append(create<ast::ReturnStatement>());
-  auto* func1 = create<ast::Function>("func1", std::move(params1), &void_type,
-                                      std::move(body1));
+  auto* func1 = create<ast::Function>("func1", params1, &void_type, body1);
   func1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
-  mod()->AddFunction(std::move(func0));
-  mod()->AddFunction(std::move(func1));
+  mod()->AddFunction(func0);
+  mod()->AddFunction(func1);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(v()->Validate(mod())) << v()->error();
@@ -668,19 +641,17 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
 
   td()->RegisterVariableForTesting(var);
   auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* lhs_ptr = lhs;
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* rhs_ptr = rhs;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(std::move(var)));
+  body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, std::move(lhs), std::move(rhs)));
+      Source{Source::Location{12, 34}}, lhs, rhs));
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(v()->ValidateStatements(body)) << v()->error();
 }
 

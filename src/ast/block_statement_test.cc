@@ -32,7 +32,7 @@ TEST_F(BlockStatementTest, Creation) {
   auto* ptr = d;
 
   BlockStatement b;
-  b.append(std::move(d));
+  b.append(d);
 
   ASSERT_EQ(b.size(), 1u);
   EXPECT_EQ(b[0], ptr);
@@ -42,21 +42,18 @@ TEST_F(BlockStatementTest, Creation_WithInsert) {
   auto* s1 = create<DiscardStatement>();
   auto* s2 = create<DiscardStatement>();
   auto* s3 = create<DiscardStatement>();
-  auto* p1 = s1;
-  auto* p2 = s2;
-  auto* p3 = s3;
 
   BlockStatement b;
-  b.insert(0, std::move(s1));
-  b.insert(0, std::move(s2));
-  b.insert(1, std::move(s3));
+  b.insert(0, s1);
+  b.insert(0, s2);
+  b.insert(1, s3);
 
   // |b| should contain s2, s3, s1
 
   ASSERT_EQ(b.size(), 3u);
-  EXPECT_EQ(b[0], p2);
-  EXPECT_EQ(b[1], p3);
-  EXPECT_EQ(b[2], p1);
+  EXPECT_EQ(b[0], s2);
+  EXPECT_EQ(b[1], s3);
+  EXPECT_EQ(b[2], s1);
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {

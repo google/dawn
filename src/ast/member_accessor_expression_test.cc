@@ -29,20 +29,16 @@ TEST_F(MemberAccessorExpressionTest, Creation) {
   auto* str = create<IdentifierExpression>("structure");
   auto* mem = create<IdentifierExpression>("member");
 
-  auto* str_ptr = str;
-  auto* mem_ptr = mem;
-
-  MemberAccessorExpression stmt(std::move(str), std::move(mem));
-  EXPECT_EQ(stmt.structure(), str_ptr);
-  EXPECT_EQ(stmt.member(), mem_ptr);
+  MemberAccessorExpression stmt(str, mem);
+  EXPECT_EQ(stmt.structure(), str);
+  EXPECT_EQ(stmt.member(), mem);
 }
 
 TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
   auto* str = create<IdentifierExpression>("structure");
   auto* mem = create<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt(Source{Source::Location{20, 2}}, std::move(str),
-                                std::move(mem));
+  MemberAccessorExpression stmt(Source{Source::Location{20, 2}}, str, mem);
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -57,7 +53,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid) {
   auto* str = create<IdentifierExpression>("structure");
   auto* mem = create<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt(std::move(str), std::move(mem));
+  MemberAccessorExpression stmt(str, mem);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -65,7 +61,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid_NullStruct) {
   auto* mem = create<IdentifierExpression>("member");
 
   MemberAccessorExpression stmt;
-  stmt.set_member(std::move(mem));
+  stmt.set_member(mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -73,7 +69,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid_InvalidStruct) {
   auto* str = create<IdentifierExpression>("");
   auto* mem = create<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt(std::move(str), std::move(mem));
+  MemberAccessorExpression stmt(str, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -81,7 +77,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid_NullMember) {
   auto* str = create<IdentifierExpression>("structure");
 
   MemberAccessorExpression stmt;
-  stmt.set_structure(std::move(str));
+  stmt.set_structure(str);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -89,7 +85,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid_InvalidMember) {
   auto* str = create<IdentifierExpression>("structure");
   auto* mem = create<IdentifierExpression>("");
 
-  MemberAccessorExpression stmt(std::move(str), std::move(mem));
+  MemberAccessorExpression stmt(str, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -97,7 +93,7 @@ TEST_F(MemberAccessorExpressionTest, ToStr) {
   auto* str = create<IdentifierExpression>("structure");
   auto* mem = create<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt(std::move(str), std::move(mem));
+  MemberAccessorExpression stmt(str, mem);
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  MemberAccessor[not set]{

@@ -79,13 +79,13 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
   params.push_back(create<ast::IdentifierExpression>("b"));
 
   ast::CallExpression call(create<ast::IdentifierExpression>("outer_product"),
-                           std::move(params));
+                           params);
 
   td.RegisterVariableForTesting(a);
   td.RegisterVariableForTesting(b);
 
-  mod.AddGlobalVariable(std::move(a));
-  mod.AddGlobalVariable(std::move(b));
+  mod.AddGlobalVariable(a);
+  mod.AddGlobalVariable(b);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
@@ -107,8 +107,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
 
-  ast::CallExpression call(create<ast::IdentifierExpression>("dot"),
-                           std::move(params));
+  ast::CallExpression call(create<ast::IdentifierExpression>("dot"), params);
 
   ast::Variable v1("param1", ast::StorageClass::kFunction, &vec);
   ast::Variable v2("param2", ast::StorageClass::kFunction, &vec);

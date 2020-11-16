@@ -47,8 +47,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 
   auto* var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
   var->set_is_const(true);
-  var->set_constructor(
-      create<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
+  var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(
@@ -64,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
 
   auto* var = create<ast::DecoratedVariable>(
       create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
-  var->set_decorations(std::move(decos));
+  var->set_decorations(decos);
   var->set_is_const(true);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
@@ -86,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
 
   auto* var = create<ast::DecoratedVariable>(
       create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
-  var->set_decorations(std::move(decos));
+  var->set_decorations(decos);
   var->set_is_const(true);
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();

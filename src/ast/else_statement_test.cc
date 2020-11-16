@@ -34,13 +34,12 @@ TEST_F(ElseStatementTest, Creation) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto* cond_ptr = cond;
-  auto* discard_ptr = body->get(0);
+  auto* discard = body->get(0);
 
-  ElseStatement e(std::move(cond), std::move(body));
-  EXPECT_EQ(e.condition(), cond_ptr);
+  ElseStatement e(cond, body);
+  EXPECT_EQ(e.condition(), cond);
   ASSERT_EQ(e.body()->size(), 1u);
-  EXPECT_EQ(e.body()->get(0), discard_ptr);
+  EXPECT_EQ(e.body()->get(0), discard);
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
@@ -59,7 +58,7 @@ TEST_F(ElseStatementTest, HasCondition) {
   ast::type::BoolType bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
-  ElseStatement e(std::move(cond), create<BlockStatement>());
+  ElseStatement e(cond, create<BlockStatement>());
   EXPECT_TRUE(e.HasCondition());
 }
 
@@ -77,7 +76,7 @@ TEST_F(ElseStatementTest, IsValid_WithBody) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatement e(std::move(body));
+  ElseStatement e(body);
   EXPECT_TRUE(e.IsValid());
 }
 
@@ -86,13 +85,13 @@ TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
-  ElseStatement e(std::move(body));
+  ElseStatement e(body);
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
   auto* cond = create<ScalarConstructorExpression>();
-  ElseStatement e(std::move(cond), create<BlockStatement>());
+  ElseStatement e(cond, create<BlockStatement>());
   EXPECT_FALSE(e.IsValid());
 }
 
@@ -100,7 +99,7 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>();
   body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
-  ElseStatement e(std::move(body));
+  ElseStatement e(body);
   EXPECT_FALSE(e.IsValid());
 }
 
@@ -111,7 +110,7 @@ TEST_F(ElseStatementTest, ToStr) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatement e(std::move(cond), std::move(body));
+  ElseStatement e(cond, body);
   std::ostringstream out;
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
@@ -129,7 +128,7 @@ TEST_F(ElseStatementTest, ToStr_NoCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatement e(std::move(body));
+  ElseStatement e(body);
   std::ostringstream out;
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{

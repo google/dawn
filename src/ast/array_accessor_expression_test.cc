@@ -27,19 +27,16 @@ TEST_F(ArrayAccessorExpressionTest, Create) {
   auto* ary = create<IdentifierExpression>("ary");
   auto* idx = create<IdentifierExpression>("idx");
 
-  auto* ary_ptr = ary;
-  auto* idx_ptr = idx;
-
-  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
-  ASSERT_EQ(exp.array(), ary_ptr);
-  ASSERT_EQ(exp.idx_expr(), idx_ptr);
+  ArrayAccessorExpression exp(ary, idx);
+  ASSERT_EQ(exp.array(), ary);
+  ASSERT_EQ(exp.idx_expr(), idx);
 }
+
 TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
   auto* ary = create<IdentifierExpression>("ary");
   auto* idx = create<IdentifierExpression>("idx");
 
-  ArrayAccessorExpression exp(Source{Source::Location{20, 2}}, std::move(ary),
-                              std::move(idx));
+  ArrayAccessorExpression exp(Source{Source::Location{20, 2}}, ary, idx);
   auto src = exp.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -54,7 +51,7 @@ TEST_F(ArrayAccessorExpressionTest, IsValid) {
   auto* ary = create<IdentifierExpression>("ary");
   auto* idx = create<IdentifierExpression>("idx");
 
-  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  ArrayAccessorExpression exp(ary, idx);
   EXPECT_TRUE(exp.IsValid());
 }
 
@@ -62,7 +59,7 @@ TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
   auto* idx = create<IdentifierExpression>("idx");
 
   ArrayAccessorExpression exp;
-  exp.set_idx_expr(std::move(idx));
+  exp.set_idx_expr(idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
@@ -70,21 +67,21 @@ TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
   auto* ary = create<IdentifierExpression>("ary");
 
   ArrayAccessorExpression exp;
-  exp.set_array(std::move(ary));
+  exp.set_array(ary);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidArray) {
   auto* ary = create<IdentifierExpression>("");
   auto* idx = create<IdentifierExpression>("idx");
-  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  ArrayAccessorExpression exp(ary, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidIndex) {
   auto* ary = create<IdentifierExpression>("ary");
   auto* idx = create<IdentifierExpression>("");
-  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  ArrayAccessorExpression exp(ary, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
@@ -92,7 +89,7 @@ TEST_F(ArrayAccessorExpressionTest, ToStr) {
   auto* ary = create<IdentifierExpression>("ary");
   auto* idx = create<IdentifierExpression>("idx");
 
-  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  ArrayAccessorExpression exp(ary, idx);
   std::ostringstream out;
   exp.to_str(out, 2);
 

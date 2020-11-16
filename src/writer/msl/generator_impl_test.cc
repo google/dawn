@@ -54,7 +54,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
                                      create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  mod.AddFunction(std::move(func));
+  mod.AddFunction(func);
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -160,18 +160,18 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("b", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("c", &f32, decos));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   EXPECT_EQ(132u, gen.calculate_alignment_size(&s));
 }
@@ -185,32 +185,32 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(create<ast::StructMember>("b", &fvec, std::move(decos)));
+  members.push_back(create<ast::StructMember>("b", &fvec, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("c", &f32, decos));
 
   auto* inner_str = create<ast::Struct>();
-  inner_str->set_members(std::move(members));
+  inner_str->set_members(members);
 
-  ast::type::StructType inner_s("Inner", std::move(inner_str));
+  ast::type::StructType inner_s("Inner", inner_str);
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("d", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("d", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("e", &inner_s, std::move(decos)));
+  members.push_back(create<ast::StructMember>("e", &inner_s, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(64, Source{}));
-  members.push_back(create<ast::StructMember>("f", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("f", &f32, decos));
 
   auto* outer_str = create<ast::Struct>();
-  outer_str->set_members(std::move(members));
+  outer_str->set_members(members);
 
-  ast::type::StructType outer_s("Outer", std::move(outer_str));
+  ast::type::StructType outer_s("Outer", outer_str);
 
   EXPECT_EQ(80u, gen.calculate_alignment_size(&outer_s));
 }

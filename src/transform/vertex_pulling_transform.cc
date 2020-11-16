@@ -151,7 +151,7 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
       create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}));
 
   var->set_decorations(std::move(decorations));
-  mod_->AddGlobalVariable(std::move(var));
+  mod_->AddGlobalVariable(var);
 }
 
 void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
@@ -193,7 +193,7 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
       create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}));
 
   var->set_decorations(std::move(decorations));
-  mod_->AddGlobalVariable(std::move(var));
+  mod_->AddGlobalVariable(var);
 }
 
 void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
@@ -257,7 +257,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
     decorations.push_back(create<ast::SetDecoration>(pulling_set_, Source{}));
     var->set_decorations(std::move(decorations));
 
-    mod_->AddGlobalVariable(std::move(var));
+    mod_->AddGlobalVariable(var);
   }
   mod_->AddConstructedType(struct_type);
 }
@@ -278,7 +278,7 @@ void VertexPullingTransform::AddVertexPullingPreamble(
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression
   // objects.
-  block->append(std::move(pos_declaration));
+  block->append(pos_declaration);
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     const VertexBufferLayoutDescriptor& buffer_layout =
@@ -302,14 +302,14 @@ void VertexPullingTransform::AddVertexPullingPreamble(
       auto* pos_value = create<ast::BinaryExpression>(
           ast::BinaryOp::kAdd,
           create<ast::BinaryExpression>(
-              ast::BinaryOp::kMultiply, std::move(index_identifier),
+              ast::BinaryOp::kMultiply, index_identifier,
               GenUint(static_cast<uint32_t>(buffer_layout.array_stride))),
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 
       // Update position of the read
       auto* set_pos_expr = create<ast::AssignmentStatement>(
-          CreatePullingPositionIdent(), std::move(pos_value));
-      block->append(std::move(set_pos_expr));
+          CreatePullingPositionIdent(), pos_value);
+      block->append(set_pos_expr);
 
       block->append(create<ast::AssignmentStatement>(
           create<ast::IdentifierExpression>(v->name()),
@@ -317,7 +317,7 @@ void VertexPullingTransform::AddVertexPullingPreamble(
     }
   }
 
-  vertex_func->body()->insert(0, std::move(block));
+  vertex_func->body()->insert(0, block);
 }
 
 ast::Expression* VertexPullingTransform::GenUint(uint32_t value) {
@@ -367,22 +367,19 @@ ast::Expression* VertexPullingTransform::AccessU32(uint32_t buffer,
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>(GetVertexBufferName(buffer)),
           create<ast::IdentifierExpression>(kStructBufferName)),
-      create<ast::BinaryExpression>(ast::BinaryOp::kDivide, std::move(pos),
-                                    GenUint(4)));
+      create<ast::BinaryExpression>(ast::BinaryOp::kDivide, pos, GenUint(4)));
 }
 
 ast::Expression* VertexPullingTransform::AccessI32(uint32_t buffer,
                                                    ast::Expression* pos) {
   // as<T> reinterprets bits
-  return create<ast::BitcastExpression>(GetI32Type(),
-                                        AccessU32(buffer, std::move(pos)));
+  return create<ast::BitcastExpression>(GetI32Type(), AccessU32(buffer, pos));
 }
 
 ast::Expression* VertexPullingTransform::AccessF32(uint32_t buffer,
                                                    ast::Expression* pos) {
   // as<T> reinterprets bits
-  return create<ast::BitcastExpression>(GetF32Type(),
-                                        AccessU32(buffer, std::move(pos)));
+  return create<ast::BitcastExpression>(GetF32Type(), AccessU32(buffer, pos));
 }
 
 ast::Expression* VertexPullingTransform::AccessPrimitive(uint32_t buffer,
@@ -394,11 +391,11 @@ ast::Expression* VertexPullingTransform::AccessPrimitive(uint32_t buffer,
   // from the position variable.
   switch (format) {
     case VertexFormat::kU32:
-      return AccessU32(buffer, std::move(pos));
+      return AccessU32(buffer, pos);
     case VertexFormat::kI32:
-      return AccessI32(buffer, std::move(pos));
+      return AccessI32(buffer, pos);
     case VertexFormat::kF32:
-      return AccessF32(buffer, std::move(pos));
+      return AccessF32(buffer, pos);
     default:
       return nullptr;
   }
@@ -415,8 +412,7 @@ ast::Expression* VertexPullingTransform::AccessVec(uint32_t buffer,
     auto* cur_pos = create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
                                                   CreatePullingPositionIdent(),
                                                   GenUint(element_stride * i));
-    expr_list.push_back(
-        AccessPrimitive(buffer, std::move(cur_pos), base_format));
+    expr_list.push_back(AccessPrimitive(buffer, cur_pos, base_format));
   }
 
   return create<ast::TypeConstructorExpression>(
@@ -443,8 +439,8 @@ VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
     uint64_t in_array_stride,
     InputStepMode in_step_mode,
     std::vector<VertexAttributeDescriptor> in_attributes)
-    : array_stride(std::move(in_array_stride)),
-      step_mode(std::move(in_step_mode)),
+    : array_stride(in_array_stride),
+      step_mode(in_step_mode),
       attributes(std::move(in_attributes)) {}
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(

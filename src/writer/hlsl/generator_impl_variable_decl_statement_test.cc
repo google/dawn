@@ -36,7 +36,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -48,7 +48,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -73,7 +73,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -84,7 +84,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -97,9 +97,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(std::move(ident));
+  var->set_constructor(ident);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float a = initializer;
 )");
@@ -111,13 +111,12 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList values;
-  auto* zero_vec =
-      create<ast::TypeConstructorExpression>(&vec, std::move(values));
+  auto* zero_vec = create<ast::TypeConstructorExpression>(&vec, values);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &vec);
-  var->set_constructor(std::move(zero_vec));
+  var->set_constructor(zero_vec);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
 )");
@@ -129,13 +128,12 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::type::MatrixType mat(&f32, 3, 2);
 
   ast::ExpressionList values;
-  auto* zero_mat =
-      create<ast::TypeConstructorExpression>(&mat, std::move(values));
+  auto* zero_mat = create<ast::TypeConstructorExpression>(&mat, values);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &mat);
-  var->set_constructor(std::move(zero_mat));
+  var->set_constructor(zero_mat);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(
       result(),

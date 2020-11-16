@@ -30,7 +30,7 @@ using HlslGeneratorImplTest_Assign = TestHelper;
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
   auto* lhs = create<ast::IdentifierExpression>("lhs");
   auto* rhs = create<ast::IdentifierExpression>("rhs");
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(lhs, rhs);
 
   gen.increment_indent();
 

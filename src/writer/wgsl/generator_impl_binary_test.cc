@@ -40,7 +40,7 @@ TEST_P(WgslBinaryTest, Emit) {
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
 
-  ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
+  ast::BinaryExpression expr(params.op, left, right);
 
   ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
   EXPECT_EQ(gen.result(), params.result);

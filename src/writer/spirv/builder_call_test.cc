@@ -53,7 +53,7 @@ TEST_F(BuilderTest, Expression_Call) {
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
-  ast::Function a_func("a_func", std::move(func_params), &f32, std::move(body));
+  ast::Function a_func("a_func", func_params, &f32, body);
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
 
@@ -64,7 +64,7 @@ TEST_F(BuilderTest, Expression_Call) {
       create<ast::FloatLiteral>(&f32, 1.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>("a_func"),
-                           std::move(call_params));
+                           call_params);
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
@@ -114,8 +114,7 @@ TEST_F(BuilderTest, Statement_Call) {
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
 
-  ast::Function a_func("a_func", std::move(func_params), &void_type,
-                       std::move(body));
+  ast::Function a_func("a_func", func_params, &void_type, body);
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
 
@@ -126,7 +125,7 @@ TEST_F(BuilderTest, Statement_Call) {
       create<ast::FloatLiteral>(&f32, 1.f)));
 
   ast::CallStatement expr(create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("a_func"), std::move(call_params)));
+      create<ast::IdentifierExpression>("a_func"), call_params));
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();

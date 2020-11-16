@@ -60,7 +60,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   ast::DecoratedVariable dv;
   dv.set_name("a");
   dv.set_type(&f32);
-  dv.set_decorations(std::move(decos));
+  dv.set_decorations(decos);
 
   ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[location(2)]] var a : f32;
@@ -81,7 +81,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::DecoratedVariable dv;
   dv.set_name("a");
   dv.set_type(&f32);
-  dv.set_decorations(std::move(decos));
+  dv.set_decorations(decos);
 
   ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
   EXPECT_EQ(
@@ -95,7 +95,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
-  v.set_constructor(std::move(ident));
+  v.set_constructor(ident);
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
@@ -107,7 +107,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
 
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
-  v.set_constructor(std::move(ident));
+  v.set_constructor(ident);
   v.set_is_const(true);
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();

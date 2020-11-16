@@ -71,15 +71,15 @@ TEST_F(BuilderTest, Function_WithParams) {
   ast::VariableList params;
   auto* var_a = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
   var_a->set_is_const(true);
-  params.push_back(std::move(var_a));
+  params.push_back(var_a);
   auto* var_b = create<ast::Variable>("b", ast::StorageClass::kFunction, &i32);
   var_b->set_is_const(true);
-  params.push_back(std::move(var_b));
+  params.push_back(var_b);
 
   auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("a")));
-  ast::Function func("a_func", std::move(params), &f32, std::move(body));
+  ast::Function func("a_func", params, &f32, body);
 
   td.RegisterVariableForTesting(func.params()[0]);
   td.RegisterVariableForTesting(func.params()[1]);
@@ -107,7 +107,7 @@ TEST_F(BuilderTest, Function_WithBody) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
 
-  ast::Function func("a_func", {}, &void_type, std::move(body));
+  ast::Function func("a_func", {}, &void_type, body);
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
@@ -165,14 +165,14 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("d", &f32, std::move(a_deco)));
+  members.push_back(create<ast::StructMember>("d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(std::move(s_decos), std::move(members));
+  auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", std::move(str));
+  ast::type::StructType s("Data", str);
   ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
@@ -181,12 +181,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
   decos.push_back(create<ast::SetDecoration>(0, Source{}));
-  data_var->set_decorations(std::move(decos));
+  data_var->set_decorations(decos);
 
   mod.AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var);
-  mod.AddGlobalVariable(std::move(data_var));
+  mod.AddGlobalVariable(data_var);
 
   {
     ast::VariableList params;
@@ -196,15 +196,14 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         create<ast::IdentifierExpression>("d")));
 
     auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
 
-    auto* func = create<ast::Function>("a", std::move(params), &void_type,
-                                       std::move(body));
+    auto* func = create<ast::Function>("a", params, &void_type, body);
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(std::move(func));
+    mod.AddFunction(func);
   }
 
   {
@@ -215,15 +214,14 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         create<ast::IdentifierExpression>("d")));
 
     auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(std::move(var)));
+    body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
 
-    auto* func = create<ast::Function>("b", std::move(params), &void_type,
-                                       std::move(body));
+    auto* func = create<ast::Function>("b", params, &void_type, body);
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(std::move(func));
+    mod.AddFunction(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

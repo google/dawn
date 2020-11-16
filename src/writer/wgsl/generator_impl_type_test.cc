@@ -67,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
 
   ast::type::ArrayType a(&b, 4);
-  a.set_decorations(std::move(decos));
+  a.set_decorations(decos);
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "[[stride(16)]] array<bool, 4>");
@@ -80,7 +80,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
   decos.push_back(create<ast::StrideDecoration>(32u, Source{}));
 
   ast::type::ArrayType a(&b, 4);
-  a.set_decorations(std::move(decos));
+  a.set_decorations(decos);
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "[[stride(16)]] [[stride(32)]] array<bool, 4>");
@@ -141,12 +141,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), "S");
@@ -162,12 +162,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -188,14 +188,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(decos, members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]

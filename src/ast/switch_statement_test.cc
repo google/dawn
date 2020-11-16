@@ -36,22 +36,19 @@ TEST_F(SwitchStatementTest, Creation) {
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  auto* case_stmt = create<CaseStatement>(lit, create<ast::BlockStatement>());
+  body.push_back(case_stmt);
 
-  auto* ident_ptr = ident;
-  auto* case_ptr = body[0];
-
-  SwitchStatement stmt(std::move(ident), std::move(body));
-  EXPECT_EQ(stmt.condition(), ident_ptr);
+  SwitchStatement stmt(ident, body);
+  EXPECT_EQ(stmt.condition(), ident);
   ASSERT_EQ(stmt.body().size(), 1u);
-  EXPECT_EQ(stmt.body()[0], case_ptr);
+  EXPECT_EQ(stmt.body()[0], case_stmt);
 }
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
   auto* ident = create<IdentifierExpression>("ident");
 
-  SwitchStatement stmt(Source{Source::Location{20, 2}}, std::move(ident),
+  SwitchStatement stmt(Source{Source::Location{20, 2}}, ident,
                        CaseStatementList());
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -71,10 +68,9 @@ TEST_F(SwitchStatementTest, IsValid) {
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
 
-  SwitchStatement stmt(std::move(ident), std::move(body));
+  SwitchStatement stmt(ident, body);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -85,11 +81,10 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
 
   SwitchStatement stmt;
-  stmt.set_body(std::move(body));
+  stmt.set_body(body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -101,10 +96,9 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 
   auto* ident = create<IdentifierExpression>("");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
 
-  SwitchStatement stmt(std::move(ident), std::move(body));
+  SwitchStatement stmt(ident, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -116,11 +110,10 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
   body.push_back(nullptr);
 
-  SwitchStatement stmt(std::move(ident), std::move(body));
+  SwitchStatement stmt(ident, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -131,17 +124,16 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
   case_body->append(nullptr);
 
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(CaseSelectorList{}, std::move(case_body)));
+  body.push_back(create<CaseStatement>(CaseSelectorList{}, case_body));
 
-  SwitchStatement stmt(std::move(ident), std::move(body));
+  SwitchStatement stmt(ident, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(SwitchStatementTest, ToStr_Empty) {
   auto* ident = create<IdentifierExpression>("ident");
 
-  SwitchStatement stmt(std::move(ident), {});
+  SwitchStatement stmt(ident, {});
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Switch{
@@ -160,10 +152,9 @@ TEST_F(SwitchStatementTest, ToStr) {
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
 
-  SwitchStatement stmt(std::move(ident), std::move(body));
+  SwitchStatement stmt(ident, body);
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Switch{

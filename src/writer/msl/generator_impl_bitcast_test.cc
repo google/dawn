@@ -32,7 +32,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
   ast::type::F32Type f32;
   auto* id = create<ast::IdentifierExpression>("id");
-  ast::BitcastExpression bitcast(&f32, std::move(id));
+  ast::BitcastExpression bitcast(&f32, id);
 
   ASSERT_TRUE(gen.EmitExpression(&bitcast)) << gen.error();
   EXPECT_EQ(gen.result(), "as_type<float>(id)");

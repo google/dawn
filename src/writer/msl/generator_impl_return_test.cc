@@ -40,7 +40,7 @@ TEST_F(MslGeneratorImplTest, Emit_Return) {
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
   auto* expr = create<ast::IdentifierExpression>("expr");
-  ast::ReturnStatement r(std::move(expr));
+  ast::ReturnStatement r(expr);
 
   gen.increment_indent();
 

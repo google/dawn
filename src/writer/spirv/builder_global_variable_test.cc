@@ -104,12 +104,12 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   td.RegisterVariableForTesting(&v);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -139,12 +139,12 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
@@ -172,12 +172,12 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
       create<ast::FloatLiteral>(&f32, 2.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
-  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec3, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
@@ -198,23 +198,25 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::VectorType vec2(&f32, 2);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0f)));
-  auto* first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
+  auto* first = create<ast::TypeConstructorExpression>(
+      &vec2, ast::ExpressionList{
+                 create<ast::ScalarConstructorExpression>(
+                     create<ast::FloatLiteral>(&f32, 1.0f)),
+                 create<ast::ScalarConstructorExpression>(
+                     create<ast::FloatLiteral>(&f32, 2.0f)),
+             });
 
-  vals.push_back(std::move(first));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
-
-  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(
+      &vec3, ast::ExpressionList{
+                 first,
+                 create<ast::ScalarConstructorExpression>(
+                     create<ast::FloatLiteral>(&f32, 3.0f)),
+             });
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
@@ -243,8 +245,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(5, Source{}));
 
-  ast::DecoratedVariable dv(std::move(v));
-  dv.set_decorations(std::move(decos));
+  ast::DecoratedVariable dv(v);
+  dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -265,8 +267,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   decos.push_back(create<ast::BindingDecoration>(2, Source{}));
   decos.push_back(create<ast::SetDecoration>(3, Source{}));
 
-  ast::DecoratedVariable dv(std::move(v));
-  dv.set_decorations(std::move(decos));
+  ast::DecoratedVariable dv(v);
+  dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -288,8 +290,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   decos.push_back(
       create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
 
-  ast::DecoratedVariable dv(std::move(v));
-  dv.set_decorations(std::move(decos));
+  ast::DecoratedVariable dv(v);
+  dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -311,7 +313,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &bool_type));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
   v.set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
 
@@ -335,7 +337,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &bool_type));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -357,7 +359,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &f32));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
   v.set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
@@ -381,7 +383,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &f32));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -403,7 +405,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &i32));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -425,7 +427,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
 
   ast::DecoratedVariable v(
       create<ast::Variable>("var", ast::StorageClass::kNone, &u32));
-  v.set_decorations(std::move(decos));
+  v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
@@ -483,10 +485,10 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
-  members.push_back(create<ast::StructMember>("b", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>("b", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(members));
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
@@ -519,9 +521,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(members));
   ast::type::AliasType B("B", &A);
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &B};
 
@@ -553,9 +555,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(members));
   ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
   ast::type::AliasType B("B", &ac);
 
@@ -587,9 +589,9 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(std::move(members)));
+  ast::type::StructType A("A", create<ast::Struct>(members));
   ast::type::AccessControlType read{ast::AccessControl::kReadOnly, &A};
   ast::type::AccessControlType rw{ast::AccessControl::kReadWrite, &A};
 

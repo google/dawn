@@ -851,7 +851,7 @@ ast::type::Type* ParserImpl::ConvertType(
           return nullptr;
         }
         if (ast_member_decoration) {
-          ast_member_decorations.push_back(std::move(ast_member_decoration));
+          ast_member_decorations.push_back(ast_member_decoration);
         }
       }
     }
@@ -863,7 +863,7 @@ ast::type::Type* ParserImpl::ConvertType(
     const auto member_name = namer_.GetMemberName(type_id, member_index);
     auto* ast_struct_member = create<ast::StructMember>(
         member_name, ast_member_ty, std::move(ast_member_decorations));
-    ast_members.push_back(std::move(ast_struct_member));
+    ast_members.push_back(ast_struct_member);
   }
 
   // Now make the struct.
@@ -872,7 +872,7 @@ ast::type::Type* ParserImpl::ConvertType(
 
   namer_.SuggestSanitizedName(type_id, "S");
   auto ast_struct_type = std::make_unique<ast::type::StructType>(
-      namer_.GetName(type_id), std::move(ast_struct));
+      namer_.GetName(type_id), ast_struct);
 
   auto* result = ctx_.type_mgr().Get(std::move(ast_struct_type));
   id_to_type_[type_id] = result;
@@ -991,21 +991,21 @@ bool ParserImpl::EmitScalarSpecConstants() {
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
           auto* cid = create<ast::ConstantIdDecoration>(deco[1], Source{});
-          spec_id_decos.push_back(std::move(cid));
+          spec_id_decos.push_back(cid);
           break;
         }
       }
       if (spec_id_decos.empty()) {
         // Register it as a named constant, without specialization id.
         ast_var->set_is_const(true);
-        ast_var->set_constructor(std::move(ast_expr));
-        ast_module_.AddGlobalVariable(std::move(ast_var));
+        ast_var->set_constructor(ast_expr);
+        ast_module_.AddGlobalVariable(ast_var);
       } else {
-        auto* ast_deco_var = create<ast::DecoratedVariable>(std::move(ast_var));
+        auto* ast_deco_var = create<ast::DecoratedVariable>(ast_var);
         ast_deco_var->set_is_const(true);
-        ast_deco_var->set_constructor(std::move(ast_expr));
+        ast_deco_var->set_constructor(ast_expr);
         ast_deco_var->set_decorations(std::move(spec_id_decos));
-        ast_module_.AddGlobalVariable(std::move(ast_deco_var));
+        ast_module_.AddGlobalVariable(ast_deco_var);
       }
       scalar_spec_constants_.insert(inst.result_id());
     }
@@ -1112,7 +1112,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
           MakeConstantExpression(var.GetSingleWordInOperand(1)).expr);
     }
     // TODO(dneto): initializers (a.k.a. constructor expression)
-    ast_module_.AddGlobalVariable(std::move(ast_var));
+    ast_module_.AddGlobalVariable(ast_var);
   }
 
   // Emit gl_Position instead of gl_PerVertex
@@ -1129,7 +1129,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
     var->set_decorations(std::move(decos));
 
-    ast_module_.AddGlobalVariable(std::move(var));
+    ast_module_.AddGlobalVariable(var);
   }
   return success_;
 }
@@ -1202,7 +1202,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     }
   }
   if (!ast_decorations.empty()) {
-    auto* decorated_var = create<ast::DecoratedVariable>(std::move(ast_var));
+    auto* decorated_var = create<ast::DecoratedVariable>(ast_var);
     decorated_var->set_decorations(std::move(ast_decorations));
     ast_var = std::move(decorated_var);
   }
@@ -1284,7 +1284,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
         // We've already emitted a diagnostic.
         return {};
       }
-      ast_components.emplace_back(std::move(ast_component.expr));
+      ast_components.emplace_back(ast_component.expr);
     }
     return {original_ast_type,
             create<ast::TypeConstructorExpression>(original_ast_type,
@@ -1394,15 +1394,14 @@ TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
     auto* unsigned_ty = unsigned_type_for_[type];
     if (unsigned_ty != nullptr) {
       // Conversion is required.
-      return {unsigned_ty, create<ast::BitcastExpression>(
-                               unsigned_ty, std::move(expr.expr))};
+      return {unsigned_ty,
+              create<ast::BitcastExpression>(unsigned_ty, expr.expr)};
     }
   } else if (requires_signed) {
     auto* signed_ty = signed_type_for_[type];
     if (signed_ty != nullptr) {
       // Conversion is required.
-      return {signed_ty,
-              create<ast::BitcastExpression>(signed_ty, std::move(expr.expr))};
+      return {signed_ty, create<ast::BitcastExpression>(signed_ty, expr.expr)};
     }
   }
   // We should not reach here.
@@ -1465,8 +1464,7 @@ TypedExpression ParserImpl::RectifyForcedResultType(
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }
-  return {expr.type,
-          create<ast::BitcastExpression>(expr.type, std::move(expr.expr))};
+  return {expr.type, create<ast::BitcastExpression>(expr.type, expr.expr)};
 }
 
 bool ParserImpl::EmitFunctions() {

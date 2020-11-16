@@ -77,12 +77,12 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
 
   td.RegisterVariableForTesting(&v);
 
@@ -121,14 +121,14 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::move(rel));
+  vals.push_back(rel);
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kFunction, &vec);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
 
   td.RegisterVariableForTesting(&v);
   b.push_function(Function{});
@@ -166,7 +166,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   ASSERT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("v", ast::StorageClass::kFunction, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   td.RegisterVariableForTesting(&v);
 
   ast::Variable v2("v2", ast::StorageClass::kFunction, &f32);
@@ -211,7 +211,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("v", ast::StorageClass::kFunction, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   td.RegisterVariableForTesting(&v);
 
   ast::Variable v2("v2", ast::StorageClass::kFunction, &f32);
@@ -254,12 +254,12 @@ TEST_F(BuilderTest, FunctionVar_Const) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
+  v.set_constructor(init);
   v.set_is_const(true);
 
   td.RegisterVariableForTesting(&v);

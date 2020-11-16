@@ -53,7 +53,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Constructor_Const) {
   ast::type::F32Type f32;
   auto* fl = create<ast::FloatLiteral>(&f32, 42.2f);
-  ast::ScalarConstructorExpression c(std::move(fl));
+  ast::ScalarConstructorExpression c(fl);
 
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -75,7 +75,7 @@ TEST_F(BuilderTest, Constructor_Type) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -100,15 +100,13 @@ TEST_F(BuilderTest, Constructor_Type_WithCasts) {
       create<ast::SintLiteral>(&i32, 1)));
 
   ast::ExpressionList vals;
-  vals.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(type_vals)));
+  vals.push_back(create<ast::TypeConstructorExpression>(&f32, type_vals));
 
   type_vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(type_vals)));
+  vals.push_back(create<ast::TypeConstructorExpression>(&f32, type_vals));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -142,7 +140,7 @@ TEST_F(BuilderTest, Constructor_Type_WithAlias) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3)));
 
-  ast::TypeConstructorExpression cast(&alias, std::move(params));
+  ast::TypeConstructorExpression cast(&alias, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -170,7 +168,7 @@ TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(create<ast::IdentifierExpression>("ident"));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
@@ -208,7 +206,7 @@ TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -243,9 +241,9 @@ TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::move(rel));
+  vals.push_back(rel);
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -261,7 +259,7 @@ TEST_F(BuilderTest, Constructor_Type_Bool_With_Bool) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
 
-  ast::TypeConstructorExpression t(&bool_type, std::move(vals));
+  ast::TypeConstructorExpression t(&bool_type, vals);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -285,7 +283,7 @@ TEST_F(BuilderTest, Constructor_Type_I32_With_I32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  ast::TypeConstructorExpression cast(&i32, std::move(params));
+  ast::TypeConstructorExpression cast(&i32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -307,7 +305,7 @@ TEST_F(BuilderTest, Constructor_Type_U32_With_U32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 2)));
 
-  ast::TypeConstructorExpression cast(&u32, std::move(params));
+  ast::TypeConstructorExpression cast(&u32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -329,7 +327,7 @@ TEST_F(BuilderTest, Constructor_Type_F32_With_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -354,7 +352,7 @@ TEST_F(BuilderTest, Constructor_Type_Vec2_With_F32_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec, std::move(params));
+  ast::TypeConstructorExpression cast(&vec, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -380,7 +378,7 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_F32_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec, std::move(params));
+  ast::TypeConstructorExpression cast(&vec, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -408,10 +406,9 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_Vec2) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -443,12 +440,11 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_Vec2_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -482,7 +478,7 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_F32_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec, std::move(params));
+  ast::TypeConstructorExpression cast(&vec, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -512,10 +508,9 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -549,12 +544,11 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec2_F32) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -586,14 +580,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_F32_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -631,12 +624,10 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec2_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -674,10 +665,9 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec3) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec3, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -712,12 +702,11 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec3_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec3, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -752,10 +741,9 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -788,12 +776,11 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -830,10 +817,9 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -868,12 +854,11 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -906,14 +891,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -952,12 +936,10 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec2, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec2_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -996,10 +978,9 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec3, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1036,12 +1017,11 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec3, std::move(vec_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&vec4, std::move(params));
+  ast::TypeConstructorExpression cast(&vec4, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1082,12 +1062,10 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1127,14 +1105,11 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1180,16 +1155,12 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec4_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1227,12 +1198,10 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1278,14 +1247,11 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1339,16 +1305,12 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec4_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1390,12 +1352,10 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1447,14 +1407,11 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1516,16 +1473,12 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec3_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec4_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
 
-  ast::TypeConstructorExpression cast(&mat, std::move(params));
+  ast::TypeConstructorExpression cast(&mat, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1557,7 +1510,7 @@ TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::TypeConstructorExpression cast(&ary, std::move(params));
+  ast::TypeConstructorExpression cast(&ary, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1595,12 +1548,10 @@ TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-  params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec2_params)));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
+  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
 
-  ast::TypeConstructorExpression cast(&ary, std::move(params));
+  ast::TypeConstructorExpression cast(&ary, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1624,11 +1575,11 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
-  members.push_back(create<ast::StructMember>("b", &vec, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, decos));
+  members.push_back(create<ast::StructMember>("b", &vec, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -1641,10 +1592,9 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_vals)));
+  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
 
-  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+  ast::TypeConstructorExpression t(&s_type, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1666,7 +1616,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_F32) {
   ast::type::F32Type f32;
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&f32, std::move(vals));
+  ast::TypeConstructorExpression t(&f32, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1684,7 +1634,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_I32) {
   ast::type::I32Type i32;
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&i32, std::move(vals));
+  ast::TypeConstructorExpression t(&i32, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1702,7 +1652,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_U32) {
   ast::type::U32Type u32;
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&u32, std::move(vals));
+  ast::TypeConstructorExpression t(&u32, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1720,7 +1670,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Bool) {
   ast::type::BoolType bool_type;
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&bool_type, std::move(vals));
+  ast::TypeConstructorExpression t(&bool_type, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1739,7 +1689,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Vector) {
   ast::type::VectorType vec(&i32, 2);
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1759,7 +1709,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Matrix) {
   ast::type::MatrixType mat(&f32, 2, 4);
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&mat, std::move(vals));
+  ast::TypeConstructorExpression t(&mat, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1780,7 +1730,7 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Array) {
   ast::type::ArrayType ary(&i32, 2);
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&ary, std::move(vals));
+  ast::TypeConstructorExpression t(&ary, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1802,13 +1752,13 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+  ast::TypeConstructorExpression t(&s_type, vals);
 
   EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -1831,7 +1781,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_I32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 2)));
 
-  ast::TypeConstructorExpression cast(&i32, std::move(params));
+  ast::TypeConstructorExpression cast(&i32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1855,7 +1805,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_U32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  ast::TypeConstructorExpression cast(&u32, std::move(params));
+  ast::TypeConstructorExpression cast(&u32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1879,7 +1829,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_I32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.4)));
 
-  ast::TypeConstructorExpression cast(&i32, std::move(params));
+  ast::TypeConstructorExpression cast(&i32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1903,7 +1853,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_U32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.4)));
 
-  ast::TypeConstructorExpression cast(&u32, std::move(params));
+  ast::TypeConstructorExpression cast(&u32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1927,7 +1877,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1951,7 +1901,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_F32) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 2)));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -1978,7 +1928,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_I32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&ivec3, std::move(params));
+  ast::TypeConstructorExpression cast(&ivec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2012,7 +1962,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_I32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&ivec3, std::move(params));
+  ast::TypeConstructorExpression cast(&ivec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2046,7 +1996,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_U32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&uvec3, std::move(params));
+  ast::TypeConstructorExpression cast(&uvec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2080,7 +2030,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_U32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&uvec3, std::move(params));
+  ast::TypeConstructorExpression cast(&uvec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2114,7 +2064,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_F32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&fvec3, std::move(params));
+  ast::TypeConstructorExpression cast(&fvec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2148,7 +2098,7 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("i"));
 
-  ast::TypeConstructorExpression cast(&fvec3, std::move(params));
+  ast::TypeConstructorExpression cast(&fvec3, params);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
@@ -2183,7 +2133,7 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  ast::TypeConstructorExpression t(&vec, std::move(params));
+  ast::TypeConstructorExpression t(&vec, params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2200,7 +2150,7 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
   params.push_back(create<ast::IdentifierExpression>("a"));
   params.push_back(create<ast::IdentifierExpression>("b"));
   params.push_back(create<ast::IdentifierExpression>("c"));
-  ast::TypeConstructorExpression t(&vec, std::move(params));
+  ast::TypeConstructorExpression t(&vec, params);
 
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
@@ -2230,7 +2180,7 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* first = create<ast::TypeConstructorExpression>(&vec, std::move(params));
+  auto* first = create<ast::TypeConstructorExpression>(&vec, params);
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
@@ -2238,13 +2188,12 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* second =
-      create<ast::TypeConstructorExpression>(&vec, std::move(params));
+  auto* second = create<ast::TypeConstructorExpression>(&vec, params);
 
   ast::ExpressionList ary_params;
-  ary_params.push_back(std::move(first));
-  ary_params.push_back(std::move(second));
-  ast::TypeConstructorExpression t(&ary, std::move(ary_params));
+  ary_params.push_back(first);
+  ary_params.push_back(second);
+  ast::TypeConstructorExpression t(&ary, ary_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2263,15 +2212,13 @@ TEST_F(BuilderTest,
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+  ast::TypeConstructorExpression t(&vec, vec_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2290,15 +2237,13 @@ TEST_F(BuilderTest, IsConstructorConst_GlobalWithTypeCastConstructor) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+  ast::TypeConstructorExpression t(&vec, vec_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2318,7 +2263,7 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  ast::TypeConstructorExpression t(&vec, std::move(params));
+  ast::TypeConstructorExpression t(&vec, params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2335,7 +2280,7 @@ TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
   params.push_back(create<ast::IdentifierExpression>("a"));
   params.push_back(create<ast::IdentifierExpression>("b"));
   params.push_back(create<ast::IdentifierExpression>("c"));
-  ast::TypeConstructorExpression t(&vec, std::move(params));
+  ast::TypeConstructorExpression t(&vec, params);
 
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
@@ -2364,7 +2309,7 @@ TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* first = create<ast::TypeConstructorExpression>(&vec, std::move(params));
+  auto* first = create<ast::TypeConstructorExpression>(&vec, params);
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
@@ -2372,13 +2317,12 @@ TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
       create<ast::FloatLiteral>(&f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* second =
-      create<ast::TypeConstructorExpression>(&vec, std::move(params));
+  auto* second = create<ast::TypeConstructorExpression>(&vec, params);
 
   ast::ExpressionList ary_params;
-  ary_params.push_back(std::move(first));
-  ary_params.push_back(std::move(second));
-  ast::TypeConstructorExpression t(&ary, std::move(ary_params));
+  ary_params.push_back(first);
+  ary_params.push_back(second);
+  ast::TypeConstructorExpression t(&ary, ary_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2397,15 +2341,13 @@ TEST_F(BuilderTest, IsConstructorConst_VectorWith_TypeCastConstConstructors) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+  ast::TypeConstructorExpression t(&vec, vec_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2424,15 +2366,13 @@ TEST_F(BuilderTest, IsConstructorConst_WithTypeCastConstructor) {
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(
-      create<ast::TypeConstructorExpression>(&f32, std::move(params)));
+  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vec_params));
+  ast::TypeConstructorExpression t(&vec, vec_params);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2451,7 +2391,7 @@ TEST_F(BuilderTest, IsConstructorConst_BitCastScalars) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  ast::TypeConstructorExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, vals);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2465,11 +2405,11 @@ TEST_F(BuilderTest, IsConstructorConst_Struct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
-  members.push_back(create<ast::StructMember>("b", &vec, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, decos));
+  members.push_back(create<ast::StructMember>("b", &vec, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -2482,10 +2422,9 @@ TEST_F(BuilderTest, IsConstructorConst_Struct) {
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_vals)));
+  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
 
-  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+  ast::TypeConstructorExpression t(&s_type, vals);
 
   ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
 
@@ -2499,11 +2438,11 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
-  members.push_back(create<ast::StructMember>("b", &vec, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, decos));
+  members.push_back(create<ast::StructMember>("b", &vec, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   ast::ExpressionList vec_vals;
   vec_vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -2515,10 +2454,9 @@ TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_vals)));
+  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
 
-  ast::TypeConstructorExpression t(&s_type, std::move(vals));
+  ast::TypeConstructorExpression t(&s_type, vals);
 
   ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
   ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);

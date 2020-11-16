@@ -49,10 +49,9 @@ TEST_F(ModuleTest, LookupFunction) {
   Module m;
 
   auto* func = create<Function>("main", VariableList{}, &f32,
-                               create<ast::BlockStatement>());
-  auto* func_ptr = func;
-  m.AddFunction(std::move(func));
-  EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
+                                create<ast::BlockStatement>());
+  m.AddFunction(func);
+  EXPECT_EQ(func, m.FindFunctionByName("main"));
 }
 
 TEST_F(ModuleTest, LookupFunctionMissing) {
@@ -70,7 +69,7 @@ TEST_F(ModuleTest, IsValid_GlobalVariable) {
   auto* var = create<Variable>("var", StorageClass::kInput, &f32);
 
   Module m;
-  m.AddGlobalVariable(std::move(var));
+  m.AddGlobalVariable(var);
   EXPECT_TRUE(m.IsValid());
 }
 
@@ -84,7 +83,7 @@ TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
   auto* var = create<Variable>("var", StorageClass::kInput, nullptr);
 
   Module m;
-  m.AddGlobalVariable(std::move(var));
+  m.AddGlobalVariable(var);
   EXPECT_FALSE(m.IsValid());
 }
 
@@ -126,10 +125,10 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 TEST_F(ModuleTest, IsValid_Function) {
   type::F32Type f32;
   auto* func = create<Function>("main", VariableList(), &f32,
-                               create<ast::BlockStatement>());
+                                create<ast::BlockStatement>());
 
   Module m;
-  m.AddFunction(std::move(func));
+  m.AddFunction(func);
   EXPECT_TRUE(m.IsValid());
 }
 
@@ -143,7 +142,7 @@ TEST_F(ModuleTest, IsValid_Invalid_Function) {
   auto* func = create<Function>();
 
   Module m;
-  m.AddFunction(std::move(func));
+  m.AddFunction(func);
   EXPECT_FALSE(m.IsValid());
 }
 

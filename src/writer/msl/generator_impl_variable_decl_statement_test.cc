@@ -44,7 +44,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -57,7 +57,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -71,7 +71,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -88,16 +88,16 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
+  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members(members);
 
-  ast::type::StructType s("S", std::move(str));
+  ast::type::StructType s("S", str);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &s);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -112,7 +112,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &vec);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -125,7 +125,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   ast::type::MatrixType mat(&f32, 2, 3);
   auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &mat);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -137,7 +137,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   gen.increment_indent();
 
@@ -150,9 +150,9 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(std::move(ident));
+  var->set_constructor(ident);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float a = initializer;
@@ -164,13 +164,12 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   ast::type::VectorType vec(&f32, 3);
 
   ast::ExpressionList values;
-  auto* zero_vec =
-      create<ast::TypeConstructorExpression>(&vec, std::move(values));
+  auto* zero_vec = create<ast::TypeConstructorExpression>(&vec, values);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &vec);
-  var->set_constructor(std::move(zero_vec));
+  var->set_constructor(zero_vec);
 
-  ast::VariableDeclStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);

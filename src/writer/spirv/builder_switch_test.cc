@@ -48,7 +48,7 @@ TEST_F(BuilderTest, Switch_Empty) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
 
-  ast::SwitchStatement expr(std::move(cond), ast::CaseStatementList{});
+  ast::SwitchStatement expr(cond, ast::CaseStatementList{});
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -99,13 +99,10 @@ TEST_F(BuilderTest, Switch_WithCase) {
   selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
-                                             std::move(case_1_body)));
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
-                                             std::move(case_2_body)));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
@@ -166,10 +163,9 @@ TEST_F(BuilderTest, Switch_WithDefault) {
                                            create<ast::SintLiteral>(&i32, 1))));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(default_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
@@ -247,14 +243,11 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   selector_2.push_back(create<ast::SintLiteral>(&i32, 3));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
-                                             std::move(case_1_body)));
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
-                                             std::move(case_2_body)));
-  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
+  cases.push_back(create<ast::CaseStatement>(default_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
@@ -341,14 +334,11 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
-                                             std::move(case_1_body)));
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_2),
-                                             std::move(case_2_body)));
-  cases.push_back(create<ast::CaseStatement>(std::move(default_body)));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
+  cases.push_back(create<ast::CaseStatement>(default_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
@@ -416,11 +406,9 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
-                                             std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
@@ -458,7 +446,7 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   case_1_body->append(
       create<ast::IfStatement>(create<ast::ScalarConstructorExpression>(
                                    create<ast::BoolLiteral>(&bool_type, true)),
-                               std::move(if_body)));
+                               if_body));
 
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
@@ -469,11 +457,9 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(std::move(selector_1),
-                                             std::move(case_1_body)));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
 
-  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
-                            std::move(cases));
+  ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);

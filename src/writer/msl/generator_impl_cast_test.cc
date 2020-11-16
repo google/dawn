@@ -36,7 +36,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
 
-  ast::TypeConstructorExpression cast(&f32, std::move(params));
+  ast::TypeConstructorExpression cast(&f32, params);
 
   ASSERT_TRUE(gen.EmitExpression(&cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float(id)");
@@ -49,7 +49,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
 
-  ast::TypeConstructorExpression cast(&vec3, std::move(params));
+  ast::TypeConstructorExpression cast(&vec3, params);
 
   ASSERT_TRUE(gen.EmitExpression(&cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(id)");

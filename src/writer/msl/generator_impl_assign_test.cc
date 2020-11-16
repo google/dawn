@@ -32,7 +32,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
   auto* lhs = create<ast::IdentifierExpression>("lhs");
   auto* rhs = create<ast::IdentifierExpression>("rhs");
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(lhs, rhs);
 
   gen.increment_indent();
 

@@ -60,7 +60,7 @@ TEST_F(BuilderTest, ArrayAccessor) {
   auto* idx_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
 
-  ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
+  ast::ArrayAccessorExpression expr(ary, idx_expr);
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -101,7 +101,7 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   auto* ary = create<ast::IdentifierExpression>("ary");
   auto* idx_expr = create<ast::IdentifierExpression>("idx");
 
-  ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
+  ast::ArrayAccessorExpression expr(ary, idx_expr);
 
   td.RegisterVariableForTesting(&var);
   td.RegisterVariableForTesting(&idx);
@@ -145,7 +145,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   auto* ary = create<ast::IdentifierExpression>("ary");
 
   ast::ArrayAccessorExpression expr(
-      std::move(ary),
+      ary,
       create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 1)),
@@ -284,11 +284,11 @@ TEST_F(BuilderTest, MemberAccessor) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
-  members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
+  members.push_back(create<ast::StructMember>("a", &f32, decos));
+  members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType s_type("my_struct", std::move(s));
+  auto* s = create<ast::Struct>(members);
+  ast::type::StructType s_type("my_struct", s);
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -333,20 +333,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>("a", &f32, std::move(decos)));
-  inner_members.push_back(
-      create<ast::StructMember>("b", &f32, std::move(decos)));
+  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct(
-      "Inner", create<ast::Struct>(std::move(inner_members)));
+  ast::type::StructType inner_struct("Inner",
+                                     create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct",
-                               create<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -396,22 +393,18 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>("a", &f32, std::move(decos)));
-  inner_members.push_back(
-      create<ast::StructMember>("b", &f32, std::move(decos)));
+  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct(
-      "Inner", create<ast::Struct>(std::move(inner_members)));
+  ast::type::StructType inner_struct("Inner",
+                                     create<ast::Struct>(inner_members));
 
   ast::type::AliasType alias("Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(
-      create<ast::StructMember>("inner", &alias, std::move(decos)));
+  outer_members.push_back(create<ast::StructMember>("inner", &alias, decos));
 
-  ast::type::StructType s_type("Outer",
-                               create<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("Outer", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -461,20 +454,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>("a", &f32, std::move(decos)));
-  inner_members.push_back(
-      create<ast::StructMember>("b", &f32, std::move(decos)));
+  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct(
-      "Inner", create<ast::Struct>(std::move(inner_members)));
+  ast::type::StructType inner_struct("Inner",
+                                     create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct",
-                               create<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -487,7 +477,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.f));
 
-  ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement expr(lhs, rhs);
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -531,20 +521,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>("a", &f32, std::move(decos)));
-  inner_members.push_back(
-      create<ast::StructMember>("b", &f32, std::move(decos)));
+  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct(
-      "Inner", create<ast::Struct>(std::move(inner_members)));
+  ast::type::StructType inner_struct("Inner",
+                                     create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, std::move(decos)));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct",
-                               create<ast::Struct>(std::move(outer_members)));
+  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
   ast::Variable store("store", ast::StorageClass::kFunction, &f32);
@@ -557,7 +544,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
           create<ast::IdentifierExpression>("inner")),
       create<ast::IdentifierExpression>("a"));
 
-  ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement expr(lhs, rhs);
 
   td.RegisterVariableForTesting(&var);
   td.RegisterVariableForTesting(&store);
@@ -793,22 +780,20 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   // index[0].foo[2].bar.baz.yx
 
   ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("baz", &vec3, std::move(decos)));
-  auto* s = create<ast::Struct>(std::move(members));
-  ast::type::StructType c_type("C", std::move(s));
 
-  members.push_back(
-      create<ast::StructMember>("bar", &c_type, std::move(decos)));
-  s = create<ast::Struct>(std::move(members));
-  ast::type::StructType b_type("B", std::move(s));
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{create<ast::StructMember>("baz", &vec3, decos)});
+  ast::type::StructType c_type("C", s);
+
+  s = create<ast::Struct>(
+      ast::StructMemberList{create<ast::StructMember>("bar", &c_type, decos)});
+  ast::type::StructType b_type("B", s);
 
   ast::type::ArrayType b_ary_type(&b_type, 3);
 
-  members.push_back(
-      create<ast::StructMember>("foo", &b_ary_type, std::move(decos)));
-  s = create<ast::Struct>(std::move(members));
-  ast::type::StructType a_type("A", std::move(s));
+  s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>("foo", &b_ary_type, decos)});
+  ast::type::StructType a_type("A", s);
 
   ast::type::ArrayType a_ary_type(&a_type, 2);
 
@@ -880,33 +865,33 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   ast::type::ArrayType arr(&vec, 3);
 
   ast::ExpressionList ary_params;
+  ary_params.push_back(create<ast::TypeConstructorExpression>(
+      &vec, ast::ExpressionList{
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 0.0)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 0.5)),
+            }));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.5)));
-  ary_params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
+  ary_params.push_back(create<ast::TypeConstructorExpression>(
+      &vec, ast::ExpressionList{
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, -0.5)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, -0.5)),
+            }));
 
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, -0.5)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, -0.5)));
-  ary_params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
-
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.5)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, -0.5)));
-  ary_params.push_back(
-      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
+  ary_params.push_back(create<ast::TypeConstructorExpression>(
+      &vec, ast::ExpressionList{
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, 0.5)),
+                create<ast::ScalarConstructorExpression>(
+                    create<ast::FloatLiteral>(&f32, -0.5)),
+            }));
 
   ast::Variable var("pos", ast::StorageClass::kPrivate, &arr);
   var.set_is_const(true);
-  var.set_constructor(
-      create<ast::TypeConstructorExpression>(&arr, std::move(ary_params)));
+  var.set_constructor(create<ast::TypeConstructorExpression>(&arr, ary_params));
 
   ast::ArrayAccessorExpression expr(create<ast::IdentifierExpression>("pos"),
                                     create<ast::ScalarConstructorExpression>(

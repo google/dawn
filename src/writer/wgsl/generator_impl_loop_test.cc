@@ -30,7 +30,7 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
-  ast::LoopStatement l(std::move(body), {});
+  ast::LoopStatement l(body, {});
 
   gen.increment_indent();
 
@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
   auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::DiscardStatement>());
 
-  ast::LoopStatement l(std::move(body), std::move(continuing));
+  ast::LoopStatement l(body, continuing);
 
   gen.increment_indent();
 

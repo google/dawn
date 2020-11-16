@@ -50,18 +50,16 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>("a", &f32, ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &i32, std::move(b_deco)));
-
   auto* str = create<ast::Struct>();
-  str->set_members(std::move(members));
+  str->set_members({
+      create<ast::StructMember>("a", &f32, ast::StructMemberDecorationList{}),
+      create<ast::StructMember>(
+          "b", &i32,
+          ast::StructMemberDecorationList{
+              create<ast::StructMemberOffsetDecoration>(4, Source{})}),
+  });
 
-  ast::type::StructType s("A", std::move(str));
+  ast::type::StructType s("A", str);
   ast::type::AliasType alias("B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
