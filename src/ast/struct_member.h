@@ -93,8 +93,8 @@ class StructMember : public Node {
   StructMemberDecorationList decorations_;
 };
 
-/// A list of unique struct members
-using StructMemberList = std::vector<std::unique_ptr<StructMember>>;
+/// A list of struct members
+using StructMemberList = std::vector<StructMember*>;
 
 }  // namespace ast
 }  // namespace tint

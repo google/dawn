@@ -126,12 +126,12 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
   }
 
   // Look for an existing vertex index builtin
-  for (auto& v : mod_->global_variables()) {
+  for (auto* v : mod_->global_variables()) {
     if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto& d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->AsDecorated()->decorations()) {
       if (d->IsBuiltin() &&
           d->AsBuiltin()->value() == ast::Builtin::kVertexIdx) {
         vertex_index_name_ = v->name();
@@ -143,7 +143,7 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
   // We didn't find a vertex index builtin, so create one
   vertex_index_name_ = kDefaultVertexIndexName;
 
-  auto var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* var = create<ast::DecoratedVariable>(create<ast::Variable>(
       vertex_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
@@ -168,12 +168,12 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
   }
 
   // Look for an existing instance index builtin
-  for (auto& v : mod_->global_variables()) {
+  for (auto* v : mod_->global_variables()) {
     if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto& d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->AsDecorated()->decorations()) {
       if (d->IsBuiltin() &&
           d->AsBuiltin()->value() == ast::Builtin::kInstanceIdx) {
         instance_index_name_ = v->name();
@@ -185,7 +185,7 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
   // We didn't find an instance index builtin, so create one
   instance_index_name_ = kDefaultInstanceIndexName;
 
-  auto var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* var = create<ast::DecoratedVariable>(create<ast::Variable>(
       instance_index_name_, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
@@ -197,12 +197,12 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
 }
 
 void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
-  for (auto& v : mod_->global_variables()) {
+  for (auto*& v : mod_->global_variables()) {
     if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto& d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->AsDecorated()->decorations()) {
       if (!d->IsLocation()) {
         continue;
       }
@@ -213,7 +213,7 @@ void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
       // in the AST.
       v = create<ast::Variable>(v->name(), ast::StorageClass::kPrivate,
                                 v->type());
-      location_to_var_[location] = v.get();
+      location_to_var_[location] = v;
       break;
     }
   }
@@ -247,7 +247,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     // The decorated variable with struct type
-    auto var = create<ast::DecoratedVariable>(
+    auto* var = create<ast::DecoratedVariable>(
         create<ast::Variable>(GetVertexBufferName(i),
                               ast::StorageClass::kStorageBuffer, struct_type));
 
@@ -268,10 +268,10 @@ void VertexPullingTransform::AddVertexPullingPreamble(
   // location.
 
   // A block statement allowing us to use append instead of insert
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto pos_declaration =
+  auto* pos_declaration =
       create<ast::VariableDeclStatement>(create<ast::Variable>(
           kPullingPosVarName, ast::StorageClass::kFunction, GetI32Type()));
 
@@ -293,13 +293,13 @@ void VertexPullingTransform::AddVertexPullingPreamble(
       auto* v = it->second;
 
       // Identifier to index by
-      auto index_identifier = create<ast::IdentifierExpression>(
+      auto* index_identifier = create<ast::IdentifierExpression>(
           buffer_layout.step_mode == InputStepMode::kVertex
               ? vertex_index_name_
               : instance_index_name_);
 
       // An expression for the start of the read in the buffer in bytes
-      auto pos_value = create<ast::BinaryExpression>(
+      auto* pos_value = create<ast::BinaryExpression>(
           ast::BinaryOp::kAdd,
           create<ast::BinaryExpression>(
               ast::BinaryOp::kMultiply, std::move(index_identifier),
@@ -307,7 +307,7 @@ void VertexPullingTransform::AddVertexPullingPreamble(
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 
       // Update position of the read
-      auto set_pos_expr = create<ast::AssignmentStatement>(
+      auto* set_pos_expr = create<ast::AssignmentStatement>(
           CreatePullingPositionIdent(), std::move(pos_value));
       block->append(std::move(set_pos_expr));
 
@@ -320,20 +320,17 @@ void VertexPullingTransform::AddVertexPullingPreamble(
   vertex_func->body()->insert(0, std::move(block));
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::GenUint(
-    uint32_t value) {
+ast::Expression* VertexPullingTransform::GenUint(uint32_t value) {
   return create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(GetU32Type(), value));
 }
 
-std::unique_ptr<ast::Expression>
-VertexPullingTransform::CreatePullingPositionIdent() {
+ast::Expression* VertexPullingTransform::CreatePullingPositionIdent() {
   return create<ast::IdentifierExpression>(kPullingPosVarName);
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessByFormat(
-    uint32_t buffer,
-    VertexFormat format) {
+ast::Expression* VertexPullingTransform::AccessByFormat(uint32_t buffer,
+                                                        VertexFormat format) {
   // TODO(idanr): this doesn't account for the format of the attribute in the
   // shader. ex: vec<u32> in shader, and attribute claims VertexFormat::Float4
   // right now, we would try to assign a vec4<f32> to this attribute, but we
@@ -359,9 +356,8 @@ std::unique_ptr<ast::Expression> VertexPullingTransform::AccessByFormat(
   }
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessU32(
-    uint32_t buffer,
-    std::unique_ptr<ast::Expression> pos) {
+ast::Expression* VertexPullingTransform::AccessU32(uint32_t buffer,
+                                                   ast::Expression* pos) {
   // Here we divide by 4, since the buffer is uint32 not uint8. The input buffer
   // has byte offsets for each attribute, and we will convert it to u32 indexes
   // by dividing. Then, that element is going to be read, and if needed,
@@ -375,26 +371,23 @@ std::unique_ptr<ast::Expression> VertexPullingTransform::AccessU32(
                                     GenUint(4)));
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessI32(
-    uint32_t buffer,
-    std::unique_ptr<ast::Expression> pos) {
+ast::Expression* VertexPullingTransform::AccessI32(uint32_t buffer,
+                                                   ast::Expression* pos) {
   // as<T> reinterprets bits
   return create<ast::BitcastExpression>(GetI32Type(),
                                         AccessU32(buffer, std::move(pos)));
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessF32(
-    uint32_t buffer,
-    std::unique_ptr<ast::Expression> pos) {
+ast::Expression* VertexPullingTransform::AccessF32(uint32_t buffer,
+                                                   ast::Expression* pos) {
   // as<T> reinterprets bits
   return create<ast::BitcastExpression>(GetF32Type(),
                                         AccessU32(buffer, std::move(pos)));
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessPrimitive(
-    uint32_t buffer,
-    std::unique_ptr<ast::Expression> pos,
-    VertexFormat format) {
+ast::Expression* VertexPullingTransform::AccessPrimitive(uint32_t buffer,
+                                                         ast::Expression* pos,
+                                                         VertexFormat format) {
   // This function uses a position expression to read, rather than using the
   // position variable. This allows us to read from offset positions relative to
   // |kPullingPosVarName|. We can't call AccessByFormat because it reads only
@@ -411,18 +404,17 @@ std::unique_ptr<ast::Expression> VertexPullingTransform::AccessPrimitive(
   }
 }
 
-std::unique_ptr<ast::Expression> VertexPullingTransform::AccessVec(
-    uint32_t buffer,
-    uint32_t element_stride,
-    ast::type::Type* base_type,
-    VertexFormat base_format,
-    uint32_t count) {
+ast::Expression* VertexPullingTransform::AccessVec(uint32_t buffer,
+                                                   uint32_t element_stride,
+                                                   ast::type::Type* base_type,
+                                                   VertexFormat base_format,
+                                                   uint32_t count) {
   ast::ExpressionList expr_list;
   for (uint32_t i = 0; i < count; ++i) {
     // Offset read position by element_stride for each component
-    auto cur_pos = create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
-                                                 CreatePullingPositionIdent(),
-                                                 GenUint(element_stride * i));
+    auto* cur_pos = create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
+                                                  CreatePullingPositionIdent(),
+                                                  GenUint(element_stride * i));
     expr_list.push_back(
         AccessPrimitive(buffer, std::move(cur_pos), base_format));
   }

@@ -29,8 +29,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-  auto lhs = create<ast::IdentifierExpression>("lhs");
-  auto rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<ast::IdentifierExpression>("lhs");
+  auto* rhs = create<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
   gen.increment_indent();

@@ -33,9 +33,9 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   ast::type::I32Type i32;
-  auto lit = create<ast::SintLiteral>(&i32, 5);
-  auto idx = create<ast::ScalarConstructorExpression>(std::move(lit));
-  auto ary = create<ast::IdentifierExpression>("ary");
+  auto* lit = create<ast::SintLiteral>(&i32, 5);
+  auto* idx = create<ast::ScalarConstructorExpression>(std::move(lit));
+  auto* ary = create<ast::IdentifierExpression>("ary");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
@@ -44,8 +44,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
-  auto ary = create<ast::IdentifierExpression>("ary");
-  auto idx = create<ast::IdentifierExpression>("idx");
+  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* idx = create<ast::IdentifierExpression>("idx");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 

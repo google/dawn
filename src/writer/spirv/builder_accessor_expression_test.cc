@@ -56,8 +56,8 @@ TEST_F(BuilderTest, ArrayAccessor) {
 
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
 
-  auto ary = create<ast::IdentifierExpression>("ary");
-  auto idx_expr = create<ast::ScalarConstructorExpression>(
+  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* idx_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
@@ -98,8 +98,8 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
   ast::Variable idx("idx", ast::StorageClass::kFunction, &i32);
 
-  auto ary = create<ast::IdentifierExpression>("ary");
-  auto idx_expr = create<ast::IdentifierExpression>("idx");
+  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* idx_expr = create<ast::IdentifierExpression>("idx");
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
@@ -142,7 +142,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 
   ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
 
-  auto ary = create<ast::IdentifierExpression>("ary");
+  auto* ary = create<ast::IdentifierExpression>("ary");
 
   ast::ArrayAccessorExpression expr(
       std::move(ary),
@@ -287,7 +287,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
@@ -478,13 +478,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("ident"),
           create<ast::IdentifierExpression>("inner")),
       create<ast::IdentifierExpression>("a"));
 
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.f));
 
   ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
@@ -549,9 +549,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
   ast::Variable store("store", ast::StorageClass::kFunction, &f32);
 
-  auto lhs = create<ast::IdentifierExpression>("store");
+  auto* lhs = create<ast::IdentifierExpression>("store");
 
-  auto rhs = create<ast::MemberAccessorExpression>(
+  auto* rhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("ident"),
           create<ast::IdentifierExpression>("inner")),
@@ -795,7 +795,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("baz", &vec3, std::move(decos)));
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType c_type("C", std::move(s));
 
   members.push_back(

@@ -42,7 +42,7 @@ class StructDecoration : public Decoration {
 };
 
 /// List of struct decorations
-using StructDecorationList = std::vector<std::unique_ptr<StructDecoration>>;
+using StructDecorationList = std::vector<StructDecoration*>;
 
 }  // namespace ast
 }  // namespace tint

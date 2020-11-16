@@ -284,14 +284,14 @@ bool Builder::Build() {
                     {Operand::Int(SpvAddressingModelLogical),
                      Operand::Int(SpvMemoryModelGLSL450)});
 
-  for (const auto& var : mod_->global_variables()) {
-    if (!GenerateGlobalVariable(var.get())) {
+  for (auto* var : mod_->global_variables()) {
+    if (!GenerateGlobalVariable(var)) {
       return false;
     }
   }
 
-  for (const auto& func : mod_->functions()) {
-    if (!GenerateFunction(func.get())) {
+  for (auto* func : mod_->functions()) {
+    if (!GenerateFunction(func)) {
       return false;
     }
   }
@@ -528,7 +528,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
        Operand::Int(func_type_id)}};
 
   InstructionList params;
-  for (const auto& param : func->params()) {
+  for (auto* param : func->params()) {
     auto param_op = result_op();
     auto param_id = param_op.to_i();
 
@@ -548,8 +548,8 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
 
-  for (const auto& stmt : *(func->body())) {
-    if (!GenerateStatement(stmt.get())) {
+  for (auto* stmt : *func->body()) {
+    if (!GenerateStatement(stmt)) {
       return false;
     }
   }
@@ -586,7 +586,7 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
   }
 
   OperandList ops = {func_op, Operand::Int(ret_id)};
-  for (const auto& param : func->params()) {
+  for (auto* param : func->params()) {
     auto param_type_id = GenerateTypeIfNeeded(param->type());
     if (param_type_id == 0) {
       return 0;
@@ -754,7 +754,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   push_type(spv::Op::OpVariable, std::move(ops));
 
   if (var->IsDecorated()) {
-    for (const auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBuiltin()) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
@@ -842,7 +842,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 
     uint32_t i = 0;
     for (; i < strct->members().size(); ++i) {
-      const auto& member = strct->members()[i];
+      auto* member = strct->members()[i];
       if (member->name() == name) {
         break;
       }
@@ -1151,7 +1151,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
   auto* tc = expr->AsConstructor()->AsTypeConstructor();
   auto* result_type = tc->type()->UnwrapAll();
   for (size_t i = 0; i < tc->values().size(); ++i) {
-    auto* e = tc->values()[i].get();
+    auto* e = tc->values()[i];
 
     if (!e->IsConstructor()) {
       if (is_global_init) {
@@ -1224,7 +1224,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
          result_type->AsVector()->size() == value_type->AsVector()->size());
   }
   if (can_cast_or_copy) {
-    return GenerateCastOrCopy(result_type, values[0].get());
+    return GenerateCastOrCopy(result_type, values[0]);
   }
 
   auto type_id = GenerateTypeIfNeeded(init->type());
@@ -1240,13 +1240,13 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   OperandList ops;
-  for (const auto& e : values) {
+  for (auto* e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
       id = GenerateConstructorExpression(nullptr, e->AsConstructor(),
                                          is_global_init);
     } else {
-      id = GenerateExpression(e.get());
+      id = GenerateExpression(e);
       id = GenerateLoadIfNeeded(e->result_type(), id);
     }
     if (id == 0) {
@@ -1268,7 +1268,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // Both scalars, but not the same type so we need to generate a conversion
     // of the value.
     if (value_type->is_scalar() && result_type->is_scalar()) {
-      id = GenerateCastOrCopy(result_type, values[0].get());
+      id = GenerateCastOrCopy(result_type, values[0]);
       out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
@@ -1686,8 +1686,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
 bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
   scope_stack_.push_scope();
-  for (const auto& block_stmt : *stmt) {
-    if (!GenerateStatement(block_stmt.get())) {
+  for (auto* block_stmt : *stmt) {
+    if (!GenerateStatement(block_stmt)) {
       return false;
     }
   }
@@ -1725,8 +1725,8 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   }
   ops.push_back(Operand::Int(func_id));
 
-  for (const auto& param : expr->params()) {
-    auto id = GenerateExpression(param.get());
+  for (auto* param : expr->params()) {
+    auto id = GenerateExpression(param);
     if (id == 0) {
       return 0;
     }
@@ -1851,8 +1851,8 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     return 0;
   }
 
-  for (const auto& p : call->params()) {
-    auto val_id = GenerateExpression(p.get());
+  for (auto* p : call->params()) {
+    auto val_id = GenerateExpression(p);
     if (val_id == 0) {
       return 0;
     }
@@ -1875,7 +1875,7 @@ uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                            uint32_t result_id,
                                            OperandList wgsl_params) {
   auto* texture_type =
-      call->params()[0].get()->result_type()->UnwrapAll()->AsTexture();
+      call->params()[0]->result_type()->UnwrapAll()->AsTexture();
 
   // TODO(dsinclair): Remove the LOD param from textureLoad on storage textures
   // when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
@@ -2036,7 +2036,7 @@ bool Builder::GenerateConditionalBlock(
   if (false_block_id != merge_block_id) {
     GenerateLabel(false_block_id);
 
-    auto* else_stmt = else_stmts[cur_else_idx].get();
+    auto* else_stmt = else_stmts[cur_else_idx];
     // Handle the else case by just outputting the statements.
     if (!else_stmt->HasCondition()) {
       if (!GenerateBlockStatement(else_stmt->body())) {
@@ -2085,7 +2085,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   OperandList params = {Operand::Int(cond_id), Operand::Int(default_block_id)};
 
   std::vector<uint32_t> case_ids;
-  for (const auto& item : stmt->body()) {
+  for (const auto* item : stmt->body()) {
     if (item->IsDefault()) {
       case_ids.push_back(default_block_id);
       continue;
@@ -2095,7 +2095,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
     auto block_id = block.to_i();
 
     case_ids.push_back(block_id);
-    for (const auto& selector : item->selectors()) {
+    for (auto* selector : item->selectors()) {
       if (!selector->IsSint()) {
         error_ = "expected integer literal for switch case label";
         return false;
@@ -2118,7 +2118,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   // branch, otherwise the branch is to the merge block which comes after
   // the switch statement.
   for (uint32_t i = 0; i < body.size(); i++) {
-    auto& item = body[i];
+    auto* item = body[i];
 
     if (item->IsDefault()) {
       generated_default = true;
@@ -2498,7 +2498,7 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
 
   auto& members = impl->members();
   for (uint32_t i = 0; i < members.size(); ++i) {
-    auto mem_id = GenerateStructMember(struct_id, i, members[i].get());
+    auto mem_id = GenerateStructMember(struct_id, i, members[i]);
     if (mem_id == 0) {
       return false;
     }
@@ -2531,7 +2531,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
               Operand::String(ctx_->namer()->NameFor(member->name()))});
 
   bool has_layout = false;
-  for (const auto& deco : member->decorations()) {
+  for (auto* deco : member->decorations()) {
     if (deco->IsOffset()) {
       push_annot(spv::Op::OpMemberDecorate,
                  {Operand::Int(struct_id), Operand::Int(idx),

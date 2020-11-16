@@ -31,25 +31,25 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-  auto def_body = create<ast::BlockStatement>();
+  auto* def_body = create<ast::BlockStatement>();
   def_body->append(create<ast::BreakStatement>());
-  auto def = create<ast::CaseStatement>(std::move(def_body));
+  auto* def = create<ast::CaseStatement>(std::move(def_body));
 
   ast::type::I32Type i32;
   ast::CaseSelectorList case_val;
   case_val.push_back(create<ast::SintLiteral>(&i32, 5));
 
-  auto case_body = create<ast::BlockStatement>();
+  auto* case_body = create<ast::BlockStatement>();
   case_body->append(create<ast::BreakStatement>());
 
-  auto case_stmt =
+  auto* case_stmt =
       create<ast::CaseStatement>(std::move(case_val), std::move(case_body));
 
   ast::CaseStatementList body;
   body.push_back(std::move(case_stmt));
   body.push_back(std::move(def));
 
-  auto cond = create<ast::IdentifierExpression>("cond");
+  auto* cond = create<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
   gen.increment_indent();
 

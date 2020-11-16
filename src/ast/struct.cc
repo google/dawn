@@ -42,16 +42,16 @@ Struct::Struct(Struct&&) = default;
 Struct::~Struct() = default;
 
 StructMember* Struct::get_member(const std::string& name) const {
-  for (auto& mem : members_) {
+  for (auto* mem : members_) {
     if (mem->name() == name) {
-      return mem.get();
+      return mem;
     }
   }
   return nullptr;
 }
 
 bool Struct::IsBlockDecorated() const {
-  for (auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsBlock()) {
       return true;
     }
@@ -60,7 +60,7 @@ bool Struct::IsBlockDecorated() const {
 }
 
 bool Struct::IsValid() const {
-  for (const auto& mem : members_) {
+  for (auto* mem : members_) {
     if (mem == nullptr || !mem->IsValid()) {
       return false;
     }
@@ -70,13 +70,13 @@ bool Struct::IsValid() const {
 
 void Struct::to_str(std::ostream& out, size_t indent) const {
   out << "Struct{" << std::endl;
-  for (auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     make_indent(out, indent + 2);
     out << "[[";
     deco->to_str(out, 0);
     out << "]]" << std::endl;
   }
-  for (const auto& member : members_) {
+  for (auto* member : members_) {
     member->to_str(out, indent + 2);
   }
   make_indent(out, indent);

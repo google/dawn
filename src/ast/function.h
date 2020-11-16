@@ -51,8 +51,7 @@ class Function : public Node {
   };
 
   /// Create a new empty function statement
-  Function();
-  /// Create a function
+  Function();  /// Create a function
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
@@ -60,7 +59,7 @@ class Function : public Node {
   Function(const std::string& name,
            VariableList params,
            type::Type* return_type,
-           std::unique_ptr<BlockStatement> body);
+           BlockStatement* body);
   /// Create a function
   /// @param source the variable source
   /// @param name the function name
@@ -71,7 +70,7 @@ class Function : public Node {
            const std::string& name,
            VariableList params,
            type::Type* return_type,
-           std::unique_ptr<BlockStatement> body);
+           BlockStatement* body);
   /// Move constructor
   Function(Function&&);
 
@@ -97,8 +96,8 @@ class Function : public Node {
   }
   /// Adds a decoration to the function
   /// @param deco the decoration to set
-  void add_decoration(std::unique_ptr<FunctionDecoration> deco) {
-    decorations_.push_back(std::move(deco));
+  void add_decoration(FunctionDecoration* deco) {
+    decorations_.push_back(deco);
   }
   /// @returns the decorations attached to this function
   const FunctionDecorationList& decorations() const { return decorations_; }
@@ -187,13 +186,11 @@ class Function : public Node {
 
   /// Sets the body of the function
   /// @param body the function body
-  void set_body(std::unique_ptr<BlockStatement> body) {
-    body_ = std::move(body);
-  }
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the function body
-  const BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_; }
   /// @returns the function body
-  BlockStatement* body() { return body_.get(); }
+  BlockStatement* body() { return body_; }
 
   /// @returns true if the name and type are both present
   bool IsValid() const override;
@@ -216,14 +213,14 @@ class Function : public Node {
   std::string name_;
   VariableList params_;
   type::Type* return_type_ = nullptr;
-  std::unique_ptr<BlockStatement> body_;
+  BlockStatement* body_ = nullptr;
   std::vector<Variable*> referenced_module_vars_;
   std::vector<std::string> ancestor_entry_points_;
   FunctionDecorationList decorations_;
 };
 
-/// A list of unique functions
-using FunctionList = std::vector<std::unique_ptr<Function>>;
+/// A list of functions
+using FunctionList = std::vector<Function*>;
 
 }  // namespace ast
 }  // namespace tint

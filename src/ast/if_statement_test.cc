@@ -25,11 +25,11 @@ namespace {
 using IfStatementTest = TestHelper;
 
 TEST_F(IfStatementTest, Creation) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto* cond_ptr = cond.get();
+  auto* cond_ptr = cond;
   auto* stmt_ptr = body->get(0);
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -39,8 +39,8 @@ TEST_F(IfStatementTest, Creation) {
 }
 
 TEST_F(IfStatementTest, Creation_WithSource) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   IfStatement stmt(Source{Source::Location{20, 2}}, std::move(cond),
@@ -56,8 +56,8 @@ TEST_F(IfStatementTest, IsIf) {
 }
 
 TEST_F(IfStatementTest, IsValid) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -65,8 +65,8 @@ TEST_F(IfStatementTest, IsValid) {
 }
 
 TEST_F(IfStatementTest, IsValid_WithElseStatements) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
@@ -80,7 +80,7 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
 }
 
 TEST_F(IfStatementTest, IsValid_MissingCondition) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   IfStatement stmt(nullptr, std::move(body));
@@ -88,8 +88,8 @@ TEST_F(IfStatementTest, IsValid_MissingCondition) {
 }
 
 TEST_F(IfStatementTest, IsValid_InvalidCondition) {
-  auto cond = create<IdentifierExpression>("");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -97,8 +97,8 @@ TEST_F(IfStatementTest, IsValid_InvalidCondition) {
 }
 
 TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
@@ -107,8 +107,8 @@ TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
@@ -117,8 +117,8 @@ TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(IfStatementTest, IsValid_NullElseStatement) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
@@ -133,8 +133,8 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
 }
 
 TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
@@ -147,8 +147,8 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
 }
 
 TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
@@ -161,8 +161,8 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
 }
 
 TEST_F(IfStatementTest, IsValid_ElseNotLast) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
@@ -176,8 +176,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
 }
 
 TEST_F(IfStatementTest, ToStr) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   IfStatement stmt(std::move(cond), std::move(body));
@@ -196,14 +196,14 @@ TEST_F(IfStatementTest, ToStr) {
 }
 
 TEST_F(IfStatementTest, ToStr_WithElseStatements) {
-  auto cond = create<IdentifierExpression>("cond");
-  auto body = create<BlockStatement>();
+  auto* cond = create<IdentifierExpression>("cond");
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto else_if_body = create<BlockStatement>();
+  auto* else_if_body = create<BlockStatement>();
   else_if_body->append(create<DiscardStatement>());
 
-  auto else_body = create<BlockStatement>();
+  auto* else_body = create<BlockStatement>();
   else_body->append(create<DiscardStatement>());
   else_body->append(create<DiscardStatement>());
 

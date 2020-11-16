@@ -33,30 +33,27 @@ class AssignmentStatement : public Statement {
   /// Constructor
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
-  AssignmentStatement(std::unique_ptr<Expression> lhs,
-                      std::unique_ptr<Expression> rhs);
+  AssignmentStatement(Expression* lhs, Expression* rhs);
   /// Constructor
   /// @param source the assignment statement source
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
-  AssignmentStatement(const Source& source,
-                      std::unique_ptr<Expression> lhs,
-                      std::unique_ptr<Expression> rhs);
+  AssignmentStatement(const Source& source, Expression* lhs, Expression* rhs);
   /// Move constructor
   AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;
 
   /// Sets the left side of the statement
   /// @param lhs the left side to set
-  void set_lhs(std::unique_ptr<Expression> lhs) { lhs_ = std::move(lhs); }
+  void set_lhs(Expression* lhs) { lhs_ = lhs; }
   /// @returns the left side expression
-  Expression* lhs() const { return lhs_.get(); }
+  Expression* lhs() const { return lhs_; }
 
   /// Sets the right side of the statement
   /// @param rhs the right side to set
-  void set_rhs(std::unique_ptr<Expression> rhs) { rhs_ = std::move(rhs); }
+  void set_rhs(Expression* rhs) { rhs_ = rhs; }
   /// @returns the right side expression
-  Expression* rhs() const { return rhs_.get(); }
+  Expression* rhs() const { return rhs_; }
 
   /// @returns true if this is an assignment statement
   bool IsAssign() const override;
@@ -72,8 +69,8 @@ class AssignmentStatement : public Statement {
  private:
   AssignmentStatement(const AssignmentStatement&) = delete;
 
-  std::unique_ptr<Expression> lhs_;
-  std::unique_ptr<Expression> rhs_;
+  Expression* lhs_ = nullptr;
+  Expression* rhs_ = nullptr;
 };
 
 }  // namespace ast

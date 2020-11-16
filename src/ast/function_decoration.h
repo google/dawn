@@ -51,8 +51,8 @@ class FunctionDecoration : public Decoration {
   explicit FunctionDecoration(const Source& source);
 };
 
-/// A list of unique function decorations
-using FunctionDecorationList = std::vector<std::unique_ptr<FunctionDecoration>>;
+/// A list of function decorations
+using FunctionDecorationList = std::vector<FunctionDecoration*>;
 
 }  // namespace ast
 }  // namespace tint

@@ -66,9 +66,9 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   // loop {
   //   v = 2;
   // }
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -76,11 +76,11 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
 
   ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -112,26 +112,26 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>();
   continuing->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 3))));
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -160,7 +160,7 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ContinueStatement>());
 
   ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());
@@ -187,7 +187,7 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
 
   ast::LoopStatement expr(std::move(body), create<ast::BlockStatement>());

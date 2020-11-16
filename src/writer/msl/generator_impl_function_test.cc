@@ -60,10 +60,10 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::type::VoidType void_type;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                     std::move(body));
 
   mod.AddFunction(std::move(func));
   gen.increment_indent();
@@ -81,10 +81,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ast::type::VoidType void_type;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("main", ast::VariableList{}, &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("main", ast::VariableList{}, &void_type,
+                                     std::move(body));
 
   mod.AddFunction(std::move(func));
   gen.increment_indent();
@@ -109,10 +109,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 
   ast::type::VoidType void_type;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("my_func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("my_func", std::move(params), &void_type,
+                                     std::move(body));
 
   mod.AddFunction(std::move(func));
   gen.increment_indent();
@@ -131,33 +131,33 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("foo")));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -191,7 +191,7 @@ TEST_F(MslGeneratorImplTest,
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
@@ -199,20 +199,20 @@ TEST_F(MslGeneratorImplTest,
       create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  auto depth_var = create<ast::DecoratedVariable>(
+  auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
   decos.push_back(
       create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  td.RegisterVariableForTesting(depth_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
   mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("depth"),
       create<ast::MemberAccessorExpression>(
@@ -220,8 +220,8 @@ TEST_F(MslGeneratorImplTest,
           create<ast::IdentifierExpression>("x"))));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -250,7 +250,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
@@ -258,22 +258,22 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("x")));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -307,7 +307,7 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
@@ -315,7 +315,7 @@ TEST_F(MslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -323,22 +323,22 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("b")));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -376,7 +376,7 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
@@ -384,7 +384,7 @@ TEST_F(MslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -392,23 +392,23 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
 
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("b")));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -438,26 +438,26 @@ TEST_F(
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  auto val_var = create<ast::DecoratedVariable>(
+  auto* val_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("val", ast::StorageClass::kOutput, &f32));
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   val_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
-  td.RegisterVariableForTesting(val_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
+  td.RegisterVariableForTesting(val_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
@@ -467,7 +467,7 @@ TEST_F(
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("foo")));
@@ -476,8 +476,8 @@ TEST_F(
       create<ast::IdentifierExpression>("param")));
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("foo")));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -491,8 +491,8 @@ TEST_F(
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   std::move(expr))));
   body->append(create<ast::ReturnStatement>());
-  auto func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
-                                      std::move(body));
+  auto* func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
+                                       std::move(body));
   func_1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -533,7 +533,7 @@ TEST_F(MslGeneratorImplTest,
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto depth_var = create<ast::DecoratedVariable>(
+  auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
@@ -541,7 +541,7 @@ TEST_F(MslGeneratorImplTest,
       create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(depth_var);
 
   mod.AddGlobalVariable(std::move(depth_var));
 
@@ -549,11 +549,11 @@ TEST_F(MslGeneratorImplTest,
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -568,8 +568,8 @@ TEST_F(MslGeneratorImplTest,
                                   std::move(expr))));
   body->append(create<ast::ReturnStatement>());
 
-  auto func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
-                                      std::move(body));
+  auto* func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
+                                       std::move(body));
   func_1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -604,7 +604,7 @@ TEST_F(
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
@@ -612,14 +612,14 @@ TEST_F(
       create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  auto depth_var = create<ast::DecoratedVariable>(
+  auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
   decos.push_back(
       create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  td.RegisterVariableForTesting(depth_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
   mod.AddGlobalVariable(std::move(depth_var));
@@ -628,7 +628,7 @@ TEST_F(
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("depth"),
       create<ast::MemberAccessorExpression>(
@@ -636,8 +636,8 @@ TEST_F(
           create<ast::IdentifierExpression>("x"))));
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -651,8 +651,8 @@ TEST_F(
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   std::move(expr))));
   body->append(create<ast::ReturnStatement>());
-  auto func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
-                                      std::move(body));
+  auto* func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
+                                       std::move(body));
   func_1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -686,7 +686,7 @@ TEST_F(MslGeneratorImplTest,
   ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
@@ -694,7 +694,7 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
 
@@ -702,13 +702,13 @@ TEST_F(MslGeneratorImplTest,
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -716,7 +716,7 @@ TEST_F(MslGeneratorImplTest,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::CallExpression>(
       create<ast::IdentifierExpression>("sub_func"), std::move(expr)));
 
@@ -724,8 +724,8 @@ TEST_F(MslGeneratorImplTest,
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -762,7 +762,7 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
@@ -770,7 +770,7 @@ TEST_F(MslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -778,20 +778,20 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("b"))));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -799,7 +799,7 @@ TEST_F(MslGeneratorImplTest,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::CallExpression>(
       create<ast::IdentifierExpression>("sub_func"), std::move(expr)));
 
@@ -807,8 +807,8 @@ TEST_F(MslGeneratorImplTest,
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -851,7 +851,7 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
@@ -859,7 +859,7 @@ TEST_F(MslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -867,20 +867,20 @@ TEST_F(MslGeneratorImplTest,
   decos.push_back(create<ast::SetDecoration>(1, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ast::VariableList params;
   params.push_back(
       create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("b"))));
-  auto sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
-                                        std::move(body));
+  auto* sub_func = create<ast::Function>("sub_func", std::move(params), &f32,
+                                         std::move(body));
 
   mod.AddFunction(std::move(sub_func));
 
@@ -888,7 +888,7 @@ TEST_F(MslGeneratorImplTest,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::CallExpression>(
       create<ast::IdentifierExpression>("sub_func"), std::move(expr)));
 
@@ -896,8 +896,8 @@ TEST_F(MslGeneratorImplTest,
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::ReturnStatement>());
 
-  auto func = create<ast::Function>("frag_main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("frag_main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -931,23 +931,23 @@ TEST_F(MslGeneratorImplTest,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(bar_var);
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
-  auto list = create<ast::BlockStatement>();
+  auto* list = create<ast::BlockStatement>();
   list->append(create<ast::ReturnStatement>());
 
   body->append(create<ast::IfStatement>(
@@ -960,8 +960,8 @@ TEST_F(MslGeneratorImplTest,
 
   body->append(create<ast::ReturnStatement>());
 
-  auto func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
-                                      std::move(body));
+  auto* func_1 = create<ast::Function>("ep_1", std::move(params), &void_type,
+                                       std::move(body));
   func_1->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
 
@@ -991,8 +991,8 @@ TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
   ast::type::VoidType void_type;
 
-  auto func = create<ast::Function>("main", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("main", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
@@ -1016,10 +1016,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
 
   ast::type::VoidType void_type;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("my_func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("my_func", std::move(params), &void_type,
+                                     std::move(body));
 
   mod.AddFunction(std::move(func));
 
@@ -1064,12 +1064,12 @@ TEST_F(MslGeneratorImplTest,
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto str = create<ast::Struct>(std::move(s_decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(s_decos), std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
   ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
-  auto data_var = create<ast::DecoratedVariable>(
+  auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -1079,22 +1079,22 @@ TEST_F(MslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  td.RegisterVariableForTesting(data_var.get());
+  td.RegisterVariableForTesting(data_var);
   mod.AddGlobalVariable(std::move(data_var));
 
   {
     ast::VariableList params;
-    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
 
-    auto body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func = create<ast::Function>("a", std::move(params), &void_type,
-                                      std::move(body));
+    auto* func = create<ast::Function>("a", std::move(params), &void_type,
+                                       std::move(body));
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
@@ -1103,17 +1103,17 @@ TEST_F(MslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
 
-    auto body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func = create<ast::Function>("b", std::move(params), &void_type,
-                                      std::move(body));
+    auto* func = create<ast::Function>("b", std::move(params), &void_type,
+                                       std::move(body));
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 

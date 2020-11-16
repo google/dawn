@@ -132,7 +132,7 @@ TEST_F(AccessControlTypeTest, MinBufferBindingSizeStruct) {
 
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AccessControlType at{AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -181,7 +181,7 @@ TEST_F(AccessControlTypeTest, BaseAlignmentStruct) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AccessControlType at{AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));

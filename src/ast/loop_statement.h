@@ -30,38 +30,33 @@ class LoopStatement : public Statement {
   /// Constructor
   /// @param body the body statements
   /// @param continuing the continuing statements
-  LoopStatement(std::unique_ptr<BlockStatement> body,
-                std::unique_ptr<BlockStatement> continuing);
+  LoopStatement(BlockStatement* body, BlockStatement* continuing);
   /// Constructor
   /// @param source the loop statement source
   /// @param body the body statements
   /// @param continuing the continuing statements
   LoopStatement(const Source& source,
-                std::unique_ptr<BlockStatement> body,
-                std::unique_ptr<BlockStatement> continuing);
+                BlockStatement* body,
+                BlockStatement* continuing);
   /// Move constructor
   LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
 
   /// Sets the body statements
   /// @param body the body statements
-  void set_body(std::unique_ptr<BlockStatement> body) {
-    body_ = std::move(body);
-  }
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the body statements
-  const BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_; }
   /// @returns the body statements
-  BlockStatement* body() { return body_.get(); }
+  BlockStatement* body() { return body_; }
 
   /// Sets the continuing statements
   /// @param continuing the continuing statements
-  void set_continuing(std::unique_ptr<BlockStatement> continuing) {
-    continuing_ = std::move(continuing);
-  }
+  void set_continuing(BlockStatement* continuing) { continuing_ = continuing; }
   /// @returns the continuing statements
-  const BlockStatement* continuing() const { return continuing_.get(); }
+  const BlockStatement* continuing() const { return continuing_; }
   /// @returns the continuing statements
-  BlockStatement* continuing() { return continuing_.get(); }
+  BlockStatement* continuing() { return continuing_; }
   /// @returns true if there are continuing statements in the loop
   bool has_continuing() const {
     return continuing_ != nullptr && !continuing_->empty();
@@ -81,8 +76,8 @@ class LoopStatement : public Statement {
  private:
   LoopStatement(const LoopStatement&) = delete;
 
-  std::unique_ptr<BlockStatement> body_;
-  std::unique_ptr<BlockStatement> continuing_;
+  BlockStatement* body_ = nullptr;
+  BlockStatement* continuing_ = nullptr;
 };
 
 }  // namespace ast

@@ -54,8 +54,8 @@ using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit) {
   auto params = GetParam();
 
-  auto left = create<ast::IdentifierExpression>("left");
-  auto right = create<ast::IdentifierExpression>("right");
+  auto* left = create<ast::IdentifierExpression>("left");
+  auto* right = create<ast::IdentifierExpression>("right");
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
@@ -84,8 +84,8 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
-  auto left = create<ast::IdentifierExpression>("left");
-  auto right = create<ast::IdentifierExpression>("right");
+  auto* left = create<ast::IdentifierExpression>("left");
+  auto* right = create<ast::IdentifierExpression>("right");
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(left),
                              std::move(right));
@@ -101,10 +101,10 @@ if (_tint_tmp) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
   // (a && b) || (c || d)
-  auto a = create<ast::IdentifierExpression>("a");
-  auto b = create<ast::IdentifierExpression>("b");
-  auto c = create<ast::IdentifierExpression>("c");
-  auto d = create<ast::IdentifierExpression>("d");
+  auto* a = create<ast::IdentifierExpression>("a");
+  auto* b = create<ast::IdentifierExpression>("b");
+  auto* c = create<ast::IdentifierExpression>("c");
+  auto* d = create<ast::IdentifierExpression>("d");
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kLogicalOr,
@@ -131,8 +131,8 @@ if (!_tint_tmp_0) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
-  auto left = create<ast::IdentifierExpression>("left");
-  auto right = create<ast::IdentifierExpression>("right");
+  auto* left = create<ast::IdentifierExpression>("left");
+  auto* right = create<ast::IdentifierExpression>("right");
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(left),
                              std::move(right));
@@ -157,17 +157,17 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
 
   ast::type::I32Type i32;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 3))));
-  auto else_stmt = create<ast::ElseStatement>(std::move(body));
+  auto* else_stmt = create<ast::ElseStatement>(std::move(body));
 
   body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 2))));
-  auto else_if_stmt = create<ast::ElseStatement>(
+  auto* else_if_stmt = create<ast::ElseStatement>(
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                     create<ast::IdentifierExpression>("b"),
                                     create<ast::IdentifierExpression>("c")),
@@ -212,9 +212,9 @@ if ((_tint_tmp)) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
   // return (a && b) || c;
-  auto a = create<ast::IdentifierExpression>("a");
-  auto b = create<ast::IdentifierExpression>("b");
-  auto c = create<ast::IdentifierExpression>("c");
+  auto* a = create<ast::IdentifierExpression>("a");
+  auto* b = create<ast::IdentifierExpression>("b");
+  auto* c = create<ast::IdentifierExpression>("c");
 
   ast::ReturnStatement expr(create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
@@ -237,10 +237,10 @@ return (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   // a = (b || c) && d;
-  auto a = create<ast::IdentifierExpression>("a");
-  auto b = create<ast::IdentifierExpression>("b");
-  auto c = create<ast::IdentifierExpression>("c");
-  auto d = create<ast::IdentifierExpression>("d");
+  auto* a = create<ast::IdentifierExpression>("a");
+  auto* b = create<ast::IdentifierExpression>("b");
+  auto* c = create<ast::IdentifierExpression>("c");
+  auto* d = create<ast::IdentifierExpression>("d");
 
   ast::AssignmentStatement expr(
       std::move(a),
@@ -267,11 +267,11 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   // var a : bool = (b && c) || d;
   ast::type::BoolType bool_type;
 
-  auto b = create<ast::IdentifierExpression>("b");
-  auto c = create<ast::IdentifierExpression>("c");
-  auto d = create<ast::IdentifierExpression>("d");
+  auto* b = create<ast::IdentifierExpression>("b");
+  auto* c = create<ast::IdentifierExpression>("c");
+  auto* d = create<ast::IdentifierExpression>("d");
 
-  auto var =
+  auto* var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   var->set_constructor(create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
@@ -298,9 +298,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   // as<i32>(a && (b || c))
   ast::type::I32Type i32;
 
-  auto a = create<ast::IdentifierExpression>("a");
-  auto b = create<ast::IdentifierExpression>("b");
-  auto c = create<ast::IdentifierExpression>("c");
+  auto* a = create<ast::IdentifierExpression>("a");
+  auto* b = create<ast::IdentifierExpression>("b");
+  auto* c = create<ast::IdentifierExpression>("c");
 
   ast::BitcastExpression expr(
       &i32, create<ast::BinaryExpression>(
@@ -326,8 +326,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   ast::type::VoidType void_type;
 
-  auto func = create<ast::Function>("foo", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("foo", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
 
   ast::ExpressionList params;

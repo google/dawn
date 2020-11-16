@@ -19,18 +19,14 @@ namespace ast {
 
 ArrayAccessorExpression::ArrayAccessorExpression() : Expression() {}
 
-ArrayAccessorExpression::ArrayAccessorExpression(
-    std::unique_ptr<Expression> array,
-    std::unique_ptr<Expression> idx_expr)
-    : Expression(), array_(std::move(array)), idx_expr_(std::move(idx_expr)) {}
+ArrayAccessorExpression::ArrayAccessorExpression(Expression* array,
+                                                 Expression* idx_expr)
+    : Expression(), array_(array), idx_expr_(idx_expr) {}
 
-ArrayAccessorExpression::ArrayAccessorExpression(
-    const Source& source,
-    std::unique_ptr<Expression> array,
-    std::unique_ptr<Expression> idx_expr)
-    : Expression(source),
-      array_(std::move(array)),
-      idx_expr_(std::move(idx_expr)) {}
+ArrayAccessorExpression::ArrayAccessorExpression(const Source& source,
+                                                 Expression* array,
+                                                 Expression* idx_expr)
+    : Expression(source), array_(array), idx_expr_(idx_expr) {}
 
 ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
     default;

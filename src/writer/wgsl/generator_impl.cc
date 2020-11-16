@@ -85,8 +85,8 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   if (!module.constructed_types().empty())
     out_ << std::endl;
 
-  for (const auto& var : module.global_variables()) {
-    if (!EmitVariable(var.get())) {
+  for (auto* var : module.global_variables()) {
+    if (!EmitVariable(var)) {
       return false;
     }
   }
@@ -94,8 +94,8 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     out_ << std::endl;
   }
 
-  for (const auto& func : module.functions()) {
-    if (!EmitFunction(func.get())) {
+  for (auto* func : module.functions()) {
+    if (!EmitFunction(func)) {
       return false;
     }
     out_ << std::endl;
@@ -126,11 +126,11 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
 
   // TODO(dsinclair): This should be smarter and only emit needed const
   // variables
-  for (const auto& var : module.global_variables()) {
+  for (auto* var : module.global_variables()) {
     if (!var->is_const()) {
       continue;
     }
-    if (!EmitVariable(var.get())) {
+    if (!EmitVariable(var)) {
       return false;
     }
   }
@@ -146,12 +146,12 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
     out_ << std::endl;
   }
 
-  for (const auto& f : module.functions()) {
+  for (auto* f : module.functions()) {
     if (!f->HasAncestorEntryPoint(name)) {
       continue;
     }
 
-    if (!EmitFunction(f.get())) {
+    if (!EmitFunction(f)) {
       return false;
     }
     out_ << std::endl;
@@ -263,13 +263,13 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
   bool first = true;
   const auto& params = expr->params();
-  for (const auto& param : params) {
+  for (auto* param : params) {
     if (!first) {
       out_ << ", ";
     }
     first = false;
 
-    if (!EmitExpression(param.get())) {
+    if (!EmitExpression(param)) {
       return false;
     }
   }
@@ -294,13 +294,13 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   out_ << "(";
 
   bool first = true;
-  for (const auto& e : expr->values()) {
+  for (auto* e : expr->values()) {
     if (!first) {
       out_ << ", ";
     }
     first = false;
 
-    if (!EmitExpression(e.get())) {
+    if (!EmitExpression(e)) {
       return false;
     }
   }
@@ -346,7 +346,7 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 }
 
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
-  for (auto& deco : func->decorations()) {
+  for (auto* deco : func->decorations()) {
     make_indent();
     out_ << "[[";
     if (deco->IsWorkgroup()) {
@@ -367,7 +367,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   out_ << "fn " << func->name() << "(";
 
   bool first = true;
-  for (const auto& v : func->params()) {
+  for (auto* v : func->params()) {
     if (!first) {
       out_ << ", ";
     }
@@ -424,7 +424,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 
-    for (const auto& deco : ary->decorations()) {
+    for (auto* deco : ary->decorations()) {
       if (deco->IsStride()) {
         out_ << "[[stride(" << deco->AsStride()->stride() << ")]] ";
       }
@@ -571,7 +571,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
 bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
   auto* impl = str->impl();
-  for (auto& deco : impl->decorations()) {
+  for (auto* deco : impl->decorations()) {
     out_ << "[[";
     deco->to_str(out_, 0);
     out_ << "]]" << std::endl;
@@ -579,8 +579,8 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
   out_ << "struct " << str->name() << " {" << std::endl;
 
   increment_indent();
-  for (const auto& mem : impl->members()) {
-    for (const auto& deco : mem->decorations()) {
+  for (auto* mem : impl->members()) {
+    for (auto* deco : mem->decorations()) {
       make_indent();
 
       // TODO(dsinclair): Split this out when we have more then one
@@ -639,7 +639,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
 bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
   out_ << "[[";
   bool first = true;
-  for (const auto& deco : var->decorations()) {
+  for (auto* deco : var->decorations()) {
     if (!first) {
       out_ << ", ";
     }
@@ -766,8 +766,8 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   out_ << "{" << std::endl;
   increment_indent();
 
-  for (const auto& s : *stmt) {
-    if (!EmitStatement(s.get())) {
+  for (auto* s : *stmt) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -877,13 +877,13 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     out_ << "case ";
 
     bool first = true;
-    for (const auto& selector : stmt->selectors()) {
+    for (auto* selector : stmt->selectors()) {
       if (!first) {
         out_ << ", ";
       }
 
       first = false;
-      if (!EmitLiteral(selector.get())) {
+      if (!EmitLiteral(selector)) {
         return false;
       }
     }
@@ -932,8 +932,8 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
     return false;
   }
 
-  for (const auto& e : stmt->else_statements()) {
-    if (!EmitElse(e.get())) {
+  for (auto* e : stmt->else_statements()) {
+    if (!EmitElse(e)) {
       return false;
     }
   }
@@ -954,8 +954,8 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   out_ << "loop {" << std::endl;
   increment_indent();
 
-  for (const auto& s : *(stmt->body())) {
-    if (!EmitStatement(s.get())) {
+  for (auto* s : *(stmt->body())) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -1003,8 +1003,8 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : stmt->body()) {
-    if (!EmitCase(s.get())) {
+  for (auto* s : stmt->body()) {
+    if (!EmitCase(s)) {
       return false;
     }
   }

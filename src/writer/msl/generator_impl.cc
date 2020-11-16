@@ -111,8 +111,8 @@ std::string GeneratorImpl::generate_name(const std::string& prefix) {
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
-  for (const auto& global : module_->global_variables()) {
-    global_variables_.set(global->name(), global.get());
+  for (auto* global : module_->global_variables()) {
+    global_variables_.set(global->name(), global);
   }
 
   for (auto* const ty : module_->constructed_types()) {
@@ -124,37 +124,37 @@ bool GeneratorImpl::Generate() {
     out_ << std::endl;
   }
 
-  for (const auto& var : module_->global_variables()) {
+  for (auto* var : module_->global_variables()) {
     if (!var->is_const()) {
       continue;
     }
-    if (!EmitProgramConstVariable(var.get())) {
+    if (!EmitProgramConstVariable(var)) {
       return false;
     }
   }
 
   // Make sure all entry point data is emitted before the entry point functions
-  for (const auto& func : module_->functions()) {
+  for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
 
-    if (!EmitEntryPointData(func.get())) {
+    if (!EmitEntryPointData(func)) {
       return false;
     }
   }
 
-  for (const auto& func : module_->functions()) {
-    if (!EmitFunction(func.get())) {
+  for (auto* func : module_->functions()) {
+    if (!EmitFunction(func)) {
       return false;
     }
   }
 
-  for (const auto& func : module_->functions()) {
+  for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
-    if (!EmitEntryPointFunction(func.get())) {
+    if (!EmitEntryPointFunction(func)) {
       return false;
     }
     out_ << std::endl;
@@ -167,7 +167,7 @@ uint32_t GeneratorImpl::calculate_largest_alignment(
     ast::type::StructType* type) {
   auto* stct = type->AsStruct()->impl();
   uint32_t largest_alignment = 0;
-  for (const auto& mem : stct->members()) {
+  for (auto* mem : stct->members()) {
     auto align = calculate_alignment_size(mem->type());
     if (align == 0) {
       return 0;
@@ -214,8 +214,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     uint32_t count = 0;
     uint32_t largest_alignment = 0;
     // Offset decorations in WGSL must be in increasing order.
-    for (const auto& mem : stct->members()) {
-      for (const auto& deco : mem->decorations()) {
+    for (auto* mem : stct->members()) {
+      for (auto* deco : mem->decorations()) {
         if (deco->IsOffset()) {
           count = deco->AsOffset()->offset();
         }
@@ -557,13 +557,13 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << name << "(";
 
       bool first = true;
-      for (const auto& param : params) {
+      for (auto* param : params) {
         if (!first) {
           out_ << ", ";
         }
         first = false;
 
-        if (!EmitExpression(param.get())) {
+        if (!EmitExpression(param)) {
           return false;
         }
       }
@@ -637,13 +637,13 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   const auto& params = expr->params();
-  for (const auto& param : params) {
+  for (auto* param : params) {
     if (!first) {
       out_ << ", ";
     }
     first = false;
 
-    if (!EmitExpression(param.get())) {
+    if (!EmitExpression(param)) {
       return false;
     }
   }
@@ -738,7 +738,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     out_ << "default:";
   } else {
     bool first = true;
-    for (const auto& selector : stmt->selectors()) {
+    for (auto* selector : stmt->selectors()) {
       if (!first) {
         out_ << std::endl;
         make_indent();
@@ -746,7 +746,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
       first = false;
 
       out_ << "case ";
-      if (!EmitLiteral(selector.get())) {
+      if (!EmitLiteral(selector)) {
         return false;
       }
       out_ << ":";
@@ -757,8 +757,8 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : *(stmt->body())) {
-    if (!EmitStatement(s.get())) {
+  for (auto* s : *stmt->body()) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -806,13 +806,13 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   } else {
     bool first = true;
-    for (const auto& e : expr->values()) {
+    for (auto* e : expr->values()) {
       if (!first) {
         out_ << ", ";
       }
       first = false;
 
-      if (!EmitExpression(e.get())) {
+      if (!EmitExpression(e)) {
         return false;
       }
     }
@@ -1206,7 +1206,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     out_ << "& " << var->name();
   }
 
-  for (const auto& v : func->params()) {
+  for (auto* v : func->params()) {
     if (!first) {
       out_ << ", ";
     }
@@ -1378,8 +1378,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   }
 
   generating_entry_point_ = true;
-  for (const auto& s : *(func->body())) {
-    if (!EmitStatement(s.get())) {
+  for (auto* s : *func->body()) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -1445,7 +1445,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     // first pass, if we have a continuing, we pull all declarations outside
     // the for loop into the continuing scope. Then, the variable declarations
     // will be turned into assignments.
-    for (const auto& s : *(stmt->body())) {
+    for (auto* s : *(stmt->body())) {
       if (!s->IsVariableDecl()) {
         continue;
       }
@@ -1472,7 +1472,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     out_ << std::endl;
   }
 
-  for (const auto& s : *(stmt->body())) {
+  for (auto* s : *(stmt->body())) {
     // If we have a continuing block we've already emitted the variable
     // declaration before the loop, so treat it as an assignment.
     if (s->IsVariableDecl() && stmt->has_continuing()) {
@@ -1493,7 +1493,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
       continue;
     }
 
-    if (!EmitStatement(s.get())) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -1547,8 +1547,8 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
     return false;
   }
 
-  for (const auto& e : stmt->else_statements()) {
-    if (!EmitElse(e.get())) {
+  for (auto* e : stmt->else_statements()) {
+    if (!EmitElse(e)) {
       return false;
     }
   }
@@ -1591,8 +1591,8 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   out_ << "{" << std::endl;
   increment_indent();
 
-  for (const auto& s : *stmt) {
-    if (!EmitStatement(s.get())) {
+  for (auto* s : *stmt) {
+    if (!EmitStatement(s)) {
       return false;
     }
   }
@@ -1681,8 +1681,8 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : stmt->body()) {
-    if (!EmitCase(s.get())) {
+  for (auto* s : stmt->body()) {
+    if (!EmitCase(s)) {
       return false;
     }
   }
@@ -1843,9 +1843,9 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
   increment_indent();
   uint32_t current_offset = 0;
   uint32_t pad_count = 0;
-  for (const auto& mem : str->impl()->members()) {
+  for (auto* mem : str->impl()->members()) {
     make_indent();
-    for (const auto& deco : mem->decorations()) {
+    for (auto* deco : mem->decorations()) {
       if (deco->IsOffset()) {
         uint32_t offset = deco->AsOffset()->offset();
         if (offset != current_offset) {

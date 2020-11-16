@@ -23,7 +23,7 @@ namespace ast {
 
 DecoratedVariable::DecoratedVariable() = default;
 
-DecoratedVariable::DecoratedVariable(std::unique_ptr<Variable> var)
+DecoratedVariable::DecoratedVariable(Variable* var)
     : Variable(var->source(), var->name(), var->storage_class(), var->type()) {}
 
 DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
@@ -31,7 +31,7 @@ DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
 DecoratedVariable::~DecoratedVariable() = default;
 
 bool DecoratedVariable::HasLocationDecoration() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsLocation()) {
       return true;
     }
@@ -40,7 +40,7 @@ bool DecoratedVariable::HasLocationDecoration() const {
 }
 
 bool DecoratedVariable::HasBuiltinDecoration() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsBuiltin()) {
       return true;
     }
@@ -49,7 +49,7 @@ bool DecoratedVariable::HasBuiltinDecoration() const {
 }
 
 bool DecoratedVariable::HasConstantIdDecoration() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsConstantId()) {
       return true;
     }
@@ -59,7 +59,7 @@ bool DecoratedVariable::HasConstantIdDecoration() const {
 
 uint32_t DecoratedVariable::constant_id() const {
   assert(HasConstantIdDecoration());
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsConstantId()) {
       return deco->AsConstantId()->value();
     }
@@ -85,7 +85,7 @@ void DecoratedVariable::to_str(std::ostream& out, size_t indent) const {
 
   make_indent(out, indent + 2);
   out << "Decorations{" << std::endl;
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     deco->to_str(out, indent + 4);
   }
 

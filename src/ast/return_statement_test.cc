@@ -26,8 +26,8 @@ namespace {
 using ReturnStatementTest = TestHelper;
 
 TEST_F(ReturnStatementTest, Creation) {
-  auto expr = create<IdentifierExpression>("expr");
-  auto* expr_ptr = expr.get();
+  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr_ptr = expr;
 
   ReturnStatement r(std::move(expr));
   EXPECT_EQ(r.value(), expr_ptr);
@@ -51,7 +51,7 @@ TEST_F(ReturnStatementTest, HasValue_WithoutValue) {
 }
 
 TEST_F(ReturnStatementTest, HasValue_WithValue) {
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
   ReturnStatement r(std::move(expr));
   EXPECT_TRUE(r.has_value());
 }
@@ -62,19 +62,19 @@ TEST_F(ReturnStatementTest, IsValid_WithoutValue) {
 }
 
 TEST_F(ReturnStatementTest, IsValid_WithValue) {
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
   ReturnStatement r(std::move(expr));
   EXPECT_TRUE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, IsValid_InvalidValue) {
-  auto expr = create<IdentifierExpression>("");
+  auto* expr = create<IdentifierExpression>("");
   ReturnStatement r(std::move(expr));
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, ToStr_WithValue) {
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
   ReturnStatement r(std::move(expr));
   std::ostringstream out;
   r.to_str(out, 2);

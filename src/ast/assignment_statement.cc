@@ -19,14 +19,13 @@ namespace ast {
 
 AssignmentStatement::AssignmentStatement() : Statement() {}
 
-AssignmentStatement::AssignmentStatement(std::unique_ptr<Expression> lhs,
-                                         std::unique_ptr<Expression> rhs)
-    : Statement(), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+AssignmentStatement::AssignmentStatement(Expression* lhs, Expression* rhs)
+    : Statement(), lhs_(lhs), rhs_(rhs) {}
 
 AssignmentStatement::AssignmentStatement(const Source& source,
-                                         std::unique_ptr<Expression> lhs,
-                                         std::unique_ptr<Expression> rhs)
-    : Statement(source), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+                                         Expression* lhs,
+                                         Expression* rhs)
+    : Statement(source), lhs_(lhs), rhs_(rhs) {}
 
 AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 

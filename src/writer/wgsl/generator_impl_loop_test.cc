@@ -28,7 +28,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   ast::LoopStatement l(std::move(body), {});
 
@@ -42,10 +42,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  auto continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));

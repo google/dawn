@@ -72,7 +72,7 @@ using SpvParserTest = SpvParserTestBase<::testing::Test>;
 /// @returnss the string dump of a function body.
 inline std::string ToString(const ast::BlockStatement* body) {
   std::ostringstream outs;
-  for (const auto& stmt : *body) {
+  for (const auto* stmt : *body) {
     stmt->to_str(outs, 0);
   }
   return outs.str();

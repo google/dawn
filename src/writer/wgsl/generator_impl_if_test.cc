@@ -28,8 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
-  auto cond = create<ast::IdentifierExpression>("cond");
-  auto body = create<ast::BlockStatement>();
+  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -44,16 +44,16 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto else_cond = create<ast::IdentifierExpression>("else_cond");
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_cond = create<ast::IdentifierExpression>("else_cond");
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(
       create<ast::ElseStatement>(std::move(else_cond), std::move(else_body)));
 
-  auto cond = create<ast::IdentifierExpression>("cond");
-  auto body = create<ast::BlockStatement>();
+  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -71,14 +71,14 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
   elses.push_back(create<ast::ElseStatement>(std::move(else_body)));
 
-  auto cond = create<ast::IdentifierExpression>("cond");
-  auto body = create<ast::BlockStatement>();
+  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -96,12 +96,12 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto else_cond = create<ast::IdentifierExpression>("else_cond");
+  auto* else_cond = create<ast::IdentifierExpression>("else_cond");
 
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
-  auto else_body_2 = create<ast::BlockStatement>();
+  auto* else_body_2 = create<ast::BlockStatement>();
   else_body_2->append(create<ast::DiscardStatement>());
 
   ast::ElseStatementList elses;
@@ -109,8 +109,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
       create<ast::ElseStatement>(std::move(else_cond), std::move(else_body)));
   elses.push_back(create<ast::ElseStatement>(std::move(else_body_2)));
 
-  auto cond = create<ast::IdentifierExpression>("cond");
-  auto body = create<ast::BlockStatement>();
+  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));

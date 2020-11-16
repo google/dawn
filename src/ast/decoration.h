@@ -65,22 +65,20 @@ class Decoration : public Node {
 };
 
 /// As dynamically casts |deco| to the target type |TO|.
-/// @return the dynamically cast decoration, or nullptr if |deco| is not of the
-/// type |TO|.
+/// @return the cast decoration, or nullptr if |deco| is not of the type |TO|.
 template <typename TO>
-std::unique_ptr<TO> As(std::unique_ptr<Decoration>&& deco) {
+TO* As(Decoration* deco) {
   if (deco == nullptr) {
     return nullptr;
   }
   if (deco->Is<TO>()) {
-    auto ptr = static_cast<TO*>(deco.release());
-    return std::unique_ptr<TO>(ptr);
+    return static_cast<TO*>(deco);
   }
   return nullptr;
 }
 
-/// A list of unique decorations
-using DecorationList = std::vector<std::unique_ptr<Decoration>>;
+/// A list of decorations
+using DecorationList = std::vector<Decoration*>;
 
 }  // namespace ast
 }  // namespace tint

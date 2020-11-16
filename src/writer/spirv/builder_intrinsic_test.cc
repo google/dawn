@@ -56,19 +56,12 @@ class IntrinsicBuilderTest : public ast::Builder, public testing::Test {
  public:
   IntrinsicBuilderTest() { set_context(&ctx); }
 
-  std::unique_ptr<ast::Variable> make_var(const std::string& name,
-                                          ast::StorageClass storage,
-                                          ast::type::Type* type) override {
-    auto var = ast::Builder::make_var(name, storage, type);
-    td.RegisterVariableForTesting(var.get());
+  ast::Variable* make_var(const std::string& name,
+                          ast::StorageClass storage,
+                          ast::type::Type* type) override {
+    auto* var = ast::Builder::make_var(name, storage, type);
+    td.RegisterVariableForTesting(var);
     return var;
-  }
-
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
-  template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
   }
 
   Context ctx;
@@ -94,13 +87,13 @@ using IntrinsicBoolTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(bool_type(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(bool_type(), 3));
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeBool
@@ -123,13 +116,13 @@ using IntrinsicFloatTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, f32());
+  auto* var = make_var("v", ast::StorageClass::kPrivate, f32());
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -147,13 +140,13 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
 TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -178,13 +171,13 @@ using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, i32());
+  auto* var = make_var("v", ast::StorageClass::kPrivate, i32());
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -201,13 +194,13 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(i32(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(i32(), 3));
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
@@ -225,13 +218,13 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
 TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, u32());
+  auto* var = make_var("v", ast::StorageClass::kPrivate, u32());
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
@@ -248,13 +241,13 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(u32(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(u32(), 3));
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
@@ -275,13 +268,13 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Dot) {
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
   auto expr = call_expr("dot", "v", "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -301,13 +294,13 @@ using IntrinsicDeriveTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, f32());
+  auto* var = make_var("v", ast::StorageClass::kPrivate, f32());
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -324,13 +317,13 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto param = GetParam();
 
-  auto var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
   auto expr = call_expr(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
 
@@ -365,16 +358,16 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
-  auto v2 = make_var("v2", ast::StorageClass::kPrivate, vec(f32(), 2));
-  auto v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* v2 = make_var("v2", ast::StorageClass::kPrivate, vec(f32(), 2));
+  auto* v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
 
   auto expr = call_expr("outerProduct", "v2", "v3");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(v2.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(v3.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v2)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 10u) << b.error();
 
@@ -397,16 +390,16 @@ TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Select) {
-  auto v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
-  auto bool_v3 =
+  auto* v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* bool_v3 =
       make_var("bool_v3", ast::StorageClass::kPrivate, vec(bool_type(), 3));
   auto expr = call_expr("select", "v3", "v3", "bool_v3");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(v3.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
 
@@ -438,8 +431,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_1d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
   auto expr = call_expr("textureLoad", "texture", 1.0f, 2);
 
@@ -472,8 +465,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
   auto expr = call_expr("textureLoad", "texture",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2);
@@ -506,8 +499,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
   auto expr = call_expr("textureLoad", "texture", 1.0f, 2);
 
@@ -536,8 +529,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
   auto expr = call_expr("textureLoad", "texture",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2);
@@ -570,8 +563,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Multisampled_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
   auto expr = call_expr("textureLoad", "texture",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2);
@@ -605,11 +598,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSample_1d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSample", "texture", "sampler", 1.0f);
 
@@ -642,11 +635,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSample_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSample", "texture", "sampler",
                         construct(vec(f32(), 2), 1.0f, 2.0f));
@@ -683,11 +676,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_1d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSampleLevel", "texture", "sampler", 1.0f, 2.0f);
 
@@ -722,11 +715,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSampleLevel", "texture", "sampler",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
@@ -764,11 +757,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_1d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSampleBias", "texture", "sampler", 1.0f, 2.0f);
 
@@ -803,11 +796,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_2d) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSampleBias", "texture", "sampler",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
@@ -845,11 +838,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr = call_expr("textureSampleCompare", "texture", "sampler",
                         construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
@@ -889,11 +882,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 
   b.push_function(Function{});
 
-  auto tex = make_var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex.get())) << b.error();
+  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto sampler = make_var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler.get())) << b.error();
+  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto expr1 = call_expr("textureSampleCompare", "texture", "sampler",
                          construct(vec2, 1.0f, 2.0f), 2.0f);
@@ -935,14 +928,14 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
-  auto var = make_var("ident", ast::StorageClass::kPrivate, f32());
+  auto* var = make_var("ident", ast::StorageClass::kPrivate, f32());
   auto expr = call_expr("round", "ident");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
@@ -1677,7 +1670,7 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Determinant) {
-  auto var = make_var("var", ast::StorageClass::kPrivate, mat(f32(), 3, 3));
+  auto* var = make_var("var", ast::StorageClass::kPrivate, mat(f32(), 3, 3));
   auto expr = call_expr("determinant", "var");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -1686,7 +1679,7 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
@@ -1715,10 +1708,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
   auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
                                            make_expr("b"), make_expr("a")));
@@ -1728,7 +1721,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()),
@@ -1756,10 +1749,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
   members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
   auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
                                            make_expr("b"), make_expr("a")));
 
@@ -1768,7 +1761,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()),
@@ -1798,12 +1791,12 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   members.push_back(create<ast::StructMember>("z", f32(), std::move(decos)));
   members.push_back(create<ast::StructMember>("a", &ary, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
-  auto var = make_var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto ptr_var = make_var("ptr_var", ast::StorageClass::kPrivate, &ptr);
+  auto* ptr_var = make_var("ptr_var", ast::StorageClass::kPrivate, &ptr);
   ptr_var->set_constructor(
       create<ast::MemberAccessorExpression>(make_expr("b"), make_expr("a")));
 
@@ -1813,7 +1806,7 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"( ... )");

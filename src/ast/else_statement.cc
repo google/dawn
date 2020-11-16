@@ -17,23 +17,18 @@
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement(std::unique_ptr<BlockStatement> body)
-    : Statement(), body_(std::move(body)) {}
+ElseStatement::ElseStatement(BlockStatement* body) : Statement(), body_(body) {}
 
-ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
-                             std::unique_ptr<BlockStatement> body)
-    : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
+ElseStatement::ElseStatement(Expression* condition, BlockStatement* body)
+    : Statement(), condition_(condition), body_(body) {}
 
-ElseStatement::ElseStatement(const Source& source,
-                             std::unique_ptr<BlockStatement> body)
-    : Statement(source), body_(std::move(body)) {}
+ElseStatement::ElseStatement(const Source& source, BlockStatement* body)
+    : Statement(source), body_(body) {}
 
 ElseStatement::ElseStatement(const Source& source,
-                             std::unique_ptr<Expression> condition,
-                             std::unique_ptr<BlockStatement> body)
-    : Statement(source),
-      condition_(std::move(condition)),
-      body_(std::move(body)) {}
+                             Expression* condition,
+                             BlockStatement* body)
+    : Statement(source), condition_(condition), body_(body) {}
 
 ElseStatement::ElseStatement(ElseStatement&&) = default;
 
@@ -67,7 +62,7 @@ void ElseStatement::to_str(std::ostream& out, size_t indent) const {
   out << "{" << std::endl;
 
   if (body_ != nullptr) {
-    for (const auto& stmt : *body_) {
+    for (auto* stmt : *body_) {
       stmt->to_str(out, indent + 4);
     }
   }

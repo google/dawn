@@ -77,9 +77,9 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -111,7 +111,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
-  auto rel =
+  auto* rel =
       create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::FloatLiteral>(&f32, 3.0f)),
@@ -123,9 +123,9 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::move(rel));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kFunction, &vec);
   v.set_constructor(std::move(init));
@@ -160,10 +160,10 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
 
   ast::type::F32Type f32;
 
-  auto init = create<ast::ScalarConstructorExpression>(
+  auto* init = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("v", ast::StorageClass::kFunction, &f32);
   v.set_constructor(std::move(init));
@@ -205,10 +205,10 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
 
   ast::type::F32Type f32;
 
-  auto init = create<ast::ScalarConstructorExpression>(
+  auto* init = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("v", ast::StorageClass::kFunction, &f32);
   v.set_constructor(std::move(init));
@@ -254,9 +254,9 @@ TEST_F(BuilderTest, FunctionVar_Const) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));

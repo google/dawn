@@ -39,15 +39,15 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
   ast::type::I32Type i32;
-  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
   ast::VariableList params;
   ast::type::VoidType void_type;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
-  auto func =
+  auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "func",
                             std::move(params), &void_type, std::move(body));
   func->add_decoration(
@@ -64,9 +64,9 @@ TEST_F(ValidateFunctionTest,
   // fn func -> void {}
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
-                                    std::move(params), &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
+                                     std::move(params), &void_type,
+                                     create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
@@ -79,16 +79,16 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
   ast::type::I32Type i32;
-  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
   ast::VariableList params;
   ast::type::VoidType void_type;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
-  auto func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
-                                    std::move(params), &i32, std::move(body));
+  auto* func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
+                                     std::move(params), &i32, std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -103,9 +103,9 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   ast::type::VoidType void_type;
   ast::type::I32Type i32;
   ast::VariableList params;
-  auto func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
-                                    std::move(params), &i32,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
+                                     std::move(params), &i32,
+                                     create<ast::BlockStatement>());
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -121,10 +121,10 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   ast::type::VoidType void_type;
   ast::VariableList params;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("func", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
@@ -138,14 +138,14 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   ast::type::VoidType void_type;
   ast::type::I32Type i32;
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
-  auto return_expr = create<ast::ScalarConstructorExpression>(
+  auto* body = create<ast::BlockStatement>();
+  auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
   body->append(create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                             std::move(return_expr)));
-  auto func = create<ast::Function>("func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("func", std::move(params), &void_type,
+                                     std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -161,13 +161,13 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
-  auto return_expr = create<ast::ScalarConstructorExpression>(
+  auto* body = create<ast::BlockStatement>();
+  auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
   body->append(create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                             std::move(return_expr)));
-  auto func =
+  auto* func =
       create<ast::Function>("func", std::move(params), &f32, std::move(body));
   mod()->AddFunction(std::move(func));
 
@@ -186,21 +186,21 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   ast::type::I32Type i32;
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
-  auto return_expr = create<ast::ScalarConstructorExpression>(
+  auto* body = create<ast::BlockStatement>();
+  auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
   body->append(create<ast::ReturnStatement>(std::move(return_expr)));
-  auto func =
+  auto* func =
       create<ast::Function>("func", std::move(params), &i32, std::move(body));
 
   ast::VariableList params_copy;
-  auto body_copy = create<ast::BlockStatement>();
-  auto return_expr_copy = create<ast::ScalarConstructorExpression>(
+  auto* body_copy = create<ast::BlockStatement>();
+  auto* return_expr_copy = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
   body_copy->append(create<ast::ReturnStatement>(std::move(return_expr_copy)));
-  auto func_copy =
+  auto* func_copy =
       create<ast::Function>(Source{Source::Location{12, 34}}, "func",
                             std::move(params_copy), &i32, std::move(body_copy));
 
@@ -218,14 +218,14 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   ast::type::F32Type f32;
   ast::type::VoidType void_type;
   ast::ExpressionList call_params;
-  auto call_expr = create<ast::CallExpression>(
+  auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
       create<ast::IdentifierExpression>("func"), std::move(call_params));
   ast::VariableList params0;
-  auto body0 = create<ast::BlockStatement>();
+  auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::CallStatement>(std::move(call_expr)));
   body0->append(create<ast::ReturnStatement>());
-  auto func0 =
+  auto* func0 =
       create<ast::Function>("func", std::move(params0), &f32, std::move(body0));
   mod()->AddFunction(std::move(func0));
 
@@ -237,20 +237,20 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   // fn func() -> i32 {var a: i32 = func(); return 2; }
   ast::type::I32Type i32;
-  auto var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   ast::ExpressionList call_params;
-  auto call_expr = create<ast::CallExpression>(
+  auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
       create<ast::IdentifierExpression>("func"), std::move(call_params));
   var->set_constructor(std::move(call_expr));
   ast::VariableList params0;
-  auto body0 = create<ast::BlockStatement>();
+  auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(std::move(var)));
-  auto return_expr = create<ast::ScalarConstructorExpression>(
+  auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
   body0->append(create<ast::ReturnStatement>(std::move(return_expr)));
-  auto func0 =
+  auto* func0 =
       create<ast::Function>("func", std::move(params0), &i32, std::move(body0));
   mod()->AddFunction(std::move(func0));
 
@@ -264,12 +264,12 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // fn vtx_main() -> i32 { return 0; }
   ast::type::I32Type i32;
   ast::VariableList params;
-  auto return_expr = create<ast::ScalarConstructorExpression>(
+  auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 0));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(std::move(return_expr)));
-  auto func =
+  auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "vtx_main",
                             std::move(params), &i32, std::move(body));
   func->add_decoration(
@@ -289,9 +289,9 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   ast::type::VoidType void_type;
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &i32));
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func =
+  auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "vtx_func",
                             std::move(params), &void_type, std::move(body));
   func->add_decoration(
@@ -311,9 +311,9 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // fn main() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func =
+  auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "main",
                             std::move(params), &void_type, std::move(body));
   func->add_decoration(
@@ -333,10 +333,10 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   // fn vtx_func() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("vtx_func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("vtx_func", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
   mod()->AddFunction(std::move(func));
@@ -349,10 +349,10 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   // fn vtx_func() -> void { return; }
   ast::type::VoidType void_type;
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto func = create<ast::Function>("vtx_func", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("vtx_func", std::move(params), &void_type,
+                                     std::move(body));
   mod()->AddFunction(std::move(func));
 
   EXPECT_TRUE(td()->Determine()) << td()->error();

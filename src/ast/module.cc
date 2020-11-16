@@ -28,9 +28,9 @@ Module::Module(Module&&) = default;
 Module::~Module() = default;
 
 Function* Module::FindFunctionByName(const std::string& name) const {
-  for (const auto& func : functions_) {
+  for (auto* func : functions_) {
     if (func->name() == name) {
-      return func.get();
+      return func;
     }
   }
   return nullptr;
@@ -38,16 +38,16 @@ Function* Module::FindFunctionByName(const std::string& name) const {
 
 Function* Module::FindFunctionByNameAndStage(const std::string& name,
                                              ast::PipelineStage stage) const {
-  for (const auto& func : functions_) {
+  for (auto* func : functions_) {
     if (func->name() == name && func->pipeline_stage() == stage) {
-      return func.get();
+      return func;
     }
   }
   return nullptr;
 }
 
 bool Module::IsValid() const {
-  for (const auto& var : global_variables_) {
+  for (auto* var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
       return false;
     }
@@ -74,7 +74,7 @@ bool Module::IsValid() const {
       return false;
     }
   }
-  for (const auto& func : functions_) {
+  for (auto* func : functions_) {
     if (func == nullptr || !func->IsValid()) {
       return false;
     }
@@ -103,10 +103,10 @@ std::string Module::to_str() const {
       str->impl()->to_str(out, indent);
     }
   }
-  for (const auto& var : global_variables_) {
+  for (auto* var : global_variables_) {
     var->to_str(out, indent);
   }
-  for (const auto& func : functions_) {
+  for (auto* func : functions_) {
     func->to_str(out, indent);
   }
   out << "}" << std::endl;

@@ -34,15 +34,15 @@ TEST_F(CaseStatementTest, Creation_i32) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto* int_ptr = b.back().get();
+  auto* int_ptr = b.back();
   auto* discard_ptr = body->get(0);
 
   CaseStatement c(std::move(b), std::move(body));
   ASSERT_EQ(c.selectors().size(), 1u);
-  EXPECT_EQ(c.selectors()[0].get(), int_ptr);
+  EXPECT_EQ(c.selectors()[0], int_ptr);
   ASSERT_EQ(c.body()->size(), 1u);
   EXPECT_EQ(c.body()->get(0), discard_ptr);
 }
@@ -53,15 +53,15 @@ TEST_F(CaseStatementTest, Creation_u32) {
   CaseSelectorList b;
   b.push_back(create<UintLiteral>(&u32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto* int_ptr = b.back().get();
+  auto* int_ptr = b.back();
   auto* discard_ptr = body->get(0);
 
   CaseStatement c(std::move(b), std::move(body));
   ASSERT_EQ(c.selectors().size(), 1u);
-  EXPECT_EQ(c.selectors()[0].get(), int_ptr);
+  EXPECT_EQ(c.selectors()[0], int_ptr);
   ASSERT_EQ(c.body()->size(), 1u);
   EXPECT_EQ(c.body()->get(0), discard_ptr);
 }
@@ -71,7 +71,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   CaseStatement c(Source{Source::Location{20, 2}}, std::move(b),
@@ -82,7 +82,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   CaseStatement c(create<ast::BlockStatement>());
@@ -115,7 +115,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
@@ -128,7 +128,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
   CaseStatement c({std::move(b)}, std::move(body));
@@ -140,7 +140,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, -2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(body));
 
@@ -157,7 +157,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   CaseSelectorList b;
   b.push_back(create<UintLiteral>(&u32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   CaseStatement c({std::move(b)}, std::move(body));
 
@@ -176,7 +176,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   b.push_back(create<SintLiteral>(&i32, 1));
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   CaseStatement c(std::move(b), std::move(body));
 
@@ -189,7 +189,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   CaseStatement c(CaseSelectorList{}, std::move(body));
 

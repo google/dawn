@@ -183,7 +183,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -204,7 +204,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -233,7 +233,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
   members.push_back(create<ast::StructMember>("c", &f32, std::move(decos)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -262,7 +262,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
   members.push_back(
       create<ast::StructMember>("float", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("S", std::move(str));
@@ -290,7 +290,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
 
   ast::type::StructType s("S", std::move(str));
 

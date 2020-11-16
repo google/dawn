@@ -32,23 +32,20 @@ class VariableDeclStatement : public Statement {
   VariableDeclStatement();
   /// Constructor
   /// @param variable the variable
-  explicit VariableDeclStatement(std::unique_ptr<Variable> variable);
+  explicit VariableDeclStatement(Variable* variable);
   /// Constructor
   /// @param source the variable statement source
   /// @param variable the variable
-  VariableDeclStatement(const Source& source,
-                        std::unique_ptr<Variable> variable);
+  VariableDeclStatement(const Source& source, Variable* variable);
   /// Move constructor
   VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;
 
   /// Sets the variable
   /// @param variable the variable to set
-  void set_variable(std::unique_ptr<Variable> variable) {
-    variable_ = std::move(variable);
-  }
+  void set_variable(Variable* variable) { variable_ = variable; }
   /// @returns the variable
-  Variable* variable() const { return variable_.get(); }
+  Variable* variable() const { return variable_; }
 
   /// @returns true if this is an variable statement
   bool IsVariableDecl() const override;
@@ -64,7 +61,7 @@ class VariableDeclStatement : public Statement {
  private:
   VariableDeclStatement(const VariableDeclStatement&) = delete;
 
-  std::unique_ptr<Variable> variable_;
+  Variable* variable_ = nullptr;
 };
 
 }  // namespace ast

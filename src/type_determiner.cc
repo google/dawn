@@ -95,8 +95,8 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  for (const auto& var : mod_->global_variables()) {
-    variable_stack_.set_global(var->name(), var.get());
+  for (auto* var : mod_->global_variables()) {
+    variable_stack_.set_global(var->name(), var);
 
     if (var->has_constructor()) {
       if (!DetermineResultType(var->constructor())) {
@@ -111,7 +111,7 @@ bool TypeDeterminer::Determine() {
 
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
-  for (const auto& func : mod_->functions()) {
+  for (auto* func : mod_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -133,8 +133,8 @@ void TypeDeterminer::set_entry_points(const std::string& fn_name,
 }
 
 bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
-  for (const auto& func : funcs) {
-    if (!DetermineFunction(func.get())) {
+  for (auto* func : funcs) {
+    if (!DetermineFunction(func)) {
       return false;
     }
   }
@@ -147,8 +147,8 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   current_function_ = func;
 
   variable_stack_.push_scope();
-  for (const auto& param : func->params()) {
-    variable_stack_.set(param->name(), param.get());
+  for (auto* param : func->params()) {
+    variable_stack_.set(param->name(), param);
   }
 
   if (!DetermineStatements(func->body())) {
@@ -162,12 +162,12 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
 }
 
 bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
-  for (const auto& stmt : *stmts) {
-    if (!DetermineVariableStorageClass(stmt.get())) {
+  for (auto* stmt : *stmts) {
+    if (!DetermineVariableStorageClass(stmt)) {
       return false;
     }
 
-    if (!DetermineResultType(stmt.get())) {
+    if (!DetermineResultType(stmt)) {
       return false;
     }
   }
@@ -238,8 +238,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
       return false;
     }
 
-    for (const auto& else_stmt : i->else_statements()) {
-      if (!DetermineResultType(else_stmt.get())) {
+    for (auto* else_stmt : i->else_statements()) {
+      if (!DetermineResultType(else_stmt)) {
         return false;
       }
     }
@@ -259,8 +259,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     if (!DetermineResultType(s->condition())) {
       return false;
     }
-    for (const auto& case_stmt : s->body()) {
-      if (!DetermineResultType(case_stmt.get())) {
+    for (auto* case_stmt : s->body()) {
+      if (!DetermineResultType(case_stmt)) {
         return false;
       }
     }
@@ -278,8 +278,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
 }
 
 bool TypeDeterminer::DetermineResultType(const ast::ExpressionList& list) {
-  for (const auto& expr : list) {
-    if (!DetermineResultType(expr.get())) {
+  for (auto* expr : list) {
+    if (!DetermineResultType(expr)) {
       return false;
     }
   }
@@ -573,7 +573,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       return true;
     }
 
-    auto& texture_param = expr->params()[0];
+    auto* texture_param = expr->params()[0];
     if (!texture_param->result_type()->UnwrapPtrIfNeeded()->IsTexture()) {
       set_error(expr->source(), "invalid first argument for " + ident->name());
       return false;
@@ -748,8 +748,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
   if (expr->IsTypeConstructor()) {
     auto* ty = expr->AsTypeConstructor();
-    for (const auto& value : ty->values()) {
-      if (!DetermineResultType(value.get())) {
+    for (auto* value : ty->values()) {
+      if (!DetermineResultType(value)) {
         return false;
       }
     }
@@ -949,7 +949,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     auto* strct = data_type->AsStruct()->impl();
     auto name = expr->member()->name();
 
-    for (const auto& member : strct->members()) {
+    for (auto* member : strct->members()) {
       if (member->name() == name) {
         ret = member->type();
         break;

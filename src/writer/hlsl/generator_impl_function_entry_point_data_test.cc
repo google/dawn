@@ -53,26 +53,26 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -80,11 +80,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func = create<ast::Function>("vtx_main", std::move(params), &f32,
-                                    std::move(body));
+  auto* func = create<ast::Function>("vtx_main", std::move(params), &f32,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -113,27 +113,27 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -141,11 +141,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func = create<ast::Function>("vtx_main", std::move(params), &f32,
-                                    std::move(body));
+  auto* func = create<ast::Function>("vtx_main", std::move(params), &f32,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -174,27 +174,27 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -202,11 +202,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func =
+  auto* func =
       create<ast::Function>("main", std::move(params), &f32, std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -235,26 +235,26 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -262,11 +262,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func =
+  auto* func =
       create<ast::Function>("main", std::move(params), &f32, std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -292,26 +292,26 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -319,11 +319,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func =
+  auto* func =
       create<ast::Function>("main", std::move(params), &f32, std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -344,26 +344,26 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
-  auto foo_var = create<ast::DecoratedVariable>(
+  auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(std::move(decos));
 
-  auto bar_var = create<ast::DecoratedVariable>(
+  auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(foo_var.get());
-  td.RegisterVariableForTesting(bar_var.get());
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
 
   mod.AddGlobalVariable(std::move(foo_var));
   mod.AddGlobalVariable(std::move(bar_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("foo"),
       create<ast::IdentifierExpression>("foo")));
@@ -371,11 +371,11 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("bar")));
 
-  auto func =
+  auto* func =
       create<ast::Function>("main", std::move(params), &f32, std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 
@@ -403,7 +403,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::type::VoidType void_type;
   ast::type::VectorType vec4(&f32, 4);
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
 
   ast::VariableDecorationList decos;
@@ -411,31 +411,31 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}));
   coord_var->set_decorations(std::move(decos));
 
-  auto depth_var = create<ast::DecoratedVariable>(
+  auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
   decos.push_back(
       create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}));
   depth_var->set_decorations(std::move(decos));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(depth_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  td.RegisterVariableForTesting(depth_var);
 
   mod.AddGlobalVariable(std::move(coord_var));
   mod.AddGlobalVariable(std::move(depth_var));
 
   ast::VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("depth"),
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
 
-  auto func = create<ast::Function>("main", std::move(params), &void_type,
-                                    std::move(body));
+  auto* func = create<ast::Function>("main", std::move(params), &void_type,
+                                     std::move(body));
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
-  auto* func_ptr = func.get();
+  auto* func_ptr = func;
 
   mod.AddFunction(std::move(func));
 

@@ -46,7 +46,7 @@ TEST_F(BuilderTest, If_Empty) {
 
   // if (true) {
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::IfStatement expr(std::move(cond), create<ast::BlockStatement>());
@@ -75,24 +75,24 @@ TEST_F(BuilderTest, If_WithStatements) {
   // if (true) {
   //   v = 2;
   // }
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::IfStatement expr(std::move(cond), std::move(body));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -122,15 +122,15 @@ TEST_F(BuilderTest, If_WithElse) {
   // } else {
   //   v = 3;
   // }
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -139,18 +139,18 @@ TEST_F(BuilderTest, If_WithElse) {
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
 
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -184,39 +184,39 @@ TEST_F(BuilderTest, If_WithElseIf) {
   // } elseif (true) {
   //   v = 3;
   // }
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 3))));
 
-  auto else_cond = create<ast::ScalarConstructorExpression>(
+  auto* else_cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(
       create<ast::ElseStatement>(std::move(else_cond), std::move(else_body)));
 
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -259,32 +259,32 @@ TEST_F(BuilderTest, If_WithMultiple) {
   // } else {
   //   v = 5;
   // }
-  auto var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
-  auto elseif_1_body = create<ast::BlockStatement>();
+  auto* elseif_1_body = create<ast::BlockStatement>();
   elseif_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 3))));
-  auto elseif_2_body = create<ast::BlockStatement>();
+  auto* elseif_2_body = create<ast::BlockStatement>();
   elseif_2_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 4))));
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 5))));
 
-  auto elseif_1_cond = create<ast::ScalarConstructorExpression>(
+  auto* elseif_1_cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
-  auto elseif_2_cond = create<ast::ScalarConstructorExpression>(
+  auto* elseif_2_cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false));
 
   ast::ElseStatementList else_stmts;
@@ -294,18 +294,18 @@ TEST_F(BuilderTest, If_WithMultiple) {
                                                   std::move(elseif_2_body)));
   else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
 
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::IfStatement expr(std::move(cond), std::move(body));
   expr.set_else_statements(std::move(else_stmts));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
@@ -356,15 +356,15 @@ TEST_F(BuilderTest, If_WithBreak) {
   //     break;
   //   }
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  auto if_body = create<ast::BlockStatement>();
+  auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());
 
-  auto if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto* if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
 
-  auto loop_body = create<ast::BlockStatement>();
+  auto* loop_body = create<ast::BlockStatement>();
   loop_body->append(std::move(if_stmt));
 
   ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
@@ -403,20 +403,20 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   //     break;
   //   }
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::BreakStatement>());
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
 
-  auto if_stmt =
+  auto* if_stmt =
       create<ast::IfStatement>(std::move(cond), create<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
-  auto loop_body = create<ast::BlockStatement>();
+  auto* loop_body = create<ast::BlockStatement>();
   loop_body->append(std::move(if_stmt));
 
   ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
@@ -456,15 +456,15 @@ TEST_F(BuilderTest, If_WithContinue) {
   //     continue;
   //   }
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  auto if_body = create<ast::BlockStatement>();
+  auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ContinueStatement>());
 
-  auto if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
+  auto* if_stmt = create<ast::IfStatement>(std::move(cond), std::move(if_body));
 
-  auto loop_body = create<ast::BlockStatement>();
+  auto* loop_body = create<ast::BlockStatement>();
   loop_body->append(std::move(if_stmt));
 
   ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
@@ -503,20 +503,20 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   //     continue;
   //   }
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  auto else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::ContinueStatement>());
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(create<ast::ElseStatement>(std::move(else_body)));
 
-  auto if_stmt =
+  auto* if_stmt =
       create<ast::IfStatement>(std::move(cond), create<ast::BlockStatement>());
   if_stmt->set_else_statements(std::move(else_stmts));
 
-  auto loop_body = create<ast::BlockStatement>();
+  auto* loop_body = create<ast::BlockStatement>();
   loop_body->append(std::move(if_stmt));
 
   ast::LoopStatement expr(std::move(loop_body), create<ast::BlockStatement>());
@@ -554,10 +554,10 @@ TEST_F(BuilderTest, If_WithReturn) {
   // if (true) {
   //   return;
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
 
-  auto if_body = create<ast::BlockStatement>();
+  auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ReturnStatement>());
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
@@ -584,12 +584,12 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   // if (true) {
   //   return false;
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
-  auto cond2 = create<ast::ScalarConstructorExpression>(
+  auto* cond2 = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false));
 
-  auto if_body = create<ast::BlockStatement>();
+  auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ReturnStatement>(std::move(cond2)));
 
   ast::IfStatement expr(std::move(cond), std::move(if_body));
@@ -618,9 +618,9 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // }
 
   ast::type::BoolType bool_type;
-  auto var =
+  auto* var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::IfStatement expr(create<ast::IdentifierExpression>("a"),
                         create<ast::BlockStatement>());
@@ -628,7 +628,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool

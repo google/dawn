@@ -19,14 +19,13 @@ namespace ast {
 
 UnaryOpExpression::UnaryOpExpression() : Expression() {}
 
-UnaryOpExpression::UnaryOpExpression(UnaryOp op,
-                                     std::unique_ptr<Expression> expr)
-    : Expression(), op_(op), expr_(std::move(expr)) {}
+UnaryOpExpression::UnaryOpExpression(UnaryOp op, Expression* expr)
+    : Expression(), op_(op), expr_(expr) {}
 
 UnaryOpExpression::UnaryOpExpression(const Source& source,
                                      UnaryOp op,
-                                     std::unique_ptr<Expression> expr)
-    : Expression(source), op_(op), expr_(std::move(expr)) {}
+                                     Expression* expr)
+    : Expression(source), op_(op), expr_(expr) {}
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 

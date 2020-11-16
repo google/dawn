@@ -35,18 +35,18 @@ namespace {
 class VertexPullingTransformHelper {
  public:
   VertexPullingTransformHelper() {
-    mod_ = create<ast::Module>();
+    mod_ = std::make_unique<ast::Module>();
     transform_ = std::make_unique<VertexPullingTransform>(&ctx_, mod_.get());
   }
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    auto func = create<ast::Function>(
+    auto* func = create<ast::Function>(
         "main", ast::VariableList{},
         ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()),
         create<ast::BlockStatement>());
     func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage ::kVertex, Source{}));
+        create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
     mod()->AddFunction(std::move(func));
   }
 
@@ -66,7 +66,7 @@ class VertexPullingTransformHelper {
   void AddVertexInputVariable(uint32_t location,
                               std::string name,
                               ast::type::Type* type) {
-    auto var = create<ast::DecoratedVariable>(
+    auto* var = create<ast::DecoratedVariable>(
         create<ast::Variable>(name, ast::StorageClass::kInput, type));
 
     ast::VariableDecorationList decorations;
@@ -80,11 +80,13 @@ class VertexPullingTransformHelper {
   ast::Module* mod() { return mod_.get(); }
   VertexPullingTransform* transform() { return transform_.get(); }
 
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
+  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
   template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  T* create(ARGS&&... args) {
+    return ctx_.create<T>(std::forward<ARGS>(args)...);
   }
 
  private:
@@ -117,7 +119,7 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
-  auto func = create<ast::Function>(
+  auto* func = create<ast::Function>(
       "main", ast::VariableList{},
       ctx()->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
       create<ast::BlockStatement>());
@@ -400,7 +402,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
 
   ast::type::I32Type i32;
   {
-    auto vertex_index_var =
+    auto* vertex_index_var =
         create<ast::DecoratedVariable>(create<ast::Variable>(
             "custom_vertex_index", ast::StorageClass::kInput, &i32));
 
@@ -413,7 +415,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   }
 
   {
-    auto instance_index_var =
+    auto* instance_index_var =
         create<ast::DecoratedVariable>(create<ast::Variable>(
             "custom_instance_index", ast::StorageClass::kInput, &i32));
 

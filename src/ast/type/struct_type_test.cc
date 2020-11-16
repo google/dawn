@@ -34,14 +34,14 @@ namespace {
 using StructTypeTest = TestHelper;
 
 TEST_F(StructTypeTest, Creation) {
-  auto impl = create<Struct>();
-  auto* ptr = impl.get();
+  auto* impl = create<Struct>();
+  auto* ptr = impl;
   StructType s{"S", std::move(impl)};
   EXPECT_EQ(s.impl(), ptr);
 }
 
 TEST_F(StructTypeTest, Is) {
-  auto impl = create<Struct>();
+  auto* impl = create<Struct>();
   StructType s{"S", std::move(impl)};
   EXPECT_FALSE(s.IsAccessControl());
   EXPECT_FALSE(s.IsAlias());
@@ -59,7 +59,7 @@ TEST_F(StructTypeTest, Is) {
 }
 
 TEST_F(StructTypeTest, TypeName) {
-  auto impl = create<Struct>();
+  auto* impl = create<Struct>();
   StructType s{"my_struct", std::move(impl)};
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }
@@ -80,7 +80,7 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -114,7 +114,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(32u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -149,7 +149,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(12u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -167,7 +167,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -186,7 +186,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -206,7 +206,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -230,7 +230,7 @@ TEST_F(StructTypeTest, BaseAlignment) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -263,7 +263,7 @@ TEST_F(StructTypeTest, BaseAlignmentArray) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -296,7 +296,7 @@ TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
@@ -313,7 +313,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec2) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -331,7 +331,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec3) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -349,7 +349,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec4) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));

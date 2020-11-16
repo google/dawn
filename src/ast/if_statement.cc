@@ -19,16 +19,13 @@
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement(std::unique_ptr<Expression> condition,
-                         std::unique_ptr<BlockStatement> body)
-    : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
+IfStatement::IfStatement(Expression* condition, BlockStatement* body)
+    : Statement(), condition_(condition), body_(body) {}
 
 IfStatement::IfStatement(const Source& source,
-                         std::unique_ptr<Expression> condition,
-                         std::unique_ptr<BlockStatement> body)
-    : Statement(source),
-      condition_(std::move(condition)),
-      body_(std::move(body)) {}
+                         Expression* condition,
+                         BlockStatement* body)
+    : Statement(source), condition_(condition), body_(body) {}
 
 IfStatement::IfStatement(IfStatement&&) = default;
 
@@ -47,7 +44,7 @@ bool IfStatement::IsValid() const {
   }
 
   bool found_else = false;
-  for (const auto& el : else_statements_) {
+  for (auto* el : else_statements_) {
     // Else statement must be last
     if (found_else)
       return false;
@@ -81,7 +78,7 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   out << "{" << std::endl;
 
   if (body_ != nullptr) {
-    for (const auto& stmt : *body_) {
+    for (auto* stmt : *body_) {
       stmt->to_str(out, indent + 4);
     }
   }
@@ -94,7 +91,7 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "}" << std::endl;
 
-  for (const auto& e : else_statements_) {
+  for (auto* e : else_statements_) {
     e->to_str(out, indent);
   }
 }

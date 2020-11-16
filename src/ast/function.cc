@@ -29,30 +29,30 @@ Function::Function() = default;
 Function::Function(const std::string& name,
                    VariableList params,
                    type::Type* return_type,
-                   std::unique_ptr<BlockStatement> body)
+                   BlockStatement* body)
     : Node(),
       name_(name),
       params_(std::move(params)),
       return_type_(return_type),
-      body_(std::move(body)) {}
+      body_(body) {}
 
 Function::Function(const Source& source,
                    const std::string& name,
                    VariableList params,
                    type::Type* return_type,
-                   std::unique_ptr<BlockStatement> body)
+                   BlockStatement* body)
     : Node(source),
       name_(name),
       params_(std::move(params)),
       return_type_(return_type),
-      body_(std::move(body)) {}
+      body_(body) {}
 
 Function::Function(Function&&) = default;
 
 Function::~Function() = default;
 
 std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsWorkgroup()) {
       return deco->AsWorkgroup()->values();
     }
@@ -61,7 +61,7 @@ std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
 }
 
 ast::PipelineStage Function::pipeline_stage() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsStage()) {
       return deco->AsStage()->value();
     }
@@ -86,9 +86,9 @@ Function::referenced_location_variables() const {
     if (!var->IsDecorated()) {
       continue;
     }
-    for (auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsLocation()) {
-        ret.push_back({var, deco.get()->AsLocation()});
+        ret.push_back({var, deco->AsLocation()});
         break;
       }
     }
@@ -108,7 +108,7 @@ Function::referenced_uniform_variables() const {
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (const auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBinding()) {
         binding = deco->AsBinding();
       } else if (deco->IsSet()) {
@@ -136,7 +136,7 @@ Function::referenced_storagebuffer_variables() const {
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (const auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBinding()) {
         binding = deco->AsBinding();
       } else if (deco->IsSet()) {
@@ -160,9 +160,9 @@ Function::referenced_builtin_variables() const {
     if (!var->IsDecorated()) {
       continue;
     }
-    for (auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBuiltin()) {
-        ret.push_back({var, deco.get()->AsBuiltin()});
+        ret.push_back({var, deco->AsBuiltin()});
         break;
       }
     }
@@ -213,7 +213,7 @@ const Statement* Function::get_last_statement() const {
 }
 
 bool Function::IsValid() const {
-  for (const auto& param : params_) {
+  for (auto* param : params_) {
     if (param == nullptr || !param->IsValid())
       return false;
   }
@@ -234,7 +234,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   out << "Function " << name_ << " -> " << return_type_->type_name()
       << std::endl;
 
-  for (const auto& deco : decorations()) {
+  for (auto* deco : decorations()) {
     deco->to_str(out, indent);
   }
 
@@ -244,7 +244,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   if (params_.size() > 0) {
     out << std::endl;
 
-    for (const auto& param : params_)
+    for (auto* param : params_)
       param->to_str(out, indent + 2);
 
     make_indent(out, indent);
@@ -255,7 +255,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
   out << "{" << std::endl;
 
   if (body_ != nullptr) {
-    for (const auto& stmt : *body_) {
+    for (auto* stmt : *body_) {
       stmt->to_str(out, indent + 2);
     }
   }
@@ -268,7 +268,7 @@ std::string Function::type_name() const {
   std::ostringstream out;
 
   out << "__func" + return_type_->type_name();
-  for (const auto& param : params_) {
+  for (auto* param : params_) {
     out << param->type()->type_name();
   }
 
@@ -288,7 +288,7 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (const auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBinding()) {
         binding = deco->AsBinding();
       } else if (deco->IsSet()) {
@@ -321,7 +321,7 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (const auto& deco : var->AsDecorated()->decorations()) {
+    for (auto* deco : var->AsDecorated()->decorations()) {
       if (deco->IsBinding()) {
         binding = deco->AsBinding();
       } else if (deco->IsSet()) {

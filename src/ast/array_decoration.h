@@ -46,8 +46,8 @@ class ArrayDecoration : public Decoration {
   explicit ArrayDecoration(const Source& source);
 };
 
-/// A list of unique array decorations
-using ArrayDecorationList = std::vector<std::unique_ptr<ArrayDecoration>>;
+/// A list of array decorations
+using ArrayDecorationList = std::vector<ArrayDecoration*>;
 
 }  // namespace ast
 }  // namespace tint

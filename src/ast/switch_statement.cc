@@ -21,16 +21,13 @@ namespace ast {
 
 SwitchStatement::SwitchStatement() : Statement() {}
 
-SwitchStatement::SwitchStatement(std::unique_ptr<Expression> condition,
-                                 CaseStatementList body)
-    : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
+SwitchStatement::SwitchStatement(Expression* condition, CaseStatementList body)
+    : condition_(condition), body_(body) {}
 
 SwitchStatement::SwitchStatement(const Source& source,
-                                 std::unique_ptr<Expression> condition,
+                                 Expression* condition,
                                  CaseStatementList body)
-    : Statement(source),
-      condition_(std::move(condition)),
-      body_(std::move(body)) {}
+    : Statement(source), condition_(condition), body_(body) {}
 
 bool SwitchStatement::IsSwitch() const {
   return true;
@@ -44,7 +41,7 @@ bool SwitchStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid()) {
     return false;
   }
-  for (const auto& stmt : body_) {
+  for (auto* stmt : body_) {
     if (stmt == nullptr || !stmt->IsValid()) {
       return false;
     }
@@ -60,7 +57,7 @@ void SwitchStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
-  for (const auto& stmt : body_) {
+  for (auto* stmt : body_) {
     stmt->to_str(out, indent + 4);
   }
 

@@ -30,7 +30,7 @@ bool BlockStatement::IsBlock() const {
 }
 
 bool BlockStatement::IsValid() const {
-  for (const auto& stmt : *this) {
+  for (auto* stmt : *this) {
     if (stmt == nullptr || !stmt->IsValid()) {
       return false;
     }
@@ -42,7 +42,7 @@ void BlockStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Block{" << std::endl;
 
-  for (const auto& stmt : *this) {
+  for (auto* stmt : *this) {
     stmt->to_str(out, indent + 2);
   }
 

@@ -31,46 +31,41 @@ class ElseStatement : public Statement {
  public:
   /// Constructor
   /// @param body the else body
-  explicit ElseStatement(std::unique_ptr<BlockStatement> body);
+  explicit ElseStatement(BlockStatement* body);
   /// Constructor
   /// @param condition the else condition
   /// @param body the else body
-  ElseStatement(std::unique_ptr<Expression> condition,
-                std::unique_ptr<BlockStatement> body);
+  ElseStatement(Expression* condition, BlockStatement* body);
   /// Constructor
   /// @param source the source information
   /// @param body the else body
-  ElseStatement(const Source& source, std::unique_ptr<BlockStatement> body);
+  ElseStatement(const Source& source, BlockStatement* body);
   /// Constructor
   /// @param source the source information
   /// @param condition the else condition
   /// @param body the else body
   ElseStatement(const Source& source,
-                std::unique_ptr<Expression> condition,
-                std::unique_ptr<BlockStatement> body);
+                Expression* condition,
+                BlockStatement* body);
   /// Move constructor
   ElseStatement(ElseStatement&&);
   ~ElseStatement() override;
 
   /// Sets the condition for the else statement
   /// @param condition the condition to set
-  void set_condition(std::unique_ptr<Expression> condition) {
-    condition_ = std::move(condition);
-  }
+  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the else condition or nullptr if none set
-  Expression* condition() const { return condition_.get(); }
+  Expression* condition() const { return condition_; }
   /// @returns true if the else has a condition
   bool HasCondition() const { return condition_ != nullptr; }
 
   /// Sets the else body
   /// @param body the else body
-  void set_body(std::unique_ptr<BlockStatement> body) {
-    body_ = std::move(body);
-  }
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the else body
-  const BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_; }
   /// @returns the else body
-  BlockStatement* body() { return body_.get(); }
+  BlockStatement* body() { return body_; }
 
   /// @returns true if this is a else statement
   bool IsElse() const override;
@@ -86,12 +81,12 @@ class ElseStatement : public Statement {
  private:
   ElseStatement(const ElseStatement&) = delete;
 
-  std::unique_ptr<Expression> condition_;
-  std::unique_ptr<BlockStatement> body_;
+  Expression* condition_ = nullptr;
+  BlockStatement* body_ = nullptr;
 };
 
-/// A list of unique else statements
-using ElseStatementList = std::vector<std::unique_ptr<ElseStatement>>;
+/// A list of else statements
+using ElseStatementList = std::vector<ElseStatement*>;
 
 }  // namespace ast
 }  // namespace tint

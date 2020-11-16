@@ -36,7 +36,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
   ast::LoopStatement l(std::move(body), {});
@@ -51,10 +51,10 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  auto continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::ReturnStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
@@ -79,20 +79,20 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   ast::type::F32Type f32;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  auto continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::ReturnStatement>());
 
-  auto inner =
+  auto* inner =
       create<ast::LoopStatement>(std::move(body), std::move(continuing));
 
   body = create<ast::BlockStatement>();
   body->append(std::move(inner));
 
-  auto lhs = create<ast::IdentifierExpression>("lhs");
-  auto rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<ast::IdentifierExpression>("lhs");
+  auto* rhs = create<ast::IdentifierExpression>("rhs");
 
   continuing = create<ast::BlockStatement>();
   continuing->append(
@@ -151,19 +151,19 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
 
   ast::type::F32Type f32;
 
-  auto var = create<ast::Variable>("lhs", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>("lhs", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.4)));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(std::move(var)));
   body->append(create<ast::VariableDeclStatement>(
       create<ast::Variable>("other", ast::StorageClass::kFunction, &f32)));
 
-  auto lhs = create<ast::IdentifierExpression>("lhs");
-  auto rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<ast::IdentifierExpression>("lhs");
+  auto* rhs = create<ast::IdentifierExpression>("rhs");
 
-  auto continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>();
   continuing->append(
       create<ast::AssignmentStatement>(std::move(lhs), std::move(rhs)));
 

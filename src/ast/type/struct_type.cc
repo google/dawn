@@ -26,8 +26,8 @@ namespace tint {
 namespace ast {
 namespace type {
 
-StructType::StructType(const std::string& name, std::unique_ptr<Struct> impl)
-    : name_(name), struct_(std::move(impl)) {}
+StructType::StructType(const std::string& name, Struct* impl)
+    : name_(name), struct_(impl) {}
 
 StructType::StructType(StructType&&) = default;
 
@@ -46,7 +46,7 @@ uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
     return 0;
   }
 
-  const auto& last_member = struct_->members().back();
+  auto* last_member = struct_->members().back();
 
   // If there is no offset, then this is not a host-shareable struct, returning
   // 0 indicates this to the caller.
@@ -67,7 +67,7 @@ uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
 
 uint64_t StructType::BaseAlignment(MemoryLayout mem_layout) const {
   uint64_t max = 0;
-  for (const auto& member : struct_->members()) {
+  for (auto* member : struct_->members()) {
     if (member->type()->BaseAlignment(mem_layout) > max) {
       max = member->type()->BaseAlignment(mem_layout);
     }

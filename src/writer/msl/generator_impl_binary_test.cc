@@ -38,8 +38,8 @@ using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
-  auto left = create<ast::IdentifierExpression>("left");
-  auto right = create<ast::IdentifierExpression>("right");
+  auto* left = create<ast::IdentifierExpression>("left");
+  auto* right = create<ast::IdentifierExpression>("right");
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 

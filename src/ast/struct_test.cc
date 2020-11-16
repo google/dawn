@@ -35,7 +35,7 @@ TEST_F(StructTest, Creation) {
   members.push_back(
       create<StructMember>("a", &i32, StructMemberDecorationList()));
 
-  Struct s{std::move(members)};
+  Struct s{members};
   EXPECT_EQ(s.members().size(), 1u);
   EXPECT_TRUE(s.decorations().empty());
   EXPECT_EQ(s.source().range.begin.line, 0u);
@@ -54,7 +54,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>(Source{}));
 
-  Struct s{std::move(decos), std::move(members)};
+  Struct s{decos, members};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_TRUE(s.decorations()[0]->IsBlock());
@@ -76,7 +76,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
 
   Struct s{
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      std::move(decos), std::move(members)};
+      decos, members};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
   EXPECT_TRUE(s.decorations()[0]->IsBlock());
@@ -99,7 +99,7 @@ TEST_F(StructTest, IsValid_Null_StructMember) {
       create<StructMember>("a", &i32, StructMemberDecorationList()));
   members.push_back(nullptr);
 
-  Struct s{std::move(members)};
+  Struct s{members};
   EXPECT_FALSE(s.IsValid());
 }
 
@@ -110,7 +110,7 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
   members.push_back(
       create<StructMember>("", &i32, StructMemberDecorationList()));
 
-  Struct s{std::move(members)};
+  Struct s{members};
   EXPECT_FALSE(s.IsValid());
 }
 
@@ -124,7 +124,7 @@ TEST_F(StructTest, ToStr) {
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>(Source{}));
 
-  Struct s{std::move(decos), std::move(members)};
+  Struct s{decos, members};
 
   std::ostringstream out;
   s.to_str(out, 2);

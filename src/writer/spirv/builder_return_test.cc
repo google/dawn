@@ -58,7 +58,7 @@ TEST_F(BuilderTest, Return_WithValue) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto val = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* val = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::ReturnStatement ret(std::move(val));
 

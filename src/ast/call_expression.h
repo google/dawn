@@ -32,27 +32,25 @@ class CallExpression : public Expression {
   /// Constructor
   /// @param func the function
   /// @param params the parameters
-  CallExpression(std::unique_ptr<Expression> func, ExpressionList params);
+  CallExpression(Expression* func, ExpressionList params);
   /// Constructor
   /// @param source the call expression source
   /// @param func the function
   /// @param params the parameters
-  CallExpression(const Source& source,
-                 std::unique_ptr<Expression> func,
-                 ExpressionList params);
+  CallExpression(const Source& source, Expression* func, ExpressionList params);
   /// Move constructor
   CallExpression(CallExpression&&);
   ~CallExpression() override;
 
   /// Sets the func
   /// @param func the func
-  void set_func(std::unique_ptr<Expression> func) { func_ = std::move(func); }
+  void set_func(Expression* func) { func_ = func; }
   /// @returns the func
-  Expression* func() const { return func_.get(); }
+  Expression* func() const { return func_; }
 
   /// Sets the parameters
   /// @param params the parameters
-  void set_params(ExpressionList params) { params_ = std::move(params); }
+  void set_params(ExpressionList params) { params_ = params; }
   /// @returns the parameters
   const ExpressionList& params() const { return params_; }
 
@@ -70,7 +68,7 @@ class CallExpression : public Expression {
  private:
   CallExpression(const CallExpression&) = delete;
 
-  std::unique_ptr<Expression> func_;
+  Expression* func_ = nullptr;
   ExpressionList params_;
 };
 

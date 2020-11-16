@@ -29,12 +29,12 @@ using ElseStatementTest = TestHelper;
 
 TEST_F(ElseStatementTest, Creation) {
   ast::type::BoolType bool_type;
-  auto cond = create<ScalarConstructorExpression>(
+  auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto* cond_ptr = cond.get();
+  auto* cond_ptr = cond;
   auto* discard_ptr = body->get(0);
 
   ElseStatement e(std::move(cond), std::move(body));
@@ -57,7 +57,7 @@ TEST_F(ElseStatementTest, IsElse) {
 
 TEST_F(ElseStatementTest, HasCondition) {
   ast::type::BoolType bool_type;
-  auto cond = create<ScalarConstructorExpression>(
+  auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
   ElseStatement e(std::move(cond), create<BlockStatement>());
   EXPECT_TRUE(e.HasCondition());
@@ -74,7 +74,7 @@ TEST_F(ElseStatementTest, IsValid) {
 }
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(body));
@@ -82,7 +82,7 @@ TEST_F(ElseStatementTest, IsValid_WithBody) {
 }
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
@@ -91,13 +91,13 @@ TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
-  auto cond = create<ScalarConstructorExpression>();
+  auto* cond = create<ScalarConstructorExpression>();
   ElseStatement e(std::move(cond), create<BlockStatement>());
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
   ElseStatement e(std::move(body));
@@ -106,9 +106,9 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(ElseStatementTest, ToStr) {
   ast::type::BoolType bool_type;
-  auto cond = create<ScalarConstructorExpression>(
+  auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(cond), std::move(body));
@@ -126,7 +126,7 @@ TEST_F(ElseStatementTest, ToStr) {
 }
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   ElseStatement e(std::move(body));

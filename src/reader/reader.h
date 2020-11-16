@@ -16,6 +16,7 @@
 #define SRC_READER_READER_H_
 
 #include <string>
+#include <utility>
 
 #include "src/ast/module.h"
 #include "src/context.h"
@@ -57,6 +58,15 @@ class Reader {
   /// Sets the diagnostic messages
   /// @param diags the list of diagnostic messages
   void set_diagnostics(const diag::List& diags) { diags_ = diags; }
+
+  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  T* create(ARGS&&... args) const {
+    return ctx_.create<T>(std::forward<ARGS>(args)...);
+  }
 
   /// The Tint context object
   Context& ctx_;

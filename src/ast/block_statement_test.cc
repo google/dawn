@@ -28,8 +28,8 @@ namespace {
 using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
-  auto d = create<DiscardStatement>();
-  auto* ptr = d.get();
+  auto* d = create<DiscardStatement>();
+  auto* ptr = d;
 
   BlockStatement b;
   b.append(std::move(d));
@@ -39,12 +39,12 @@ TEST_F(BlockStatementTest, Creation) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithInsert) {
-  auto s1 = create<DiscardStatement>();
-  auto s2 = create<DiscardStatement>();
-  auto s3 = create<DiscardStatement>();
-  auto* p1 = s1.get();
-  auto* p2 = s2.get();
-  auto* p3 = s3.get();
+  auto* s1 = create<DiscardStatement>();
+  auto* s2 = create<DiscardStatement>();
+  auto* s3 = create<DiscardStatement>();
+  auto* p1 = s1;
+  auto* p2 = s2;
+  auto* p3 = s3;
 
   BlockStatement b;
   b.insert(0, std::move(s1));

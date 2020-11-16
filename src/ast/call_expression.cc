@@ -19,14 +19,13 @@ namespace ast {
 
 CallExpression::CallExpression() : Expression() {}
 
-CallExpression::CallExpression(std::unique_ptr<Expression> func,
-                               ExpressionList params)
-    : Expression(), func_(std::move(func)), params_(std::move(params)) {}
+CallExpression::CallExpression(Expression* func, ExpressionList params)
+    : Expression(), func_(func), params_(params) {}
 
 CallExpression::CallExpression(const Source& source,
-                               std::unique_ptr<Expression> func,
+                               Expression* func,
                                ExpressionList params)
-    : Expression(source), func_(std::move(func)), params_(std::move(params)) {}
+    : Expression(source), func_(func), params_(params) {}
 
 CallExpression::CallExpression(CallExpression&&) = default;
 
@@ -41,7 +40,7 @@ bool CallExpression::IsValid() const {
     return false;
 
   // All params must be valid
-  for (const auto& param : params_) {
+  for (auto* param : params_) {
     if (param == nullptr || !param->IsValid())
       return false;
   }
@@ -55,7 +54,7 @@ void CallExpression::to_str(std::ostream& out, size_t indent) const {
 
   make_indent(out, indent + 2);
   out << "(" << std::endl;
-  for (const auto& param : params_)
+  for (auto* param : params_)
     param->to_str(out, indent + 4);
 
   make_indent(out, indent + 2);

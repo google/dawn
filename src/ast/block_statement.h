@@ -38,16 +38,14 @@ class BlockStatement : public Statement {
 
   /// Appends a statement to the block
   /// @param stmt the statement to append
-  void append(std::unique_ptr<ast::Statement> stmt) {
-    statements_.push_back(std::move(stmt));
-  }
+  void append(ast::Statement* stmt) { statements_.push_back(stmt); }
 
   /// Insert a statement to the block
   /// @param index the index to insert at
   /// @param stmt the statement to insert
-  void insert(size_t index, std::unique_ptr<ast::Statement> stmt) {
+  void insert(size_t index, ast::Statement* stmt) {
     auto offset = static_cast<decltype(statements_)::difference_type>(index);
-    statements_.insert(statements_.begin() + offset, std::move(stmt));
+    statements_.insert(statements_.begin() + offset, stmt);
   }
 
   /// @returns true if the block is empty
@@ -57,35 +55,35 @@ class BlockStatement : public Statement {
 
   /// @returns the last statement in the block or nullptr if block empty
   const ast::Statement* last() const {
-    return statements_.empty() ? nullptr : statements_.back().get();
+    return statements_.empty() ? nullptr : statements_.back();
   }
   /// @returns the last statement in the block or nullptr if block empty
   ast::Statement* last() {
-    return statements_.empty() ? nullptr : statements_.back().get();
+    return statements_.empty() ? nullptr : statements_.back();
   }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  const ast::Statement* get(size_t idx) const { return statements_[idx].get(); }
+  const ast::Statement* get(size_t idx) const { return statements_[idx]; }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  ast::Statement* operator[](size_t idx) { return statements_[idx].get(); }
+  ast::Statement* operator[](size_t idx) { return statements_[idx]; }
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
   const ast::Statement* operator[](size_t idx) const {
-    return statements_[idx].get();
+    return statements_[idx];
   }
 
   /// @returns the beginning iterator
-  std::vector<std::unique_ptr<ast::Statement>>::const_iterator begin() const {
+  std::vector<ast::Statement*>::const_iterator begin() const {
     return statements_.begin();
   }
   /// @returns the ending iterator
-  std::vector<std::unique_ptr<ast::Statement>>::const_iterator end() const {
+  std::vector<ast::Statement*>::const_iterator end() const {
     return statements_.end();
   }
 
@@ -103,7 +101,7 @@ class BlockStatement : public Statement {
  private:
   BlockStatement(const BlockStatement&) = delete;
 
-  std::vector<std::unique_ptr<ast::Statement>> statements_;
+  std::vector<ast::Statement*> statements_;
 };
 
 }  // namespace ast

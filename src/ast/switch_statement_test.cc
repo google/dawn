@@ -34,22 +34,22 @@ TEST_F(SwitchStatementTest, Creation) {
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 1));
 
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
       create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
 
-  auto* ident_ptr = ident.get();
-  auto* case_ptr = body[0].get();
+  auto* ident_ptr = ident;
+  auto* case_ptr = body[0];
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_EQ(stmt.condition(), ident_ptr);
   ASSERT_EQ(stmt.body().size(), 1u);
-  EXPECT_EQ(stmt.body()[0].get(), case_ptr);
+  EXPECT_EQ(stmt.body()[0], case_ptr);
 }
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
 
   SwitchStatement stmt(Source{Source::Location{20, 2}}, std::move(ident),
                        CaseStatementList());
@@ -69,7 +69,7 @@ TEST_F(SwitchStatementTest, IsValid) {
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
       create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
@@ -99,7 +99,7 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = create<IdentifierExpression>("");
+  auto* ident = create<IdentifierExpression>("");
   CaseStatementList body;
   body.push_back(
       create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
@@ -114,7 +114,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
       create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));
@@ -125,9 +125,9 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
 
-  auto case_body = create<ast::BlockStatement>();
+  auto* case_body = create<ast::BlockStatement>();
   case_body->append(nullptr);
 
   CaseStatementList body;
@@ -139,7 +139,7 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
 }
 
 TEST_F(SwitchStatementTest, ToStr_Empty) {
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
 
   SwitchStatement stmt(std::move(ident), {});
   std::ostringstream out;
@@ -158,7 +158,7 @@ TEST_F(SwitchStatementTest, ToStr) {
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
-  auto ident = create<IdentifierExpression>("ident");
+  auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
       create<CaseStatement>(std::move(lit), create<ast::BlockStatement>()));

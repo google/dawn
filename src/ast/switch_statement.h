@@ -34,14 +34,13 @@ class SwitchStatement : public Statement {
   /// Constructor
   /// @param condition the switch condition
   /// @param body the switch body
-  SwitchStatement(std::unique_ptr<Expression> condition,
-                  CaseStatementList body);
+  SwitchStatement(Expression* condition, CaseStatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the switch condition
   /// @param body the switch body
   SwitchStatement(const Source& source,
-                  std::unique_ptr<Expression> condition,
+                  Expression* condition,
                   CaseStatementList body);
   /// Move constructor
   SwitchStatement(SwitchStatement&&);
@@ -49,11 +48,9 @@ class SwitchStatement : public Statement {
 
   /// Sets the condition for the switch statement
   /// @param condition the condition to set
-  void set_condition(std::unique_ptr<Expression> condition) {
-    condition_ = std::move(condition);
-  }
+  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the switch condition or nullptr if none set
-  Expression* condition() const { return condition_.get(); }
+  Expression* condition() const { return condition_; }
   /// @returns true if this is a default statement
   bool IsDefault() const { return condition_ == nullptr; }
 
@@ -77,7 +74,7 @@ class SwitchStatement : public Statement {
  private:
   SwitchStatement(const SwitchStatement&) = delete;
 
-  std::unique_ptr<Expression> condition_;
+  Expression* condition_ = nullptr;
   CaseStatementList body_;
 };
 

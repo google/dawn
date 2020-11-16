@@ -67,8 +67,8 @@ class VariableDecoration : public Decoration {
   explicit VariableDecoration(const Source& source);
 };
 
-/// A list of unique variable decorations
-using VariableDecorationList = std::vector<std::unique_ptr<VariableDecoration>>;
+/// A list of variable decorations
+using VariableDecorationList = std::vector<VariableDecoration*>;
 
 }  // namespace ast
 }  // namespace tint

@@ -56,24 +56,10 @@ using DecorationList = std::vector<Decoration>;
 
 /// An AST expression with its type.
 struct TypedExpression {
-  /// Constructor
-  TypedExpression();
-  /// Constructor
-  /// @param t the type
-  /// @param e the expression
-  TypedExpression(ast::type::Type* t, std::unique_ptr<ast::Expression> e);
-  /// Move constructor
-  /// @param other the other typed expression
-  TypedExpression(TypedExpression&& other);
-  /// Destructor
-  ~TypedExpression();
-  /// Takes values from another typed expression.
-  /// @param other the other typed expression
-  void reset(TypedExpression&& other);
   /// The type
-  ast::type::Type* type;
+  ast::type::Type* type = nullptr;
   /// The expression
-  std::unique_ptr<ast::Expression> expr;
+  ast::Expression* expr = nullptr;
 };
 
 /// Parser implementation for SPIR-V.
@@ -187,7 +173,7 @@ class ParserImpl : Reader {
   /// @param member_index the index of the member
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the corresponding ast::StructuMemberDecoration
-  std::unique_ptr<ast::StructMemberDecoration> ConvertMemberDecoration(
+  ast::StructMemberDecoration* ConvertMemberDecoration(
       uint32_t struct_type_id,
       uint32_t member_index,
       const Decoration& decoration);
@@ -274,9 +260,9 @@ class ParserImpl : Reader {
   /// @param sc the storage class, which cannot be ast::StorageClass::kNone
   /// @param type the type
   /// @returns a new Variable node, or null in the error case
-  std::unique_ptr<ast::Variable> MakeVariable(uint32_t id,
-                                              ast::StorageClass sc,
-                                              ast::type::Type* type);
+  ast::Variable* MakeVariable(uint32_t id,
+                              ast::StorageClass sc,
+                              ast::type::Type* type);
 
   /// Creates an AST expression node for a SPIR-V constant.
   /// @param id the SPIR-V ID of the constant
@@ -286,7 +272,7 @@ class ParserImpl : Reader {
   /// Creates an AST expression node for the null value for the given type.
   /// @param type the AST type
   /// @returns a new expression
-  std::unique_ptr<ast::Expression> MakeNullValue(ast::type::Type* type);
+  ast::Expression* MakeNullValue(ast::type::Type* type);
 
   /// Converts a given expression to the signedness demanded for an operand
   /// of the given SPIR-V opcode, if required.  If the operation assumes
@@ -431,13 +417,6 @@ class ParserImpl : Reader {
   /// @returns true on success.
   bool ApplyArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
                              ast::type::ArrayType* ast_type);
-
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
-  template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) const {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
-  }
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;

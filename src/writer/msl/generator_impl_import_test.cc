@@ -58,8 +58,8 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto ident = create<ast::IdentifierExpression>(param.name);
-  auto* ident_ptr = ident.get();
+  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident_ptr = ident;
 
   ast::CallExpression call(std::move(ident), std::move(params));
 
@@ -268,7 +268,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
+  auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("var"));

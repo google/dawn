@@ -187,22 +187,6 @@ bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
 
 }  // namespace
 
-TypedExpression::TypedExpression() : type(nullptr), expr(nullptr) {}
-
-TypedExpression::TypedExpression(ast::type::Type* t,
-                                 std::unique_ptr<ast::Expression> e)
-    : type(t), expr(std::move(e)) {}
-
-TypedExpression::TypedExpression(TypedExpression&& other)
-    : type(other.type), expr(std::move(other.expr)) {}
-
-TypedExpression::~TypedExpression() {}
-
-void TypedExpression::reset(TypedExpression&& other) {
-  type = other.type;
-  expr = std::move(other.expr);
-}
-
 ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
       spv_binary_(spv_binary),
@@ -375,10 +359,10 @@ std::string ParserImpl::ShowType(uint32_t type_id) {
   return "SPIR-V type " + std::to_string(type_id);
 }
 
-std::unique_ptr<ast::StructMemberDecoration>
-ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
-                                    uint32_t member_index,
-                                    const Decoration& decoration) {
+ast::StructMemberDecoration* ParserImpl::ConvertMemberDecoration(
+    uint32_t struct_type_id,
+    uint32_t member_index,
+    const Decoration& decoration) {
   if (decoration.empty()) {
     Fail() << "malformed SPIR-V decoration: it's empty";
     return nullptr;
@@ -861,7 +845,7 @@ ast::type::Type* ParserImpl::ConvertType(
         // the members are non-writable.
         is_non_writable = true;
       } else {
-        auto ast_member_decoration =
+        auto* ast_member_decoration =
             ConvertMemberDecoration(type_id, member_index, decoration);
         if (!success_) {
           return nullptr;
@@ -877,14 +861,14 @@ ast::type::Type* ParserImpl::ConvertType(
       ++num_non_writable_members;
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
-    auto ast_struct_member = create<ast::StructMember>(
+    auto* ast_struct_member = create<ast::StructMember>(
         member_name, ast_member_ty, std::move(ast_member_decorations));
     ast_members.push_back(std::move(ast_struct_member));
   }
 
   // Now make the struct.
-  auto ast_struct = create<ast::Struct>(std::move(ast_struct_decorations),
-                                        std::move(ast_members));
+  auto* ast_struct = create<ast::Struct>(std::move(ast_struct_decorations),
+                                         std::move(ast_members));
 
   namer_.SuggestSanitizedName(type_id, "S");
   auto ast_struct_type = std::make_unique<ast::type::StructType>(
@@ -963,7 +947,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
   for (auto& inst : module_->types_values()) {
     // These will be populated for a valid scalar spec constant.
     ast::type::Type* ast_type = nullptr;
-    std::unique_ptr<ast::ScalarConstructorExpression> ast_expr;
+    ast::ScalarConstructorExpression* ast_expr = nullptr;
 
     switch (inst.opcode()) {
       case SpvOpSpecConstantTrue:
@@ -1001,12 +985,12 @@ bool ParserImpl::EmitScalarSpecConstants() {
         break;
     }
     if (ast_type && ast_expr) {
-      auto ast_var =
+      auto* ast_var =
           MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type);
       ast::VariableDecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto cid = create<ast::ConstantIdDecoration>(deco[1], Source{});
+          auto* cid = create<ast::ConstantIdDecoration>(deco[1], Source{});
           spec_id_decos.push_back(std::move(cid));
           break;
         }
@@ -1017,7 +1001,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
         ast_var->set_constructor(std::move(ast_expr));
         ast_module_.AddGlobalVariable(std::move(ast_var));
       } else {
-        auto ast_deco_var = create<ast::DecoratedVariable>(std::move(ast_var));
+        auto* ast_deco_var = create<ast::DecoratedVariable>(std::move(ast_var));
         ast_deco_var->set_is_const(true);
         ast_deco_var->set_constructor(std::move(ast_expr));
         ast_deco_var->set_decorations(std::move(spec_id_decos));
@@ -1118,7 +1102,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     auto* ast_store_type = ast_type->AsPointer()->type();
     auto ast_storage_class = ast_type->AsPointer()->storage_class();
-    auto ast_var =
+    auto* ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
     if (var.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
@@ -1136,7 +1120,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
-    auto var = create<ast::DecoratedVariable>(MakeVariable(
+    auto* var = create<ast::DecoratedVariable>(MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.member_type_id)));
@@ -1150,9 +1134,9 @@ bool ParserImpl::EmitModuleScopeVariables() {
   return success_;
 }
 
-std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
-                                                        ast::StorageClass sc,
-                                                        ast::type::Type* type) {
+ast::Variable* ParserImpl::MakeVariable(uint32_t id,
+                                        ast::StorageClass sc,
+                                        ast::type::Type* type) {
   if (type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
@@ -1167,7 +1151,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         std::make_unique<ast::type::AccessControlType>(access, type));
   }
 
-  auto ast_var = create<ast::Variable>(namer_.Name(id), sc, type);
+  auto* ast_var = create<ast::Variable>(namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
@@ -1218,7 +1202,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
     }
   }
   if (!ast_decorations.empty()) {
-    auto decorated_var = create<ast::DecoratedVariable>(std::move(ast_var));
+    auto* decorated_var = create<ast::DecoratedVariable>(std::move(ast_var));
     decorated_var->set_decorations(std::move(ast_decorations));
     ast_var = std::move(decorated_var);
   }
@@ -1315,8 +1299,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   return {};
 }
 
-std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
-    ast::type::Type* type) {
+ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
   // TODO(dneto): Use the no-operands constructor syntax when it becomes
   // available in Tint.
   // https://github.com/gpuweb/gpuweb/issues/685
@@ -1380,7 +1363,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
   if (type->IsStruct()) {
     auto* struct_ty = type->AsStruct();
     ast::ExpressionList ast_components;
-    for (auto& member : struct_ty->impl()->members()) {
+    for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
     return create<ast::TypeConstructorExpression>(original_type,

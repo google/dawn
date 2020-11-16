@@ -122,11 +122,9 @@ class Variable : public Node {
 
   /// Sets the constructor
   /// @param expr the constructor expression
-  void set_constructor(std::unique_ptr<Expression> expr) {
-    constructor_ = std::move(expr);
-  }
+  void set_constructor(Expression* expr) { constructor_ = expr; }
   /// @returns the constructor expression or nullptr if none set
-  Expression* constructor() const { return constructor_.get(); }
+  Expression* constructor() const { return constructor_; }
   /// @returns true if the variable has an constructor
   bool has_constructor() const { return constructor_ != nullptr; }
 
@@ -170,11 +168,11 @@ class Variable : public Node {
   StorageClass storage_class_ = StorageClass::kNone;
   // The value type if a const or formal paramter, and the store type if a var
   type::Type* type_ = nullptr;
-  std::unique_ptr<Expression> constructor_;
+  Expression* constructor_ = nullptr;
 };
 
-/// A list of unique variables
-using VariableList = std::vector<std::unique_ptr<Variable>>;
+/// A list of variables
+using VariableList = std::vector<Variable*>;
 
 }  // namespace ast
 }  // namespace tint

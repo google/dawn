@@ -57,9 +57,9 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
 
   ast::type::I32Type i32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -89,7 +89,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
       create<ast::SintLiteral>(&i32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
@@ -97,7 +97,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
       create<ast::SintLiteral>(&i32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -121,8 +121,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
 
   ast::Variable var("param", ast::StorageClass::kFunction, &i32);
 
-  auto lhs = create<ast::IdentifierExpression>("param");
-  auto rhs = create<ast::IdentifierExpression>("param");
+  auto* lhs = create<ast::IdentifierExpression>("param");
+  auto* rhs = create<ast::IdentifierExpression>("param");
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -169,9 +169,9 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
 
   ast::type::U32Type u32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -201,7 +201,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
       create<ast::UintLiteral>(&u32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
@@ -209,7 +209,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
       create<ast::UintLiteral>(&u32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -247,9 +247,9 @@ TEST_P(BinaryArithFloatTest, Scalar) {
 
   ast::type::F32Type f32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.2f));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 4.5f));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -279,7 +279,7 @@ TEST_P(BinaryArithFloatTest, Vector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
@@ -287,7 +287,7 @@ TEST_P(BinaryArithFloatTest, Vector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -319,9 +319,9 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 
   ast::type::U32Type u32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -353,7 +353,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
       create<ast::UintLiteral>(&u32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
@@ -361,7 +361,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
       create<ast::UintLiteral>(&u32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -397,9 +397,9 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 
   ast::type::I32Type i32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 4));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -431,7 +431,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
       create<ast::SintLiteral>(&i32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
@@ -439,7 +439,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
       create<ast::SintLiteral>(&i32, 1)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -475,9 +475,9 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 
   ast::type::F32Type f32;
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.2f));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 4.5f));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
@@ -509,7 +509,7 @@ TEST_P(BinaryCompareFloatTest, Vector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
@@ -517,7 +517,7 @@ TEST_P(BinaryCompareFloatTest, Vector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
@@ -558,9 +558,9 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
@@ -584,7 +584,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
 
   ast::ExpressionList vals;
@@ -594,7 +594,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -617,12 +617,12 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = create<ast::IdentifierExpression>("mat");
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* lhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -630,7 +630,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
@@ -650,12 +650,12 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = create<ast::ScalarConstructorExpression>(
+  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
-  auto rhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs = create<ast::IdentifierExpression>("mat");
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -663,7 +663,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
@@ -684,8 +684,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = create<ast::IdentifierExpression>("mat");
+  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* lhs = create<ast::IdentifierExpression>("mat");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -694,9 +694,9 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -704,7 +704,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
@@ -726,7 +726,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -735,11 +735,11 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  auto rhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs = create<ast::IdentifierExpression>("mat");
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -747,7 +747,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
@@ -769,11 +769,11 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
-  auto lhs = create<ast::IdentifierExpression>("mat");
-  auto rhs = create<ast::IdentifierExpression>("mat");
+  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* lhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs = create<ast::IdentifierExpression>("mat");
 
-  td.RegisterVariableForTesting(var.get());
+  td.RegisterVariableForTesting(var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, std::move(lhs),
                              std::move(rhs));
@@ -781,7 +781,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
@@ -800,14 +800,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 TEST_F(BuilderTest, Binary_LogicalAnd) {
   ast::type::I32Type i32;
 
-  auto lhs =
+  auto* lhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 1)),
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 2)));
 
-  auto rhs =
+  auto* rhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 3)),
@@ -846,20 +846,20 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   ast::type::BoolType bool_type;
 
-  auto a_var =
+  auto* a_var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   a_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
-  auto b_var =
+  auto* b_var =
       create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
   b_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto lhs = create<ast::IdentifierExpression>("a");
-  auto rhs = create<ast::IdentifierExpression>("b");
+  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* rhs = create<ast::IdentifierExpression>("b");
 
-  td.RegisterVariableForTesting(a_var.get());
-  td.RegisterVariableForTesting(b_var.get());
+  td.RegisterVariableForTesting(a_var);
+  td.RegisterVariableForTesting(b_var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(lhs),
                              std::move(rhs));
@@ -869,8 +869,8 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(a_var.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(b_var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a_var)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(b_var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
@@ -896,14 +896,14 @@ OpBranch %9
 TEST_F(BuilderTest, Binary_LogicalOr) {
   ast::type::I32Type i32;
 
-  auto lhs =
+  auto* lhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 1)),
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 2)));
 
-  auto rhs =
+  auto* rhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 3)),
@@ -942,20 +942,20 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   ast::type::BoolType bool_type;
 
-  auto a_var =
+  auto* a_var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   a_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
-  auto b_var =
+  auto* b_var =
       create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
   b_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto lhs = create<ast::IdentifierExpression>("a");
-  auto rhs = create<ast::IdentifierExpression>("b");
+  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* rhs = create<ast::IdentifierExpression>("b");
 
-  td.RegisterVariableForTesting(a_var.get());
-  td.RegisterVariableForTesting(b_var.get());
+  td.RegisterVariableForTesting(a_var);
+  td.RegisterVariableForTesting(b_var);
 
   ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(lhs),
                              std::move(rhs));
@@ -965,8 +965,8 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(a_var.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(b_var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a_var)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(b_var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool

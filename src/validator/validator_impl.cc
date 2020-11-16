@@ -61,7 +61,7 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
 
 bool ValidatorImpl::ValidateGlobalVariables(
     const ast::VariableList& global_vars) {
-  for (const auto& var : global_vars) {
+  for (auto* var : global_vars) {
     if (variable_stack_.has(var->name())) {
       set_error(var->source(),
                 "v-0011: redeclared global identifier '" + var->name() + "'");
@@ -78,22 +78,22 @@ bool ValidatorImpl::ValidateGlobalVariables(
                 "v-global01: global constants shouldn't have a storage class");
       return false;
     }
-    variable_stack_.set_global(var->name(), var.get());
+    variable_stack_.set_global(var->name(), var);
   }
   return true;
 }
 
 bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
-  for (const auto& func : funcs) {
+  for (auto* func : funcs) {
     if (function_stack_.has(func->name())) {
       set_error(func->source(),
                 "v-0016: function names must be unique '" + func->name() + "'");
       return false;
     }
 
-    function_stack_.set(func->name(), func.get());
-    current_function_ = func.get();
-    if (!ValidateFunction(func.get())) {
+    function_stack_.set(func->name(), func);
+    current_function_ = func;
+    if (!ValidateFunction(func)) {
       return false;
     }
     current_function_ = nullptr;
@@ -104,7 +104,7 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
 
 bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
   auto shader_is_present = false;
-  for (const auto& func : funcs) {
+  for (auto* func : funcs) {
     if (func->IsEntryPoint()) {
       shader_is_present = true;
       if (!func->params().empty()) {
@@ -121,7 +121,7 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         return false;
       }
       auto stage_deco_count = 0;
-      for (const auto& deco : func->decorations()) {
+      for (auto* deco : func->decorations()) {
         if (deco->IsStage()) {
           stage_deco_count++;
         }
@@ -146,8 +146,8 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
 bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   variable_stack_.push_scope();
 
-  for (const auto& param : func->params()) {
-    variable_stack_.set(param->name(), param.get());
+  for (auto* param : func->params()) {
+    variable_stack_.set(param->name(), param);
   }
   if (!ValidateStatements(func->body())) {
     return false;
@@ -190,8 +190,8 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
   if (!block) {
     return false;
   }
-  for (const auto& stmt : *block) {
-    if (!ValidateStatement(stmt.get())) {
+  for (auto* stmt : *block) {
+    if (!ValidateStatement(stmt)) {
       return false;
     }
   }
@@ -261,19 +261,19 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
 
   int default_counter = 0;
   std::unordered_set<int32_t> selector_set;
-  for (const auto& case_stmt : s->body()) {
-    if (!ValidateStatement(case_stmt.get())) {
+  for (auto* case_stmt : s->body()) {
+    if (!ValidateStatement(case_stmt)) {
       return false;
     }
 
-    if (case_stmt.get()->IsDefault()) {
+    if (case_stmt->IsDefault()) {
       default_counter++;
     }
 
-    for (const auto& selector : case_stmt.get()->selectors()) {
-      auto* selector_ptr = selector.get();
+    for (auto* selector : case_stmt->selectors()) {
+      auto* selector_ptr = selector;
       if (cond_type != selector_ptr->type()) {
-        set_error(case_stmt.get()->source(),
+        set_error(case_stmt->source(),
                   "v-0026: the case selector values must have the same "
                   "type as the selector expression.");
         return false;
@@ -286,7 +286,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
         auto v_str = selector_ptr->type()->IsU32()
                          ? selector_ptr->AsUint()->to_str()
                          : selector_ptr->AsSint()->to_str();
-        set_error(case_stmt.get()->source(),
+        set_error(case_stmt->source(),
                   "v-0027: a literal value must not appear more than once in "
                   "the case selectors for a switch statement: '" +
                       v_str + "'");
@@ -302,7 +302,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
     return false;
   }
 
-  auto* last_clause = s->body().back().get();
+  auto* last_clause = s->body().back();
   auto* last_stmt_of_last_clause = last_clause->AsCase()->body()->last();
   if (last_stmt_of_last_clause && last_stmt_of_last_clause->IsFallthrough()) {
     set_error(last_stmt_of_last_clause->source(),

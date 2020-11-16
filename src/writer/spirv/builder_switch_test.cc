@@ -45,7 +45,7 @@ TEST_F(BuilderTest, Switch_Empty) {
 
   // switch (1) {
   // }
-  auto cond = create<ast::ScalarConstructorExpression>(
+  auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
 
   ast::SwitchStatement expr(std::move(cond), ast::CaseStatementList{});
@@ -77,16 +77,16 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = create<ast::BlockStatement>();
+  auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 1))));
 
-  auto case_2_body = create<ast::BlockStatement>();
+  auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -107,14 +107,14 @@ TEST_F(BuilderTest, Switch_WithCase) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -156,10 +156,10 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //     v = 1;
   //  }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto default_body = create<ast::BlockStatement>();
+  auto* default_body = create<ast::BlockStatement>();
   default_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -171,14 +171,14 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -218,22 +218,22 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = create<ast::BlockStatement>();
+  auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 1))));
 
-  auto case_2_body = create<ast::BlockStatement>();
+  auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto default_body = create<ast::BlockStatement>();
+  auto* default_body = create<ast::BlockStatement>();
   default_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -256,14 +256,14 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -312,23 +312,23 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = create<ast::BlockStatement>();
+  auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 1))));
   case_1_body->append(create<ast::FallthroughStatement>());
 
-  auto case_2_body = create<ast::BlockStatement>();
+  auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
                                            create<ast::SintLiteral>(&i32, 2))));
 
-  auto default_body = create<ast::BlockStatement>();
+  auto* default_body = create<ast::BlockStatement>();
   default_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -350,14 +350,14 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -402,10 +402,10 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //      fallthrough;
   //  }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto case_1_body = create<ast::BlockStatement>();
+  auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
                                        create<ast::ScalarConstructorExpression>(
@@ -422,14 +422,14 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_FALSE(b.GenerateSwitchStatement(&expr)) << b.error();
@@ -448,13 +448,13 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
 
-  auto if_body = create<ast::BlockStatement>();
+  auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());
 
-  auto case_1_body = create<ast::BlockStatement>();
+  auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
       create<ast::IfStatement>(create<ast::ScalarConstructorExpression>(
                                    create<ast::BoolLiteral>(&bool_type, true)),
@@ -475,14 +475,14 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   ast::SwitchStatement expr(create<ast::IdentifierExpression>("a"),
                             std::move(cases));
 
-  td.RegisterVariableForTesting(v.get());
-  td.RegisterVariableForTesting(a.get());
+  td.RegisterVariableForTesting(v);
+  td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v.get())) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();

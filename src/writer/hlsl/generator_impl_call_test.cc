@@ -32,11 +32,11 @@ using HlslGeneratorImplTest_Call = TestHelper;
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   ast::type::VoidType void_type;
 
-  auto id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(std::move(id), {});
 
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
@@ -46,14 +46,14 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
   ast::type::VoidType void_type;
 
-  auto id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(std::move(id), std::move(params));
 
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
@@ -63,15 +63,15 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   ast::type::VoidType void_type;
 
-  auto id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));
   params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallStatement call(
       create<ast::CallExpression>(std::move(id), std::move(params)));
 
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(out, &call)) << gen.error();

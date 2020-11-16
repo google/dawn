@@ -40,7 +40,7 @@ StructMember::StructMember(StructMember&&) = default;
 StructMember::~StructMember() = default;
 
 bool StructMember::has_offset_decoration() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsOffset()) {
       return true;
     }
@@ -49,7 +49,7 @@ bool StructMember::has_offset_decoration() const {
 }
 
 uint32_t StructMember::offset() const {
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco->IsOffset()) {
       return deco->AsOffset()->offset();
     }
@@ -61,7 +61,7 @@ bool StructMember::IsValid() const {
   if (name_.empty() || type_ == nullptr) {
     return false;
   }
-  for (const auto& deco : decorations_) {
+  for (auto* deco : decorations_) {
     if (deco == nullptr) {
       return false;
     }
@@ -74,7 +74,7 @@ void StructMember::to_str(std::ostream& out, size_t indent) const {
   out << "StructMember{";
   if (decorations_.size() > 0) {
     out << "[[ ";
-    for (const auto& deco : decorations_)
+    for (auto* deco : decorations_)
       out << deco->str() << " ";
     out << "]] ";
   }

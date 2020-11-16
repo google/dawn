@@ -26,9 +26,9 @@ using BitcastExpressionTest = TestHelper;
 
 TEST_F(BitcastExpressionTest, Create) {
   type::F32Type f32;
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
 
-  auto* expr_ptr = expr.get();
+  auto* expr_ptr = expr;
 
   BitcastExpression exp(&f32, std::move(expr));
   ASSERT_EQ(exp.type(), &f32);
@@ -37,7 +37,7 @@ TEST_F(BitcastExpressionTest, Create) {
 
 TEST_F(BitcastExpressionTest, CreateWithSource) {
   type::F32Type f32;
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
 
   BitcastExpression exp(Source{Source::Location{20, 2}}, &f32, std::move(expr));
   auto src = exp.source();
@@ -52,14 +52,14 @@ TEST_F(BitcastExpressionTest, IsBitcast) {
 
 TEST_F(BitcastExpressionTest, IsValid) {
   type::F32Type f32;
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
 
   BitcastExpression exp(&f32, std::move(expr));
   EXPECT_TRUE(exp.IsValid());
 }
 
 TEST_F(BitcastExpressionTest, IsValid_MissingType) {
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
 
   BitcastExpression exp;
   exp.set_expr(std::move(expr));
@@ -76,14 +76,14 @@ TEST_F(BitcastExpressionTest, IsValid_MissingExpr) {
 
 TEST_F(BitcastExpressionTest, IsValid_InvalidExpr) {
   type::F32Type f32;
-  auto expr = create<IdentifierExpression>("");
+  auto* expr = create<IdentifierExpression>("");
   BitcastExpression e(&f32, std::move(expr));
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(BitcastExpressionTest, ToStr) {
   type::F32Type f32;
-  auto expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>("expr");
 
   BitcastExpression exp(&f32, std::move(expr));
   std::ostringstream out;

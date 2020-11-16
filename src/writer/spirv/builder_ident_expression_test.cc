@@ -50,9 +50,9 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -109,9 +109,9 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -165,8 +165,8 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto lhs = create<ast::IdentifierExpression>("var");
-  auto rhs = create<ast::IdentifierExpression>("var");
+  auto* lhs = create<ast::IdentifierExpression>("var");
+  auto* rhs = create<ast::IdentifierExpression>("var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
                              std::move(rhs));
@@ -199,8 +199,8 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto lhs = create<ast::IdentifierExpression>("var");
-  auto rhs = create<ast::IdentifierExpression>("var");
+  auto* lhs = create<ast::IdentifierExpression>("var");
+  auto* rhs = create<ast::IdentifierExpression>("var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
                              std::move(rhs));

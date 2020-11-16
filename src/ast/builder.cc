@@ -19,15 +19,14 @@ namespace ast {
 
 Builder::Builder() = default;
 
-Builder::Builder(Context* ctx) : ctx_(ctx) {}
+Builder::Builder(tint::Context* ctx) : ctx_(ctx) {}
 
 Builder::~Builder() = default;
 
-std::unique_ptr<ast::Variable> Builder::make_var(const std::string& name,
-                                                 ast::StorageClass storage,
-                                                 ast::type::Type* type) {
-  auto var = create<ast::Variable>(name, storage, type);
-  return var;
+ast::Variable* Builder::make_var(const std::string& name,
+                                 ast::StorageClass storage,
+                                 ast::type::Type* type) {
+  return create<ast::Variable>(name, storage, type);
 }
 
 }  // namespace ast

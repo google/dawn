@@ -95,15 +95,15 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  auto v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto v_out =
+  auto* v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
+  auto* v_out =
       create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
-  auto v_wg =
+  auto* v_wg =
       create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_in.get())) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_out.get())) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg.get())) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
 
   mod.AddGlobalVariable(std::move(v_in));
   mod.AddGlobalVariable(std::move(v_out));
@@ -139,7 +139,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("my_out"),
       create<ast::IdentifierExpression>("my_in")));
@@ -152,21 +152,21 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
       create<ast::IdentifierExpression>("my_in")));
   func.set_body(std::move(body));
 
-  auto v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto v_out =
+  auto* v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
+  auto* v_out =
       create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
-  auto v_wg =
+  auto* v_wg =
       create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
 
-  td.RegisterVariableForTesting(v_in.get());
-  td.RegisterVariableForTesting(v_out.get());
-  td.RegisterVariableForTesting(v_wg.get());
+  td.RegisterVariableForTesting(v_in);
+  td.RegisterVariableForTesting(v_out);
+  td.RegisterVariableForTesting(v_wg);
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_in.get())) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_out.get())) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg.get())) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
 
   mod.AddGlobalVariable(std::move(v_in));
   mod.AddGlobalVariable(std::move(v_out));

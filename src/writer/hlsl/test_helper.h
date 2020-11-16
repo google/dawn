@@ -43,11 +43,13 @@ class TestHelperBase : public BODY {
   /// @returns the pre result string
   std::string pre_result() const { return pre.str(); }
 
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
+  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer  template <typename T, typename... ARGS>
   template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  T* create(ARGS&&... args) {
+    return ctx.create<T>(std::forward<ARGS>(args)...);
   }
 
   /// The context

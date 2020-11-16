@@ -104,9 +104,9 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -139,9 +139,9 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -172,9 +172,9 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
       create<ast::FloatLiteral>(&f32, 2.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
-  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -203,15 +203,15 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0f)));
-  auto first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
+  auto* first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
 
   vals.push_back(std::move(first));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
-  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
@@ -239,7 +239,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::type::F32Type f32;
-  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(5, Source{}));
 
@@ -260,7 +260,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   ast::type::F32Type f32;
-  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(2, Source{}));
   decos.push_back(create<ast::SetDecoration>(3, Source{}));
@@ -283,7 +283,7 @@ OpDecorate %1 DescriptorSet 3
 
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   ast::type::F32Type f32;
-  auto v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
+  auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(
       create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));

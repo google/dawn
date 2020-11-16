@@ -33,7 +33,7 @@ using HlslGeneratorImplTest_Case = TestHelper;
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   ast::type::I32Type i32;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
@@ -68,7 +68,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   ast::type::I32Type i32;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::FallthroughStatement>());
 
   ast::CaseSelectorList lit;
@@ -87,7 +87,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
@@ -106,7 +106,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
   ast::CaseStatement c(std::move(body));
 

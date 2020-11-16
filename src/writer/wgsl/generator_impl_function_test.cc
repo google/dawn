@@ -43,7 +43,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
@@ -61,7 +61,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
@@ -85,7 +85,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
@@ -105,7 +105,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
@@ -126,7 +126,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
@@ -177,12 +177,12 @@ TEST_F(WgslGeneratorImplTest,
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto str = create<ast::Struct>(std::move(s_decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(s_decos), std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
   ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
 
-  auto data_var = create<ast::DecoratedVariable>(
+  auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
@@ -192,22 +192,22 @@ TEST_F(WgslGeneratorImplTest,
 
   mod.AddConstructedType(&s);
 
-  td.RegisterVariableForTesting(data_var.get());
+  td.RegisterVariableForTesting(data_var);
   mod.AddGlobalVariable(std::move(data_var));
 
   {
     ast::VariableList params;
-    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
 
-    auto body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func = create<ast::Function>("a", std::move(params), &void_type,
-                                      std::move(body));
+    auto* func = create<ast::Function>("a", std::move(params), &void_type,
+                                       std::move(body));
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
@@ -216,17 +216,17 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
 
-    auto body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(std::move(var)));
     body->append(create<ast::ReturnStatement>());
 
-    auto func = create<ast::Function>("b", std::move(params), &void_type,
-                                      std::move(body));
+    auto* func = create<ast::Function>("b", std::move(params), &void_type,
+                                       std::move(body));
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 

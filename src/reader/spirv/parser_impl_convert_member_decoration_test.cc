@@ -34,16 +34,16 @@ using ::testing::Eq;
 TEST_F(SpvParserTest, ConvertMemberDecoration_Empty) {
   auto* p = parser(std::vector<uint32_t>{});
 
-  auto result = p->ConvertMemberDecoration(1, 1, {});
-  EXPECT_EQ(result.get(), nullptr);
+  auto* result = p->ConvertMemberDecoration(1, 1, {});
+  EXPECT_EQ(result, nullptr);
   EXPECT_THAT(p->error(), Eq("malformed SPIR-V decoration: it's empty"));
 }
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
   auto* p = parser(std::vector<uint32_t>{});
 
-  auto result = p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset});
-  EXPECT_EQ(result.get(), nullptr);
+  auto* result = p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset});
+  EXPECT_EQ(result, nullptr);
   EXPECT_THAT(p->error(), Eq("malformed Offset decoration: expected 1 literal "
                              "operand, has 0: member 13 of SPIR-V type 12"));
 }
@@ -51,8 +51,9 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
   auto* p = parser(std::vector<uint32_t>{});
 
-  auto result = p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset, 3, 4});
-  EXPECT_EQ(result.get(), nullptr);
+  auto* result =
+      p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset, 3, 4});
+  EXPECT_EQ(result, nullptr);
   EXPECT_THAT(p->error(), Eq("malformed Offset decoration: expected 1 literal "
                              "operand, has 2: member 13 of SPIR-V type 12"));
 }
@@ -60,8 +61,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
   auto* p = parser(std::vector<uint32_t>{});
 
-  auto result = p->ConvertMemberDecoration(1, 1, {SpvDecorationOffset, 8});
-  ASSERT_NE(result.get(), nullptr);
+  auto* result = p->ConvertMemberDecoration(1, 1, {SpvDecorationOffset, 8});
+  ASSERT_NE(result, nullptr);
   EXPECT_TRUE(result->IsOffset());
   auto* offset_deco = result->AsOffset();
   ASSERT_NE(offset_deco, nullptr);
@@ -72,8 +73,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_UnhandledDecoration) {
   auto* p = parser(std::vector<uint32_t>{});
 
-  auto result = p->ConvertMemberDecoration(12, 13, {12345678});
-  EXPECT_EQ(result.get(), nullptr);
+  auto* result = p->ConvertMemberDecoration(12, 13, {12345678});
+  EXPECT_EQ(result, nullptr);
   EXPECT_THAT(p->error(), Eq("unhandled member decoration: 12345678 on member "
                              "13 of SPIR-V type 12"));
 }

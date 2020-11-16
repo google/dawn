@@ -45,7 +45,7 @@ bool TypeConstructorExpression::IsValid() const {
   if (type_ == nullptr) {
     return false;
   }
-  for (const auto& val : values_) {
+  for (auto* val : values_) {
     if (val == nullptr || !val->IsValid()) {
       return false;
     }
@@ -59,7 +59,7 @@ void TypeConstructorExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << type_->type_name() << std::endl;
 
-  for (const auto& val : values_) {
+  for (auto* val : values_) {
     val->to_str(out, indent + 2);
   }
   make_indent(out, indent);

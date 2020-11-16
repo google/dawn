@@ -279,7 +279,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto s = create<ast::Struct>();
+  auto* s = create<ast::Struct>();
   ast::type::StructType s_type("S", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -300,7 +300,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -325,7 +325,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   ast::StructDecorationList struct_decos;
   struct_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto s = create<ast::Struct>(std::move(struct_decos), std::move(members));
+  auto* s = create<ast::Struct>(std::move(struct_decos), std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -354,7 +354,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   members.push_back(create<ast::StructMember>("a", &f32, std::move(a_decos)));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("S", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -391,7 +391,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
   members.push_back(
       create<ast::StructMember>("c", &glsl_mat4x4, std::move(empty_c)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("S", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -437,7 +437,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   members.push_back(
       create<ast::StructMember>("c", &glsl_mat4x4, std::move(c_decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("S", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -501,7 +501,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   members.push_back(
       create<ast::StructMember>("c", &glsl_mat4x4, std::move(c_decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("S", std::move(s));
 
   auto id = b.GenerateTypeIfNeeded(&s_type);

@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 1u);
-  auto deco = ast::As<ast::StructMemberDecoration>(std::move(decos.value[0]));
+  auto* deco = ast::As<ast::StructMemberDecoration>(std::move(decos.value[0]));
   ASSERT_NE(deco, nullptr);
   EXPECT_TRUE(deco->IsOffset());
 }

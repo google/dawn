@@ -28,7 +28,7 @@ namespace tint {
 namespace ast {
 
 /// A list of case literals
-using CaseSelectorList = std::vector<std::unique_ptr<ast::IntLiteral>>;
+using CaseSelectorList = std::vector<IntLiteral*>;
 
 /// A case statement
 class CaseStatement : public Statement {
@@ -36,19 +36,18 @@ class CaseStatement : public Statement {
   /// Constructor
   /// Creates a default case statement
   /// @param body the case body
-  explicit CaseStatement(std::unique_ptr<BlockStatement> body);
+  explicit CaseStatement(BlockStatement* body);
   /// Constructor
   /// @param selectors the case selectors
   /// @param body the case body
-  CaseStatement(CaseSelectorList selectors,
-                std::unique_ptr<BlockStatement> body);
+  CaseStatement(CaseSelectorList selectors, BlockStatement* body);
   /// Constructor
   /// @param source the source information
   /// @param selectors the case selectors
   /// @param body the case body
   CaseStatement(const Source& source,
                 CaseSelectorList selectors,
-                std::unique_ptr<BlockStatement> body);
+                BlockStatement* body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
@@ -65,13 +64,11 @@ class CaseStatement : public Statement {
 
   /// Sets the case body
   /// @param body the case body
-  void set_body(std::unique_ptr<BlockStatement> body) {
-    body_ = std::move(body);
-  }
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the case body
-  const BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_; }
   /// @returns the case body
-  BlockStatement* body() { return body_.get(); }
+  BlockStatement* body() { return body_; }
 
   /// @returns true if this is a case statement
   bool IsCase() const override;
@@ -88,11 +85,11 @@ class CaseStatement : public Statement {
   CaseStatement(const CaseStatement&) = delete;
 
   CaseSelectorList selectors_;
-  std::unique_ptr<BlockStatement> body_;
+  BlockStatement* body_ = nullptr;
 };
 
-/// A list of unique case statements
-using CaseStatementList = std::vector<std::unique_ptr<CaseStatement>>;
+/// A list of case statements
+using CaseStatementList = std::vector<CaseStatement*>;
 
 }  // namespace ast
 }  // namespace tint

@@ -37,7 +37,7 @@ using HlslGeneratorImplTest_Constructor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;
-  auto lit = create<ast::BoolLiteral>(&bool_type, false);
+  auto* lit = create<ast::BoolLiteral>(&bool_type, false);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Int) {
   ast::type::I32Type i32;
-  auto lit = create<ast::SintLiteral>(&i32, -12345);
+  auto* lit = create<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
@@ -55,7 +55,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Int) {
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_UInt) {
   ast::type::U32Type u32;
-  auto lit = create<ast::UintLiteral>(&u32, 56779);
+  auto* lit = create<ast::UintLiteral>(&u32, 56779);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
@@ -65,7 +65,8 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_UInt) {
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Float) {
   ast::type::F32Type f32;
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
-  auto lit = create<ast::FloatLiteral>(&f32, static_cast<float>((1 << 30) - 4));
+  auto* lit =
+      create<ast::FloatLiteral>(&f32, static_cast<float>((1 << 30) - 4));
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
@@ -75,7 +76,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Float) {
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
   ast::type::F32Type f32;
 
-  auto lit = create<ast::FloatLiteral>(&f32, -1.2e-5);
+  auto* lit = create<ast::FloatLiteral>(&f32, -1.2e-5);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -88,7 +89,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
   ast::type::BoolType b;
 
-  auto lit = create<ast::BoolLiteral>(&b, true);
+  auto* lit = create<ast::BoolLiteral>(&b, true);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -101,7 +102,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
-  auto lit = create<ast::SintLiteral>(&i32, -12345);
+  auto* lit = create<ast::SintLiteral>(&i32, -12345);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -114,7 +115,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
   ast::type::U32Type u32;
 
-  auto lit = create<ast::UintLiteral>(&u32, 12345);
+  auto* lit = create<ast::UintLiteral>(&u32, 12345);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -128,9 +129,9 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  auto lit1 = create<ast::FloatLiteral>(&f32, 1.f);
-  auto lit2 = create<ast::FloatLiteral>(&f32, 2.f);
-  auto lit3 = create<ast::FloatLiteral>(&f32, 3.f);
+  auto* lit1 = create<ast::FloatLiteral>(&f32, 1.f);
+  auto* lit2 = create<ast::FloatLiteral>(&f32, 2.f);
+  auto* lit3 = create<ast::FloatLiteral>(&f32, 3.f);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit1)));
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit2)));
@@ -165,11 +166,11 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
   ast::ExpressionList mat_values;
 
   for (size_t i = 0; i < 2; i++) {
-    auto lit1 =
+    auto* lit1 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(1 + (i * 2)));
-    auto lit2 =
+    auto* lit2 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(2 + (i * 2)));
-    auto lit3 =
+    auto* lit3 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(3 + (i * 2)));
 
     ast::ExpressionList values;
@@ -201,11 +202,11 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
   ast::ExpressionList ary_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto lit1 =
+    auto* lit1 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(1 + (i * 3)));
-    auto lit2 =
+    auto* lit2 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(2 + (i * 3)));
-    auto lit3 =
+    auto* lit3 =
         create<ast::FloatLiteral>(&f32, static_cast<float>(3 + (i * 3)));
 
     ast::ExpressionList values;

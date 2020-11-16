@@ -19,18 +19,14 @@ namespace ast {
 
 MemberAccessorExpression::MemberAccessorExpression() = default;
 
-MemberAccessorExpression::MemberAccessorExpression(
-    std::unique_ptr<Expression> structure,
-    std::unique_ptr<IdentifierExpression> member)
-    : Expression(), struct_(std::move(structure)), member_(std::move(member)) {}
+MemberAccessorExpression::MemberAccessorExpression(Expression* structure,
+                                                   IdentifierExpression* member)
+    : Expression(), struct_(structure), member_(member) {}
 
-MemberAccessorExpression::MemberAccessorExpression(
-    const Source& source,
-    std::unique_ptr<Expression> structure,
-    std::unique_ptr<IdentifierExpression> member)
-    : Expression(source),
-      struct_(std::move(structure)),
-      member_(std::move(member)) {}
+MemberAccessorExpression::MemberAccessorExpression(const Source& source,
+                                                   Expression* structure,
+                                                   IdentifierExpression* member)
+    : Expression(source), struct_(structure), member_(member) {}
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
     default;

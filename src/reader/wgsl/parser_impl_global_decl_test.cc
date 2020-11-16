@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   auto m = p->module();
   ASSERT_EQ(m.global_variables().size(), 1u);
 
-  auto* v = m.global_variables()[0].get();
+  auto* v = m.global_variables()[0];
   EXPECT_EQ(v->name(), "a");
 }
 
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   auto m = p->module();
   ASSERT_EQ(m.global_variables().size(), 1u);
 
-  auto* v = m.global_variables()[0].get();
+  auto* v = m.global_variables()[0];
   EXPECT_EQ(v->name(), "a");
 }
 

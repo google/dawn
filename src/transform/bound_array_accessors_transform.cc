@@ -57,7 +57,7 @@ bool BoundArrayAccessorsTransform::Run() {
   // constant expression. There can't be any array accessors as per the current
   // grammar.
 
-  for (auto& func : mod_->functions()) {
+  for (auto* func : mod_->functions()) {
     scope_stack_.push_scope();
     if (!ProcessStatement(func->body())) {
       return false;
@@ -72,8 +72,8 @@ bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
     auto* as = stmt->AsAssign();
     return ProcessExpression(as->lhs()) && ProcessExpression(as->rhs());
   } else if (stmt->IsBlock()) {
-    for (auto& s : *(stmt->AsBlock())) {
-      if (!ProcessStatement(s.get())) {
+    for (auto* s : *(stmt->AsBlock())) {
+      if (!ProcessStatement(s)) {
         return false;
       }
     }
@@ -97,8 +97,8 @@ bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
     if (!ProcessExpression(e->condition()) || !ProcessStatement(e->body())) {
       return false;
     }
-    for (auto& s : e->else_statements()) {
-      if (!ProcessStatement(s.get())) {
+    for (auto* s : e->else_statements()) {
+      if (!ProcessStatement(s)) {
         return false;
       }
     }
@@ -118,8 +118,8 @@ bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
       return false;
     }
 
-    for (auto& c : s->body()) {
-      if (!ProcessStatement(c.get())) {
+    for (auto* c : s->body()) {
+      if (!ProcessStatement(c)) {
         return false;
       }
     }
@@ -146,8 +146,8 @@ bool BoundArrayAccessorsTransform::ProcessExpression(ast::Expression* expr) {
     if (!ProcessExpression(c->func())) {
       return false;
     }
-    for (auto& e : c->params()) {
-      if (!ProcessExpression(e.get())) {
+    for (auto* e : c->params()) {
+      if (!ProcessExpression(e)) {
         return false;
       }
     }
@@ -156,8 +156,8 @@ bool BoundArrayAccessorsTransform::ProcessExpression(ast::Expression* expr) {
   } else if (expr->IsConstructor()) {
     auto* c = expr->AsConstructor();
     if (c->IsTypeConstructor()) {
-      for (auto& e : c->AsTypeConstructor()->values()) {
-        if (!ProcessExpression(e.get())) {
+      for (auto* e : c->AsTypeConstructor()->values()) {
+        if (!ProcessExpression(e)) {
           return false;
         }
       }
@@ -241,7 +241,7 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
     auto* u32 = ctx_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
 
     ast::ExpressionList cast_expr;
-    cast_expr.push_back(expr->take_idx_expr());
+    cast_expr.push_back(expr->idx_expr());
 
     ast::ExpressionList params;
     params.push_back(
@@ -249,7 +249,7 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
     params.push_back(create<ast::ScalarConstructorExpression>(
         create<ast::UintLiteral>(u32, size - 1)));
 
-    auto call_expr = create<ast::CallExpression>(
+    auto* call_expr = create<ast::CallExpression>(
         create<ast::IdentifierExpression>("min"), std::move(params));
     call_expr->set_result_type(u32);
 

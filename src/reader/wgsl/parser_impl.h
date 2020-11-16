@@ -65,18 +65,16 @@ struct ForHeader {
   /// @param init the initializer statement
   /// @param cond the condition statement
   /// @param cont the continuing statement
-  ForHeader(std::unique_ptr<ast::Statement> init,
-            std::unique_ptr<ast::Expression> cond,
-            std::unique_ptr<ast::Statement> cont);
+  ForHeader(ast::Statement* init, ast::Expression* cond, ast::Statement* cont);
 
   ~ForHeader();
 
   /// The for loop initializer
-  std::unique_ptr<ast::Statement> initializer;
+  ast::Statement* initializer = nullptr;
   /// The for loop condition
-  std::unique_ptr<ast::Expression> condition;
+  ast::Expression* condition = nullptr;
   /// The for loop continuing statement
-  std::unique_ptr<ast::Statement> continuing;
+  ast::Statement* continuing = nullptr;
 };
 
 /// ParserImpl for WGSL source data
@@ -301,14 +299,13 @@ class ParserImpl {
   /// `variable_decoration_list*` provided as |decos|.
   /// @returns the variable parsed or nullptr
   /// @param decos the list of decorations for the variable declaration.
-  Maybe<std::unique_ptr<ast::Variable>> global_variable_decl(
-      ast::DecorationList& decos);
+  Maybe<ast::Variable*> global_variable_decl(ast::DecorationList& decos);
   /// Parses a `global_constant_decl` grammar element
   /// @returns the const object or nullptr
-  Maybe<std::unique_ptr<ast::Variable>> global_constant_decl();
+  Maybe<ast::Variable*> global_constant_decl();
   /// Parses a `variable_decl` grammar element
   /// @returns the parsed variable or nullptr otherwise
-  Maybe<std::unique_ptr<ast::Variable>> variable_decl();
+  Maybe<ast::Variable*> variable_decl();
   /// Parses a `variable_ident_decl` grammar element, erroring on parse
   /// failure.
   /// @param use a description of what was being parsed if an error was raised.
@@ -341,14 +338,12 @@ class ParserImpl {
   /// failure.
   /// @param decos the list of decorations for the struct member.
   /// @returns the struct member or nullptr
-  Expect<std::unique_ptr<ast::StructMember>> expect_struct_member(
-      ast::DecorationList& decos);
+  Expect<ast::StructMember*> expect_struct_member(ast::DecorationList& decos);
   /// Parses a `function_decl` grammar element with the initial
   /// `function_decoration_decl*` provided as |decos|.
   /// @param decos the list of decorations for the function declaration.
   /// @returns the parsed function, nullptr otherwise
-  Maybe<std::unique_ptr<ast::Function>> function_decl(
-      ast::DecorationList& decos);
+  Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<ast::type::Type*> texture_sampler_types();
@@ -380,7 +375,7 @@ class ParserImpl {
   Maybe<ast::type::Type*> function_type_decl();
   /// Parses a `function_header` grammar element
   /// @returns the parsed function nullptr otherwise
-  Maybe<std::unique_ptr<ast::Function>> function_header();
+  Maybe<ast::Function*> function_header();
   /// Parses a `param_list` grammar element, erroring on parse failure.
   /// @returns the parsed variables
   Expect<ast::VariableList> expect_param_list();
@@ -394,73 +389,73 @@ class ParserImpl {
   Expect<ast::Builtin> expect_builtin();
   /// Parses a `body_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed statements
-  Expect<std::unique_ptr<ast::BlockStatement>> expect_body_stmt();
+  Expect<ast::BlockStatement*> expect_body_stmt();
   /// Parses a `paren_rhs_stmt` grammar element, erroring on parse failure.
   /// @returns the parsed element or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_paren_rhs_stmt();
+  Expect<ast::Expression*> expect_paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
-  Expect<std::unique_ptr<ast::BlockStatement>> expect_statements();
+  Expect<ast::BlockStatement*> expect_statements();
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::Statement>> statement();
+  Maybe<ast::Statement*> statement();
   /// Parses a `break_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::BreakStatement>> break_stmt();
+  Maybe<ast::BreakStatement*> break_stmt();
   /// Parses a `return_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::ReturnStatement>> return_stmt();
+  Maybe<ast::ReturnStatement*> return_stmt();
   /// Parses a `continue_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::ContinueStatement>> continue_stmt();
+  Maybe<ast::ContinueStatement*> continue_stmt();
   /// Parses a `variable_stmt` grammar element
   /// @returns the parsed variable or nullptr
-  Maybe<std::unique_ptr<ast::VariableDeclStatement>> variable_stmt();
+  Maybe<ast::VariableDeclStatement*> variable_stmt();
   /// Parses a `if_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::IfStatement>> if_stmt();
+  Maybe<ast::IfStatement*> if_stmt();
   /// Parses a `elseif_stmt` grammar element
   /// @returns the parsed elements
   Maybe<ast::ElseStatementList> elseif_stmt();
   /// Parses a `else_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::ElseStatement>> else_stmt();
+  Maybe<ast::ElseStatement*> else_stmt();
   /// Parses a `switch_stmt` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::SwitchStatement>> switch_stmt();
+  Maybe<ast::SwitchStatement*> switch_stmt();
   /// Parses a `switch_body` grammar element
   /// @returns the parsed statement or nullptr
-  Maybe<std::unique_ptr<ast::CaseStatement>> switch_body();
+  Maybe<ast::CaseStatement*> switch_body();
   /// Parses a `case_selectors` grammar element
   /// @returns the list of literals
   Expect<ast::CaseSelectorList> expect_case_selectors();
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
-  Maybe<std::unique_ptr<ast::BlockStatement>> case_body();
+  Maybe<ast::BlockStatement*> case_body();
   /// Parses a `func_call_stmt` grammar element
   /// @returns the parsed function call or nullptr
-  Maybe<std::unique_ptr<ast::CallStatement>> func_call_stmt();
+  Maybe<ast::CallStatement*> func_call_stmt();
   /// Parses a `loop_stmt` grammar element
   /// @returns the parsed loop or nullptr
-  Maybe<std::unique_ptr<ast::LoopStatement>> loop_stmt();
+  Maybe<ast::LoopStatement*> loop_stmt();
   /// Parses a `for_header` grammar element, erroring on parse failure.
   /// @returns the parsed for header or nullptr
   Expect<std::unique_ptr<ForHeader>> expect_for_header();
   /// Parses a `for_stmt` grammar element
   /// @returns the parsed for loop or nullptr
-  Maybe<std::unique_ptr<ast::Statement>> for_stmt();
+  Maybe<ast::Statement*> for_stmt();
   /// Parses a `continuing_stmt` grammar element
   /// @returns the parsed statements
-  Maybe<std::unique_ptr<ast::BlockStatement>> continuing_stmt();
+  Maybe<ast::BlockStatement*> continuing_stmt();
   /// Parses a `const_literal` grammar element
   /// @returns the const literal parsed or nullptr if none found
-  Maybe<std::unique_ptr<ast::Literal>> const_literal();
+  Maybe<ast::Literal*> const_literal();
   /// Parses a `const_expr` grammar element, erroring on parse failure.
   /// @returns the parsed constructor expression or nullptr on error
-  Expect<std::unique_ptr<ast::ConstructorExpression>> expect_const_expr();
+  Expect<ast::ConstructorExpression*> expect_const_expr();
   /// Parses a `primary_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> primary_expression();
+  Maybe<ast::Expression*> primary_expression();
   /// Parses a `argument_expression_list` grammar element, erroring on parse
   /// failure.
   /// @returns the list of arguments
@@ -468,107 +463,96 @@ class ParserImpl {
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> postfix_expr(
-      std::unique_ptr<ast::Expression> prefix);
+  Maybe<ast::Expression*> postfix_expr(ast::Expression* prefix);
   /// Parses a `postfix_expression` grammar elment
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> postfix_expression();
+  Maybe<ast::Expression*> postfix_expression();
   /// Parses a `unary_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> unary_expression();
+  Maybe<ast::Expression*> unary_expression();
   /// Parses the recursive part of the `multiplicative_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_multiplicative_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_multiplicative_expr(ast::Expression* lhs);
   /// Parses the `multiplicative_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> multiplicative_expression();
+  Maybe<ast::Expression*> multiplicative_expression();
   /// Parses the recursive part of the `additive_expression`, erroring on parse
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_additive_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_additive_expr(ast::Expression* lhs);
   /// Parses the `additive_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> additive_expression();
+  Maybe<ast::Expression*> additive_expression();
   /// Parses the recursive part of the `shift_expression`, erroring on parse
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_shift_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_shift_expr(ast::Expression* lhs);
   /// Parses the `shift_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> shift_expression();
+  Maybe<ast::Expression*> shift_expression();
   /// Parses the recursive part of the `relational_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_relational_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_relational_expr(ast::Expression* lhs);
   /// Parses the `relational_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> relational_expression();
+  Maybe<ast::Expression*> relational_expression();
   /// Parses the recursive part of the `equality_expression`, erroring on parse
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_equality_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_equality_expr(ast::Expression* lhs);
   /// Parses the `equality_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> equality_expression();
+  Maybe<ast::Expression*> equality_expression();
   /// Parses the recursive part of the `and_expression`, erroring on parse
   /// failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_and_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_and_expr(ast::Expression* lhs);
   /// Parses the `and_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> and_expression();
+  Maybe<ast::Expression*> and_expression();
   /// Parses the recursive part of the `exclusive_or_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_exclusive_or_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_exclusive_or_expr(ast::Expression* lhs);
   /// Parses the `exclusive_or_expression` grammar elememnt
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> exclusive_or_expression();
+  Maybe<ast::Expression*> exclusive_or_expression();
   /// Parses the recursive part of the `inclusive_or_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_inclusive_or_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_inclusive_or_expr(ast::Expression* lhs);
   /// Parses the `inclusive_or_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> inclusive_or_expression();
+  Maybe<ast::Expression*> inclusive_or_expression();
   /// Parses the recursive part of the `logical_and_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_logical_and_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_logical_and_expr(ast::Expression* lhs);
   /// Parses a `logical_and_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> logical_and_expression();
+  Maybe<ast::Expression*> logical_and_expression();
   /// Parses the recursive part of the `logical_or_expression`, erroring on
   /// parse failure.
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr
-  Expect<std::unique_ptr<ast::Expression>> expect_logical_or_expr(
-      std::unique_ptr<ast::Expression> lhs);
+  Expect<ast::Expression*> expect_logical_or_expr(ast::Expression* lhs);
   /// Parses a `logical_or_expression` grammar element
   /// @returns the parsed expression or nullptr
-  Maybe<std::unique_ptr<ast::Expression>> logical_or_expression();
+  Maybe<ast::Expression*> logical_or_expression();
   /// Parses a `assignment_stmt` grammar element
   /// @returns the parsed assignment or nullptr
-  Maybe<std::unique_ptr<ast::AssignmentStatement>> assignment_stmt();
+  Maybe<ast::AssignmentStatement*> assignment_stmt();
   /// Parses one or more bracketed decoration lists.
   /// @return the parsed decoration list, or an empty list on error.
   Maybe<ast::DecorationList> decoration_list();
@@ -585,12 +569,12 @@ class ParserImpl {
   /// * `global_const_decoration`
   /// * `function_decoration`
   /// @return the parsed decoration, or nullptr.
-  Maybe<std::unique_ptr<ast::Decoration>> decoration();
+  Maybe<ast::Decoration*> decoration();
   /// Parses a single decoration, reporting an error if the next token does not
   /// represent a decoration.
   /// @see #decoration for the full list of decorations this method parses.
   /// @return the parsed decoration, or nullptr on error.
-  Expect<std::unique_ptr<ast::Decoration>> expect_decoration();
+  Expect<ast::Decoration*> expect_decoration();
 
  private:
   /// ReturnType resolves to the return type for the function or lambda F.
@@ -730,8 +714,7 @@ class ParserImpl {
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
   template <typename T>
-  Expect<std::vector<std::unique_ptr<T>>> cast_decorations(
-      ast::DecorationList& in);
+  Expect<std::vector<T*>> cast_decorations(ast::DecorationList& in);
   /// Reports an error if the decoration list |list| is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
@@ -742,20 +725,22 @@ class ParserImpl {
       ast::ArrayDecorationList decos);
   Expect<ast::type::Type*> expect_type_decl_matrix(Token t);
 
-  Expect<std::unique_ptr<ast::ConstructorExpression>>
-  expect_const_expr_internal(uint32_t depth);
+  Expect<ast::ConstructorExpression*> expect_const_expr_internal(
+      uint32_t depth);
 
   Expect<ast::type::Type*> expect_type(const std::string& use);
 
-  Maybe<std::unique_ptr<ast::Statement>> non_block_statement();
-  Maybe<std::unique_ptr<ast::Statement>> for_header_initializer();
-  Maybe<std::unique_ptr<ast::Statement>> for_header_continuing();
+  Maybe<ast::Statement*> non_block_statement();
+  Maybe<ast::Statement*> for_header_initializer();
+  Maybe<ast::Statement*> for_header_continuing();
 
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
+  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
   template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) const {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  T* create(ARGS&&... args) {
+    return ctx_.create<T>(std::forward<ARGS>(args)...);
   }
 
   Context& ctx_;

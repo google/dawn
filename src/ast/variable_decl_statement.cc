@@ -19,12 +19,12 @@ namespace ast {
 
 VariableDeclStatement::VariableDeclStatement() : Statement() {}
 
-VariableDeclStatement::VariableDeclStatement(std::unique_ptr<Variable> variable)
-    : Statement(), variable_(std::move(variable)) {}
+VariableDeclStatement::VariableDeclStatement(Variable* variable)
+    : Statement(), variable_(variable) {}
 
 VariableDeclStatement::VariableDeclStatement(const Source& source,
-                                             std::unique_ptr<Variable> variable)
-    : Statement(source), variable_(std::move(variable)) {}
+                                             Variable* variable)
+    : Statement(source), variable_(variable) {}
 
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 

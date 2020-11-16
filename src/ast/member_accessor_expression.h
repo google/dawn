@@ -34,34 +34,29 @@ class MemberAccessorExpression : public Expression {
   /// Constructor
   /// @param structure the structure
   /// @param member the member
-  MemberAccessorExpression(std::unique_ptr<Expression> structure,
-                           std::unique_ptr<IdentifierExpression> member);
+  MemberAccessorExpression(Expression* structure, IdentifierExpression* member);
   /// Constructor
   /// @param source the member accessor expression source
   /// @param structure the structure
   /// @param member the member
   MemberAccessorExpression(const Source& source,
-                           std::unique_ptr<Expression> structure,
-                           std::unique_ptr<IdentifierExpression> member);
+                           Expression* structure,
+                           IdentifierExpression* member);
   /// Move constructor
   MemberAccessorExpression(MemberAccessorExpression&&);
   ~MemberAccessorExpression() override;
 
   /// Sets the structure
   /// @param structure the structure
-  void set_structure(std::unique_ptr<Expression> structure) {
-    struct_ = std::move(structure);
-  }
+  void set_structure(Expression* structure) { struct_ = structure; }
   /// @returns the structure
-  Expression* structure() const { return struct_.get(); }
+  Expression* structure() const { return struct_; }
 
   /// Sets the member
   /// @param member the member
-  void set_member(std::unique_ptr<IdentifierExpression> member) {
-    member_ = std::move(member);
-  }
+  void set_member(IdentifierExpression* member) { member_ = member; }
   /// @returns the member expression
-  IdentifierExpression* member() const { return member_.get(); }
+  IdentifierExpression* member() const { return member_; }
 
   /// @returns true if this is a member accessor expression
   bool IsMemberAccessor() const override;
@@ -77,8 +72,8 @@ class MemberAccessorExpression : public Expression {
  private:
   MemberAccessorExpression(const MemberAccessorExpression&) = delete;
 
-  std::unique_ptr<Expression> struct_;
-  std::unique_ptr<IdentifierExpression> member_;
+  Expression* struct_ = nullptr;
+  IdentifierExpression* member_ = nullptr;
 };
 
 }  // namespace ast

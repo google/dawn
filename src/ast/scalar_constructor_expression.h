@@ -31,12 +31,11 @@ class ScalarConstructorExpression : public ConstructorExpression {
   ScalarConstructorExpression();
   /// Constructor
   /// @param literal the const literal
-  explicit ScalarConstructorExpression(std::unique_ptr<Literal> literal);
+  explicit ScalarConstructorExpression(Literal* literal);
   /// Constructor
   /// @param source the constructor source
   /// @param literal the const literal
-  ScalarConstructorExpression(const Source& source,
-                              std::unique_ptr<Literal> literal);
+  ScalarConstructorExpression(const Source& source, Literal* literal);
   /// Move constructor
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
@@ -46,11 +45,9 @@ class ScalarConstructorExpression : public ConstructorExpression {
 
   /// Set the literal value
   /// @param literal the literal
-  void set_literal(std::unique_ptr<Literal> literal) {
-    literal_ = std::move(literal);
-  }
+  void set_literal(Literal* literal) { literal_ = literal; }
   /// @returns the literal value
-  Literal* literal() const { return literal_.get(); }
+  Literal* literal() const { return literal_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -63,7 +60,7 @@ class ScalarConstructorExpression : public ConstructorExpression {
  private:
   ScalarConstructorExpression(const ScalarConstructorExpression&) = delete;
 
-  std::unique_ptr<Literal> literal_;
+  Literal* literal_ = nullptr;
 };
 
 }  // namespace ast

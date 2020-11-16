@@ -32,37 +32,29 @@ class ArrayAccessorExpression : public Expression {
   /// Constructor
   /// @param array the array
   /// @param idx_expr the index expression
-  ArrayAccessorExpression(std::unique_ptr<Expression> array,
-                          std::unique_ptr<Expression> idx_expr);
+  ArrayAccessorExpression(Expression* array, Expression* idx_expr);
   /// Constructor
   /// @param source the array accessor source
   /// @param array the array
   /// @param idx_expr the index expression
   ArrayAccessorExpression(const Source& source,
-                          std::unique_ptr<Expression> array,
-                          std::unique_ptr<Expression> idx_expr);
+                          Expression* array,
+                          Expression* idx_expr);
   /// Move constructor
   ArrayAccessorExpression(ArrayAccessorExpression&&);
   ~ArrayAccessorExpression() override;
 
   /// Sets the array
   /// @param array the array
-  void set_array(std::unique_ptr<Expression> array) {
-    array_ = std::move(array);
-  }
+  void set_array(Expression* array) { array_ = array; }
   /// @returns the array
-  Expression* array() const { return array_.get(); }
+  Expression* array() const { return array_; }
 
   /// Sets the index expression
   /// @param idx_expr the index expression
-  void set_idx_expr(std::unique_ptr<Expression> idx_expr) {
-    idx_expr_ = std::move(idx_expr);
-  }
+  void set_idx_expr(Expression* idx_expr) { idx_expr_ = idx_expr; }
   /// @returns the index expression
-  Expression* idx_expr() const { return idx_expr_.get(); }
-  /// Removes the index expression from the array accessor
-  /// @returns the unique pointer to the index expression
-  std::unique_ptr<Expression> take_idx_expr() { return std::move(idx_expr_); }
+  Expression* idx_expr() const { return idx_expr_; }
 
   /// @returns true if this is an array accessor expression
   bool IsArrayAccessor() const override;
@@ -78,8 +70,8 @@ class ArrayAccessorExpression : public Expression {
  private:
   ArrayAccessorExpression(const ArrayAccessorExpression&) = delete;
 
-  std::unique_ptr<Expression> array_;
-  std::unique_ptr<Expression> idx_expr_;
+  Expression* array_ = nullptr;
+  Expression* idx_expr_ = nullptr;
 };
 
 }  // namespace ast

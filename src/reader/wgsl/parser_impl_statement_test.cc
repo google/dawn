@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, Statement) {
 
 TEST_F(ParserImplTest, Statement_Semicolon) {
   auto* p = parser(";");
-  auto e = p->statement();
+  p->statement();
   ASSERT_FALSE(p->has_error()) << p->error();
 }
 

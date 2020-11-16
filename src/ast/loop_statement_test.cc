@@ -28,11 +28,11 @@ namespace {
 using LoopStatementTest = TestHelper;
 
 TEST_F(LoopStatementTest, Creation) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   auto* b_ptr = body->last();
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
   auto* c_ptr = continuing->last();
 
@@ -44,10 +44,10 @@ TEST_F(LoopStatementTest, Creation) {
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(Source{Source::Location{20, 2}}, std::move(body),
@@ -63,7 +63,7 @@ TEST_F(LoopStatementTest, IsLoop) {
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), {});
@@ -71,10 +71,10 @@ TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -82,10 +82,10 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
 }
 
 TEST_F(LoopStatementTest, IsValid) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -93,7 +93,7 @@ TEST_F(LoopStatementTest, IsValid) {
 }
 
 TEST_F(LoopStatementTest, IsValid_WithoutContinuing) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), create<BlockStatement>());
@@ -106,11 +106,11 @@ TEST_F(LoopStatementTest, IsValid_WithoutBody) {
 }
 
 TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -118,11 +118,11 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
   body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -130,10 +130,10 @@ TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
   continuing->append(nullptr);
 
@@ -142,10 +142,10 @@ TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
   continuing->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
@@ -154,7 +154,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
 }
 
 TEST_F(LoopStatementTest, ToStr) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), {});
@@ -167,10 +167,10 @@ TEST_F(LoopStatementTest, ToStr) {
 }
 
 TEST_F(LoopStatementTest, ToStr_WithContinuing) {
-  auto body = create<BlockStatement>();
+  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  auto continuing = create<BlockStatement>();
+  auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));

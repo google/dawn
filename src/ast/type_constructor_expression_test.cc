@@ -33,12 +33,12 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
   type::F32Type f32;
   ExpressionList expr;
   expr.push_back(create<IdentifierExpression>("expr"));
-  auto* expr_ptr = expr[0].get();
+  auto* expr_ptr = expr[0];
 
   TypeConstructorExpression t(&f32, std::move(expr));
   EXPECT_EQ(t.type(), &f32);
   ASSERT_EQ(t.values().size(), 1u);
-  EXPECT_EQ(t.values()[0].get(), expr_ptr);
+  EXPECT_EQ(t.values()[0], expr_ptr);
 }
 
 TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {

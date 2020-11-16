@@ -20,14 +20,12 @@ namespace ast {
 ScalarConstructorExpression::ScalarConstructorExpression()
     : ConstructorExpression() {}
 
-ScalarConstructorExpression::ScalarConstructorExpression(
-    std::unique_ptr<Literal> literal)
-    : ConstructorExpression(), literal_(std::move(literal)) {}
+ScalarConstructorExpression::ScalarConstructorExpression(Literal* literal)
+    : literal_(literal) {}
 
-ScalarConstructorExpression::ScalarConstructorExpression(
-    const Source& source,
-    std::unique_ptr<Literal> litearl)
-    : ConstructorExpression(source), literal_(std::move(litearl)) {}
+ScalarConstructorExpression::ScalarConstructorExpression(const Source& source,
+                                                         Literal* litearl)
+    : ConstructorExpression(source), literal_(litearl) {}
 
 ScalarConstructorExpression::ScalarConstructorExpression(
     ScalarConstructorExpression&&) = default;

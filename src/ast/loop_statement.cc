@@ -17,16 +17,13 @@
 namespace tint {
 namespace ast {
 
-LoopStatement::LoopStatement(std::unique_ptr<BlockStatement> body,
-                             std::unique_ptr<BlockStatement> continuing)
-    : Statement(), body_(std::move(body)), continuing_(std::move(continuing)) {}
+LoopStatement::LoopStatement(BlockStatement* body, BlockStatement* continuing)
+    : Statement(), body_(body), continuing_(continuing) {}
 
 LoopStatement::LoopStatement(const Source& source,
-                             std::unique_ptr<BlockStatement> body,
-                             std::unique_ptr<BlockStatement> continuing)
-    : Statement(source),
-      body_(std::move(body)),
-      continuing_(std::move(continuing)) {}
+                             BlockStatement* body,
+                             BlockStatement* continuing)
+    : Statement(source), body_(body), continuing_(continuing) {}
 
 LoopStatement::LoopStatement(LoopStatement&&) = default;
 
@@ -51,7 +48,7 @@ void LoopStatement::to_str(std::ostream& out, size_t indent) const {
   out << "Loop{" << std::endl;
 
   if (body_ != nullptr) {
-    for (const auto& stmt : *body_) {
+    for (auto* stmt : *body_) {
       stmt->to_str(out, indent + 2);
     }
   }
@@ -60,7 +57,7 @@ void LoopStatement::to_str(std::ostream& out, size_t indent) const {
     make_indent(out, indent + 2);
     out << "continuing {" << std::endl;
 
-    for (const auto& stmt : *continuing_) {
+    for (auto* stmt : *continuing_) {
       stmt->to_str(out, indent + 4);
     }
 

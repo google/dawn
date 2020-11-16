@@ -21,12 +21,11 @@ ReturnStatement::ReturnStatement() : Statement() {}
 
 ReturnStatement::ReturnStatement(const Source& source) : Statement(source) {}
 
-ReturnStatement::ReturnStatement(std::unique_ptr<Expression> value)
-    : Statement(), value_(std::move(value)) {}
+ReturnStatement::ReturnStatement(Expression* value)
+    : Statement(), value_(value) {}
 
-ReturnStatement::ReturnStatement(const Source& source,
-                                 std::unique_ptr<Expression> value)
-    : Statement(source), value_(std::move(value)) {}
+ReturnStatement::ReturnStatement(const Source& source, Expression* value)
+    : Statement(source), value_(value) {}
 
 ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 

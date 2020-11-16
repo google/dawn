@@ -25,9 +25,9 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-  auto expr = create<ast::CallExpression>(
+  auto* expr = create<ast::CallExpression>(
       create<ast::IdentifierExpression>("func"), ExpressionList{});
-  auto* expr_ptr = expr.get();
+  auto* expr_ptr = expr;
 
   CallStatement c(std::move(expr));
   EXPECT_EQ(c.expr(), expr_ptr);

@@ -189,49 +189,41 @@ class VertexPullingTransform : public Transformer {
 
   /// Generates an expression holding a constant uint
   /// @param value uint value
-  std::unique_ptr<ast::Expression> GenUint(uint32_t value);
+  ast::Expression* GenUint(uint32_t value);
 
   /// Generates an expression to read the shader value |kPullingPosVarName|
-  std::unique_ptr<ast::Expression> CreatePullingPositionIdent();
+  ast::Expression* CreatePullingPositionIdent();
 
   /// Generates an expression reading from a buffer a specific format.
   /// This reads the value wherever |kPullingPosVarName| points to at the time
   /// of the read.
   /// @param buffer the index of the vertex buffer
   /// @param format the format to read
-  std::unique_ptr<ast::Expression> AccessByFormat(uint32_t buffer,
-                                                  VertexFormat format);
+  ast::Expression* AccessByFormat(uint32_t buffer, VertexFormat format);
 
   /// Generates an expression reading a uint32 from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<ast::Expression> AccessU32(
-      uint32_t buffer,
-      std::unique_ptr<ast::Expression> pos);
+  ast::Expression* AccessU32(uint32_t buffer, ast::Expression* pos);
 
   /// Generates an expression reading an int32 from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<ast::Expression> AccessI32(
-      uint32_t buffer,
-      std::unique_ptr<ast::Expression> pos);
+  ast::Expression* AccessI32(uint32_t buffer, ast::Expression* pos);
 
   /// Generates an expression reading a float from a vertex buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
-  std::unique_ptr<ast::Expression> AccessF32(
-      uint32_t buffer,
-      std::unique_ptr<ast::Expression> pos);
+  ast::Expression* AccessF32(uint32_t buffer, ast::Expression* pos);
 
   /// Generates an expression reading a basic type (u32, i32, f32) from a vertex
   /// buffer
   /// @param buffer the index of the vertex buffer
   /// @param pos an expression for the position of the access, in bytes
   /// @param format the underlying vertex format
-  std::unique_ptr<ast::Expression> AccessPrimitive(
-      uint32_t buffer,
-      std::unique_ptr<ast::Expression> pos,
-      VertexFormat format);
+  ast::Expression* AccessPrimitive(uint32_t buffer,
+                                   ast::Expression* pos,
+                                   VertexFormat format);
 
   /// Generates an expression reading a vec2/3/4 from a vertex buffer.
   /// This reads the value wherever |kPullingPosVarName| points to at the time
@@ -241,11 +233,11 @@ class VertexPullingTransform : public Transformer {
   /// @param base_type underlying AST type
   /// @param base_format underlying vertex format
   /// @param count how many elements the vector has
-  std::unique_ptr<ast::Expression> AccessVec(uint32_t buffer,
-                                             uint32_t element_stride,
-                                             ast::type::Type* base_type,
-                                             VertexFormat base_format,
-                                             uint32_t count);
+  ast::Expression* AccessVec(uint32_t buffer,
+                             uint32_t element_stride,
+                             ast::type::Type* base_type,
+                             VertexFormat base_format,
+                             uint32_t count);
 
   // Used to grab corresponding types from the type manager
   ast::type::Type* GetU32Type();

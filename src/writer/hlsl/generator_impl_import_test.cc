@@ -57,7 +57,7 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(param.name);
   ast::CallExpression expr(std::move(ident), std::move(params));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -272,7 +272,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
-  auto var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
+  auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("var"));

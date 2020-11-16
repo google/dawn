@@ -47,12 +47,12 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   exprs.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
+  auto* var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
   var->set_is_const(true);
   var->set_constructor(
       create<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var.get())) << gen.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(
       gen.result(),
       "constant float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
@@ -64,14 +64,14 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
-  auto var = create<ast::DecoratedVariable>(
+  auto* var = create<ast::DecoratedVariable>(
       create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var.get())) << gen.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
 }
 

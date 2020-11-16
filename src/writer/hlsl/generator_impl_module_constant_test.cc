@@ -45,12 +45,12 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   exprs.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
+  auto* var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
   var->set_is_const(true);
   var->set_constructor(
       create<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(
       result(),
       "static const float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
@@ -62,14 +62,14 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
-  auto var = create<ast::DecoratedVariable>(
+  auto* var = create<ast::DecoratedVariable>(
       create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #define WGSL_SPEC_CONSTANT_23 3.00000000f
 #endif
@@ -84,12 +84,12 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
-  auto var = create<ast::DecoratedVariable>(
+  auto* var = create<ast::DecoratedVariable>(
       create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(std::move(decos));
   var->set_is_const(true);
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var.get())) << gen.error();
+  ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #error spec constant required for constant id 23
 #endif

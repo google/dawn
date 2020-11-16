@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   ASSERT_NE(deco.value, nullptr);
   ASSERT_FALSE(p->has_error());
 
-  auto member_deco =
+  auto* member_deco =
       ast::As<ast::StructMemberDecoration>(std::move(deco.value));
   ASSERT_NE(member_deco, nullptr);
   ASSERT_TRUE(member_deco->IsOffset());

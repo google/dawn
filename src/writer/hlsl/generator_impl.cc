@@ -118,8 +118,8 @@ void GeneratorImpl::make_indent(std::ostream& out) {
 }
 
 bool GeneratorImpl::Generate(std::ostream& out) {
-  for (const auto& global : module_->global_variables()) {
-    register_global(global.get());
+  for (auto* global : module_->global_variables()) {
+    register_global(global);
   }
 
   for (auto* const ty : module_->constructed_types()) {
@@ -131,38 +131,38 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     out << std::endl;
   }
 
-  for (const auto& var : module_->global_variables()) {
+  for (auto* var : module_->global_variables()) {
     if (!var->is_const()) {
       continue;
     }
-    if (!EmitProgramConstVariable(out, var.get())) {
+    if (!EmitProgramConstVariable(out, var)) {
       return false;
     }
   }
 
   std::unordered_set<std::string> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
-  for (const auto& func : module_->functions()) {
+  for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
 
-    if (!EmitEntryPointData(out, func.get(), emitted_globals)) {
+    if (!EmitEntryPointData(out, func, emitted_globals)) {
       return false;
     }
   }
 
-  for (const auto& func : module_->functions()) {
-    if (!EmitFunction(out, func.get())) {
+  for (auto* func : module_->functions()) {
+    if (!EmitFunction(out, func)) {
       return false;
     }
   }
 
-  for (const auto& func : module_->functions()) {
+  for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
-    if (!EmitEntryPointFunction(out, func.get())) {
+    if (!EmitEntryPointFunction(out, func)) {
       return false;
     }
     out << std::endl;
@@ -450,8 +450,8 @@ bool GeneratorImpl::EmitBlock(std::ostream& out,
   out << "{" << std::endl;
   increment_indent();
 
-  for (const auto& s : *stmt) {
-    if (!EmitStatement(out, s.get())) {
+  for (auto* s : *stmt) {
+    if (!EmitStatement(out, s)) {
       return false;
     }
   }
@@ -625,13 +625,13 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       out << name << "(";
 
       bool first = true;
-      for (const auto& param : params) {
+      for (auto* param : params) {
         if (!first) {
           out << ", ";
         }
         first = false;
 
-        if (!EmitExpression(pre, out, param.get())) {
+        if (!EmitExpression(pre, out, param)) {
           return false;
         }
       }
@@ -675,13 +675,13 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   const auto& params = expr->params();
-  for (const auto& param : params) {
+  for (auto* param : params) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    if (!EmitExpression(pre, out, param.get())) {
+    if (!EmitExpression(pre, out, param)) {
       return false;
     }
   }
@@ -758,7 +758,7 @@ bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
     out << "default:";
   } else {
     bool first = true;
-    for (const auto& selector : stmt->selectors()) {
+    for (auto* selector : stmt->selectors()) {
       if (!first) {
         out << std::endl;
         make_indent(out);
@@ -766,7 +766,7 @@ bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
       first = false;
 
       out << "case ";
-      if (!EmitLiteral(out, selector.get())) {
+      if (!EmitLiteral(out, selector)) {
         return false;
       }
       out << ":";
@@ -777,8 +777,8 @@ bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : *(stmt->body())) {
-    if (!EmitStatement(out, s.get())) {
+  for (auto* s : *stmt->body()) {
+    if (!EmitStatement(out, s)) {
       return false;
     }
   }
@@ -831,13 +831,13 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     }
   } else {
     bool first = true;
-    for (const auto& e : expr->values()) {
+    for (auto* e : expr->values()) {
       if (!first) {
         out << ", ";
       }
       first = false;
 
-      if (!EmitExpression(pre, out, e.get())) {
+      if (!EmitExpression(pre, out, e)) {
         return false;
       }
     }
@@ -943,7 +943,7 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
     return false;
   }
 
-  for (const auto& e : stmt->else_statements()) {
+  for (auto* e : stmt->else_statements()) {
     if (e->HasCondition()) {
       if_out << " else {" << std::endl;
 
@@ -968,7 +968,7 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
   }
   if_out << std::endl;
 
-  for (const auto& e : stmt->else_statements()) {
+  for (auto* e : stmt->else_statements()) {
     if (!e->HasCondition()) {
       continue;
     }
@@ -1114,7 +1114,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
   }
 
-  for (const auto& v : func->params()) {
+  for (auto* v : func->params()) {
     if (!first) {
       out << ", ";
     }
@@ -1414,8 +1414,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   }
 
   generating_entry_point_ = true;
-  for (const auto& s : *(func->body())) {
-    if (!EmitStatement(out, s.get())) {
+  for (auto* s : *func->body()) {
+    if (!EmitStatement(out, s)) {
       return false;
     }
   }
@@ -1503,7 +1503,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
     // first pass, if we have a continuing, we pull all declarations outside
     // the for loop into the continuing scope. Then, the variable declarations
     // will be turned into assignments.
-    for (const auto& s : *(stmt->body())) {
+    for (auto* s : *stmt->body()) {
       if (!s->IsVariableDecl()) {
         continue;
       }
@@ -1530,7 +1530,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
     out << std::endl;
   }
 
-  for (const auto& s : *(stmt->body())) {
+  for (auto* s : *(stmt->body())) {
     // If we have a continuing block we've already emitted the variable
     // declaration before the loop, so treat it as an assignment.
     if (s->IsVariableDecl() && stmt->has_continuing()) {
@@ -1559,7 +1559,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
       continue;
     }
 
-    if (!EmitStatement(out, s.get())) {
+    if (!EmitStatement(out, s)) {
       return false;
     }
   }
@@ -1927,8 +1927,8 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 
   increment_indent();
 
-  for (const auto& s : stmt->body()) {
-    if (!EmitCase(out, s.get())) {
+  for (auto* s : stmt->body()) {
+    if (!EmitCase(out, s)) {
       return false;
     }
   }
@@ -2060,7 +2060,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
   out << "struct " << name << " {" << std::endl;
 
   increment_indent();
-  for (const auto& mem : str->impl()->members()) {
+  for (auto* mem : str->impl()->members()) {
     make_indent(out);
     // TODO(dsinclair): Handle [[offset]] annotation on structs
     // https://bugs.chromium.org/p/tint/issues/detail?id=184

@@ -30,8 +30,8 @@ TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 2u);
 
-  auto deco_0 = ast::As<ast::FunctionDecoration>(std::move(decos.value[0]));
-  auto deco_1 = ast::As<ast::FunctionDecoration>(std::move(decos.value[1]));
+  auto* deco_0 = ast::As<ast::FunctionDecoration>(std::move(decos.value[0]));
+  auto* deco_1 = ast::As<ast::FunctionDecoration>(std::move(decos.value[1]));
   ASSERT_NE(deco_0, nullptr);
   ASSERT_NE(deco_1, nullptr);
 

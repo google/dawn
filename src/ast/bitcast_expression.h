@@ -33,29 +33,27 @@ class BitcastExpression : public Expression {
   /// Constructor
   /// @param type the type
   /// @param expr the expr
-  BitcastExpression(type::Type* type, std::unique_ptr<Expression> expr);
+  BitcastExpression(type::Type* type, Expression* expr);
   /// Constructor
   /// @param source the bitcast expression source
   /// @param type the type
   /// @param expr the expr
-  BitcastExpression(const Source& source,
-                    type::Type* type,
-                    std::unique_ptr<Expression> expr);
+  BitcastExpression(const Source& source, type::Type* type, Expression* expr);
   /// Move constructor
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
 
   /// Sets the type
   /// @param type the type
-  void set_type(type::Type* type) { type_ = std::move(type); }
+  void set_type(type::Type* type) { type_ = type; }
   /// @returns the left side expression
   type::Type* type() const { return type_; }
 
   /// Sets the expr
   /// @param expr the expression
-  void set_expr(std::unique_ptr<Expression> expr) { expr_ = std::move(expr); }
+  void set_expr(Expression* expr) { expr_ = expr; }
   /// @returns the expression
-  Expression* expr() const { return expr_.get(); }
+  Expression* expr() const { return expr_; }
 
   /// @returns true if this is a bitcast expression
   bool IsBitcast() const override;
@@ -72,7 +70,7 @@ class BitcastExpression : public Expression {
   BitcastExpression(const BitcastExpression&) = delete;
 
   type::Type* type_ = nullptr;
-  std::unique_ptr<Expression> expr_;
+  Expression* expr_ = nullptr;
 };
 
 }  // namespace ast

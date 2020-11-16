@@ -49,7 +49,7 @@ TEST_F(BuilderTest, Expression_Call) {
   func_params.push_back(
       create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
@@ -109,7 +109,7 @@ TEST_F(BuilderTest, Statement_Call) {
   func_params.push_back(
       create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
 
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));

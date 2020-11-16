@@ -24,26 +24,26 @@ namespace {
 using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, Creation) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   ExpressionList params;
   params.push_back(create<IdentifierExpression>("param1"));
   params.push_back(create<IdentifierExpression>("param2"));
 
-  auto* func_ptr = func.get();
-  auto* param1_ptr = params[0].get();
-  auto* param2_ptr = params[1].get();
+  auto* func_ptr = func;
+  auto* param1_ptr = params[0];
+  auto* param2_ptr = params[1];
 
   CallExpression stmt(std::move(func), std::move(params));
   EXPECT_EQ(stmt.func(), func_ptr);
 
   const auto& vec = stmt.params();
   ASSERT_EQ(vec.size(), 2u);
-  EXPECT_EQ(vec[0].get(), param1_ptr);
-  EXPECT_EQ(vec[1].get(), param2_ptr);
+  EXPECT_EQ(vec[0], param1_ptr);
+  EXPECT_EQ(vec[1], param2_ptr);
 }
 
 TEST_F(CallExpressionTest, Creation_WithSource) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   CallExpression stmt(Source{Source::Location{20, 2}}, std::move(func), {});
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -51,13 +51,13 @@ TEST_F(CallExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(CallExpressionTest, IsCall) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   EXPECT_TRUE(stmt.IsCall());
 }
 
 TEST_F(CallExpressionTest, IsValid) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   EXPECT_TRUE(stmt.IsValid());
 }
@@ -68,7 +68,7 @@ TEST_F(CallExpressionTest, IsValid_MissingFunction) {
 }
 
 TEST_F(CallExpressionTest, IsValid_NullParam) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   ExpressionList params;
   params.push_back(create<IdentifierExpression>("param1"));
   params.push_back(nullptr);
@@ -79,7 +79,7 @@ TEST_F(CallExpressionTest, IsValid_NullParam) {
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
-  auto func = create<IdentifierExpression>("");
+  auto* func = create<IdentifierExpression>("");
   ExpressionList params;
   params.push_back(create<IdentifierExpression>("param1"));
 
@@ -88,7 +88,7 @@ TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidParam) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   ExpressionList params;
   params.push_back(create<IdentifierExpression>(""));
 
@@ -97,7 +97,7 @@ TEST_F(CallExpressionTest, IsValid_InvalidParam) {
 }
 
 TEST_F(CallExpressionTest, ToStr_NoParams) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   CallExpression stmt(std::move(func), {});
   std::ostringstream out;
   stmt.to_str(out, 2);
@@ -110,7 +110,7 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
 }
 
 TEST_F(CallExpressionTest, ToStr_WithParams) {
-  auto func = create<IdentifierExpression>("func");
+  auto* func = create<IdentifierExpression>("func");
   ExpressionList params;
   params.push_back(create<IdentifierExpression>("param1"));
   params.push_back(create<IdentifierExpression>("param2"));

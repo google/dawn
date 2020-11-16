@@ -51,7 +51,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &i32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("A", std::move(str));
@@ -80,7 +80,7 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_ToStruct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &i32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("A", std::move(str));

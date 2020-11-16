@@ -34,22 +34,20 @@ class ReturnStatement : public Statement {
   explicit ReturnStatement(const Source& source);
   /// Constructor
   /// @param value the return value
-  explicit ReturnStatement(std::unique_ptr<Expression> value);
+  explicit ReturnStatement(Expression* value);
   /// Constructor
   /// @param source the return statement source
   /// @param value the return value
-  ReturnStatement(const Source& source, std::unique_ptr<Expression> value);
+  ReturnStatement(const Source& source, Expression* value);
   /// Move constructor
   ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;
 
   /// Sets the value
   /// @param value the value
-  void set_value(std::unique_ptr<Expression> value) {
-    value_ = std::move(value);
-  }
+  void set_value(Expression* value) { value_ = value; }
   /// @returns the value
-  Expression* value() const { return value_.get(); }
+  Expression* value() const { return value_; }
   /// @returns true if the return has a value
   bool has_value() const { return value_ != nullptr; }
 
@@ -67,7 +65,7 @@ class ReturnStatement : public Statement {
  private:
   ReturnStatement(const ReturnStatement&) = delete;
 
-  std::unique_ptr<Expression> value_;
+  Expression* value_ = nullptr;
 };
 
 }  // namespace ast

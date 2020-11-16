@@ -19,14 +19,13 @@ namespace ast {
 
 BitcastExpression::BitcastExpression() : Expression() {}
 
-BitcastExpression::BitcastExpression(type::Type* type,
-                                     std::unique_ptr<Expression> expr)
-    : Expression(), type_(type), expr_(std::move(expr)) {}
+BitcastExpression::BitcastExpression(type::Type* type, Expression* expr)
+    : Expression(), type_(type), expr_(expr) {}
 
 BitcastExpression::BitcastExpression(const Source& source,
                                      type::Type* type,
-                                     std::unique_ptr<Expression> expr)
-    : Expression(source), type_(type), expr_(std::move(expr)) {}
+                                     Expression* expr)
+    : Expression(source), type_(type), expr_(expr) {}
 
 BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;

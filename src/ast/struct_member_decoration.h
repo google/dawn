@@ -46,9 +46,8 @@ class StructMemberDecoration : public Decoration {
   explicit StructMemberDecoration(const Source& source);
 };
 
-/// A list of unique struct member decorations
-using StructMemberDecorationList =
-    std::vector<std::unique_ptr<StructMemberDecoration>>;
+/// A list of struct member decorations
+using StructMemberDecorationList = std::vector<StructMemberDecoration*>;
 
 }  // namespace ast
 }  // namespace tint

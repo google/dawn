@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   ASSERT_FALSE(m.errored);
   ASSERT_EQ(m.value.size(), 1u);
 
-  const auto& mem = m.value[0];
+  const auto* mem = m.value[0];
   EXPECT_EQ(mem->name(), "a");
   EXPECT_EQ(mem->type(), i32);
   EXPECT_EQ(mem->decorations().size(), 0u);

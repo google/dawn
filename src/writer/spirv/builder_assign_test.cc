@@ -47,8 +47,8 @@ TEST_F(BuilderTest, Assign_Var) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  auto ident = create<ast::IdentifierExpression>("var");
-  auto val = create<ast::ScalarConstructorExpression>(
+  auto* ident = create<ast::IdentifierExpression>("var");
+  auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
@@ -81,9 +81,9 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec);
 
-  auto ident = create<ast::IdentifierExpression>("var");
+  auto* ident = create<ast::IdentifierExpression>("var");
   ast::ExpressionList vals;
-  auto val = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
+  auto* val = create<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
@@ -119,13 +119,13 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0f)));
-  auto first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
+  auto* first = create<ast::TypeConstructorExpression>(&vec2, std::move(vals));
 
   vals.push_back(std::move(first));
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
@@ -173,7 +173,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* init = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
@@ -219,16 +219,16 @@ TEST_F(BuilderTest, Assign_StructMember) {
   members.push_back(create<ast::StructMember>("a", &f32, std::move(decos)));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(decos)));
 
-  auto s = create<ast::Struct>(std::move(members));
+  auto* s = create<ast::Struct>(std::move(members));
   ast::type::StructType s_type("my_struct", std::move(s));
 
   ast::Variable v("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto ident = create<ast::MemberAccessorExpression>(
+  auto* ident = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("ident"),
       create<ast::IdentifierExpression>("b"));
 
-  auto val = create<ast::ScalarConstructorExpression>(
+  auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 4.0f));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
@@ -266,7 +266,7 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
-  auto ident = create<ast::IdentifierExpression>("var");
+  auto* ident = create<ast::IdentifierExpression>("var");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -276,7 +276,7 @@ TEST_F(BuilderTest, Assign_Vector) {
   vals.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto val = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+  auto* val = create<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
@@ -313,10 +313,10 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
-  auto ident = create<ast::MemberAccessorExpression>(
+  auto* ident = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("var"),
       create<ast::IdentifierExpression>("y"));
-  auto val = create<ast::ScalarConstructorExpression>(
+  auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
@@ -358,11 +358,11 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
-  auto ident = create<ast::ArrayAccessorExpression>(
+  auto* ident = create<ast::ArrayAccessorExpression>(
       create<ast::IdentifierExpression>("var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 1)));
-  auto val = create<ast::ScalarConstructorExpression>(
+  auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));

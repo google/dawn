@@ -56,7 +56,7 @@ Inspector::~Inspector() {
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
 
-  for (const auto& func : module_.functions()) {
+  for (auto* func : module_.functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -96,7 +96,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
-  for (auto& var : module_.global_variables()) {
+  for (auto* var : module_.global_variables()) {
     if (!var->IsDecorated()) {
       continue;
     }

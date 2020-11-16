@@ -56,9 +56,7 @@ class BinaryExpression : public Expression {
   /// @param op the operation type
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
-  BinaryExpression(BinaryOp op,
-                   std::unique_ptr<Expression> lhs,
-                   std::unique_ptr<Expression> rhs);
+  BinaryExpression(BinaryOp op, Expression* lhs, Expression* rhs);
   /// Constructor
   /// @param source the binary expression source
   /// @param op the operation type
@@ -66,8 +64,8 @@ class BinaryExpression : public Expression {
   /// @param rhs the right side of the expression
   BinaryExpression(const Source& source,
                    BinaryOp op,
-                   std::unique_ptr<Expression> lhs,
-                   std::unique_ptr<Expression> rhs);
+                   Expression* lhs,
+                   Expression* rhs);
   /// Move constructor
   BinaryExpression(BinaryExpression&&);
   ~BinaryExpression() override;
@@ -117,15 +115,15 @@ class BinaryExpression : public Expression {
 
   /// Sets the left side of the expression
   /// @param lhs the left side to set
-  void set_lhs(std::unique_ptr<Expression> lhs) { lhs_ = std::move(lhs); }
+  void set_lhs(Expression* lhs) { lhs_ = lhs; }
   /// @returns the left side expression
-  Expression* lhs() const { return lhs_.get(); }
+  Expression* lhs() const { return lhs_; }
 
   /// Sets the right side of the expression
   /// @param rhs the right side to set
-  void set_rhs(std::unique_ptr<Expression> rhs) { rhs_ = std::move(rhs); }
+  void set_rhs(Expression* rhs) { rhs_ = rhs; }
   /// @returns the right side expression
-  Expression* rhs() const { return rhs_.get(); }
+  Expression* rhs() const { return rhs_; }
 
   /// @returns true if this is a op expression
   bool IsBinary() const override;
@@ -142,8 +140,8 @@ class BinaryExpression : public Expression {
   BinaryExpression(const BinaryExpression&) = delete;
 
   BinaryOp op_ = BinaryOp::kNone;
-  std::unique_ptr<Expression> lhs_;
-  std::unique_ptr<Expression> rhs_;
+  Expression* lhs_ = nullptr;
+  Expression* rhs_ = nullptr;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {

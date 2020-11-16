@@ -33,14 +33,12 @@ class UnaryOpExpression : public Expression {
   /// Constructor
   /// @param op the op
   /// @param expr the expr
-  UnaryOpExpression(UnaryOp op, std::unique_ptr<Expression> expr);
+  UnaryOpExpression(UnaryOp op, Expression* expr);
   /// Constructor
   /// @param source the unary op expression source
   /// @param op the op
   /// @param expr the expr
-  UnaryOpExpression(const Source& source,
-                    UnaryOp op,
-                    std::unique_ptr<Expression> expr);
+  UnaryOpExpression(const Source& source, UnaryOp op, Expression* expr);
   /// Move constructor
   UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;
@@ -53,9 +51,9 @@ class UnaryOpExpression : public Expression {
 
   /// Sets the expr
   /// @param expr the expression
-  void set_expr(std::unique_ptr<Expression> expr) { expr_ = std::move(expr); }
+  void set_expr(Expression* expr) { expr_ = expr; }
   /// @returns the expression
-  Expression* expr() const { return expr_.get(); }
+  Expression* expr() const { return expr_; }
 
   /// @returns true if this is an as expression
   bool IsUnaryOp() const override;
@@ -72,7 +70,7 @@ class UnaryOpExpression : public Expression {
   UnaryOpExpression(const UnaryOpExpression&) = delete;
 
   UnaryOp op_ = UnaryOp::kNegation;
-  std::unique_ptr<Expression> expr_;
+  Expression* expr_ = nullptr;
 };
 
 }  // namespace ast

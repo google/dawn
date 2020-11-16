@@ -20,15 +20,15 @@ namespace ast {
 BinaryExpression::BinaryExpression() : Expression() {}
 
 BinaryExpression::BinaryExpression(BinaryOp op,
-                                   std::unique_ptr<Expression> lhs,
-                                   std::unique_ptr<Expression> rhs)
-    : Expression(), op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+                                   Expression* lhs,
+                                   Expression* rhs)
+    : Expression(), op_(op), lhs_(lhs), rhs_(rhs) {}
 
 BinaryExpression::BinaryExpression(const Source& source,
                                    BinaryOp op,
-                                   std::unique_ptr<Expression> lhs,
-                                   std::unique_ptr<Expression> rhs)
-    : Expression(source), op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+                                   Expression* lhs,
+                                   Expression* rhs)
+    : Expression(source), op_(op), lhs_(lhs), rhs_(rhs) {}
 
 BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 

@@ -496,8 +496,8 @@ class FunctionEmitter {
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @returns the new statement, or a null statement
-  std::unique_ptr<ast::Statement> MakeBranch(const BlockInfo& src_info,
-                                             const BlockInfo& dest_info) const {
+  ast::Statement* MakeBranch(const BlockInfo& src_info,
+                             const BlockInfo& dest_info) const {
     return MakeBranchDetailed(src_info, dest_info, false, nullptr);
   }
 
@@ -507,9 +507,8 @@ class FunctionEmitter {
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @returns the new statement, or a null statement
-  std::unique_ptr<ast::Statement> MakeForcedBranch(
-      const BlockInfo& src_info,
-      const BlockInfo& dest_info) const {
+  ast::Statement* MakeForcedBranch(const BlockInfo& src_info,
+                                   const BlockInfo& dest_info) const {
     return MakeBranchDetailed(src_info, dest_info, true, nullptr);
   }
 
@@ -527,11 +526,10 @@ class FunctionEmitter {
   /// @param forced if true, always emit the branch (if it exists in WGSL)
   /// @param flow_guard_name_ptr return parameter for control flow guard name
   /// @returns the new statement, or a null statement
-  std::unique_ptr<ast::Statement> MakeBranchDetailed(
-      const BlockInfo& src_info,
-      const BlockInfo& dest_info,
-      bool forced,
-      std::string* flow_guard_name_ptr) const;
+  ast::Statement* MakeBranchDetailed(const BlockInfo& src_info,
+                                     const BlockInfo& dest_info,
+                                     bool forced,
+                                     std::string* flow_guard_name_ptr) const;
 
   /// Returns a new if statement with the given statements as the then-clause
   /// and the else-clause.  Either or both clauses might be nullptr. If both
@@ -540,10 +538,9 @@ class FunctionEmitter {
   /// @param then_stmt the statement for the then clause of the if, or nullptr
   /// @param else_stmt the statement for the else clause of the if, or nullptr
   /// @returns the new statement, or nullptr
-  std::unique_ptr<ast::Statement> MakeSimpleIf(
-      std::unique_ptr<ast::Expression> condition,
-      std::unique_ptr<ast::Statement> then_stmt,
-      std::unique_ptr<ast::Statement> else_stmt) const;
+  ast::Statement* MakeSimpleIf(ast::Expression* condition,
+                               ast::Statement* then_stmt,
+                               ast::Statement* else_stmt) const;
 
   /// Emits the statements for an normal-terminator OpBranchConditional
   /// where one branch is a case fall through (the true branch if and only
@@ -558,7 +555,7 @@ class FunctionEmitter {
   /// branch
   /// @returns the false if emission fails
   bool EmitConditionalCaseFallThrough(const BlockInfo& src_info,
-                                      std::unique_ptr<ast::Expression> cond,
+                                      ast::Expression* cond,
                                       EdgeKind other_edge_kind,
                                       const BlockInfo& other_dest,
                                       bool fall_through_is_true_branch);
@@ -719,7 +716,7 @@ class FunctionEmitter {
   /// Does nothing if the statement is null.
   /// @param statement the new statement
   /// @returns a pointer to the statement.
-  ast::Statement* AddStatement(std::unique_ptr<ast::Statement> statement);
+  ast::Statement* AddStatement(ast::Statement* statement);
 
   /// Appends a new statement to the top of the statement stack, and attaches
   /// source location information from the given instruction. Does nothing if
@@ -727,7 +724,7 @@ class FunctionEmitter {
   /// @param statement the new statement
   /// @returns a pointer to the statement.
   ast::Statement* AddStatementForInstruction(
-      std::unique_ptr<ast::Statement> statement,
+      ast::Statement* statement,
       const spvtools::opt::Instruction& inst);
 
   /// Sets the source information for the given instruction to the given
@@ -750,8 +747,8 @@ class FunctionEmitter {
     StatementBlock(const Construct* construct,
                    uint32_t end_id,
                    CompletionAction completion_action,
-                   std::unique_ptr<ast::BlockStatement> statements,
-                   std::unique_ptr<ast::CaseStatementList> cases);
+                   ast::BlockStatement* statements,
+                   ast::CaseStatementList* cases);
     StatementBlock(StatementBlock&&);
     ~StatementBlock();
 
@@ -767,12 +764,12 @@ class FunctionEmitter {
     // Only one of |statements| or |cases| is active.
 
     // The list of statements being built, if this construct is not a switch.
-    std::unique_ptr<ast::BlockStatement> statements_;
+    ast::BlockStatement* statements_ = nullptr;
     // The list of switch cases being built, if this construct is a switch.
     // The algorithm will cache a pointer to the vector.  We want that pointer
     // to be stable no matter how |statements_stack_| is resized.  That's
     // why we make this a unique_ptr rather than just a plain vector.
-    std::unique_ptr<ast::CaseStatementList> cases_;
+    std::unique_ptr<ast::CaseStatementList> cases_ = nullptr;
   };
 
   /// Pushes an empty statement block onto the statements stack.
@@ -795,16 +792,19 @@ class FunctionEmitter {
   void PushTrueGuard(uint32_t end_id);
 
   /// @returns a boolean true expression.
-  std::unique_ptr<ast::Expression> MakeTrue() const;
+  ast::Expression* MakeTrue() const;
 
   /// @returns a boolean false expression.
-  std::unique_ptr<ast::Expression> MakeFalse() const;
+  ast::Expression* MakeFalse() const;
 
-  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
-  /// @param args the arguments to forward to the constructor for `T`
+  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
   template <typename T, typename... ARGS>
-  std::unique_ptr<T> create(ARGS&&... args) const {
-    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  T* create(ARGS&&... args) const {
+    auto& ctx = parser_impl_.context();
+    return ctx.create<T>(std::forward<ARGS>(args)...);
   }
 
   ParserImpl& parser_impl_;

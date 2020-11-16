@@ -197,7 +197,7 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeStruct) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AliasType alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -246,7 +246,7 @@ TEST_F(AliasTypeTest, BaseAlignmentStruct) {
   }
   ast::StructDecorationList decos;
 
-  auto str = create<ast::Struct>(std::move(decos), std::move(members));
+  auto* str = create<ast::Struct>(std::move(decos), std::move(members));
   StructType struct_type("struct_type", std::move(str));
   AliasType alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));

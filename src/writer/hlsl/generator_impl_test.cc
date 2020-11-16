@@ -29,8 +29,8 @@ using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::VoidType void_type;
-  auto func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                    create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>());
   mod.AddFunction(std::move(func));
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();

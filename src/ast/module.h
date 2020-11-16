@@ -37,9 +37,7 @@ class Module {
 
   /// Add a global variable to the module
   /// @param var the variable to add
-  void AddGlobalVariable(std::unique_ptr<Variable> var) {
-    global_variables_.push_back(std::move(var));
-  }
+  void AddGlobalVariable(Variable* var) { global_variables_.push_back(var); }
   /// @returns the global variables for the module
   const VariableList& global_variables() const { return global_variables_; }
 
@@ -59,9 +57,7 @@ class Module {
 
   /// Adds a function to the module
   /// @param func the function
-  void AddFunction(std::unique_ptr<Function> func) {
-    functions_.push_back(std::move(func));
-  }
+  void AddFunction(Function* func) { functions_.push_back(func); }
   /// @returns the modules functions
   const FunctionList& functions() const { return functions_; }
   /// Returns the function with the given name

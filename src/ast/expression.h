@@ -117,8 +117,8 @@ class Expression : public Node {
   type::Type* result_type_ = nullptr;
 };
 
-/// A list of unique expressions
-using ExpressionList = std::vector<std::unique_ptr<Expression>>;
+/// A list of expressions
+using ExpressionList = std::vector<Expression*>;
 
 }  // namespace ast
 }  // namespace tint

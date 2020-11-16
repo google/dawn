@@ -31,18 +31,16 @@ class CallStatement : public Statement {
   CallStatement();
   /// Constructor
   /// @param call the function
-  explicit CallStatement(std::unique_ptr<CallExpression> call);
+  explicit CallStatement(CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;
 
   /// Sets the call expression
   /// @param call the call
-  void set_expr(std::unique_ptr<CallExpression> call) {
-    call_ = std::move(call);
-  }
+  void set_expr(CallExpression* call) { call_ = call; }
   /// @returns the call expression
-  CallExpression* expr() const { return call_.get(); }
+  CallExpression* expr() const { return call_; }
 
   /// @returns true if this is a call statement
   bool IsCall() const override;
@@ -58,7 +56,7 @@ class CallStatement : public Statement {
  private:
   CallStatement(const CallStatement&) = delete;
 
-  std::unique_ptr<CallExpression> call_;
+  CallExpression* call_ = nullptr;
 };
 
 }  // namespace ast

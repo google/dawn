@@ -71,8 +71,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
   ast::type::VectorType vec2(&f32, 2);
   ast::type::VectorType vec3(&f32, 3);
 
-  auto a = create<ast::Variable>("a", ast::StorageClass::kNone, &vec2);
-  auto b = create<ast::Variable>("b", ast::StorageClass::kNone, &vec3);
+  auto* a = create<ast::Variable>("a", ast::StorageClass::kNone, &vec2);
+  auto* b = create<ast::Variable>("b", ast::StorageClass::kNone, &vec3);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("a"));
@@ -81,8 +81,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
   ast::CallExpression call(create<ast::IdentifierExpression>("outer_product"),
                            std::move(params));
 
-  td.RegisterVariableForTesting(a.get());
-  td.RegisterVariableForTesting(b.get());
+  td.RegisterVariableForTesting(a);
+  td.RegisterVariableForTesting(b);
 
   mod.AddGlobalVariable(std::move(a));
   mod.AddGlobalVariable(std::move(b));

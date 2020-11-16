@@ -54,21 +54,21 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("mem", &f32, std::move(deco)));
 
-  auto strct = create<ast::Struct>();
+  auto* strct = create<ast::Struct>();
   strct->set_members(std::move(members));
 
   ast::type::StructType s("Str", std::move(strct));
 
-  auto str_var = create<ast::DecoratedVariable>(
+  auto* str_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("str", ast::StorageClass::kPrivate, &s));
 
-  auto str = create<ast::IdentifierExpression>("str");
-  auto mem = create<ast::IdentifierExpression>("mem");
+  auto* str = create<ast::IdentifierExpression>("str");
+  auto* mem = create<ast::IdentifierExpression>("mem");
 
   ast::MemberAccessorExpression expr(std::move(str), std::move(mem));
 
-  td.RegisterVariableForTesting(str_var.get());
-  gen.register_global(str_var.get());
+  td.RegisterVariableForTesting(str_var);
+  gen.register_global(str_var);
   mod.AddGlobalVariable(std::move(str_var));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -98,19 +98,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("b"));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -142,19 +142,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -189,27 +189,27 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto b_var = create<ast::Variable>("b", ast::StorageClass::kPrivate, &mat);
+  auto* b_var = create<ast::Variable>("b", ast::StorageClass::kPrivate, &mat);
 
-  auto coord_var =
+  auto* coord_var =
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
       create<ast::IdentifierExpression>("a"));
-  auto rhs = create<ast::IdentifierExpression>("b");
+  auto* rhs = create<ast::IdentifierExpression>("b");
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  td.RegisterVariableForTesting(b_var.get());
-  gen.register_global(coord_var.get());
-  gen.register_global(b_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  td.RegisterVariableForTesting(b_var);
+  gen.register_global(coord_var);
+  gen.register_global(b_var);
   mod.AddGlobalVariable(std::move(coord_var));
   mod.AddGlobalVariable(std::move(b_var));
 
@@ -249,24 +249,24 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
       create<ast::IdentifierExpression>("a"));
-  auto rhs =
+  auto* rhs =
       create<ast::TypeConstructorExpression>(&mat, ast::ExpressionList{});
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -305,19 +305,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -356,19 +356,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -400,19 +400,19 @@ TEST_F(
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -447,12 +447,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("a", &mat, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::ArrayAccessorExpression expr(
@@ -465,8 +465,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 1)));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -497,12 +497,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("a", &ary, std::move(a_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::ArrayAccessorExpression expr(
@@ -512,8 +512,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 2)));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -544,12 +544,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("a", &ary, std::move(a_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
   ast::ArrayAccessorExpression expr(
@@ -567,8 +567,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
           create<ast::ScalarConstructorExpression>(
               create<ast::SintLiteral>(&i32, 3))));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -601,24 +601,24 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
       create<ast::IdentifierExpression>("b"));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0f));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -650,27 +650,27 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("a", &ary, std::move(a_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lhs = create<ast::ArrayAccessorExpression>(
+  auto* lhs = create<ast::ArrayAccessorExpression>(
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("data"),
           create<ast::IdentifierExpression>("a")),
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 2)));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -703,24 +703,24 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
       create<ast::IdentifierExpression>("a"));
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -755,16 +755,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -802,32 +802,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(b_deco)));
 
-  auto str = create<ast::Struct>();
+  auto* str = create<ast::Struct>();
   str->set_members(std::move(members));
 
   ast::type::StructType s("Data", std::move(str));
 
-  auto coord_var = create<ast::DecoratedVariable>(
+  auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lit1 = create<ast::FloatLiteral>(&f32, 1.f);
-  auto lit2 = create<ast::FloatLiteral>(&f32, 2.f);
-  auto lit3 = create<ast::FloatLiteral>(&f32, 3.f);
+  auto* lit1 = create<ast::FloatLiteral>(&f32, 1.f);
+  auto* lit2 = create<ast::FloatLiteral>(&f32, 2.f);
+  auto* lit3 = create<ast::FloatLiteral>(&f32, 3.f);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit1)));
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit2)));
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit3)));
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
       create<ast::IdentifierExpression>("b"));
-  auto rhs = create<ast::TypeConstructorExpression>(&fvec3, std::move(values));
+  auto* rhs = create<ast::TypeConstructorExpression>(&fvec3, std::move(values));
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -867,7 +867,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -880,16 +880,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -936,7 +936,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -949,16 +949,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -1008,7 +1008,7 @@ TEST_F(
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -1021,16 +1021,16 @@ TEST_F(
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -1079,7 +1079,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -1092,16 +1092,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -1151,7 +1151,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -1164,21 +1164,21 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::ArrayAccessorExpression>(
           create<ast::MemberAccessorExpression>(
               create<ast::IdentifierExpression>("data"),
@@ -1187,15 +1187,15 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::SintLiteral>(&i32, 2))),
       create<ast::IdentifierExpression>("b"));
 
-  auto lit1 = create<ast::FloatLiteral>(&f32, 1.f);
-  auto lit2 = create<ast::FloatLiteral>(&f32, 2.f);
-  auto lit3 = create<ast::FloatLiteral>(&f32, 3.f);
+  auto* lit1 = create<ast::FloatLiteral>(&f32, 1.f);
+  auto* lit2 = create<ast::FloatLiteral>(&f32, 2.f);
+  auto* lit3 = create<ast::FloatLiteral>(&f32, 3.f);
   ast::ExpressionList values;
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit1)));
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit2)));
   values.push_back(create<ast::ScalarConstructorExpression>(std::move(lit3)));
 
-  auto rhs = create<ast::TypeConstructorExpression>(&fvec3, std::move(values));
+  auto* rhs = create<ast::TypeConstructorExpression>(&fvec3, std::move(values));
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -1235,7 +1235,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
   members.push_back(create<ast::StructMember>("b", &fvec3, std::move(deco)));
 
-  auto data_str = create<ast::Struct>();
+  auto* data_str = create<ast::Struct>();
   data_str->set_members(std::move(members));
 
   ast::type::StructType data("Data", std::move(data_str));
@@ -1248,21 +1248,21 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("c", &ary, std::move(deco)));
 
-  auto pre_str = create<ast::Struct>();
+  auto* pre_str = create<ast::Struct>();
   pre_str->set_members(std::move(members));
 
   ast::type::StructType pre_struct("Pre", std::move(pre_str));
 
-  auto coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
 
-  td.RegisterVariableForTesting(coord_var.get());
-  gen.register_global(coord_var.get());
+  td.RegisterVariableForTesting(coord_var);
+  gen.register_global(coord_var);
   mod.AddGlobalVariable(std::move(coord_var));
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto lhs = create<ast::MemberAccessorExpression>(
+  auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
           create<ast::ArrayAccessorExpression>(
               create<ast::MemberAccessorExpression>(
@@ -1273,7 +1273,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
           create<ast::IdentifierExpression>("b")),
       create<ast::IdentifierExpression>("y"));
 
-  auto rhs = create<ast::ScalarConstructorExpression>(
+  auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&i32, 1.f));
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));

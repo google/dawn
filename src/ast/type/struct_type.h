@@ -31,7 +31,7 @@ class StructType : public Type {
   /// Constructor
   /// @param name the name of the struct
   /// @param impl the struct data
-  StructType(const std::string& name, std::unique_ptr<Struct> impl);
+  StructType(const std::string& name, Struct* impl);
   /// Move constructor
   StructType(StructType&&);
   ~StructType() override;
@@ -46,7 +46,7 @@ class StructType : public Type {
   bool IsStruct() const override;
 
   /// @returns the struct name
-  Struct* impl() const { return struct_.get(); }
+  Struct* impl() const { return struct_; }
 
   /// @returns the name for the type
   std::string type_name() const override;
@@ -63,7 +63,7 @@ class StructType : public Type {
 
  private:
   std::string name_;
-  std::unique_ptr<Struct> struct_;
+  Struct* struct_ = nullptr;
 
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 };

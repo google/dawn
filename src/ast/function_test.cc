@@ -38,14 +38,14 @@ TEST_F(FunctionTest, Creation) {
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
-  auto* var_ptr = params[0].get();
+  auto* var_ptr = params[0];
 
   Function f("func", std::move(params), &void_type,
              create<ast::BlockStatement>());
   EXPECT_EQ(f.name(), "func");
   ASSERT_EQ(f.params().size(), 1u);
   EXPECT_EQ(f.return_type(), &void_type);
-  EXPECT_EQ(f.params()[0].get(), var_ptr);
+  EXPECT_EQ(f.params()[0], var_ptr);
 }
 
 TEST_F(FunctionTest, Creation_WithSource) {
@@ -188,7 +188,7 @@ TEST_F(FunctionTest, IsValid) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type,
@@ -249,7 +249,7 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
@@ -266,7 +266,7 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
@@ -280,7 +280,7 @@ TEST_F(FunctionTest, ToStr) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type, create<ast::BlockStatement>());
@@ -300,7 +300,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
   Function f("func", {}, &void_type, create<ast::BlockStatement>());
@@ -325,7 +325,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto block = create<ast::BlockStatement>();
+  auto* block = create<ast::BlockStatement>();
   block->append(create<DiscardStatement>());
 
   Function f("func", std::move(params), &void_type,
@@ -373,9 +373,9 @@ TEST_F(FunctionTest, GetLastStatement) {
   type::VoidType void_type;
 
   VariableList params;
-  auto body = create<ast::BlockStatement>();
-  auto stmt = create<DiscardStatement>();
-  auto* stmt_ptr = stmt.get();
+  auto* body = create<ast::BlockStatement>();
+  auto* stmt = create<DiscardStatement>();
+  auto* stmt_ptr = stmt;
   body->append(std::move(stmt));
   Function f("func", std::move(params), &void_type,
              create<ast::BlockStatement>());
@@ -388,7 +388,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
   type::VoidType void_type;
 
   VariableList params;
-  auto body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>();
   Function f("func", std::move(params), &void_type,
              create<ast::BlockStatement>());
   f.set_body(std::move(body));

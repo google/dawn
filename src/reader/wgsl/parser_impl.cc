@@ -340,7 +340,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
 // global_variable_decl
 //  : variable_decoration_list* variable_decl
 //  | variable_decoration_list* variable_decl EQUAL const_expr
-Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_variable_decl(
+Maybe<ast::Variable*> ParserImpl::global_variable_decl(
     ast::DecorationList& decos) {
   auto decl = variable_decl();
   if (decl.errored)
@@ -348,14 +348,14 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_variable_decl(
   if (!decl.matched)
     return Failure::kNoMatch;
 
-  auto var = std::move(decl.value);
+  auto* var = std::move(decl.value);
 
   auto var_decos = cast_decorations<ast::VariableDecoration>(decos);
   if (var_decos.errored)
     return Failure::kErrored;
 
   if (var_decos.value.size() > 0) {
-    auto dv = create<ast::DecoratedVariable>(std::move(var));
+    auto* dv = create<ast::DecoratedVariable>(std::move(var));
     dv->set_decorations(std::move(var_decos.value));
     var = std::move(dv);
   }
@@ -371,7 +371,7 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_variable_decl(
 
 // global_constant_decl
 //  : CONST variable_ident_decl EQUAL const_expr
-Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_constant_decl() {
+Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (!match(Token::Type::kConst))
     return Failure::kNoMatch;
 
@@ -381,8 +381,8 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_constant_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  auto var = create<ast::Variable>(decl->source, decl->name,
-                                   ast::StorageClass::kNone, decl->type);
+  auto* var = create<ast::Variable>(decl->source, decl->name,
+                                    ast::StorageClass::kNone, decl->type);
   var->set_is_const(true);
 
   if (!expect(use, Token::Type::kEqual))
@@ -399,7 +399,7 @@ Maybe<std::unique_ptr<ast::Variable>> ParserImpl::global_constant_decl() {
 
 // variable_decl
 //   : VAR variable_storage_decoration? variable_ident_decl
-Maybe<std::unique_ptr<ast::Variable>> ParserImpl::variable_decl() {
+Maybe<ast::Variable*> ParserImpl::variable_decl() {
   if (!match(Token::Type::kVar))
     return Failure::kNoMatch;
 
@@ -1100,16 +1100,15 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
         ast::StructMemberList members;
 
         while (synchronized_ && !peek().IsBraceRight() && !peek().IsEof()) {
-          auto member =
-              sync(Token::Type::kSemicolon,
-                   [&]() -> Expect<std::unique_ptr<ast::StructMember>> {
-                     auto decos = decoration_list();
-                     if (decos.errored)
-                       errored = true;
-                     if (!synchronized_)
-                       return Failure::kErrored;
-                     return expect_struct_member(decos.value);
-                   });
+          auto member = sync(Token::Type::kSemicolon,
+                             [&]() -> Expect<ast::StructMember*> {
+                               auto decos = decoration_list();
+                               if (decos.errored)
+                                 errored = true;
+                               if (!synchronized_)
+                                 return Failure::kErrored;
+                               return expect_struct_member(decos.value);
+                             });
 
           if (member.errored) {
             errored = true;
@@ -1127,7 +1126,7 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
 
 // struct_member
 //   : struct_member_decoration_decl+ variable_ident_decl SEMICOLON
-Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
+Expect<ast::StructMember*> ParserImpl::expect_struct_member(
     ast::DecorationList& decos) {
   auto decl = expect_variable_ident_decl("struct member");
   if (decl.errored)
@@ -1146,8 +1145,7 @@ Expect<std::unique_ptr<ast::StructMember>> ParserImpl::expect_struct_member(
 
 // function_decl
 //   : function_header body_stmt
-Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_decl(
-    ast::DecorationList& decos) {
+Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
   auto f = function_header();
   if (f.errored) {
     if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
@@ -1195,7 +1193,7 @@ Maybe<ast::type::Type*> ParserImpl::function_type_decl() {
 
 // function_header
 //   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
-Maybe<std::unique_ptr<ast::Function>> ParserImpl::function_header() {
+Maybe<ast::Function*> ParserImpl::function_header() {
   Source source;
   if (!match(Token::Type::kFn, &source))
     return Failure::kNoMatch;
@@ -1247,8 +1245,8 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 
   ast::VariableList ret;
   for (;;) {
-    auto var = create<ast::Variable>(decl->source, decl->name,
-                                     ast::StorageClass::kNone, decl->type);
+    auto* var = create<ast::Variable>(decl->source, decl->name,
+                                      ast::StorageClass::kNone, decl->type);
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
@@ -1299,30 +1297,29 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
 
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
-Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_body_stmt() {
+Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
   return expect_brace_block("", [&] { return expect_statements(); });
 }
 
 // paren_rhs_stmt
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_paren_rhs_stmt() {
-  return expect_paren_block(
-      "", [&]() -> Expect<std::unique_ptr<ast::Expression>> {
-        auto expr = logical_or_expression();
-        if (expr.errored)
-          return Failure::kErrored;
-        if (!expr.matched)
-          return add_error(peek(), "unable to parse expression");
+Expect<ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
+  return expect_paren_block("", [&]() -> Expect<ast::Expression*> {
+    auto expr = logical_or_expression();
+    if (expr.errored)
+      return Failure::kErrored;
+    if (!expr.matched)
+      return add_error(peek(), "unable to parse expression");
 
-        return std::move(expr.value);
-      });
+    return std::move(expr.value);
+  });
 }
 
 // statements
 //   : statement*
-Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
+Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
   bool errored = false;
-  auto ret = create<ast::BlockStatement>();
+  auto* ret = create<ast::BlockStatement>();
 
   while (synchronized_) {
     auto stmt = statement();
@@ -1356,7 +1353,7 @@ Expect<std::unique_ptr<ast::BlockStatement>> ParserImpl::expect_statements() {
 //      | continue_stmt SEMICOLON
 //      | DISCARD SEMICOLON
 //      | assignment_stmt SEMICOLON
-Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
+Maybe<ast::Statement*> ParserImpl::statement() {
   while (match(Token::Type::kSemicolon)) {
     // Skip empty statements
   }
@@ -1412,8 +1409,8 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::statement() {
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
 //   | assignment_stmt SEMICOLON
-Maybe<std::unique_ptr<ast::Statement>> ParserImpl::non_block_statement() {
-  auto stmt = [&]() -> Maybe<std::unique_ptr<ast::Statement>> {
+Maybe<ast::Statement*> ParserImpl::non_block_statement() {
+  auto stmt = [&]() -> Maybe<ast::Statement*> {
     auto ret_stmt = return_stmt();
     if (ret_stmt.errored)
       return Failure::kErrored;
@@ -1465,7 +1462,7 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::non_block_statement() {
 
 // return_stmt
 //   : RETURN logical_or_expression?
-Maybe<std::unique_ptr<ast::ReturnStatement>> ParserImpl::return_stmt() {
+Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
   Source source;
   if (!match(Token::Type::kReturn, &source))
     return Failure::kNoMatch;
@@ -1485,7 +1482,7 @@ Maybe<std::unique_ptr<ast::ReturnStatement>> ParserImpl::return_stmt() {
 //   : variable_decl
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
-Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
+Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   if (match(Token::Type::kConst)) {
     auto decl = expect_variable_ident_decl("constant declaration");
     if (decl.errored)
@@ -1500,8 +1497,8 @@ Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
     if (!constructor.matched)
       return add_error(peek(), "missing constructor for const declaration");
 
-    auto var = create<ast::Variable>(decl->source, decl->name,
-                                     ast::StorageClass::kNone, decl->type);
+    auto* var = create<ast::Variable>(decl->source, decl->name,
+                                      ast::StorageClass::kNone, decl->type);
     var->set_is_const(true);
     var->set_constructor(std::move(constructor.value));
 
@@ -1530,7 +1527,7 @@ Maybe<std::unique_ptr<ast::VariableDeclStatement>> ParserImpl::variable_stmt() {
 
 // if_stmt
 //   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
-Maybe<std::unique_ptr<ast::IfStatement>> ParserImpl::if_stmt() {
+Maybe<ast::IfStatement*> ParserImpl::if_stmt() {
   Source source;
   if (!match(Token::Type::kIf, &source))
     return Failure::kNoMatch;
@@ -1551,8 +1548,8 @@ Maybe<std::unique_ptr<ast::IfStatement>> ParserImpl::if_stmt() {
   if (el.errored)
     return Failure::kErrored;
 
-  auto stmt = create<ast::IfStatement>(source, std::move(condition.value),
-                                       std::move(body.value));
+  auto* stmt = create<ast::IfStatement>(source, std::move(condition.value),
+                                        std::move(body.value));
   if (el.matched) {
     elseif.value.push_back(std::move(el.value));
   }
@@ -1590,7 +1587,7 @@ Maybe<ast::ElseStatementList> ParserImpl::elseif_stmt() {
 
 // else_stmt
 //   : ELSE body_stmt
-Maybe<std::unique_ptr<ast::ElseStatement>> ParserImpl::else_stmt() {
+Maybe<ast::ElseStatement*> ParserImpl::else_stmt() {
   Source source;
   if (!match(Token::Type::kElse, &source))
     return Failure::kNoMatch;
@@ -1604,7 +1601,7 @@ Maybe<std::unique_ptr<ast::ElseStatement>> ParserImpl::else_stmt() {
 
 // switch_stmt
 //   : SWITCH paren_rhs_stmt BRACKET_LEFT switch_body+ BRACKET_RIGHT
-Maybe<std::unique_ptr<ast::SwitchStatement>> ParserImpl::switch_stmt() {
+Maybe<ast::SwitchStatement*> ParserImpl::switch_stmt() {
   Source source;
   if (!match(Token::Type::kSwitch, &source))
     return Failure::kNoMatch;
@@ -1642,7 +1639,7 @@ Maybe<std::unique_ptr<ast::SwitchStatement>> ParserImpl::switch_stmt() {
 // switch_body
 //   : CASE case_selectors COLON BRACKET_LEFT case_body BRACKET_RIGHT
 //   | DEFAULT COLON BRACKET_LEFT case_body BRACKET_RIGHT
-Maybe<std::unique_ptr<ast::CaseStatement>> ParserImpl::switch_body() {
+Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
   auto t = peek();
   if (!t.IsCase() && !t.IsDefault())
     return Failure::kNoMatch;
@@ -1650,7 +1647,7 @@ Maybe<std::unique_ptr<ast::CaseStatement>> ParserImpl::switch_body() {
   auto source = t.source();
   next();  // Consume the peek
 
-  auto stmt = create<ast::CaseStatement>(create<ast::BlockStatement>());
+  auto* stmt = create<ast::CaseStatement>(create<ast::BlockStatement>());
   stmt->set_source(source);
   if (t.IsCase()) {
     auto selectors = expect_case_selectors();
@@ -1692,8 +1689,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
     if (!cond->IsInt())
       return add_error(t, "invalid case selector must be an integer value");
 
-    std::unique_ptr<ast::IntLiteral> selector(cond.value.release()->AsInt());
-    selectors.push_back(std::move(selector));
+    selectors.push_back(cond.value->AsInt());
   }
 
   if (selectors.empty())
@@ -1706,8 +1702,8 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   :
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
-Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::case_body() {
-  auto ret = create<ast::BlockStatement>();
+Maybe<ast::BlockStatement*> ParserImpl::case_body() {
+  auto* ret = create<ast::BlockStatement>();
   for (;;) {
     Source source;
     if (match(Token::Type::kFallthrough, &source)) {
@@ -1732,29 +1728,28 @@ Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::case_body() {
 
 // loop_stmt
 //   : LOOP BRACKET_LEFT statements continuing_stmt? BRACKET_RIGHT
-Maybe<std::unique_ptr<ast::LoopStatement>> ParserImpl::loop_stmt() {
+Maybe<ast::LoopStatement*> ParserImpl::loop_stmt() {
   Source source;
   if (!match(Token::Type::kLoop, &source))
     return Failure::kNoMatch;
 
-  return expect_brace_block(
-      "loop", [&]() -> Maybe<std::unique_ptr<ast::LoopStatement>> {
-        auto body = expect_statements();
-        if (body.errored)
-          return Failure::kErrored;
+  return expect_brace_block("loop", [&]() -> Maybe<ast::LoopStatement*> {
+    auto body = expect_statements();
+    if (body.errored)
+      return Failure::kErrored;
 
-        auto continuing = continuing_stmt();
-        if (continuing.errored)
-          return Failure::kErrored;
+    auto continuing = continuing_stmt();
+    if (continuing.errored)
+      return Failure::kErrored;
 
-        return create<ast::LoopStatement>(source, std::move(body.value),
-                                          std::move(continuing.value));
-      });
+    return create<ast::LoopStatement>(source, std::move(body.value),
+                                      std::move(continuing.value));
+  });
 }
 
-ForHeader::ForHeader(std::unique_ptr<ast::Statement> init,
-                     std::unique_ptr<ast::Expression> cond,
-                     std::unique_ptr<ast::Statement> cont)
+ForHeader::ForHeader(ast::Statement* init,
+                     ast::Expression* cond,
+                     ast::Statement* cont)
     : initializer(std::move(init)),
       condition(std::move(cond)),
       continuing(std::move(cont)) {}
@@ -1762,7 +1757,7 @@ ForHeader::ForHeader(std::unique_ptr<ast::Statement> init,
 ForHeader::~ForHeader() = default;
 
 // (variable_stmt | assignment_stmt | func_call_stmt)?
-Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_header_initializer() {
+Maybe<ast::Statement*> ParserImpl::for_header_initializer() {
   auto call = func_call_stmt();
   if (call.errored)
     return Failure::kErrored;
@@ -1785,7 +1780,7 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_header_initializer() {
 }
 
 // (assignment_stmt | func_call_stmt)?
-Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_header_continuing() {
+Maybe<ast::Statement*> ParserImpl::for_header_continuing() {
   auto call_stmt = func_call_stmt();
   if (call_stmt.errored)
     return Failure::kErrored;
@@ -1825,14 +1820,14 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
   if (continuing.errored)
     return Failure::kErrored;
 
-  return create<ForHeader>(std::move(initializer.value),
-                           std::move(condition.value),
-                           std::move(continuing.value));
+  return std::make_unique<ForHeader>(std::move(initializer.value),
+                                     std::move(condition.value),
+                                     std::move(continuing.value));
 }
 
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT BRACE_LEFT statements BRACE_RIGHT
-Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
+Maybe<ast::Statement*> ParserImpl::for_stmt() {
   Source source;
   if (!match(Token::Type::kFor, &source))
     return Failure::kNoMatch;
@@ -1852,31 +1847,31 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
   // as we would expect from the loop statement.
   if (header->condition != nullptr) {
     // !condition
-    auto not_condition = create<ast::UnaryOpExpression>(
+    auto* not_condition = create<ast::UnaryOpExpression>(
         header->condition->source(), ast::UnaryOp::kNot,
         std::move(header->condition));
     // { break; }
-    auto break_stmt = create<ast::BreakStatement>(not_condition->source());
-    auto break_body = create<ast::BlockStatement>(not_condition->source());
+    auto* break_stmt = create<ast::BreakStatement>(not_condition->source());
+    auto* break_body = create<ast::BlockStatement>(not_condition->source());
     break_body->append(std::move(break_stmt));
     // if (!condition) { break; }
-    auto break_if_not_condition = create<ast::IfStatement>(
+    auto* break_if_not_condition = create<ast::IfStatement>(
         not_condition->source(), std::move(not_condition),
         std::move(break_body));
     body->insert(0, std::move(break_if_not_condition));
   }
 
-  std::unique_ptr<ast::BlockStatement> continuing_body = nullptr;
+  ast::BlockStatement* continuing_body = nullptr;
   if (header->continuing != nullptr) {
     continuing_body = create<ast::BlockStatement>(header->continuing->source());
     continuing_body->append(std::move(header->continuing));
   }
 
-  auto loop = create<ast::LoopStatement>(source, std::move(body.value),
-                                         std::move(continuing_body));
+  auto* loop = create<ast::LoopStatement>(source, std::move(body.value),
+                                          std::move(continuing_body));
 
   if (header->initializer != nullptr) {
-    auto result = create<ast::BlockStatement>(source);
+    auto* result = create<ast::BlockStatement>(source);
     result->append(std::move(header->initializer));
     result->append(std::move(loop));
     return result;
@@ -1887,7 +1882,7 @@ Maybe<std::unique_ptr<ast::Statement>> ParserImpl::for_stmt() {
 
 // func_call_stmt
 //    : IDENT PAREN_LEFT argument_expression_list* PAREN_RIGHT
-Maybe<std::unique_ptr<ast::CallStatement>> ParserImpl::func_call_stmt() {
+Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
   auto t = peek();
   auto t2 = peek(1);
   if (!t.IsIdentifier() || !t2.IsParenLeft())
@@ -1919,7 +1914,7 @@ Maybe<std::unique_ptr<ast::CallStatement>> ParserImpl::func_call_stmt() {
 
 // break_stmt
 //   : BREAK
-Maybe<std::unique_ptr<ast::BreakStatement>> ParserImpl::break_stmt() {
+Maybe<ast::BreakStatement*> ParserImpl::break_stmt() {
   Source source;
   if (!match(Token::Type::kBreak, &source))
     return Failure::kNoMatch;
@@ -1929,7 +1924,7 @@ Maybe<std::unique_ptr<ast::BreakStatement>> ParserImpl::break_stmt() {
 
 // continue_stmt
 //   : CONTINUE
-Maybe<std::unique_ptr<ast::ContinueStatement>> ParserImpl::continue_stmt() {
+Maybe<ast::ContinueStatement*> ParserImpl::continue_stmt() {
   Source source;
   if (!match(Token::Type::kContinue, &source))
     return Failure::kNoMatch;
@@ -1939,7 +1934,7 @@ Maybe<std::unique_ptr<ast::ContinueStatement>> ParserImpl::continue_stmt() {
 
 // continuing_stmt
 //   : CONTINUING body_stmt
-Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::continuing_stmt() {
+Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
     return create<ast::BlockStatement>();
 
@@ -1952,7 +1947,7 @@ Maybe<std::unique_ptr<ast::BlockStatement>> ParserImpl::continuing_stmt() {
 //   | const_literal
 //   | paren_rhs_stmt
 //   | BITCAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
+Maybe<ast::Expression*> ParserImpl::primary_expression() {
   auto t = peek();
   auto source = t.source();
 
@@ -1994,8 +1989,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
     return Failure::kErrored;
   if (type.matched) {
     auto expr = expect_paren_block(
-        "type constructor",
-        [&]() -> Expect<std::unique_ptr<ast::TypeConstructorExpression>> {
+        "type constructor", [&]() -> Expect<ast::TypeConstructorExpression*> {
           t = peek();
           if (t.IsParenRight() || t.IsEof())
             return create<ast::TypeConstructorExpression>(
@@ -2023,8 +2017,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::primary_expression() {
 //   | BRACE_LEFT logical_or_expression BRACE_RIGHT postfix_expr
 //   | PAREN_LEFT argument_expression_list* PAREN_RIGHT postfix_expr
 //   | PERIOD IDENTIFIER postfix_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expr(
-    std::unique_ptr<ast::Expression> prefix) {
+Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
   Source source;
   if (match(Token::Type::kBracketLeft, &source)) {
     auto param = logical_or_expression();
@@ -2073,7 +2066,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expr(
 
 // postfix_expression
 //   : primary_expression postfix_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::postfix_expression() {
+Maybe<ast::Expression*> ParserImpl::postfix_expression() {
   auto prefix = primary_expression();
   if (prefix.errored)
     return Failure::kErrored;
@@ -2112,7 +2105,7 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list() {
 //   : postfix_expression
 //   | MINUS unary_expression
 //   | BANG unary_expression
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::unary_expression() {
+Maybe<ast::Expression*> ParserImpl::unary_expression() {
   auto t = peek();
   auto source = t.source();
   if (t.IsMinus() || t.IsBang()) {
@@ -2141,8 +2134,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::unary_expression() {
 //   | STAR unary_expression multiplicative_expr
 //   | FORWARD_SLASH unary_expression multiplicative_expr
 //   | MODULO unary_expression multiplicative_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_multiplicative_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
+    ast::Expression* lhs) {
   auto t = peek();
 
   ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2173,8 +2166,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_multiplicative_expr(
 
 // multiplicative_expression
 //   : unary_expression multiplicative_expr
-Maybe<std::unique_ptr<ast::Expression>>
-ParserImpl::multiplicative_expression() {
+Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
   auto lhs = unary_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2188,8 +2180,8 @@ ParserImpl::multiplicative_expression() {
 //   :
 //   | PLUS multiplicative_expression additive_expr
 //   | MINUS multiplicative_expression additive_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_additive_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_additive_expr(
+    ast::Expression* lhs) {
   auto t = peek();
 
   ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2215,7 +2207,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_additive_expr(
 
 // additive_expression
 //   : multiplicative_expression additive_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::additive_expression() {
+Maybe<ast::Expression*> ParserImpl::additive_expression() {
   auto lhs = multiplicative_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2229,8 +2221,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::additive_expression() {
 //   :
 //   | LESS_THAN LESS_THAN additive_expression shift_expr
 //   | GREATER_THAN GREATER_THAN additive_expression shift_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_shift_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
   auto t = peek();
   auto source = t.source();
   auto t2 = peek(1);
@@ -2264,7 +2255,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_shift_expr(
 
 // shift_expression
 //   : additive_expression shift_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::shift_expression() {
+Maybe<ast::Expression*> ParserImpl::shift_expression() {
   auto lhs = additive_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2280,8 +2271,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::shift_expression() {
 //   | GREATER_THAN shift_expression relational_expr
 //   | LESS_THAN_EQUAL shift_expression relational_expr
 //   | GREATER_THAN_EQUAL shift_expression relational_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_relational_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_relational_expr(
+    ast::Expression* lhs) {
   auto t = peek();
   ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsLessThan())
@@ -2313,7 +2304,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_relational_expr(
 
 // relational_expression
 //   : shift_expression relational_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::relational_expression() {
+Maybe<ast::Expression*> ParserImpl::relational_expression() {
   auto lhs = shift_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2327,8 +2318,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::relational_expression() {
 //   :
 //   | EQUAL_EQUAL relational_expression equality_expr
 //   | NOT_EQUAL relational_expression equality_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_equality_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_equality_expr(
+    ast::Expression* lhs) {
   auto t = peek();
   ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsEqualEqual())
@@ -2356,7 +2347,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_equality_expr(
 
 // equality_expression
 //   : relational_expression equality_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::equality_expression() {
+Maybe<ast::Expression*> ParserImpl::equality_expression() {
   auto lhs = relational_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2369,8 +2360,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::equality_expression() {
 // and_expr
 //   :
 //   | AND equality_expression and_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_and_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
   auto t = peek();
   if (!t.IsAnd())
     return lhs;
@@ -2390,7 +2380,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_and_expr(
 
 // and_expression
 //   : equality_expression and_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::and_expression() {
+Maybe<ast::Expression*> ParserImpl::and_expression() {
   auto lhs = equality_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2403,8 +2393,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::and_expression() {
 // exclusive_or_expr
 //   :
 //   | XOR and_expression exclusive_or_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_exclusive_or_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_exclusive_or_expr(
+    ast::Expression* lhs) {
   Source source;
   if (!match(Token::Type::kXor, &source))
     return lhs;
@@ -2421,7 +2411,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_exclusive_or_expr(
 
 // exclusive_or_expression
 //   : and_expression exclusive_or_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::exclusive_or_expression() {
+Maybe<ast::Expression*> ParserImpl::exclusive_or_expression() {
   auto lhs = and_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2434,8 +2424,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::exclusive_or_expression() {
 // inclusive_or_expr
 //   :
 //   | OR exclusive_or_expression inclusive_or_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_inclusive_or_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_inclusive_or_expr(
+    ast::Expression* lhs) {
   Source source;
   if (!match(Token::Type::kOr))
     return lhs;
@@ -2452,7 +2442,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_inclusive_or_expr(
 
 // inclusive_or_expression
 //   : exclusive_or_expression inclusive_or_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::inclusive_or_expression() {
+Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
   auto lhs = exclusive_or_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2465,8 +2455,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::inclusive_or_expression() {
 // logical_and_expr
 //   :
 //   | AND_AND inclusive_or_expression logical_and_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_and_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
+    ast::Expression* lhs) {
   auto t = peek();
   if (!t.IsAndAnd())
     return lhs;
@@ -2487,7 +2477,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_and_expr(
 
 // logical_and_expression
 //   : inclusive_or_expression logical_and_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::logical_and_expression() {
+Maybe<ast::Expression*> ParserImpl::logical_and_expression() {
   auto lhs = inclusive_or_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2500,8 +2490,8 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::logical_and_expression() {
 // logical_or_expr
 //   :
 //   | OR_OR logical_and_expression logical_or_expr
-Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_or_expr(
-    std::unique_ptr<ast::Expression> lhs) {
+Expect<ast::Expression*> ParserImpl::expect_logical_or_expr(
+    ast::Expression* lhs) {
   Source source;
   if (!match(Token::Type::kOrOr))
     return lhs;
@@ -2518,7 +2508,7 @@ Expect<std::unique_ptr<ast::Expression>> ParserImpl::expect_logical_or_expr(
 
 // logical_or_expression
 //   : logical_and_expression logical_or_expr
-Maybe<std::unique_ptr<ast::Expression>> ParserImpl::logical_or_expression() {
+Maybe<ast::Expression*> ParserImpl::logical_or_expression() {
   auto lhs = logical_and_expression();
   if (lhs.errored)
     return Failure::kErrored;
@@ -2530,7 +2520,7 @@ Maybe<std::unique_ptr<ast::Expression>> ParserImpl::logical_or_expression() {
 
 // assignment_stmt
 //   : unary_expression EQUAL logical_or_expression
-Maybe<std::unique_ptr<ast::AssignmentStatement>> ParserImpl::assignment_stmt() {
+Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   auto t = peek();
   auto source = t.source();
 
@@ -2559,7 +2549,7 @@ Maybe<std::unique_ptr<ast::AssignmentStatement>> ParserImpl::assignment_stmt() {
 //   | FLOAT_LITERAL
 //   | TRUE
 //   | FALSE
-Maybe<std::unique_ptr<ast::Literal>> ParserImpl::const_literal() {
+Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
@@ -2587,13 +2577,12 @@ Maybe<std::unique_ptr<ast::Literal>> ParserImpl::const_literal() {
 // const_expr
 //   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
 //   | const_literal
-Expect<std::unique_ptr<ast::ConstructorExpression>>
-ParserImpl::expect_const_expr() {
+Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
   return expect_const_expr_internal(0);
 }
 
-Expect<std::unique_ptr<ast::ConstructorExpression>>
-ParserImpl::expect_const_expr_internal(uint32_t depth) {
+Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr_internal(
+    uint32_t depth) {
   auto t = peek();
 
   if (depth > kMaxConstExprDepth) {
@@ -2706,7 +2695,7 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   });
 }
 
-Expect<std::unique_ptr<ast::Decoration>> ParserImpl::expect_decoration() {
+Expect<ast::Decoration*> ParserImpl::expect_decoration() {
   auto t = peek();
   auto deco = decoration();
   if (deco.errored)
@@ -2716,8 +2705,8 @@ Expect<std::unique_ptr<ast::Decoration>> ParserImpl::expect_decoration() {
   return add_error(t, "expected decoration");
 }
 
-Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
-  using Result = Maybe<std::unique_ptr<ast::Decoration>>;
+Maybe<ast::Decoration*> ParserImpl::decoration() {
+  using Result = Maybe<ast::Decoration*>;
   auto t = next();
   if (t.IsLocation()) {
     const char* use = "location decoration";
@@ -2822,12 +2811,11 @@ Maybe<std::unique_ptr<ast::Decoration>> ParserImpl::decoration() {
 }
 
 template <typename T>
-Expect<std::vector<std::unique_ptr<T>>> ParserImpl::cast_decorations(
-    ast::DecorationList& in) {
+Expect<std::vector<T*>> ParserImpl::cast_decorations(ast::DecorationList& in) {
   bool ok = true;
-  std::vector<std::unique_ptr<T>> out;
+  std::vector<T*> out;
   out.reserve(in.size());
-  for (auto& deco : in) {
+  for (auto* deco : in) {
     if (!deco->Is<T>()) {
       std::stringstream msg;
       msg << deco->GetKind() << " decoration type cannot be used for "

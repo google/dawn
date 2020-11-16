@@ -32,36 +32,31 @@ class IfStatement : public Statement {
   /// Constructor
   /// @param condition the if condition
   /// @param body the if body
-  IfStatement(std::unique_ptr<Expression> condition,
-              std::unique_ptr<BlockStatement> body);
+  IfStatement(Expression* condition, BlockStatement* body);
   /// Constructor
   /// @param source the source information
   /// @param condition the if condition
   /// @param body the if body
   IfStatement(const Source& source,
-              std::unique_ptr<Expression> condition,
-              std::unique_ptr<BlockStatement> body);
+              Expression* condition,
+              BlockStatement* body);
   /// Move constructor
   IfStatement(IfStatement&&);
   ~IfStatement() override;
 
   /// Sets the condition for the if statement
   /// @param condition the condition to set
-  void set_condition(std::unique_ptr<Expression> condition) {
-    condition_ = std::move(condition);
-  }
+  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the if condition or nullptr if none set
-  Expression* condition() const { return condition_.get(); }
+  Expression* condition() const { return condition_; }
 
   /// Sets the if body
   /// @param body the if body
-  void set_body(std::unique_ptr<BlockStatement> body) {
-    body_ = std::move(body);
-  }
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the if body
-  const BlockStatement* body() const { return body_.get(); }
+  const BlockStatement* body() const { return body_; }
   /// @returns the if body
-  BlockStatement* body() { return body_.get(); }
+  BlockStatement* body() { return body_; }
 
   /// Sets the else statements
   /// @param else_statements the else statements to set
@@ -90,8 +85,8 @@ class IfStatement : public Statement {
  private:
   IfStatement(const IfStatement&) = delete;
 
-  std::unique_ptr<Expression> condition_;
-  std::unique_ptr<BlockStatement> body_;
+  Expression* condition_ = nullptr;
+  BlockStatement* body_ = nullptr;
   ElseStatementList else_statements_;
 };
 

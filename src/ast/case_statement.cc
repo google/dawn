@@ -17,19 +17,15 @@
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement(std::unique_ptr<BlockStatement> body)
-    : Statement(), body_(std::move(body)) {}
+CaseStatement::CaseStatement(BlockStatement* body) : Statement(), body_(body) {}
 
-CaseStatement::CaseStatement(CaseSelectorList selectors,
-                             std::unique_ptr<BlockStatement> body)
-    : Statement(), selectors_(std::move(selectors)), body_(std::move(body)) {}
+CaseStatement::CaseStatement(CaseSelectorList selectors, BlockStatement* body)
+    : Statement(), selectors_(selectors), body_(body) {}
 
 CaseStatement::CaseStatement(const Source& source,
                              CaseSelectorList selectors,
-                             std::unique_ptr<BlockStatement> body)
-    : Statement(source),
-      selectors_(std::move(selectors)),
-      body_(std::move(body)) {}
+                             BlockStatement* body)
+    : Statement(source), selectors_(selectors), body_(body) {}
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;
 
@@ -51,7 +47,7 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
   } else {
     out << "Case ";
     bool first = true;
-    for (const auto& selector : selectors_) {
+    for (auto* selector : selectors_) {
       if (!first)
         out << ", ";
 
@@ -62,7 +58,7 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
   }
 
   if (body_ != nullptr) {
-    for (const auto& stmt : *body_) {
+    for (auto* stmt : *body_) {
       stmt->to_str(out, indent + 2);
     }
   }

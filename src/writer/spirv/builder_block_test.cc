@@ -49,7 +49,7 @@ TEST_F(BuilderTest, Block) {
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
-  auto inner = create<ast::BlockStatement>();
+  auto* inner = create<ast::BlockStatement>();
   inner->append(create<ast::VariableDeclStatement>(
       create<ast::Variable>("var", ast::StorageClass::kFunction, &f32)));
   inner->append(create<ast::AssignmentStatement>(
