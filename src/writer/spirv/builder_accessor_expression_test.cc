@@ -946,6 +946,51 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
 )");
 }
 
+TEST_F(BuilderTest, Accessor_Const_Vec) {
+  // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
+  // pos[1]
+
+  ast::type::F32Type f32;
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&f32, 2);
+
+  ast::ExpressionList vec_params;
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 0.0)));
+  vec_params.push_back(create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 0.5)));
+
+  ast::Variable var("pos", ast::StorageClass::kPrivate, &vec);
+  var.set_is_const(true);
+  var.set_constructor(
+      create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));
+
+  ast::ArrayAccessorExpression expr(create<ast::IdentifierExpression>("pos"),
+                                    create<ast::ScalarConstructorExpression>(
+                                        create<ast::UintLiteral>(&u32, 1)));
+
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstant %2 0
+%4 = OpConstant %2 0.5
+%5 = OpConstantComposite %1 %3 %4
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), "");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%8 = OpVectorExtractDynamic %2 %5 %7
+)");
+}
+
 TEST_F(BuilderTest, DISABLED_Accessor_Array_NonPointer) {
   // const a : array<f32, 3>;
   // a[2]

@@ -978,13 +978,16 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
   info.source_type = source->result_type();
 
-  // If our initial access in into an array, and that array is not a pointer,
-  // then we need to load that array into a variable in order to be access
-  // chain into the array
+  // If our initial access is into an array of non-scalar types, and that array
+  // is not a pointer, then we need to load that array into a variable in order
+  // to access chain into the array.
   if (accessors[0]->IsArrayAccessor()) {
     auto* ary_res_type =
         accessors[0]->AsArrayAccessor()->array()->result_type();
-    if (!ary_res_type->IsPointer()) {
+
+    if (!ary_res_type->IsPointer() &&
+        (ary_res_type->IsArray() &&
+         !ary_res_type->AsArray()->type()->is_scalar())) {
       ast::type::PointerType ptr(ary_res_type, ast::StorageClass::kFunction);
       auto result_type_id = GenerateTypeIfNeeded(&ptr);
       if (result_type_id == 0) {
