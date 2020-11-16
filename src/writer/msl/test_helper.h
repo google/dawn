@@ -22,7 +22,7 @@
 #include "src/ast/module.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
