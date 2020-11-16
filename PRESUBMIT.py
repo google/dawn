@@ -16,6 +16,8 @@ See http://dev.chromium.org/developers/how-tos/depottools/presubmit-scripts
 for more details about the presubmit API built into depot_tools.
 """
 
+import re
+
 
 def _LicenseHeader(input_api):
     """Returns the license header regexp."""
@@ -42,6 +44,81 @@ def _LicenseHeader(input_api):
     return license_header
 
 
+REGEXES = [
+    r"(?i)black[-_]?list",
+    r"(?i)white[-_]?list",
+    r"(?i)gr[ea]y[-_]?list",
+    r"(?i)(first class citizen)",
+    r"(?i)black[-_]?hat",
+    r"(?i)white[-_]?hat",
+    r"(?i)gr[ea]y[-_]?hat",
+    r"(?i)master",
+    r"(?i)slave",
+    r"(?i)\bhim\b",
+    r"(?i)\bhis\b",
+    r"(?i)\bshe\b",
+    r"(?i)\bher\b",
+    r"(?i)\bguys\b",
+    r"(?i)\bhers\b",
+    r"(?i)\bman\b",
+    r"(?i)\bwoman\b",
+    r"(?i)\she\s",
+    r"(?i)\she$",
+    r"(?i)^he\s",
+    r"(?i)^he$",
+    r"(?i)\she['|\u2019]d\s",
+    r"(?i)\she['|\u2019]d$",
+    r"(?i)^he['|\u2019]d\s",
+    r"(?i)^he['|\u2019]d$",
+    r"(?i)\she['|\u2019]s\s",
+    r"(?i)\she['|\u2019]s$",
+    r"(?i)^he['|\u2019]s\s",
+    r"(?i)^he['|\u2019]s$",
+    r"(?i)\she['|\u2019]ll\s",
+    r"(?i)\she['|\u2019]ll$",
+    r"(?i)^he['|\u2019]ll\s",
+    r"(?i)^he['|\u2019]ll$",
+    r"(?i)grandfather",
+    r"(?i)\bmitm\b",
+    r"(?i)\bcrazy\b",
+    r"(?i)\binsane\b",
+    r"(?i)\bblind\sto\b",
+    r"(?i)\bflying\sblind\b",
+    r"(?i)\bblind\seye\b",
+    r"(?i)\bcripple\b",
+    r"(?i)\bcrippled\b",
+    r"(?i)\bdumb\b",
+    r"(?i)\bdummy\b",
+    r"(?i)\bparanoid\b",
+    r"(?i)\bsane\b",
+    r"(?i)\bsanity\b",
+    r"(?i)red[-_]?line",
+]
+
+REGEX_LIST = []
+for reg in REGEXES:
+    REGEX_LIST.append(re.compile(reg))
+
+def CheckNonInclusiveLanguage(input_api, output_api, source_file_filter=None):
+  """Checks the files for non-inclusive language."""
+
+  matches = []
+  for f in input_api.AffectedFiles(include_deletes=False,
+                                         file_filter=source_file_filter):
+    for line_num, line in f.ChangedContents():
+        for reg in REGEX_LIST:
+            match = reg.search(line)
+            if match:
+                matches.append("{} ({}): found non-inclusive language: {}".
+                    format(f.LocalPath(), line_num, match.group(0)))
+
+  if len(matches):
+    return [output_api.PresubmitPromptWarning(
+      'Non-inclusive language found:', items=matches)]
+
+  return []
+
+
 def CheckChange(input_api, output_api):
     results = []
 
@@ -63,8 +140,7 @@ def CheckChange(input_api, output_api):
     results += input_api.canned_checks.CheckChangeLintsClean(input_api,
                                                              output_api,
                                                              lint_filters="")
-    results += input_api.canned_checks.CheckGenderNeutral(
-        input_api, output_api)
+    results += CheckNonInclusiveLanguage(input_api, output_api)
 
     return results
 
