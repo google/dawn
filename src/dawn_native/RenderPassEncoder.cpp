@@ -28,6 +28,22 @@
 #include <cstring>
 
 namespace dawn_native {
+    namespace {
+
+        // Check the query at queryIndex is unavailable, otherwise it cannot be written.
+        MaybeError ValidateQueryIndexOverwrite(QuerySetBase* querySet,
+                                               uint32_t queryIndex,
+                                               const QueryAvailabilityMap& queryAvailabilityMap) {
+            auto it = queryAvailabilityMap.find(querySet);
+            if (it != queryAvailabilityMap.end() && it->second[queryIndex]) {
+                return DAWN_VALIDATION_ERROR(
+                    "The same query cannot be written twice in same render pass.");
+            }
+
+            return {};
+        }
+
+    }  // namespace
 
     // The usage tracker is passed in here, because it is prepopulated with usages from the
     // BeginRenderPassCmd. If we had RenderPassEncoder responsible for recording the
@@ -56,6 +72,22 @@ namespace dawn_native {
                                                     CommandEncoder* commandEncoder,
                                                     EncodingContext* encodingContext) {
         return new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    }
+
+    void RenderPassEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex) {
+        DAWN_ASSERT(querySet != nullptr);
+
+        // Gets the iterator for that querySet or create a new vector of bool set to false
+        // if the querySet wasn't registered.
+        auto it = mQueryAvailabilityMap.emplace(querySet, querySet->GetQueryCount()).first;
+        it->second[queryIndex] = 1;
+
+        // Track it again on command encoder for zero-initializing when resolving unused queries.
+        mCommandEncoder->TrackQueryAvailability(querySet, queryIndex);
+    }
+
+    const QueryAvailabilityMap& RenderPassEncoder::GetQueryAvailabilityMap() const {
+        return mQueryAvailabilityMap;
     }
 
     void RenderPassEncoder::EndPass() {
@@ -180,12 +212,12 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
-                DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex,
-                                                mCommandEncoder->GetUsedQueryIndices()));
-                mCommandEncoder->TrackUsedQuerySet(querySet);
+                DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
+                DAWN_TRY(
+                    ValidateQueryIndexOverwrite(querySet, queryIndex, GetQueryAvailabilityMap()));
             }
 
-            mCommandEncoder->TrackUsedQueryIndex(querySet, queryIndex);
+            TrackQueryAvailability(querySet, queryIndex);
 
             WriteTimestampCmd* cmd =
                 allocator->Allocate<WriteTimestampCmd>(Command::WriteTimestamp);

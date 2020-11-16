@@ -351,24 +351,13 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTimestampQuery(QuerySetBase* querySet,
-                                      uint32_t queryIndex,
-                                      const UsedQueryMap& usedQueryIndices) {
+    MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex) {
         if (querySet->GetQueryType() != wgpu::QueryType::Timestamp) {
-            return DAWN_VALIDATION_ERROR("The query type of query set must be Timestamp");
+            return DAWN_VALIDATION_ERROR("The type of query set must be Timestamp");
         }
 
         if (queryIndex >= querySet->GetQueryCount()) {
             return DAWN_VALIDATION_ERROR("Query index exceeds the number of queries in query set");
-        }
-
-        UsedQueryMap::const_iterator it = usedQueryIndices.find(querySet);
-        if (it != usedQueryIndices.end()) {
-            // Get the used query index records
-            const std::vector<bool>& queryIndices = it->second;
-            if (queryIndices[queryIndex] == 1) {
-                return DAWN_VALIDATION_ERROR("Duplicated query index writen");
-            }
         }
 
         return {};

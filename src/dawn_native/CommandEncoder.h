@@ -29,7 +29,7 @@ namespace dawn_native {
 
     struct BeginRenderPassCmd;
 
-    using UsedQueryMap = std::map<QuerySetBase*, std::vector<bool>>;
+    using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
 
     class CommandEncoder final : public ObjectBase {
       public:
@@ -39,8 +39,8 @@ namespace dawn_native {
         CommandBufferResourceUsage AcquireResourceUsages();
 
         void TrackUsedQuerySet(QuerySetBase* querySet);
-        void TrackUsedQueryIndex(QuerySetBase* querySet, uint32_t queryIndex);
-        const UsedQueryMap& GetUsedQueryIndices() const;
+        void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
+        const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
         // Dawn API
         ComputePassEncoder* BeginComputePass(const ComputePassDescriptor* descriptor);
@@ -83,7 +83,7 @@ namespace dawn_native {
         std::set<BufferBase*> mTopLevelBuffers;
         std::set<TextureBase*> mTopLevelTextures;
         std::set<QuerySetBase*> mUsedQuerySets;
-        UsedQueryMap mUsedQueryIndices;
+        QueryAvailabilityMap mQueryAvailabilityMap;
     };
 
 }  // namespace dawn_native

@@ -35,6 +35,9 @@ namespace dawn_native {
                                             CommandEncoder* commandEncoder,
                                             EncodingContext* encodingContext);
 
+        void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
+        const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
+
         void EndPass();
 
         void SetStencilReference(uint32_t reference);
@@ -63,6 +66,11 @@ namespace dawn_native {
 
         uint32_t mRenderTargetWidth;
         uint32_t mRenderTargetHeight;
+
+        // This map is to indicate the availability of the queries used in render pass. The same
+        // query cannot be written twice in same render pass, so each render pass also need to have
+        // its own query availability map.
+        QueryAvailabilityMap mQueryAvailabilityMap;
     };
 
 }  // namespace dawn_native
