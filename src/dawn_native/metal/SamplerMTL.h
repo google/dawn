@@ -17,6 +17,8 @@
 
 #include "dawn_native/Sampler.h"
 
+#include "common/NSRef.h"
+
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {
@@ -31,9 +33,8 @@ namespace dawn_native { namespace metal {
 
       private:
         Sampler(Device* device, const SamplerDescriptor* descriptor);
-        ~Sampler() override;
 
-        id<MTLSamplerState> mMtlSamplerState = nil;
+        NSPRef<id<MTLSamplerState>> mMtlSamplerState;
     };
 
 }}  // namespace dawn_native::metal

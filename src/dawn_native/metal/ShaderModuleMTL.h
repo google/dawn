@@ -17,9 +17,10 @@
 
 #include "dawn_native/ShaderModule.h"
 
-#import <Metal/Metal.h>
-
+#include "common/NSRef.h"
 #include "dawn_native/Error.h"
+
+#import <Metal/Metal.h>
 
 namespace spirv_cross {
     class CompilerMSL;
@@ -37,11 +38,8 @@ namespace dawn_native { namespace metal {
                                                    const ShaderModuleDescriptor* descriptor);
 
         struct MetalFunctionData {
-            id<MTLFunction> function = nil;
+            NSPRef<id<MTLFunction>> function;
             bool needsStorageBufferLength;
-            ~MetalFunctionData() {
-                [function release];
-            }
         };
         MaybeError CreateFunction(const char* entryPointName,
                                   SingleShaderStage stage,

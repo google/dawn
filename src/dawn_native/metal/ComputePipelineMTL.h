@@ -17,6 +17,8 @@
 
 #include "dawn_native/ComputePipeline.h"
 
+#include "common/NSRef.h"
+
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {
@@ -33,11 +35,10 @@ namespace dawn_native { namespace metal {
         bool RequiresStorageBufferLength() const;
 
       private:
-        ~ComputePipeline() override;
         using ComputePipelineBase::ComputePipelineBase;
         MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
 
-        id<MTLComputePipelineState> mMtlComputePipelineState = nil;
+        NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
         MTLSize mLocalWorkgroupSize;
         bool mRequiresStorageBufferLength;
     };

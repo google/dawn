@@ -44,18 +44,17 @@ namespace dawn_native { namespace metal {
 
     // static
     ResultOrError<Device*> Device::Create(AdapterBase* adapter,
-                                          id<MTLDevice> mtlDevice,
+                                          NSPRef<id<MTLDevice>> mtlDevice,
                                           const DeviceDescriptor* descriptor) {
-        Ref<Device> device = AcquireRef(new Device(adapter, mtlDevice, descriptor));
+        Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor));
         DAWN_TRY(device->Initialize());
         return device.Detach();
     }
 
     Device::Device(AdapterBase* adapter,
-                   id<MTLDevice> mtlDevice,
+                   NSPRef<id<MTLDevice>> mtlDevice,
                    const DeviceDescriptor* descriptor)
-        : DeviceBase(adapter, descriptor), mMtlDevice([mtlDevice retain]), mCompletedSerial(0) {
-        [mMtlDevice retain];
+        : DeviceBase(adapter, descriptor), mMtlDevice(std::move(mtlDevice)), mCompletedSerial(0) {
     }
 
     Device::~Device() {
@@ -69,7 +68,7 @@ namespace dawn_native { namespace metal {
             ForceSetToggle(Toggle::MetalEnableVertexPulling, false);
         }
 
-        mCommandQueue = [mMtlDevice newCommandQueue];
+        mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
 
         return DeviceBase::Initialize(new Queue(this));
     }
@@ -80,18 +79,18 @@ namespace dawn_native { namespace metal {
 #if defined(DAWN_PLATFORM_MACOS)
             if (@available(macOS 10.12, *)) {
                 haveStoreAndMSAAResolve =
-                    [mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+                    [*mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
             }
 #elif defined(DAWN_PLATFORM_IOS)
             haveStoreAndMSAAResolve =
-                [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
+                [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
 #endif
             // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
             SetToggle(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
 
             bool haveSamplerCompare = true;
 #if defined(DAWN_PLATFORM_IOS)
-            haveSamplerCompare = [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
+            haveSamplerCompare = [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
             // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
             SetToggle(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
@@ -99,7 +98,7 @@ namespace dawn_native { namespace metal {
             bool haveBaseVertexBaseInstance = true;
 #if defined(DAWN_PLATFORM_IOS)
             haveBaseVertexBaseInstance =
-                [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
+                [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
             // TODO(crbug.com/dawn/343): Investigate emulation.
             SetToggle(Toggle::DisableBaseVertex, !haveBaseVertexBaseInstance);
@@ -187,7 +186,7 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError Device::TickImpl() {
-        if (mCommandContext.GetCommands() != nil) {
+        if (mCommandContext.GetCommands() != nullptr) {
             SubmitPendingCommandBuffer();
         }
 
@@ -195,33 +194,33 @@ namespace dawn_native { namespace metal {
     }
 
     id<MTLDevice> Device::GetMTLDevice() {
-        return mMtlDevice;
+        return mMtlDevice.Get();
     }
 
     id<MTLCommandQueue> Device::GetMTLQueue() {
-        return mCommandQueue;
+        return mCommandQueue.Get();
     }
 
     CommandRecordingContext* Device::GetPendingCommandContext() {
-        if (mCommandContext.GetCommands() == nil) {
+        if (mCommandContext.GetCommands() == nullptr) {
             TRACE_EVENT0(GetPlatform(), General, "[MTLCommandQueue commandBuffer]");
             // The MTLCommandBuffer will be autoreleased by default.
             // The autorelease pool may drain before the command buffer is submitted. Retain so it
             // stays alive.
-            mCommandContext = CommandRecordingContext([[mCommandQueue commandBuffer] retain]);
+            mCommandContext = CommandRecordingContext([*mCommandQueue commandBuffer]);
         }
         return &mCommandContext;
     }
 
     void Device::SubmitPendingCommandBuffer() {
-        if (mCommandContext.GetCommands() == nil) {
+        if (mCommandContext.GetCommands() == nullptr) {
             return;
         }
 
         IncrementLastSubmittedCommandSerial();
 
         // Acquire the pending command buffer, which is retained. It must be released later.
-        id<MTLCommandBuffer> pendingCommands = mCommandContext.AcquireCommands();
+        NSPRef<id<MTLCommandBuffer>> pendingCommands = mCommandContext.AcquireCommands();
 
         // Replace mLastSubmittedCommands with the mutex held so we avoid races between the
         // schedule handler and this code.
@@ -230,12 +229,15 @@ namespace dawn_native { namespace metal {
             mLastSubmittedCommands = pendingCommands;
         }
 
-        [pendingCommands addScheduledHandler:^(id<MTLCommandBuffer>) {
+        // Make a local copy of the pointer to the commands because it's not clear how ObjC blocks
+        // handle types with copy / move constructors being referenced in the block..
+        id<MTLCommandBuffer> pendingCommandsPointer = pendingCommands.Get();
+        [*pendingCommands addScheduledHandler:^(id<MTLCommandBuffer>) {
             // This is DRF because we hold the mutex for mLastSubmittedCommands and pendingCommands
             // is a local value (and not the member itself).
             std::lock_guard<std::mutex> lock(mLastSubmittedCommandsMutex);
-            if (this->mLastSubmittedCommands == pendingCommands) {
-                this->mLastSubmittedCommands = nil;
+            if (this->mLastSubmittedCommands.Get() == pendingCommandsPointer) {
+                this->mLastSubmittedCommands = nullptr;
             }
         }];
 
@@ -243,7 +245,7 @@ namespace dawn_native { namespace metal {
         // mLastSubmittedSerial so it is captured by value.
         ExecutionSerial pendingSerial = GetLastSubmittedCommandSerial();
         // this ObjC block runs on a different thread
-        [pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
+        [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
             TRACE_EVENT_ASYNC_END0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                    uint64_t(pendingSerial));
             ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
@@ -252,8 +254,7 @@ namespace dawn_native { namespace metal {
 
         TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                  uint64_t(pendingSerial));
-        [pendingCommands commit];
-        [pendingCommands release];
+        [*pendingCommands commit];
     }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
@@ -356,11 +357,12 @@ namespace dawn_native { namespace metal {
 
     void Device::WaitForCommandsToBeScheduled() {
         SubmitPendingCommandBuffer();
-        [mLastSubmittedCommands waitUntilScheduled];
+        [*mLastSubmittedCommands waitUntilScheduled];
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
-        [mCommandContext.AcquireCommands() release];
+        // Forget all pending commands.
+        mCommandContext.AcquireCommands();
         CheckPassedSerials();
 
         // Wait for all commands to be finished so we can free resources
@@ -375,13 +377,11 @@ namespace dawn_native { namespace metal {
     void Device::ShutDownImpl() {
         ASSERT(GetState() == State::Disconnected);
 
-        [mCommandContext.AcquireCommands() release];
+        // Forget all pending commands.
+        mCommandContext.AcquireCommands();
 
-        [mCommandQueue release];
-        mCommandQueue = nil;
-
-        [mMtlDevice release];
-        mMtlDevice = nil;
+        mCommandQueue = nullptr;
+        mMtlDevice = nullptr;
     }
 
     uint32_t Device::GetOptimalBytesPerRowAlignment() const {

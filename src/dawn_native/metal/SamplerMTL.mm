@@ -62,7 +62,8 @@ namespace dawn_native { namespace metal {
 
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
-        MTLSamplerDescriptor* mtlDesc = [MTLSamplerDescriptor new];
+        NSRef<MTLSamplerDescriptor> mtlDescRef = AcquireNSRef([MTLSamplerDescriptor new]);
+        MTLSamplerDescriptor* mtlDesc = mtlDescRef.Get();
 
         mtlDesc.minFilter = FilterModeToMinMagFilter(descriptor->minFilter);
         mtlDesc.magFilter = FilterModeToMinMagFilter(descriptor->magFilter);
@@ -83,17 +84,12 @@ namespace dawn_native { namespace metal {
             // Metal debug device errors.
         }
 
-        mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];
-
-        [mtlDesc release];
-    }
-
-    Sampler::~Sampler() {
-        [mMtlSamplerState release];
+        mMtlSamplerState =
+            AcquireNSPRef([device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc]);
     }
 
     id<MTLSamplerState> Sampler::GetMTLSamplerState() {
-        return mMtlSamplerState;
+        return mMtlSamplerState.Get();
     }
 
 }}  // namespace dawn_native::metal

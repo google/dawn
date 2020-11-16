@@ -23,14 +23,15 @@ namespace dawn_native { namespace metal {
 
     MaybeError StagingBuffer::Initialize() {
         const size_t bufferSize = GetSize();
-        mBuffer = [mDevice->GetMTLDevice() newBufferWithLength:bufferSize
-                                                       options:MTLResourceStorageModeShared];
+        mBuffer = AcquireNSPRef([mDevice->GetMTLDevice()
+            newBufferWithLength:bufferSize
+                        options:MTLResourceStorageModeShared]);
 
-        if (mBuffer == nil) {
+        if (mBuffer == nullptr) {
             return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
         }
 
-        mMappedPointer = [mBuffer contents];
+        mMappedPointer = [*mBuffer contents];
         if (mMappedPointer == nullptr) {
             return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
         }
@@ -38,13 +39,8 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    StagingBuffer::~StagingBuffer() {
-        [mBuffer release];
-        mBuffer = nil;
-    }
-
     id<MTLBuffer> StagingBuffer::GetBufferHandle() const {
-        return mBuffer;
+        return mBuffer.Get();
     }
 
 }}  // namespace dawn_native::metal

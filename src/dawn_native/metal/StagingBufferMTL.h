@@ -17,6 +17,8 @@
 
 #include "dawn_native/StagingBuffer.h"
 
+#include "common/NSRef.h"
+
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {
@@ -26,7 +28,6 @@ namespace dawn_native { namespace metal {
     class StagingBuffer : public StagingBufferBase {
       public:
         StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer() override;
 
         id<MTLBuffer> GetBufferHandle() const;
 
@@ -34,7 +35,7 @@ namespace dawn_native { namespace metal {
 
       private:
         Device* mDevice;
-        id<MTLBuffer> mBuffer = nil;
+        NSPRef<id<MTLBuffer>> mBuffer;
     };
 }}  // namespace dawn_native::metal
 

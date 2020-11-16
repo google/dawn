@@ -17,6 +17,8 @@
 
 #include "dawn_native/RenderPipeline.h"
 
+#include "common/NSRef.h"
+
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {
@@ -43,7 +45,6 @@ namespace dawn_native { namespace metal {
         wgpu::ShaderStage GetStagesRequiringStorageBufferLength() const;
 
       private:
-        ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
         MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
 
@@ -52,8 +53,8 @@ namespace dawn_native { namespace metal {
         MTLPrimitiveType mMtlPrimitiveTopology;
         MTLWinding mMtlFrontFace;
         MTLCullMode mMtlCullMode;
-        id<MTLRenderPipelineState> mMtlRenderPipelineState = nil;
-        id<MTLDepthStencilState> mMtlDepthStencilState = nil;
+        NSPRef<id<MTLRenderPipelineState>> mMtlRenderPipelineState;
+        NSPRef<id<MTLDepthStencilState>> mMtlDepthStencilState;
         ityp::array<VertexBufferSlot, uint32_t, kMaxVertexBuffers> mMtlVertexBufferIndices;
 
         wgpu::ShaderStage mStagesRequiringStorageBufferLength = wgpu::ShaderStage::None;

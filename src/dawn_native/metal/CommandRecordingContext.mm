@@ -20,8 +20,8 @@ namespace dawn_native { namespace metal {
 
     CommandRecordingContext::CommandRecordingContext() = default;
 
-    CommandRecordingContext::CommandRecordingContext(id<MTLCommandBuffer> commands)
-        : mCommands(commands) {
+    CommandRecordingContext::CommandRecordingContext(NSPRef<id<MTLCommandBuffer>> commands)
+        : mCommands(std::move(commands)) {
     }
 
     CommandRecordingContext::CommandRecordingContext(CommandRecordingContext&& rhs)
@@ -35,90 +35,87 @@ namespace dawn_native { namespace metal {
 
     CommandRecordingContext::~CommandRecordingContext() {
         // Commands must be acquired.
-        ASSERT(mCommands == nil);
+        ASSERT(mCommands == nullptr);
     }
 
     id<MTLCommandBuffer> CommandRecordingContext::GetCommands() {
-        return mCommands;
+        return mCommands.Get();
     }
 
-    id<MTLCommandBuffer> CommandRecordingContext::AcquireCommands() {
-        if (mCommands == nil) {
-            return nil;
+    NSPRef<id<MTLCommandBuffer>> CommandRecordingContext::AcquireCommands() {
+        // A blit encoder can be left open from WriteBuffer, make sure we close it.
+        if (mCommands != nullptr) {
+            EndBlit();
         }
 
-        // A blit encoder can be left open from WriteBuffer, make sure we close it.
-        EndBlit();
-
         ASSERT(!mInEncoder);
-        id<MTLCommandBuffer> commands = mCommands;
-        mCommands = nil;
-        return commands;
+        return std::move(mCommands);
     }
 
     id<MTLBlitCommandEncoder> CommandRecordingContext::EnsureBlit() {
-        ASSERT(mCommands != nil);
+        ASSERT(mCommands != nullptr);
 
-        if (mBlit == nil) {
+        if (mBlit == nullptr) {
             ASSERT(!mInEncoder);
             mInEncoder = true;
-            // The autorelease pool may drain before the encoder is ended. Retain so it stays alive.
-            mBlit = [[mCommands blitCommandEncoder] retain];
+
+            // The encoder is created autoreleased. Retain it to avoid the autoreleasepool from
+            // draining from under us.
+            mBlit = [*mCommands blitCommandEncoder];
         }
-        return mBlit;
+        return mBlit.Get();
     }
 
     void CommandRecordingContext::EndBlit() {
-        ASSERT(mCommands != nil);
+        ASSERT(mCommands != nullptr);
 
-        if (mBlit != nil) {
-            [mBlit endEncoding];
-            [mBlit release];
-            mBlit = nil;
+        if (mBlit != nullptr) {
+            [*mBlit endEncoding];
+            mBlit = nullptr;
             mInEncoder = false;
         }
     }
 
     id<MTLComputeCommandEncoder> CommandRecordingContext::BeginCompute() {
-        ASSERT(mCommands != nil);
-        ASSERT(mCompute == nil);
+        ASSERT(mCommands != nullptr);
+        ASSERT(mCompute == nullptr);
         ASSERT(!mInEncoder);
 
         mInEncoder = true;
-        // The autorelease pool may drain before the encoder is ended. Retain so it stays alive.
-        mCompute = [[mCommands computeCommandEncoder] retain];
-        return mCompute;
+        // The encoder is created autoreleased. Retain it to avoid the autoreleasepool from draining
+        // from under us.
+        mCompute = [*mCommands computeCommandEncoder];
+        return mCompute.Get();
     }
 
     void CommandRecordingContext::EndCompute() {
-        ASSERT(mCommands != nil);
-        ASSERT(mCompute != nil);
+        ASSERT(mCommands != nullptr);
+        ASSERT(mCompute != nullptr);
 
-        [mCompute endEncoding];
-        [mCompute release];
-        mCompute = nil;
+        [*mCompute endEncoding];
+        mCompute = nullptr;
         mInEncoder = false;
     }
 
     id<MTLRenderCommandEncoder> CommandRecordingContext::BeginRender(
         MTLRenderPassDescriptor* descriptor) {
-        ASSERT(mCommands != nil);
-        ASSERT(mRender == nil);
+        ASSERT(mCommands != nullptr);
+        ASSERT(mRender == nullptr);
         ASSERT(!mInEncoder);
 
         mInEncoder = true;
-        // The autorelease pool may drain before the encoder is ended. Retain so it stays alive.
-        mRender = [[mCommands renderCommandEncoderWithDescriptor:descriptor] retain];
-        return mRender;
+        // The encoder is created autoreleased. Retain it to avoid the autoreleasepool from draining
+        // from under us.
+        mRender = [*mCommands renderCommandEncoderWithDescriptor:descriptor];
+        return mRender.Get();
     }
 
     void CommandRecordingContext::EndRender() {
-        ASSERT(mCommands != nil);
-        ASSERT(mRender != nil);
+        ASSERT(mCommands != nullptr);
+        ASSERT(mRender != nullptr);
 
-        [mRender endEncoding];
-        [mRender release];
-        mRender = nil;
+        [*mRender endEncoding];
+        mRender = nullptr;
         mInEncoder = false;
     }
 

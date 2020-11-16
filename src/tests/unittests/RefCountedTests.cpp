@@ -118,7 +118,6 @@ TEST(Ref, Gets) {
     test->Release();
 
     EXPECT_EQ(test.Get(), original);
-    EXPECT_EQ(&*test, original);
     EXPECT_EQ(test->GetThis(), original);
 }
 
@@ -127,7 +126,6 @@ TEST(Ref, DefaultsToNull) {
     Ref<RCTest> test;
 
     EXPECT_EQ(test.Get(), nullptr);
-    EXPECT_EQ(&*test, nullptr);
     EXPECT_EQ(test->GetThis(), nullptr);
 }
 

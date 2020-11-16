@@ -35,7 +35,7 @@ namespace dawn_native { namespace metal {
     class Device : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(AdapterBase* adapter,
-                                             id<MTLDevice> mtlDevice,
+                                             NSPRef<id<MTLDevice>> mtlDevice,
                                              const DeviceDescriptor* descriptor);
         ~Device() override;
 
@@ -72,7 +72,9 @@ namespace dawn_native { namespace metal {
         uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
       private:
-        Device(AdapterBase* adapter, id<MTLDevice> mtlDevice, const DeviceDescriptor* descriptor);
+        Device(AdapterBase* adapter,
+               NSPRef<id<MTLDevice>> mtlDevice,
+               const DeviceDescriptor* descriptor);
 
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -108,8 +110,8 @@ namespace dawn_native { namespace metal {
         MaybeError WaitForIdleForDestruction() override;
         ExecutionSerial CheckAndUpdateCompletedSerials() override;
 
-        id<MTLDevice> mMtlDevice = nil;
-        id<MTLCommandQueue> mCommandQueue = nil;
+        NSPRef<id<MTLDevice>> mMtlDevice;
+        NSPRef<id<MTLCommandQueue>> mCommandQueue;
 
         CommandRecordingContext mCommandContext;
 
@@ -120,7 +122,7 @@ namespace dawn_native { namespace metal {
         // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
         // a different thread so we guard access to it with a mutex.
         std::mutex mLastSubmittedCommandsMutex;
-        id<MTLCommandBuffer> mLastSubmittedCommands = nil;
+        NSPRef<id<MTLCommandBuffer>> mLastSubmittedCommands;
     };
 
 }}  // namespace dawn_native::metal

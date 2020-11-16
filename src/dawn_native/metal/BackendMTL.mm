@@ -15,6 +15,7 @@
 #include "dawn_native/metal/BackendMTL.h"
 
 #include "common/GPUInfo.h"
+#include "common/NSRef.h"
 #include "common/Platform.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/MetalBackend.h"
@@ -176,8 +177,8 @@ namespace dawn_native { namespace metal {
     class Adapter : public AdapterBase {
       public:
         Adapter(InstanceBase* instance, id<MTLDevice> device)
-            : AdapterBase(instance, wgpu::BackendType::Metal), mDevice([device retain]) {
-            mPCIInfo.name = std::string([mDevice.name UTF8String]);
+            : AdapterBase(instance, wgpu::BackendType::Metal), mDevice(device) {
+            mPCIInfo.name = std::string([[*mDevice name] UTF8String]);
 
             PCIIDs ids;
             if (!instance->ConsumedError(GetDevicePCIInfo(device, &ids))) {
@@ -206,10 +207,6 @@ namespace dawn_native { namespace metal {
             InitializeSupportedExtensions();
         }
 
-        ~Adapter() override {
-            [mDevice release];
-        }
-
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
             return Device::Create(this, mDevice, descriptor);
@@ -217,14 +214,14 @@ namespace dawn_native { namespace metal {
 
         void InitializeSupportedExtensions() {
 #if defined(DAWN_PLATFORM_MACOS)
-            if ([mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
+            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
                 mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
             }
 #endif
 
             if (@available(macOS 10.15, iOS 14.0, *)) {
-                if ([mDevice supportsFamily:MTLGPUFamilyMac2] ||
-                    [mDevice supportsFamily:MTLGPUFamilyApple5]) {
+                if ([*mDevice supportsFamily:MTLGPUFamilyMac2] ||
+                    [*mDevice supportsFamily:MTLGPUFamilyApple5]) {
                     mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
                     mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
                 }
@@ -233,7 +230,7 @@ namespace dawn_native { namespace metal {
             mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
 
-        id<MTLDevice> mDevice = nil;
+        NSPRef<id<MTLDevice>> mDevice;
     };
 
     // Implementation of the Metal backend's BackendConnection
@@ -251,13 +248,12 @@ namespace dawn_native { namespace metal {
 #if defined(DAWN_PLATFORM_MACOS)
         if (@available(macOS 10.11, *)) {
             supportedVersion = YES;
-            NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
 
-            for (id<MTLDevice> device in devices) {
+            NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
+
+            for (id<MTLDevice> device in devices.Get()) {
                 adapters.push_back(std::make_unique<Adapter>(GetInstance(), device));
             }
-
-            [devices release];
         }
 #endif
 

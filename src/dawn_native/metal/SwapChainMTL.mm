@@ -92,15 +92,15 @@ namespace dawn_native { namespace metal {
         CGSize size = {};
         size.width = GetWidth();
         size.height = GetHeight();
-        [mLayer setDrawableSize:size];
+        [*mLayer setDrawableSize:size];
 
-        [mLayer setFramebufferOnly:(GetUsage() == wgpu::TextureUsage::RenderAttachment)];
-        [mLayer setDevice:ToBackend(GetDevice())->GetMTLDevice()];
-        [mLayer setPixelFormat:MetalPixelFormat(GetFormat())];
+        [*mLayer setFramebufferOnly:(GetUsage() == wgpu::TextureUsage::RenderAttachment)];
+        [*mLayer setDevice:ToBackend(GetDevice())->GetMTLDevice()];
+        [*mLayer setPixelFormat:MetalPixelFormat(GetFormat())];
 
 #if defined(DAWN_PLATFORM_MACOS)
         if (@available(macos 10.13, *)) {
-            [mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
+            [*mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
         }
 #endif  // defined(DAWN_PLATFORM_MACOS)
 
@@ -110,40 +110,36 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError SwapChain::PresentImpl() {
-        ASSERT(mCurrentDrawable != nil);
-        [mCurrentDrawable present];
+        ASSERT(mCurrentDrawable != nullptr);
+        [*mCurrentDrawable present];
 
         mTexture->Destroy();
         mTexture = nullptr;
 
-        [mCurrentDrawable release];
-        mCurrentDrawable = nil;
+        mCurrentDrawable = nullptr;
 
         return {};
     }
 
     ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
-        ASSERT(mCurrentDrawable == nil);
-        mCurrentDrawable = [mLayer nextDrawable];
-        [mCurrentDrawable retain];
+        ASSERT(mCurrentDrawable == nullptr);
+        mCurrentDrawable = [*mLayer nextDrawable];
 
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
 
-        // mTexture will add a reference to mCurrentDrawable.texture to keep it alive.
-        mTexture =
-            AcquireRef(new Texture(ToBackend(GetDevice()), &textureDesc, mCurrentDrawable.texture));
+        mTexture = AcquireRef(
+            new Texture(ToBackend(GetDevice()), &textureDesc, [*mCurrentDrawable texture]));
         return mTexture->CreateView(nullptr);
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
-        ASSERT((mTexture.Get() == nullptr) == (mCurrentDrawable == nil));
+        ASSERT((mTexture.Get() == nullptr) == (mCurrentDrawable == nullptr));
 
         if (mTexture.Get() != nullptr) {
             mTexture->Destroy();
             mTexture = nullptr;
 
-            [mCurrentDrawable release];
-            mCurrentDrawable = nil;
+            mCurrentDrawable = nullptr;
         }
     }
 

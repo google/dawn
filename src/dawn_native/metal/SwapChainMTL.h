@@ -17,6 +17,8 @@
 
 #include "dawn_native/SwapChain.h"
 
+#include "common/NSRef.h"
+
 @class CAMetalLayer;
 @protocol CAMetalDrawable;
 
@@ -47,9 +49,9 @@ namespace dawn_native { namespace metal {
         using NewSwapChainBase::NewSwapChainBase;
         MaybeError Initialize(NewSwapChainBase* previousSwapChain);
 
-        CAMetalLayer* mLayer = nullptr;
+        NSRef<CAMetalLayer> mLayer;
 
-        id<CAMetalDrawable> mCurrentDrawable = nil;
+        NSPRef<id<CAMetalDrawable>> mCurrentDrawable;
         Ref<Texture> mTexture;
 
         MaybeError PresentImpl() override;

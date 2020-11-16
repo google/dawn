@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_METAL_BUFFERMTL_H_
 #define DAWNNATIVE_METAL_BUFFERMTL_H_
 
+#include "common/NSRef.h"
 #include "common/SerialQueue.h"
 #include "dawn_native/Buffer.h"
 
@@ -53,7 +54,7 @@ namespace dawn_native { namespace metal {
         void InitializeToZero(CommandRecordingContext* commandContext);
         void ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
 
-        id<MTLBuffer> mMtlBuffer = nil;
+        NSPRef<id<MTLBuffer>> mMtlBuffer;
     };
 
 }}  // namespace dawn_native::metal

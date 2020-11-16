@@ -14,6 +14,8 @@
 #ifndef DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 #define DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 
+#include "common/NSRef.h"
+
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {
@@ -23,7 +25,7 @@ namespace dawn_native { namespace metal {
     class CommandRecordingContext {
       public:
         CommandRecordingContext();
-        CommandRecordingContext(id<MTLCommandBuffer> commands);
+        CommandRecordingContext(NSPRef<id<MTLCommandBuffer>> commands);
 
         CommandRecordingContext(const CommandRecordingContext& rhs) = delete;
         CommandRecordingContext& operator=(const CommandRecordingContext& rhs) = delete;
@@ -35,7 +37,7 @@ namespace dawn_native { namespace metal {
 
         id<MTLCommandBuffer> GetCommands();
 
-        id<MTLCommandBuffer> AcquireCommands();
+        NSPRef<id<MTLCommandBuffer>> AcquireCommands();
 
         id<MTLBlitCommandEncoder> EnsureBlit();
         void EndBlit();
@@ -47,10 +49,10 @@ namespace dawn_native { namespace metal {
         void EndRender();
 
       private:
-        id<MTLCommandBuffer> mCommands = nil;
-        id<MTLBlitCommandEncoder> mBlit = nil;
-        id<MTLComputeCommandEncoder> mCompute = nil;
-        id<MTLRenderCommandEncoder> mRender = nil;
+        NSPRef<id<MTLCommandBuffer>> mCommands;
+        NSPRef<id<MTLBlitCommandEncoder>> mBlit;
+        NSPRef<id<MTLComputeCommandEncoder>> mCompute;
+        NSPRef<id<MTLRenderCommandEncoder>> mRender;
         bool mInEncoder = false;
     };
 
