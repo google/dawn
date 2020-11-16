@@ -26,7 +26,7 @@ Builder::~Builder() = default;
 std::unique_ptr<ast::Variable> Builder::make_var(const std::string& name,
                                                  ast::StorageClass storage,
                                                  ast::type::Type* type) {
-  auto var = std::make_unique<ast::Variable>(name, storage, type);
+  auto var = create<ast::Variable>(name, storage, type);
   return var;
 }
 

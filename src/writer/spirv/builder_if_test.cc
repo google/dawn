@@ -618,12 +618,12 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // }
 
   ast::type::BoolType bool_type;
-  auto var = std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction,
-                                             &bool_type);
+  auto var =
+      create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   td.RegisterVariableForTesting(var.get());
 
-  ast::IfStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
-                        std::make_unique<ast::BlockStatement>());
+  ast::IfStatement expr(create<ast::IdentifierExpression>("a"),
+                        create<ast::BlockStatement>());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
