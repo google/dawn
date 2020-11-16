@@ -85,7 +85,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   auto body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  CaseStatement c;
+  CaseStatement c(create<ast::BlockStatement>());
   c.set_body(std::move(body));
   EXPECT_TRUE(c.IsDefault());
 }
@@ -95,18 +95,18 @@ TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  CaseStatement c;
+  CaseStatement c(create<ast::BlockStatement>());
   c.set_selectors(std::move(b));
   EXPECT_FALSE(c.IsDefault());
 }
 
 TEST_F(CaseStatementTest, IsCase) {
-  CaseStatement c;
+  CaseStatement c(create<ast::BlockStatement>());
   EXPECT_TRUE(c.IsCase());
 }
 
 TEST_F(CaseStatementTest, IsValid) {
-  CaseStatement c;
+  CaseStatement c(create<ast::BlockStatement>());
   EXPECT_TRUE(c.IsValid());
 }
 

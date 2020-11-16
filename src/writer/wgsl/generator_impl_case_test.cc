@@ -70,11 +70,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
-  ast::CaseStatement c;
-
   auto body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
-  c.set_body(std::move(body));
+  ast::CaseStatement c(std::move(body));
 
   gen.increment_indent();
 

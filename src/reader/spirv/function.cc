@@ -2150,7 +2150,8 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   for (size_t i = last_clause_index;; --i) {
     // Create the case clause.  Temporarily put it in the wrong order
     // on the case statement list.
-    cases->emplace_back(std::make_unique<ast::CaseStatement>());
+    cases->emplace_back(std::make_unique<ast::CaseStatement>(
+        std::make_unique<ast::BlockStatement>()));
     auto* clause = cases->back().get();
 
     // Create a list of integer literals for the selector values leading to
@@ -2189,8 +2190,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
       // Generate a default clause with a just fallthrough.
       auto stmts = std::make_unique<ast::BlockStatement>();
       stmts->append(std::make_unique<ast::FallthroughStatement>());
-      auto case_stmt = std::make_unique<ast::CaseStatement>();
-      case_stmt->set_body(std::move(stmts));
+      auto case_stmt = std::make_unique<ast::CaseStatement>(std::move(stmts));
       cases->emplace_back(std::move(case_stmt));
     }
 

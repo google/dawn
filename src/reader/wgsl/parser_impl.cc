@@ -1653,7 +1653,8 @@ Maybe<std::unique_ptr<ast::CaseStatement>> ParserImpl::switch_body() {
   auto source = t.source();
   next();  // Consume the peek
 
-  auto stmt = std::make_unique<ast::CaseStatement>();
+  auto stmt = std::make_unique<ast::CaseStatement>(
+      std::make_unique<ast::BlockStatement>());
   stmt->set_source(source);
   if (t.IsCase()) {
     auto selectors = expect_case_selectors();

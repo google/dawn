@@ -34,8 +34,6 @@ using CaseSelectorList = std::vector<std::unique_ptr<ast::IntLiteral>>;
 class CaseStatement : public Statement {
  public:
   /// Constructor
-  CaseStatement();
-  /// Constructor
   /// Creates a default case statement
   /// @param body the case body
   explicit CaseStatement(std::unique_ptr<BlockStatement> body);

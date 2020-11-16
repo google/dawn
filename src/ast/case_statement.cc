@@ -17,9 +17,6 @@
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement()
-    : Statement(), body_(std::make_unique<BlockStatement>()) {}
-
 CaseStatement::CaseStatement(std::unique_ptr<BlockStatement> body)
     : Statement(), body_(std::move(body)) {}
 

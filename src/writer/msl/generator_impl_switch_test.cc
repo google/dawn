@@ -33,10 +33,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Switch) {
-  auto def = create<ast::CaseStatement>();
   auto def_body = create<ast::BlockStatement>();
   def_body->append(create<ast::BreakStatement>());
-  def->set_body(std::move(def_body));
+  auto def = create<ast::CaseStatement>(std::move(def_body));
 
   ast::type::I32Type i32;
   ast::CaseSelectorList case_val;
