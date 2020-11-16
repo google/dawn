@@ -15,7 +15,9 @@
 #ifndef SRC_TRANSFORM_TRANSFORMER_H_
 #define SRC_TRANSFORM_TRANSFORMER_H_
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "src/ast/module.h"
 #include "src/context.h"
@@ -39,6 +41,13 @@ class Transformer {
   const std::string& error() { return error_; }
 
  protected:
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) const {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
+
   /// The context
   Context* ctx_ = nullptr;
   /// The module

@@ -244,13 +244,13 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
     cast_expr.push_back(expr->take_idx_expr());
 
     ast::ExpressionList params;
-    params.push_back(std::make_unique<ast::TypeConstructorExpression>(
-        u32, std::move(cast_expr)));
-    params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::UintLiteral>(u32, size - 1)));
+    params.push_back(
+        create<ast::TypeConstructorExpression>(u32, std::move(cast_expr)));
+    params.push_back(create<ast::ScalarConstructorExpression>(
+        create<ast::UintLiteral>(u32, size - 1)));
 
-    auto call_expr = std::make_unique<ast::CallExpression>(
-        std::make_unique<ast::IdentifierExpression>("min"), std::move(params));
+    auto call_expr = create<ast::CallExpression>(
+        create<ast::IdentifierExpression>("min"), std::move(params));
     call_expr->set_result_type(u32);
 
     expr->set_idx_expr(std::move(call_expr));
