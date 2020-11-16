@@ -226,11 +226,6 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
-        if (strcmp("--skip-validation", argv[i]) == 0) {
-            mEnabledToggles.push_back("skip_validation");
-            continue;
-        }
-
         constexpr const char kEnableTogglesSwitch[] = "--enable-toggles=";
         argLen = sizeof(kEnableTogglesSwitch) - 1;
         if (strncmp(argv[i], kEnableTogglesSwitch, argLen) == 0) {
@@ -305,7 +300,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             dawn::InfoLog()
                 << "\n\nUsage: " << argv[0]
-                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--skip-validation]\n"
+                << " [GTEST_FLAGS...] [-w] [-d] [-c]\n"
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
                    "    [--adapter-vendor-id=x]"
                    " [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
@@ -314,9 +309,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    " to disabled)\n"
                    "  -c, --begin-capture-on-startup: Begin debug capture on startup "
                    "(defaults to no capture)\n"
-                   "  --skip-validation: Skip Dawn validation\n"
                    "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
-                   "      ex.) skip_validation,use_tint,disable_robustness,turn_off_vsync\n"
+                   "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"
