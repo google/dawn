@@ -123,7 +123,9 @@ class ParserImpl : Reader {
 
   /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
   /// If the type is only used for builtins, then register that specially,
-  /// and return null.
+  /// and return null.  If the type is a sampler, image, or sampled image, then
+  /// return the Void type, because those opaque types are handled in a
+  /// different way.
   /// On failure, logs an error and returns null.  This should only be called
   /// after the internal representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.

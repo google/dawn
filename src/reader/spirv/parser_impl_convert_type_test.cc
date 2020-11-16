@@ -816,6 +816,44 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
   EXPECT_TRUE(p->error().empty());
 }
 
+TEST_F(SpvParserTest, ConvertType_Sampler_PretendVoid) {
+  // We fake the type suport for samplers, images, and sampled images.
+  auto* p = parser(test::Assemble(R"(
+  %1 = OpTypeSampler
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_Image_PretendVoid) {
+  // We fake the type suport for samplers, images, and sampled images.
+  auto* p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %1 = OpTypeImage %float 2D 0 0 0 1 Unknown
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_SampledImage_PretendVoid) {
+  auto* p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %im = OpTypeImage %float 2D 0 0 0 1 Unknown
+  %1 = OpTypeSampledImage %im
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(p->error().empty());
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

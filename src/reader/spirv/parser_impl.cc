@@ -305,6 +305,12 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       // But the SPIR-V defines those before defining the function
       // type.  No further work is required here.
       return nullptr;
+    case spvtools::opt::analysis::Type::kSampler:
+    case spvtools::opt::analysis::Type::kSampledImage:
+    case spvtools::opt::analysis::Type::kImage:
+      // Fake it for sampler and texture types.  These are handled in an
+      // entirely different way.
+      return save(ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
     default:
       break;
   }
@@ -890,6 +896,7 @@ ast::type::Type* ParserImpl::ConvertType(
   const auto* inst = def_use_mgr_->GetDef(type_id);
   const auto pointee_type_id = inst->GetSingleWordInOperand(1);
   const auto storage_class = SpvStorageClass(inst->GetSingleWordInOperand(0));
+
   if (pointee_type_id == builtin_position_.struct_type_id) {
     builtin_position_.pointer_type_id = type_id;
     builtin_position_.storage_class = storage_class;
