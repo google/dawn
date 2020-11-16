@@ -229,6 +229,214 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::Builtin::kNone},
         BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::Builtin::kNone}));
 
+// Dim
+
+struct DimCase {
+  SpvDim dim;
+  bool arrayed;
+  bool expect_success;
+  ast::type::TextureDimension expected;
+};
+inline std::ostream& operator<<(std::ostream& out, DimCase dc) {
+  out << "DimCase{ SpvDim:" << int(dc.dim) << " arrayed?:" << int(dc.arrayed)
+      << " expect_success?:" << int(dc.expect_success)
+      << " expected:" << int(dc.expected) << "}";
+  return out;
+}
+
+class SpvDimTest : public testing::TestWithParam<DimCase> {
+ public:
+  SpvDimTest()
+      : success_(true),
+        fail_stream_(&success_, &errors_),
+        converter_(fail_stream_) {}
+
+  std::string error() const { return errors_.str(); }
+
+ protected:
+  bool success_ = true;
+  std::stringstream errors_;
+  FailStream fail_stream_;
+  EnumConverter converter_;
+};
+
+TEST_P(SpvDimTest, Samples) {
+  const auto params = GetParam();
+
+  const auto result = converter_.ToDim(params.dim, params.arrayed);
+  EXPECT_EQ(success_, params.expect_success);
+  if (params.expect_success) {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_TRUE(error().empty());
+  } else {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_THAT(error(), ::testing::HasSubstr("dimension"));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterGood,
+    SpvDimTest,
+    testing::Values(
+        // Non-arrayed
+        DimCase{SpvDim1D, false, true, ast::type::TextureDimension::k1d},
+        DimCase{SpvDim2D, false, true, ast::type::TextureDimension::k2d},
+        DimCase{SpvDim3D, false, true, ast::type::TextureDimension::k3d},
+        DimCase{SpvDimCube, false, true, ast::type::TextureDimension::kCube},
+        // Arrayed
+        DimCase{SpvDim1D, true, true, ast::type::TextureDimension::k1dArray},
+        DimCase{SpvDim2D, true, true, ast::type::TextureDimension::k2dArray},
+        DimCase{SpvDimCube, true, true,
+                ast::type::TextureDimension::kCubeArray}));
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterBad,
+    SpvDimTest,
+    testing::Values(
+        // Invalid SPIR-V dimensionality.
+        DimCase{SpvDimMax, false, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimMax, true, false, ast::type::TextureDimension::kNone},
+        // Vulkan non-arrayed dimensionalities not supported by WGSL.
+        DimCase{SpvDimRect, false, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimBuffer, false, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimSubpassData, false, false,
+                ast::type::TextureDimension::kNone},
+        // Arrayed dimensionalities not supported by WGSL
+        DimCase{SpvDim3D, true, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimRect, true, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimBuffer, true, false, ast::type::TextureDimension::kNone},
+        DimCase{SpvDimSubpassData, true, false,
+                ast::type::TextureDimension::kNone}));
+
+// ImageFormat
+
+struct ImageFormatCase {
+  SpvImageFormat format;
+  bool expect_success;
+  ast::type::ImageFormat expected;
+};
+inline std::ostream& operator<<(std::ostream& out, ImageFormatCase ifc) {
+  out << "ImageFormatCase{ SpvImageFormat:" << int(ifc.format)
+      << " expect_success?:" << int(ifc.expect_success)
+      << " expected:" << int(ifc.expected) << "}";
+  return out;
+}
+
+class SpvImageFormatTest : public testing::TestWithParam<ImageFormatCase> {
+ public:
+  SpvImageFormatTest()
+      : success_(true),
+        fail_stream_(&success_, &errors_),
+        converter_(fail_stream_) {}
+
+  std::string error() const { return errors_.str(); }
+
+ protected:
+  bool success_ = true;
+  std::stringstream errors_;
+  FailStream fail_stream_;
+  EnumConverter converter_;
+};
+
+TEST_P(SpvImageFormatTest, Samples) {
+  const auto params = GetParam();
+
+  const auto result = converter_.ToImageFormat(params.format);
+  EXPECT_EQ(success_, params.expect_success) << params;
+  if (params.expect_success) {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_TRUE(error().empty());
+  } else {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_THAT(error(), ::testing::StartsWith("invalid image format: "));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterGood,
+    SpvImageFormatTest,
+    testing::Values(
+        // Unknown.  This is used for sampled images.
+        ImageFormatCase{SpvImageFormatUnknown, true,
+                        ast::type::ImageFormat::kNone},
+        // 8 bit channels
+        ImageFormatCase{SpvImageFormatRgba8, true,
+                        ast::type::ImageFormat::kRgba8Unorm},
+        ImageFormatCase{SpvImageFormatRgba8Snorm, true,
+                        ast::type::ImageFormat::kRgba8Snorm},
+        ImageFormatCase{SpvImageFormatRgba8ui, true,
+                        ast::type::ImageFormat::kRgba8Uint},
+        ImageFormatCase{SpvImageFormatRgba8i, true,
+                        ast::type::ImageFormat::kRgba8Sint},
+        // 16 bit channels
+        ImageFormatCase{SpvImageFormatRgba16ui, true,
+                        ast::type::ImageFormat::kRgba16Uint},
+        ImageFormatCase{SpvImageFormatRgba16i, true,
+                        ast::type::ImageFormat::kRgba16Sint},
+        ImageFormatCase{SpvImageFormatRgba16f, true,
+                        ast::type::ImageFormat::kRgba16Float},
+        // 32 bit channels
+        // ... 1 channel
+        ImageFormatCase{SpvImageFormatR32ui, true,
+                        ast::type::ImageFormat::kR32Uint},
+        ImageFormatCase{SpvImageFormatR32i, true,
+                        ast::type::ImageFormat::kR32Sint},
+        ImageFormatCase{SpvImageFormatR32f, true,
+                        ast::type::ImageFormat::kR32Float},
+        // ... 2 channels
+        ImageFormatCase{SpvImageFormatRg32ui, true,
+                        ast::type::ImageFormat::kRg32Uint},
+        ImageFormatCase{SpvImageFormatRg32i, true,
+                        ast::type::ImageFormat::kRg32Sint},
+        ImageFormatCase{SpvImageFormatRg32f, true,
+                        ast::type::ImageFormat::kRg32Float},
+        // ... 4 channels
+        ImageFormatCase{SpvImageFormatRgba32ui, true,
+                        ast::type::ImageFormat::kRgba32Uint},
+        ImageFormatCase{SpvImageFormatRgba32i, true,
+                        ast::type::ImageFormat::kRgba32Sint},
+        ImageFormatCase{SpvImageFormatRgba32f, true,
+                        ast::type::ImageFormat::kRgba32Float}));
+
+INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
+                         SpvImageFormatTest,
+                         testing::Values(
+                             // Scanning in order from the SPIR-V spec.
+                             ImageFormatCase{SpvImageFormatRg16f, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatR11fG11fB10f, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatR16f, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRgb10A2, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg16, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg8, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatR16, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatR8, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRgba16Snorm, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg16Snorm, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg8Snorm, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg16i, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg8i, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatR8i, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRgb10a2ui, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg16ui, false,
+                                             ast::type::ImageFormat::kNone},
+                             ImageFormatCase{SpvImageFormatRg8ui, false,
+                                             ast::type::ImageFormat::kNone}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

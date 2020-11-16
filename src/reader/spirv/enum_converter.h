@@ -19,6 +19,8 @@
 #include "src/ast/builtin.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/type/storage_texture_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/reader/spirv/fail_stream.h"
 
 namespace tint {
@@ -51,6 +53,19 @@ class EnumConverter {
   /// @param b the SPIR-V builtin
   /// @returns a Tint AST builtin
   ast::Builtin ToBuiltin(SpvBuiltIn b);
+
+  /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
+  /// On failure, logs an error and returns kNone
+  /// @param dim the SPIR-V Dim value
+  /// @param arrayed true if the texture is arrayed
+  /// @returns a Tint AST texture dimension
+  ast::type::TextureDimension ToDim(SpvDim dim, bool arrayed);
+
+  /// Converts a SPIR-V Image Format to a Tint ImageFormat
+  /// On failure, logs an error and returns kNone
+  /// @param fmt the SPIR-V format
+  /// @returns a Tint AST format
+  ast::type::ImageFormat ToImageFormat(SpvImageFormat fmt);
 
  private:
   /// Registers a failure and returns a stream for log diagnostics.
