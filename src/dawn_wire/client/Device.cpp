@@ -15,6 +15,7 @@
 #include "dawn_wire/client/Device.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 #include "dawn_wire/client/ApiObjects_autogen.h"
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/ObjectAllocator.h"
@@ -23,6 +24,27 @@ namespace dawn_wire { namespace client {
 
     Device::Device(Client* client, uint32_t initialRefcount, uint32_t initialId)
         : ObjectBase(this, initialRefcount, initialId), mClient(client) {
+#if defined(DAWN_ENABLE_ASSERTS)
+        mErrorCallback = [](WGPUErrorType, char const*, void*) {
+            static bool calledOnce = false;
+            if (!calledOnce) {
+                calledOnce = true;
+                dawn::WarningLog() << "No Dawn device uncaptured error callback was set. This is "
+                                      "probably not intended. If you really want to ignore errors "
+                                      "and suppress this message, set the callback to null.";
+            }
+        };
+
+        mDeviceLostCallback = [](char const*, void*) {
+            static bool calledOnce = false;
+            if (!calledOnce) {
+                calledOnce = true;
+                dawn::WarningLog() << "No Dawn device lost callback was set. This is probably not "
+                                      "intended. If you really want to ignore device lost "
+                                      "and suppress this message, set the callback to null.";
+            }
+        };
+#endif  // DAWN_ENABLE_ASSERTS
         // Get the default queue for this device.
         auto* allocation = mClient->QueueAllocator().New(this);
         mDefaultQueue = allocation->object.get();
