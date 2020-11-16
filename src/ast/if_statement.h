@@ -30,8 +30,6 @@ namespace ast {
 class IfStatement : public Statement {
  public:
   /// Constructor
-  IfStatement();
-  /// Constructor
   /// @param condition the if condition
   /// @param body the if body
   IfStatement(std::unique_ptr<Expression> condition,

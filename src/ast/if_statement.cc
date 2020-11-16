@@ -19,9 +19,6 @@
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement()
-    : Statement(), body_(std::make_unique<BlockStatement>()) {}
-
 IfStatement::IfStatement(std::unique_ptr<Expression> condition,
                          std::unique_ptr<BlockStatement> body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}

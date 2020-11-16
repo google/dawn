@@ -98,7 +98,7 @@ TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
   auto body = create<BlockStatement>();
-  body->append(create<IfStatement>());
+  body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
   ElseStatement e(std::move(body));
   EXPECT_FALSE(e.IsValid());

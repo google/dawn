@@ -91,7 +91,7 @@ TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
 
 TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
   BlockStatement b;
-  b.append(create<IfStatement>());
+  b.append(create<IfStatement>(nullptr, create<BlockStatement>()));
   EXPECT_FALSE(b.IsValid());
 }
 

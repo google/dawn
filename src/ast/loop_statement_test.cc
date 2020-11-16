@@ -120,7 +120,7 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
 TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
   auto body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  body->append(create<IfStatement>());
+  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
   auto continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
@@ -147,7 +147,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
 
   auto continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
-  continuing->append(create<IfStatement>());
+  continuing->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
   LoopStatement l(std::move(body), std::move(continuing));
   EXPECT_FALSE(l.IsValid());

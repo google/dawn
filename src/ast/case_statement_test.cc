@@ -129,7 +129,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   b.push_back(create<SintLiteral>(&i32, 2));
 
   auto body = create<BlockStatement>();
-  body->append(create<IfStatement>());
+  body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
 
   CaseStatement c({std::move(b)}, std::move(body));
   EXPECT_FALSE(c.IsValid());

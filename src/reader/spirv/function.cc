@@ -515,10 +515,11 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   // if-selection with a then-clause ending at the same block
   // as the statement block at the top of the stack.
   const auto& top = statements_stack_.back();
-  auto* const guard_stmt =
-      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
-  guard_stmt->set_condition(
-      std::make_unique<ast::IdentifierExpression>(guard_name));
+  auto cond = std::make_unique<ast::IdentifierExpression>(guard_name);
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto* const guard_stmt = AddStatement(std::make_unique<ast::IfStatement>(
+                                            std::move(cond), std::move(body)))
+                               ->AsIf();
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
                           guard_stmt->set_body(std::move(s->statements_));
@@ -528,8 +529,11 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
 void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   assert(!statements_stack_.empty());
   const auto& top = statements_stack_.back();
-  auto* const guard_stmt =
-      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
+  auto cond = MakeTrue();
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto* const guard_stmt = AddStatement(std::make_unique<ast::IfStatement>(
+                                            std::move(cond), std::move(body)))
+                               ->AsIf();
   guard_stmt->set_condition(MakeTrue());
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
@@ -1977,12 +1981,15 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     AddStatement(std::move(guard_decl));
   }
 
-  auto* const if_stmt =
-      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
   const auto condition_id =
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
+  auto cond = MakeExpression(condition_id).expr;
+  auto body = std::make_unique<ast::BlockStatement>();
+  auto* const if_stmt = AddStatement(std::make_unique<ast::IfStatement>(
+                                         std::move(cond), std::move(body)))
+                            ->AsIf();
+
   // Generate the code for the condition.
-  if_stmt->set_condition(std::move(MakeExpression(condition_id).expr));
 
   // Compute the block IDs that should end the then-clause and the else-clause.
 
@@ -2413,8 +2420,8 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeSimpleIf(
   if ((then_stmt == nullptr) && (else_stmt == nullptr)) {
     return nullptr;
   }
-  auto if_stmt = std::make_unique<ast::IfStatement>();
-  if_stmt->set_condition(std::move(condition));
+  auto if_stmt = std::make_unique<ast::IfStatement>(
+      std::move(condition), std::make_unique<ast::BlockStatement>());
   if (then_stmt != nullptr) {
     auto stmts = std::make_unique<ast::BlockStatement>();
     stmts->append(std::move(then_stmt));
