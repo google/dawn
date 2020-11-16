@@ -19,12 +19,12 @@ import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
-# Import mac_min_system_version
+# Import mac_deployment_target
 if (is_mac) {
   if (dawn_has_build) {
     import("//build/config/mac/mac_sdk.gni")
   } else {
-    mac_min_system_version = "10.11.0"
+    mac_deployment_target = "10.11.0"
   }
 }
 
@@ -63,7 +63,7 @@ config("dawn_native_internal") {
   # TODO(cwallez@chromium.org): Consider using API_AVAILABLE annotations on all
   # metal code in dawn once crbug.com/1004024 is sorted out if Chromium still
   # supports 10.10 then.
-  if (is_mac && mac_min_system_version == "10.10.0") {
+  if (is_mac && mac_deployment_target == "10.10.0") {
     cflags_objcc = [ "-Wno-unguarded-availability" ]
   }
 }
