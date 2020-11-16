@@ -986,8 +986,10 @@ bool TypeDeterminer::DetermineMemberAccessor(
           std::make_unique<ast::type::VectorType>(vec->type(), size));
     }
   } else {
-    set_error(expr->source(),
-              "invalid type " + data_type->type_name() + " in member accessor");
+    set_error(
+        expr->source(),
+        "v-0007: invalid use of member accessor on a non-vector/non-struct " +
+            data_type->type_name());
     return false;
   }
 
