@@ -432,6 +432,13 @@ class ParserImpl : Reader {
   bool ApplyArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
                              ast::type::ArrayType* ast_type);
 
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) const {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
+
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 

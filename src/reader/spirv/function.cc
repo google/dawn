@@ -502,9 +502,8 @@ FunctionEmitter::StatementBlock::~StatementBlock() = default;
 void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             uint32_t end_id,
                                             CompletionAction action) {
-  statements_stack_.emplace_back(
-      StatementBlock{construct, end_id, action,
-                     std::make_unique<ast::BlockStatement>(), nullptr});
+  statements_stack_.emplace_back(StatementBlock{
+      construct, end_id, action, create<ast::BlockStatement>(), nullptr});
 }
 
 void FunctionEmitter::PushGuard(const std::string& guard_name,
@@ -515,11 +514,11 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   // if-selection with a then-clause ending at the same block
   // as the statement block at the top of the stack.
   const auto& top = statements_stack_.back();
-  auto cond = std::make_unique<ast::IdentifierExpression>(guard_name);
-  auto body = std::make_unique<ast::BlockStatement>();
-  auto* const guard_stmt = AddStatement(std::make_unique<ast::IfStatement>(
-                                            std::move(cond), std::move(body)))
-                               ->AsIf();
+  auto cond = create<ast::IdentifierExpression>(guard_name);
+  auto body = create<ast::BlockStatement>();
+  auto* const guard_stmt =
+      AddStatement(create<ast::IfStatement>(std::move(cond), std::move(body)))
+          ->AsIf();
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
                           guard_stmt->set_body(std::move(s->statements_));
@@ -530,10 +529,10 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   assert(!statements_stack_.empty());
   const auto& top = statements_stack_.back();
   auto cond = MakeTrue();
-  auto body = std::make_unique<ast::BlockStatement>();
-  auto* const guard_stmt = AddStatement(std::make_unique<ast::IfStatement>(
-                                            std::move(cond), std::move(body)))
-                               ->AsIf();
+  auto body = create<ast::BlockStatement>();
+  auto* const guard_stmt =
+      AddStatement(create<ast::IfStatement>(std::move(cond), std::move(body)))
+          ->AsIf();
   guard_stmt->set_condition(MakeTrue());
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
@@ -649,13 +648,12 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
     return false;
   }
 
-  auto ast_fn =
-      std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty,
-                                      std::make_unique<ast::BlockStatement>());
+  auto ast_fn = create<ast::Function>(name, std::move(ast_params), ret_ty,
+                                      create<ast::BlockStatement>());
 
   if (ep_info_ != nullptr) {
     ast_fn->add_decoration(
-        std::make_unique<ast::StageDecoration>(ep_info_->stage, Source{}));
+        create<ast::StageDecoration>(ep_info_->stage, Source{}));
   }
 
   ast_module_.AddFunction(std::move(ast_fn));
@@ -1707,8 +1705,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
           parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1))
               .expr);
     }
-    auto var_decl_stmt =
-        std::make_unique<ast::VariableDeclStatement>(std::move(var));
+    auto var_decl_stmt = create<ast::VariableDeclStatement>(std::move(var));
     AddStatementForInstruction(std::move(var_decl_stmt), inst);
     // Save this as an already-named value.
     identifier_values_.insert(inst.result_id());
@@ -1723,7 +1720,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
     return TypedExpression(
         parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
-        std::make_unique<ast::IdentifierExpression>(namer_.Name(id)));
+        create<ast::IdentifierExpression>(namer_.Name(id)));
   }
   if (singly_used_values_.count(id)) {
     auto expr = std::move(singly_used_values_[id]);
@@ -1742,9 +1739,9 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   switch (inst->opcode()) {
     case SpvOpVariable:
       // This occurs for module-scope variables.
-      return TypedExpression(parser_impl_.ConvertType(inst->type_id()),
-                             std::make_unique<ast::IdentifierExpression>(
-                                 namer_.Name(inst->result_id())));
+      return TypedExpression(
+          parser_impl_.ConvertType(inst->type_id()),
+          create<ast::IdentifierExpression>(namer_.Name(inst->result_id())));
     default:
       break;
   }
@@ -1973,21 +1970,20 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   const std::string guard_name = block_info.flow_guard_name;
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
-    auto guard_var = std::make_unique<ast::Variable>(
+    auto guard_var = create<ast::Variable>(
         guard_name, ast::StorageClass::kFunction, parser_impl_.BoolType());
     guard_var->set_constructor(MakeTrue());
-    auto guard_decl =
-        std::make_unique<ast::VariableDeclStatement>(std::move(guard_var));
+    auto guard_decl = create<ast::VariableDeclStatement>(std::move(guard_var));
     AddStatement(std::move(guard_decl));
   }
 
   const auto condition_id =
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
   auto cond = MakeExpression(condition_id).expr;
-  auto body = std::make_unique<ast::BlockStatement>();
-  auto* const if_stmt = AddStatement(std::make_unique<ast::IfStatement>(
-                                         std::move(cond), std::move(body)))
-                            ->AsIf();
+  auto body = create<ast::BlockStatement>();
+  auto* const if_stmt =
+      AddStatement(create<ast::IfStatement>(std::move(cond), std::move(body)))
+          ->AsIf();
 
   // Generate the code for the condition.
 
@@ -2040,17 +2036,18 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
   auto push_else = [this, if_stmt, else_end, construct]() {
     // Push the else clause onto the stack first.
-    PushNewStatementBlock(construct, else_end, [if_stmt](StatementBlock* s) {
-      // Only set the else-clause if there are statements to fill it.
-      if (!s->statements_->empty()) {
-        // The "else" consists of the statement list from the top of statments
-        // stack, without an elseif condition.
-        ast::ElseStatementList else_stmts;
-        else_stmts.emplace_back(std::make_unique<ast::ElseStatement>(
-            nullptr, std::move(s->statements_)));
-        if_stmt->set_else_statements(std::move(else_stmts));
-      }
-    });
+    PushNewStatementBlock(
+        construct, else_end, [this, if_stmt](StatementBlock* s) {
+          // Only set the else-clause if there are statements to fill it.
+          if (!s->statements_->empty()) {
+            // The "else" consists of the statement list from the top of
+            // statments stack, without an elseif condition.
+            ast::ElseStatementList else_stmts;
+            else_stmts.emplace_back(
+                create<ast::ElseStatement>(nullptr, std::move(s->statements_)));
+            if_stmt->set_else_statements(std::move(else_stmts));
+          }
+        });
   };
 
   if (GetBlockInfo(else_end)->pos < GetBlockInfo(then_end)->pos) {
@@ -2099,7 +2096,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   const auto* branch = block_info.basic_block->terminator();
 
   auto* const switch_stmt =
-      AddStatement(std::make_unique<ast::SwitchStatement>())->AsSwitch();
+      AddStatement(create<ast::SwitchStatement>())->AsSwitch();
   const auto selector_id = branch->GetSingleWordInOperand(0);
   // Generate the code for the selector.
   auto selector = MakeExpression(selector_id);
@@ -2111,7 +2108,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
       construct, construct->end_id, [switch_stmt](StatementBlock* s) {
         switch_stmt->set_body(std::move(*std::move(s->cases_)));
       });
-  statements_stack_.back().cases_ = std::make_unique<ast::CaseStatementList>();
+  statements_stack_.back().cases_ = create<ast::CaseStatementList>();
   // Grab a pointer to the case list.  It will get buried in the statement block
   // stack.
   auto* cases = statements_stack_.back().cases_.get();
@@ -2157,8 +2154,8 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   for (size_t i = last_clause_index;; --i) {
     // Create the case clause.  Temporarily put it in the wrong order
     // on the case statement list.
-    cases->emplace_back(std::make_unique<ast::CaseStatement>(
-        std::make_unique<ast::BlockStatement>()));
+    cases->emplace_back(
+        create<ast::CaseStatement>(create<ast::BlockStatement>()));
     auto* clause = cases->back().get();
 
     // Create a list of integer literals for the selector values leading to
@@ -2175,10 +2172,10 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
         if (selector.type->is_unsigned_scalar_or_vector()) {
           selectors.emplace_back(
-              std::make_unique<ast::UintLiteral>(selector.type, value32));
+              create<ast::UintLiteral>(selector.type, value32));
         } else {
           selectors.emplace_back(
-              std::make_unique<ast::SintLiteral>(selector.type, value32));
+              create<ast::SintLiteral>(selector.type, value32));
         }
       }
       clause->set_selectors(std::move(selectors));
@@ -2195,9 +2192,9 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     if ((default_info == clause_heads[i]) && has_selectors &&
         construct->ContainsPos(default_info->pos)) {
       // Generate a default clause with a just fallthrough.
-      auto stmts = std::make_unique<ast::BlockStatement>();
-      stmts->append(std::make_unique<ast::FallthroughStatement>());
-      auto case_stmt = std::make_unique<ast::CaseStatement>(std::move(stmts));
+      auto stmts = create<ast::BlockStatement>();
+      stmts->append(create<ast::FallthroughStatement>());
+      auto case_stmt = create<ast::CaseStatement>(std::move(stmts));
       cases->emplace_back(std::move(case_stmt));
     }
 
@@ -2214,10 +2211,10 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 }
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
-  auto* loop = AddStatement(std::make_unique<ast::LoopStatement>(
-                                std::make_unique<ast::BlockStatement>(),
-                                std::make_unique<ast::BlockStatement>()))
-                   ->AsLoop();
+  auto* loop =
+      AddStatement(create<ast::LoopStatement>(create<ast::BlockStatement>(),
+                                              create<ast::BlockStatement>()))
+          ->AsLoop();
   PushNewStatementBlock(
       construct, construct->end_id,
       [loop](StatementBlock* s) { loop->set_body(std::move(s->statements_)); });
@@ -2244,18 +2241,17 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
   const auto& terminator = *(block_info.basic_block->terminator());
   switch (terminator.opcode()) {
     case SpvOpReturn:
-      AddStatement(std::make_unique<ast::ReturnStatement>());
+      AddStatement(create<ast::ReturnStatement>());
       return true;
     case SpvOpReturnValue: {
       auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
-      AddStatement(
-          std::make_unique<ast::ReturnStatement>(std::move(value.expr)));
+      AddStatement(create<ast::ReturnStatement>(std::move(value.expr)));
     }
       return true;
     case SpvOpKill:
       // For now, assume SPIR-V OpKill has same semantics as WGSL discard.
       // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
-      AddStatement(std::make_unique<ast::DiscardStatement>());
+      AddStatement(create<ast::DiscardStatement>());
       return true;
     case SpvOpUnreachable:
       // Translate as if it's a return. This avoids the problem where WGSL
@@ -2263,10 +2259,10 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       {
         const auto* result_type = type_mgr_->GetType(function_.type_id());
         if (result_type->AsVoid() != nullptr) {
-          AddStatement(std::make_unique<ast::ReturnStatement>());
+          AddStatement(create<ast::ReturnStatement>());
         } else {
           auto* ast_type = parser_impl_.ConvertType(function_.type_id());
-          AddStatement(std::make_unique<ast::ReturnStatement>(
+          AddStatement(create<ast::ReturnStatement>(
               parser_impl_.MakeNullValue(ast_type)));
         }
       }
@@ -2350,7 +2346,7 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
       break;
     case EdgeKind::kSwitchBreak: {
       if (forced) {
-        return std::make_unique<ast::BreakStatement>();
+        return create<ast::BreakStatement>();
       }
       // Unless forced, don't bother with a break at the end of a case/default
       // clause.
@@ -2375,10 +2371,10 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
         }
       }
       // We need a break.
-      return std::make_unique<ast::BreakStatement>();
+      return create<ast::BreakStatement>();
     }
     case EdgeKind::kLoopBreak:
-      return std::make_unique<ast::BreakStatement>();
+      return create<ast::BreakStatement>();
     case EdgeKind::kLoopContinue:
       // An unconditional continue to the next block is redundant and ugly.
       // Skip it in that case.
@@ -2386,7 +2382,7 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
         break;
       }
       // Otherwise, emit a regular continue statement.
-      return std::make_unique<ast::ContinueStatement>();
+      return create<ast::ContinueStatement>();
     case EdgeKind::kIfBreak: {
       const auto& flow_guard =
           GetBlockInfo(dest_info.header_for_merge)->flow_guard_name;
@@ -2395,9 +2391,8 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
           *flow_guard_name_ptr = flow_guard;
         }
         // Signal an exit from the branch.
-        return std::make_unique<ast::AssignmentStatement>(
-            std::make_unique<ast::IdentifierExpression>(flow_guard),
-            MakeFalse());
+        return create<ast::AssignmentStatement>(
+            create<ast::IdentifierExpression>(flow_guard), MakeFalse());
       }
 
       // For an unconditional branch, the break out to an if-selection
@@ -2405,7 +2400,7 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
       break;
     }
     case EdgeKind::kCaseFallThrough:
-      return std::make_unique<ast::FallthroughStatement>();
+      return create<ast::FallthroughStatement>();
     case EdgeKind::kForward:
       // Unconditional forward branch is implicit.
       break;
@@ -2420,19 +2415,19 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeSimpleIf(
   if ((then_stmt == nullptr) && (else_stmt == nullptr)) {
     return nullptr;
   }
-  auto if_stmt = std::make_unique<ast::IfStatement>(
-      std::move(condition), std::make_unique<ast::BlockStatement>());
+  auto if_stmt = create<ast::IfStatement>(std::move(condition),
+                                          create<ast::BlockStatement>());
   if (then_stmt != nullptr) {
-    auto stmts = std::make_unique<ast::BlockStatement>();
+    auto stmts = create<ast::BlockStatement>();
     stmts->append(std::move(then_stmt));
     if_stmt->set_body(std::move(stmts));
   }
   if (else_stmt != nullptr) {
-    auto stmts = std::make_unique<ast::BlockStatement>();
+    auto stmts = create<ast::BlockStatement>();
     stmts->append(std::move(else_stmt));
     ast::ElseStatementList else_stmts;
     else_stmts.emplace_back(
-        std::make_unique<ast::ElseStatement>(nullptr, std::move(stmts)));
+        create<ast::ElseStatement>(nullptr, std::move(stmts)));
     if_stmt->set_else_statements(std::move(else_stmts));
   }
   return if_stmt;
@@ -2479,7 +2474,7 @@ bool FunctionEmitter::EmitConditionalCaseFallThrough(
     AddStatement(
         MakeSimpleIf(std::move(cond), std::move(other_branch), nullptr));
   }
-  AddStatement(std::make_unique<ast::FallthroughStatement>());
+  AddStatement(create<ast::FallthroughStatement>());
 
   return success();
 }
@@ -2506,7 +2501,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(def_inst);
     auto* ast_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
-    AddStatement(std::make_unique<ast::VariableDeclStatement>(
+    AddStatement(create<ast::VariableDeclStatement>(
         parser_impl_.MakeVariable(id, ast::StorageClass::kFunction, ast_type)));
     // Save this as an already-named value.
     identifier_values_.insert(id);
@@ -2517,10 +2512,10 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(def_inst);
     const auto phi_var_name = GetDefInfo(id)->phi_var;
     assert(!phi_var_name.empty());
-    auto var = std::make_unique<ast::Variable>(
-        phi_var_name, ast::StorageClass::kFunction,
-        parser_impl_.ConvertType(def_inst->type_id()));
-    AddStatement(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+    auto var =
+        create<ast::Variable>(phi_var_name, ast::StorageClass::kFunction,
+                              parser_impl_.ConvertType(def_inst->type_id()));
+    AddStatement(create<ast::VariableDeclStatement>(std::move(var)));
   }
 
   // Emit regular statements.
@@ -2550,9 +2545,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     for (auto assignment : block_info.phi_assignments) {
       const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
       auto expr = MakeExpression(assignment.value);
-      AddStatement(std::make_unique<ast::AssignmentStatement>(
-          std::make_unique<ast::IdentifierExpression>(var_name),
-          std::move(expr.expr)));
+      AddStatement(create<ast::AssignmentStatement>(
+          create<ast::IdentifierExpression>(var_name), std::move(expr.expr)));
     }
   }
 
@@ -2574,7 +2568,7 @@ bool FunctionEmitter::EmitConstDefinition(
   ast_const->set_constructor(std::move(ast_expr.expr));
   ast_const->set_is_const(true);
   AddStatementForInstruction(
-      std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)), inst);
+      create<ast::VariableDeclStatement>(std::move(ast_const)), inst);
   // Save this as an already-named value.
   identifier_values_.insert(inst.result_id());
   return success();
@@ -2588,8 +2582,8 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
   if (def_info && def_info->requires_hoisted_def) {
     // Emit an assignment of the expression to the hoisted variable.
     AddStatementForInstruction(
-        std::make_unique<ast::AssignmentStatement>(
-            std::make_unique<ast::IdentifierExpression>(namer_.Name(result_id)),
+        create<ast::AssignmentStatement>(
+            create<ast::IdentifierExpression>(namer_.Name(result_id)),
             std::move(ast_expr.expr)),
         inst);
     return true;
@@ -2654,7 +2648,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
       auto rhs = MakeExpression(value_id);
-      AddStatementForInstruction(std::make_unique<ast::AssignmentStatement>(
+      AddStatementForInstruction(create<ast::AssignmentStatement>(
                                      std::move(lhs.expr), std::move(rhs.expr)),
                                  inst);
       return success();
@@ -2678,9 +2672,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     }
     case SpvOpPhi: {
       // Emit a read from the associated state variable.
-      auto expr = TypedExpression(
-          parser_impl_.ConvertType(inst.type_id()),
-          std::make_unique<ast::IdentifierExpression>(def_info->phi_var));
+      auto expr =
+          TypedExpression(parser_impl_.ConvertType(inst.type_id()),
+                          create<ast::IdentifierExpression>(def_info->phi_var));
       return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
     }
     case SpvOpFunctionCall:
@@ -2714,7 +2708,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (binary_op != ast::BinaryOp::kNone) {
     auto arg0 = MakeOperand(inst, 0);
     auto arg1 = MakeOperand(inst, 1);
-    auto binary_expr = std::make_unique<ast::BinaryExpression>(
+    auto binary_expr = create<ast::BinaryExpression>(
         binary_op, std::move(arg0.expr), std::move(arg1.expr));
     TypedExpression result(ast_type, std::move(binary_expr));
     return parser_impl_.RectifyForcedResultType(std::move(result), opcode,
@@ -2724,8 +2718,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   auto unary_op = ast::UnaryOp::kNegation;
   if (GetUnaryOp(opcode, &unary_op)) {
     auto arg0 = MakeOperand(inst, 0);
-    auto unary_expr = std::make_unique<ast::UnaryOpExpression>(
-        unary_op, std::move(arg0.expr));
+    auto unary_expr =
+        create<ast::UnaryOpExpression>(unary_op, std::move(arg0.expr));
     TypedExpression result(ast_type, std::move(unary_expr));
     return parser_impl_.RectifyForcedResultType(std::move(result), opcode,
                                                 arg0.type);
@@ -2735,10 +2729,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (unary_builtin_name != nullptr) {
     ast::ExpressionList params;
     params.emplace_back(MakeOperand(inst, 0).expr);
-    return {ast_type,
-            std::make_unique<ast::CallExpression>(
-                std::make_unique<ast::IdentifierExpression>(unary_builtin_name),
-                std::move(params))};
+    return {ast_type, create<ast::CallExpression>(
+                          create<ast::IdentifierExpression>(unary_builtin_name),
+                          std::move(params))};
   }
 
   const auto intrinsic = GetIntrinsic(opcode);
@@ -2751,7 +2744,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   if (opcode == SpvOpBitcast) {
-    return {ast_type, std::make_unique<ast::BitcastExpression>(
+    return {ast_type, create<ast::BitcastExpression>(
                           ast_type, MakeOperand(inst, 0).expr)};
   }
 
@@ -2759,10 +2752,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (negated_op != ast::BinaryOp::kNone) {
     auto arg0 = MakeOperand(inst, 0);
     auto arg1 = MakeOperand(inst, 1);
-    auto binary_expr = std::make_unique<ast::BinaryExpression>(
+    auto binary_expr = create<ast::BinaryExpression>(
         negated_op, std::move(arg0.expr), std::move(arg1.expr));
-    auto negated_expr = std::make_unique<ast::UnaryOpExpression>(
-        ast::UnaryOp::kNot, std::move(binary_expr));
+    auto negated_expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot,
+                                                       std::move(binary_expr));
     return {ast_type, std::move(negated_expr)};
   }
 
@@ -2780,7 +2773,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
       operands.emplace_back(MakeOperand(inst, iarg).expr);
     }
-    return {ast_type, std::make_unique<ast::TypeConstructorExpression>(
+    return {ast_type, create<ast::TypeConstructorExpression>(
                           ast_type, std::move(operands))};
   }
 
@@ -2838,15 +2831,14 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     return {};
   }
 
-  auto func = std::make_unique<ast::IdentifierExpression>(name);
+  auto func = create<ast::IdentifierExpression>(name);
   ast::ExpressionList operands;
   // All parameters to GLSL.std.450 extended instructions are IDs.
   for (uint32_t iarg = 2; iarg < inst.NumInOperands(); ++iarg) {
     operands.emplace_back(MakeOperand(inst, iarg).expr);
   }
   auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-  auto call = std::make_unique<ast::CallExpression>(std::move(func),
-                                                    std::move(operands));
+  auto call = create<ast::CallExpression>(std::move(func), std::move(operands));
   return {ast_type, std::move(call)};
 }
 
@@ -2913,7 +2905,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       // Replace the gl_PerVertex reference with the gl_Position reference
       ptr_ty_id = builtin_position_info.member_pointer_type_id;
       current_expr.expr =
-          std::make_unique<ast::IdentifierExpression>(namer_.Name(base_id));
+          create<ast::IdentifierExpression>(namer_.Name(base_id));
       current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
     }
   }
@@ -2963,13 +2955,13 @@ TypedExpression FunctionEmitter::MakeAccessChain(
                    << " is too big. Max handled index is "
                    << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
           }
-          auto letter_index = std::make_unique<ast::IdentifierExpression>(
-              swizzles[index_const_val]);
-          next_expr = std::make_unique<ast::MemberAccessorExpression>(
+          auto letter_index =
+              create<ast::IdentifierExpression>(swizzles[index_const_val]);
+          next_expr = create<ast::MemberAccessorExpression>(
               std::move(current_expr.expr), std::move(letter_index));
         } else {
           // Non-constant index. Use array syntax
-          next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+          next_expr = create<ast::ArrayAccessorExpression>(
               std::move(current_expr.expr),
               std::move(MakeOperand(inst, index).expr));
         }
@@ -2978,20 +2970,20 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         break;
       case SpvOpTypeMatrix:
         // Use array syntax.
-        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::ArrayAccessorExpression>(
             std::move(current_expr.expr),
             std::move(MakeOperand(inst, index).expr));
         // All matrix components are the same type.
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeArray:
-        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::ArrayAccessorExpression>(
             std::move(current_expr.expr),
             std::move(MakeOperand(inst, index).expr));
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeRuntimeArray:
-        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::ArrayAccessorExpression>(
             std::move(current_expr.expr),
             std::move(MakeOperand(inst, index).expr));
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
@@ -3011,10 +3003,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(
                  << pointee_type_id << " having " << num_members << " members";
           return {};
         }
-        auto member_access = std::make_unique<ast::IdentifierExpression>(
+        auto member_access = create<ast::IdentifierExpression>(
             namer_.GetMemberName(pointee_type_id, uint32_t(index_const_val)));
 
-        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+        next_expr = create<ast::MemberAccessorExpression>(
             std::move(current_expr.expr), std::move(member_access));
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(
             static_cast<uint32_t>(index_const_val));
@@ -3047,10 +3039,10 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   // expressions.
   TypedExpression current_expr(MakeOperand(inst, 0));
 
-  auto make_index = [](uint32_t literal) {
+  auto make_index = [this](uint32_t literal) {
     ast::type::U32Type u32;
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::UintLiteral>(&u32, literal));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::UintLiteral>(&u32, literal));
   };
   static const char* swizzles[] = {"x", "y", "z", "w"};
 
@@ -3088,8 +3080,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
                  << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
         }
         auto letter_index =
-            std::make_unique<ast::IdentifierExpression>(swizzles[index_val]);
-        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+            create<ast::IdentifierExpression>(swizzles[index_val]);
+        next_expr = create<ast::MemberAccessorExpression>(
             std::move(current_expr.expr), std::move(letter_index));
         // All vector components are the same type.
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
@@ -3110,7 +3102,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
                  << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
         }
         // Use array syntax.
-        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::ArrayAccessorExpression>(
             std::move(current_expr.expr), make_index(index_val));
         // All matrix components are the same type.
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
@@ -3120,7 +3112,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         // The array size could be a spec constant, and so it's not always
         // statically checkable.  Instead, rely on a runtime index clamp
         // or runtime check to keep this safe.
-        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+        next_expr = create<ast::ArrayAccessorExpression>(
             std::move(current_expr.expr), make_index(index_val));
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
@@ -3135,10 +3127,10 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
                  << current_type_id << " having " << num_members << " members";
           return {};
         }
-        auto member_access = std::make_unique<ast::IdentifierExpression>(
+        auto member_access = create<ast::IdentifierExpression>(
             namer_.GetMemberName(current_type_id, uint32_t(index_val)));
 
-        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+        next_expr = create<ast::MemberAccessorExpression>(
             std::move(current_expr.expr), std::move(member_access));
         current_type_id = current_type_inst->GetSingleWordInOperand(index_val);
         break;
@@ -3155,14 +3147,14 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
 }
 
 std::unique_ptr<ast::Expression> FunctionEmitter::MakeTrue() const {
-  return std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(parser_impl_.BoolType(), true));
+  return create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(parser_impl_.BoolType(), true));
 }
 
 std::unique_ptr<ast::Expression> FunctionEmitter::MakeFalse() const {
   ast::type::BoolType bool_type;
-  return std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(parser_impl_.BoolType(), false));
+  return create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(parser_impl_.BoolType(), false));
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(
@@ -3188,15 +3180,15 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
     const auto index = inst.GetSingleWordInOperand(i);
     if (index < vec0_len) {
       assert(index < sizeof(swizzles) / sizeof(swizzles[0]));
-      values.emplace_back(std::make_unique<ast::MemberAccessorExpression>(
+      values.emplace_back(create<ast::MemberAccessorExpression>(
           MakeExpression(vec0_id).expr,
-          std::make_unique<ast::IdentifierExpression>(swizzles[index])));
+          create<ast::IdentifierExpression>(swizzles[index])));
     } else if (index < vec0_len + vec1_len) {
       const auto sub_index = index - vec0_len;
       assert(sub_index < sizeof(swizzles) / sizeof(swizzles[0]));
-      values.emplace_back(std::make_unique<ast::MemberAccessorExpression>(
+      values.emplace_back(create<ast::MemberAccessorExpression>(
           MakeExpression(vec1_id).expr,
-          std::make_unique<ast::IdentifierExpression>(swizzles[sub_index])));
+          create<ast::IdentifierExpression>(swizzles[sub_index])));
     } else if (index == 0xFFFFFFFF) {
       // By rule, this maps to OpUndef.  Instead, make it zero.
       values.emplace_back(parser_impl_.MakeNullValue(result_type->type()));
@@ -3206,7 +3198,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
       return {};
     }
   }
-  return {result_type, std::make_unique<ast::TypeConstructorExpression>(
+  return {result_type, create<ast::TypeConstructorExpression>(
                            result_type, std::move(values))};
 }
 
@@ -3497,28 +3489,27 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
 
   ast::ExpressionList params;
   params.push_back(std::move(arg_expr.expr));
-  TypedExpression result(expr_type,
-                         std::make_unique<ast::TypeConstructorExpression>(
-                             expr_type, std::move(params)));
+  TypedExpression result(expr_type, create<ast::TypeConstructorExpression>(
+                                        expr_type, std::move(params)));
 
   if (requested_type == expr_type) {
     return result;
   }
-  return {requested_type, std::make_unique<ast::BitcastExpression>(
+  return {requested_type, create<ast::BitcastExpression>(
                               requested_type, std::move(result.expr))};
 }
 
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   // We ignore function attributes such as Inline, DontInline, Pure, Const.
-  auto function = std::make_unique<ast::IdentifierExpression>(
+  auto function = create<ast::IdentifierExpression>(
       namer_.Name(inst.GetSingleWordInOperand(0)));
 
   ast::ExpressionList params;
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
     params.emplace_back(MakeOperand(inst, iarg).expr);
   }
-  auto call_expr = std::make_unique<ast::CallExpression>(std::move(function),
-                                                         std::move(params));
+  auto call_expr =
+      create<ast::CallExpression>(std::move(function), std::move(params));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     return Fail() << "internal error: no mapped type result of call: "
@@ -3528,8 +3519,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   if (result_type->IsVoid()) {
     return nullptr !=
            AddStatementForInstruction(
-               std::make_unique<ast::CallStatement>(std::move(call_expr)),
-               inst);
+               create<ast::CallStatement>(std::move(call_expr)), inst);
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst,
@@ -3541,15 +3531,15 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   const auto intrinsic = GetIntrinsic(inst.opcode());
   std::ostringstream ss;
   ss << intrinsic;
-  auto ident = std::make_unique<ast::IdentifierExpression>(ss.str());
+  auto ident = create<ast::IdentifierExpression>(ss.str());
   ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
   for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
     params.emplace_back(MakeOperand(inst, iarg).expr);
   }
-  auto call_expr = std::make_unique<ast::CallExpression>(std::move(ident),
-                                                         std::move(params));
+  auto call_expr =
+      create<ast::CallExpression>(std::move(ident), std::move(params));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     Fail() << "internal error: no mapped type result of call: "
@@ -3578,10 +3568,9 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
     params.push_back(std::move(operand2.expr));
     // The condition goes last.
     params.push_back(std::move(condition.expr));
-    return {operand1.type,
-            std::make_unique<ast::CallExpression>(
-                std::make_unique<ast::IdentifierExpression>("select"),
-                std::move(params))};
+    return {operand1.type, create<ast::CallExpression>(
+                               create<ast::IdentifierExpression>("select"),
+                               std::move(params))};
   }
   return {};
 }

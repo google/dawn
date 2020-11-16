@@ -392,8 +392,7 @@ ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
             << ShowType(struct_type_id);
         return nullptr;
       }
-      return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1],
-                                                                 Source{});
+      return create<ast::StructMemberOffsetDecoration>(decoration[1], Source{});
     case SpvDecorationNonReadable:
       // WGSL doesn't have a member decoration for this.  Silently drop it.
       return nullptr;
@@ -782,8 +781,7 @@ bool ParserImpl::ApplyArrayDecorations(
                       << ": multiple ArrayStride decorations";
       }
       ast::ArrayDecorationList decos;
-      decos.push_back(
-          std::make_unique<ast::StrideDecoration>(stride, Source{}));
+      decos.push_back(create<ast::StrideDecoration>(stride, Source{}));
       ast_type->set_decorations(std::move(decos));
     } else {
       return Fail() << "invalid array type ID " << type_id
@@ -806,10 +804,10 @@ ast::type::Type* ParserImpl::ConvertType(
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
       ast_struct_decorations.push_back(
-          std::make_unique<ast::StructBlockDecoration>(Source{}));
+          create<ast::StructBlockDecoration>(Source{}));
     } else if (decoration == SpvDecorationBufferBlock) {
       ast_struct_decorations.push_back(
-          std::make_unique<ast::StructBlockDecoration>(Source{}));
+          create<ast::StructBlockDecoration>(Source{}));
       remap_buffer_block_type_.insert(type_id);
     } else {
       Fail() << "struct with ID " << type_id
@@ -879,14 +877,14 @@ ast::type::Type* ParserImpl::ConvertType(
       ++num_non_writable_members;
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
-    auto ast_struct_member = std::make_unique<ast::StructMember>(
+    auto ast_struct_member = create<ast::StructMember>(
         member_name, ast_member_ty, std::move(ast_member_decorations));
     ast_members.push_back(std::move(ast_struct_member));
   }
 
   // Now make the struct.
-  auto ast_struct = std::make_unique<ast::Struct>(
-      std::move(ast_struct_decorations), std::move(ast_members));
+  auto ast_struct = create<ast::Struct>(std::move(ast_struct_decorations),
+                                        std::move(ast_members));
 
   namer_.SuggestSanitizedName(type_id, "S");
   auto ast_struct_type = std::make_unique<ast::type::StructType>(
@@ -971,8 +969,8 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstantTrue:
       case SpvOpSpecConstantFalse: {
         ast_type = ConvertType(inst.type_id());
-        ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
-            std::make_unique<ast::BoolLiteral>(
+        ast_expr =
+            create<ast::ScalarConstructorExpression>(create<ast::BoolLiteral>(
                 ast_type, inst.opcode() == SpvOpSpecConstantTrue));
         break;
       }
@@ -980,19 +978,19 @@ bool ParserImpl::EmitScalarSpecConstants() {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
         if (ast_type->IsI32()) {
-          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::SintLiteral>(
+          ast_expr =
+              create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
                   ast_type, static_cast<int32_t>(literal_value)));
         } else if (ast_type->IsU32()) {
-          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::UintLiteral>(
+          ast_expr =
+              create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
                   ast_type, static_cast<uint32_t>(literal_value)));
         } else if (ast_type->IsF32()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
-          ast_expr = std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::FloatLiteral>(ast_type, float_value));
+          ast_expr = create<ast::ScalarConstructorExpression>(
+              create<ast::FloatLiteral>(ast_type, float_value));
         } else {
           return Fail() << " invalid result type for OpSpecConstant "
                         << inst.PrettyPrint();
@@ -1008,8 +1006,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
       ast::VariableDecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto cid =
-              std::make_unique<ast::ConstantIdDecoration>(deco[1], Source{});
+          auto cid = create<ast::ConstantIdDecoration>(deco[1], Source{});
           spec_id_decos.push_back(std::move(cid));
           break;
         }
@@ -1020,8 +1017,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
         ast_var->set_constructor(std::move(ast_expr));
         ast_module_.AddGlobalVariable(std::move(ast_var));
       } else {
-        auto ast_deco_var =
-            std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
+        auto ast_deco_var = create<ast::DecoratedVariable>(std::move(ast_var));
         ast_deco_var->set_is_const(true);
         ast_deco_var->set_constructor(std::move(ast_expr));
         ast_deco_var->set_decorations(std::move(spec_id_decos));
@@ -1140,13 +1136,13 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
-    auto var = std::make_unique<ast::DecoratedVariable>(MakeVariable(
+    auto var = create<ast::DecoratedVariable>(MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.member_type_id)));
     ast::VariableDecorationList decos;
-    decos.push_back(std::make_unique<ast::BuiltinDecoration>(
-        ast::Builtin::kPosition, Source{}));
+    decos.push_back(
+        create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
     var->set_decorations(std::move(decos));
 
     ast_module_.AddGlobalVariable(std::move(var));
@@ -1171,7 +1167,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         std::make_unique<ast::type::AccessControlType>(access, type));
   }
 
-  auto ast_var = std::make_unique<ast::Variable>(namer_.Name(id), sc, type);
+  auto ast_var = create<ast::Variable>(namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
@@ -1191,7 +1187,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::BuiltinDecoration>(ast_builtin, Source{}));
+          create<ast::BuiltinDecoration>(ast_builtin, Source{}));
     }
     if (deco[0] == SpvDecorationLocation) {
       if (deco.size() != 2) {
@@ -1200,7 +1196,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::LocationDecoration>(deco[1], Source{}));
+          create<ast::LocationDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
@@ -1209,7 +1205,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::SetDecoration>(deco[1], Source{}));
+          create<ast::SetDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
@@ -1218,12 +1214,11 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
       }
       ast_decorations.emplace_back(
-          std::make_unique<ast::BindingDecoration>(deco[1], Source{}));
+          create<ast::BindingDecoration>(deco[1], Source{}));
     }
   }
   if (!ast_decorations.empty()) {
-    auto decorated_var =
-        std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
+    auto decorated_var = create<ast::DecoratedVariable>(std::move(ast_var));
     decorated_var->set_decorations(std::move(ast_decorations));
     ast_var = std::move(decorated_var);
   }
@@ -1263,26 +1258,26 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->IsU32()) {
-    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
-                          std::make_unique<ast::UintLiteral>(
-                              ast_type, spirv_const->GetU32()))};
+    return {ast_type,
+            create<ast::ScalarConstructorExpression>(
+                create<ast::UintLiteral>(ast_type, spirv_const->GetU32()))};
   }
   if (ast_type->IsI32()) {
-    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
-                          std::make_unique<ast::SintLiteral>(
-                              ast_type, spirv_const->GetS32()))};
+    return {ast_type,
+            create<ast::ScalarConstructorExpression>(
+                create<ast::SintLiteral>(ast_type, spirv_const->GetS32()))};
   }
   if (ast_type->IsF32()) {
-    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
-                          std::make_unique<ast::FloatLiteral>(
-                              ast_type, spirv_const->GetFloat()))};
+    return {ast_type,
+            create<ast::ScalarConstructorExpression>(
+                create<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()))};
   }
   if (ast_type->IsBool()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
-    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
-                          std::make_unique<ast::BoolLiteral>(ast_type, value))};
+    return {ast_type, create<ast::ScalarConstructorExpression>(
+                          create<ast::BoolLiteral>(ast_type, value))};
   }
   auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
@@ -1308,8 +1303,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
       ast_components.emplace_back(std::move(ast_component.expr));
     }
     return {original_ast_type,
-            std::make_unique<ast::TypeConstructorExpression>(
-                original_ast_type, std::move(ast_components))};
+            create<ast::TypeConstructorExpression>(original_ast_type,
+                                                   std::move(ast_components))};
   }
   auto* spirv_null_const = spirv_const->AsNullConstant();
   if (spirv_null_const != nullptr) {
@@ -1336,20 +1331,20 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
   type = type->UnwrapIfNeeded();
 
   if (type->IsBool()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::BoolLiteral>(type, false));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::BoolLiteral>(type, false));
   }
   if (type->IsU32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::UintLiteral>(type, 0u));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::UintLiteral>(type, 0u));
   }
   if (type->IsI32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::SintLiteral>(type, 0));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::SintLiteral>(type, 0));
   }
   if (type->IsF32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(type, 0.0f));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::FloatLiteral>(type, 0.0f));
   }
   if (type->IsVector()) {
     const auto* vec_ty = type->AsVector();
@@ -1357,8 +1352,8 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(vec_ty->type()));
     }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(type,
+                                                  std::move(ast_components));
   }
   if (type->IsMatrix()) {
     const auto* mat_ty = type->AsMatrix();
@@ -1370,8 +1365,8 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
       ast_components.emplace_back(MakeNullValue(column_ty));
     }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(type,
+                                                  std::move(ast_components));
   }
   if (type->IsArray()) {
     auto* arr_ty = type->AsArray();
@@ -1379,8 +1374,8 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));
     }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        original_type, std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(original_type,
+                                                  std::move(ast_components));
   }
   if (type->IsStruct()) {
     auto* struct_ty = type->AsStruct();
@@ -1388,8 +1383,8 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     for (auto& member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        original_type, std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(original_type,
+                                                  std::move(ast_components));
   }
   Fail() << "can't make null value for type: " << type->type_name();
   return nullptr;
@@ -1416,15 +1411,15 @@ TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
     auto* unsigned_ty = unsigned_type_for_[type];
     if (unsigned_ty != nullptr) {
       // Conversion is required.
-      return {unsigned_ty, std::make_unique<ast::BitcastExpression>(
+      return {unsigned_ty, create<ast::BitcastExpression>(
                                unsigned_ty, std::move(expr.expr))};
     }
   } else if (requires_signed) {
     auto* signed_ty = signed_type_for_[type];
     if (signed_ty != nullptr) {
       // Conversion is required.
-      return {signed_ty, std::make_unique<ast::BitcastExpression>(
-                             signed_ty, std::move(expr.expr))};
+      return {signed_ty,
+              create<ast::BitcastExpression>(signed_ty, std::move(expr.expr))};
     }
   }
   // We should not reach here.
@@ -1487,8 +1482,8 @@ TypedExpression ParserImpl::RectifyForcedResultType(
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }
-  return {expr.type, std::make_unique<ast::BitcastExpression>(
-                         expr.type, std::move(expr.expr))};
+  return {expr.type,
+          create<ast::BitcastExpression>(expr.type, std::move(expr.expr))};
 }
 
 bool ParserImpl::EmitFunctions() {

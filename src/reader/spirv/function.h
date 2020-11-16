@@ -21,6 +21,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "source/opt/basic_block.h"
@@ -798,6 +799,13 @@ class FunctionEmitter {
 
   /// @returns a boolean false expression.
   std::unique_ptr<ast::Expression> MakeFalse() const;
+
+  /// @return a `std::unique_ptr` to a new `T` constructed with `args`
+  /// @param args the arguments to forward to the constructor for `T`
+  template <typename T, typename... ARGS>
+  std::unique_ptr<T> create(ARGS&&... args) const {
+    return std::make_unique<T>(std::forward<ARGS>(args)...);
+  }
 
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
