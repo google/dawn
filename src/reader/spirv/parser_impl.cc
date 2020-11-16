@@ -309,7 +309,8 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       break;
   }
 
-  Fail() << "unknown SPIR-V type: " << type_id;
+  Fail() << "unknown SPIR-V type with ID " << type_id << ": "
+         << def_use_mgr_->GetDef(type_id)->PrettyPrint();
   return nullptr;
 }
 

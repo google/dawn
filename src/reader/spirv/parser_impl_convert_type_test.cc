@@ -79,7 +79,8 @@ TEST_F(SpvParserTest, ConvertType_UnhandledType) {
 
   auto* type = p->ConvertType(70);
   EXPECT_EQ(nullptr, type);
-  EXPECT_THAT(p->error(), Eq("unknown SPIR-V type: 70"));
+  EXPECT_THAT(p->error(),
+              Eq("unknown SPIR-V type with ID 70: %70 = OpTypePipe WriteOnly"));
 }
 
 TEST_F(SpvParserTest, ConvertType_Void) {
