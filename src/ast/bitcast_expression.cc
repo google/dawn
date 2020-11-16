@@ -43,7 +43,8 @@ bool BitcastExpression::IsValid() const {
 
 void BitcastExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Bitcast<" << type_->type_name() << ">{" << std::endl;
+  out << "Bitcast[" << result_type_str() << "]<" << type_->type_name() << ">{"
+      << std::endl;
   expr_->to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;

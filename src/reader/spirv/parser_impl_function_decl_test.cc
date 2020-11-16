@@ -200,7 +200,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   {
     Return{
       {
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -213,8 +213,8 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
         none
         __u32
         {
-          Call{
-            Identifier{leaf}
+          Call[not set]{
+            Identifier[not set]{leaf}
             (
             )
           }
@@ -223,7 +223,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
     }
     Return{
       {
-        Identifier{leaf_result}
+        Identifier[not set]{leaf_result}
       }
     }
   }
@@ -236,8 +236,8 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
         none
         __u32
         {
-          Call{
-            Identifier{branch}
+          Call[not set]{
+            Identifier[not set]{branch}
             (
             )
           }
@@ -267,7 +267,7 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   {
     Return{
       {
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{0.000000}
       }
     }
   })"))

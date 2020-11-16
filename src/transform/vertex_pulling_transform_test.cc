@@ -186,29 +186,29 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{4}
+            ScalarConstructor[__u32]{4}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_0}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_a}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
@@ -271,29 +271,29 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_instance_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_instance_index}
             multiply
-            ScalarConstructor{4}
+            ScalarConstructor[__u32]{4}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_0}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_a}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
@@ -356,29 +356,29 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{4}
+            ScalarConstructor[__u32]{4}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_0}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_a}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
@@ -493,57 +493,57 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{custom_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{custom_vertex_index}
             multiply
-            ScalarConstructor{4}
+            ScalarConstructor[__u32]{4}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_0}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_a}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{custom_instance_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{custom_instance_index}
             multiply
-            ScalarConstructor{4}
+            ScalarConstructor[__u32]{4}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_b}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_1}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_b}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
@@ -616,114 +616,114 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{16}
+            ScalarConstructor[__u32]{16}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        Bitcast<__f32>{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{_tint_pulling_vertex_buffer_0}
-              Identifier{_tint_vertex_data}
+        Identifier[__ptr_private__f32]{var_a}
+        Bitcast[__f32]<__f32>{
+          ArrayAccessor[__ptr_storage_buffer__u32]{
+            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+              Identifier[not set]{_tint_vertex_data}
             }
-            Binary{
-              Identifier{_tint_pulling_pos}
+            Binary[__i32]{
+              Identifier[__ptr_function__i32]{_tint_pulling_pos}
               divide
-              ScalarConstructor{4}
+              ScalarConstructor[__u32]{4}
             }
           }
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{16}
+            ScalarConstructor[__u32]{16}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_b}
-        TypeConstructor{
+        Identifier[__ptr_private__array__f32_4]{var_b}
+        TypeConstructor[__vec_4__f32]{
           __vec_4__f32
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{0}
+                  ScalarConstructor[__u32]{0}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{4}
+                  ScalarConstructor[__u32]{4}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{8}
+                  ScalarConstructor[__u32]{8}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{12}
+                  ScalarConstructor[__u32]{12}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
@@ -824,207 +824,207 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{8}
+            ScalarConstructor[__u32]{8}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_a}
-        TypeConstructor{
+        Identifier[__ptr_private__array__f32_2]{var_a}
+        TypeConstructor[__vec_2__f32]{
           __vec_2__f32
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{0}
+                  ScalarConstructor[__u32]{0}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_0}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{4}
+                  ScalarConstructor[__u32]{4}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{12}
+            ScalarConstructor[__u32]{12}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_b}
-        TypeConstructor{
+        Identifier[__ptr_private__array__f32_3]{var_b}
+        TypeConstructor[__vec_3__f32]{
           __vec_3__f32
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_1}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{0}
+                  ScalarConstructor[__u32]{0}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_1}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{4}
+                  ScalarConstructor[__u32]{4}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_1}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{8}
+                  ScalarConstructor[__u32]{8}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
         }
       }
       Assignment{
-        Identifier{_tint_pulling_pos}
-        Binary{
-          Binary{
-            Identifier{_tint_pulling_vertex_index}
+        Identifier[__ptr_function__i32]{_tint_pulling_pos}
+        Binary[__i32]{
+          Binary[__i32]{
+            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
             multiply
-            ScalarConstructor{16}
+            ScalarConstructor[__u32]{16}
           }
           add
-          ScalarConstructor{0}
+          ScalarConstructor[__u32]{0}
         }
       }
       Assignment{
-        Identifier{var_c}
-        TypeConstructor{
+        Identifier[__ptr_private__array__f32_4]{var_c}
+        TypeConstructor[__vec_4__f32]{
           __vec_4__f32
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_2}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{0}
+                  ScalarConstructor[__u32]{0}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_2}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{4}
+                  ScalarConstructor[__u32]{4}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_2}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{8}
+                  ScalarConstructor[__u32]{8}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }
-          Bitcast<__f32>{
-            ArrayAccessor{
-              MemberAccessor{
-                Identifier{_tint_pulling_vertex_buffer_2}
-                Identifier{_tint_vertex_data}
+          Bitcast[__f32]<__f32>{
+            ArrayAccessor[__ptr_storage_buffer__u32]{
+              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
+                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
+                Identifier[not set]{_tint_vertex_data}
               }
-              Binary{
-                Binary{
-                  Identifier{_tint_pulling_pos}
+              Binary[__i32]{
+                Binary[__i32]{
+                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
                   add
-                  ScalarConstructor{12}
+                  ScalarConstructor[__u32]{12}
                 }
                 divide
-                ScalarConstructor{4}
+                ScalarConstructor[__u32]{4}
               }
             }
           }

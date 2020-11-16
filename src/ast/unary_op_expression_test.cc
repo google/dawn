@@ -71,9 +71,9 @@ TEST_F(UnaryOpExpressionTest, ToStr) {
   UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
   std::ostringstream out;
   u.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  UnaryOp{
+  EXPECT_EQ(out.str(), R"(  UnaryOp[not set]{
     not
-    Identifier{ident}
+    Identifier[not set]{ident}
   }
 )");
 }

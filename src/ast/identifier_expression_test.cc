@@ -55,7 +55,7 @@ TEST_F(IdentifierExpressionTest, ToStr) {
   IdentifierExpression i("ident");
   std::ostringstream out;
   i.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Identifier{ident}
+  EXPECT_EQ(out.str(), R"(  Identifier[not set]{ident}
 )");
 }
 

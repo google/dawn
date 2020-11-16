@@ -73,7 +73,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
     none
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
 }
@@ -83,7 +83,7 @@ VariableDeclStatement{
     none
     __u32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
 }
@@ -93,7 +93,7 @@ VariableDeclStatement{
     none
     __i32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
 }
@@ -103,7 +103,7 @@ VariableDeclStatement{
     none
     __f32
     {
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     }
   }
 })")) << ToString(fe.ast_body());
@@ -133,10 +133,10 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
     none
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -147,10 +147,10 @@ VariableDeclStatement{
     none
     __vec_2__i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__i32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -161,10 +161,10 @@ VariableDeclStatement{
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
       }
     }
   }
@@ -193,17 +193,17 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
     none
     __mat_2_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_2__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
       }
     }
@@ -234,10 +234,10 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
     none
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -266,12 +266,12 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
     none
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{false}
-        ScalarConstructor{0}
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{false}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0.000000}
       }
     }
   }

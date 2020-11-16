@@ -88,8 +88,8 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
     none
     __u32
     {
-      Bitcast<__u32>{
-        ScalarConstructor{50.000000}
+      Bitcast[not set]<__u32>{
+        ScalarConstructor[not set]{50.000000}
       }
     }
   })"))
@@ -114,11 +114,11 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
     none
     __vec_2__f32
     {
-      Bitcast<__vec_2__f32>{
-        TypeConstructor{
+      Bitcast[not set]<__vec_2__f32>{
+        TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor{10}
-          ScalarConstructor{20}
+          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{20}
         }
       }
     }
@@ -243,9 +243,9 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
     none
     __f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __f32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -270,10 +270,10 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
     none
     __f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __f32
-        Bitcast<__i32>{
-          Identifier{x_30}
+        Bitcast[not set]<__i32>{
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -299,9 +299,9 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -326,10 +326,10 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        Bitcast<__vec_2__i32>{
-          Identifier{x_30}
+        Bitcast[not set]<__vec_2__i32>{
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -388,10 +388,10 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
     none
     __f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __f32
-        Bitcast<__u32>{
-          Identifier{x_30}
+        Bitcast[not set]<__u32>{
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -417,9 +417,9 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
     none
     __f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __f32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -444,10 +444,10 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        Bitcast<__vec_2__u32>{
-          Identifier{x_30}
+        Bitcast[not set]<__vec_2__u32>{
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -473,9 +473,9 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -534,9 +534,9 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
     none
     __i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __i32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -561,10 +561,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
     none
     __u32
     {
-      Bitcast<__u32>{
-        TypeConstructor{
+      Bitcast[not set]<__u32>{
+        TypeConstructor[not set]{
           __i32
-          Identifier{x_30}
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -590,9 +590,9 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
     none
     __vec_2__i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__i32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -617,10 +617,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
     none
     __vec_2__u32
     {
-      Bitcast<__vec_2__u32>{
-        TypeConstructor{
+      Bitcast[not set]<__vec_2__u32>{
+        TypeConstructor[not set]{
           __vec_2__i32
-          Identifier{x_30}
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -680,10 +680,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
     none
     __i32
     {
-      Bitcast<__i32>{
-        TypeConstructor{
+      Bitcast[not set]<__i32>{
+        TypeConstructor[not set]{
           __u32
-          Identifier{x_30}
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -709,9 +709,9 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
     none
     __u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __u32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))
@@ -736,10 +736,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
     none
     __vec_2__i32
     {
-      Bitcast<__vec_2__i32>{
-        TypeConstructor{
+      Bitcast[not set]<__vec_2__i32>{
+        TypeConstructor[not set]{
           __vec_2__u32
-          Identifier{x_30}
+          Identifier[not set]{x_30}
         }
       }
     }
@@ -765,9 +765,9 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
     none
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        Identifier{x_30}
+        Identifier[not set]{x_30}
       }
     }
   })"))

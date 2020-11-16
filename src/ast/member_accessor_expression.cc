@@ -53,7 +53,7 @@ bool MemberAccessorExpression::IsValid() const {
 
 void MemberAccessorExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "MemberAccessor{" << std::endl;
+  out << "MemberAccessor[" << result_type_str() << "]{" << std::endl;
   struct_->to_str(out, indent + 2);
   member_->to_str(out, indent + 2);
   make_indent(out, indent);

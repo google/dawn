@@ -145,7 +145,7 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Switch{
-    Identifier{ident}
+    Identifier[not set]{ident}
     {
     }
   }
@@ -167,7 +167,7 @@ TEST_F(SwitchStatementTest, ToStr) {
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Switch{
-    Identifier{ident}
+    Identifier[not set]{ident}
     {
       Case 2{
       }

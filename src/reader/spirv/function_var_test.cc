@@ -214,7 +214,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
     function
     __bool
     {
-      ScalarConstructor{true}
+      ScalarConstructor[not set]{true}
     }
   }
 }
@@ -224,7 +224,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
 }
@@ -234,7 +234,7 @@ VariableDeclStatement{
     function
     __i32
     {
-      ScalarConstructor{-1}
+      ScalarConstructor[not set]{-1}
     }
   }
 }
@@ -244,7 +244,7 @@ VariableDeclStatement{
     function
     __u32
     {
-      ScalarConstructor{1}
+      ScalarConstructor[not set]{1}
     }
   }
 }
@@ -254,7 +254,7 @@ VariableDeclStatement{
     function
     __f32
     {
-      ScalarConstructor{1.500000}
+      ScalarConstructor[not set]{1.500000}
     }
   }
 }
@@ -287,7 +287,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
     function
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
 }
@@ -297,7 +297,7 @@ VariableDeclStatement{
     function
     __i32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
 }
@@ -307,7 +307,7 @@ VariableDeclStatement{
     function
     __u32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
 }
@@ -317,7 +317,7 @@ VariableDeclStatement{
     function
     __f32
     {
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     }
   }
 }
@@ -346,10 +346,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
     function
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{1.500000}
-        ScalarConstructor{2.000000}
+        ScalarConstructor[not set]{1.500000}
+        ScalarConstructor[not set]{2.000000}
       }
     }
   }
@@ -384,22 +384,22 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
     function
     __mat_2_3__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_3__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{1.500000}
-          ScalarConstructor{2.000000}
+          ScalarConstructor[not set]{1.500000}
+          ScalarConstructor[not set]{2.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{2.000000}
-          ScalarConstructor{3.000000}
+          ScalarConstructor[not set]{2.000000}
+          ScalarConstructor[not set]{3.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{3.000000}
-          ScalarConstructor{4.000000}
+          ScalarConstructor[not set]{3.000000}
+          ScalarConstructor[not set]{4.000000}
         }
       }
     }
@@ -430,10 +430,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
     function
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{1}
-        ScalarConstructor{2}
+        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{2}
       }
     }
   }
@@ -464,10 +464,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
     function
     __alias_Arr__array__u32_2_stride_16
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __alias_Arr__array__u32_2_stride_16
-        ScalarConstructor{1}
-        ScalarConstructor{2}
+        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{2}
       }
     }
   }
@@ -497,10 +497,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
     function
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -531,10 +531,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
     function
     __alias_Arr__array__u32_2_stride_16
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __alias_Arr__array__u32_2_stride_16
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   }
@@ -565,14 +565,14 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
     function
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{1}
-        ScalarConstructor{1.500000}
-        TypeConstructor{
+        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1.500000}
+        TypeConstructor[not set]{
           __array__u32_2
-          ScalarConstructor{1}
-          ScalarConstructor{2}
+          ScalarConstructor[not set]{1}
+          ScalarConstructor[not set]{2}
         }
       }
     }
@@ -604,14 +604,14 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     function
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0.000000}
+        TypeConstructor[not set]{
           __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
+          ScalarConstructor[not set]{0}
+          ScalarConstructor[not set]{0}
         }
       }
     }
@@ -650,15 +650,15 @@ TEST_F(SpvParserTest,
   }
 }
 Assignment{
-  Identifier{x_25}
-  ScalarConstructor{1}
+  Identifier[not set]{x_25}
+  ScalarConstructor[not set]{1}
 }
 Assignment{
-  Identifier{x_25}
-  Binary{
-    ScalarConstructor{1}
+  Identifier[not set]{x_25}
+  Binary[not set]{
+    ScalarConstructor[not set]{1}
     add
-    ScalarConstructor{1}
+    ScalarConstructor[not set]{1}
   }
 }
 Return{}
@@ -700,25 +700,25 @@ VariableDeclStatement{
     none
     __u32
     {
-      Binary{
-        ScalarConstructor{1}
+      Binary[not set]{
+        ScalarConstructor[not set]{1}
         add
-        ScalarConstructor{1}
+        ScalarConstructor[not set]{1}
       }
     }
   }
 }
 Assignment{
-  Identifier{x_25}
-  ScalarConstructor{1}
+  Identifier[not set]{x_25}
+  ScalarConstructor[not set]{1}
 }
 Assignment{
-  Identifier{x_25}
-  Identifier{x_2}
+  Identifier[not set]{x_25}
+  Identifier[not set]{x_2}
 }
 Assignment{
-  Identifier{x_25}
-  Identifier{x_2}
+  Identifier[not set]{x_25}
+  Identifier[not set]{x_2}
 }
 Return{}
 )")) << ToString(fe.ast_body());
@@ -770,29 +770,29 @@ VariableDeclStatement{
     none
     __u32
     {
-      Binary{
-        ScalarConstructor{1}
+      Binary[not set]{
+        ScalarConstructor[not set]{1}
         add
-        ScalarConstructor{1}
+        ScalarConstructor[not set]{1}
       }
     }
   }
 }
 Assignment{
-  Identifier{x_25}
-  ScalarConstructor{1}
+  Identifier[not set]{x_25}
+  ScalarConstructor[not set]{1}
 }
 Loop{
   continuing {
     Assignment{
-      Identifier{x_25}
-      Identifier{x_2}
+      Identifier[not set]{x_25}
+      Identifier[not set]{x_2}
     }
   }
 }
 Assignment{
-  Identifier{x_25}
-  ScalarConstructor{2}
+  Identifier[not set]{x_25}
+  ScalarConstructor[not set]{2}
 }
 Return{}
 )")) << ToString(fe.ast_body());
@@ -855,8 +855,8 @@ TEST_F(
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{0}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{0}
 }
 Loop{
   VariableDeclStatement{
@@ -867,32 +867,32 @@ Loop{
     }
   }
   Assignment{
-    Identifier{x_1}
-    ScalarConstructor{1}
+    Identifier[not set]{x_1}
+    ScalarConstructor[not set]{1}
   }
   If{
     (
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     )
     {
       Break{}
     }
   }
   Assignment{
-    Identifier{x_1}
-    ScalarConstructor{3}
+    Identifier[not set]{x_1}
+    ScalarConstructor[not set]{3}
   }
   If{
     (
-      ScalarConstructor{true}
+      ScalarConstructor[not set]{true}
     )
     {
       Assignment{
-        Identifier{x_2}
-        Binary{
-          ScalarConstructor{1}
+        Identifier[not set]{x_2}
+        Binary[not set]{
+          ScalarConstructor[not set]{1}
           add
-          ScalarConstructor{1}
+          ScalarConstructor[not set]{1}
         }
       }
     }
@@ -903,17 +903,17 @@ Loop{
     }
   }
   Assignment{
-    Identifier{x_1}
-    Identifier{x_2}
+    Identifier[not set]{x_1}
+    Identifier[not set]{x_2}
   }
   continuing {
     Assignment{
-      Identifier{x_1}
-      ScalarConstructor{4}
+      Identifier[not set]{x_1}
+      ScalarConstructor[not set]{4}
     }
     If{
       (
-        ScalarConstructor{false}
+        ScalarConstructor[not set]{false}
       )
       {
         Break{}
@@ -922,8 +922,8 @@ Loop{
   }
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{5}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{5}
 }
 Return{}
 )")) << ToString(fe.ast_body());
@@ -976,13 +976,13 @@ TEST_F(
     none
     __u32
     {
-      ScalarConstructor{1}
+      ScalarConstructor[not set]{1}
     }
   }
 }
 If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
   }
@@ -993,13 +993,13 @@ VariableDeclStatement{
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 }
 Assignment{
-  Identifier{x_200}
-  Identifier{x_3}
+  Identifier[not set]{x_200}
+  Identifier[not set]{x_3}
 }
 Return{}
 )")) << ToString(fe.ast_body());
@@ -1055,7 +1055,7 @@ TEST_F(SpvParserTest,
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
     VariableDeclStatement{
@@ -1064,13 +1064,13 @@ TEST_F(SpvParserTest,
         none
         __u32
         {
-          ScalarConstructor{1}
+          ScalarConstructor[not set]{1}
         }
       }
     }
     If{
       (
-        ScalarConstructor{true}
+        ScalarConstructor[not set]{true}
       )
       {
       }
@@ -1081,13 +1081,13 @@ TEST_F(SpvParserTest,
         none
         __u32
         {
-          Identifier{x_1}
+          Identifier[not set]{x_1}
         }
       }
     }
     Assignment{
-      Identifier{x_200}
-      Identifier{x_3}
+      Identifier[not set]{x_200}
+      Identifier[not set]{x_3}
     }
   }
 }
@@ -1140,7 +1140,7 @@ TEST_F(
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
     VariableDeclStatement{
@@ -1149,12 +1149,12 @@ TEST_F(
         none
         __u32
         {
-          ScalarConstructor{1}
+          ScalarConstructor[not set]{1}
         }
       }
     }
     Switch{
-      ScalarConstructor{1}
+      ScalarConstructor[not set]{1}
       {
         Case 0{
         }
@@ -1168,13 +1168,13 @@ TEST_F(
         none
         __u32
         {
-          Identifier{x_1}
+          Identifier[not set]{x_1}
         }
       }
     }
     Assignment{
-      Identifier{x_200}
-      Identifier{x_3}
+      Identifier[not set]{x_200}
+      Identifier[not set]{x_3}
     }
   }
 }
@@ -1225,7 +1225,7 @@ TEST_F(SpvParserTest,
     none
     __u32
     {
-      ScalarConstructor{1}
+      ScalarConstructor[not set]{1}
     }
   }
 }
@@ -1235,13 +1235,13 @@ VariableDeclStatement{
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 }
 If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
   }
@@ -1312,7 +1312,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
       none
       __bool
       {
-        Identifier{x_7}
+        Identifier[not set]{x_7}
       }
     }
   }
@@ -1322,21 +1322,21 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
       none
       __bool
       {
-        Identifier{x_8}
+        Identifier[not set]{x_8}
       }
     }
   }
   Assignment{
-    Identifier{x_2_phi}
-    ScalarConstructor{0}
+    Identifier[not set]{x_2_phi}
+    ScalarConstructor[not set]{0}
   }
   Assignment{
-    Identifier{x_3_phi}
-    ScalarConstructor{1}
+    Identifier[not set]{x_3_phi}
+    ScalarConstructor[not set]{1}
   }
   If{
     (
-      Identifier{x_101}
+      Identifier[not set]{x_101}
     )
     {
       Break{}
@@ -1349,7 +1349,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
         none
         __u32
         {
-          Identifier{x_2_phi}
+          Identifier[not set]{x_2_phi}
         }
       }
     }
@@ -1359,25 +1359,25 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
         none
         __u32
         {
-          Identifier{x_3_phi}
+          Identifier[not set]{x_3_phi}
         }
       }
     }
     Assignment{
-      Identifier{x_2_phi}
-      Binary{
-        Identifier{x_2}
+      Identifier[not set]{x_2_phi}
+      Binary[not set]{
+        Identifier[not set]{x_2}
         add
-        ScalarConstructor{1}
+        ScalarConstructor[not set]{1}
       }
     }
     Assignment{
-      Identifier{x_3_phi}
-      Identifier{x_3}
+      Identifier[not set]{x_3_phi}
+      Identifier[not set]{x_3}
     }
     If{
       (
-        Identifier{x_102}
+        Identifier[not set]{x_102}
       )
       {
         Break{}
@@ -1454,7 +1454,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
       none
       __bool
       {
-        Identifier{x_7}
+        Identifier[not set]{x_7}
       }
     }
   }
@@ -1464,21 +1464,21 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
       none
       __bool
       {
-        Identifier{x_8}
+        Identifier[not set]{x_8}
       }
     }
   }
   Assignment{
-    Identifier{x_2_phi}
-    ScalarConstructor{0}
+    Identifier[not set]{x_2_phi}
+    ScalarConstructor[not set]{0}
   }
   Assignment{
-    Identifier{x_3_phi}
-    ScalarConstructor{1}
+    Identifier[not set]{x_3_phi}
+    ScalarConstructor[not set]{1}
   }
   If{
     (
-      Identifier{x_101}
+      Identifier[not set]{x_101}
     )
     {
       Break{}
@@ -1498,7 +1498,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
         none
         __u32
         {
-          Identifier{x_2_phi}
+          Identifier[not set]{x_2_phi}
         }
       }
     }
@@ -1508,13 +1508,13 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
         none
         __u32
         {
-          Identifier{x_3_phi}
+          Identifier[not set]{x_3_phi}
         }
       }
     }
     If{
       (
-        Identifier{x_102}
+        Identifier[not set]{x_102}
       )
       {
         Break{}
@@ -1522,20 +1522,20 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     }
     continuing {
       Assignment{
-        Identifier{x_4}
-        Binary{
-          Identifier{x_2}
+        Identifier[not set]{x_4}
+        Binary[not set]{
+          Identifier[not set]{x_2}
           add
-          ScalarConstructor{1}
+          ScalarConstructor[not set]{1}
         }
       }
       Assignment{
-        Identifier{x_2_phi}
-        Identifier{x_4}
+        Identifier[not set]{x_2_phi}
+        Identifier[not set]{x_4}
       }
       Assignment{
-        Identifier{x_3_phi}
-        Identifier{x_3}
+        Identifier[not set]{x_3_phi}
+        Identifier[not set]{x_3}
       }
     }
   }
@@ -1595,7 +1595,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
     none
     __bool
     {
-      Identifier{x_17}
+      Identifier[not set]{x_17}
     }
   }
 }
@@ -1615,12 +1615,12 @@ Loop{
     }
   }
   Assignment{
-    Identifier{x_2_phi}
-    ScalarConstructor{0}
+    Identifier[not set]{x_2_phi}
+    ScalarConstructor[not set]{0}
   }
   Assignment{
-    Identifier{x_5_phi}
-    ScalarConstructor{1}
+    Identifier[not set]{x_5_phi}
+    ScalarConstructor[not set]{1}
   }
   Loop{
     VariableDeclStatement{
@@ -1636,7 +1636,7 @@ Loop{
         none
         __u32
         {
-          Identifier{x_2_phi}
+          Identifier[not set]{x_2_phi}
         }
       }
     }
@@ -1646,7 +1646,7 @@ Loop{
         none
         __u32
         {
-          Identifier{x_5_phi}
+          Identifier[not set]{x_5_phi}
         }
       }
     }
@@ -1656,10 +1656,10 @@ Loop{
         none
         __u32
         {
-          Binary{
-            Identifier{x_2}
+          Binary[not set]{
+            Identifier[not set]{x_2}
             add
-            ScalarConstructor{1}
+            ScalarConstructor[not set]{1}
           }
         }
       }
@@ -1670,17 +1670,17 @@ Loop{
         none
         __u32
         {
-          Binary{
-            Identifier{x_4}
+          Binary[not set]{
+            Identifier[not set]{x_4}
             add
-            ScalarConstructor{1}
+            ScalarConstructor[not set]{1}
           }
         }
       }
     }
     If{
       (
-        Identifier{x_101}
+        Identifier[not set]{x_101}
       )
       {
         Break{}
@@ -1688,20 +1688,20 @@ Loop{
     }
     continuing {
       Assignment{
-        Identifier{x_7}
-        Binary{
-          Identifier{x_4}
+        Identifier[not set]{x_7}
+        Binary[not set]{
+          Identifier[not set]{x_4}
           add
-          Identifier{x_6}
+          Identifier[not set]{x_6}
         }
       }
       Assignment{
-        Identifier{x_2_phi}
-        Identifier{x_4}
+        Identifier[not set]{x_2_phi}
+        Identifier[not set]{x_4}
       }
       Assignment{
-        Identifier{x_5_phi}
-        Identifier{x_7}
+        Identifier[not set]{x_5_phi}
+        Identifier[not set]{x_7}
       }
     }
   }
@@ -1763,7 +1763,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
     none
     __bool
     {
-      Identifier{x_7}
+      Identifier[not set]{x_7}
     }
   }
 }
@@ -1773,14 +1773,14 @@ VariableDeclStatement{
     none
     __bool
     {
-      Identifier{x_8}
+      Identifier[not set]{x_8}
     }
   }
 }
 Loop{
   If{
     (
-      Identifier{x_101}
+      Identifier[not set]{x_101}
     )
     {
       Break{}
@@ -1795,12 +1795,12 @@ Loop{
   }
   If{
     (
-      Identifier{x_102}
+      Identifier[not set]{x_102}
     )
     {
       Assignment{
-        Identifier{x_2_phi}
-        ScalarConstructor{0}
+        Identifier[not set]{x_2_phi}
+        ScalarConstructor[not set]{0}
       }
       Continue{}
     }
@@ -1808,8 +1808,8 @@ Loop{
   Else{
     {
       Assignment{
-        Identifier{x_2_phi}
-        ScalarConstructor{1}
+        Identifier[not set]{x_2_phi}
+        ScalarConstructor[not set]{1}
       }
     }
   }
@@ -1820,13 +1820,13 @@ Loop{
         none
         __u32
         {
-          Identifier{x_2_phi}
+          Identifier[not set]{x_2_phi}
         }
       }
     }
     Assignment{
-      Identifier{x_1}
-      Identifier{x_2}
+      Identifier[not set]{x_1}
+      Identifier[not set]{x_2}
     }
   }
 }
@@ -1883,7 +1883,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
     none
     __bool
     {
-      Identifier{x_7}
+      Identifier[not set]{x_7}
     }
   }
 }
@@ -1893,14 +1893,14 @@ VariableDeclStatement{
     none
     __bool
     {
-      Identifier{x_8}
+      Identifier[not set]{x_8}
     }
   }
 }
 Loop{
   If{
     (
-      Identifier{x_101}
+      Identifier[not set]{x_101}
     )
     {
       Break{}
@@ -1914,17 +1914,17 @@ Loop{
     }
   }
   Assignment{
-    Identifier{x_2_phi}
-    ScalarConstructor{0}
+    Identifier[not set]{x_2_phi}
+    ScalarConstructor[not set]{0}
   }
   If{
     (
-      Identifier{x_102}
+      Identifier[not set]{x_102}
     )
     {
       Assignment{
-        Identifier{x_2_phi}
-        ScalarConstructor{1}
+        Identifier[not set]{x_2_phi}
+        ScalarConstructor[not set]{1}
       }
     }
   }
@@ -1935,13 +1935,13 @@ Loop{
         none
         __u32
         {
-          Identifier{x_2_phi}
+          Identifier[not set]{x_2_phi}
         }
       }
     }
     Assignment{
-      Identifier{x_1}
-      Identifier{x_2}
+      Identifier[not set]{x_1}
+      Identifier[not set]{x_2}
     }
   }
 }
@@ -1996,10 +1996,10 @@ VariableDeclStatement{
     none
     __bool
     {
-      Binary{
-        ScalarConstructor{true}
+      Binary[not set]{
+        ScalarConstructor[not set]{true}
         logical_and
-        ScalarConstructor{true}
+        ScalarConstructor[not set]{true}
       }
     }
   }
@@ -2010,25 +2010,25 @@ VariableDeclStatement{
     none
     __bool
     {
-      UnaryOp{
+      UnaryOp[not set]{
         not
-        Identifier{x_11}
+        Identifier[not set]{x_11}
       }
     }
   }
 }
 Assignment{
-  Identifier{x_101_phi}
-  Identifier{x_11}
+  Identifier[not set]{x_101_phi}
+  Identifier[not set]{x_11}
 }
 If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
     Assignment{
-      Identifier{x_101_phi}
-      Identifier{x_12}
+      Identifier[not set]{x_101_phi}
+      Identifier[not set]{x_12}
     }
   }
 }
@@ -2038,7 +2038,7 @@ VariableDeclStatement{
     none
     __bool
     {
-      Identifier{x_101_phi}
+      Identifier[not set]{x_101_phi}
     }
   }
 }

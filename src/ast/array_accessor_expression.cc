@@ -52,7 +52,7 @@ bool ArrayAccessorExpression::IsValid() const {
 
 void ArrayAccessorExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "ArrayAccessor{" << std::endl;
+  out << "ArrayAccessor[" << result_type_str() << "]{" << std::endl;
   array_->to_str(out, indent + 2);
   idx_expr_->to_str(out, indent + 2);
   make_indent(out, indent);

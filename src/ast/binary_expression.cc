@@ -50,7 +50,7 @@ bool BinaryExpression::IsValid() const {
 
 void BinaryExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Binary{" << std::endl;
+  out << "Binary[" << result_type_str() << "]{" << std::endl;
   lhs_->to_str(out, indent + 2);
 
   make_indent(out, indent + 2);

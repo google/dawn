@@ -16,6 +16,7 @@
 #define SRC_AST_EXPRESSION_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "src/ast/node.h"
@@ -43,6 +44,12 @@ class Expression : public Node {
   void set_result_type(type::Type* type);
   /// @returns the resulting type from this expression
   type::Type* result_type() const { return result_type_; }
+
+  /// @returns a string representation of the result type or 'not set' if no
+  /// result type present
+  std::string result_type_str() const {
+    return result_type_ ? result_type_->type_name() : "not set";
+  }
 
   /// @returns true if this is an array accessor expression
   virtual bool IsArrayAccessor() const;

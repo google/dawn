@@ -45,7 +45,8 @@ bool ScalarConstructorExpression::IsValid() const {
 void ScalarConstructorExpression::to_str(std::ostream& out,
                                          size_t indent) const {
   make_indent(out, indent);
-  out << "ScalarConstructor{" << literal_->to_str() << "}" << std::endl;
+  out << "ScalarConstructor[" << result_type_str() << "]{" << literal_->to_str()
+      << "}" << std::endl;
 }
 
 }  // namespace ast

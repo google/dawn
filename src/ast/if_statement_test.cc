@@ -186,7 +186,7 @@ TEST_F(IfStatementTest, ToStr) {
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  If{
     (
-      Identifier{cond}
+      Identifier[not set]{cond}
     )
     {
       Discard{}
@@ -221,7 +221,7 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  If{
     (
-      Identifier{cond}
+      Identifier[not set]{cond}
     )
     {
       Discard{}
@@ -229,7 +229,7 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   }
   Else{
     (
-      Identifier{ident}
+      Identifier[not set]{ident}
     )
     {
       Discard{}

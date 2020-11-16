@@ -482,15 +482,7 @@ int main(int argc, const char** argv) {
     tint::diag::Formatter().format(reader->diagnostics(), printer.get());
     return 1;
   }
-
   auto mod = reader->module();
-  if (options.dump_ast) {
-    std::cout << std::endl << mod.to_str() << std::endl;
-  }
-  if (options.parse_only) {
-    return 1;
-  }
-
   if (!mod.IsValid()) {
     std::cerr << "Invalid module generated..." << std::endl;
     return 1;
@@ -499,6 +491,13 @@ int main(int argc, const char** argv) {
   tint::TypeDeterminer td(&ctx, &mod);
   if (!td.Determine()) {
     std::cerr << "Type Determination: " << td.error() << std::endl;
+    return 1;
+  }
+
+  if (options.dump_ast) {
+    std::cout << std::endl << mod.to_str() << std::endl;
+  }
+  if (options.parse_only) {
     return 1;
   }
 

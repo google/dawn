@@ -96,9 +96,9 @@ TEST_F(ArrayAccessorExpressionTest, ToStr) {
   std::ostringstream out;
   exp.to_str(out, 2);
 
-  EXPECT_EQ(out.str(), R"(  ArrayAccessor{
-    Identifier{ary}
-    Identifier{idx}
+  EXPECT_EQ(out.str(), R"(  ArrayAccessor[not set]{
+    Identifier[not set]{ary}
+    Identifier[not set]{idx}
   }
 )");
 }

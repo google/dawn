@@ -38,7 +38,8 @@ bool IdentifierExpression::IsValid() const {
 
 void IdentifierExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Identifier{" << name_ << "}" << std::endl;
+  out << "Identifier[" << result_type_str() << "]{" << name_ << "}"
+      << std::endl;
 }
 
 }  // namespace ast

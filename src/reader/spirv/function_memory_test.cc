@@ -51,16 +51,16 @@ TEST_F(SpvParserTest, EmitStatement_StoreBoolConst) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{true}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{true}
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{false}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{false}
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{false}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{false}
 })"));
 }
 
@@ -83,12 +83,12 @@ TEST_F(SpvParserTest, EmitStatement_StoreUintConst) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{42}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{42}
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{0}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{0}
 })"));
 }
 
@@ -111,12 +111,12 @@ TEST_F(SpvParserTest, EmitStatement_StoreIntConst) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{42}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{42}
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{0}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{0}
 })"));
 }
 
@@ -139,12 +139,12 @@ TEST_F(SpvParserTest, EmitStatement_StoreFloatConst) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{42.000000}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{42.000000}
 }
 Assignment{
-  Identifier{x_1}
-  ScalarConstructor{0.000000}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{0.000000}
 })"));
 }
 
@@ -173,7 +173,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadBool) {
     none
     __bool
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   })"));
 }
@@ -202,7 +202,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadScalar) {
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 }
@@ -212,7 +212,7 @@ VariableDeclStatement{
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 })"));
@@ -243,17 +243,17 @@ TEST_F(SpvParserTest, EmitStatement_UseLoadedScalarTwice) {
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 }
 Assignment{
-  Identifier{x_1}
-  Identifier{x_2}
+  Identifier[not set]{x_1}
+  Identifier[not set]{x_2}
 }
 Assignment{
-  Identifier{x_1}
-  Identifier{x_2}
+  Identifier[not set]{x_1}
+  Identifier[not set]{x_2}
 }
 )"));
 }
@@ -275,8 +275,8 @@ TEST_F(SpvParserTest, EmitStatement_StoreToModuleScopeVar) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  Identifier{x_1}
-  ScalarConstructor{42}
+  Identifier[not set]{x_1}
+  ScalarConstructor[not set]{42}
 })"));
 }
 
@@ -342,11 +342,11 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorSwizzle) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  MemberAccessor{
-    Identifier{myvar}
-    Identifier{z}
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{z}
   }
-  ScalarConstructor{42}
+  ScalarConstructor[not set]{42}
 })")) << ToString(fe.ast_body());
 }
 
@@ -405,11 +405,11 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorNonConstIndex) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  ArrayAccessor{
-    Identifier{myvar}
-    Identifier{x_11}
+  ArrayAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{x_11}
   }
-  ScalarConstructor{42}
+  ScalarConstructor[not set]{42}
 })"));
 }
 
@@ -442,16 +442,16 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Matrix) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  ArrayAccessor{
-    Identifier{myvar}
-    ScalarConstructor{2}
+  ArrayAccessor[not set]{
+    Identifier[not set]{myvar}
+    ScalarConstructor[not set]{2}
   }
-  TypeConstructor{
+  TypeConstructor[not set]{
     __vec_4__f32
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
   }
 })"));
 }
@@ -485,16 +485,16 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Array) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  ArrayAccessor{
-    Identifier{myvar}
-    ScalarConstructor{2}
+  ArrayAccessor[not set]{
+    Identifier[not set]{myvar}
+    ScalarConstructor[not set]{2}
   }
-  TypeConstructor{
+  TypeConstructor[not set]{
     __vec_4__f32
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
-    ScalarConstructor{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
+    ScalarConstructor[not set]{42.000000}
   }
 })"));
 }
@@ -527,11 +527,11 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  MemberAccessor{
-    Identifier{myvar}
-    Identifier{age}
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{age}
   }
-  ScalarConstructor{42.000000}
+  ScalarConstructor[not set]{42.000000}
 })"));
 }
 
@@ -575,18 +575,18 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct_DifferOnlyMemberName) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  MemberAccessor{
-    Identifier{myvar}
-    Identifier{age}
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{age}
   }
-  ScalarConstructor{42.000000}
+  ScalarConstructor[not set]{42.000000}
 }
 Assignment{
-  MemberAccessor{
-    Identifier{myvar2}
-    Identifier{ancientness}
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar2}
+    Identifier[not set]{ancientness}
   }
-  ScalarConstructor{420.000000}
+  ScalarConstructor[not set]{420.000000}
 })")) << ToString(fe.ast_body());
 }
 
@@ -685,14 +685,14 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  ArrayAccessor{
-    MemberAccessor{
-      Identifier{myvar}
-      Identifier{age}
+  ArrayAccessor[not set]{
+    MemberAccessor[not set]{
+      Identifier[not set]{myvar}
+      Identifier[not set]{age}
     }
-    ScalarConstructor{2}
+    ScalarConstructor[not set]{2}
   }
-  ScalarConstructor{42.000000}
+  ScalarConstructor[not set]{42.000000}
 })"));
 }
 
@@ -725,14 +725,14 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  MemberAccessor{
-    ArrayAccessor{
-      Identifier{myvar}
-      ScalarConstructor{2}
+  MemberAccessor[not set]{
+    ArrayAccessor[not set]{
+      Identifier[not set]{myvar}
+      ScalarConstructor[not set]{2}
     }
-    Identifier{w}
+    Identifier[not set]{w}
   }
-  ScalarConstructor{42.000000}
+  ScalarConstructor[not set]{42.000000}
 })"));
 }
 
@@ -833,21 +833,21 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  MemberAccessor{
-    Identifier{myvar}
-    Identifier{field0}
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{field0}
   }
-  ScalarConstructor{0}
+  ScalarConstructor[not set]{0}
 }
 Assignment{
-  ArrayAccessor{
-    MemberAccessor{
-      Identifier{myvar}
-      Identifier{field1}
+  ArrayAccessor[not set]{
+    MemberAccessor[not set]{
+      Identifier[not set]{myvar}
+      Identifier[not set]{field1}
     }
-    ScalarConstructor{1}
+    ScalarConstructor[not set]{1}
   }
-  ScalarConstructor{0}
+  ScalarConstructor[not set]{0}
 })")) << ToString(fe.ast_body())
       << p->error();
 }
@@ -872,14 +872,14 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
-  ArrayAccessor{
-    MemberAccessor{
-      Identifier{myvar}
-      Identifier{field1}
+  ArrayAccessor[not set]{
+    MemberAccessor[not set]{
+      Identifier[not set]{myvar}
+      Identifier[not set]{field1}
     }
-    ScalarConstructor{1}
+    ScalarConstructor[not set]{1}
   }
-  ScalarConstructor{0}
+  ScalarConstructor[not set]{0}
 })")) << ToString(fe.ast_body())
       << p->error();
 }
@@ -910,19 +910,19 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
     none
     __ptr_storage_buffer__u32
     {
-      ArrayAccessor{
-        MemberAccessor{
-          Identifier{myvar}
-          Identifier{field1}
+      ArrayAccessor[not set]{
+        MemberAccessor[not set]{
+          Identifier[not set]{myvar}
+          Identifier[not set]{field1}
         }
-        ScalarConstructor{1}
+        ScalarConstructor[not set]{1}
       }
     }
   }
 }
 Assignment{
-  Identifier{x_2}
-  ScalarConstructor{0}
+  Identifier[not set]{x_2}
+  ScalarConstructor[not set]{0}
 })")) << ToString(fe.ast_body())
       << p->error();
 }
@@ -968,17 +968,17 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
 }
 If{
   (
-    ScalarConstructor{true}
+    ScalarConstructor[not set]{true}
   )
   {
     Assignment{
-      Identifier{x_2}
-      ArrayAccessor{
-        MemberAccessor{
-          Identifier{myvar}
-          Identifier{field1}
+      Identifier[not set]{x_2}
+      ArrayAccessor[not set]{
+        MemberAccessor[not set]{
+          Identifier[not set]{myvar}
+          Identifier[not set]{field1}
         }
-        ScalarConstructor{1}
+        ScalarConstructor[not set]{1}
       }
     }
   }
@@ -989,8 +989,8 @@ Else{
   }
 }
 Assignment{
-  Identifier{x_2}
-  ScalarConstructor{0}
+  Identifier[not set]{x_2}
+  ScalarConstructor[not set]{0}
 }
 Return{}
 )")) << ToString(fe.ast_body())

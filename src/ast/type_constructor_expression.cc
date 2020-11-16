@@ -55,7 +55,7 @@ bool TypeConstructorExpression::IsValid() const {
 
 void TypeConstructorExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "TypeConstructor{" << std::endl;
+  out << "TypeConstructor[" << result_type_str() << "]{" << std::endl;
   make_indent(out, indent + 2);
   out << type_->type_name() << std::endl;
 

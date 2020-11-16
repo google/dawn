@@ -59,7 +59,7 @@ TEST_F(ScalarConstructorExpressionTest, ToStr) {
   ScalarConstructorExpression c(std::move(b));
   std::ostringstream out;
   c.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  ScalarConstructor{true}
+  EXPECT_EQ(out.str(), R"(  ScalarConstructor[not set]{true}
 )");
 }
 

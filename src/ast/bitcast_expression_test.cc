@@ -89,8 +89,8 @@ TEST_F(BitcastExpressionTest, ToStr) {
   std::ostringstream out;
   exp.to_str(out, 2);
 
-  EXPECT_EQ(out.str(), R"(  Bitcast<__f32>{
-    Identifier{expr}
+  EXPECT_EQ(out.str(), R"(  Bitcast[not set]<__f32>{
+    Identifier[not set]{expr}
   }
 )");
 }

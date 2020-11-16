@@ -100,9 +100,9 @@ TEST_F(MemberAccessorExpressionTest, ToStr) {
   MemberAccessorExpression stmt(std::move(str), std::move(mem));
   std::ostringstream out;
   stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  MemberAccessor{
-    Identifier{structure}
-    Identifier{member}
+  EXPECT_EQ(out.str(), R"(  MemberAccessor[not set]{
+    Identifier[not set]{structure}
+    Identifier[not set]{member}
   }
 )");
 }

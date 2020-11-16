@@ -101,8 +101,8 @@ TEST_F(AssignmentStatementTest, ToStr) {
   stmt.to_str(out, 2);
 
   EXPECT_EQ(out.str(), R"(  Assignment{
-    Identifier{lhs}
-    Identifier{rhs}
+    Identifier[not set]{lhs}
+    Identifier[not set]{rhs}
   }
 )");
 }

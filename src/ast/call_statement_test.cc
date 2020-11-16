@@ -60,8 +60,8 @@ TEST_F(CallStatementTest, ToStr) {
 
   std::ostringstream out;
   c.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Call{
-    Identifier{func}
+  EXPECT_EQ(out.str(), R"(  Call[not set]{
+    Identifier[not set]{func}
     (
     )
   }

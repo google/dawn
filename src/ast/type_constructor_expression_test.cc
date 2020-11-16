@@ -114,11 +114,11 @@ TEST_F(TypeConstructorExpressionTest, ToStr) {
   TypeConstructorExpression t(&vec, std::move(expr));
   std::ostringstream out;
   t.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  TypeConstructor{
+  EXPECT_EQ(out.str(), R"(  TypeConstructor[not set]{
     __vec_3__f32
-    Identifier{expr_1}
-    Identifier{expr_2}
-    Identifier{expr_3}
+    Identifier[not set]{expr_1}
+    Identifier[not set]{expr_2}
+    Identifier[not set]{expr_3}
   }
 )");
 }

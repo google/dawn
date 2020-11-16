@@ -92,10 +92,10 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
     none
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor{10}
-        ScalarConstructor{20}
+        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{20}
       }
     }
   }
@@ -106,10 +106,10 @@ VariableDeclStatement{
     none
     __vec_2__i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__i32
-        ScalarConstructor{30}
-        ScalarConstructor{40}
+        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{40}
       }
     }
   }
@@ -120,10 +120,10 @@ VariableDeclStatement{
     none
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{50.000000}
-        ScalarConstructor{60.000000}
+        ScalarConstructor[not set]{50.000000}
+        ScalarConstructor[not set]{60.000000}
       }
     }
   }
@@ -148,22 +148,22 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
     none
     __mat_2_3__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_3__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{60.000000}
-          ScalarConstructor{50.000000}
+          ScalarConstructor[not set]{60.000000}
+          ScalarConstructor[not set]{50.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{70.000000}
-          ScalarConstructor{70.000000}
+          ScalarConstructor[not set]{70.000000}
+          ScalarConstructor[not set]{70.000000}
         }
       }
     }
@@ -189,13 +189,13 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
     none
     __array__u32_5
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_5
-        ScalarConstructor{10}
-        ScalarConstructor{20}
-        ScalarConstructor{3}
-        ScalarConstructor{4}
-        ScalarConstructor{5}
+        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{4}
+        ScalarConstructor[not set]{5}
       }
     }
   })"))
@@ -220,15 +220,15 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
     none
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
         }
-        ScalarConstructor{5}
-        ScalarConstructor{30}
+        ScalarConstructor[not set]{5}
+        ScalarConstructor[not set]{30}
       }
     }
   })"))
@@ -255,13 +255,13 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
     none
     __f32
     {
-      MemberAccessor{
-        TypeConstructor{
+      MemberAccessor[not set]{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
         }
-        Identifier{y}
+        Identifier[not set]{y}
       }
     }
   })"))
@@ -306,9 +306,9 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
     none
     __vec_2__f32
     {
-      ArrayAccessor{
-        Identifier{x_1}
-        ScalarConstructor{2}
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{2}
       }
     }
   })"))
@@ -357,12 +357,12 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
     none
     __f32
     {
-      MemberAccessor{
-        ArrayAccessor{
-          Identifier{x_1}
-          ScalarConstructor{2}
+      MemberAccessor[not set]{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1}
+          ScalarConstructor[not set]{2}
         }
-        Identifier{y}
+        Identifier[not set]{y}
       }
     }
   })"))
@@ -391,9 +391,9 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
     none
     __u32
     {
-      ArrayAccessor{
-        Identifier{x_1}
-        ScalarConstructor{3}
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{3}
       }
     }
   })"))
@@ -442,9 +442,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
     none
     __i32
     {
-      MemberAccessor{
-        Identifier{x_1}
-        Identifier{field2}
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field2}
       }
     }
   })"))
@@ -484,9 +484,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
     none
     __u32
     {
-      MemberAccessor{
-        Identifier{x_1}
-        Identifier{algo}
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{algo}
       }
     }
   })"))
@@ -497,9 +497,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
     none
     __u32
     {
-      MemberAccessor{
-        Identifier{x_3}
-        Identifier{rithm}
+      MemberAccessor[not set]{
+        Identifier[not set]{x_3}
+        Identifier[not set]{rithm}
       }
     }
   })"))
@@ -550,18 +550,18 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
     none
     __f32
     {
-      MemberAccessor{
-        ArrayAccessor{
-          ArrayAccessor{
-            MemberAccessor{
-              Identifier{x_1}
-              Identifier{field1}
+      MemberAccessor[not set]{
+        ArrayAccessor[not set]{
+          ArrayAccessor[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{field1}
             }
-            ScalarConstructor{2}
+            ScalarConstructor[not set]{2}
           }
-          ScalarConstructor{0}
+          ScalarConstructor[not set]{0}
         }
-        Identifier{y}
+        Identifier[not set]{y}
       }
     }
   })"))
@@ -589,7 +589,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
     none
     __u32
     {
-      ScalarConstructor{3}
+      ScalarConstructor[not set]{3}
     }
   }
 }
@@ -599,7 +599,7 @@ VariableDeclStatement{
     none
     __u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 })")) << ToString(fe.ast_body());
@@ -627,7 +627,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
     none
     __ptr_function__u32
     {
-      Identifier{x_10}
+      Identifier[not set]{x_10}
     }
   }
 }
@@ -637,7 +637,7 @@ VariableDeclStatement{
     none
     __ptr_function__u32
     {
-      Identifier{x_1}
+      Identifier[not set]{x_1}
     }
   }
 })")) << ToString(fe.ast_body());
@@ -666,23 +666,23 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
     none
     __vec_4__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_4__u32
-        MemberAccessor{
-          Identifier{x_2}
-          Identifier{y}
+        MemberAccessor[not set]{
+          Identifier[not set]{x_2}
+          Identifier[not set]{y}
         }
-        MemberAccessor{
-          Identifier{x_2}
-          Identifier{x}
+        MemberAccessor[not set]{
+          Identifier[not set]{x_2}
+          Identifier[not set]{x}
         }
-        MemberAccessor{
-          Identifier{x_1}
-          Identifier{y}
+        MemberAccessor[not set]{
+          Identifier[not set]{x_1}
+          Identifier[not set]{y}
         }
-        MemberAccessor{
-          Identifier{x_1}
-          Identifier{x}
+        MemberAccessor[not set]{
+          Identifier[not set]{x_1}
+          Identifier[not set]{x}
         }
       }
     }
@@ -708,39 +708,39 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
     none
     __vec_4__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_4__u32
-        MemberAccessor{
-          TypeConstructor{
+        MemberAccessor[not set]{
+          TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor{4}
-            ScalarConstructor{3}
+            ScalarConstructor[not set]{4}
+            ScalarConstructor[not set]{3}
           }
-          Identifier{y}
+          Identifier[not set]{y}
         }
-        MemberAccessor{
-          TypeConstructor{
+        MemberAccessor[not set]{
+          TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor{4}
-            ScalarConstructor{3}
+            ScalarConstructor[not set]{4}
+            ScalarConstructor[not set]{3}
           }
-          Identifier{x}
+          Identifier[not set]{x}
         }
-        MemberAccessor{
-          TypeConstructor{
+        MemberAccessor[not set]{
+          TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor{3}
-            ScalarConstructor{4}
+            ScalarConstructor[not set]{3}
+            ScalarConstructor[not set]{4}
           }
-          Identifier{y}
+          Identifier[not set]{y}
         }
-        MemberAccessor{
-          TypeConstructor{
+        MemberAccessor[not set]{
+          TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor{3}
-            ScalarConstructor{4}
+            ScalarConstructor[not set]{3}
+            ScalarConstructor[not set]{4}
           }
-          Identifier{x}
+          Identifier[not set]{x}
         }
       }
     }
@@ -767,12 +767,12 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
     none
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor{0}
-        MemberAccessor{
-          Identifier{x_1}
-          Identifier{y}
+        ScalarConstructor[not set]{0}
+        MemberAccessor[not set]{
+          Identifier[not set]{x_1}
+          Identifier[not set]{y}
         }
       }
     }

@@ -106,10 +106,11 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          ScalarConstructor{50.000000}
+          ScalarConstructor[not set]{50.000000}
         )
       }
     }
@@ -136,13 +137,14 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{50.000000}
-            ScalarConstructor{60.000000}
+            ScalarConstructor[not set]{50.000000}
+            ScalarConstructor[not set]{60.000000}
           }
         )
       }
@@ -170,11 +172,12 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
         )
       }
     }
@@ -201,18 +204,19 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{50.000000}
-            ScalarConstructor{60.000000}
+            ScalarConstructor[not set]{50.000000}
+            ScalarConstructor[not set]{60.000000}
           }
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{60.000000}
-            ScalarConstructor{50.000000}
+            ScalarConstructor[not set]{60.000000}
+            ScalarConstructor[not set]{50.000000}
           }
         )
       }
@@ -240,10 +244,11 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          ScalarConstructor{50.000000}
+          ScalarConstructor[not set]{50.000000}
         )
       }
     }
@@ -270,13 +275,14 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
     none
     __vec_2__f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{50.000000}
-            ScalarConstructor{60.000000}
+            ScalarConstructor[not set]{50.000000}
+            ScalarConstructor[not set]{60.000000}
           }
         )
       }
@@ -304,11 +310,12 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
         )
       }
     }
@@ -335,18 +342,19 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
     none
     __vec_2__f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{50.000000}
-            ScalarConstructor{60.000000}
+            ScalarConstructor[not set]{50.000000}
+            ScalarConstructor[not set]{60.000000}
           }
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{60.000000}
-            ScalarConstructor{50.000000}
+            ScalarConstructor[not set]{60.000000}
+            ScalarConstructor[not set]{50.000000}
           }
         )
       }
@@ -374,12 +382,13 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
     none
     __f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          ScalarConstructor{50.000000}
-          ScalarConstructor{60.000000}
-          ScalarConstructor{70.000000}
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
+          ScalarConstructor[not set]{70.000000}
         )
       }
     }
@@ -407,23 +416,24 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
     none
     __vec_2__f32
     {
-      Call{
-        Identifier{)" + GetParam().wgsl_func + R"(}
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
         (
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{50.000000}
-            ScalarConstructor{60.000000}
+            ScalarConstructor[not set]{50.000000}
+            ScalarConstructor[not set]{60.000000}
           }
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{60.000000}
-            ScalarConstructor{50.000000}
+            ScalarConstructor[not set]{60.000000}
+            ScalarConstructor[not set]{50.000000}
           }
-          TypeConstructor{
+          TypeConstructor[not set]{
             __vec_2__f32
-            ScalarConstructor{70.000000}
-            ScalarConstructor{70.000000}
+            ScalarConstructor[not set]{70.000000}
+            ScalarConstructor[not set]{70.000000}
           }
         )
       }

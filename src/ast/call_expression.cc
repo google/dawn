@@ -50,7 +50,7 @@ bool CallExpression::IsValid() const {
 
 void CallExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Call{" << std::endl;
+  out << "Call[" << result_type_str() << "]{" << std::endl;
   func_->to_str(out, indent + 2);
 
   make_indent(out, indent + 2);

@@ -111,10 +111,10 @@ TEST_F(BinaryExpressionTest, ToStr) {
   BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   std::ostringstream out;
   r.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Binary{
-    Identifier{lhs}
+  EXPECT_EQ(out.str(), R"(  Binary[not set]{
+    Identifier[not set]{lhs}
     equal
-    Identifier{rhs}
+    Identifier[not set]{rhs}
   }
 )");
 }

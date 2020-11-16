@@ -101,8 +101,8 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
   CallExpression stmt(std::move(func), {});
   std::ostringstream out;
   stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Call{
-    Identifier{func}
+  EXPECT_EQ(out.str(), R"(  Call[not set]{
+    Identifier[not set]{func}
     (
     )
   }
@@ -118,11 +118,11 @@ TEST_F(CallExpressionTest, ToStr_WithParams) {
   CallExpression stmt(std::move(func), std::move(params));
   std::ostringstream out;
   stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Call{
-    Identifier{func}
+  EXPECT_EQ(out.str(), R"(  Call[not set]{
+    Identifier[not set]{func}
     (
-      Identifier{param1}
-      Identifier{param2}
+      Identifier[not set]{param1}
+      Identifier[not set]{param2}
     )
   }
 )");

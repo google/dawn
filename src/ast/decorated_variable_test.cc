@@ -133,7 +133,7 @@ TEST_F(DecoratedVariableTest, to_str) {
     function
     __f32
     {
-      Identifier{expr}
+      Identifier[not set]{expr}
     }
   }
 )");

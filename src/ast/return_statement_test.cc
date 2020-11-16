@@ -80,7 +80,7 @@ TEST_F(ReturnStatementTest, ToStr_WithValue) {
   r.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Return{
     {
-      Identifier{expr}
+      Identifier[not set]{expr}
     }
   }
 )");

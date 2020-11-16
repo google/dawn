@@ -42,7 +42,7 @@ bool UnaryOpExpression::IsValid() const {
 
 void UnaryOpExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "UnaryOp{" << std::endl;
+  out << "UnaryOp[" << result_type_str() << "]{" << std::endl;
   make_indent(out, indent + 2);
   out << op_ << std::endl;
   expr_->to_str(out, indent + 2);

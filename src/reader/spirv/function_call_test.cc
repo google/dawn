@@ -56,8 +56,8 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
   Function x_100 -> __void
   ()
   {
-    Call{
-      Identifier{x_50}
+    Call[not set]{
+      Identifier[not set]{x_50}
       (
       )
     }
@@ -96,8 +96,8 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
     none
     __u32
     {
-      Call{
-        Identifier{x_50}
+      Call[not set]{
+        Identifier[not set]{x_50}
         (
         )
       }
@@ -113,7 +113,7 @@ Return{})"))
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
   {
-    ScalarConstructor{42}
+    ScalarConstructor[not set]{42}
   }
 })")) << ToString(fe.ast_body());
   }
@@ -159,8 +159,8 @@ VariableDeclStatement{
     none
     __u32
     {
-      Call{
-        Identifier{x_50}
+      Call[not set]{
+        Identifier[not set]{x_50}
         (
         )
       }
@@ -168,12 +168,12 @@ VariableDeclStatement{
   }
 }
 Assignment{
-  Identifier{x_10}
-  Identifier{x_1}
+  Identifier[not set]{x_10}
+  Identifier[not set]{x_1}
 }
 Assignment{
-  Identifier{x_10}
-  Identifier{x_1}
+  Identifier[not set]{x_10}
+  Identifier[not set]{x_1}
 }
 Return{})"))
         << ToString(fe.ast_body());
@@ -183,7 +183,7 @@ Return{})"))
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
   {
-    ScalarConstructor{42}
+    ScalarConstructor[not set]{42}
   }
 })")) << ToString(fe.ast_body());
   }
@@ -232,10 +232,10 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   {
     Return{
       {
-        Binary{
-          Identifier{x_51}
+        Binary[not set]{
+          Identifier[not set]{x_51}
           add
-          Identifier{x_52}
+          Identifier[not set]{x_52}
         }
       }
     }
@@ -249,11 +249,11 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
         none
         __u32
         {
-          Call{
-            Identifier{x_50}
+          Call[not set]{
+            Identifier[not set]{x_50}
             (
-              ScalarConstructor{42}
-              ScalarConstructor{84}
+              ScalarConstructor[not set]{42}
+              ScalarConstructor[not set]{84}
             )
           }
         }

@@ -329,13 +329,13 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
-      Identifier{gl_Position}
-      TypeConstructor{
+      Identifier[not set]{gl_Position}
+      TypeConstructor[not set]{
         __vec_4__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
       }
     })"))
       << module_str;
@@ -360,11 +360,11 @@ TEST_F(SpvParserTest,
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
-      MemberAccessor{
-        Identifier{gl_Position}
-        Identifier{y}
+      MemberAccessor[not set]{
+        Identifier[not set]{gl_Position}
+        Identifier[not set]{y}
       }
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     })"))
       << module_str;
 }
@@ -392,11 +392,11 @@ TEST_F(SpvParserTest,
   EXPECT_THAT(module_str, HasSubstr(R"(
   {
     Assignment{
-      MemberAccessor{
-        Identifier{gl_Position}
-        Identifier{y}
+      MemberAccessor[not set]{
+        Identifier[not set]{gl_Position}
+        Identifier[not set]{y}
       }
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     }
     Return{}
   })"))
@@ -518,7 +518,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
     private
     __bool
     {
-      ScalarConstructor{true}
+      ScalarConstructor[not set]{true}
     }
   }
   Variable{
@@ -526,7 +526,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
     private
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
   Variable{
@@ -534,7 +534,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
     private
     __i32
     {
-      ScalarConstructor{-1}
+      ScalarConstructor[not set]{-1}
     }
   }
   Variable{
@@ -542,7 +542,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
     private
     __u32
     {
-      ScalarConstructor{1}
+      ScalarConstructor[not set]{1}
     }
   }
   Variable{
@@ -550,7 +550,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
     private
     __f32
     {
-      ScalarConstructor{1.500000}
+      ScalarConstructor[not set]{1.500000}
     }
   })"));
 }
@@ -575,7 +575,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
     private
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
   Variable{
@@ -583,7 +583,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
     private
     __i32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
   Variable{
@@ -591,7 +591,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
     private
     __u32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
   Variable{
@@ -599,7 +599,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
     private
     __f32
     {
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     }
   })"));
 }
@@ -624,7 +624,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
     private
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
   Variable{
@@ -632,7 +632,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
     private
     __i32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
   Variable{
@@ -640,7 +640,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
     private
     __u32
     {
-      ScalarConstructor{0}
+      ScalarConstructor[not set]{0}
     }
   }
   Variable{
@@ -648,7 +648,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
     private
     __f32
     {
-      ScalarConstructor{0.000000}
+      ScalarConstructor[not set]{0.000000}
     }
   })"));
 }
@@ -668,10 +668,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
     private
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{1.500000}
-        ScalarConstructor{2.000000}
+        ScalarConstructor[not set]{1.500000}
+        ScalarConstructor[not set]{2.000000}
       }
     }
   })"));
@@ -691,10 +691,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
     private
     __vec_2__bool
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__bool
-        ScalarConstructor{false}
-        ScalarConstructor{false}
+        ScalarConstructor[not set]{false}
+        ScalarConstructor[not set]{false}
       }
     }
   })"));
@@ -714,10 +714,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
     private
     __vec_2__bool
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__bool
-        ScalarConstructor{false}
-        ScalarConstructor{false}
+        ScalarConstructor[not set]{false}
+        ScalarConstructor[not set]{false}
       }
     }
   })"));
@@ -737,10 +737,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
     private
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -760,10 +760,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
     private
     __vec_2__u32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -783,10 +783,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
     private
     __vec_2__i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__i32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -806,10 +806,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
     private
     __vec_2__i32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__i32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -829,10 +829,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
     private
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
       }
     }
   })"));
@@ -852,10 +852,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
     private
     __vec_2__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __vec_2__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
       }
     }
   })"));
@@ -881,22 +881,22 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
     private
     __mat_2_3__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_3__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{1.500000}
-          ScalarConstructor{2.000000}
+          ScalarConstructor[not set]{1.500000}
+          ScalarConstructor[not set]{2.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{2.000000}
-          ScalarConstructor{3.000000}
+          ScalarConstructor[not set]{2.000000}
+          ScalarConstructor[not set]{3.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{3.000000}
-          ScalarConstructor{4.000000}
+          ScalarConstructor[not set]{3.000000}
+          ScalarConstructor[not set]{4.000000}
         }
       }
     }
@@ -917,22 +917,22 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
     private
     __mat_2_3__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_3__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
       }
     }
@@ -953,22 +953,22 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
     private
     __mat_2_3__f32
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __mat_2_3__f32
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
-        TypeConstructor{
+        TypeConstructor[not set]{
           __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
+          ScalarConstructor[not set]{0.000000}
+          ScalarConstructor[not set]{0.000000}
         }
       }
     }
@@ -990,10 +990,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
     private
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{1}
-        ScalarConstructor{2}
+        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{2}
       }
     }
   })"));
@@ -1013,10 +1013,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
     private
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -1036,10 +1036,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
     private
     __array__u32_2
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
       }
     }
   })"));
@@ -1061,14 +1061,14 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
     private
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{1}
-        ScalarConstructor{1.500000}
-        TypeConstructor{
+        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1.500000}
+        TypeConstructor[not set]{
           __array__u32_2
-          ScalarConstructor{1}
-          ScalarConstructor{2}
+          ScalarConstructor[not set]{1}
+          ScalarConstructor[not set]{2}
         }
       }
     }
@@ -1090,14 +1090,14 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
     private
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0.000000}
+        TypeConstructor[not set]{
           __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
+          ScalarConstructor[not set]{0}
+          ScalarConstructor[not set]{0}
         }
       }
     }
@@ -1119,14 +1119,14 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
     private
     __struct_S
     {
-      TypeConstructor{
+      TypeConstructor[not set]{
         __struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0.000000}
+        TypeConstructor[not set]{
           __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
+          ScalarConstructor[not set]{0}
+          ScalarConstructor[not set]{0}
         }
       }
     }
@@ -1509,7 +1509,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
     none
     __bool
     {
-      ScalarConstructor{true}
+      ScalarConstructor[not set]{true}
     }
   }
 })")) << module_str;
@@ -1534,7 +1534,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
     none
     __bool
     {
-      ScalarConstructor{false}
+      ScalarConstructor[not set]{false}
     }
   }
 })")) << module_str;
@@ -1559,7 +1559,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
     none
     __u32
     {
-      ScalarConstructor{42}
+      ScalarConstructor[not set]{42}
     }
   }
 })")) << module_str;
@@ -1584,7 +1584,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
     none
     __i32
     {
-      ScalarConstructor{42}
+      ScalarConstructor[not set]{42}
     }
   }
 })")) << module_str;
@@ -1609,7 +1609,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
     none
     __f32
     {
-      ScalarConstructor{2.500000}
+      ScalarConstructor[not set]{2.500000}
     }
   }
 })")) << module_str;
@@ -1632,7 +1632,7 @@ TEST_F(SpvParserTest,
     none
     __f32
     {
-      ScalarConstructor{2.500000}
+      ScalarConstructor[not set]{2.500000}
     }
   }
 })")) << module_str;
@@ -1660,10 +1660,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
     none
     __f32
     {
-      Binary{
-        Identifier{myconst}
+      Binary[not set]{
+        Identifier[not set]{myconst}
         add
-        Identifier{myconst}
+        Identifier[not set]{myconst}
       }
     }
   })"))

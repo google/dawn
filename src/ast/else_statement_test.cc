@@ -116,7 +116,7 @@ TEST_F(ElseStatementTest, ToStr) {
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     (
-      ScalarConstructor{true}
+      ScalarConstructor[not set]{true}
     )
     {
       Discard{}
