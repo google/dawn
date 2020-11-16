@@ -154,13 +154,92 @@ OpStore %7 %6
 )");
 }
 
-TEST_F(BuilderTest,
-       DISABLED_FunctionVar_WithNonConstantConstructorLoadedFromVar) {
-  // fn main() -> void {
-  //   var v : f32 = 1.0;
-  //   var v2 : f32 = v; // Should generate the load automatically.
-  // }
-  FAIL();
+TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
+  // var v : f32 = 1.0;
+  // var v2 : f32 = v; // Should generate the load and store automatically.
+
+  ast::type::F32Type f32;
+
+  auto init = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f));
+
+  ASSERT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("v", ast::StorageClass::kFunction, &f32);
+  v.set_constructor(std::move(init));
+  td.RegisterVariableForTesting(&v);
+
+  ast::Variable v2("v2", ast::StorageClass::kFunction, &f32);
+  v2.set_constructor(create<ast::IdentifierExpression>("v"));
+  td.RegisterVariableForTesting(&v2);
+
+  ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
+
+  b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(&v2)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_76"
+OpName %7 "tint_7632"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 1
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%3 = OpVariable %4 Function %5
+%7 = OpVariable %4 Function %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %3 %2
+%6 = OpLoad %1 %3
+OpStore %7 %6
+)");
+}
+
+TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
+  // var v : f32 = 1.0;
+  // const v2 : f32 = v; // Should generate the load
+
+  ast::type::F32Type f32;
+
+  auto init = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f));
+
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("v", ast::StorageClass::kFunction, &f32);
+  v.set_constructor(std::move(init));
+  td.RegisterVariableForTesting(&v);
+
+  ast::Variable v2("v2", ast::StorageClass::kFunction, &f32);
+  v2.set_is_const(true);
+  v2.set_constructor(create<ast::IdentifierExpression>("v"));
+  td.RegisterVariableForTesting(&v2);
+
+  ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
+
+  b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(&v2)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_76"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 1
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%3 = OpVariable %4 Function %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %3 %2
+%6 = OpLoad %1 %3
+)");
 }
 
 TEST_F(BuilderTest, FunctionVar_Const) {

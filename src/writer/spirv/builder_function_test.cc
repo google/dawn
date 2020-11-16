@@ -239,9 +239,9 @@ OpName %3 "tint_44617461"
 OpMemberName %3 0 "tint_64"
 OpName %1 "tint_64617461"
 OpName %7 "tint_61"
-OpName %13 "tint_76"
+OpName %14 "tint_76"
 OpName %17 "tint_62"
-OpName %20 "tint_76"
+OpName %21 "tint_76"
 OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpDecorate %1 Binding 0
@@ -255,22 +255,22 @@ OpDecorate %1 DescriptorSet 0
 %9 = OpTypeInt 32 0
 %10 = OpConstant %9 0
 %11 = OpTypePointer StorageBuffer %4
-%14 = OpTypePointer Function %4
-%15 = OpConstantNull %4
+%15 = OpTypePointer Function %4
+%16 = OpConstantNull %4
 %7 = OpFunction %6 None %5
 %8 = OpLabel
-%13 = OpVariable %14 Function %15
+%14 = OpVariable %15 Function %16
 %12 = OpAccessChain %11 %1 %10
-%16 = OpLoad %4 %12
-OpStore %13 %16
+%13 = OpLoad %4 %12
+OpStore %14 %13
 OpReturn
 OpFunctionEnd
 %17 = OpFunction %6 None %5
 %18 = OpLabel
-%20 = OpVariable %14 Function %15
+%21 = OpVariable %15 Function %16
 %19 = OpAccessChain %11 %1 %10
-%21 = OpLoad %4 %19
-OpStore %20 %21
+%20 = OpLoad %4 %19
+OpStore %21 %20
 OpReturn
 OpFunctionEnd
 )");

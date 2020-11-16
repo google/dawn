@@ -607,6 +607,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
     if (init_id == 0) {
       return false;
     }
+    init_id = GenerateLoadIfNeeded(var->constructor()->result_type(), init_id);
   }
 
   if (var->is_const()) {
@@ -644,7 +645,6 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
                      Operand::Int(null_id)});
 
   if (var->has_constructor()) {
-    init_id = GenerateLoadIfNeeded(var->constructor()->result_type(), init_id);
     GenerateStore(var_id, init_id);
   }
 
@@ -1055,7 +1055,7 @@ uint32_t Builder::GenerateIdentifierExpression(
     return val;
   }
 
-  error_ = "unable to find name for identifier: " + expr->name();
+  error_ = "unable to find variable with identifier: " + expr->name();
   return 0;
 }
 
