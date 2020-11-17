@@ -14,10 +14,15 @@
 
 #include "src/transform/manager.h"
 
+#include "src/type_determiner.h"
+
 namespace tint {
 namespace transform {
 
-Manager::Manager() = default;
+Manager::Manager() : context_(nullptr), module_(nullptr) {}
+
+Manager::Manager(Context* context, ast::Module* module)
+    : context_(context), module_(module) {}
 
 Manager::~Manager() = default;
 
@@ -28,6 +33,17 @@ bool Manager::Run() {
       return false;
     }
   }
+
+  if (context_ != nullptr && module_ != nullptr) {
+    // The transformed have potentially inserted nodes into the AST, so the type
+    // determinater needs to be run.
+    TypeDeterminer td(context_, module_);
+    if (!td.Determine()) {
+      error_ = td.error();
+      return false;
+    }
+  }
+
   return true;
 }
 

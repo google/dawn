@@ -31,7 +31,11 @@ namespace transform {
 class Manager {
  public:
   /// Constructor
+  /// DEPRECATED
   Manager();
+  /// @param ctx the tint context
+  /// @param mod the module to transform
+  Manager(Context* context, ast::Module* module);
   ~Manager();
 
   /// Add pass to the manager
@@ -48,6 +52,8 @@ class Manager {
   std::string error() const { return error_; }
 
  private:
+  Context* context_;
+  ast::Module* module_;
   std::vector<std::unique_ptr<Transformer>> transforms_;
 
   std::string error_;
