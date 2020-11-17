@@ -136,6 +136,14 @@ hooks = [
                '--arch=x64'],
   },
   {
+    # Update the Mac toolchain if possible, this makes builders use "hermetic XCode" which is
+    # is more consistent (only changes when rolling build/) and is cached.
+    'name': 'mac_toolchain',
+    'pattern': '.',
+    'condition': 'checkout_mac',
+    'action': ['python', 'build/mac_toolchain.py'],
+  },
+  {
     # Update the Windows toolchain if necessary. Must run before 'clang' below.
     'name': 'win_toolchain',
     'pattern': '.',
