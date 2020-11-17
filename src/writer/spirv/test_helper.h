@@ -34,7 +34,7 @@ template <typename BASE>
 class TestHelperBase : public ast::BuilderWithContext, public BASE {
  public:
   TestHelperBase() : td(ctx, &mod), b(ctx, &mod) {}
-  ~TestHelperBase() = default;
+  ~TestHelperBase() override = default;
 
   /// The module
   ast::Module mod;
