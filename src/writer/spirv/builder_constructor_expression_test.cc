@@ -48,14 +48,12 @@ namespace writer {
 namespace spirv {
 namespace {
 
-using BuilderTest = TestHelper;
+using SpvBuilderConstructorTest = TestHelper;
 
-TEST_F(BuilderTest, Constructor_Const) {
-  ast::type::F32Type f32;
-  auto* fl = create<ast::FloatLiteral>(&f32, 42.2f);
-  ast::ScalarConstructorExpression c(fl);
+TEST_F(SpvBuilderConstructorTest, Const) {
+  auto* c = Expr(42.2f);
 
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &c, true), 2u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -63,23 +61,12 @@ TEST_F(BuilderTest, Constructor_Const) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type) {
+  auto* t = vec3<f32>(1.0f, 1.0f, 3.0f);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 5u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -90,29 +77,14 @@ TEST_F(BuilderTest, Constructor_Type) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_WithCasts) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&f32, 2);
+TEST_F(SpvBuilderConstructorTest, Type_WithCasts) {
+  auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(1));
 
-  ast::ExpressionList type_vals;
-  type_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::TypeConstructorExpression>(&f32, type_vals));
-
-  type_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(create<ast::TypeConstructorExpression>(&f32, type_vals));
-
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 7u);
+  EXPECT_EQ(b.GenerateExpression(t), 7u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -127,20 +99,13 @@ TEST_F(BuilderTest, Constructor_Type_WithCasts) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_WithAlias) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-
+TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
-  // cast<Int>(1.f)
+  // cast<Int>(2.3f)
 
-  ast::type::AliasType alias("Int", &i32);
+  ast::type::AliasType alias("Int", ty.i32);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.3)));
-
-  ast::TypeConstructorExpression cast(&alias, params);
+  ast::TypeConstructorExpression cast(&alias, ExprList(2.3f));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -156,27 +121,17 @@ TEST_F(BuilderTest, Constructor_Type_WithAlias) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
+TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.f32);
 
-  auto* var =
-      create<ast::Variable>("ident", ast::StorageClass::kFunction, &f32);
+  auto* t = vec2<f32>(1.0f, "ident");
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(create<ast::IdentifierExpression>("ident"));
-
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateExpression(&t), 8u);
+  EXPECT_EQ(b.GenerateExpression(t), 8u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -195,24 +150,14 @@ TEST_F(BuilderTest, Constructor_Type_IdentifierExpression_Param) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
-  ast::type::I32Type i32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&u32, 2);
+TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
+  auto* t = vec2<u32>(1, 1);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 7u);
+  EXPECT_EQ(b.GenerateExpression(t), 7u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
@@ -228,44 +173,27 @@ TEST_F(BuilderTest, Constructor_Vector_Bitcast_Params) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_NonConst_Value_Fails) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
-  auto* rel =
-      create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::FloatLiteral>(&f32, 3.0f)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::FloatLiteral>(&f32, 3.0f)));
+TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
+  auto* rel = create<ast::BinaryExpression>(ast::BinaryOp::kAdd, Expr(3.0f),
+                                            Expr(3.0f));
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(rel);
+  auto* t = vec2<f32>(1.0f, rel);
 
-  ast::TypeConstructorExpression t(&vec, vals);
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &t, true), 0u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Bool_With_Bool) {
-  ast::type::BoolType bool_type;
+TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
+  ast::TypeConstructorExpression cast(ty.bool_, ExprList(true));
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(&bool_type, true)));
-
-  ast::TypeConstructorExpression t(&bool_type, vals);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 1u);
+  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
@@ -276,14 +204,8 @@ TEST_F(BuilderTest, Constructor_Type_Bool_With_Bool) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_I32_With_I32) {
-  ast::type::I32Type i32;
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-
-  ast::TypeConstructorExpression cast(&i32, params);
+TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
+  ast::TypeConstructorExpression cast(ty.i32, ExprList(2));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -298,14 +220,8 @@ TEST_F(BuilderTest, Constructor_Type_I32_With_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_U32_With_U32) {
-  ast::type::U32Type u32;
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 2)));
-
-  ast::TypeConstructorExpression cast(&u32, params);
+TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
+  ast::TypeConstructorExpression cast(ty.u32, ExprList(2u));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -320,14 +236,8 @@ TEST_F(BuilderTest, Constructor_Type_U32_With_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_F32_With_F32) {
-  ast::type::F32Type f32;
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&f32, params);
+TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
+  ast::TypeConstructorExpression cast(ty.f32, ExprList(2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -342,22 +252,13 @@ TEST_F(BuilderTest, Constructor_Type_F32_With_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec2_With_F32_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
+  auto* cast = vec2<f32>(2.0f, 2.0f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 4u);
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
@@ -366,24 +267,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec2_With_F32_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_F32_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
+  auto* cast = vec3<f32>(2.0f, 2.0f, 2.0f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 4u);
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -392,28 +282,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_F32_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
+  auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec3, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -428,28 +303,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_F32_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec3_With_Vec2_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
+  auto* cast = vec3<f32>(vec2<f32>(2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec3, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -464,26 +324,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec3_With_Vec2_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_F32_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
+  auto* cast = vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 4u);
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -492,30 +339,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_F32_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
+  auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -530,30 +360,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_F32_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec2_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
+  auto* cast = vec4<f32>(2.0f, vec2<f32>(2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -568,30 +381,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec2_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_F32_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
+  auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), 2.0f, 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -606,33 +402,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_F32_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_Vec2) {
+  auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec2_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 10u);
+  EXPECT_EQ(b.GenerateExpression(cast), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -649,30 +425,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
+  auto* cast = vec4<f32>(2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 9u);
+  EXPECT_EQ(b.GenerateExpression(cast), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -688,30 +447,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_F32_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec3_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
+  auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 9u);
+  EXPECT_EQ(b.GenerateExpression(cast), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -727,28 +469,13 @@ TEST_F(BuilderTest, Constructor_Type_Vec4_With_Vec3_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
+  auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec3, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -764,28 +491,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_F32_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
+  auto* cast = vec3<f32>(vec2<f32>(2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec3, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -801,30 +513,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec3_With_Vec2_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
+  auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -840,30 +535,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
+  auto* cast = vec4<f32>(2.0f, vec2<f32>(2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -879,30 +557,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
+  auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), 2.0f, 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 11u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -918,33 +579,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
+  auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec2, vec2_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -962,30 +603,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
+  auto* cast = vec4<f32>(2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -1003,30 +627,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_F32_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec4(&f32, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec3_F32) {
+  auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec3, vec_params));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&vec4, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, &cast, true), 13u);
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -1044,33 +651,13 @@ TEST_F(BuilderTest, Constructor_Type_ModuleScope_Vec4_With_Vec3_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
-  ast::type::MatrixType mat(&f32, 2, 2);
+TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_With_Vec2_Vec2) {
+  auto* cast = mat2x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -1081,40 +668,14 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x2_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
-  ast::type::MatrixType mat(&f32, 2, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_With_Vec2_Vec2_Vec2) {
+  auto* cast = mat3x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f),
+                           vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -1125,47 +686,14 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x2_With_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
-  ast::type::MatrixType mat(&f32, 2, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
+  auto* cast = mat4x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f),
+                           vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec4_params;
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -1176,37 +704,14 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::MatrixType mat(&f32, 3, 2);
+TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_With_Vec3_Vec3) {
+  auto* cast =
+      mat2x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 3
@@ -1217,46 +722,15 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x3_With_Vec3_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::MatrixType mat(&f32, 3, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_With_Vec3_Vec3_Vec3) {
+  auto* cast =
+      mat3x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f),
+                  vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 3
@@ -1267,55 +741,15 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x3_With_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::MatrixType mat(&f32, 3, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
+  auto* cast =
+      mat4x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f),
+                  vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec4_params;
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 3
@@ -1326,41 +760,14 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 4);
-  ast::type::MatrixType mat(&f32, 4, 2);
+TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_With_Vec4_Vec4) {
+  auto* cast = mat2x4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
+                           vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 4
@@ -1371,52 +778,15 @@ TEST_F(BuilderTest, Constructor_Type_Mat2x4_With_Vec4_Vec4) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 4);
-  ast::type::MatrixType mat(&f32, 4, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_With_Vec4_Vec4_Vec4) {
+  auto* cast = mat3x4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
+                           vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
+                           vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 4
@@ -1427,63 +797,15 @@ TEST_F(BuilderTest, Constructor_Type_Mat3x4_With_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 4);
-  ast::type::MatrixType mat(&f32, 4, 4);
+TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
+  auto* cast = mat4x4<f32>(
+      vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
+      vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec3_params;
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec3_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec4_params;
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec4_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec3_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec4_params));
-
-  ast::TypeConstructorExpression cast(&mat, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 4
@@ -1494,28 +816,13 @@ TEST_F(BuilderTest, Constructor_Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 5);
+TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
+  auto* cast = array<f32, 5>(2.0f, 2.0f, 2.0f, 2.0f, 2.0f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::TypeConstructorExpression cast(&ary, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u);
+  EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpTypeInt 32 0
@@ -1526,81 +833,41 @@ TEST_F(BuilderTest, Constructor_Type_Array_5_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Array_2_Vec3) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::ArrayType ary(&vec, 2);
+TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
+  auto* cast =
+      array<f32, 2>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList vec2_params;
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec2_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec_params));
-  params.push_back(create<ast::TypeConstructorExpression>(&vec, vec2_params));
-
-  ast::TypeConstructorExpression cast(&ary, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 8u);
+  EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 3
-%4 = OpTypeInt 32 0
-%5 = OpConstant %4 2
-%1 = OpTypeArray %2 %5
-%6 = OpConstant %3 2
-%7 = OpConstantComposite %2 %6 %6 %6
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 2
+%1 = OpTypeArray %2 %4
+%5 = OpTypeVector %2 3
+%6 = OpConstant %2 2
+%7 = OpConstantComposite %5 %6 %6 %6
 %8 = OpConstantComposite %1 %7 %7
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Struct) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-
+TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, decos));
-  members.push_back(create<ast::StructMember>("b", &vec, decos));
-
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>("a", ty.f32, decos),
+      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+  });
   ast::type::StructType s_type("my_struct", s);
 
-  ast::ExpressionList vec_vals;
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
+  auto* t = Construct(&s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
-
-  ast::TypeConstructorExpression t(&s_type, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 6u);
+  EXPECT_EQ(b.GenerateExpression(t), 6u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -1612,17 +879,14 @@ TEST_F(BuilderTest, Constructor_Type_Struct) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_F32) {
-  ast::type::F32Type f32;
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
+  auto* t = Construct(ty.f32);
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&f32, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 2u);
+  EXPECT_EQ(b.GenerateExpression(t), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -1630,17 +894,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_I32) {
-  ast::type::I32Type i32;
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
+  auto* t = Construct(ty.i32);
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&i32, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 2u);
+  EXPECT_EQ(b.GenerateExpression(t), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
@@ -1648,17 +909,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_U32) {
-  ast::type::U32Type u32;
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
+  auto* t = Construct(ty.u32);
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&u32, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 2u);
+  EXPECT_EQ(b.GenerateExpression(t), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
@@ -1666,17 +924,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_Bool) {
-  ast::type::BoolType bool_type;
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
+  auto* t = Construct(ty.bool_);
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&bool_type, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 2u);
+  EXPECT_EQ(b.GenerateExpression(t), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
@@ -1684,18 +939,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Bool) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_Vector) {
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&i32, 2);
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Vector) {
+  auto* t = vec2<i32>();
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 3u);
+  EXPECT_EQ(b.GenerateExpression(t), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
@@ -1704,18 +955,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Vector) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_Matrix) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 2, 4);
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix) {
+  auto* t = mat4x2<f32>();
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&mat, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 4u);
+  EXPECT_EQ(b.GenerateExpression(t), 4u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -1725,18 +972,14 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Matrix) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_Array) {
-  ast::type::I32Type i32;
-  ast::type::ArrayType ary(&i32, 2);
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
+  auto* t = array<i32, 2>();
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&ary, vals);
-
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 5u);
+  EXPECT_EQ(b.GenerateExpression(t), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
@@ -1747,24 +990,20 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Array) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
-  ast::type::F32Type f32;
-
+TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, decos));
-
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>("a", ty.f32, decos),
+  });
   ast::type::StructType s_type("my_struct", s);
 
-  ast::ExpressionList vals;
-  ast::TypeConstructorExpression t(&s_type, vals);
+  auto* t = Construct(&s_type);
 
-  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&t), 3u);
+  EXPECT_EQ(b.GenerateExpression(t), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -1773,20 +1012,13 @@ TEST_F(BuilderTest, Constructor_Type_ZeroInit_Struct) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_I32) {
-  ast::type::U32Type u32;
-  ast::type::I32Type i32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
+  auto* cast = Construct(ty.i32, 2u);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 2)));
-
-  ast::TypeConstructorExpression cast(&i32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpTypeInt 32 0
@@ -1797,20 +1029,13 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_U32) {
-  ast::type::U32Type u32;
-  ast::type::I32Type i32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
+  auto* cast = Construct(ty.u32, 2);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-
-  ast::TypeConstructorExpression cast(&u32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %3 = OpTypeInt 32 1
@@ -1821,20 +1046,13 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_I32) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
+  auto* cast = Construct(ty.i32, 2.4f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.4)));
-
-  ast::TypeConstructorExpression cast(&i32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpTypeFloat 32
@@ -1845,20 +1063,13 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_U32) {
-  ast::type::U32Type u32;
-  ast::type::F32Type f32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
+  auto* cast = Construct(ty.u32, 2.4f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.4)));
-
-  ast::TypeConstructorExpression cast(&u32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %3 = OpTypeFloat 32
@@ -1869,20 +1080,13 @@ TEST_F(BuilderTest, Constructor_Type_Convert_F32_To_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_F32) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
+  auto* cast = Construct(ty.f32, 2);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-
-  ast::TypeConstructorExpression cast(&f32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpTypeInt 32 1
@@ -1893,20 +1097,13 @@ TEST_F(BuilderTest, Constructor_Type_Convert_I32_To_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_F32) {
-  ast::type::U32Type u32;
-  ast::type::F32Type f32;
+TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
+  auto* cast = Construct(ty.f32, 2u);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 2)));
-
-  ast::TypeConstructorExpression cast(&f32, params);
-
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpTypeInt 32 0
@@ -1917,25 +1114,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_U32_To_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_I32) {
-  ast::type::U32Type u32;
-  ast::type::VectorType uvec3(&u32, 3);
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<u32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+  auto* cast = Construct(ty.vec3<i32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&ivec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -1951,25 +1139,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_I32) {
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::F32Type f32;
-  ast::type::VectorType fvec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+  auto* cast = Construct(ty.vec3<i32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&ivec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -1985,25 +1164,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_I32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_U32) {
-  ast::type::U32Type u32;
-  ast::type::VectorType uvec3(&u32, 3);
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<i32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+  auto* cast = Construct(ty.vec3<u32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&uvec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -2019,25 +1189,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_U32) {
-  ast::type::U32Type u32;
-  ast::type::VectorType uvec3(&u32, 3);
-  ast::type::F32Type f32;
-  ast::type::VectorType fvec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+  auto* cast = Construct(ty.vec3<u32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&uvec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -2053,25 +1214,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_F32_to_U32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_F32) {
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::F32Type f32;
-  ast::type::VectorType fvec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<i32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+  auto* cast = Construct(ty.vec3<f32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&fvec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -2087,25 +1239,16 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_I32_to_F32) {
 )");
 }
 
-TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
-  ast::type::U32Type u32;
-  ast::type::VectorType uvec3(&u32, 3);
-  ast::type::F32Type f32;
-  ast::type::VectorType fvec3(&f32, 3);
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
+  auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<u32>());
 
-  auto* var = create<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+  auto* cast = Construct(ty.vec3<f32>(), "i");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("i"));
-
-  ast::TypeConstructorExpression cast(&fvec3, params);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&cast), 6u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -2121,351 +1264,178 @@ TEST_F(BuilderTest, Constructor_Type_Convert_Vectors_U32_to_F32) {
 )");
 }
 
-TEST_F(BuilderTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_GlobalVectorWithAllConstConstructors) {
   // vec3<f32>(1.0, 2.0, 3.0)  -> true
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  auto* t = vec3<f32>(1.f, 2.f, 3.f);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  ast::TypeConstructorExpression t(&vec, params);
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_TRUE(b.is_constructor_const(&t, true));
+  EXPECT_TRUE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_GlobalVector_WithIdent) {
+TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVector_WithIdent) {
   // vec3<f32>(a, b, c)  -> false -- ERROR
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  auto* t = vec3<f32>("a", "b", "c");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("a"));
-  params.push_back(create<ast::IdentifierExpression>("b"));
-  params.push_back(create<ast::IdentifierExpression>("c"));
-  ast::TypeConstructorExpression t(&vec, params);
+  Var("a", ast::StorageClass::kPrivate, ty.f32);
+  Var("b", ast::StorageClass::kPrivate, ty.f32);
+  Var("c", ast::StorageClass::kPrivate, ty.f32);
 
-  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
-  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
-  ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
-  td.RegisterVariableForTesting(&var_a);
-  td.RegisterVariableForTesting(&var_b);
-  td.RegisterVariableForTesting(&var_c);
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), "constructor must be a constant expression");
 }
 
-TEST_F(BuilderTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_GlobalArrayWithAllConstConstructors) {
   // array<vec3<f32>, 2>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
   //   -> true
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::ArrayType ary(&vec, 2);
+  auto* t = Construct(ty.array(ty.vec2<f32>(), 2), vec3<f32>(1.f, 2.f, 3.f),
+                      vec3<f32>(1.f, 2.f, 3.f));
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* first = create<ast::TypeConstructorExpression>(&vec, params);
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* second = create<ast::TypeConstructorExpression>(&vec, params);
-
-  ast::ExpressionList ary_params;
-  ary_params.push_back(first);
-  ary_params.push_back(second);
-  ast::TypeConstructorExpression t(&ary, ary_params);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_TRUE(b.is_constructor_const(&t, true));
+  EXPECT_TRUE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest,
+TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_GlobalVectorWithMatchingTypeConstructors) {
   // vec3<f32>(f32(1.0), f32(2.0))  -> false
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
 
-  ast::ExpressionList vec_params;
+  auto* t = vec2<f32>(Construct<f32>(1.f), Construct<f32>(2.f));
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
-
-  ast::TypeConstructorExpression t(&vec, vec_params);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_GlobalWithTypeCastConstructor) {
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_GlobalWithTypeCastConstructor) {
   // vec3<f32>(f32(1), f32(2)) -> false
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&f32, 3);
 
-  ast::ExpressionList vec_params;
+  auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(2));
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
-
-  ast::TypeConstructorExpression t(&vec, vec_params);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, true));
+  EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_VectorWithAllConstConstructors) {
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_VectorWithAllConstConstructors) {
   // vec3<f32>(1.0, 2.0, 3.0)  -> true
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  ast::TypeConstructorExpression t(&vec, params);
+  auto* t = vec3<f32>(1.f, 2.f, 3.f);
 
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_Vector_WithIdent) {
+TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
   // vec3<f32>(a, b, c)  -> false
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("a"));
-  params.push_back(create<ast::IdentifierExpression>("b"));
-  params.push_back(create<ast::IdentifierExpression>("c"));
-  ast::TypeConstructorExpression t(&vec, params);
+  auto* t = vec3<f32>("a", "b", "c");
 
-  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
-  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
-  ast::Variable var_c("c", ast::StorageClass::kPrivate, &f32);
-  td.RegisterVariableForTesting(&var_a);
-  td.RegisterVariableForTesting(&var_b);
-  td.RegisterVariableForTesting(&var_c);
+  Var("a", ast::StorageClass::kPrivate, ty.f32);
+  Var("b", ast::StorageClass::kPrivate, ty.f32);
+  Var("c", ast::StorageClass::kPrivate, ty.f32);
 
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_ArrayWithAllConstConstructors) {
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_ArrayWithAllConstConstructors) {
   // array<vec3<f32>, 2>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
   //   -> true
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::ArrayType ary(&vec, 2);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* first = create<ast::TypeConstructorExpression>(&vec, params);
+  auto* first = vec3<f32>(1.f, 2.f, 3.f);
+  auto* second = vec3<f32>(1.f, 2.f, 3.f);
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
-  auto* second = create<ast::TypeConstructorExpression>(&vec, params);
+  auto* t = Construct(ty.array(ty.vec3<f32>(), 2), first, second);
 
-  ast::ExpressionList ary_params;
-  ary_params.push_back(first);
-  ary_params.push_back(second);
-  ast::TypeConstructorExpression t(&ary, ary_params);
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_VectorWith_TypeCastConstConstructors) {
-  // vec2<f32>(f32(1.0), f32(2.0))  -> false
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&f32, 2);
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_VectorWith_TypeCastConstConstructors) {
+  // vec2<f32>(f32(1), f32(2))  -> false
 
-  ast::ExpressionList vec_params;
+  auto* t = vec2<f32>(1, 2);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
-
-  ast::TypeConstructorExpression t(&vec, vec_params);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_WithTypeCastConstructor) {
+TEST_F(SpvBuilderConstructorTest, IsConstructorConst_WithTypeCastConstructor) {
   // vec3<f32>(f32(1), f32(2)) -> false
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&f32, 3);
 
-  ast::ExpressionList vec_params;
+  auto* t = vec3<f32>(1, 2);
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-  vec_params.push_back(create<ast::TypeConstructorExpression>(&f32, params));
-
-  ast::TypeConstructorExpression t(&vec, vec_params);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_BitCastScalars) {
-  ast::type::I32Type i32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&u32, 2);
+TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
+  auto* t = vec2<u32>(1, 1);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ast::TypeConstructorExpression t(&vec, vals);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_Struct) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-
+TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, decos));
-  members.push_back(create<ast::StructMember>("b", &vec, decos));
-
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>("a", ty.f32, decos),
+      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+  });
   ast::type::StructType s_type("my_struct", s);
 
-  ast::ExpressionList vec_vals;
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
+  auto* t = Construct(&s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ast::TypeConstructorExpression t(&s_type, vals);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_TRUE(b.is_constructor_const(&t, false));
+  EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(BuilderTest, IsConstructorConst_Struct_WithIdentSubExpression) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-
+TEST_F(SpvBuilderConstructorTest,
+       IsConstructorConst_Struct_WithIdentSubExpression) {
   ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, decos));
-  members.push_back(create<ast::StructMember>("b", &vec, decos));
+  auto* s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>("a", ty.f32, decos),
+      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+  });
 
-  auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
 
-  ast::ExpressionList vec_vals;
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vec_vals.push_back(create<ast::IdentifierExpression>("a"));
-  vec_vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
+  auto* t = Construct(&s_type, 2.f, "a", 2.f);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2)));
-  vals.push_back(create<ast::TypeConstructorExpression>(&vec, vec_vals));
+  Var("a", ast::StorageClass::kPrivate, ty.f32);
+  Var("b", ast::StorageClass::kPrivate, ty.f32);
 
-  ast::TypeConstructorExpression t(&s_type, vals);
+  ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
-  ast::Variable var_a("a", ast::StorageClass::kPrivate, &f32);
-  ast::Variable var_b("b", ast::StorageClass::kPrivate, &f32);
-  td.RegisterVariableForTesting(&var_a);
-  td.RegisterVariableForTesting(&var_b);
-
-  ASSERT_TRUE(td.DetermineResultType(&t)) << td.error();
-
-  EXPECT_FALSE(b.is_constructor_const(&t, false));
+  EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
 
