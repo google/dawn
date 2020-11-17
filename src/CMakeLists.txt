@@ -450,6 +450,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/parser_impl_convert_type_test.cc
     reader/spirv/parser_impl_function_decl_test.cc
     reader/spirv/parser_impl_get_decorations_test.cc
+    reader/spirv/parser_impl_handle_test.cc
     reader/spirv/parser_impl_import_test.cc
     reader/spirv/parser_impl_module_var_test.cc
     reader/spirv/parser_impl_named_types_test.cc

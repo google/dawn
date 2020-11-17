@@ -1503,6 +1503,88 @@ bool ParserImpl::EmitFunctions() {
   return success_;
 }
 
+const spvtools::opt::Instruction*
+ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
+                                                bool follow_image) {
+  auto local_fail = [this, id,
+                     follow_image]() -> const spvtools::opt::Instruction* {
+    const auto* inst = def_use_mgr_->GetDef(id);
+    Fail() << "Could not find memory object declaration for the "
+           << (follow_image ? "image" : "sampler") << " underlying id " << id
+           << (inst ? inst->PrettyPrint() : std::string());
+    return nullptr;
+  };
+
+  auto& memo_table =
+      (follow_image ? mem_obj_decl_image_ : mem_obj_decl_sampler_);
+
+  // Use a visited set to defend against bad input which might have long
+  // chains or even loops.
+  std::unordered_set<uint32_t> visited;
+
+  // Trace backward in the SSA data flow until we hit a memory object
+  // declaration.
+  while (true) {
+    auto where = memo_table.find(id);
+    if (where != memo_table.end()) {
+      return where->second;
+    }
+    // Protect against loops.
+    auto visited_iter = visited.find(id);
+    if (visited_iter != visited.end()) {
+      // We've hit a loop. Mark all the visited nodes
+      // as dead ends.
+      for (auto iter : visited) {
+        memo_table[iter] = nullptr;
+      }
+      return nullptr;
+    }
+    visited.insert(id);
+
+    const auto* inst = def_use_mgr_->GetDef(id);
+    if (inst == nullptr) {
+      return local_fail();
+    }
+    switch (inst->opcode()) {
+      case SpvOpFunctionParameter:
+      case SpvOpVariable:
+        // We found the memory object declaration.
+        // Remember it as the answer for the whole path.
+        for (auto iter : visited) {
+          memo_table[iter] = inst;
+        }
+        return inst;
+      case SpvOpLoad:
+        // Follow the pointer being loaded
+        id = inst->GetSingleWordInOperand(0);
+        break;
+      case SpvOpCopyObject:
+        // Follow the object being copied.
+        id = inst->GetSingleWordInOperand(0);
+        break;
+      case SpvOpAccessChain:
+      case SpvOpInBoundsAccessChain:
+      case SpvOpPtrAccessChain:
+      case SpvOpInBoundsPtrAccessChain:
+        // Follow the base pointer.
+        id = inst->GetSingleWordInOperand(0);
+        break;
+      case SpvOpSampledImage:
+        // Follow the image or the sampler, depending on the follow_image
+        // parameter.
+        id = inst->GetSingleWordInOperand(follow_image ? 0 : 1);
+        break;
+      case SpvOpImage:
+        // Follow the sampled image
+        id = inst->GetSingleWordInOperand(0);
+        break;
+      default:
+        // This is not valid.
+        return local_fail();
+    }
+  }
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint

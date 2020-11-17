@@ -375,6 +375,22 @@ class ParserImpl : Reader {
     return scalar_spec_constants_.find(id) != scalar_spec_constants_.end();
   }
 
+  /// For a SPIR-V ID that defines a sampler, image, or sampled image value,
+  /// return the SPIR-V instruction that represents the memory object
+  /// declaration for the object.  If we encounter an OpSampledImage along the
+  /// way, follow the image operand when follow_image is true; otherwise follow
+  /// the sampler operand. Returns null and emits an error if it can't trace
+  /// back to a memory object declaration.
+  /// This method can be used any time after BuildInternalModule has been
+  /// invoked.
+  /// @param id the SPIR-V ID of the sampler, image, or sampled image
+  /// @param follow_image indicates whether to follow the image operand of
+  /// OpSampledImage
+  /// @returns the memory object declaration for the handle, or nullptr on error
+  const spvtools::opt::Instruction* GetMemoryObjectDeclarationForHandle(
+      uint32_t id,
+      bool follow_image);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -497,6 +513,18 @@ class ParserImpl : Reader {
   // Maps function_id to a list of entrypoint information
   std::unordered_map<uint32_t, std::vector<EntryPointInfo>>
       function_to_ep_info_;
+
+  // Maps from a SPIR-V ID to its underlying memory object declaration,
+  // following image paths. This a memoization table for
+  // GetMemoryObjectDeclarationForHandle. (A SPIR-V memory object declaration is
+  // an OpVariable or an OpFunctinParameter with pointer type).
+  std::unordered_map<uint32_t, const spvtools::opt::Instruction*>
+      mem_obj_decl_image_;
+  // Maps from a SPIR-V ID to its underlying memory object declaration,
+  // following sampler paths. This a memoization table for
+  // GetMemoryObjectDeclarationForHandle.
+  std::unordered_map<uint32_t, const spvtools::opt::Instruction*>
+      mem_obj_decl_sampler_;
 };
 
 }  // namespace spirv
