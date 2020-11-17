@@ -402,3 +402,17 @@ TEST(Ref, MoveAssignmentDerived) {
     destination = nullptr;
     EXPECT_TRUE(deleted);
 }
+
+// Test Ref's InitializeInto.
+TEST(Ref, InitializeInto) {
+    bool deleted = false;
+    RCTest* original = new RCTest(&deleted);
+
+    // InitializeInto acquires the ref.
+    Ref<RCTest> ref;
+    *ref.InitializeInto() = original;
+    EXPECT_EQ(original->GetRefCountForTesting(), 1u);
+
+    ref = nullptr;
+    EXPECT_TRUE(deleted);
+}

@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/BackendMTL.h"
 
+#include "common/CoreFoundationRef.h"
 #include "common/GPUInfo.h"
 #include "common/NSRef.h"
 #include "common/Platform.h"
@@ -23,6 +24,7 @@
 
 #if defined(DAWN_PLATFORM_MACOS)
 #    import <IOKit/IOKitLib.h>
+#    include "common/IOKitRef.h"
 #endif
 
 namespace dawn_native { namespace metal {
@@ -72,18 +74,17 @@ namespace dawn_native { namespace metal {
 
             // Recursively search registry entry and its parents for property name
             // The data should release with CFRelease
-            CFDataRef data = static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
-                entry, kIOServicePlane, name, kCFAllocatorDefault,
-                kIORegistryIterateRecursively | kIORegistryIterateParents));
+            CFRef<CFDataRef> data =
+                AcquireCFRef(static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
+                    entry, kIOServicePlane, name, kCFAllocatorDefault,
+                    kIORegistryIterateRecursively | kIORegistryIterateParents)));
 
             if (data == nullptr) {
                 return value;
             }
 
             // CFDataGetBytePtr() is guaranteed to return a read-only pointer
-            value = *reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(data));
-
-            CFRelease(data);
+            value = *reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(data.Get()));
             return value;
         }
 
@@ -107,37 +108,34 @@ namespace dawn_native { namespace metal {
         MaybeError API_AVAILABLE(macos(10.13))
             GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
             // Get a matching dictionary for the IOGraphicsAccelerator2
-            CFMutableDictionaryRef matchingDict = IORegistryEntryIDMatching([device registryID]);
+            CFRef<CFMutableDictionaryRef> matchingDict =
+                AcquireCFRef(IORegistryEntryIDMatching([device registryID]));
             if (matchingDict == nullptr) {
                 return DAWN_INTERNAL_ERROR("Failed to create the matching dict for the device");
             }
 
             // IOServiceGetMatchingService will consume the reference on the matching dictionary,
             // so we don't need to release the dictionary.
-            io_registry_entry_t acceleratorEntry =
-                IOServiceGetMatchingService(kIOMasterPortDefault, matchingDict);
+            IORef<io_registry_entry_t> acceleratorEntry = AcquireIORef(
+                IOServiceGetMatchingService(kIOMasterPortDefault, matchingDict.Detach()));
             if (acceleratorEntry == IO_OBJECT_NULL) {
                 return DAWN_INTERNAL_ERROR(
                     "Failed to get the IO registry entry for the accelerator");
             }
 
             // Get the parent entry that will be the IOPCIDevice
-            io_registry_entry_t deviceEntry = IO_OBJECT_NULL;
-            if (IORegistryEntryGetParentEntry(acceleratorEntry, kIOServicePlane, &deviceEntry) !=
-                kIOReturnSuccess) {
-                IOObjectRelease(acceleratorEntry);
+            IORef<io_registry_entry_t> deviceEntry;
+            if (IORegistryEntryGetParentEntry(acceleratorEntry.Get(), kIOServicePlane,
+                                              deviceEntry.InitializeInto()) != kIOReturnSuccess) {
                 return DAWN_INTERNAL_ERROR("Failed to get the IO registry entry for the device");
             }
 
             ASSERT(deviceEntry != IO_OBJECT_NULL);
-            IOObjectRelease(acceleratorEntry);
 
-            uint32_t vendorId = GetEntryProperty(deviceEntry, CFSTR("vendor-id"));
-            uint32_t deviceId = GetEntryProperty(deviceEntry, CFSTR("device-id"));
+            uint32_t vendorId = GetEntryProperty(deviceEntry.Get(), CFSTR("vendor-id"));
+            uint32_t deviceId = GetEntryProperty(deviceEntry.Get(), CFSTR("device-id"));
 
             *ids = PCIIDs{vendorId, deviceId};
-
-            IOObjectRelease(deviceEntry);
 
             return {};
         }

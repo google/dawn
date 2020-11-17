@@ -15,6 +15,7 @@
 #ifndef COMMON_REFBASE_H_
 #define COMMON_REFBASE_H_
 
+#include "common/Assert.h"
 #include "common/Compiler.h"
 
 #include <type_traits>
@@ -161,6 +162,11 @@ class RefBase {
     void Acquire(T value) {
         Release();
         mValue = value;
+    }
+
+    T* InitializeInto() DAWN_NO_DISCARD {
+        ASSERT(mValue == kNullValue);
+        return &mValue;
     }
 
   private:
