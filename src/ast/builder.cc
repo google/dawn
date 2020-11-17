@@ -17,16 +17,28 @@
 namespace tint {
 namespace ast {
 
-Builder::Builder() = default;
+TypesBuilder::TypesBuilder(TypeManager* tm)
+    : bool_(tm->Get<ast::type::BoolType>()),
+      f32(tm->Get<ast::type::F32Type>()),
+      i32(tm->Get<ast::type::I32Type>()),
+      u32(tm->Get<ast::type::U32Type>()),
+      void_(tm->Get<ast::type::VoidType>()),
+      tm_(tm) {}
 
-Builder::Builder(tint::Context* ctx) : ctx_(ctx) {}
-
+Builder::Builder(tint::Context* c) : ctx(c), ty(&c->type_mgr()) {}
 Builder::~Builder() = default;
 
-ast::Variable* Builder::make_var(const std::string& name,
-                                 ast::StorageClass storage,
-                                 ast::type::Type* type) {
-  return create<ast::Variable>(name, storage, type);
+ast::Variable* Builder::Var(const std::string& name,
+                            ast::StorageClass storage,
+                            ast::type::Type* type) {
+  auto* var = create<ast::Variable>(name, storage, type);
+  OnVariableBuilt(var);
+  return var;
+}
+
+BuilderWithContext::BuilderWithContext() : Builder(new Context()) {}
+BuilderWithContext::~BuilderWithContext() {
+  delete ctx;
 }
 
 }  // namespace ast

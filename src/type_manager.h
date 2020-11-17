@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "src/ast/type/type.h"
 
@@ -36,6 +37,15 @@ class TypeManager {
   /// @param type The type to register
   /// @return the pointer to the registered type
   ast::type::Type* Get(std::unique_ptr<ast::type::Type> type);
+
+  /// Get the given type `T` from the type manager
+  /// @param args the arguments to pass to the type constructor
+  /// @return the pointer to the registered type
+  template <typename T, typename... ARGS>
+  T* Get(ARGS&&... args) {
+    auto ty = Get(std::make_unique<T>(std::forward<ARGS>(args)...));
+    return static_cast<T*>(ty);
+  }
 
   /// Returns the type map
   /// @returns the mapping from name string to type.

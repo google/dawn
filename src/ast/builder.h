@@ -15,8 +15,6 @@
 #ifndef SRC_AST_BUILDER_H_
 #define SRC_AST_BUILDER_H_
 
-#include <assert.h>
-
 #include <memory>
 #include <string>
 #include <utility>
@@ -42,175 +40,234 @@
 namespace tint {
 namespace ast {
 
-/// Helper for building common AST constructs
-class Builder {
+/// TypesBuilder holds basic `ast::tint` types and methods for constructing
+/// complex types.
+class TypesBuilder {
  public:
   /// Constructor
-  /// Note, the context _must_ be set with |set_context| before the builder
-  /// is used.
-  Builder();
+  /// @param tm the type manager
+  explicit TypesBuilder(TypeManager* tm);
+
+  /// A boolean type
+  ast::type::BoolType* const bool_;
+  /// A f32 type
+  ast::type::F32Type* const f32;
+  /// A i32 type
+  ast::type::I32Type* const i32;
+  /// A u32 type
+  ast::type::U32Type* const u32;
+  /// A void type
+  ast::type::VoidType* const void_;
+
+  /// @return the tint AST type for the C type `T`.
+  template <typename T>
+  ast::type::Type* Of() const;
+
+  /// @return the tint AST type for a 2-element vector of the C type `T`.
+  template <typename T>
+  ast::type::Type* vec2() const;
+
+  /// @return the tint AST type for a 3-element vector of the C type `T`.
+  template <typename T>
+  ast::type::Type* vec3() const;
+
+  /// @return the tint AST type for a 4-element vector of the C type `T`.
+  template <typename T>
+  ast::type::Type* vec4() const;
+
+  /// @return the tint AST type for a 3x3 matrix of the C type `T`.
+  template <typename T>
+  ast::type::Type* mat3x3() const;
+
+  /// @return the tint AST type for an array of type `T`.
+  template <typename T>
+  ast::type::Type* arr() const;
+
+ private:
+  /// CToAST<T> is specialized for various `T` types and each specialization
+  /// contains a single static `get()` method for obtaining the corresponding
+  /// AST type for the C type `T`.
+  /// `get()` has the signature:
+  ///    `static ast::type::Type* get(Types* t)`
+  template <typename T>
+  struct CToAST {};
+
+  TypeManager* const tm_;
+};
+
+/// Helper for building common AST constructs.
+class Builder {
+ public:
+  /// `i32` is a type alias to `int`.
+  /// Useful for passing to template methods such as `vec2<i32>()` to imitate
+  /// WGSL syntax.
+  /// Note: this is intentionally not aliased to uint32_t as we want integer
+  /// literals passed to the builder to match WGSL's integer literal types.
+  using i32 = decltype(1);
+  /// `u32` is a type alias to `unsigned int`.
+  /// Useful for passing to template methods such as `vec2<u32>()` to imitate
+  /// WGSL syntax.
+  /// Note: this is intentionally not aliased to uint32_t as we want integer
+  /// literals passed to the builder to match WGSL's integer literal types.
+  using u32 = decltype(1u);
+  /// `f32` is a type alias to `float`
+  /// Useful for passing to template methods such as `vec2<f32>()` to imitate
+  /// WGSL syntax.
+  using f32 = float;
+
   /// Constructor
   /// @param ctx the context to use in the builder
   explicit Builder(tint::Context* ctx);
   virtual ~Builder();
 
-  /// Sets the given context into the builder
-  /// @param ctx the context to set
-  void set_context(tint::Context* ctx) { ctx_ = ctx; }
-
-  /// Creates a new type
-  /// @param args the arguments to pass to the type constructor
-  /// @returns a registered pointer to the requested type
-  template <typename T, typename... ARGS>
-  ast::type::Type* type(ARGS&&... args) {
-    assert(ctx_);
-    return ctx_->type_mgr().Get(
-        std::make_unique<T>(std::forward<ARGS>(args)...));
-  }
-
-  /// @returns a pointer to the bool type
-  ast::type::BoolType* bool_type() {
-    return type<ast::type::BoolType>()->AsBool();
-  }
-
-  /// @returns a pointer to the f32 type
-  ast::type::F32Type* f32() { return type<ast::type::F32Type>()->AsF32(); }
-
-  /// @returns a pointer to the i32 type
-  ast::type::I32Type* i32() { return type<ast::type::I32Type>()->AsI32(); }
-
-  /// @param ty the type of the matrix components
-  /// @param rows the number of rows
-  /// @param cols the number of columns
-  /// @returns a pointer to the u32 type
-  ast::type::MatrixType* mat(ast::type::Type* ty,
-                             uint32_t rows,
-                             uint32_t cols) {
-    return type<ast::type::MatrixType>(ty, rows, cols)->AsMatrix();
-  }
-
-  /// @returns a pointer to the u32 type
-  ast::type::U32Type* u32() { return type<ast::type::U32Type>()->AsU32(); }
-
-  /// @param ty the type of the vector components
-  /// @param size the size of the vector
-  /// @returns a pointer to the vector type
-  ast::type::VectorType* vec(ast::type::Type* ty, uint32_t size) {
-    return type<ast::type::VectorType>(ty, size)->AsVector();
-  }
-
-  /// @returns a pointer to the void type
-  ast::type::VoidType* void_type() {
-    return type<ast::type::VoidType>()->AsVoid();
-  }
-
   /// @param expr the expression
   /// @return expr
-  ast::Expression* make_expr(ast::Expression* expr) { return expr; }
+  ast::Expression* Expr(ast::Expression* expr) { return expr; }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
-  ast::IdentifierExpression* make_expr(const std::string& name) {
+  ast::IdentifierExpression* Expr(const std::string& name) {
     return create<ast::IdentifierExpression>(name);
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
-  ast::IdentifierExpression* make_expr(const char* name) {
+  ast::IdentifierExpression* Expr(const char* name) {
     return create<ast::IdentifierExpression>(name);
   }
 
   /// @param value the float value
   /// @return a Scalar constructor for the given value
-  ast::ScalarConstructorExpression* make_expr(float value) {
-    return create<ast::ScalarConstructorExpression>(make_literal(value));
+  ast::ScalarConstructorExpression* Expr(f32 value) {
+    return create<ast::ScalarConstructorExpression>(Literal(value));
   }
 
-  /// @param value the int value
+  /// @param value the integer value
   /// @return a Scalar constructor for the given value
-  ast::ScalarConstructorExpression* make_expr(int32_t value) {
-    return create<ast::ScalarConstructorExpression>(make_literal(value));
+  ast::ScalarConstructorExpression* Expr(i32 value) {
+    return create<ast::ScalarConstructorExpression>(Literal(value));
   }
 
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
-  ast::ScalarConstructorExpression* make_expr(uint32_t value) {
-    return create<ast::ScalarConstructorExpression>(make_literal(value));
+  ast::ScalarConstructorExpression* Expr(u32 value) {
+    return create<ast::ScalarConstructorExpression>(Literal(value));
   }
 
-  /// @param val the boolan value
-  /// @return a boolean literal with the given value
-  ast::BoolLiteral* make_literal(bool val) {
-    return create<ast::BoolLiteral>(bool_type(), val);
-  }
-
-  /// @param val the float value
-  /// @return a float literal with the given value
-  ast::FloatLiteral* make_literal(float val) {
-    return create<ast::FloatLiteral>(f32(), val);
-  }
-
-  /// @param val the unsigned int value
-  /// @return a UintLiteral with the given value
-  ast::UintLiteral* make_literal(uint32_t val) {
-    return create<ast::UintLiteral>(u32(), val);
-  }
-
-  /// @param val the integer value
-  /// @return the SintLiteral with the given value
-  ast::SintLiteral* make_literal(int32_t val) {
-    return create<ast::SintLiteral>(i32(), val);
-  }
-
-  /// Converts `arg` to an `ast::Expression` using `make_expr()`, then appends
-  /// it to `list`.
+  /// Converts `arg` to an `ast::Expression` using `Expr()`, then appends it to
+  /// `list`.
   /// @param list the list to append too
   /// @param arg the arg to create
   template <typename ARG>
-  void append_expr(ast::ExpressionList& list, ARG&& arg) {
-    list.emplace_back(make_expr(std::forward<ARG>(arg)));
+  void Append(ast::ExpressionList& list, ARG&& arg) {
+    list.emplace_back(Expr(std::forward<ARG>(arg)));
   }
 
-  /// Converts `arg0` and `args` to `ast::Expression`s using `make_expr()`,
+  /// Converts `arg0` and `args` to `ast::Expression`s using `Expr()`,
   /// then appends them to `list`.
   /// @param list the list to append too
   /// @param arg0 the first argument
   /// @param args the rest of the arguments
   template <typename ARG0, typename... ARGS>
-  void append_expr(ast::ExpressionList& list, ARG0&& arg0, ARGS&&... args) {
-    append_expr(list, std::forward<ARG0>(arg0));
-    append_expr(list, std::forward<ARGS>(args)...);
+  void Append(ast::ExpressionList& list, ARG0&& arg0, ARGS&&... args) {
+    Append(list, std::forward<ARG0>(arg0));
+    Append(list, std::forward<ARGS>(args)...);
   }
 
-  /// @param ty the type
+  /// @param args the list of expressions
+  /// @return the list of expressions converted to `ast::Expression`s using
+  /// `Expr()`,
+  template <typename... ARGS>
+  ast::ExpressionList ExprList(ARGS&&... args) {
+    ast::ExpressionList list;
+    list.reserve(sizeof...(args));
+    Append(list, std::forward<ARGS>(args)...);
+    return list;
+  }
+
+  /// @param val the boolan value
+  /// @return a boolean literal with the given value
+  ast::BoolLiteral* Literal(bool val) {
+    return create<ast::BoolLiteral>(ty.bool_, val);
+  }
+
+  /// @param val the float value
+  /// @return a float literal with the given value
+  ast::FloatLiteral* Literal(f32 val) {
+    return create<ast::FloatLiteral>(ty.f32, val);
+  }
+
+  /// @param val the unsigned int value
+  /// @return a UintLiteral with the given value
+  ast::UintLiteral* Literal(u32 val) {
+    return create<ast::UintLiteral>(ty.u32, val);
+  }
+
+  /// @param val the integer value
+  /// @return the SintLiteral with the given value
+  ast::SintLiteral* Literal(i32 val) {
+    return create<ast::SintLiteral>(ty.i32, val);
+  }
+
   /// @param args the arguments for the type constructor
   /// @return an `ast::TypeConstructorExpression` of type `ty`, with the values
-  /// of `args` converted to `ast::Expression`s using `make_expr()`
-  template <typename... ARGS>
-  ast::TypeConstructorExpression* construct(ast::type::Type* ty,
-                                            ARGS&&... args) {
-    ast::ExpressionList vals;
-    append_expr(vals, std::forward<ARGS>(args)...);
-    return create<ast::TypeConstructorExpression>(ty, std::move(vals));
+  /// of `args` converted to `ast::Expression`s using `Expr()`
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* Construct(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.Of<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param x the first component of the vector
+  /// @param y the second component of the vector
+  /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type
+  /// `T`, constructed with the values `x` and `y`.
+  template <typename T>
+  ast::TypeConstructorExpression* vec2(T&& x, T&& y) {
+    return create<ast::TypeConstructorExpression>(
+        ty.vec2<T>(), ExprList(std::move(x), std::move(y)));
+  }
+
+  /// @param x the first component of the vector
+  /// @param y the second component of the vector
+  /// @param z the third component of the vector
+  /// @return an `ast::TypeConstructorExpression` of a 3-element vector of type
+  /// `T`, constructed with the values `x`, `y` and `z`.
+  template <typename T>
+  ast::TypeConstructorExpression* vec3(T&& x, T&& y, T&& z) {
+    return create<ast::TypeConstructorExpression>(
+        ty.vec3<T>(), ExprList(std::move(x), std::move(y), std::move(z)));
+  }
+
+  /// @param x the first component of the vector
+  /// @param y the second component of the vector
+  /// @param z the third component of the vector
+  /// @param w the fourth component of the vector
+  /// @return an `ast::TypeConstructorExpression` of a 4-element vector of type
+  /// `T`, constructed with the values `x`, `y`, `z` and `w`.
+  template <typename T>
+  ast::TypeConstructorExpression* vec4(T&& x, T&& y, T&& z, T&& w) {
+    return create<ast::TypeConstructorExpression>(
+        ty.vec4<T>(),
+        ExprList(std::move(x), std::move(y), std::move(z), std::move(w)));
   }
 
   /// @param name the variable name
   /// @param storage the variable storage class
   /// @param type the variable type
   /// @returns a `ast::Variable` with the given name, storage and type
-  virtual ast::Variable* make_var(const std::string& name,
-                                  ast::StorageClass storage,
-                                  ast::type::Type* type);
+  ast::Variable* Var(const std::string& name,
+                     ast::StorageClass storage,
+                     ast::type::Type* type);
 
   /// @param func the function name
   /// @param args the function call arguments
   /// @returns a `ast::CallExpression` to the function `func`, with the
-  /// arguments of `args` converted to `ast::Expression`s using `make_expr()`.
+  /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
   template <typename... ARGS>
-  ast::CallExpression call_expr(const std::string& func, ARGS&&... args) {
-    ast::ExpressionList params;
-    append_expr(params, std::forward<ARGS>(args)...);
-    return ast::CallExpression{make_expr(func), std::move(params)};
+  ast::CallExpression Call(const std::string& func, ARGS&&... args) {
+    return ast::CallExpression{Expr(func),
+                               ExprList(std::forward<ARGS>(args)...)};
   }
 
   /// Creates a new `ast::Node` owned by the Context. When the Context is
@@ -219,12 +276,75 @@ class Builder {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return ctx_->create<T>(std::forward<ARGS>(args)...);
+    return ctx->create<T>(std::forward<ARGS>(args)...);
   }
 
- private:
-  tint::Context* ctx_ = nullptr;
+  /// The builder context
+  tint::Context* const ctx;
+  /// The builder types
+  const TypesBuilder ty;
+
+ protected:
+  /// Called whenever a new variable is built with `Var()`.
+  virtual void OnVariableBuilt(ast::Variable*) {}
 };
+
+template <typename T>
+ast::type::Type* TypesBuilder::Of() const {
+  return CToAST<T>::get(this);
+}
+
+template <typename T>
+ast::type::Type* TypesBuilder::vec2() const {
+  return tm_->Get<ast::type::VectorType>(Of<T>(), 2);
+}
+template <typename T>
+ast::type::Type* TypesBuilder::vec3() const {
+  return tm_->Get<ast::type::VectorType>(Of<T>(), 3);
+}
+template <typename T>
+ast::type::Type* TypesBuilder::vec4() const {
+  return tm_->Get<ast::type::VectorType>(Of<T>(), 4);
+}
+template <typename T>
+ast::type::Type* TypesBuilder::mat3x3() const {
+  return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 3);
+}
+template <typename T>
+ast::type::Type* TypesBuilder::arr() const {
+  return tm_->Get<ast::type::ArrayType>(Of<T>());
+}
+
+/// BuilderWithContext is a `Builder` that constructs and owns its `Context`.
+class BuilderWithContext : public Builder {
+ public:
+  BuilderWithContext();
+  ~BuilderWithContext() override;
+};
+
+//! @cond Doxygen_Suppress
+// Various template specializations for TypesBuilder::CToAST.
+template <>
+struct TypesBuilder::CToAST<Builder::i32> {
+  static ast::type::Type* get(const TypesBuilder* t) { return t->i32; }
+};
+template <>
+struct TypesBuilder::CToAST<Builder::u32> {
+  static ast::type::Type* get(const TypesBuilder* t) { return t->u32; }
+};
+template <>
+struct TypesBuilder::CToAST<Builder::f32> {
+  static ast::type::Type* get(const TypesBuilder* t) { return t->f32; }
+};
+template <>
+struct TypesBuilder::CToAST<bool> {
+  static ast::type::Type* get(const TypesBuilder* t) { return t->bool_; }
+};
+template <>
+struct TypesBuilder::CToAST<void> {
+  static ast::type::Type* get(const TypesBuilder* t) { return t->void_; }
+};
+//! @endcond
 
 }  // namespace ast
 }  // namespace tint

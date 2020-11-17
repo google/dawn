@@ -45,29 +45,22 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
-#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-class IntrinsicBuilderTest : public ast::Builder, public testing::Test {
- public:
-  IntrinsicBuilderTest() { set_context(&ctx); }
-
-  ast::Variable* make_var(const std::string& name,
-                          ast::StorageClass storage,
-                          ast::type::Type* type) override {
-    auto* var = ast::Builder::make_var(name, storage, type);
+class IntrinsicBuilderTest : public ast::BuilderWithContext,
+                             public testing::Test {
+ protected:
+  void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
-    return var;
   }
 
-  Context ctx;
   ast::Module mod;
-  TypeDeterminer td{&ctx, &mod};
-  spirv::Builder b{&ctx, &mod};
+  TypeDeterminer td{ctx, &mod};
+  spirv::Builder b{ctx, &mod};
 };
 
 template <typename T>
@@ -87,8 +80,8 @@ using IntrinsicBoolTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(bool_type(), 3));
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<bool>());
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -116,8 +109,8 @@ using IntrinsicFloatTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, f32());
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -140,8 +133,8 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
 TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -171,8 +164,8 @@ using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, i32());
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -194,8 +187,8 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(i32(), 3));
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<i32>());
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -218,8 +211,8 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
 TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, u32());
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.u32);
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -241,8 +234,8 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(u32(), 3));
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<u32>());
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -268,8 +261,8 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Dot) {
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
-  auto expr = call_expr("dot", "v", "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto expr = Call("dot", "v", "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -294,8 +287,8 @@ using IntrinsicDeriveTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, f32());
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -317,8 +310,8 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto param = GetParam();
 
-  auto* var = make_var("v", ast::StorageClass::kPrivate, vec(f32(), 3));
-  auto expr = call_expr(param.name, "v");
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -358,10 +351,10 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
-  auto* v2 = make_var("v2", ast::StorageClass::kPrivate, vec(f32(), 2));
-  auto* v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
+  auto* v2 = Var("v2", ast::StorageClass::kPrivate, ty.vec2<f32>());
+  auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto expr = call_expr("outerProduct", "v2", "v3");
+  auto expr = Call("outerProduct", "v2", "v3");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -390,10 +383,9 @@ TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Select) {
-  auto* v3 = make_var("v3", ast::StorageClass::kPrivate, vec(f32(), 3));
-  auto* bool_v3 =
-      make_var("bool_v3", ast::StorageClass::kPrivate, vec(bool_type(), 3));
-  auto expr = call_expr("select", "v3", "v3", "bool_v3");
+  auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto* bool_v3 = Var("bool_v3", ast::StorageClass::kPrivate, ty.vec3<bool>());
+  auto expr = Call("select", "v3", "v3", "bool_v3");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -431,10 +423,10 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_1d) {
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto expr = call_expr("textureLoad", "texture", 1.0f, 2);
+  auto expr = Call("textureLoad", "texture", 1.0f, 2);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -465,11 +457,10 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto expr = call_expr("textureLoad", "texture",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2);
+  auto expr = Call("textureLoad", "texture", vec2<f32>(1.0f, 2.0f), 2);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -495,14 +486,14 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
-  ast::type::SampledTextureType s(ast::type::TextureDimension::k1d, f32());
+  ast::type::SampledTextureType s(ast::type::TextureDimension::k1d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto expr = call_expr("textureLoad", "texture", 1.0f, 2);
+  auto expr = Call("textureLoad", "texture", 1.0f, 2);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -525,15 +516,14 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
-  ast::type::SampledTextureType s(ast::type::TextureDimension::k2d, f32());
+  ast::type::SampledTextureType s(ast::type::TextureDimension::k2d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto expr = call_expr("textureLoad", "texture",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2);
+  auto expr = Call("textureLoad", "texture", vec2<f32>(1.0f, 2.0f), 2);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -559,15 +549,15 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Multisampled_2d) {
-  ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d, f32());
+  ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d,
+                                       ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &s);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto expr = call_expr("textureLoad", "texture",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2);
+  auto expr = Call("textureLoad", "texture", vec2<f32>(1.0f, 2.0f), 2);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 5u) << b.error();
@@ -598,13 +588,13 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSample_1d) {
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSample", "texture", "sampler", 1.0f);
+  auto expr = Call("textureSample", "texture", "sampler", 1.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 7u) << b.error();
@@ -635,14 +625,14 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSample_2d) {
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSample", "texture", "sampler",
-                        construct(vec(f32(), 2), 1.0f, 2.0f));
+  auto expr =
+      Call("textureSample", "texture", "sampler", vec2<f32>(1.0f, 2.0f));
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 7u) << b.error();
@@ -672,17 +662,17 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSample_2d) {
 
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_1d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
-  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, f32());
+  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSampleLevel", "texture", "sampler", 1.0f, 2.0f);
+  auto expr = Call("textureSampleLevel", "texture", "sampler", 1.0f, 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -711,18 +701,18 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_1d) {
 
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_2d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
-  ast::type::SampledTextureType t(ast::type::TextureDimension::k2d, f32());
+  ast::type::SampledTextureType t(ast::type::TextureDimension::k2d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSampleLevel", "texture", "sampler",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
+  auto expr = Call("textureSampleLevel", "texture", "sampler",
+                   vec2<f32>(1.0f, 2.0f), 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -753,17 +743,17 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleLevel_2d) {
 
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_1d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
-  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, f32());
+  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSampleBias", "texture", "sampler", 1.0f, 2.0f);
+  auto expr = Call("textureSampleBias", "texture", "sampler", 1.0f, 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -792,18 +782,18 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_1d) {
 
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleBias_2d) {
   ast::type::SamplerType s(ast::type::SamplerKind::kSampler);
-  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, f32());
+  ast::type::SampledTextureType t(ast::type::TextureDimension::k1d, ty.f32);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSampleBias", "texture", "sampler",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
+  auto expr = Call("textureSampleBias", "texture", "sampler",
+                   vec2<f32>(1.0f, 2.0f), 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -838,14 +828,14 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare) {
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr = call_expr("textureSampleCompare", "texture", "sampler",
-                        construct(vec(f32(), 2), 1.0f, 2.0f), 2.0f);
+  auto expr = Call("textureSampleCompare", "texture", "sampler",
+                   vec2<f32>(1.0f, 2.0f), 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_EQ(b.GenerateExpression(&expr), 8u) << b.error();
@@ -875,24 +865,22 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare) {
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
-  auto* vec2 = vec(f32(), 2);
-
   ast::type::SamplerType s(ast::type::SamplerKind::kComparisonSampler);
   ast::type::DepthTextureType t(ast::type::TextureDimension::k2d);
 
   b.push_function(Function{});
 
-  auto* tex = make_var("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Var("texture", ast::StorageClass::kNone, &t);
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
 
-  auto* sampler = make_var("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr1 = call_expr("textureSampleCompare", "texture", "sampler",
-                         construct(vec2, 1.0f, 2.0f), 2.0f);
+  auto expr1 = Call("textureSampleCompare", "texture", "sampler",
+                    vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  auto expr2 = call_expr("textureSampleCompare", "texture", "sampler",
-                         construct(vec2, 1.0f, 2.0f), 2.0f);
+  auto expr2 = Call("textureSampleCompare", "texture", "sampler",
+                    vec2<f32>(1.0f, 2.0f), 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(&expr1)) << td.error();
   EXPECT_TRUE(td.DetermineResultType(&expr2)) << td.error();
@@ -928,12 +916,12 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
-  auto* var = make_var("ident", ast::StorageClass::kPrivate, f32());
-  auto expr = call_expr("round", "ident");
+  auto* var = Var("ident", ast::StorageClass::kPrivate, ty.f32);
+  auto expr = Call("round", "ident");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -961,10 +949,10 @@ using Intrinsic_Builtin_SingleParam_Float_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1.0f);
+  auto expr = Call(param.name, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -986,10 +974,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, construct(vec(f32(), 2), 1.0f, 1.0f));
+  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1036,11 +1024,11 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                          IntrinsicData{"trunc", "Trunc"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
-  auto expr = call_expr("length", 1.0f);
+  auto expr = Call("length", 1.0f);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1059,10 +1047,10 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
-  auto expr = call_expr("length", construct(vec(f32(), 2), 1.0f, 1.0f));
+  auto expr = Call("length", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1083,10 +1071,10 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Normalize) {
-  auto expr = call_expr("normalize", construct(vec(f32(), 2), 1.0f, 1.0f));
+  auto expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1111,10 +1099,11 @@ using Intrinsic_Builtin_DualParam_Float_Test =
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1.0f, 1.0f);
+  auto expr = Call(param.name, 1.0f, 1.0f);
+
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1136,13 +1125,11 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec2 = vec(f32(), 2);
-  auto expr = call_expr(param.name, construct(vec2, 1.0f, 1.0f),
-                        construct(vec2, 1.0f, 1.0f));
+  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1172,10 +1159,11 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                          IntrinsicData{"step", "Step"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
-  auto expr = call_expr("distance", 1.0f, 1.0f);
+  auto expr = Call("distance", 1.0f, 1.0f);
+
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1194,13 +1182,11 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
-  auto* vec3 = vec(f32(), 2);
-  auto expr = call_expr("distance", construct(vec3, 1.0f, 1.0f),
-                        construct(vec3, 1.0f, 1.0f));
+  auto expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1221,13 +1207,12 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Cross) {
-  auto* vec3 = vec(f32(), 3);
-  auto expr = call_expr("cross", construct(vec3, 1.0f, 1.0f, 1.0f),
-                        construct(vec3, 1.0f, 1.0f, 1.0f));
+  auto expr =
+      Call("cross", vec3<f32>(1.0f, 1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1252,10 +1237,10 @@ using Intrinsic_Builtin_ThreeParam_Float_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1.0f, 1.0f, 1.0f);
+  auto expr = Call(param.name, 1.0f, 1.0f, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1277,14 +1262,12 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec3 = vec(f32(), 2);
-  auto expr =
-      call_expr(param.name, construct(vec3, 1.0f, 1.0f),
-                construct(vec3, 1.0f, 1.0f), construct(vec3, 1.0f, 1.0f));
+  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
+                   vec2<f32>(1.0f, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1319,10 +1302,10 @@ using Intrinsic_Builtin_SingleParam_Sint_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1);
+  auto expr = Call(param.name, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1344,10 +1327,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, construct(vec(i32(), 2), 1, 1));
+  auto expr = Call(param.name, vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1376,10 +1359,10 @@ using Intrinsic_Builtin_SingleParam_Uint_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1u);
+  auto expr = Call(param.name, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1401,10 +1384,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, construct(vec(u32(), 2), 1u, 1u));
+  auto expr = Call(param.name, vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1433,10 +1416,10 @@ using Intrinsic_Builtin_DualParam_SInt_Test =
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1, 1);
+  auto expr = Call(param.name, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1458,12 +1441,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec2 = vec(i32(), 2);
-  auto expr =
-      call_expr(param.name, construct(vec2, 1, 1), construct(vec2, 1, 1));
+  auto expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1493,10 +1474,10 @@ using Intrinsic_Builtin_DualParam_UInt_Test =
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1u, 1u);
+  auto expr = Call(param.name, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1518,13 +1499,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec2 = vec(u32(), 2);
-  auto expr =
-      call_expr(param.name, construct(vec2, 1u, 1u), construct(vec2, 1u, 1u));
-
+  auto expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1554,10 +1532,10 @@ using Intrinsic_Builtin_ThreeParam_Sint_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1, 1, 1);
+  auto expr = Call(param.name, 1, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1579,13 +1557,12 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec2 = vec(i32(), 2);
-  auto expr = call_expr(param.name, construct(vec2, 1, 1),
-                        construct(vec2, 1, 1), construct(vec2, 1, 1));
+  auto expr =
+      Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1), vec2<i32>(1, 1));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1614,10 +1591,10 @@ using Intrinsic_Builtin_ThreeParam_Uint_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = call_expr(param.name, 1u, 1u, 1u);
+  auto expr = Call(param.name, 1u, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1639,13 +1616,12 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto* vec2 = vec(u32(), 2);
-  auto expr = call_expr(param.name, construct(vec2, 1u, 1u),
-                        construct(vec2, 1u, 1u), construct(vec2, 1u, 1u));
+  auto expr =
+      Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1670,12 +1646,12 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Determinant) {
-  auto* var = make_var("var", ast::StorageClass::kPrivate, mat(f32(), 3, 3));
-  auto expr = call_expr("determinant", "var");
+  auto* var = Var("var", ast::StorageClass::kPrivate, ty.mat3x3<f32>());
+  auto expr = Call("determinant", "var");
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -1702,23 +1678,21 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
-  ast::type::ArrayType ary(f32());
-
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &ary, decos));
+  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
 
-  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
-                                           make_expr("b"), make_expr("a")));
+  auto expr = Call("arrayLength",
+                   create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -1742,23 +1716,21 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  ast::type::ArrayType ary(f32());
-
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", f32(), decos));
-  members.push_back(create<ast::StructMember>("a", &ary, decos));
+  members.push_back(create<ast::StructMember>("z", ty.f32, decos));
+  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
 
-  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
-  auto expr = call_expr("arrayLength", create<ast::MemberAccessorExpression>(
-                                           make_expr("b"), make_expr("a")));
+  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
+  auto expr = Call("arrayLength",
+                   create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -1783,27 +1755,26 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
 // TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
 TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
-  ast::type::ArrayType ary(f32());
-  ast::type::PointerType ptr(&ary, ast::StorageClass::kStorageBuffer);
+  ast::type::PointerType ptr(ty.arr<f32>(), ast::StorageClass::kStorageBuffer);
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", f32(), decos));
-  members.push_back(create<ast::StructMember>("a", &ary, decos));
+  members.push_back(create<ast::StructMember>("z", ty.f32, decos));
+  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
 
-  auto* var = make_var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto* ptr_var = make_var("ptr_var", ast::StorageClass::kPrivate, &ptr);
+  auto* ptr_var = Var("ptr_var", ast::StorageClass::kPrivate, &ptr);
   ptr_var->set_constructor(
-      create<ast::MemberAccessorExpression>(make_expr("b"), make_expr("a")));
+      create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
 
-  auto expr = call_expr("arrayLength", "ptr_var");
+  auto expr = Call("arrayLength", "ptr_var");
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, void_type(), create<ast::BlockStatement>());
+  ast::Function func("a_func", {}, ty.void_, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
