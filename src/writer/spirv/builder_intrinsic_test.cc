@@ -1680,7 +1680,7 @@ OpFunctionEnd
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
+  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
@@ -1719,7 +1719,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
+  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);
@@ -1755,12 +1755,13 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
 // TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
 TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
-  ast::type::PointerType ptr(ty.arr<f32>(), ast::StorageClass::kStorageBuffer);
+  ast::type::PointerType ptr(ty.array<f32>(),
+                             ast::StorageClass::kStorageBuffer);
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>("a", ty.arr<f32>(), decos));
+  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::StructType s_type("my_struct", s);

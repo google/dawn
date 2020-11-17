@@ -26,6 +26,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -61,27 +62,94 @@ class TypesBuilder {
 
   /// @return the tint AST type for the C type `T`.
   template <typename T>
-  ast::type::Type* Of() const;
+  ast::type::Type* Of() const {
+    return CToAST<T>::get(this);
+  }
 
   /// @return the tint AST type for a 2-element vector of the C type `T`.
   template <typename T>
-  ast::type::Type* vec2() const;
+  ast::type::VectorType* vec2() const {
+    return tm_->Get<ast::type::VectorType>(Of<T>(), 2);
+  }
 
   /// @return the tint AST type for a 3-element vector of the C type `T`.
   template <typename T>
-  ast::type::Type* vec3() const;
+  ast::type::VectorType* vec3() const {
+    return tm_->Get<ast::type::VectorType>(Of<T>(), 3);
+  }
 
   /// @return the tint AST type for a 4-element vector of the C type `T`.
   template <typename T>
-  ast::type::Type* vec4() const;
+  ast::type::Type* vec4() const {
+    return tm_->Get<ast::type::VectorType>(Of<T>(), 4);
+  }
+
+  /// @return the tint AST type for a 2x3 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat2x2() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 2);
+  }
+
+  /// @return the tint AST type for a 2x3 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat2x3() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 2);
+  }
+
+  /// @return the tint AST type for a 2x4 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat2x4() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 2);
+  }
+
+  /// @return the tint AST type for a 3x2 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat3x2() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 3);
+  }
 
   /// @return the tint AST type for a 3x3 matrix of the C type `T`.
   template <typename T>
-  ast::type::Type* mat3x3() const;
+  ast::type::MatrixType* mat3x3() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 3);
+  }
 
-  /// @return the tint AST type for an array of type `T`.
+  /// @return the tint AST type for a 3x4 matrix of the C type `T`.
   template <typename T>
-  ast::type::Type* arr() const;
+  ast::type::MatrixType* mat3x4() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 3);
+  }
+
+  /// @return the tint AST type for a 4x2 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat4x2() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 4);
+  }
+
+  /// @return the tint AST type for a 4x3 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat4x3() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 4);
+  }
+
+  /// @return the tint AST type for a 4x4 matrix of the C type `T`.
+  template <typename T>
+  ast::type::MatrixType* mat4x4() const {
+    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 4);
+  }
+
+  /// @param subtype the array element type
+  /// @param n the array size. 0 represents unbounded
+  /// @return the tint AST type for a array of size `n` of type `T`
+  ast::type::ArrayType* array(ast::type::Type* subtype, uint32_t n) const {
+    return tm_->Get<ast::type::ArrayType>(subtype, n);
+  }
+
+  /// @return the tint AST type for an array of size `N` of type `T`
+  template <typename T, int N = 0>
+  ast::type::ArrayType* array() const {
+    return array(Of<T>(), N);
+  }
 
  private:
   /// CToAST<T> is specialized for various `T` types and each specialization
@@ -136,6 +204,12 @@ class Builder {
     return create<ast::IdentifierExpression>(name);
   }
 
+  /// @param value the boolean value
+  /// @return a Scalar constructor for the given value
+  ast::ScalarConstructorExpression* Expr(bool value) {
+    return create<ast::ScalarConstructorExpression>(Literal(value));
+  }
+
   /// @param value the float value
   /// @return a Scalar constructor for the given value
   ast::ScalarConstructorExpression* Expr(f32 value) {
@@ -173,6 +247,9 @@ class Builder {
     Append(list, std::forward<ARG0>(arg0));
     Append(list, std::forward<ARGS>(args)...);
   }
+
+  /// @return an empty list of expressions,
+  ast::ExpressionList ExprList() { return {}; }
 
   /// @param args the list of expressions
   /// @return the list of expressions converted to `ast::Expression`s using
@@ -218,38 +295,132 @@ class Builder {
         ty.Of<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
-  /// @param x the first component of the vector
-  /// @param y the second component of the vector
+  /// @param type the type to construct
+  /// @param args the arguments for the constructor
+  /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
+  /// values `args`.
+  template <typename... ARGS>
+  ast::TypeConstructorExpression* Construct(ast::type::Type* type,
+                                            ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        type, ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type
-  /// `T`, constructed with the values `x` and `y`.
-  template <typename T>
-  ast::TypeConstructorExpression* vec2(T&& x, T&& y) {
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* vec2(ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
-        ty.vec2<T>(), ExprList(std::move(x), std::move(y)));
+        ty.vec2<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
-  /// @param x the first component of the vector
-  /// @param y the second component of the vector
-  /// @param z the third component of the vector
+  /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 3-element vector of type
-  /// `T`, constructed with the values `x`, `y` and `z`.
-  template <typename T>
-  ast::TypeConstructorExpression* vec3(T&& x, T&& y, T&& z) {
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* vec3(ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
-        ty.vec3<T>(), ExprList(std::move(x), std::move(y), std::move(z)));
+        ty.vec3<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
-  /// @param x the first component of the vector
-  /// @param y the second component of the vector
-  /// @param z the third component of the vector
-  /// @param w the fourth component of the vector
+  /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 4-element vector of type
-  /// `T`, constructed with the values `x`, `y`, `z` and `w`.
-  template <typename T>
-  ast::TypeConstructorExpression* vec4(T&& x, T&& y, T&& z, T&& w) {
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* vec4(ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
-        ty.vec4<T>(),
-        ExprList(std::move(x), std::move(y), std::move(z), std::move(w)));
+        ty.vec4<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 2x2 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat2x2(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat2x2<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 2x3 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat2x3(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat2x3<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 2x4 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat2x4(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat2x4<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 3x2 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat3x2(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat3x2<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 3x3 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat3x3(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat3x3<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 3x4 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat3x4(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat3x4<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 4x2 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat4x2(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat4x2<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 4x3 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat4x3(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat4x3<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the matrix constructor
+  /// @return an `ast::TypeConstructorExpression` of a 4x4 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, typename... ARGS>
+  ast::TypeConstructorExpression* mat4x4(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.mat4x4<T>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param args the arguments for the array constructor
+  /// @return an `ast::TypeConstructorExpression` of a 4x4 matrix of type
+  /// `T`, constructed with the values `args`.
+  template <typename T, int N = 0, typename... ARGS>
+  ast::TypeConstructorExpression* array(ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        ty.array<T, N>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param name the variable name
@@ -288,32 +459,6 @@ class Builder {
   /// Called whenever a new variable is built with `Var()`.
   virtual void OnVariableBuilt(ast::Variable*) {}
 };
-
-template <typename T>
-ast::type::Type* TypesBuilder::Of() const {
-  return CToAST<T>::get(this);
-}
-
-template <typename T>
-ast::type::Type* TypesBuilder::vec2() const {
-  return tm_->Get<ast::type::VectorType>(Of<T>(), 2);
-}
-template <typename T>
-ast::type::Type* TypesBuilder::vec3() const {
-  return tm_->Get<ast::type::VectorType>(Of<T>(), 3);
-}
-template <typename T>
-ast::type::Type* TypesBuilder::vec4() const {
-  return tm_->Get<ast::type::VectorType>(Of<T>(), 4);
-}
-template <typename T>
-ast::type::Type* TypesBuilder::mat3x3() const {
-  return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 3);
-}
-template <typename T>
-ast::type::Type* TypesBuilder::arr() const {
-  return tm_->Get<ast::type::ArrayType>(Of<T>());
-}
 
 /// BuilderWithContext is a `Builder` that constructs and owns its `Context`.
 class BuilderWithContext : public Builder {
