@@ -273,6 +273,8 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/parser.h
     reader/spirv/parser_impl.cc
     reader/spirv/parser_impl.h
+    reader/spirv/usage.cc
+    reader/spirv/usage.h
   )
 endif()
 
@@ -459,6 +461,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/parser_test.cc
     reader/spirv/spirv_tools_helpers_test.cc
     reader/spirv/spirv_tools_helpers_test.h
+    reader/spirv/usage_test.cc
   )
 endif()
 

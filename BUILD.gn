@@ -470,6 +470,8 @@ source_set("libtint_spv_reader_src") {
     "src/reader/spirv/parser.h",
     "src/reader/spirv/parser_impl.cc",
     "src/reader/spirv/parser_impl.h",
+    "src/reader/spirv/usage.cc",
+    "src/reader/spirv/usage.h",
   ]
 
   deps = [
@@ -855,6 +857,7 @@ source_set("tint_unittests_spv_reader_src") {
     "src/reader/spirv/parser_test.cc",
     "src/reader/spirv/spirv_tools_helpers_test.cc",
     "src/reader/spirv/spirv_tools_helpers_test.h",
+    "src/reader/spirv/usage_test.cc",
   ]
 
   configs += [
