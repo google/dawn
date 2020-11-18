@@ -602,12 +602,12 @@ namespace dawn_native { namespace vulkan {
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
-        if (mTexture) {
+        if (mTexture != nullptr) {
             mTexture->Destroy();
             mTexture = nullptr;
         }
 
-        if (mBlitTexture) {
+        if (mBlitTexture != nullptr) {
             mBlitTexture->Destroy();
             mBlitTexture = nullptr;
         }

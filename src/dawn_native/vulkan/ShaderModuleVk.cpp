@@ -26,8 +26,9 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
                                                       const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        if (!module)
+        if (module == nullptr) {
             return DAWN_VALIDATION_ERROR("Unable to create ShaderModule");
+        }
         DAWN_TRY(module->Initialize());
         return module.Detach();
     }

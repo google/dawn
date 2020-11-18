@@ -1102,7 +1102,7 @@ namespace dawn_native { namespace d3d12 {
                 i, attachmentInfo.loadOp, attachmentInfo.clearColor, view->GetD3D12Format());
 
             // Set color store operation.
-            if (attachmentInfo.resolveTarget.Get() != nullptr) {
+            if (attachmentInfo.resolveTarget != nullptr) {
                 TextureView* resolveDestinationView = ToBackend(attachmentInfo.resolveTarget.Get());
                 Texture* resolveDestinationTexture =
                     ToBackend(resolveDestinationView->GetTexture());

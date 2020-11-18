@@ -381,7 +381,7 @@ namespace dawn_native { namespace opengl {
 
             for (ColorAttachmentIndex i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
+                if (renderPass->colorAttachments[i].resolveTarget != nullptr) {
                     if (readFbo == 0) {
                         ASSERT(writeFbo == 0);
                         gl.GenFramebuffers(1, &readFbo);

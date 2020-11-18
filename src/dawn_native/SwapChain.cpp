@@ -167,7 +167,7 @@ namespace dawn_native {
         ASSERT(!IsError());
 
         // Return the same current texture view until Present is called.
-        if (mCurrentTextureView.Get() != nullptr) {
+        if (mCurrentTextureView != nullptr) {
             // Calling GetCurrentTextureView always returns a new reference so add it even when
             // reuse the existing texture view.
             mCurrentTextureView->Reference();
@@ -247,7 +247,7 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (mCurrentTextureView.Get() == nullptr) {
+        if (mCurrentTextureView == nullptr) {
             return DAWN_VALIDATION_ERROR(
                 "Cannot call present without a GetCurrentTextureView call for this frame");
         }
@@ -271,7 +271,7 @@ namespace dawn_native {
     }
 
     NewSwapChainBase::~NewSwapChainBase() {
-        if (mCurrentTextureView.Get() != nullptr) {
+        if (mCurrentTextureView != nullptr) {
             ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
                    TextureBase::TextureState::Destroyed);
         }
@@ -304,7 +304,7 @@ namespace dawn_native {
             return TextureViewBase::MakeError(GetDevice());
         }
 
-        if (mCurrentTextureView.Get() != nullptr) {
+        if (mCurrentTextureView != nullptr) {
             // Calling GetCurrentTextureView always returns a new reference so add it even when
             // reusing the existing texture view.
             mCurrentTextureView->Reference();
@@ -384,7 +384,7 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Presenting on detached swapchain");
         }
 
-        if (mCurrentTextureView.Get() == nullptr) {
+        if (mCurrentTextureView == nullptr) {
             return DAWN_VALIDATION_ERROR("Presenting without prior GetCurrentTextureView");
         }
 

@@ -190,7 +190,7 @@ namespace dawn_native {
         mState = State::Disconnected;
 
         // mCurrentErrorScope can be null if we failed device initialization.
-        if (mCurrentErrorScope.Get() != nullptr) {
+        if (mCurrentErrorScope != nullptr) {
             mCurrentErrorScope->UnlinkForShutdown();
         }
         mErrorScopeTracker = nullptr;
@@ -295,7 +295,7 @@ namespace dawn_native {
     }
 
     ErrorScope* DeviceBase::GetCurrentErrorScope() {
-        ASSERT(mCurrentErrorScope.Get() != nullptr);
+        ASSERT(mCurrentErrorScope != nullptr);
         return mCurrentErrorScope.Get();
     }
 
@@ -459,7 +459,7 @@ namespace dawn_native {
     }
 
     BindGroupLayoutBase* DeviceBase::GetEmptyBindGroupLayout() {
-        ASSERT(mEmptyBindGroupLayout);
+        ASSERT(mEmptyBindGroupLayout != nullptr);
         return mEmptyBindGroupLayout.Get();
     }
 
@@ -639,7 +639,7 @@ namespace dawn_native {
     BufferBase* DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
         Ref<BufferBase> result = nullptr;
         if (ConsumedError(CreateBufferInternal(descriptor), &result)) {
-            ASSERT(result.Get() == nullptr);
+            ASSERT(result == nullptr);
             return BufferBase::MakeError(this, descriptor);
         }
 
@@ -837,7 +837,7 @@ namespace dawn_native {
 
     QueueBase* DeviceBase::GetDefaultQueue() {
         // Backends gave the default queue during initialization.
-        ASSERT(mDefaultQueue.Get() != nullptr);
+        ASSERT(mDefaultQueue != nullptr);
 
         // Returns a new reference to the queue.
         mDefaultQueue->Reference();

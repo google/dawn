@@ -133,9 +133,9 @@ namespace dawn_native { namespace metal {
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
-        ASSERT((mTexture.Get() == nullptr) == (mCurrentDrawable == nullptr));
+        ASSERT((mTexture == nullptr) == (mCurrentDrawable == nullptr));
 
-        if (mTexture.Get() != nullptr) {
+        if (mTexture != nullptr) {
             mTexture->Destroy();
             mTexture = nullptr;
 

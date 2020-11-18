@@ -83,7 +83,7 @@ namespace dawn_native { namespace metal {
                 descriptor.colorAttachments[i].level = attachmentInfo.view->GetBaseMipLevel();
                 descriptor.colorAttachments[i].slice = attachmentInfo.view->GetBaseArrayLayer();
 
-                bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
+                bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
 
                 switch (attachmentInfo.storeOp) {
                     case wgpu::StoreOp::Store:

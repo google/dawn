@@ -278,7 +278,7 @@ namespace dawn_native {
             // next loop iteration.
 
             if (entry.buffer != nullptr) {
-                ASSERT(mBindingData.bindings[bindingIndex].Get() == nullptr);
+                ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
                 mBindingData.bindings[bindingIndex] = entry.buffer;
                 mBindingData.bufferData[bindingIndex].offset = entry.offset;
                 uint64_t bufferSize = (entry.size == wgpu::kWholeSize)
@@ -289,13 +289,13 @@ namespace dawn_native {
             }
 
             if (entry.textureView != nullptr) {
-                ASSERT(mBindingData.bindings[bindingIndex].Get() == nullptr);
+                ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
                 mBindingData.bindings[bindingIndex] = entry.textureView;
                 continue;
             }
 
             if (entry.sampler != nullptr) {
-                ASSERT(mBindingData.bindings[bindingIndex].Get() == nullptr);
+                ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
                 mBindingData.bindings[bindingIndex] = entry.sampler;
                 continue;
             }
@@ -313,7 +313,7 @@ namespace dawn_native {
     }
 
     BindGroupBase::~BindGroupBase() {
-        if (mLayout) {
+        if (mLayout != nullptr) {
             ASSERT(!IsError());
             for (BindingIndex i{0}; i < mLayout->GetBindingCount(); ++i) {
                 mBindingData.bindings[i].~Ref<ObjectBase>();

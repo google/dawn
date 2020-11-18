@@ -182,13 +182,13 @@ namespace dawn_native { namespace d3d12 {
     }
 
     D3D12_GPU_DESCRIPTOR_HANDLE BindGroup::GetBaseSamplerDescriptor() const {
-        ASSERT(mSamplerAllocationEntry.Get() != nullptr);
+        ASSERT(mSamplerAllocationEntry != nullptr);
         return mSamplerAllocationEntry->GetBaseDescriptor();
     }
 
     bool BindGroup::PopulateSamplers(Device* device,
                                      ShaderVisibleDescriptorAllocator* samplerAllocator) {
-        if (mSamplerAllocationEntry.Get() == nullptr) {
+        if (mSamplerAllocationEntry == nullptr) {
             return true;
         }
         return mSamplerAllocationEntry->Populate(device, samplerAllocator);

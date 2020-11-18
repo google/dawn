@@ -387,7 +387,7 @@ namespace dawn_native { namespace null {
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
-        if (mTexture.Get() != nullptr) {
+        if (mTexture != nullptr) {
             mTexture->Destroy();
             mTexture = nullptr;
         }

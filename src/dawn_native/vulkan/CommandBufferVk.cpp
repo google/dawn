@@ -273,7 +273,7 @@ namespace dawn_native { namespace vulkan {
                      IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                     const auto& attachmentInfo = renderPass->colorAttachments[i];
 
-                    bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
+                    bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
                     wgpu::LoadOp loadOp = attachmentInfo.loadOp;
 
                     query.SetColor(i, attachmentInfo.view->GetFormat().format, loadOp,
@@ -355,7 +355,7 @@ namespace dawn_native { namespace vulkan {
 
                 for (ColorAttachmentIndex i :
                      IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                    if (renderPass->colorAttachments[i].resolveTarget.Get() != nullptr) {
+                    if (renderPass->colorAttachments[i].resolveTarget != nullptr) {
                         TextureView* view =
                             ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());
 

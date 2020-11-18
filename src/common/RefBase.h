@@ -134,10 +134,6 @@ class RefBase {
         return mValue != other;
     }
 
-    operator bool() {
-        return mValue != kNullValue;
-    }
-
     const T operator->() const {
         return mValue;
     }

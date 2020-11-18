@@ -129,17 +129,6 @@ TEST(Ref, DefaultsToNull) {
     EXPECT_EQ(test->GetThis(), nullptr);
 }
 
-// Test Refs can be used inside ifs
-TEST(Ref, BoolConversion) {
-    Ref<RCTest> empty;
-    Ref<RCTest> full(new RCTest);
-    full->Release();
-
-    if (!full || empty) {
-        EXPECT_TRUE(false);
-    }
-}
-
 // Test Ref's copy constructor
 TEST(Ref, CopyConstructor) {
     bool deleted = false;

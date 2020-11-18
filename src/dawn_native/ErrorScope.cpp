@@ -23,7 +23,7 @@ namespace dawn_native {
 
     ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent)
         : RefCounted(), mErrorFilter(errorFilter), mParent(parent), mIsRoot(false) {
-        ASSERT(mParent.Get() != nullptr);
+        ASSERT(mParent != nullptr);
     }
 
     ErrorScope::~ErrorScope() {
@@ -124,9 +124,9 @@ namespace dawn_native {
         Ref<ErrorScope> parentScope = nullptr;
         for (; !currentScope->IsRoot(); currentScope = parentScope.Get()) {
             ASSERT(!currentScope->IsRoot());
-            ASSERT(currentScope.Get() != nullptr);
+            ASSERT(currentScope != nullptr);
             parentScope = std::move(currentScope->mParent);
-            ASSERT(parentScope.Get() != nullptr);
+            ASSERT(parentScope != nullptr);
 
             // On shutdown, error scopes that have yet to have a status get Unknown.
             if (currentScope->mErrorType == wgpu::ErrorType::NoError) {
