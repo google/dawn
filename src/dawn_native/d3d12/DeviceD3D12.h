@@ -178,6 +178,8 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError CheckDebugLayerAndGenerateErrors();
 
+        void ApplyUseDxcToggle();
+
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
         ExecutionSerial CheckAndUpdateCompletedSerials() override;

@@ -153,6 +153,10 @@ namespace dawn_native { namespace d3d12 {
         // Device shouldn't be used until after DeviceBase::Initialize so we must wait until after
         // device initialization to call NextSerial
         DAWN_TRY(NextSerial());
+
+        // The environment can only use DXC when it's available. Override the decision if it is not
+        // applicable.
+        ApplyUseDxcToggle();
         return {};
     }
 
@@ -186,6 +190,12 @@ namespace dawn_native { namespace d3d12 {
 
     ComPtr<IDXGIFactory4> Device::GetFactory() const {
         return ToBackend(GetAdapter())->GetBackend()->GetFactory();
+    }
+
+    void Device::ApplyUseDxcToggle() {
+        if (!ToBackend(GetAdapter())->GetBackend()->GetFunctions()->IsDXCAvailable()) {
+            ForceSetToggle(Toggle::UseDXC, false);
+        }
     }
 
     ResultOrError<IDxcLibrary*> Device::GetOrCreateDxcLibrary() const {

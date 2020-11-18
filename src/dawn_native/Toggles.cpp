@@ -126,7 +126,9 @@ namespace dawn_native {
               "default. This setting is used to test bindgroup encoding.",
               "https://crbug.com/dawn/155"}},
             {Toggle::UseDXC,
-             {"use_dxc", "Use DXC instead of FXC for compiling HLSL",
+             {"use_dxc",
+              "Use DXC instead of FXC for compiling HLSL when both dxcompiler.dll and dxil.dll "
+              "is available.",
               "https://crbug.com/dawn/402"}},
             {Toggle::DisableRobustness,
              {"disable_robustness", "Disable robust buffer access", "https://crbug.com/dawn/480"}},
