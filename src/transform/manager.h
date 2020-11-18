@@ -33,8 +33,8 @@ class Manager {
   /// Constructor
   /// DEPRECATED
   Manager();
-  /// @param ctx the tint context
-  /// @param mod the module to transform
+  /// @param context the tint context
+  /// @param module the module to transform
   Manager(Context* context, ast::Module* module);
   ~Manager();
 
