@@ -41,6 +41,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/context.h"
+#include "src/transform/manager.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -49,7 +50,13 @@ namespace {
 
 class BoundArrayAccessorsTest : public testing::Test {
  public:
-  BoundArrayAccessorsTest() : td_(&ctx_, &mod_), transform_(&ctx_, &mod_) {}
+  BoundArrayAccessorsTest() : td_(&ctx_, &mod_) {
+    auto transform =
+        std::make_unique<BoundArrayAccessorsTransform>(&ctx_, &mod_);
+    transform_ = transform.get();
+    manager_ = std::make_unique<Manager>(&ctx_, &mod_);
+    manager_->append(std::move(transform));
+  }
 
   ast::BlockStatement* SetupFunctionAndBody() {
     auto* block = create<ast::BlockStatement>();
@@ -67,7 +74,7 @@ class BoundArrayAccessorsTest : public testing::Test {
 
   TypeDeterminer* td() { return &td_; }
 
-  BoundArrayAccessorsTransform* transform() { return &transform_; }
+  Manager* manager() { return manager_.get(); }
 
   /// Creates a new `ast::Node` owned by the Context. When the Context is
   /// destructed, the `ast::Node` will also be destructed.
@@ -83,7 +90,8 @@ class BoundArrayAccessorsTest : public testing::Test {
   ast::Module mod_;
   TypeDeterminer td_;
   ast::type::VoidType void_type_;
-  BoundArrayAccessorsTransform transform_;
+  std::unique_ptr<Manager> manager_;
+  BoundArrayAccessorsTransform* transform_;
   ast::BlockStatement* body_ = nullptr;
 };
 
@@ -120,7 +128,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsCall());
 
@@ -183,7 +191,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsCall());
 
@@ -256,7 +264,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -304,7 +312,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsCall());
 
@@ -357,7 +365,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -396,7 +404,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -435,7 +443,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -483,7 +491,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsCall());
 
@@ -535,7 +543,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -574,7 +582,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -616,7 +624,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -680,7 +688,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -759,7 +767,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -827,7 +835,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -881,7 +889,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -936,7 +944,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());
@@ -991,7 +999,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_TRUE(transform()->Run());
+  ASSERT_TRUE(manager()->Run());
   ASSERT_TRUE(ptr->IsArrayAccessor());
 
   ASSERT_TRUE(ptr->array()->IsArrayAccessor());

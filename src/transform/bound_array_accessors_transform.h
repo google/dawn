@@ -40,6 +40,9 @@ class BoundArrayAccessorsTransform : public Transformer {
   explicit BoundArrayAccessorsTransform(Context* ctx, ast::Module* mod);
   ~BoundArrayAccessorsTransform() override;
 
+  /// Users of Tint should register the transform with transform manager and
+  /// invoke its Run(), instead of directly calling the transform's Run().
+  /// Calling Run() directly does not perform module state cleanup operations.
   /// @returns true if the transformation was successful
   bool Run() override;
 

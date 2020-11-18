@@ -164,6 +164,9 @@ class VertexPullingTransform : public Transformer {
   /// @param number the set number we will use
   void SetPullingBufferBindingSet(uint32_t number);
 
+  /// Users of Tint should register the transform with transform manager and
+  /// invoke its Run(), instead of directly calling the transform's Run().
+  /// Calling Run() directly does not perform module state cleanup operations.
   /// @returns true if the transformation was successful
   bool Run() override;
 

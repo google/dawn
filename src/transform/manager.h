@@ -31,8 +31,6 @@ namespace transform {
 class Manager {
  public:
   /// Constructor
-  /// DEPRECATED
-  Manager();
   /// @param context the tint context
   /// @param module the module to transform
   Manager(Context* context, ast::Module* module);

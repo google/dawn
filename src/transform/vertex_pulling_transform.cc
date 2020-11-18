@@ -38,7 +38,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/type_determiner.h"
 
 namespace tint {
 namespace transform {
@@ -101,11 +100,7 @@ bool VertexPullingTransform::Run() {
   AddVertexStorageBuffers();
   AddVertexPullingPreamble(vertex_func);
 
-  // We've potentially inserted nodes into the AST so we have to make sure to
-  // re-run type determination else those nodes will be missing their
-  // result_type
-  TypeDeterminer td(ctx_, mod_);
-  return td.Determine();
+  return true;
 }
 
 std::string VertexPullingTransform::GetVertexBufferName(uint32_t index) {

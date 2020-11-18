@@ -507,7 +507,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::transform::Manager transform_manager;
+  tint::transform::Manager transform_manager(&ctx, &mod);
   for (const auto& name : options.transforms) {
     // TODO(dsinclair): The vertex pulling transform requires setup code to
     // be run that needs user input. Should we find a way to support that here

@@ -19,8 +19,6 @@
 namespace tint {
 namespace transform {
 
-Manager::Manager() : context_(nullptr), module_(nullptr) {}
-
 Manager::Manager(Context* context, ast::Module* module)
     : context_(context), module_(module) {}
 

@@ -25,6 +25,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/transform/manager.h"
 #include "src/type_determiner.h"
 #include "src/validator/validator.h"
 
@@ -36,7 +37,11 @@ class VertexPullingTransformHelper {
  public:
   VertexPullingTransformHelper() {
     mod_ = std::make_unique<ast::Module>();
-    transform_ = std::make_unique<VertexPullingTransform>(&ctx_, mod_.get());
+    manager_ = std::make_unique<Manager>(&ctx_, mod_.get());
+    auto transform =
+        std::make_unique<VertexPullingTransform>(&ctx_, mod_.get());
+    transform_ = transform.get();
+    manager_->append(std::move(transform));
   }
 
   // Create basic module with an entry point and vertex function
@@ -78,7 +83,8 @@ class VertexPullingTransformHelper {
 
   Context* ctx() { return &ctx_; }
   ast::Module* mod() { return mod_.get(); }
-  VertexPullingTransform* transform() { return transform_.get(); }
+  Manager* manager() { return manager_.get(); }
+  VertexPullingTransform* transform() { return transform_; }
 
   /// Creates a new `ast::Node` owned by the Context. When the Context is
   /// destructed, the `ast::Node` will also be destructed.
@@ -92,21 +98,22 @@ class VertexPullingTransformHelper {
  private:
   Context ctx_;
   std::unique_ptr<ast::Module> mod_;
-  std::unique_ptr<VertexPullingTransform> transform_;
+  std::unique_ptr<Manager> manager_;
+  VertexPullingTransform* transform_;
 };
 
 class VertexPullingTransformTest : public VertexPullingTransformHelper,
                                    public testing::Test {};
 
 TEST_F(VertexPullingTransformTest, Error_NoVertexState) {
-  EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->error(), "SetVertexState not called");
+  EXPECT_FALSE(manager()->Run());
+  EXPECT_EQ(manager()->error(), "SetVertexState not called");
 }
 
 TEST_F(VertexPullingTransformTest, Error_NoEntryPoint) {
   transform()->SetVertexState(std::make_unique<VertexStateDescriptor>());
-  EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
+  EXPECT_FALSE(manager()->Run());
+  EXPECT_EQ(manager()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
@@ -114,8 +121,8 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
   InitTransform({});
   transform()->SetEntryPoint("_");
 
-  EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
+  EXPECT_FALSE(manager()->Run());
+  EXPECT_EQ(manager()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
@@ -128,14 +135,14 @@ TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
   mod()->AddFunction(func);
 
   InitTransform({});
-  EXPECT_FALSE(transform()->Run());
-  EXPECT_EQ(transform()->error(), "Vertex stage entry point not found");
+  EXPECT_FALSE(manager()->Run());
+  EXPECT_EQ(manager()->error(), "Vertex stage entry point not found");
 }
 
 TEST_F(VertexPullingTransformTest, BasicModule) {
   InitBasicModule();
   InitTransform({});
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 }
 
 TEST_F(VertexPullingTransformTest, OneAttribute) {
@@ -146,7 +153,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -231,7 +238,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   InitTransform(
       {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -316,7 +323,7 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
   transform()->SetPullingBufferBindingSet(5);
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -431,7 +438,7 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
       {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
         {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -571,7 +578,7 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
          InputStepMode::kVertex,
          {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}});
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -756,7 +763,7 @@ TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
         {12, InputStepMode::kVertex, {{VertexFormat::kVec3F32, 0, 1}}},
         {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}}}});
 
-  EXPECT_TRUE(transform()->Run());
+  EXPECT_TRUE(manager()->Run());
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
