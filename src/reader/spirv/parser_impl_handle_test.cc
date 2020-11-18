@@ -851,11 +851,6 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, FunctionParam) {
   Usage su = p->GetHandleUsage(10);
   Usage iu = p->GetHandleUsage(20);
 
-  std::cout << p->GetHandleUsage(10) << std::endl;
-  std::cout << p->GetHandleUsage(20) << std::endl;
-  std::cout << p->GetHandleUsage(110) << std::endl;
-  std::cout << p->GetHandleUsage(120) << std::endl;
-
   EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 }
@@ -923,9 +918,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageQueryLod
         SampledImageCase{
             "%result = OpImageQueryLod %v2float %sampled_image %coords",
-            "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"}
-
-        ));
+            "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"}));
 
 // Test RegisterHandleUsage, raw image cases.
 // For these we test the use of an image value directly, and not combined
@@ -1052,9 +1045,7 @@ INSTANTIATE_TEST_SUITE_P(
         RawImageCase{"f_texture_2d_ms",
                      "%result = OpImageQuerySamples "
                      "%uint %im",
-                     "Usage(Texture( is_sampled ms ))"}
-
-        ));
+                     "Usage(Texture( is_sampled ms ))"}));
 
 }  // namespace
 }  // namespace spirv

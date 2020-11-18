@@ -39,8 +39,12 @@ namespace spirv {
 ///      AddSampledTexture and AddDepthTexture usages
 class Usage {
  public:
+  /// Constructor
   Usage();
+  /// Copy constructor
+  /// @param other the Usage to clone
   Usage(const Usage& other);
+  /// Destructor
   ~Usage();
 
   /// @returns true if this usage is internally consistent
@@ -94,16 +98,16 @@ class Usage {
   void AddTexture();
   /// Records usage as a read-only storage texture.
   void AddStorageReadTexture();
-  // Records usage as a write-only storage texture.
+  /// Records usage as a write-only storage texture.
   void AddStorageWriteTexture();
-  // Records usage as a sampled texture.
+  /// Records usage as a sampled texture.
   void AddSampledTexture();
-  // Records usage as a multisampled texture.
+  /// Records usage as a multisampled texture.
   void AddMultisampledTexture();
   /// Records usage as a depth texture.
   void AddDepthTexture();
 
-  /// Returns this usage object as a string.
+  /// @returns this usage object as a string.
   std::string to_str() const;
 
  private:
