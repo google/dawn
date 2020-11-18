@@ -179,6 +179,22 @@ std::string CommonTypes() {
   )";
 }
 
+TEST_F(SpvParserTest,
+       GetMemoryObjectDeclarationForHandle_WellFormedButNotAHandle) {
+  const auto assembly = Preamble() + CommonTypes() + R"(
+     %10 = OpConstantNull %ptr_sampler
+     %20 = OpConstantNull %ptr_f_texture_1d
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildInternalModule());
+  const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
+  const auto* image = p->GetMemoryObjectDeclarationForHandle(20, true);
+
+  EXPECT_EQ(sampler, nullptr);
+  EXPECT_EQ(image, nullptr);
+  EXPECT_TRUE(p->error().empty());
+}
+
 TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Direct) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %10 = OpVariable %ptr_sampler UniformConstant

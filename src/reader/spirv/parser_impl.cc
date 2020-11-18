@@ -1579,8 +1579,12 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
         id = inst->GetSingleWordInOperand(0);
         break;
       default:
-        // This is not valid.
-        return local_fail();
+        // Can't trace further.
+        // Remember it as the answer for the whole path.
+        for (auto iter : visited) {
+          memo_table[iter] = nullptr;
+        }
+        return nullptr;
     }
   }
 }

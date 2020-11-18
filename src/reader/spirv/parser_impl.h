@@ -379,14 +379,14 @@ class ParserImpl : Reader {
   /// return the SPIR-V instruction that represents the memory object
   /// declaration for the object.  If we encounter an OpSampledImage along the
   /// way, follow the image operand when follow_image is true; otherwise follow
-  /// the sampler operand. Returns null and emits an error if it can't trace
-  /// back to a memory object declaration.
-  /// This method can be used any time after BuildInternalModule has been
-  /// invoked.
+  /// the sampler operand. Returns nullptr if we can't trace back to a memory
+  /// object declaration.  Emits an error and returns nullptr when the scan
+  /// fails due to a malformed module. This method can be used any time after
+  /// BuildInternalModule has been invoked.
   /// @param id the SPIR-V ID of the sampler, image, or sampled image
   /// @param follow_image indicates whether to follow the image operand of
   /// OpSampledImage
-  /// @returns the memory object declaration for the handle, or nullptr on error
+  /// @returns the memory object declaration for the handle, or nullptr
   const spvtools::opt::Instruction* GetMemoryObjectDeclarationForHandle(
       uint32_t id,
       bool follow_image);
