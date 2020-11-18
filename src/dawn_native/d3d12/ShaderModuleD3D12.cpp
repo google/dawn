@@ -218,9 +218,11 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        tint::transform::BoundArrayAccessorsTransform boundArrayTransformer(&context, &module);
-        if (!boundArrayTransformer.Run()) {
-            errorStream << "Bound Array Accessors Transform: " << boundArrayTransformer.error()
+        tint::transform::Manager transformManager(&context, &module);
+        transformManager.append(
+            std::make_unique<tint::transform::BoundArrayAccessorsTransform>(&context, &module));
+        if (!transformManager.Run()) {
+            errorStream << "Bound Array Accessors Transform: " << transformManager.error()
                         << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
