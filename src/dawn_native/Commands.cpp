@@ -36,6 +36,11 @@ namespace dawn_native {
                     begin->~BeginComputePassCmd();
                     break;
                 }
+                case Command::BeginOcclusionQuery: {
+                    BeginOcclusionQueryCmd* begin = commands->NextCommand<BeginOcclusionQueryCmd>();
+                    begin->~BeginOcclusionQueryCmd();
+                    break;
+                }
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* begin = commands->NextCommand<BeginRenderPassCmd>();
                     begin->~BeginRenderPassCmd();
@@ -95,6 +100,11 @@ namespace dawn_native {
                 case Command::EndComputePass: {
                     EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
                     cmd->~EndComputePassCmd();
+                    break;
+                }
+                case Command::EndOcclusionQuery: {
+                    EndOcclusionQueryCmd* cmd = commands->NextCommand<EndOcclusionQueryCmd>();
+                    cmd->~EndOcclusionQueryCmd();
                     break;
                 }
                 case Command::EndRenderPass: {
@@ -198,6 +208,10 @@ namespace dawn_native {
                 commands->NextCommand<BeginComputePassCmd>();
                 break;
 
+            case Command::BeginOcclusionQuery:
+                commands->NextCommand<BeginOcclusionQueryCmd>();
+                break;
+
             case Command::BeginRenderPass:
                 commands->NextCommand<BeginRenderPassCmd>();
                 break;
@@ -244,6 +258,10 @@ namespace dawn_native {
 
             case Command::EndComputePass:
                 commands->NextCommand<EndComputePassCmd>();
+                break;
+
+            case Command::EndOcclusionQuery:
+                commands->NextCommand<EndOcclusionQueryCmd>();
                 break;
 
             case Command::EndRenderPass:

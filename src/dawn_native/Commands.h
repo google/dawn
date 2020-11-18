@@ -34,6 +34,7 @@ namespace dawn_native {
 
     enum class Command {
         BeginComputePass,
+        BeginOcclusionQuery,
         BeginRenderPass,
         CopyBufferToBuffer,
         CopyBufferToTexture,
@@ -46,6 +47,7 @@ namespace dawn_native {
         DrawIndirect,
         DrawIndexedIndirect,
         EndComputePass,
+        EndOcclusionQuery,
         EndRenderPass,
         ExecuteBundles,
         InsertDebugMarker,
@@ -65,6 +67,11 @@ namespace dawn_native {
     };
 
     struct BeginComputePassCmd {};
+
+    struct BeginOcclusionQueryCmd {
+        Ref<QuerySetBase> querySet;
+        uint32_t queryIndex;
+    };
 
     struct RenderPassColorAttachmentInfo {
         Ref<TextureViewBase> view;
@@ -172,6 +179,11 @@ namespace dawn_native {
     };
 
     struct EndComputePassCmd {};
+
+    struct EndOcclusionQueryCmd {
+        Ref<QuerySetBase> querySet;
+        uint32_t queryIndex;
+    };
 
     struct EndRenderPassCmd {};
 

@@ -28,6 +28,7 @@ namespace dawn_native {
                           CommandEncoder* commandEncoder,
                           EncodingContext* encodingContext,
                           PassResourceUsageTracker usageTracker,
+                          QuerySetBase* occlusionQuerySet,
                           uint32_t renderTargetWidth,
                           uint32_t renderTargetHeight);
 
@@ -51,6 +52,9 @@ namespace dawn_native {
         void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
         void ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles);
 
+        void BeginOcclusionQuery(uint32_t queryIndex);
+        void EndOcclusionQuery();
+
         void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
       protected:
@@ -71,6 +75,11 @@ namespace dawn_native {
         // query cannot be written twice in same render pass, so each render pass also need to have
         // its own query availability map.
         QueryAvailabilityMap mQueryAvailabilityMap;
+
+        // The resources for occlusion query
+        Ref<QuerySetBase> mOcclusionQuerySet;
+        uint32_t mCurrentOcclusionQueryIndex = 0;
+        bool mOcclusionQueryActive = false;
     };
 
 }  // namespace dawn_native

@@ -1363,6 +1363,15 @@
                 ]
             },
             {
+                "name": "begin occlusion query",
+                "args": [
+                    {"name": "query index", "type": "uint32_t"}
+                ]
+            },
+            {
+                "name": "end occlusion query"
+            },
+            {
                 "name": "write timestamp",
                 "args": [
                     {"name": "query set", "type": "query set"},

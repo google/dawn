@@ -1482,6 +1482,14 @@ namespace dawn_native { namespace d3d12 {
                     break;
                 }
 
+                case Command::BeginOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
+                case Command::EndOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
                 case Command::WriteTimestamp: {
                     WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 

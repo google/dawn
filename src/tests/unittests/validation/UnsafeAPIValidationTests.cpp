@@ -167,3 +167,32 @@ TEST_F(UnsafeAPIValidationTest, DynamicStorageBuffer) {
         ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
     }
 }
+
+// Check that occlusion query is disallowed as part of unsafe APIs.
+TEST_F(UnsafeAPIValidationTest, OcclusionQueryDisallowed) {
+    DummyRenderPass renderPass(device);
+
+    // Control case: BeginRenderPass without occlusionQuerySet is allowed.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        pass.EndPass();
+        encoder.Finish();
+    }
+
+    // Error case: BeginRenderPass with occlusionQuerySet is disallowed.
+    {
+        wgpu::QuerySetDescriptor descriptor;
+        descriptor.type = wgpu::QueryType::Occlusion;
+        descriptor.count = 1;
+        wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+        renderPass.occlusionQuerySet = querySet;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}

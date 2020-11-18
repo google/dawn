@@ -159,6 +159,16 @@ namespace dawn_native {
         Command type;
         while (commands->NextCommandId(&type)) {
             switch (type) {
+                case Command::BeginOcclusionQuery: {
+                    commands->NextCommand<BeginOcclusionQueryCmd>();
+                    break;
+                }
+
+                case Command::EndOcclusionQuery: {
+                    commands->NextCommand<EndOcclusionQueryCmd>();
+                    break;
+                }
+
                 case Command::EndRenderPass: {
                     commands->NextCommand<EndRenderPassCmd>();
                     DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));

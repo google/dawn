@@ -1222,6 +1222,14 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
+                case Command::BeginOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
+                case Command::EndOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
                 case Command::WriteTimestamp: {
                     WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 

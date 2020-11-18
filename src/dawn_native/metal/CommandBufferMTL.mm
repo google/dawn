@@ -1294,6 +1294,14 @@ namespace dawn_native { namespace metal {
                     break;
                 }
 
+                case Command::BeginOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
+                case Command::EndOcclusionQuery: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
                 case Command::WriteTimestamp: {
                     WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
                     QuerySet* querySet = ToBackend(cmd->querySet.Get());

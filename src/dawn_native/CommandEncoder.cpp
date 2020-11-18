@@ -324,7 +324,19 @@ namespace dawn_native {
             }
 
             if (descriptor->occlusionQuerySet != nullptr) {
-                return DAWN_VALIDATION_ERROR("occlusionQuerySet not implemented");
+                DAWN_TRY(device->ValidateObject(descriptor->occlusionQuerySet));
+
+                // Occlusion query has not been implemented completely. Disallow it as unsafe until
+                // the implementaion is completed.
+                if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Occlusion query is disallowed because it has not been implemented "
+                        "completely.");
+                }
+
+                if (descriptor->occlusionQuerySet->GetQueryType() != wgpu::QueryType::Occlusion) {
+                    return DAWN_VALIDATION_ERROR("The type of query set must be Occlusion");
+                }
             }
 
             if (descriptor->colorAttachmentCount == 0 &&
@@ -508,8 +520,9 @@ namespace dawn_native {
             });
 
         if (success) {
-            RenderPassEncoder* passEncoder = new RenderPassEncoder(
-                device, this, &mEncodingContext, std::move(usageTracker), width, height);
+            RenderPassEncoder* passEncoder =
+                new RenderPassEncoder(device, this, &mEncodingContext, std::move(usageTracker),
+                                      descriptor->occlusionQuerySet, width, height);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
