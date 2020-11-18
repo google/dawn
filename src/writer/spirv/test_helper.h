@@ -31,13 +31,11 @@ namespace spirv {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public ast::BuilderWithContext, public BASE {
+class TestHelperBase : public ast::BuilderWithContextAndModule, public BASE {
  public:
-  TestHelperBase() : td(ctx, &mod), b(ctx, &mod) {}
+  TestHelperBase() : td(ctx, mod), b(ctx, mod) {}
   ~TestHelperBase() override = default;
 
-  /// The module
-  ast::Module mod;
   /// The type determiner
   TypeDeterminer td;
   /// The generator

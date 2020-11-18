@@ -35,13 +35,13 @@ class TestHelperBase : public BASE {
   TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
   ~TestHelperBase() = default;
 
-  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return ctx.create<T>(std::forward<ARGS>(args)...);
+    return mod.create<T>(std::forward<ARGS>(args)...);
   }
 
   /// The context

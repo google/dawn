@@ -77,6 +77,20 @@ class Module {
   /// @returns a string representation of the module
   std::string to_str() const;
 
+  /// Creates a new `ast::Node` owned by the Module. When the Module is
+  /// destructed, the `ast::Node` will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  T* create(ARGS&&... args) {
+    static_assert(std::is_base_of<ast::Node, T>::value,
+                  "T does not derive from ast::Node");
+    auto uptr = std::make_unique<T>(std::forward<ARGS>(args)...);
+    auto ptr = uptr.get();
+    ast_nodes_.emplace_back(std::move(uptr));
+    return ptr;
+  }
+
  private:
   Module(const Module&) = delete;
 
@@ -84,6 +98,7 @@ class Module {
   // The constructed types are owned by the type manager
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
+  std::vector<std::unique_ptr<ast::Node>> ast_nodes_;
 };
 
 }  // namespace ast

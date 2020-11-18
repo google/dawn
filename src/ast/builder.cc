@@ -25,7 +25,8 @@ TypesBuilder::TypesBuilder(TypeManager* tm)
       void_(tm->Get<ast::type::VoidType>()),
       tm_(tm) {}
 
-Builder::Builder(tint::Context* c) : ctx(c), ty(&c->type_mgr()) {}
+Builder::Builder(tint::Context* c, tint::ast::Module* m)
+    : ctx(c), mod(m), ty(&c->type_mgr()) {}
 Builder::~Builder() = default;
 
 ast::Variable* Builder::Var(const std::string& name,
@@ -36,9 +37,11 @@ ast::Variable* Builder::Var(const std::string& name,
   return var;
 }
 
-BuilderWithContext::BuilderWithContext() : Builder(new Context()) {}
-BuilderWithContext::~BuilderWithContext() {
+BuilderWithContextAndModule::BuilderWithContextAndModule()
+    : Builder(new Context(), new ast::Module()) {}
+BuilderWithContextAndModule::~BuilderWithContextAndModule() {
   delete ctx;
+  delete mod;
 }
 
 }  // namespace ast

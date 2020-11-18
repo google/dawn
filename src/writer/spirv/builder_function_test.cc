@@ -252,10 +252,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   decos.push_back(create<ast::SetDecoration>(0, Source{}));
   data_var->set_decorations(decos);
 
-  mod.AddConstructedType(&s);
+  mod->AddConstructedType(&s);
 
   td.RegisterVariableForTesting(data_var);
-  mod.AddGlobalVariable(data_var);
+  mod->AddGlobalVariable(data_var);
 
   {
     ast::VariableList params;
@@ -272,7 +272,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(func);
+    mod->AddFunction(func);
   }
 
   {
@@ -290,7 +290,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
 
-    mod.AddFunction(func);
+    mod->AddFunction(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

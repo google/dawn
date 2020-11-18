@@ -24,6 +24,7 @@
 #include "src/ast/expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/array_type.h"
@@ -185,7 +186,8 @@ class Builder {
 
   /// Constructor
   /// @param ctx the context to use in the builder
-  explicit Builder(tint::Context* ctx);
+  /// @param mod the module to use in the builder
+  explicit Builder(tint::Context* ctx, tint::ast::Module* mod);
   virtual ~Builder();
 
   /// @param expr the expression
@@ -441,17 +443,19 @@ class Builder {
                                ExprList(std::forward<ARGS>(args)...)};
   }
 
-  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return ctx->create<T>(std::forward<ARGS>(args)...);
+    return mod->create<T>(std::forward<ARGS>(args)...);
   }
 
-  /// The builder context
+  /// The builder module
   tint::Context* const ctx;
+  /// The builder module
+  tint::ast::Module* const mod;
   /// The builder types
   const TypesBuilder ty;
 
@@ -460,11 +464,12 @@ class Builder {
   virtual void OnVariableBuilt(ast::Variable*) {}
 };
 
-/// BuilderWithContext is a `Builder` that constructs and owns its `Context`.
-class BuilderWithContext : public Builder {
+/// BuilderWithContextAndModule is a `Builder` that constructs and owns its
+/// `Context` and `Module`.
+class BuilderWithContextAndModule : public Builder {
  public:
-  BuilderWithContext();
-  ~BuilderWithContext() override;
+  BuilderWithContextAndModule();
+  ~BuilderWithContextAndModule() override;
 };
 
 //! @cond Doxygen_Suppress

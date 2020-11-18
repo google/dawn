@@ -105,9 +105,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
 
-  mod.AddGlobalVariable(v_in);
-  mod.AddGlobalVariable(v_out);
-  mod.AddGlobalVariable(v_wg);
+  mod->AddGlobalVariable(v_in);
+  mod->AddGlobalVariable(v_out);
+  mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"
@@ -168,9 +168,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
 
-  mod.AddGlobalVariable(v_in);
-  mod.AddGlobalVariable(v_out);
-  mod.AddGlobalVariable(v_wg);
+  mod->AddGlobalVariable(v_in);
+  mod->AddGlobalVariable(v_out);
+  mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"

@@ -76,7 +76,6 @@ class ParserImplTestWithParam : public testing::TestWithParam<T> {
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
-  std::unique_ptr<ParserImpl> impl;
   Context ctx_;
 };
 

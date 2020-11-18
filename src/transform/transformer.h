@@ -44,13 +44,13 @@ class Transformer {
   const std::string& error() { return error_; }
 
  protected:
-  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return ctx_->create<T>(std::forward<ARGS>(args)...);
+    return mod_->create<T>(std::forward<ARGS>(args)...);
   }
 
   /// The context

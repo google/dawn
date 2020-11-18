@@ -797,14 +797,13 @@ class FunctionEmitter {
   /// @returns a boolean false expression.
   ast::Expression* MakeFalse() const;
 
-  /// Creates a new `ast::Node` owned by the Context. When the Context is
+  /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) const {
-    auto& ctx = parser_impl_.context();
-    return ctx.create<T>(std::forward<ARGS>(args)...);
+    return ast_module_.create<T>(std::forward<ARGS>(args)...);
   }
 
   ParserImpl& parser_impl_;

@@ -51,16 +51,15 @@ namespace writer {
 namespace spirv {
 namespace {
 
-class IntrinsicBuilderTest : public ast::BuilderWithContext,
+class IntrinsicBuilderTest : public ast::BuilderWithContextAndModule,
                              public testing::Test {
  protected:
   void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
   }
 
-  ast::Module mod;
-  TypeDeterminer td{ctx, &mod};
-  spirv::Builder b{ctx, &mod};
+  TypeDeterminer td{ctx, mod};
+  spirv::Builder b{ctx, mod};
 };
 
 template <typename T>
