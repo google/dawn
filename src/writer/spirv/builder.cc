@@ -1749,9 +1749,15 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     return 0;
   }
 
+  auto intrinsic = ident->intrinsic();
+
+  if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
+    GenerateTextureIntrinsic(ident, call, Operand::Int(result_type_id), result);
+    return result_id;
+  }
+
   OperandList params = {Operand::Int(result_type_id), result};
 
-  auto intrinsic = ident->intrinsic();
   if (ast::intrinsic::IsFineDerivative(intrinsic) ||
       ast::intrinsic::IsCoarseDerivative(intrinsic)) {
     push_capability(SpvCapabilityDerivativeControl);
@@ -1825,7 +1831,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     op = spv::Op::OpBitReverse;
   } else if (intrinsic == ast::Intrinsic::kSelect) {
     op = spv::Op::OpSelect;
-  } else if (!ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
+  } else {
     GenerateGLSLstd450Import();
 
     auto set_iter = import_name_to_id_.find(kGLSLstd450);
@@ -1846,7 +1852,8 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
 
     op = spv::Op::OpExtInst;
   }
-  if (!ast::intrinsic::IsTextureIntrinsic(intrinsic) && op == spv::Op::OpNop) {
+
+  if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + ident->name();
     return 0;
   }
@@ -1854,15 +1861,11 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   for (auto* p : call->params()) {
     auto val_id = GenerateExpression(p);
     if (val_id == 0) {
-      return 0;
+      return false;
     }
     val_id = GenerateLoadIfNeeded(p->result_type(), val_id);
 
-    params.push_back(Operand::Int(val_id));
-  }
-
-  if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
-    return GenerateTextureIntrinsic(ident, call, result_id, params);
+    params.emplace_back(Operand::Int(val_id));
   }
 
   push_function_inst(op, params);
@@ -1870,68 +1873,171 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   return result_id;
 }
 
-uint32_t Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
-                                           ast::CallExpression* call,
-                                           uint32_t result_id,
-                                           OperandList wgsl_params) {
+void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
+                                       ast::CallExpression* call,
+                                       spirv::Operand result_type,
+                                       spirv::Operand result_id) {
   auto* texture_type =
       call->params()[0]->result_type()->UnwrapAll()->AsTexture();
 
-  // TODO(dsinclair): Remove the LOD param from textureLoad on storage textures
-  // when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
+  auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
+      ident->intrinsic_signature());
+  assert(sig != nullptr);
+  auto& pidx = sig->params.idx;
+  auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
+
+  assert(pidx.texture != kNotUsed);
+
+  auto op = spv::Op::OpNop;
+
+  auto gen_param = [&](size_t idx) {
+    auto* p = call->params()[idx];
+    auto val_id = GenerateExpression(p);
+    if (val_id == 0) {
+      return Operand::Int(0);
+    }
+    val_id = GenerateLoadIfNeeded(p->result_type(), val_id);
+
+    return Operand::Int(val_id);
+  };
+
+  // Populate the spirv_params with common parameters
+  OperandList spirv_params;
+  spirv_params.reserve(8);  // Enough to fit most parameter lists
+  spirv_params.emplace_back(std::move(result_type));  // result type
+  spirv_params.emplace_back(std::move(result_id));    // result id
+
+  // Extra image operands, appended to spirv_params.
+  uint32_t spirv_operand_mask = 0;
+  OperandList spirv_operands;
+  spirv_operands.reserve(4);  // Enough to fit most parameter lists
+
   if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
-    std::vector<Operand> spirv_params = {
-        std::move(wgsl_params[0]), std::move(wgsl_params[1]),
-        std::move(wgsl_params[2]), std::move(wgsl_params[3])};
-    if (texture_type->IsMultisampled()) {
-      spirv_params.push_back(Operand::Int(SpvImageOperandsSampleMask));
+    op = texture_type->IsStorage() ? spv::Op::OpImageRead
+                                   : spv::Op::OpImageFetch;
+    spirv_params.emplace_back(gen_param(pidx.texture));
+    spirv_params.emplace_back(gen_param(pidx.coords));
+
+    // TODO(dsinclair): Remove the LOD param from textureLoad on storage
+    // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
+    if (pidx.level != kNotUsed) {
+      if (texture_type->IsMultisampled()) {
+        spirv_operand_mask |= SpvImageOperandsSampleMask;
+      } else {
+        spirv_operand_mask |= SpvImageOperandsLodMask;
+      }
+      spirv_operands.emplace_back(gen_param(pidx.level));
+    }
+  } else {
+    assert(pidx.sampler != kNotUsed);
+
+    auto sampler_param = gen_param(pidx.sampler);
+    auto texture_param = gen_param(pidx.texture);
+    auto sampled_image =
+        GenerateSampledImage(texture_type, texture_param, sampler_param);
+
+    // Populate the spirv_params with the common parameters
+    spirv_params.emplace_back(Operand::Int(sampled_image));  // sampled image
+
+    if (pidx.array_index != kNotUsed) {
+      // Array index needs to be appended to the coordinates.
+      auto* param_coords = call->params()[pidx.coords];
+      auto* param_array_index = call->params()[pidx.array_index];
+
+      uint32_t packed_coords_size;
+      ast::type::Type* packed_coords_el_ty;  // Currenly must be f32.
+      if (param_coords->result_type()->IsVector()) {
+        auto* vec = param_coords->result_type()->AsVector();
+        packed_coords_size = vec->size() + 1;
+        packed_coords_el_ty = vec->type();
+      } else {
+        packed_coords_size = 2;
+        packed_coords_el_ty = param_coords->result_type();
+      }
+
+      // Cast param_array_index to the vector element type
+      ast::TypeConstructorExpression array_index_cast(packed_coords_el_ty,
+                                                      {param_array_index});
+      array_index_cast.set_result_type(packed_coords_el_ty);
+
+      ast::type::VectorType packed_coords_ty(packed_coords_el_ty,
+                                             packed_coords_size);
+
+      ast::TypeConstructorExpression constructor{
+          &packed_coords_ty, {param_coords, &array_index_cast}};
+      auto packed_coords =
+          GenerateTypeConstructorExpression(&constructor, false);
+
+      spirv_params.emplace_back(Operand::Int(packed_coords));  // coordinates
+
     } else {
-      spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
+      spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
     }
-    spirv_params.push_back(std::move(wgsl_params[4]));
 
-    auto op = spv::Op::OpImageFetch;
-    if (texture_type->IsStorage()) {
-      op = spv::Op::OpImageRead;
+    switch (ident->intrinsic()) {
+      case ast::Intrinsic::kTextureSample: {
+        op = spv::Op::OpImageSampleImplicitLod;
+        break;
+      }
+      case ast::Intrinsic::kTextureSampleBias: {
+        op = spv::Op::OpImageSampleImplicitLod;
+        assert(pidx.bias != kNotUsed);
+        spirv_operand_mask |= SpvImageOperandsBiasMask;
+        spirv_operands.emplace_back(gen_param(pidx.bias));
+        break;
+      }
+      case ast::Intrinsic::kTextureSampleLevel: {
+        op = spv::Op::OpImageSampleExplicitLod;
+        assert(pidx.level != kNotUsed);
+        spirv_operand_mask |= SpvImageOperandsLodMask;
+        spirv_operands.emplace_back(gen_param(pidx.level));
+        break;
+      }
+      case ast::Intrinsic::kTextureSampleGrad: {
+        op = spv::Op::OpImageSampleExplicitLod;
+        assert(pidx.ddx != kNotUsed);
+        assert(pidx.ddy != kNotUsed);
+        spirv_operand_mask |= SpvImageOperandsGradMask;
+        spirv_operands.emplace_back(gen_param(pidx.ddx));
+        spirv_operands.emplace_back(gen_param(pidx.ddy));
+        break;
+      }
+      case ast::Intrinsic::kTextureSampleCompare: {
+        op = spv::Op::OpImageSampleDrefExplicitLod;
+        assert(pidx.depth_ref != kNotUsed);
+        spirv_params.emplace_back(gen_param(pidx.depth_ref));
+
+        spirv_operand_mask |= SpvImageOperandsLodMask;
+        ast::type::F32Type f32;
+        ast::FloatLiteral float_0(&f32, 0.0);
+        spirv_operands.emplace_back(
+            Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0)));
+        break;
+      }
+      default:
+        break;  // unreachable
     }
-    push_function_inst(op, spirv_params);
-    return result_id;
   }
 
-  spv::Op op = spv::Op::OpNop;
-  OperandList spirv_params = {
-      wgsl_params[0], std::move(wgsl_params[1]),
-      Operand::Int(GenerateSampledImage(texture_type, std::move(wgsl_params[2]),
-                                        std::move(wgsl_params[3]))),
-      std::move(wgsl_params[4])};
-
-  if (ident->intrinsic() == ast::Intrinsic::kTextureSample) {
-    op = spv::Op::OpImageSampleImplicitLod;
-  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleLevel) {
-    op = spv::Op::OpImageSampleExplicitLod;
-    spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
-    spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleBias) {
-    op = spv::Op::OpImageSampleImplicitLod;
-    spirv_params.push_back(Operand::Int(SpvImageOperandsBiasMask));
-    spirv_params.push_back(std::move(wgsl_params[5]));
-  } else if (ident->intrinsic() == ast::Intrinsic::kTextureSampleCompare) {
-    op = spv::Op::OpImageSampleDrefExplicitLod;
-    spirv_params.push_back(std::move(wgsl_params[5]));
-
-    spirv_params.push_back(Operand::Int(SpvImageOperandsLodMask));
-    ast::type::F32Type f32;
-    ast::FloatLiteral float_0(&f32, 0.0);
-    spirv_params.push_back(
-        Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0)));
+  if (pidx.offset != kNotUsed) {
+    spirv_operand_mask |= SpvImageOperandsOffsetMask;
+    spirv_operands.emplace_back(gen_param(pidx.offset));
   }
+
+  if (spirv_operand_mask != 0) {
+    // Note: Order of operands is based on SpvImageXXXOperands value -
+    // smaller-numbered SpvImageXXXOperands bits appear first.
+    spirv_params.emplace_back(Operand::Int(spirv_operand_mask));
+    spirv_params.insert(std::end(spirv_params), std::begin(spirv_operands),
+                        std::end(spirv_operands));
+  }
+
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + ident->name();
-    return 0;
+    return;
   }
-  push_function_inst(op, spirv_params);
 
-  return result_id;
+  push_function_inst(op, spirv_params);
 }
 
 uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,

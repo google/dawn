@@ -552,26 +552,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return true;
   }
   if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-    // TODO(dsinclair): Remove the LOD param from textureLoad on storage
-    // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
-    uint32_t num_of_params =
-        (ident->intrinsic() == ast::Intrinsic::kTextureLoad ||
-         ident->intrinsic() == ast::Intrinsic::kTextureSample)
-            ? 3
-            : 4;
-    if (expr->params().size() != num_of_params) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " + ident->name() +
-                    ", got " + std::to_string(expr->params().size()) +
-                    " and expected " + std::to_string(num_of_params));
-      return false;
-    }
-
-    if (ident->intrinsic() == ast::Intrinsic::kTextureSampleCompare) {
-      expr->func()->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
-      return true;
-    }
+    ast::intrinsic::TextureSignature::Parameters param;
 
     auto* texture_param = expr->params()[0];
     if (!texture_param->result_type()->UnwrapPtrIfNeeded()->IsTexture()) {
@@ -580,6 +561,115 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
     ast::type::TextureType* texture =
         texture_param->result_type()->UnwrapPtrIfNeeded()->AsTexture();
+
+    bool is_array = false;
+    switch (texture->dim()) {
+      case ast::type::TextureDimension::k1dArray:
+      case ast::type::TextureDimension::k2dArray:
+      case ast::type::TextureDimension::kCubeArray:
+        is_array = true;
+        break;
+      default:
+        break;
+    }
+    switch (ident->intrinsic()) {
+      case ast::Intrinsic::kTextureLoad:
+        param.idx.texture = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+
+        // TODO(dsinclair): Remove the LOD param from textureLoad on storage
+        // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
+        if (expr->params().size() > param.count) {
+          param.idx.level = param.count++;
+        }
+
+        break;
+      case ast::Intrinsic::kTextureSample:
+        param.idx.texture = param.count++;
+        param.idx.sampler = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        if (expr->params().size() > param.count) {
+          param.idx.offset = param.count++;
+        }
+        break;
+      case ast::Intrinsic::kTextureSampleBias:
+        param.idx.texture = param.count++;
+        param.idx.sampler = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        param.idx.bias = param.count++;
+        if (expr->params().size() > param.count) {
+          param.idx.offset = param.count++;
+        }
+        break;
+      case ast::Intrinsic::kTextureSampleLevel:
+        param.idx.texture = param.count++;
+        param.idx.sampler = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        param.idx.level = param.count++;
+        if (expr->params().size() > param.count) {
+          param.idx.offset = param.count++;
+        }
+        break;
+      case ast::Intrinsic::kTextureSampleCompare:
+        param.idx.texture = param.count++;
+        param.idx.sampler = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        param.idx.depth_ref = param.count++;
+        if (expr->params().size() > param.count) {
+          param.idx.offset = param.count++;
+        }
+        break;
+      case ast::Intrinsic::kTextureSampleGrad:
+        param.idx.texture = param.count++;
+        param.idx.sampler = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        param.idx.ddx = param.count++;
+        param.idx.ddy = param.count++;
+        if (expr->params().size() > param.count) {
+          param.idx.offset = param.count++;
+        }
+        break;
+      default:
+        set_error(expr->source(),
+                  "Internal compiler error: Unreachable intrinsic " +
+                      std::to_string(static_cast<int>(ident->intrinsic())));
+        return false;
+    }
+
+    if (expr->params().size() != param.count) {
+      set_error(expr->source(),
+                "incorrect number of parameters for " + ident->name() +
+                    ", got " + std::to_string(expr->params().size()) +
+                    " and expected " + std::to_string(param.count));
+      return false;
+    }
+
+    ident->set_intrinsic_signature(
+        std::make_unique<ast::intrinsic::TextureSignature>(param));
+
+    if (texture->IsDepth()) {
+      expr->func()->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+      return true;
+    }
 
     if (!texture->IsStorage() &&
         !(texture->IsSampled() || texture->IsMultisampled())) {
@@ -925,6 +1015,8 @@ bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleBias);
   } else if (ident->name() == "textureSampleCompare") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleCompare);
+  } else if (ident->name() == "textureSampleGrad") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureSampleGrad);
   } else if (ident->name() == "textureSampleLevel") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleLevel);
   } else if (ident->name() == "trunc") {

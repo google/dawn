@@ -755,6 +755,8 @@ source_set("tint_unittests_core_src") {
     "src/ast/function_test.cc",
     "src/ast/identifier_expression_test.cc",
     "src/ast/if_statement_test.cc",
+    "src/ast/intrinsic_texture_helper_test.cc",
+    "src/ast/intrinsic_texture_helper_test.h",
     "src/ast/int_literal_test.cc",
     "src/ast/location_decoration_test.cc",
     "src/ast/loop_statement_test.cc",

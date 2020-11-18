@@ -216,6 +216,9 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
     case Intrinsic::kTextureSampleCompare:
       out << "textureSampleCompare";
       break;
+    case Intrinsic::kTextureSampleGrad:
+      out << "textureSampleGrad";
+      break;
     case Intrinsic::kTextureSampleLevel:
       out << "textureSampleLevel";
       break;
@@ -230,6 +233,12 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
 }
 
 namespace intrinsic {
+
+Signature::~Signature() = default;
+TextureSignature::~TextureSignature() = default;
+
+TextureSignature::Parameters::Index::Index() = default;
+TextureSignature::Parameters::Index::Index(const Index&) = default;
 
 bool IsCoarseDerivative(ast::Intrinsic i) {
   return i == Intrinsic::kDpdxCoarse || i == Intrinsic::kDpdyCoarse ||
@@ -256,7 +265,8 @@ bool IsTextureIntrinsic(ast::Intrinsic i) {
   return i == Intrinsic::kTextureLoad || i == Intrinsic::kTextureSample ||
          i == Intrinsic::kTextureSampleLevel ||
          i == Intrinsic::kTextureSampleBias ||
-         i == Intrinsic::kTextureSampleCompare;
+         i == Intrinsic::kTextureSampleCompare ||
+         i == Intrinsic::kTextureSampleGrad;
 }
 
 }  // namespace intrinsic

@@ -231,7 +231,7 @@ class Builder {
   bool GenerateExecutionModes(ast::Function* func, uint32_t id);
   /// Generates an expression
   /// @param expr the expression to generate
-  /// @returns the resulting ID of the exp = {};ression or 0 on error
+  /// @returns the resulting ID of the expression or 0 on error
   uint32_t GenerateExpression(ast::Expression* expr);
   /// Generates the instructions for a function
   /// @param func the function to generate
@@ -335,14 +335,13 @@ class Builder {
   /// Generates a texture intrinsic call
   /// @param ident the texture intrinsic
   /// @param call the call expression
-  /// @param result_id result ID of the texture instruction
-  /// @param wgsl_params SPIR-V arguments for WGSL-specific intrinsic's call
+  /// @param result_type result type operand of the texture instruction
+  /// @param result_id result identifier operand of the texture instruction
   /// parameters
-  /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
-                                    ast::CallExpression* call,
-                                    uint32_t result_id,
-                                    OperandList wgsl_params);
+  void GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
+                                ast::CallExpression* call,
+                                spirv::Operand result_type,
+                                spirv::Operand result_id);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

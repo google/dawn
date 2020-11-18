@@ -364,6 +364,8 @@ set(TINT_TEST_SRCS
   ast/function_test.cc
   ast/identifier_expression_test.cc
   ast/if_statement_test.cc
+  ast/intrinsic_texture_helper_test.cc
+  ast/intrinsic_texture_helper_test.h
   ast/int_literal_test.cc
   ast/location_decoration_test.cc
   ast/loop_statement_test.cc

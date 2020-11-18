@@ -529,6 +529,44 @@ class InspectorHelper {
                                  body);
   }
 
+  /// Generates a function that references a specific sampler variable
+  /// @param func_name name of the function created
+  /// @param texture_name name of the texture to be sampled
+  /// @param sampler_name name of the sampler to use
+  /// @param coords_name name of the coords variable to use
+  /// @param array_index name of the array index variable to use
+  /// @returns a function that references all of the values specified
+  ast::Function* MakeSamplerReferenceBodyFunction(
+      const std::string& func_name,
+      const std::string& texture_name,
+      const std::string& sampler_name,
+      const std::string& coords_name,
+      const std::string& array_index,
+      ast::type::Type* base_type) {
+    std::string result_name = "sampler_result";
+
+    auto* body = create<ast::BlockStatement>();
+
+    auto* call_result = create<ast::Variable>(
+        "sampler_result", ast::StorageClass::kFunction, vec_type(base_type, 4));
+    body->append(create<ast::VariableDeclStatement>(call_result));
+
+    ast::ExpressionList call_params;
+    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
+    call_params.push_back(create<ast::IdentifierExpression>(array_index));
+    auto* call_expr = create<ast::CallExpression>(
+        create<ast::IdentifierExpression>("textureSample"), call_params);
+
+    body->append(create<ast::AssignmentStatement>(
+        create<ast::IdentifierExpression>("sampler_result"), call_expr));
+    body->append(create<ast::ReturnStatement>());
+
+    return create<ast::Function>(func_name, ast::VariableList(), void_type(),
+                                 body);
+  }
+
   /// Generates a function that references a specific comparison sampler
   /// variable.
   /// @param func_name name of the function created
@@ -683,6 +721,9 @@ class InspectorGetComparisonSamplerResourceBindingsTest
       public testing::Test {};
 class InspectorGetSampledTextureResourceBindingsTest : public InspectorHelper,
                                                        public testing::Test {};
+class InspectorGetSampledArrayTextureResourceBindingsTest
+    : public InspectorHelper,
+      public testing::Test {};
 struct GetSampledTextureTestParams {
   ast::type::TextureDimension type_dim;
   inspector::ResourceBinding::TextureDimension inspector_dim;
@@ -691,11 +732,19 @@ struct GetSampledTextureTestParams {
 class InspectorGetSampledTextureResourceBindingsTestWithParam
     : public InspectorHelper,
       public testing::TestWithParam<GetSampledTextureTestParams> {};
-
+class InspectorGetSampledArrayTextureResourceBindingsTestWithParam
+    : public InspectorHelper,
+      public testing::TestWithParam<GetSampledTextureTestParams> {};
 class InspectorGetMultisampledTextureResourceBindingsTest
     : public InspectorHelper,
       public testing::Test {};
+class InspectorGetMultisampledArrayTextureResourceBindingsTest
+    : public InspectorHelper,
+      public testing::Test {};
 typedef GetSampledTextureTestParams GetMultisampledTextureTestParams;
+class InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam
+    : public InspectorHelper,
+      public testing::TestWithParam<GetMultisampledTextureTestParams> {};
 class InspectorGetMultisampledTextureResourceBindingsTestWithParam
     : public InspectorHelper,
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
@@ -2009,18 +2058,6 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
             ast::type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kFloat},
@@ -2031,18 +2068,6 @@ INSTANTIATE_TEST_SUITE_P(
         GetSampledTextureTestParams{
             ast::type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
-            inspector::ResourceBinding::TextureDimension::k2dArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
-            inspector::ResourceBinding::TextureDimension::k2dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
-            inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
             ast::type::TextureDimension::k3d,
@@ -2067,6 +2092,65 @@ INSTANTIATE_TEST_SUITE_P(
         GetSampledTextureTestParams{
             ast::type::TextureDimension::kCube,
             inspector::ResourceBinding::TextureDimension::kCube,
+            inspector::ResourceBinding::SampledKind::kUInt}));
+
+TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
+       textureSample) {
+  auto sampled_texture_type = MakeSampledTextureType(
+      GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
+  AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  auto* coord_type =
+      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  AddGlobalVariable("foo_coords", coord_type);
+  AddGlobalVariable("foo_array_index", u32_type());
+
+  auto* func = MakeSamplerReferenceBodyFunction(
+      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
+      GetBaseType(GetParam().sampled_kind));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(func);
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
+  EXPECT_EQ(GetParam().sampled_kind, result[0].sampled_kind);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetSampledArrayTextureResourceBindingsTest,
+    InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
+    testing::Values(
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
+            inspector::ResourceBinding::SampledKind::kFloat},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
+            inspector::ResourceBinding::SampledKind::kSInt},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
+            inspector::ResourceBinding::SampledKind::kUInt},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k2dArray,
+            inspector::ResourceBinding::TextureDimension::k2dArray,
+            inspector::ResourceBinding::SampledKind::kFloat},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k2dArray,
+            inspector::ResourceBinding::TextureDimension::k2dArray,
+            inspector::ResourceBinding::SampledKind::kSInt},
+        GetSampledTextureTestParams{
+            ast::type::TextureDimension::k2dArray,
+            inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
             ast::type::TextureDimension::kCubeArray,
@@ -2080,18 +2164,6 @@ INSTANTIATE_TEST_SUITE_P(
             ast::type::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray,
             inspector::ResourceBinding::SampledKind::kUInt}));
-
-TEST_F(InspectorGetMultisampledTextureResourceBindingsTest, Empty) {
-  auto* foo = MakeEmptyBodyFunction("foo");
-  foo->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
-  mod()->AddFunction(foo);
-
-  auto result = inspector()->GetSampledTextureResourceBindings("foo");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
-
-  EXPECT_EQ(0u, result.size());
-}
 
 TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
        textureSample) {
@@ -2139,18 +2211,6 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetMultisampledTextureTestParams{
             ast::type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kFloat},
@@ -2161,6 +2221,65 @@ INSTANTIATE_TEST_SUITE_P(
         GetMultisampledTextureTestParams{
             ast::type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
+            inspector::ResourceBinding::SampledKind::kUInt}));
+
+TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
+  auto* foo = MakeEmptyBodyFunction("foo");
+  foo->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(foo);
+
+  auto result = inspector()->GetSampledTextureResourceBindings("foo");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  EXPECT_EQ(0u, result.size());
+}
+
+TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
+       textureSample) {
+  auto multisampled_texture_type = MakeMultisampledTextureType(
+      GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
+  AddMultisampledTexture("foo_texture", multisampled_texture_type.get(), 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  auto* coord_type =
+      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  AddGlobalVariable("foo_coords", coord_type);
+  AddGlobalVariable("foo_array_index", u32_type());
+
+  auto* func = MakeSamplerReferenceBodyFunction(
+      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
+      GetBaseType(GetParam().sampled_kind));
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(func);
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  auto result = inspector()->GetMultisampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
+  EXPECT_EQ(GetParam().sampled_kind, result[0].sampled_kind);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetMultisampledArrayTextureResourceBindingsTest,
+    InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
+    testing::Values(
+        GetMultisampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
+            inspector::ResourceBinding::SampledKind::kFloat},
+        GetMultisampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
+            inspector::ResourceBinding::SampledKind::kSInt},
+        GetMultisampledTextureTestParams{
+            ast::type::TextureDimension::k1dArray,
+            inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetMultisampledTextureTestParams{
             ast::type::TextureDimension::k2dArray,

@@ -14,6 +14,7 @@
 
 #include "src/type_determiner.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -26,6 +27,7 @@
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
@@ -34,6 +36,7 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/pipeline_stage.h"
@@ -79,27 +82,17 @@ class FakeExpr : public ast::Expression {
   void to_str(std::ostream&, size_t) const override {}
 };
 
-class TypeDeterminerHelper {
+class TypeDeterminerHelper : public ast::BuilderWithContextAndModule {
  public:
-  TypeDeterminerHelper()
-      : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
+  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(ctx, mod)) {}
 
   TypeDeterminer* td() const { return td_.get(); }
-  ast::Module* mod() { return &mod_; }
-  Context* ctx() { return &ctx_; }
-
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod_.create<T>(std::forward<ARGS>(args)...);
-  }
 
  private:
-  Context ctx_;
-  ast::Module mod_;
+  void OnVariableBuilt(ast::Variable* var) override {
+    td_->RegisterVariableForTesting(var);
+  }
+
   std::unique_ptr<TypeDeterminer> td_;
 };
 
@@ -350,7 +343,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32,
                                      create<ast::BlockStatement>());
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -379,12 +372,12 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   main_body->append(create<ast::CallStatement>(call_expr));
   main_body->append(create<ast::ReturnStatement>());
   auto* func_main = create<ast::Function>("main", params0, &f32, main_body);
-  mod()->AddFunction(func_main);
+  mod->AddFunction(func_main);
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
   auto* func = create<ast::Function>("func", params0, &f32, body);
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_FALSE(td()->Determine()) << td()->error();
   EXPECT_EQ(td()->error(),
@@ -412,7 +405,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
       create<ast::SintLiteral>(&i32, 2)));
   auto* init = var->constructor();
 
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   EXPECT_TRUE(td()->Determine());
   ASSERT_NE(init->result_type(), nullptr);
@@ -436,7 +429,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
       create<ast::SintLiteral>(&i32, 2));
   auto* var =
       create<ast::Variable>("my_var", ast::StorageClass::kFunction, &ary);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -461,7 +454,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
       create<ast::SintLiteral>(&i32, 2));
   auto* var =
       create<ast::Variable>("my_var", ast::StorageClass::kFunction, &aary);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -486,7 +479,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   auto* var =
       create<ast::Variable>("my_var", ast::StorageClass::kFunction, &ary);
   var->set_is_const(true);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -506,7 +499,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -532,7 +525,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   auto* idx2 = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -558,7 +551,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &vec);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -592,7 +585,7 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32,
                                      create<ast::BlockStatement>());
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -611,7 +604,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32,
                                      create<ast::BlockStatement>());
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -695,7 +688,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -711,7 +704,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
   ast::type::F32Type f32;
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -792,7 +785,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32,
                                      create<ast::BlockStatement>());
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -822,11 +815,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   auto* priv_var =
       create<ast::Variable>("priv_var", ast::StorageClass::kPrivate, &f32);
 
-  mod()->AddGlobalVariable(in_var);
-  mod()->AddGlobalVariable(out_var);
-  mod()->AddGlobalVariable(sb_var);
-  mod()->AddGlobalVariable(wg_var);
-  mod()->AddGlobalVariable(priv_var);
+  mod->AddGlobalVariable(in_var);
+  mod->AddGlobalVariable(out_var);
+  mod->AddGlobalVariable(sb_var);
+  mod->AddGlobalVariable(wg_var);
+  mod->AddGlobalVariable(priv_var);
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -844,7 +837,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
       create<ast::IdentifierExpression>("priv_var")));
   auto* func = create<ast::Function>("my_func", params, &f32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -872,11 +865,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* priv_var =
       create<ast::Variable>("priv_var", ast::StorageClass::kPrivate, &f32);
 
-  mod()->AddGlobalVariable(in_var);
-  mod()->AddGlobalVariable(out_var);
-  mod()->AddGlobalVariable(sb_var);
-  mod()->AddGlobalVariable(wg_var);
-  mod()->AddGlobalVariable(priv_var);
+  mod->AddGlobalVariable(in_var);
+  mod->AddGlobalVariable(out_var);
+  mod->AddGlobalVariable(sb_var);
+  mod->AddGlobalVariable(wg_var);
+  mod->AddGlobalVariable(priv_var);
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -894,7 +887,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -903,7 +896,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
                                   ast::ExpressionList{})));
   auto* func2 = create<ast::Function>("func", params, &f32, body);
 
-  mod()->AddFunction(func2);
+  mod->AddFunction(func2);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -933,7 +926,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   ast::VariableList params;
   auto* func = create<ast::Function>("my_func", params, &f32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   ast::Variable v("var", ast::StorageClass::kFunction, &f32);
   td()->RegisterVariableForTesting(&v);
@@ -959,7 +952,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   auto* var = create<ast::Variable>("my_struct", ast::StorageClass::kNone, &st);
 
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -993,7 +986,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto* var =
       create<ast::Variable>("my_struct", ast::StorageClass::kNone, &alias);
 
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1015,7 +1008,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("my_vec", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1036,7 +1029,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("my_vec", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1100,7 +1093,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ast::type::StructType stA("A", strctA);
 
   auto* var = create<ast::Variable>("c", ast::StorageClass::kNone, &stA);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1133,7 +1126,7 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   ast::type::I32Type i32;
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &i32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1153,7 +1146,7 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   ast::type::VectorType vec3(&i32, 3);
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1187,7 +1180,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 
   auto* var =
       create<ast::Variable>("val", ast::StorageClass::kNone, &bool_type);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1207,7 +1200,7 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   ast::type::VectorType vec3(&bool_type, 3);
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1233,7 +1226,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
   ast::type::I32Type i32;
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &i32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1253,7 +1246,7 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   ast::type::VectorType vec3(&i32, 3);
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1280,7 +1273,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
   ast::type::I32Type i32;
 
   auto* var = create<ast::Variable>("val", ast::StorageClass::kNone, &i32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1302,8 +1295,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
       create<ast::Variable>("scalar", ast::StorageClass::kNone, &f32);
   auto* vector =
       create<ast::Variable>("vector", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(scalar);
-  mod()->AddGlobalVariable(vector);
+  mod->AddGlobalVariable(scalar);
+  mod->AddGlobalVariable(vector);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1327,8 +1320,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
       create<ast::Variable>("scalar", ast::StorageClass::kNone, &f32);
   auto* vector =
       create<ast::Variable>("vector", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(scalar);
-  mod()->AddGlobalVariable(vector);
+  mod->AddGlobalVariable(scalar);
+  mod->AddGlobalVariable(vector);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1350,7 +1343,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
 
   auto* vector =
       create<ast::Variable>("vector", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(vector);
+  mod->AddGlobalVariable(vector);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1374,8 +1367,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
       create<ast::Variable>("scalar", ast::StorageClass::kNone, &f32);
   auto* matrix =
       create<ast::Variable>("matrix", ast::StorageClass::kNone, &mat3x2);
-  mod()->AddGlobalVariable(scalar);
-  mod()->AddGlobalVariable(matrix);
+  mod->AddGlobalVariable(scalar);
+  mod->AddGlobalVariable(matrix);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1402,8 +1395,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
       create<ast::Variable>("scalar", ast::StorageClass::kNone, &f32);
   auto* matrix =
       create<ast::Variable>("matrix", ast::StorageClass::kNone, &mat3x2);
-  mod()->AddGlobalVariable(scalar);
-  mod()->AddGlobalVariable(matrix);
+  mod->AddGlobalVariable(scalar);
+  mod->AddGlobalVariable(matrix);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1431,8 +1424,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
       create<ast::Variable>("vector", ast::StorageClass::kNone, &vec3);
   auto* matrix =
       create<ast::Variable>("matrix", ast::StorageClass::kNone, &mat3x2);
-  mod()->AddGlobalVariable(vector);
-  mod()->AddGlobalVariable(matrix);
+  mod->AddGlobalVariable(vector);
+  mod->AddGlobalVariable(matrix);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1457,8 +1450,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
       create<ast::Variable>("vector", ast::StorageClass::kNone, &vec3);
   auto* matrix =
       create<ast::Variable>("matrix", ast::StorageClass::kNone, &mat3x2);
-  mod()->AddGlobalVariable(vector);
-  mod()->AddGlobalVariable(matrix);
+  mod->AddGlobalVariable(vector);
+  mod->AddGlobalVariable(matrix);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1483,8 +1476,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
       create<ast::Variable>("mat4x3", ast::StorageClass::kNone, &mat4x3);
   auto* matrix2 =
       create<ast::Variable>("mat3x4", ast::StorageClass::kNone, &mat3x4);
-  mod()->AddGlobalVariable(matrix1);
-  mod()->AddGlobalVariable(matrix2);
+  mod->AddGlobalVariable(matrix1);
+  mod->AddGlobalVariable(matrix2);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1510,7 +1503,7 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   ast::type::F32Type f32;
 
   auto* var = create<ast::Variable>("ident", ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1533,7 +1526,7 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
   ast::type::VectorType vec4(&f32, 4);
 
   auto* var = create<ast::Variable>("ident", ast::StorageClass::kNone, &vec4);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1575,8 +1568,8 @@ TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
 
   auto* var1 = create<ast::Variable>("ident1", ast::StorageClass::kNone, &vec4);
   auto* var2 = create<ast::Variable>("ident2", ast::StorageClass::kNone, &vec4);
-  mod()->AddGlobalVariable(var1);
-  mod()->AddGlobalVariable(var2);
+  mod->AddGlobalVariable(var1);
+  mod->AddGlobalVariable(var2);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -1610,7 +1603,7 @@ TEST_P(Intrinsic, Test) {
   ast::type::VectorType vec3(&bool_type, 3);
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -1637,7 +1630,7 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -1661,7 +1654,7 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   ast::type::F32Type f32;
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -1682,7 +1675,7 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
   ast::type::F32Type f32;
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   ast::CallExpression expr(create<ast::IdentifierExpression>(name),
@@ -1700,7 +1693,7 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   ast::type::F32Type f32;
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -1769,7 +1762,7 @@ class Intrinsic_TextureOperation
                       ast::type::Type* type,
                       ast::ExpressionList* call_params) {
     auto* var = create<ast::Variable>(name, ast::StorageClass::kNone, type);
-    mod()->AddGlobalVariable(var);
+    mod->AddGlobalVariable(var);
     call_params->push_back(create<ast::IdentifierExpression>(name));
   }
 
@@ -1794,7 +1787,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto coords_type = get_coords_type(dim, &i32);
 
   ast::type::Type* texture_type =
-      ctx()->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+      ctx->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
           dim, ast::AccessControl::kReadOnly, format));
 
   ast::ExpressionList call_params;
@@ -1891,184 +1884,9 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
 }
 
-TEST_P(Intrinsic_SampledTextureOperation, TextureSample) {
-  auto dim = GetParam().dim;
-  auto type = GetParam().type;
-
-  auto s = subtype(type);
-  ast::type::F32Type f32;
-  auto sampler_type = std::make_unique<ast::type::SamplerType>(
-      ast::type::SamplerKind::kSampler);
-  auto coords_type = get_coords_type(dim, &f32);
-  auto texture_type =
-      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
-
-  ast::ExpressionList call_params;
-
-  add_call_param("texture", texture_type.get(), &call_params);
-  add_call_param("sampler", sampler_type.get(), &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
-
-  ast::CallExpression expr(create<ast::IdentifierExpression>("textureSample"),
-                           call_params);
-
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(&expr));
-
-  ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsVector());
-  if (type == TextureType::kF32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  } else if (type == TextureType::kI32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
-  } else {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
-  }
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
-}
-
-TEST_P(Intrinsic_SampledTextureOperation, TextureSampleLevel) {
-  auto dim = GetParam().dim;
-  auto type = GetParam().type;
-
-  ast::type::F32Type f32;
-  auto s = subtype(type);
-  auto sampler_type = std::make_unique<ast::type::SamplerType>(
-      ast::type::SamplerKind::kSampler);
-  auto coords_type = get_coords_type(dim, &f32);
-  auto texture_type =
-      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
-
-  ast::ExpressionList call_params;
-
-  add_call_param("texture", texture_type.get(), &call_params);
-  add_call_param("sampler", sampler_type.get(), &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
-  add_call_param("lod", &f32, &call_params);
-
-  ast::CallExpression expr(
-      create<ast::IdentifierExpression>("textureSampleLevel"), call_params);
-
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(&expr));
-
-  ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsVector());
-  if (type == TextureType::kF32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  } else if (type == TextureType::kI32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
-  } else {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
-  }
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
-}
-
-TEST_P(Intrinsic_SampledTextureOperation, TextureSampleBias) {
-  auto dim = GetParam().dim;
-  auto type = GetParam().type;
-
-  ast::type::F32Type f32;
-  auto s = subtype(type);
-  auto sampler_type = std::make_unique<ast::type::SamplerType>(
-      ast::type::SamplerKind::kSampler);
-  auto coords_type = get_coords_type(dim, &f32);
-  auto texture_type =
-      std::make_unique<ast::type::SampledTextureType>(dim, s.get());
-
-  ast::ExpressionList call_params;
-
-  add_call_param("texture", texture_type.get(), &call_params);
-  add_call_param("sampler", sampler_type.get(), &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
-  add_call_param("bias", &f32, &call_params);
-
-  ast::CallExpression expr(
-      create<ast::IdentifierExpression>("textureSampleBias"), call_params);
-
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(&expr));
-
-  ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsVector());
-  if (type == TextureType::kF32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  } else if (type == TextureType::kI32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
-  } else {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
-  }
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
-}
-
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_SampledTextureOperation,
-    testing::Values(
-        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k1d, TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k1dArray,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k1dArray,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k1dArray,
-                          TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k2d, TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k2dArray,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k2dArray,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k2dArray,
-                          TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::k3d, TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::kCube,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::kCube,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::kCube,
-                          TextureType::kU32},
-        TextureTestParams{ast::type::TextureDimension::kCubeArray,
-                          TextureType::kF32},
-        TextureTestParams{ast::type::TextureDimension::kCubeArray,
-                          TextureType::kI32},
-        TextureTestParams{ast::type::TextureDimension::kCubeArray,
-                          TextureType::kU32}));
-
-using Intrinsic_DepthTextureOperation = Intrinsic_TextureOperation;
-TEST_P(Intrinsic_DepthTextureOperation, TextureSampleCompare) {
-  auto dim = GetParam().dim;
-
-  ast::type::F32Type f32;
-  auto sampler_type = std::make_unique<ast::type::SamplerType>(
-      ast::type::SamplerKind::kComparisonSampler);
-  auto coords_type = get_coords_type(dim, &f32);
-  auto texture_type = std::make_unique<ast::type::DepthTextureType>(dim);
-
-  ast::ExpressionList call_params;
-
-  add_call_param("texture", texture_type.get(), &call_params);
-  add_call_param("sampler_comparison", sampler_type.get(), &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
-  add_call_param("depth_reference", &f32, &call_params);
-
-  ast::CallExpression expr(
-      create<ast::IdentifierExpression>("textureSampleCompare"), call_params);
-
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(&expr));
-
-  ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsF32());
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
-    Intrinsic_DepthTextureOperation,
     testing::Values(TextureTestParams{ast::type::TextureDimension::k2d},
                     TextureTestParams{ast::type::TextureDimension::k2dArray},
                     TextureTestParams{ast::type::TextureDimension::kCube},
@@ -2080,7 +1898,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -2105,8 +1923,8 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   auto* var = create<ast::Variable>("my_var", ast::StorageClass::kNone, &vec3);
   auto* bool_var =
       create<ast::Variable>("bool_var", ast::StorageClass::kNone, &bool_vec3);
-  mod()->AddGlobalVariable(var);
-  mod()->AddGlobalVariable(bool_var);
+  mod->AddGlobalVariable(var);
+  mod->AddGlobalVariable(bool_var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("my_var"));
@@ -2130,7 +1948,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("v", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("v"));
@@ -2150,7 +1968,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
   ast::type::VectorType vec3(&f32, 3);
 
   auto* var = create<ast::Variable>("v", ast::StorageClass::kNone, &vec3);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("v"));
@@ -2175,8 +1993,8 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
 
   auto* var1 = create<ast::Variable>("v3", ast::StorageClass::kNone, &vec3);
   auto* var2 = create<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
-  mod()->AddGlobalVariable(var1);
-  mod()->AddGlobalVariable(var2);
+  mod->AddGlobalVariable(var1);
+  mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("v3"));
@@ -2204,7 +2022,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
   ast::type::VectorType vec2(&f32, 2);
 
   auto* var2 = create<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
-  mod()->AddGlobalVariable(var2);
+  mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("v2"));
@@ -2224,7 +2042,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
   ast::type::VectorType vec2(&f32, 2);
 
   auto* var2 = create<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
-  mod()->AddGlobalVariable(var2);
+  mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::IdentifierExpression>("v2"));
@@ -2249,7 +2067,7 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   ast::type::VectorType vec4(&f32, 4);
 
   auto* var = create<ast::Variable>("ident", ast::StorageClass::kNone, &vec4);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -2276,7 +2094,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
   body->append(stmt);
   auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kFunction);
@@ -2293,7 +2111,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
   body->append(stmt);
   auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kNone);
@@ -2309,7 +2127,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   body->append(stmt);
   auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
@@ -2403,6 +2221,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"textureSampleBias", ast::Intrinsic::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
                       ast::Intrinsic::kTextureSampleCompare},
+        IntrinsicData{"textureSampleGrad", ast::Intrinsic::kTextureSampleGrad},
         IntrinsicData{"textureSampleLevel",
                       ast::Intrinsic::kTextureSampleLevel},
         IntrinsicData{"trunc", ast::Intrinsic::kTrunc}));
@@ -4358,7 +4177,7 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   ast::type::MatrixType mat(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -4383,7 +4202,7 @@ TEST_P(ImportData_Matrix_OneParam_Test, Error_Float) {
   ast::type::F32Type f32;
 
   auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &f32);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -4419,7 +4238,7 @@ TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
   ast::type::MatrixType mat(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
-  mod()->AddGlobalVariable(var);
+  mod->AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -4495,21 +4314,21 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   ep_2->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
 
-  mod()->AddFunction(func_b);
-  mod()->AddFunction(func_c);
-  mod()->AddFunction(func_a);
-  mod()->AddFunction(ep_1);
-  mod()->AddFunction(ep_2);
+  mod->AddFunction(func_b);
+  mod->AddFunction(func_c);
+  mod->AddFunction(func_a);
+  mod->AddFunction(ep_1);
+  mod->AddFunction(ep_2);
 
-  mod()->AddGlobalVariable(
+  mod->AddGlobalVariable(
       create<ast::Variable>("first", ast::StorageClass::kPrivate, &f32));
-  mod()->AddGlobalVariable(
+  mod->AddGlobalVariable(
       create<ast::Variable>("second", ast::StorageClass::kPrivate, &f32));
-  mod()->AddGlobalVariable(
+  mod->AddGlobalVariable(
       create<ast::Variable>("call_a", ast::StorageClass::kPrivate, &f32));
-  mod()->AddGlobalVariable(
+  mod->AddGlobalVariable(
       create<ast::Variable>("call_b", ast::StorageClass::kPrivate, &f32));
-  mod()->AddGlobalVariable(
+  mod->AddGlobalVariable(
       create<ast::Variable>("call_c", ast::StorageClass::kPrivate, &f32));
 
   // Register the functions and calculate the callers
@@ -4531,6 +4350,239 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
 
   EXPECT_TRUE(ep_1->ancestor_entry_points().empty());
   EXPECT_TRUE(ep_2->ancestor_entry_points().empty());
+}
+
+using TypeDeterminerTextureIntrinsicTest =
+    TypeDeterminerTestWithParam<ast::intrinsic::test::TextureOverloadCase>;
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    TypeDeterminerTextureIntrinsicTest,
+    testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
+
+std::string to_str(const std::string& function,
+                   const ast::intrinsic::TextureSignature* sig) {
+  struct Parameter {
+    size_t idx;
+    std::string name;
+  };
+  std::vector<Parameter> params;
+  auto maybe_add_param = [&params](size_t idx, const char* name) {
+    if (idx != ast::intrinsic::TextureSignature::Parameters::kNotUsed) {
+      params.emplace_back(Parameter{idx, name});
+    }
+  };
+  maybe_add_param(sig->params.idx.array_index, "array_index");
+  maybe_add_param(sig->params.idx.bias, "bias");
+  maybe_add_param(sig->params.idx.coords, "coords");
+  maybe_add_param(sig->params.idx.depth_ref, "depth_ref");
+  maybe_add_param(sig->params.idx.ddx, "ddx");
+  maybe_add_param(sig->params.idx.ddy, "ddy");
+  maybe_add_param(sig->params.idx.level, "level");
+  maybe_add_param(sig->params.idx.offset, "offset");
+  maybe_add_param(sig->params.idx.sampler, "sampler");
+  maybe_add_param(sig->params.idx.texture, "texture");
+  std::sort(
+      params.begin(), params.end(),
+      [](const Parameter& a, const Parameter& b) { return a.idx < b.idx; });
+
+  std::stringstream out;
+  out << function << "(";
+  bool first = true;
+  for (auto& param : params) {
+    if (!first) {
+      out << ", ";
+    }
+    out << param.name;
+    first = false;
+  }
+  out << ")";
+  return out.str();
+}
+
+const char* expected_texture_overload(
+    ast::intrinsic::test::ValidTextureOverload overload) {
+  using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
+  switch (overload) {
+    case ValidTextureOverload::kSample1dF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSample1dArrayF32:
+      return "textureSample(texture, sampler, coords, array_index)";
+    case ValidTextureOverload::kSample2dF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSample2dOffsetF32:
+      return "textureSample(texture, sampler, coords, offset)";
+    case ValidTextureOverload::kSample2dArrayF32:
+      return "textureSample(texture, sampler, coords, array_index)";
+    case ValidTextureOverload::kSample2dArrayOffsetF32:
+      return "textureSample(texture, sampler, coords, array_index, offset)";
+    case ValidTextureOverload::kSample3dF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSample3dOffsetF32:
+      return "textureSample(texture, sampler, coords, offset)";
+    case ValidTextureOverload::kSampleCubeF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSampleCubeArrayF32:
+      return "textureSample(texture, sampler, coords, array_index)";
+    case ValidTextureOverload::kSampleDepth2dF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSampleDepth2dOffsetF32:
+      return "textureSample(texture, sampler, coords, offset)";
+    case ValidTextureOverload::kSampleDepth2dArrayF32:
+      return "textureSample(texture, sampler, coords, array_index)";
+    case ValidTextureOverload::kSampleDepth2dArrayOffsetF32:
+      return "textureSample(texture, sampler, coords, array_index, offset)";
+    case ValidTextureOverload::kSampleDepthCubeF32:
+      return "textureSample(texture, sampler, coords)";
+    case ValidTextureOverload::kSampleDepthCubeArrayF32:
+      return "textureSample(texture, sampler, coords, array_index)";
+    case ValidTextureOverload::kSampleBias2dF32:
+      return "textureSampleBias(texture, sampler, coords, bias)";
+    case ValidTextureOverload::kSampleBias2dOffsetF32:
+      return "textureSampleBias(texture, sampler, coords, bias, offset)";
+    case ValidTextureOverload::kSampleBias2dArrayF32:
+      return "textureSampleBias(texture, sampler, coords, array_index, "
+             "bias)";
+    case ValidTextureOverload::kSampleBias2dArrayOffsetF32:
+      return "textureSampleBias(texture, sampler, coords, array_index, "
+             "bias, offset)";
+    case ValidTextureOverload::kSampleBias3dF32:
+      return "textureSampleBias(texture, sampler, coords, bias)";
+    case ValidTextureOverload::kSampleBias3dOffsetF32:
+      return "textureSampleBias(texture, sampler, coords, bias, offset)";
+    case ValidTextureOverload::kSampleBiasCubeF32:
+      return "textureSampleBias(texture, sampler, coords, bias)";
+    case ValidTextureOverload::kSampleBiasCubeArrayF32:
+      return "textureSampleBias(texture, sampler, coords, array_index, "
+             "bias)";
+    case ValidTextureOverload::kSampleLevel2dF32:
+      return "textureSampleLevel(texture, sampler, coords, level)";
+    case ValidTextureOverload::kSampleLevel2dOffsetF32:
+      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+    case ValidTextureOverload::kSampleLevel2dArrayF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, "
+             "level)";
+    case ValidTextureOverload::kSampleLevel2dArrayOffsetF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, "
+             "level, offset)";
+    case ValidTextureOverload::kSampleLevel3dF32:
+      return "textureSampleLevel(texture, sampler, coords, level)";
+    case ValidTextureOverload::kSampleLevel3dOffsetF32:
+      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+    case ValidTextureOverload::kSampleLevelCubeF32:
+      return "textureSampleLevel(texture, sampler, coords, level)";
+    case ValidTextureOverload::kSampleLevelCubeArrayF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, "
+             "level)";
+    case ValidTextureOverload::kSampleLevelDepth2dF32:
+      return "textureSampleLevel(texture, sampler, coords, level)";
+    case ValidTextureOverload::kSampleLevelDepth2dOffsetF32:
+      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+    case ValidTextureOverload::kSampleLevelDepth2dArrayF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, level)";
+    case ValidTextureOverload::kSampleLevelDepth2dArrayOffsetF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, level, "
+             "offset)";
+    case ValidTextureOverload::kSampleLevelDepthCubeF32:
+      return "textureSampleLevel(texture, sampler, coords, level)";
+    case ValidTextureOverload::kSampleLevelDepthCubeArrayF32:
+      return "textureSampleLevel(texture, sampler, coords, array_index, "
+             "level)";
+    case ValidTextureOverload::kSampleGrad2dF32:
+      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+    case ValidTextureOverload::kSampleGrad2dOffsetF32:
+      return "textureSampleGrad(texture, sampler, coords, ddx, ddy, "
+             "offset)";
+    case ValidTextureOverload::kSampleGrad2dArrayF32:
+      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
+             "ddy)";
+    case ValidTextureOverload::kSampleGrad2dArrayOffsetF32:
+      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
+             "ddy, offset)";
+    case ValidTextureOverload::kSampleGrad3dF32:
+      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+    case ValidTextureOverload::kSampleGrad3dOffsetF32:
+      return "textureSampleGrad(texture, sampler, coords, ddx, ddy, "
+             "offset)";
+    case ValidTextureOverload::kSampleGradCubeF32:
+      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+    case ValidTextureOverload::kSampleGradCubeArrayF32:
+      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
+             "ddy)";
+    case ValidTextureOverload::kSampleGradDepth2dF32:
+      return "textureSampleCompare(texture, sampler, coords, depth_ref)";
+    case ValidTextureOverload::kSampleGradDepth2dOffsetF32:
+      return "textureSampleCompare(texture, sampler, coords, depth_ref, "
+             "offset)";
+    case ValidTextureOverload::kSampleGradDepth2dArrayF32:
+      return "textureSampleCompare(texture, sampler, coords, array_index, "
+             "depth_ref)";
+    case ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32:
+      return "textureSampleCompare(texture, sampler, coords, array_index, "
+             "depth_ref, offset)";
+    case ValidTextureOverload::kSampleGradDepthCubeF32:
+      return "textureSampleCompare(texture, sampler, coords, depth_ref)";
+    case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
+      return "textureSampleCompare(texture, sampler, coords, array_index, "
+             "depth_ref)";
+  }
+  return "<unmatched texture overload>";
+}
+
+TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
+  auto param = GetParam();
+
+  ast::type::Type* datatype = nullptr;
+  switch (param.texture_data_type) {
+    case ast::intrinsic::test::TextureDataType::kF32:
+      datatype = ty.f32;
+      break;
+    case ast::intrinsic::test::TextureDataType::kU32:
+      datatype = ty.u32;
+      break;
+    case ast::intrinsic::test::TextureDataType::kI32:
+      datatype = ty.i32;
+      break;
+  }
+
+  ast::type::SamplerType sampler_type{param.sampler_kind};
+  switch (param.texture_kind) {
+    case ast::intrinsic::test::TextureKind::kRegular:
+      Var("texture", ast::StorageClass::kNone,
+          ctx->type_mgr().Get<ast::type::SampledTextureType>(
+              param.texture_dimension, datatype));
+      break;
+
+    case ast::intrinsic::test::TextureKind::kDepth:
+      Var("texture", ast::StorageClass::kNone,
+          ctx->type_mgr().Get<ast::type::DepthTextureType>(
+              param.texture_dimension));
+      break;
+  }
+
+  Var("sampler", ast::StorageClass::kNone, &sampler_type);
+
+  auto* ident = Expr(param.function);
+  ast::CallExpression call{ident, param.args(this)};
+
+  EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
+
+  switch (param.texture_kind) {
+    case ast::intrinsic::test::TextureKind::kRegular:
+      ASSERT_TRUE(call.result_type()->IsVector());
+      EXPECT_EQ(call.result_type()->AsVector()->type(), datatype);
+      break;
+
+    case ast::intrinsic::test::TextureKind::kDepth:
+      EXPECT_EQ(call.result_type(), ty.f32);
+      break;
+  }
+
+  auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
+      ident->intrinsic_signature());
+
+  auto* expected = expected_texture_overload(param.overload);
+  EXPECT_EQ(to_str(param.function, sig), expected);
 }
 
 }  // namespace
