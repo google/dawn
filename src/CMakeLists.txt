@@ -416,6 +416,7 @@ set(TINT_TEST_SRCS
   validator/validator_control_block_test.cc
   validator/validator_function_test.cc
   validator/validator_test.cc
+  validator/validator_type_test.cc
 )
 
 ## Tint library
