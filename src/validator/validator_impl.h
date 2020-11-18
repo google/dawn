@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_expression.h"
@@ -117,6 +118,12 @@ class ValidatorImpl {
   /// @param funcs the functions to check
   /// @returns true if the valdiation was successful
   bool ValidateEntryPoint(const ast::FunctionList& funcs);
+
+  /// Validates constructed types
+  /// @param constructed_types the types to check
+  /// @returns true if the valdiation was successful
+  bool ValidateConstructedTypes(
+      const std::vector<ast::type::Type*>& constructed_types);
 
  private:
   std::string error_;

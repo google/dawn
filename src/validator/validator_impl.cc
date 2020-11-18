@@ -22,8 +22,11 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/intrinsic.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
@@ -48,6 +51,9 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   if (!ValidateGlobalVariables(module->global_variables())) {
     return false;
   }
+  if (!ValidateConstructedTypes(module->constructed_types())) {
+    return false;
+  }
   if (!ValidateFunctions(module->functions())) {
     return false;
   }
@@ -56,6 +62,28 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
   }
   function_stack_.pop_scope();
 
+  return true;
+}
+
+bool ValidatorImpl::ValidateConstructedTypes(
+    const std::vector<ast::type::Type*>& constructed_types) {
+  for (auto* const ct : constructed_types) {
+    if (ct->IsStruct()) {
+      auto* st = ct->AsStruct();
+      for (auto* member : st->impl()->members()) {
+        if (member->type()->UnwrapAll()->IsArray()) {
+          auto* r = member->type()->UnwrapAll()->AsArray();
+          if (r->IsRuntimeArray() && member != st->impl()->members().back()) {
+            set_error(member->source(),
+                      "v-0015: runtime arrays may only appear as the last "
+                      "member of a struct: '" +
+                          member->name() + "'");
+            return false;
+          }
+        }
+      }
+    }
+  }
   return true;
 }
 

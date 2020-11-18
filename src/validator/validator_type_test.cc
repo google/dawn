@@ -17,6 +17,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/struct_type.h"
@@ -51,11 +52,11 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   auto* st = create<ast::Struct>(decos, members);
   ast::type::StructType struct_type("Foo", st);
 
-  // mod()->AddConstructedType(&struct_type);
-  // EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  mod()->AddConstructedType(&struct_type);
+  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
 }
 
-TEST_F(ValidatorTypeTest, DISABLED_RuntimeArrayIsNotLast_Fail) {
+TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   // struct Foo {
   //   rt: array<f32>;
   //   vf: f32;
@@ -78,10 +79,71 @@ TEST_F(ValidatorTypeTest, DISABLED_RuntimeArrayIsNotLast_Fail) {
   ast::type::StructType struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
-  // EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
-  // EXPECT_EQ(v()->error(),
-  //           "12:34: v-0015: runtime arrays may only appear as the last member
-  //           " "of a struct: 'rt'");
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "of a struct: 'rt'");
 }
+
+TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
+  // type RTArr = array<u32>;
+  // struct s {
+  //  b: RTArr;
+  //  a: u32;
+  //}
+
+  ast::type::F32Type u32;
+  ast::type::ArrayType array(&u32);
+  ast::type::AliasType alias{"RTArr", &array};
+
+  ast::StructMemberList members;
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>(
+        Source{Source::Location{12, 34}}, "b", &alias, deco));
+  }
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>("a", &u32, deco));
+  }
+
+  ast::StructDecorationList decos;
+  auto* st = create<ast::Struct>(decos, members);
+  ast::type::StructType struct_type("s", st);
+  mod()->AddConstructedType(&struct_type);
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "of a struct: 'b'");
+}
+
+TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
+  // type RTArr = array<u32>;
+  // struct s {
+  //  a: u32;
+  //  b: RTArr;
+  //}
+
+  ast::type::F32Type u32;
+  ast::type::ArrayType array(&u32);
+  ast::type::AliasType alias{"RTArr", &array};
+
+  ast::StructMemberList members;
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>("a", &u32, deco));
+  }
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>(
+        Source{Source::Location{12, 34}}, "b", &alias, deco));
+  }
+  ast::StructDecorationList decos;
+  auto* st = create<ast::Struct>(decos, members);
+  ast::type::StructType struct_type("s", st);
+  mod()->AddConstructedType(&struct_type);
+  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+}
+
 }  // namespace
 }  // namespace tint
