@@ -18,6 +18,7 @@
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
@@ -51,15 +52,83 @@ TEST_F(BuilderTest, Function_Empty) {
   ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_615f66756e63"
-)");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+%2 = OpTypeVoid
 %1 = OpTypeFunction %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpReturn
+OpFunctionEnd
 )");
+}
 
-  ASSERT_GE(b.functions().size(), 1u);
-  const auto& ret = b.functions()[0];
-  EXPECT_EQ(DumpInstruction(ret.declaration()), R"(%3 = OpFunction %2 None %1
+TEST_F(BuilderTest, Function_Terminator_Return) {
+  ast::type::VoidType void_type;
+
+  auto* body = create<ast::BlockStatement>();
+  body->append(create<ast::ReturnStatement>());
+
+  ast::Function func("a_func", {}, &void_type, body);
+
+  ASSERT_TRUE(b.GenerateFunction(&func));
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+
+  auto* var_a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
+  td.RegisterVariableForTesting(var_a);
+
+  auto* body = create<ast::BlockStatement>();
+  body->append(
+      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("a")));
+  ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type, body);
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_61"
+OpName %7 "tint_615f66756e63"
+%3 = OpTypeFloat 32
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%9 = OpLoad %3 %1
+OpReturnValue %9
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Function_Terminator_Discard) {
+  ast::type::VoidType void_type;
+
+  auto* body = create<ast::BlockStatement>();
+  body->append(create<ast::DiscardStatement>());
+
+  ast::Function func("a_func", {}, &void_type, body);
+
+  ASSERT_TRUE(b.GenerateFunction(&func));
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpKill
+OpFunctionEnd
 )");
 }
 

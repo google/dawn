@@ -141,6 +141,7 @@ OpBranch %9
 %11 = OpLabel
 OpBranch %9
 %9 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -198,6 +199,7 @@ OpSwitch %10 %11
 OpStore %1 %12
 OpBranch %9
 %9 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -288,6 +290,7 @@ OpBranch %9
 OpStore %1 %16
 OpBranch %9
 %9 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -379,6 +382,7 @@ OpBranch %9
 OpStore %1 %16
 OpBranch %9
 %9 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -501,6 +505,7 @@ OpBranch %9
 %11 = OpLabel
 OpBranch %9
 %9 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }

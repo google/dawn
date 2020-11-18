@@ -15,7 +15,6 @@
 [[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
 fn bar() -> void {
-  return;
 }
 
 [[stage(fragment)]]
@@ -23,5 +22,4 @@ fn main() -> void {
     var a : vec2<f32> = vec2<f32>();
     gl_FragColor = vec4<f32>(0.4, 0.4, 0.8, 1.0);
     bar();
-    return;
 }

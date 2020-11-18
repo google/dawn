@@ -28,7 +28,6 @@
 fn vtx_main() -> void {
    Position = uniforms.modelViewProjectionMatrix * cur_position;
    vtxFragColor = color;
-   return;
 }
 
 # Fragment shader
@@ -38,5 +37,4 @@ fn vtx_main() -> void {
 [[stage(fragment)]]
 fn frag_main() -> void {
   outColor = fragColor;
-  return;
 }

@@ -17,6 +17,15 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
+
+// Returns true if the given Op is a function terminator
+bool OpIsFunctionTerminator(spv::Op op) {
+  return op == spv::Op::OpReturn || op == spv::Op::OpReturnValue ||
+         op == spv::Op::OpKill;
+}
+
+}  // namespace
 
 Function::Function()
     : declaration_(Instruction{spv::Op::OpNop, {}}),
@@ -45,6 +54,17 @@ void Function::iterate(std::function<void(const Instruction&)> cb) const {
   }
   for (const auto& inst : instructions_) {
     cb(inst);
+  }
+
+  bool needs_terminator = false;
+  if (instructions_.empty()) {
+    needs_terminator = true;
+  } else {
+    const auto& last = instructions_.back();
+    needs_terminator = !OpIsFunctionTerminator(last.opcode());
+  }
+  if (needs_terminator) {
+    cb(Instruction{spv::Op::OpReturn, {}});
   }
 
   cb(Instruction{spv::Op::OpFunctionEnd, {}});

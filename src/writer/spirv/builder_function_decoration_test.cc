@@ -258,9 +258,11 @@ OpName %5 "tint_6d61696e32"
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
 %4 = OpLabel
+OpReturn
 OpFunctionEnd
 %5 = OpFunction %2 None %1
 %6 = OpLabel
+OpReturn
 OpFunctionEnd
 )");
 }

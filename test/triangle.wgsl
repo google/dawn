@@ -24,7 +24,6 @@ const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
 [[stage(vertex)]]
 fn vtx_main() -> void {
   Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-  return;
 }
 
 # Fragment shader
@@ -33,5 +32,4 @@ fn vtx_main() -> void {
 [[stage(fragment)]]
 fn frag_main() -> void {
   outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-  return;
 }

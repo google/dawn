@@ -940,6 +940,7 @@ OpName %7 "tint_615f66756e63"
 %8 = OpLabel
 %11 = OpLoad %3 %1
 %9 = OpExtInst %3 %10 Round %11
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -967,6 +968,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -994,6 +996,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1042,6 +1045,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 Length %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1066,6 +1070,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 Length %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1090,6 +1095,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 Normalize %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1118,6 +1124,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1146,6 +1153,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1177,6 +1185,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 Distance %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1202,6 +1211,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 Distance %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1228,6 +1238,7 @@ OpName %3 "tint_615f66756e63"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 Cross %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1255,6 +1266,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1284,6 +1296,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1320,6 +1333,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1347,6 +1361,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1377,6 +1392,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1404,6 +1420,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1434,6 +1451,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1461,6 +1479,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1492,6 +1511,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1519,6 +1539,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1550,6 +1571,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1579,6 +1601,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1609,6 +1632,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
                                 R"( %8 %8 %8
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1638,6 +1662,7 @@ OpName %3 "tint_615f66756e63"
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
                                 R"( %10 %10 %10
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -1673,6 +1698,7 @@ OpName %5 "tint_766172"
 %4 = OpLabel
 %13 = OpLoad %7 %5
 %11 = OpExtInst %9 %12 Determinant %13
+OpReturn
 OpFunctionEnd
 )");
 }

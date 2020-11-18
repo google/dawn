@@ -95,6 +95,7 @@ OpFunctionEnd
 %12 = OpFunction %11 None %10
 %13 = OpLabel
 %14 = OpFunctionCall %2 %3 %15 %15
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -156,6 +157,7 @@ OpFunctionEnd
 %12 = OpFunction %2 None %11
 %13 = OpLabel
 %14 = OpFunctionCall %2 %4 %15 %15
+OpReturn
 OpFunctionEnd
 )");
 }

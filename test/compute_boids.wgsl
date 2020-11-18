@@ -26,7 +26,6 @@ fn vert_main() -> void {
       (a_pos.x * cos(angle)) - (a_pos.y * sin(angle)),
       (a_pos.x * sin(angle)) + (a_pos.y * cos(angle)));
   gl_Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
-  return;
 }
 
 # fragment shader
@@ -35,7 +34,6 @@ fn vert_main() -> void {
 [[stage(fragment)]]
 fn frag_main() -> void {
   fragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-  return;
 }
 
 # compute shader
@@ -137,6 +135,4 @@ fn comp_main() -> void {
   # Write back
   particlesB.particles[index].pos = vPos;
   particlesB.particles[index].vel = vVel;
-
-  return;
 }

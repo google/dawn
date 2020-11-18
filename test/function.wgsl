@@ -19,5 +19,4 @@ fn main() -> f32 {
 [[stage(compute)]]
 [[workgroup_size(2)]]
 fn ep() -> void {
-  return;
 }
