@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
-  auto* p = parser("my_var : f32");
+  auto p = parser("my_var : f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(decl.errored);
@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
-  auto* p = parser(": f32");
+  auto p = parser(": f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingColon) {
-  auto* p = parser("my_var f32");
+  auto p = parser("my_var f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingColon) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
-  auto* p = parser("my_var :");
+  auto p = parser("my_var :");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
-  auto* p = parser("123 : f32");
+  auto p = parser("123 : f32");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
-  auto* p = parser("my_var : invalid");
+  auto p = parser("my_var : invalid");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);

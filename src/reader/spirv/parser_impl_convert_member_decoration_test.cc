@@ -32,7 +32,7 @@ namespace {
 using ::testing::Eq;
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_Empty) {
-  auto* p = parser(std::vector<uint32_t>{});
+  auto p = parser(std::vector<uint32_t>{});
 
   auto* result = p->ConvertMemberDecoration(1, 1, {});
   EXPECT_EQ(result, nullptr);
@@ -40,7 +40,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Empty) {
 }
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
-  auto* p = parser(std::vector<uint32_t>{});
+  auto p = parser(std::vector<uint32_t>{});
 
   auto* result = p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset});
   EXPECT_EQ(result, nullptr);
@@ -49,7 +49,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
 }
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
-  auto* p = parser(std::vector<uint32_t>{});
+  auto p = parser(std::vector<uint32_t>{});
 
   auto* result =
       p->ConvertMemberDecoration(12, 13, {SpvDecorationOffset, 3, 4});
@@ -59,7 +59,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
 }
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
-  auto* p = parser(std::vector<uint32_t>{});
+  auto p = parser(std::vector<uint32_t>{});
 
   auto* result = p->ConvertMemberDecoration(1, 1, {SpvDecorationOffset, 8});
   ASSERT_NE(result, nullptr);
@@ -71,7 +71,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
 }
 
 TEST_F(SpvParserTest, ConvertMemberDecoration_UnhandledDecoration) {
-  auto* p = parser(std::vector<uint32_t>{});
+  auto p = parser(std::vector<uint32_t>{});
 
   auto* result = p->ConvertMemberDecoration(12, 13, {12345678});
   EXPECT_EQ(result, nullptr);

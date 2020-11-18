@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
-  auto* p = parser("a | true");
+  auto p = parser("a | true");
   auto e = p->inclusive_or_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_InvalidLHS) {
-  auto* p = parser("if (a) {} | true");
+  auto p = parser("if (a) {} | true");
   auto e = p->inclusive_or_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, InclusiveOrExpression_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_InvalidRHS) {
-  auto* p = parser("true | if (a) {}");
+  auto p = parser("true | if (a) {}");
   auto e = p->inclusive_or_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, InclusiveOrExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, InclusiveOrExpression_NoOr_ReturnsLHS) {
-  auto* p = parser("a true");
+  auto p = parser("a true");
   auto e = p->inclusive_or_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

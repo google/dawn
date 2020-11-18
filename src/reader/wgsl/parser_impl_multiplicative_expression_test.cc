@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
-  auto* p = parser("a * true");
+  auto p = parser("a * true");
   auto e = p->multiplicative_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
-  auto* p = parser("a / true");
+  auto p = parser("a / true");
   auto e = p->multiplicative_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
-  auto* p = parser("a % true");
+  auto p = parser("a % true");
   auto e = p->multiplicative_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_InvalidLHS) {
-  auto* p = parser("if (a) {} * true");
+  auto p = parser("if (a) {} * true");
   auto e = p->multiplicative_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -104,7 +104,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_InvalidRHS) {
-  auto* p = parser("true * if (a) {}");
+  auto p = parser("true * if (a) {}");
   auto e = p->multiplicative_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_NoOr_ReturnsLHS) {
-  auto* p = parser("a true");
+  auto p = parser("a true");
   auto e = p->multiplicative_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

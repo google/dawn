@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
-  auto* p = parser("a < true");
+  auto p = parser("a < true");
   auto e = p->relational_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
-  auto* p = parser("a > true");
+  auto p = parser("a > true");
   auto e = p->relational_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
-  auto* p = parser("a <= true");
+  auto p = parser("a <= true");
   auto e = p->relational_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
-  auto* p = parser("a >= true");
+  auto p = parser("a >= true");
   auto e = p->relational_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -118,7 +118,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {
-  auto* p = parser("if (a) {} < true");
+  auto p = parser("if (a) {} < true");
   auto e = p->relational_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
-  auto* p = parser("true < if (a) {}");
+  auto p = parser("true < if (a) {}");
   auto e = p->relational_expression();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(e.value, nullptr);
@@ -135,7 +135,7 @@ TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_NoOr_ReturnsLHS) {
-  auto* p = parser("a true");
+  auto p = parser("a true");
   auto e = p->relational_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

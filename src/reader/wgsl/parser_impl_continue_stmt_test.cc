@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinueStmt) {
-  auto* p = parser("continue");
+  auto p = parser("continue");
   auto e = p->continue_stmt();
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();

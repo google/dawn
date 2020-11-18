@@ -27,7 +27,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, UnaryExpression_Postix) {
-  auto* p = parser("a[2]");
+  auto p = parser("a[2]");
   auto e = p->unary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
-  auto* p = parser("- 1");
+  auto p = parser("- 1");
   auto e = p->unary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
-  auto* p = parser("-if(a) {}");
+  auto p = parser("-if(a) {}");
   auto e = p->unary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang) {
-  auto* p = parser("!1");
+  auto p = parser("!1");
   auto e = p->unary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
-  auto* p = parser("!if (a) {}");
+  auto p = parser("!if (a) {}");
   auto e = p->unary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

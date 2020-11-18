@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
-  auto* p = parser(R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case 1: {}
   case 2: {}
 })");
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
-  auto* p = parser("switch(a) { }");
+  auto p = parser("switch(a) { }");
   auto e = p->switch_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, SwitchStmt_Empty) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
-  auto* p = parser(R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case 1: {}
   default: {}
   case 2: {}
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
-  auto* p = parser("switch(a=b) {}");
+  auto p = parser("switch(a=b) {}");
   auto e = p->switch_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
-  auto* p = parser("switch {}");
+  auto p = parser("switch {}");
   auto e = p->switch_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
-  auto* p = parser("switch(a) }");
+  auto p = parser("switch(a) }");
   auto e = p->switch_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
-  auto* p = parser("switch(a) {");
+  auto p = parser("switch(a) {");
   auto e = p->switch_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -110,7 +110,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
-  auto* p = parser(R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case: {}
 })");
   auto e = p->switch_stmt();

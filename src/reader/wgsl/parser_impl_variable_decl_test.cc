@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecl_Parses) {
-  auto* p = parser("var my_var : f32");
+  auto p = parser("var my_var : f32");
   auto var = p->variable_decl();
   EXPECT_FALSE(p->has_error());
   EXPECT_TRUE(var.matched);
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
-  auto* p = parser("my_var : f32");
+  auto p = parser("my_var : f32");
   auto v = p->variable_decl();
   EXPECT_EQ(v.value, nullptr);
   EXPECT_FALSE(v.matched);
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, VariableDecl_MissingVar) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
-  auto* p = parser("var my_var f32");
+  auto p = parser("var my_var f32");
   auto v = p->variable_decl();
   EXPECT_FALSE(v.matched);
   EXPECT_TRUE(v.errored);
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
-  auto* p = parser("var<private> my_var : f32");
+  auto p = parser("var<private> my_var : f32");
   auto v = p->variable_decl();
   EXPECT_TRUE(v.matched);
   EXPECT_FALSE(v.errored);
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
-  auto* p = parser("var<unknown> my_var : f32");
+  auto p = parser("var<unknown> my_var : f32");
   auto v = p->variable_decl();
   EXPECT_FALSE(v.matched);
   EXPECT_TRUE(v.errored);

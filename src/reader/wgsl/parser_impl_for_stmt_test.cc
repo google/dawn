@@ -26,13 +26,13 @@ namespace {
 class ForStmtTest : public ParserImplTest {
  public:
   void TestForLoop(std::string loop_str, std::string for_str) {
-    auto* p_loop = parser(loop_str);
+    auto p_loop = parser(loop_str);
     auto e_loop = p_loop->expect_statements();
     EXPECT_FALSE(e_loop.errored);
     EXPECT_FALSE(p_loop->has_error()) << p_loop->error();
     ASSERT_NE(e_loop.value, nullptr);
 
-    auto* p_for = parser(for_str);
+    auto p_for = parser(for_str);
     auto e_for = p_for->expect_statements();
     EXPECT_FALSE(e_for.errored);
     EXPECT_FALSE(p_for->has_error()) << p_for->error();
@@ -158,7 +158,7 @@ TEST_F(ForStmtTest, All) {
 class ForStmtErrorTest : public ParserImplTest {
  public:
   void TestForWithError(std::string for_str, std::string error_str) {
-    auto* p_for = parser(for_str);
+    auto p_for = parser(for_str);
     auto e_for = p_for->for_stmt();
 
     EXPECT_FALSE(e_for.matched);

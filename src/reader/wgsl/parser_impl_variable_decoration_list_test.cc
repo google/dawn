@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
-  auto* p = parser(R"([[location(4), builtin(position)]])");
+  auto p = parser(R"([[location(4), builtin(position)]])");
   auto decos = p->decoration_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, VariableDecorationList_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Empty) {
-  auto* p = parser(R"([[]])");
+  auto p = parser(R"([[]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, VariableDecorationList_Empty) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
-  auto* p = parser(R"([[invalid]])");
+  auto p = parser(R"([[invalid]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {
-  auto* p = parser(R"([[builtin(position), ]])");
+  auto p = parser(R"([[builtin(position), ]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_MissingComma) {
-  auto* p = parser(R"([[binding(4) location(5)]])");
+  auto p = parser(R"([[binding(4) location(5)]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, VariableDecorationList_MissingComma) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
-  auto* p = parser(R"([[location(bad)]])");
+  auto p = parser(R"([[location(bad)]])");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
-  auto* p = parser("[[builtin(invalid)]]");
+  auto p = parser("[[builtin(invalid)]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);

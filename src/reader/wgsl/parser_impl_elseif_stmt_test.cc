@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ElseIfStmt) {
-  auto* p = parser("elseif (a == 4) { a = b; c = d; }");
+  auto p = parser("elseif (a == 4) { a = b; c = d; }");
   auto e = p->elseif_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, ElseIfStmt) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
-  auto* p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
+  auto p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
   auto e = p->elseif_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
-  auto* p = parser("elseif (true) { fn main() -> void {}}");
+  auto p = parser("elseif (true) { fn main() -> void {}}");
   auto e = p->elseif_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_MissingBody) {
-  auto* p = parser("elseif (true)");
+  auto p = parser("elseif (true)");
   auto e = p->elseif_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

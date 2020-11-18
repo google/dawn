@@ -195,7 +195,7 @@ TEST_F(SpvParserTest,
      %10 = OpConstantNull %ptr_sampler
      %20 = OpConstantNull %ptr_f_texture_1d
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
   const auto* image = p->GetMemoryObjectDeclarationForHandle(20, true);
@@ -210,7 +210,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Direct) {
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
@@ -247,7 +247,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -282,7 +282,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -319,7 +319,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -354,7 +354,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -382,7 +382,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -410,7 +410,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -443,7 +443,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(100, false);
@@ -474,7 +474,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Image) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
 
@@ -493,7 +493,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Direct) {
      %entry = OpLabel
      OpReturn
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
@@ -530,7 +530,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -565,7 +565,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -602,7 +602,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -637,7 +637,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -666,7 +666,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -694,7 +694,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Load) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(110, false);
@@ -728,7 +728,7 @@ TEST_F(SpvParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(100, false);
@@ -760,7 +760,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
 
@@ -804,7 +804,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterHandleUsage());
   EXPECT_TRUE(p->error().empty());
@@ -844,7 +844,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, FunctionParam) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule()) << p->error() << assembly << std::endl;
   EXPECT_TRUE(p->RegisterHandleUsage()) << p->error() << assembly << std::endl;
   EXPECT_TRUE(p->error().empty()) << p->error() << assembly << std::endl;
@@ -953,7 +953,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, Variable) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterHandleUsage());
   EXPECT_TRUE(p->error().empty());
@@ -990,7 +990,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, FunctionParam) {
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterHandleUsage());
   EXPECT_TRUE(p->error().empty());

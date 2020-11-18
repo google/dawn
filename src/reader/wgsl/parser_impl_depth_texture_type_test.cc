@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DepthTextureType_Invalid) {
-  auto* p = parser("1234");
+  auto p = parser("1234");
   auto t = p->depth_texture_type();
   EXPECT_FALSE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, DepthTextureType_Invalid) {
 }
 
 TEST_F(ParserImplTest, DepthTextureType_2d) {
-  auto* p = parser("texture_depth_2d");
+  auto p = parser("texture_depth_2d");
   auto t = p->depth_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
 }
 
 TEST_F(ParserImplTest, DepthTextureType_2dArray) {
-  auto* p = parser("texture_depth_2d_array");
+  auto p = parser("texture_depth_2d_array");
   auto t = p->depth_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
 }
 
 TEST_F(ParserImplTest, DepthTextureType_Cube) {
-  auto* p = parser("texture_depth_cube");
+  auto p = parser("texture_depth_cube");
   auto t = p->depth_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
 }
 
 TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
-  auto* p = parser("texture_depth_cube_array");
+  auto p = parser("texture_depth_cube_array");
   auto t = p->depth_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);

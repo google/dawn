@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
-  auto* p = parser("a + true");
+  auto p = parser("a + true");
   auto e = p->additive_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
-  auto* p = parser("a - true");
+  auto p = parser("a - true");
   auto e = p->additive_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidLHS) {
-  auto* p = parser("if (a) {} + true");
+  auto p = parser("if (a) {} + true");
   auto e = p->additive_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, AdditiveExpression_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidRHS) {
-  auto* p = parser("true + if (a) {}");
+  auto p = parser("true + if (a) {}");
   auto e = p->additive_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, AdditiveExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_NoOr_ReturnsLHS) {
-  auto* p = parser("a true");
+  auto p = parser("a true");
   auto e = p->additive_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

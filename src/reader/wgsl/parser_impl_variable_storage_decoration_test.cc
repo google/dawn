@@ -36,7 +36,7 @@ class VariableStorageTest
 
 TEST_P(VariableStorageTest, Parses) {
   auto params = GetParam();
-  auto* p = parser(std::string("<") + params.input + ">");
+  auto p = parser(std::string("<") + params.input + ">");
 
   auto sc = p->variable_storage_decoration();
   EXPECT_FALSE(p->has_error());
@@ -64,7 +64,7 @@ INSTANTIATE_TEST_SUITE_P(
         VariableStorageData{"function", ast::StorageClass::kFunction}));
 
 TEST_F(ParserImplTest, VariableStorageDecoration_NoMatch) {
-  auto* p = parser("<not-a-storage-class>");
+  auto p = parser("<not-a-storage-class>");
   auto sc = p->variable_storage_decoration();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(sc.errored);
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, VariableStorageDecoration_NoMatch) {
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_Empty) {
-  auto* p = parser("<>");
+  auto p = parser("<>");
   auto sc = p->variable_storage_decoration();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(sc.errored);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, VariableStorageDecoration_Empty) {
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingLessThan) {
-  auto* p = parser("in>");
+  auto p = parser("in>");
   auto sc = p->variable_storage_decoration();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(sc.errored);
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, VariableStorageDecoration_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingGreaterThan) {
-  auto* p = parser("<in");
+  auto p = parser("<in");
   auto sc = p->variable_storage_decoration();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(sc.errored);

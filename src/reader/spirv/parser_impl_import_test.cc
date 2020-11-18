@@ -32,7 +32,7 @@ using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
 TEST_F(SpvParserTest, Import_NoImport) {
-  auto* p = parser(test::Assemble("%1 = OpTypeVoid"));
+  auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
@@ -40,7 +40,7 @@ TEST_F(SpvParserTest, Import_NoImport) {
 }
 
 TEST_F(SpvParserTest, Import_ImportGlslStd450) {
-  auto* p = parser(test::Assemble(R"(%1 = OpExtInstImport "GLSL.std.450")"));
+  auto p = parser(test::Assemble(R"(%1 = OpExtInstImport "GLSL.std.450")"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   EXPECT_THAT(p->glsl_std_450_imports(), ElementsAre(1));

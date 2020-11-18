@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SampledTextureType_Invalid) {
-  auto* p = parser("1234");
+  auto p = parser("1234");
   auto t = p->sampled_texture_type();
   EXPECT_FALSE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, SampledTextureType_Invalid) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_1d_Old) {
-  auto* p = parser("texture_sampled_1d");
+  auto p = parser("texture_sampled_1d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, SampledTextureType_1d_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_1dArray_Old) {
-  auto* p = parser("texture_sampled_1d_array");
+  auto p = parser("texture_sampled_1d_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, SampledTextureType_1dArray_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_2d_Old) {
-  auto* p = parser("texture_sampled_2d");
+  auto p = parser("texture_sampled_2d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, SampledTextureType_2d_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_2dArray_Old) {
-  auto* p = parser("texture_sampled_2d_array");
+  auto p = parser("texture_sampled_2d_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_3d_Old) {
-  auto* p = parser("texture_sampled_3d");
+  auto p = parser("texture_sampled_3d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, SampledTextureType_3d_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_Cube_Old) {
-  auto* p = parser("texture_sampled_cube");
+  auto p = parser("texture_sampled_cube");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, SampledTextureType_Cube_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_kCubeArray_Old) {
-  auto* p = parser("texture_sampled_cube_array");
+  auto p = parser("texture_sampled_cube_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, SampledTextureType_kCubeArray_Old) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_1d) {
-  auto* p = parser("texture_1d");
+  auto p = parser("texture_1d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -103,7 +103,7 @@ TEST_F(ParserImplTest, SampledTextureType_1d) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_1dArray) {
-  auto* p = parser("texture_1d_array");
+  auto p = parser("texture_1d_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, SampledTextureType_1dArray) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_2d) {
-  auto* p = parser("texture_2d");
+  auto p = parser("texture_2d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, SampledTextureType_2d) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_2dArray) {
-  auto* p = parser("texture_2d_array");
+  auto p = parser("texture_2d_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -130,7 +130,7 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_3d) {
-  auto* p = parser("texture_3d");
+  auto p = parser("texture_3d");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, SampledTextureType_3d) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_Cube) {
-  auto* p = parser("texture_cube");
+  auto p = parser("texture_cube");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -148,7 +148,7 @@ TEST_F(ParserImplTest, SampledTextureType_Cube) {
 }
 
 TEST_F(ParserImplTest, SampledTextureType_kCubeArray) {
-  auto* p = parser("texture_cube_array");
+  auto p = parser("texture_cube_array");
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);

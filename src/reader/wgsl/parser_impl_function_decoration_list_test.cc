@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
-  auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)]]");
+  auto p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(decos.errored);
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_Empty) {
-  auto* p = parser("[[]]");
+  auto p = parser("[[]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_Empty) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_Invalid) {
-  auto* p = parser("[[invalid]]");
+  auto p = parser("[[invalid]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_Invalid) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_ExtraComma) {
-  auto* p = parser("[[workgroup_size(2), ]]");
+  auto p = parser("[[workgroup_size(2), ]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_ExtraComma) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingComma) {
-  auto* p = parser("[[workgroup_size(2) workgroup_size(2)]]");
+  auto p = parser("[[workgroup_size(2) workgroup_size(2)]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_MissingComma) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
-  auto* p = parser("[[workgroup_size()]]");
+  auto p = parser("[[workgroup_size()]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, FunctionDecorationList_BadDecoration) {
 }
 
 TEST_F(ParserImplTest, FunctionDecorationList_MissingRightAttr) {
-  auto* p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
+  auto p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);

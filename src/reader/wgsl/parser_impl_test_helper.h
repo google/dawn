@@ -35,20 +35,14 @@ class ParserImplTest : public testing::Test {
   ParserImplTest();
   ~ParserImplTest() override;
 
-  /// Sets up the test helper
-  void SetUp() override;
-
-  /// Tears down the test helper
-  void TearDown() override;
-
   /// Retrieves the parser from the helper
   /// @param str the string to parse
   /// @returns the parser implementation
-  ParserImpl* parser(const std::string& str) {
+  std::unique_ptr<ParserImpl> parser(const std::string& str) {
     auto file = std::make_unique<Source::File>("test.wgsl", str);
-    impl_ = std::make_unique<ParserImpl>(&ctx_, file.get());
+    auto impl = std::make_unique<ParserImpl>(&ctx_, file.get());
     files_.emplace_back(std::move(file));
-    return impl_.get();
+    return impl;
   }
 
   /// @returns the type manager
@@ -56,7 +50,6 @@ class ParserImplTest : public testing::Test {
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
-  std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
 };
 
@@ -68,23 +61,14 @@ class ParserImplTestWithParam : public testing::TestWithParam<T> {
   ParserImplTestWithParam() = default;
   ~ParserImplTestWithParam() override = default;
 
-  /// Sets up the test helper
-  void SetUp() override { ctx_.Reset(); }
-
-  /// Tears down the test helper
-  void TearDown() override {
-    impl_ = nullptr;
-    files_.clear();
-  }
-
   /// Retrieves the parser from the helper
   /// @param str the string to parse
   /// @returns the parser implementation
-  ParserImpl* parser(const std::string& str) {
+  std::unique_ptr<ParserImpl> parser(const std::string& str) {
     auto file = std::make_unique<Source::File>("test.wgsl", str);
-    impl_ = std::make_unique<ParserImpl>(&ctx_, file.get());
+    auto impl = std::make_unique<ParserImpl>(&ctx_, file.get());
     files_.emplace_back(std::move(file));
-    return impl_.get();
+    return impl;
   }
 
   /// @returns the type manager
@@ -92,7 +76,7 @@ class ParserImplTestWithParam : public testing::TestWithParam<T> {
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
-  std::unique_ptr<ParserImpl> impl_;
+  std::unique_ptr<ParserImpl> impl;
   Context ctx_;
 };
 

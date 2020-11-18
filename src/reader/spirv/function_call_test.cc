@@ -30,7 +30,7 @@ using ::testing::Eq;
 using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
 
@@ -68,7 +68,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -88,7 +88,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   {
-    FunctionEmitter fe(p, *spirv_function(100));
+    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   VariableConst{
@@ -109,7 +109,7 @@ Return{})"))
   }
 
   {
-    FunctionEmitter fe(p, *spirv_function(50));
+    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
   {
@@ -120,7 +120,7 @@ Return{})"))
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -144,7 +144,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   {
-    FunctionEmitter fe(p, *spirv_function(100));
+    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
@@ -179,7 +179,7 @@ Return{})"))
         << ToString(fe.ast_body());
   }
   {
-    FunctionEmitter fe(p, *spirv_function(50));
+    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
   {
@@ -190,7 +190,7 @@ Return{})"))
 }
 
 TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0

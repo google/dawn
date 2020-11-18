@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ImageStorageType_Invalid) {
-  auto* p = parser("1234");
+  auto p = parser("1234");
   auto t = p->expect_image_storage_type("test");
   EXPECT_TRUE(t.errored);
   EXPECT_TRUE(p->has_error());
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, ImageStorageType_Invalid) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R8Unorm) {
-  auto* p = parser("r8unorm");
+  auto p = parser("r8unorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR8Unorm);
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, ImageStorageType_R8Unorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R8Snorm) {
-  auto* p = parser("r8snorm");
+  auto p = parser("r8snorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR8Snorm);
@@ -47,7 +47,7 @@ TEST_F(ParserImplTest, ImageStorageType_R8Snorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R8Uint) {
-  auto* p = parser("r8uint");
+  auto p = parser("r8uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR8Uint);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, ImageStorageType_R8Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R8Sint) {
-  auto* p = parser("r8sint");
+  auto p = parser("r8sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR8Sint);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, ImageStorageType_R8Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R16Uint) {
-  auto* p = parser("r16uint");
+  auto p = parser("r16uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR16Uint);
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, ImageStorageType_R16Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R16Sint) {
-  auto* p = parser("r16sint");
+  auto p = parser("r16sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR16Sint);
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, ImageStorageType_R16Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R16Float) {
-  auto* p = parser("r16float");
+  auto p = parser("r16float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR16Float);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, ImageStorageType_R16Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg8Unorm) {
-  auto* p = parser("rg8unorm");
+  auto p = parser("rg8unorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg8Unorm);
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg8Unorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg8Snorm) {
-  auto* p = parser("rg8snorm");
+  auto p = parser("rg8snorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg8Snorm);
@@ -103,7 +103,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg8Snorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg8Uint) {
-  auto* p = parser("rg8uint");
+  auto p = parser("rg8uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg8Uint);
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg8Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg8Sint) {
-  auto* p = parser("rg8sint");
+  auto p = parser("rg8sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg8Sint);
@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg8Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R32Uint) {
-  auto* p = parser("r32uint");
+  auto p = parser("r32uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR32Uint);
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R32Sint) {
-  auto* p = parser("r32sint");
+  auto p = parser("r32sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR32Sint);
@@ -135,7 +135,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_R32Float) {
-  auto* p = parser("r32float");
+  auto p = parser("r32float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kR32Float);
@@ -143,7 +143,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg16Uint) {
-  auto* p = parser("rg16uint");
+  auto p = parser("rg16uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg16Uint);
@@ -151,7 +151,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg16Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg16Sint) {
-  auto* p = parser("rg16sint");
+  auto p = parser("rg16sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg16Sint);
@@ -159,7 +159,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg16Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg16Float) {
-  auto* p = parser("rg16float");
+  auto p = parser("rg16float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg16Float);
@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg16Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba8Unorm) {
-  auto* p = parser("rgba8unorm");
+  auto p = parser("rgba8unorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba8Unorm);
@@ -175,7 +175,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Unorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba8UnormSrgb) {
-  auto* p = parser("rgba8unorm_srgb");
+  auto p = parser("rgba8unorm_srgb");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba8UnormSrgb);
@@ -183,7 +183,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8UnormSrgb) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba8Snorm) {
-  auto* p = parser("rgba8snorm");
+  auto p = parser("rgba8snorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba8Snorm);
@@ -191,7 +191,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Snorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba8Uint) {
-  auto* p = parser("rgba8uint");
+  auto p = parser("rgba8uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba8Uint);
@@ -199,7 +199,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba8Sint) {
-  auto* p = parser("rgba8sint");
+  auto p = parser("rgba8sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba8Sint);
@@ -207,7 +207,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Bgra8Unorm) {
-  auto* p = parser("bgra8unorm");
+  auto p = parser("bgra8unorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kBgra8Unorm);
@@ -215,7 +215,7 @@ TEST_F(ParserImplTest, ImageStorageType_Bgra8Unorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Bgra8UnormSrgb) {
-  auto* p = parser("bgra8unorm_srgb");
+  auto p = parser("bgra8unorm_srgb");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kBgra8UnormSrgb);
@@ -223,7 +223,7 @@ TEST_F(ParserImplTest, ImageStorageType_Bgra8UnormSrgb) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgb10A2Unorm) {
-  auto* p = parser("rgb10a2unorm");
+  auto p = parser("rgb10a2unorm");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgb10A2Unorm);
@@ -231,7 +231,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgb10A2Unorm) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg11B10Float) {
-  auto* p = parser("rg11b10float");
+  auto p = parser("rg11b10float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg11B10Float);
@@ -239,7 +239,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg11B10Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg32Uint) {
-  auto* p = parser("rg32uint");
+  auto p = parser("rg32uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg32Uint);
@@ -247,7 +247,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg32Sint) {
-  auto* p = parser("rg32sint");
+  auto p = parser("rg32sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg32Sint);
@@ -255,7 +255,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rg32Float) {
-  auto* p = parser("rg32float");
+  auto p = parser("rg32float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRg32Float);
@@ -263,7 +263,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba16Uint) {
-  auto* p = parser("rgba16uint");
+  auto p = parser("rgba16uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba16Uint);
@@ -271,7 +271,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba16Sint) {
-  auto* p = parser("rgba16sint");
+  auto p = parser("rgba16sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba16Sint);
@@ -279,7 +279,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba16Float) {
-  auto* p = parser("rgba16float");
+  auto p = parser("rgba16float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba16Float);
@@ -287,7 +287,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Float) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba32Uint) {
-  auto* p = parser("rgba32uint");
+  auto p = parser("rgba32uint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba32Uint);
@@ -295,7 +295,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba32Uint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba32Sint) {
-  auto* p = parser("rgba32sint");
+  auto p = parser("rgba32sint");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba32Sint);
@@ -303,7 +303,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba32Sint) {
 }
 
 TEST_F(ParserImplTest, ImageStorageType_Rgba32Float) {
-  auto* p = parser("rgba32float");
+  auto p = parser("rgba32float");
   auto t = p->expect_image_storage_type("test");
   EXPECT_FALSE(t.errored);
   EXPECT_EQ(t.value, ast::type::ImageFormat::kRgba32Float);

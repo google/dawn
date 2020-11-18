@@ -21,15 +21,6 @@ ParserImplTest::ParserImplTest() = default;
 
 ParserImplTest::~ParserImplTest() = default;
 
-void ParserImplTest::SetUp() {
-  ctx_.Reset();
-}
-
-void ParserImplTest::TearDown() {
-  impl_ = nullptr;
-  files_.clear();
-}
-
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

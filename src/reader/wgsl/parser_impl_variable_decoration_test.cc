@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecoration_Location) {
-  auto* p = parser("location(4)");
+  auto p = parser("location(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
-  auto* p = parser("location 4)");
+  auto p = parser("location 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
-  auto* p = parser("location(4");
+  auto p = parser("location(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
-  auto* p = parser("location()");
+  auto p = parser("location()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
-  auto* p = parser("location(nan)");
+  auto p = parser("location(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -95,7 +95,7 @@ class BuiltinTest : public ParserImplTestWithParam<BuiltinData> {};
 
 TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   auto params = GetParam();
-  auto* p = parser(std::string("builtin(") + params.input + ")");
+  auto p = parser(std::string("builtin(") + params.input + ")");
 
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
@@ -125,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kGlobalInvocationId}));
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
-  auto* p = parser("builtin position)");
+  auto p = parser("builtin position)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -135,7 +135,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
-  auto* p = parser("builtin(position");
+  auto p = parser("builtin(position");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -145,7 +145,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
-  auto* p = parser("builtin()");
+  auto p = parser("builtin()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -155,7 +155,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
-  auto* p = parser("builtin(other_thingy)");
+  auto p = parser("builtin(other_thingy)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
-  auto* p = parser("builtin(3)");
+  auto p = parser("builtin(3)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -175,7 +175,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding) {
-  auto* p = parser("binding(4)");
+  auto p = parser("binding(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
@@ -190,7 +190,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
-  auto* p = parser("binding 4)");
+  auto p = parser("binding 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -200,7 +200,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
-  auto* p = parser("binding(4");
+  auto p = parser("binding(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -210,7 +210,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
-  auto* p = parser("binding()");
+  auto p = parser("binding()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
-  auto* p = parser("binding(nan)");
+  auto p = parser("binding(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -232,7 +232,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_set) {
-  auto* p = parser("set(4)");
+  auto p = parser("set(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
@@ -247,7 +247,7 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
-  auto* p = parser("set 2)");
+  auto p = parser("set 2)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -257,7 +257,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
-  auto* p = parser("set(2");
+  auto p = parser("set(2");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -267,7 +267,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
-  auto* p = parser("set()");
+  auto p = parser("set()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -278,7 +278,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
-  auto* p = parser("set(nan)");
+  auto p = parser("set(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);

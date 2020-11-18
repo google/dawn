@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
-  auto* p = parser(R"({
+  auto p = parser(R"({
   discard;
   return 1 + b / 2;
 })");
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, BodyStmt) {
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
-  auto* p = parser("{}");
+  auto p = parser("{}");
   auto e = p->expect_body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, BodyStmt_Empty) {
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
-  auto* p = parser("{fn main() -> void {}}");
+  auto p = parser("{fn main() -> void {}}");
   auto e = p->expect_body_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
 }
 
 TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
-  auto* p = parser("{return;");
+  auto p = parser("{return;");
   auto e = p->expect_body_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);

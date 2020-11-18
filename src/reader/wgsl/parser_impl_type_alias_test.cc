@@ -29,7 +29,7 @@ namespace {
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto* p = parser("type a = i32");
+  auto p = parser("type a = i32");
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   ast::type::StructType str("B", {});
 
-  auto* p = parser("type a = B");
+  auto p = parser("type a = B");
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
-  auto* p = parser("type = i32");
+  auto p = parser("type = i32");
   auto t = p->type_alias();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
-  auto* p = parser("type 123 = i32");
+  auto p = parser("type 123 = i32");
   auto t = p->type_alias();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
-  auto* p = parser("type a i32");
+  auto p = parser("type a i32");
   auto t = p->type_alias();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidType) {
-  auto* p = parser("type a = B");
+  auto p = parser("type a = B");
   auto t = p->type_alias();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);

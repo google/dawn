@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, EqualityExpression_Parses_Equal) {
-  auto* p = parser("a == true");
+  auto p = parser("a == true");
   auto e = p->equality_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, EqualityExpression_Parses_Equal) {
 }
 
 TEST_F(ParserImplTest, EqualityExpression_Parses_NotEqual) {
-  auto* p = parser("a != true");
+  auto p = parser("a != true");
   auto e = p->equality_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, EqualityExpression_Parses_NotEqual) {
 }
 
 TEST_F(ParserImplTest, EqualityExpression_InvalidLHS) {
-  auto* p = parser("if (a) {} == true");
+  auto p = parser("if (a) {} == true");
   auto e = p->equality_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, EqualityExpression_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, EqualityExpression_InvalidRHS) {
-  auto* p = parser("true == if (a) {}");
+  auto p = parser("true == if (a) {}");
   auto e = p->equality_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, EqualityExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, EqualityExpression_NoOr_ReturnsLHS) {
-  auto* p = parser("a true");
+  auto p = parser("a true");
   auto e = p->equality_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

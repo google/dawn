@@ -29,7 +29,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
-  auto* p = parser("a[1]");
+  auto p = parser("a[1]");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
-  auto* p = parser("a[1 + b / 4]");
+  auto p = parser("a[1 + b / 4]");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
-  auto* p = parser("a[]");
+  auto p = parser("a[]");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
-  auto* p = parser("a[1");
+  auto p = parser("a[1");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
-  auto* p = parser("a[if(a() {})]");
+  auto p = parser("a[if(a() {})]");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -99,7 +99,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
-  auto* p = parser("a()");
+  auto p = parser("a()");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
-  auto* p = parser("test(1, b, 2 + 3 / b)");
+  auto p = parser("test(1, b, 2 + 3 / b)");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
-  auto* p = parser("a(if(a) {})");
+  auto p = parser("a(if(a) {})");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -148,7 +148,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
-  auto* p = parser("a(b, )");
+  auto p = parser("a(b, )");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -158,7 +158,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
-  auto* p = parser("a(");
+  auto p = parser("a(");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -168,7 +168,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
-  auto* p = parser("a.b");
+  auto p = parser("a.b");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -185,7 +185,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
-  auto* p = parser("a.if");
+  auto p = parser("a.if");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -195,7 +195,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
-  auto* p = parser("a.");
+  auto p = parser("a.");
   auto e = p->postfix_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -205,7 +205,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
-  auto* p = parser("a b");
+  auto p = parser("a b");
   auto e = p->postfix_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

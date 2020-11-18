@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructDecl_Parses) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 struct S {
   a : i32;
   [[offset(4)]] b : f32;
@@ -45,7 +45,7 @@ struct S {
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 [[block]] struct B {
   a : f32;
   b : f32;
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 [[block]]
 [[block]] struct S {
   a : f32;
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
-  auto* p = parser("struct S {}");
+  auto p = parser("struct S {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -110,7 +110,7 @@ TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingIdent) {
-  auto* p = parser("struct {}");
+  auto p = parser("struct {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -126,7 +126,7 @@ TEST_F(ParserImplTest, StructDecl_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
-  auto* p = parser("struct S }");
+  auto p = parser("struct S }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -142,7 +142,7 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
-  auto* p = parser("struct S { a : B; }");
+  auto p = parser("struct S { a : B; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -158,7 +158,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
-  auto* p = parser("[[block struct S { a : i32; }");
+  auto p = parser("[[block struct S { a : i32; }");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -173,7 +173,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
-  auto* p = parser("[[block]] S {}");
+  auto p = parser("[[block]] S {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);

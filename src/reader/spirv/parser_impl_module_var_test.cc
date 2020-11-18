@@ -64,7 +64,7 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
-  auto* p = parser(test::Assemble(""));
+  auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
@@ -72,7 +72,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_NotAWebGPUStorageClass) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
     %52 = OpVariable %ptr CrossWorkgroup
@@ -86,7 +86,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_NotAWebGPUStorageClass) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_Function) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Function %float
     %52 = OpVariable %ptr Function
@@ -102,7 +102,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_Function) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float
     %3 = OpTypePointer Private %fn_ty
@@ -118,7 +118,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_NonPointerType) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %5 = OpTypeFunction %float
     %3 = OpTypePointer Private %5
@@ -132,7 +132,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonPointerType) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
     %52 = OpVariable %ptr Workgroup
@@ -150,7 +150,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpName %52 "the_counter"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
@@ -169,7 +169,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpName %52 "my_own_private_idaho"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Private %float
@@ -188,7 +188,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVertexIndex) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %52 BuiltIn VertexIndex
     %uint = OpTypeInt 32 0
     %ptr = OpTypePointer Input %uint
@@ -236,7 +236,7 @@ std::string PerVertexPreamble() {
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_MapsToModuleScopeVec4Var) {
   // In Vulkan SPIR-V, Position is the first member of gl_PerVertex
   const std::string assembly = PerVertexPreamble();
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
 
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
@@ -272,7 +272,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
   EXPECT_THAT(p->error(), Eq("storing to the whole per-vertex structure is not "
                              "supported: OpStore %1 %9"))
@@ -288,7 +288,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
   EXPECT_THAT(p->error(), Eq("operations producing a per-vertex structure are "
                              "not supported: %1000 = OpUndef %10"))
@@ -304,7 +304,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(), Eq("operations producing a per-vertex structure are "
                              "not supported: %1000 = OpUndef %11"))
@@ -323,7 +323,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -354,7 +354,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -385,7 +385,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -415,7 +415,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_NotSupported) {
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(), Eq("accessing per-vertex member 1 is not supported. "
                              "Only Position is supported"));
@@ -435,7 +435,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinClipDistance_NotSupported) {
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(), Eq("accessing per-vertex member 2 is not supported. "
                              "Only Position is supported"));
@@ -455,7 +455,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinCullDistance_NotSupported) {
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(), Eq("accessing per-vertex member 3 is not supported. "
                              "Only Position is supported"));
@@ -474,7 +474,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPerVertex_MemberIndex_NotConstant) {
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("first index of access chain into per-vertex structure is not "
@@ -495,7 +495,7 @@ TEST_F(SpvParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("first index of access chain into per-vertex structure is not "
@@ -503,7 +503,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %1 = OpVariable %ptr_bool Private %true
      %2 = OpVariable %ptr_bool Private %false
      %3 = OpVariable %ptr_int Private %int_m1
@@ -556,7 +556,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -605,7 +605,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %undef_bool = OpUndef %bool
      %undef_int = OpUndef %int
      %undef_uint = OpUndef %uint
@@ -654,7 +654,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -678,7 +678,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpConstantNull %v2bool
      %200 = OpVariable %ptr Private %const
@@ -701,7 +701,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpUndef %v2bool
      %200 = OpVariable %ptr Private %const
@@ -724,7 +724,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpConstantNull %v2uint
      %200 = OpVariable %ptr Private %const
@@ -747,7 +747,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpUndef %v2uint
      %200 = OpVariable %ptr Private %const
@@ -770,7 +770,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpConstantNull %v2int
      %200 = OpVariable %ptr Private %const
@@ -793,7 +793,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpUndef %v2int
      %200 = OpVariable %ptr Private %const
@@ -816,7 +816,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpConstantNull %v2float
      %200 = OpVariable %ptr Private %const
@@ -839,7 +839,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpUndef %v2float
      %200 = OpVariable %ptr Private %const
@@ -862,7 +862,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -904,7 +904,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpConstantNull %m3v2float
      %200 = OpVariable %ptr Private %const
@@ -940,7 +940,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpUndef %m3v2float
      %200 = OpVariable %ptr Private %const
@@ -976,7 +976,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -1000,7 +1000,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpConstantNull %arr2uint
      %200 = OpVariable %ptr Private %const
@@ -1023,7 +1023,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpUndef %arr2uint
      %200 = OpVariable %ptr Private %const
@@ -1046,7 +1046,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -1077,7 +1077,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpConstantNull %strct
      %200 = OpVariable %ptr Private %const
@@ -1106,7 +1106,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpUndef %strct
      %200 = OpVariable %ptr Private %const
@@ -1135,7 +1135,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_LocationDecoration_Valid) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Location 3
 )" + CommonTypes() + R"(
@@ -1186,7 +1186,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 3
      OpDecorate %strct Block
@@ -1240,7 +1240,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Binding 3
      OpDecorate %strct Block
@@ -1295,7 +1295,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(SpvParserTest,
        ModuleScopeVar_StructMember_NonReadableDecoration_Dropped) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %strct Block
      OpMemberDecorate %strct 0 NonReadable
@@ -1322,7 +1322,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 ColMajor
@@ -1351,7 +1351,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 MatrixStride 8
@@ -1380,7 +1380,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 RowMajor
@@ -1401,7 +1401,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
 
 TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_AllMembers) {
   // Variable should have access(read)
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 NonWritable
@@ -1431,7 +1431,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_AllMembers) {
 
 TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers) {
   // Variable should have access(read_write)
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 NonWritable
@@ -1462,7 +1462,7 @@ TEST_F(
     SpvParserTest,
     ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
   // Variable should have access(read_write)
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 NonWritable
@@ -1491,7 +1491,7 @@ TEST_F(
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %bool = OpTypeBool
@@ -1516,7 +1516,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %bool = OpTypeBool
@@ -1541,7 +1541,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %uint = OpTypeInt 32 0
@@ -1566,7 +1566,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %int = OpTypeInt 32 1
@@ -1591,7 +1591,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %float = OpTypeFloat 32
@@ -1618,7 +1618,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
 TEST_F(SpvParserTest,
        ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
   // When we don't have a spec ID, declare an undecorated module-scope constant.
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      %float = OpTypeFloat 32
      %c = OpSpecConstant %float 2.5
@@ -1639,7 +1639,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      %float = OpTypeFloat 32
      %c = OpSpecConstant %float 2.5
@@ -1651,7 +1651,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty());
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(

@@ -36,31 +36,24 @@ class SpvParserTestBase : public T {
   SpvParserTestBase() = default;
   ~SpvParserTestBase() override = default;
 
-  /// Sets up the test helper
-  void SetUp() override { ctx_.Reset(); }
-
-  /// Tears down the test helper
-  void TearDown() override { impl_ = nullptr; }
-
   /// Retrieves the parser from the helper
   /// @param input the SPIR-V binary to parse
   /// @returns a parser for the given binary
-  ParserImpl* parser(const std::vector<uint32_t>& input) {
-    impl_ = std::make_unique<ParserImpl>(&ctx_, input);
-    return impl_.get();
+  std::unique_ptr<ParserImpl> parser(const std::vector<uint32_t>& input) {
+    return std::make_unique<ParserImpl>(&ctx_, input);
   }
 
   /// Gets the internal representation of the function with the given ID.
   /// Assumes ParserImpl::BuildInternalRepresentation has been run and
   /// succeeded.
+  /// @param parser the parser
   /// @param id the SPIR-V ID of the function
   /// @returns the internal representation of the function
-  spvtools::opt::Function* spirv_function(uint32_t id) {
-    return impl_->ir_context()->GetFunction(id);
+  spvtools::opt::Function* spirv_function(ParserImpl* parser, uint32_t id) {
+    return parser->ir_context()->GetFunction(id);
   }
 
  private:
-  std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
 };
 

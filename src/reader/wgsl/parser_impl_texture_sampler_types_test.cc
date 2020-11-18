@@ -25,7 +25,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_Invalid) {
-  auto* p = parser("1234");
+  auto p = parser("1234");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Invalid) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
-  auto* p = parser("sampler");
+  auto p = parser("sampler");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
-  auto* p = parser("sampler_comparison");
+  auto p = parser("sampler_comparison");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
-  auto* p = parser("texture_depth_2d");
+  auto p = parser("texture_depth_2d");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
-  auto* p = parser("texture_sampled_1d<f32>");
+  auto p = parser("texture_sampled_1d<f32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
-  auto* p = parser("texture_sampled_2d<i32>");
+  auto p = parser("texture_sampled_2d<i32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
-  auto* p = parser("texture_sampled_3d<u32>");
+  auto p = parser("texture_sampled_3d<u32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -107,7 +107,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid_Old) {
-  auto* p = parser("texture_sampled_1d<abc>");
+  auto p = parser("texture_sampled_1d<abc>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType_Old) {
-  auto* p = parser("texture_sampled_1d<>");
+  auto p = parser("texture_sampled_1d<>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan_Old) {
-  auto* p = parser("texture_sampled_1d");
+  auto p = parser("texture_sampled_1d");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan_Old) {
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_SampledTexture_MissingGreaterThan_Old) {
-  auto* p = parser("texture_sampled_1d<u32");
+  auto p = parser("texture_sampled_1d<u32");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -148,7 +148,7 @@ TEST_F(ParserImplTest,
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
-  auto* p = parser("texture_1d<f32>");
+  auto p = parser("texture_1d<f32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -161,7 +161,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
-  auto* p = parser("texture_2d<i32>");
+  auto p = parser("texture_2d<i32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -174,7 +174,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
-  auto* p = parser("texture_3d<u32>");
+  auto p = parser("texture_3d<u32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -187,7 +187,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
-  auto* p = parser("texture_1d<abc>");
+  auto p = parser("texture_1d<abc>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -197,7 +197,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
-  auto* p = parser("texture_1d<>");
+  auto p = parser("texture_1d<>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -207,7 +207,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
-  auto* p = parser("texture_1d");
+  auto p = parser("texture_1d");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -217,7 +217,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
-  auto* p = parser("texture_1d<u32");
+  auto p = parser("texture_1d<u32");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -227,7 +227,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
-  auto* p = parser("texture_multisampled_2d<i32>");
+  auto p = parser("texture_multisampled_2d<i32>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -240,7 +240,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
-  auto* p = parser("texture_multisampled_2d<abc>");
+  auto p = parser("texture_multisampled_2d<abc>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -250,7 +250,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
-  auto* p = parser("texture_multisampled_2d<>");
+  auto p = parser("texture_multisampled_2d<>");
   auto t = p->texture_sampler_types();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
@@ -261,7 +261,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_MultisampledTexture_MissingLessThan) {
-  auto* p = parser("texture_multisampled_2d");
+  auto p = parser("texture_multisampled_2d");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -271,7 +271,7 @@ TEST_F(ParserImplTest,
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_MultisampledTexture_MissingGreaterThan) {
-  auto* p = parser("texture_multisampled_2d<u32");
+  auto p = parser("texture_multisampled_2d<u32");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -281,7 +281,7 @@ TEST_F(ParserImplTest,
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm_Old) {
-  auto* p = parser("texture_ro_1d<r8unorm>");
+  auto p = parser("texture_ro_1d<r8unorm>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -298,7 +298,7 @@ TEST_F(ParserImplTest,
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Writeonly2dR16Float_Old) {
-  auto* p = parser("texture_wo_2d<r16float>");
+  auto p = parser("texture_wo_2d<r16float>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -314,7 +314,7 @@ TEST_F(ParserImplTest,
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType_Old) {
-  auto* p = parser("texture_ro_1d<abc>");
+  auto p = parser("texture_ro_1d<abc>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -323,7 +323,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType_Old) {
-  auto* p = parser("texture_wo_1d<>");
+  auto p = parser("texture_wo_1d<>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -332,7 +332,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType_Old) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan_Old) {
-  auto* p = parser("texture_ro_1d");
+  auto p = parser("texture_ro_1d");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -342,7 +342,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan_Old) {
 
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_MissingGreaterThan_Old) {
-  auto* p = parser("texture_wo_1d<r8unorm");
+  auto p = parser("texture_wo_1d<r8unorm");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -351,7 +351,7 @@ TEST_F(ParserImplTest,
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
-  auto* p = parser("texture_storage_ro_1d<r8unorm>");
+  auto p = parser("texture_storage_ro_1d<r8unorm>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -367,7 +367,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
-  auto* p = parser("texture_storage_wo_2d<r16float>");
+  auto p = parser("texture_storage_wo_2d<r16float>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
@@ -383,7 +383,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
-  auto* p = parser("texture_storage_ro_1d<abc>");
+  auto p = parser("texture_storage_ro_1d<abc>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -392,7 +392,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
-  auto* p = parser("texture_storage_ro_1d<>");
+  auto p = parser("texture_storage_ro_1d<>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -401,7 +401,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
-  auto* p = parser("texture_storage_ro_1d");
+  auto p = parser("texture_storage_ro_1d");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -410,7 +410,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
-  auto* p = parser("texture_storage_ro_1d<r8unorm");
+  auto p = parser("texture_storage_ro_1d<r8unorm");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);

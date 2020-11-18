@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
-  auto* p = parser("offset(4)");
+  auto p = parser("offset(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
-  auto* p = parser("offset 4)");
+  auto p = parser("offset 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
-  auto* p = parser("offset(4");
+  auto p = parser("offset(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
-  auto* p = parser("offset()");
+  auto p = parser("offset()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
-  auto* p = parser("offset(nan)");
+  auto p = parser("offset(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);

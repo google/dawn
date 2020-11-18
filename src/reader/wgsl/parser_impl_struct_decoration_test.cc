@@ -36,7 +36,7 @@ class StructDecorationTest
 
 TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
-  auto* p = parser(params.input);
+  auto p = parser(params.input);
 
   auto deco = p->decoration();
   ASSERT_FALSE(p->has_error());
@@ -52,7 +52,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          testing::Values(StructDecorationData{"block", true}));
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
-  auto* p = parser("not-a-stage");
+  auto p = parser("not-a-stage");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_FALSE(deco.errored);

@@ -27,7 +27,7 @@ class ParserImplErrorTest : public ParserImplTest {};
   do {                                                               \
     std::string source = SOURCE;                                     \
     std::string expected = EXPECTED;                                 \
-    auto* p = parser(source);                                        \
+    auto p = parser(source);                                         \
     EXPECT_EQ(false, p->Parse());                                    \
     EXPECT_EQ(true, p->diagnostics().contains_errors());             \
     EXPECT_EQ(expected, diag::Formatter().format(p->diagnostics())); \

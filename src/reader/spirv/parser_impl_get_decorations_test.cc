@@ -27,7 +27,7 @@ using ::testing::Eq;
 using ::testing::UnorderedElementsAre;
 
 TEST_F(SpvParserTest, GetDecorationsFor_NotAnId) {
-  auto* p = parser(test::Assemble(""));
+  auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   auto decorations = p->GetDecorationsFor(42);
   EXPECT_TRUE(decorations.empty());
@@ -35,7 +35,7 @@ TEST_F(SpvParserTest, GetDecorationsFor_NotAnId) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsFor_NoDecorations) {
-  auto* p = parser(test::Assemble("%1 = OpTypeVoid"));
+  auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   auto decorations = p->GetDecorationsFor(1);
   EXPECT_TRUE(decorations.empty());
@@ -43,7 +43,7 @@ TEST_F(SpvParserTest, GetDecorationsFor_NoDecorations) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsFor_OneDecoration) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %10 Block
     %float = OpTypeFloat 32
     %10 = OpTypeStruct %float
@@ -56,7 +56,7 @@ TEST_F(SpvParserTest, GetDecorationsFor_OneDecoration) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsFor_MultiDecoration) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %5 RelaxedPrecision
     OpDecorate %5 Location 7      ; Invalid case made up for test
     %float = OpTypeFloat 32
@@ -71,7 +71,7 @@ TEST_F(SpvParserTest, GetDecorationsFor_MultiDecoration) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsForMember_NotAnId) {
-  auto* p = parser(test::Assemble(""));
+  auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   auto decorations = p->GetDecorationsForMember(42, 9);
   EXPECT_TRUE(decorations.empty());
@@ -79,7 +79,7 @@ TEST_F(SpvParserTest, GetDecorationsForMember_NotAnId) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsForMember_NotAStruct) {
-  auto* p = parser(test::Assemble("%1 = OpTypeVoid"));
+  auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   auto decorations = p->GetDecorationsFor(1);
   EXPECT_TRUE(decorations.empty());
@@ -87,7 +87,7 @@ TEST_F(SpvParserTest, GetDecorationsForMember_NotAStruct) {
 }
 
 TEST_F(SpvParserTest, GetDecorationsForMember_MemberWithoutDecoration) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %10 = OpTypeStruct %uint
   )"));
@@ -99,7 +99,7 @@ TEST_F(SpvParserTest, GetDecorationsForMember_MemberWithoutDecoration) {
 
 // TODO(dneto): Enable when ArrayStride is handled
 TEST_F(SpvParserTest, DISABLED_GetDecorationsForMember_OneDecoration) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpMemberDecorate %10 1 ArrayStride 12
     %uint = OpTypeInt 32 0
     %uint_2 = OpConstant %uint 2
@@ -117,7 +117,7 @@ TEST_F(SpvParserTest, DISABLED_GetDecorationsForMember_OneDecoration) {
 // crbug.com/tint/30 for ArrayStride
 // crbug.com/tint/31 for matrix layout
 TEST_F(SpvParserTest, DISABLED_GetDecorationsForMember_MultiDecoration) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpMemberDecorate %50 1 RelaxedPrecision
     OpMemberDecorate %50 2 ArrayStride 16
     OpMemberDecorate %50 2 MatrixStride 8

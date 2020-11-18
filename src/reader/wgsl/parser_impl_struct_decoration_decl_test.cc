@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
-  auto* p = parser("[[block]]");
+  auto p = parser("[[block]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(decos.errored);
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
-  auto* p = parser("[[block");
+  auto p = parser("[[block");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
-  auto* p = parser("[[invalid]]");
+  auto p = parser("[[invalid]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);

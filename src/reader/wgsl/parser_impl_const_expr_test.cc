@@ -27,7 +27,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
-  auto* p = parser("vec2<f32>(1., 2.)");
+  auto p = parser("vec2<f32>(1., 2.)");
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
-  auto* p = parser("vec2<f32>(1., 2.");
+  auto p = parser("vec2<f32>(1., 2.");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
-  auto* p = parser("vec2<f32> 1., 2.)");
+  auto p = parser("vec2<f32> 1., 2.)");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
-  auto* p = parser("vec2<f32>(1.,)");
+  auto p = parser("vec2<f32>(1.,)");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
-  auto* p = parser("vec2<f32>(1. 2.");
+  auto p = parser("vec2<f32>(1. 2.");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
-  auto* p = parser("vec2<f32>()");
+  auto p = parser("vec2<f32>()");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
-  auto* p = parser("vec2<f32>(1., if(a) {})");
+  auto p = parser("vec2<f32>(1., if(a) {})");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -109,7 +109,7 @@ TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
-  auto* p = parser("true");
+  auto p = parser("true");
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
@@ -122,7 +122,7 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
-  auto* p = parser("invalid");
+  auto p = parser("invalid");
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, ConstExpr_Recursion) {
   for (size_t i = 0; i < 200; i++) {
     out << ")";
   }
-  auto* p = parser(out.str());
+  auto p = parser(out.str());
   auto e = p->expect_const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);

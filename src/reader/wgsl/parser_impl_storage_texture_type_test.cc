@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StorageTextureType_Invalid) {
-  auto* p = parser("abc");
+  auto p = parser("abc");
   auto t = p->storage_texture_type();
   EXPECT_FALSE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, StorageTextureType_Invalid) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Readonly1d_Old) {
-  auto* p = parser("texture_ro_1d");
+  auto p = parser("texture_ro_1d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly1d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Readonly1dArray_Old) {
-  auto* p = parser("texture_ro_1d_array");
+  auto p = parser("texture_ro_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly1dArray_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Readonly2d_Old) {
-  auto* p = parser("texture_ro_2d");
+  auto p = parser("texture_ro_2d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly2d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Readonly2dArray_Old) {
-  auto* p = parser("texture_ro_2d_array");
+  auto p = parser("texture_ro_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly2dArray_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Readonly3d_Old) {
-  auto* p = parser("texture_ro_3d");
+  auto p = parser("texture_ro_3d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, StorageTextureType_Readonly3d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Writeonly1d_Old) {
-  auto* p = parser("texture_wo_1d");
+  auto p = parser("texture_wo_1d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly1d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Writeonly1dArray_Old) {
-  auto* p = parser("texture_wo_1d_array");
+  auto p = parser("texture_wo_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -101,7 +101,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly1dArray_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Writeonly2d_Old) {
-  auto* p = parser("texture_wo_2d");
+  auto p = parser("texture_wo_2d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly2d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Writeonly2dArray_Old) {
-  auto* p = parser("texture_wo_2d_array");
+  auto p = parser("texture_wo_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly2dArray_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_Writeonly3d_Old) {
-  auto* p = parser("texture_wo_3d");
+  auto p = parser("texture_wo_3d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -131,7 +131,7 @@ TEST_F(ParserImplTest, StorageTextureType_Writeonly3d_Old) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_ro_1d) {
-  auto* p = parser("texture_storage_ro_1d");
+  auto p = parser("texture_storage_ro_1d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, StorageTextureType_ro_1d) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_ro_1dArray) {
-  auto* p = parser("texture_storage_ro_1d_array");
+  auto p = parser("texture_storage_ro_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -151,7 +151,7 @@ TEST_F(ParserImplTest, StorageTextureType_ro_1dArray) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_ro_2d) {
-  auto* p = parser("texture_storage_ro_2d");
+  auto p = parser("texture_storage_ro_2d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -161,7 +161,7 @@ TEST_F(ParserImplTest, StorageTextureType_ro_2d) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_ro_2dArray) {
-  auto* p = parser("texture_storage_ro_2d_array");
+  auto p = parser("texture_storage_ro_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -171,7 +171,7 @@ TEST_F(ParserImplTest, StorageTextureType_ro_2dArray) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_ro_3d) {
-  auto* p = parser("texture_storage_ro_3d");
+  auto p = parser("texture_storage_ro_3d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -181,7 +181,7 @@ TEST_F(ParserImplTest, StorageTextureType_ro_3d) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_wo_1d) {
-  auto* p = parser("texture_storage_wo_1d");
+  auto p = parser("texture_storage_wo_1d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -191,7 +191,7 @@ TEST_F(ParserImplTest, StorageTextureType_wo_1d) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_wo_1dArray) {
-  auto* p = parser("texture_storage_wo_1d_array");
+  auto p = parser("texture_storage_wo_1d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -201,7 +201,7 @@ TEST_F(ParserImplTest, StorageTextureType_wo_1dArray) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_wo_2d) {
-  auto* p = parser("texture_storage_wo_2d");
+  auto p = parser("texture_storage_wo_2d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -211,7 +211,7 @@ TEST_F(ParserImplTest, StorageTextureType_wo_2d) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_wo_2dArray) {
-  auto* p = parser("texture_storage_wo_2d_array");
+  auto p = parser("texture_storage_wo_2d_array");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, StorageTextureType_wo_2dArray) {
 }
 
 TEST_F(ParserImplTest, StorageTextureType_wo_3d) {
-  auto* p = parser("texture_storage_wo_3d");
+  auto p = parser("texture_storage_wo_3d");
   auto t = p->storage_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);

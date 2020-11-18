@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, CaseBody_Empty) {
-  auto* p = parser("");
+  auto p = parser("");
   auto e = p->case_body();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, CaseBody_Empty) {
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
   var a: i32;
   a = 2;)");
 
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
-  auto* p = parser("a =");
+  auto p = parser("a =");
   auto e = p->case_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough) {
-  auto* p = parser("fallthrough;");
+  auto p = parser("fallthrough;");
   auto e = p->case_body();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(e.errored);
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough) {
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
-  auto* p = parser("fallthrough");
+  auto p = parser("fallthrough");
   auto e = p->case_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);

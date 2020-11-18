@@ -28,7 +28,7 @@ namespace {
 using ::testing::Eq;
 
 TEST_F(SpvParserTest, UserName_RespectOpName) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %1 "the_void_type"
      %1 = OpTypeVoid
   )"));
@@ -37,7 +37,7 @@ TEST_F(SpvParserTest, UserName_RespectOpName) {
 }
 
 TEST_F(SpvParserTest, UserName_IgnoreEmptyName) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %1 ""
      %1 = OpTypeVoid
   )"));
@@ -46,7 +46,7 @@ TEST_F(SpvParserTest, UserName_IgnoreEmptyName) {
 }
 
 TEST_F(SpvParserTest, UserName_DistinguishDuplicateSuggestion) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpName %1 "vanilla"
      OpName %2 "vanilla"
      %1 = OpTypeVoid
@@ -58,7 +58,7 @@ TEST_F(SpvParserTest, UserName_DistinguishDuplicateSuggestion) {
 }
 
 TEST_F(SpvParserTest, UserName_RespectOpMemberName) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpMemberName %3 0 "strawberry"
      OpMemberName %3 1 "vanilla"
      OpMemberName %3 2 "chocolate"
@@ -72,7 +72,7 @@ TEST_F(SpvParserTest, UserName_RespectOpMemberName) {
 }
 
 TEST_F(SpvParserTest, UserName_IgnoreEmptyMemberName) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpMemberName %3 0 ""
      %2 = OpTypeInt 32 0
      %3 = OpTypeStruct %2
@@ -82,7 +82,7 @@ TEST_F(SpvParserTest, UserName_IgnoreEmptyMemberName) {
 }
 
 TEST_F(SpvParserTest, UserName_SynthesizeMemberNames) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      %2 = OpTypeInt 32 0
      %3 = OpTypeStruct %2 %2 %2
   )"));
@@ -93,7 +93,7 @@ TEST_F(SpvParserTest, UserName_SynthesizeMemberNames) {
 }
 
 TEST_F(SpvParserTest, UserName_MemberNamesMixUserAndSynthesized) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
      OpMemberName %3 1 "vanilla"
      %2 = OpTypeInt 32 0
      %3 = OpTypeStruct %2 %2 %2

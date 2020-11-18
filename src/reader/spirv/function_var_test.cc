@@ -78,7 +78,7 @@ std::string Preamble() {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpVariable %ptr_uint Function
@@ -88,7 +88,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -116,7 +116,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
-  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
+  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -126,7 +126,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -154,7 +154,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
-  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
+  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -164,7 +164,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -192,7 +192,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
-  auto* p =
+  auto p =
       parser(test::Assemble(Names({"a", "b", "c", "d", "e"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -205,7 +205,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -262,7 +262,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
-  auto* p = parser(test::Assemble(Names({"a", "b", "c", "d"}) + Preamble() + R"(
+  auto p = parser(test::Assemble(Names({"a", "b", "c", "d"}) + Preamble() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -278,7 +278,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -325,7 +325,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -337,7 +337,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -358,7 +358,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -375,7 +375,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -409,7 +409,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -421,7 +421,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -442,7 +442,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
-  auto* p = parser(test::Assemble(
+  auto p = parser(test::Assemble(
       std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
@@ -455,7 +455,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -476,7 +476,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantNull %arr2uint
@@ -488,7 +488,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -509,7 +509,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
-  auto* p = parser(test::Assemble(
+  auto p = parser(test::Assemble(
       std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
@@ -522,7 +522,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -543,7 +543,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -556,7 +556,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -582,7 +582,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
-  auto* p = parser(test::Assemble(Preamble() + R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -595,7 +595,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
@@ -637,9 +637,9 @@ TEST_F(SpvParserTest,
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -682,9 +682,9 @@ TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -752,9 +752,9 @@ TEST_F(SpvParserTest,
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -849,9 +849,9 @@ TEST_F(
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
@@ -963,9 +963,9 @@ TEST_F(
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
@@ -1048,9 +1048,9 @@ TEST_F(SpvParserTest,
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
@@ -1133,9 +1133,9 @@ TEST_F(
      OpReturn
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
@@ -1212,9 +1212,9 @@ TEST_F(SpvParserTest,
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
@@ -1286,9 +1286,9 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
@@ -1428,9 +1428,9 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
@@ -1583,10 +1583,10 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << assembly << p->error();
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -1752,9 +1752,9 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -1872,9 +1872,9 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
 
      OpFunctionEnd
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
@@ -1978,9 +1978,9 @@ TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
                OpFunctionEnd
 
   )";
-  auto* p = parser(test::Assemble(assembly));
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p, *spirv_function(100));
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{

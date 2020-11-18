@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SwitchBody_Case) {
-  auto* p = parser("case 1: { a = 4; }");
+  auto p = parser("case 1: { a = 4; }");
   auto e = p->switch_body();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, SwitchBody_Case) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
-  auto* p = parser("case a == 4: { a = 4; }");
+  auto p = parser("case a == 4: { a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidSelector_bool) {
-  auto* p = parser("case true: { a = 4; }");
+  auto p = parser("case true: { a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidSelector_bool) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
-  auto* p = parser("case: { a = 4; }");
+  auto p = parser("case: { a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {
-  auto* p = parser("case 1 { a = 4; }");
+  auto p = parser("case 1 { a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
-  auto* p = parser("case 1: a = 4; }");
+  auto p = parser("case 1: a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
-  auto* p = parser("case 1: { a = 4; ");
+  auto p = parser("case 1: { a = 4; ");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
-  auto* p = parser("case 1: { fn main() -> void {} }");
+  auto p = parser("case 1: { fn main() -> void {} }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default) {
-  auto* p = parser("default: { a = 4; }");
+  auto p = parser("default: { a = 4; }");
   auto e = p->switch_body();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, SwitchBody_Default) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {
-  auto* p = parser("default { a = 4; }");
+  auto p = parser("default { a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
-  auto* p = parser("default: a = 4; }");
+  auto p = parser("default: a = 4; }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
-  auto* p = parser("default: { a = 4; ");
+  auto p = parser("default: { a = 4; ");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -149,7 +149,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
-  auto* p = parser("default: { fn main() -> void {} }");
+  auto p = parser("default: { fn main() -> void {} }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);

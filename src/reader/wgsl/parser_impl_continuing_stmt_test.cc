@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinuingStmt) {
-  auto* p = parser("continuing { discard; }");
+  auto p = parser("continuing { discard; }");
   auto e = p->continuing_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, ContinuingStmt) {
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
-  auto* p = parser("continuing { discard }");
+  auto p = parser("continuing { discard }");
   auto e = p->continuing_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

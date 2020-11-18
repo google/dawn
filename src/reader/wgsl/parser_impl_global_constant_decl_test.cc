@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalConstantDecl) {
-  auto* p = parser("const a : f32 = 1.");
+  auto p = parser("const a : f32 = 1.");
   auto e = p->global_constant_decl();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
-  auto* p = parser("const a: f32 1.");
+  auto p = parser("const a: f32 1.");
   auto e = p->global_constant_decl();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
-  auto* p = parser("const a: invalid = 1.");
+  auto p = parser("const a: invalid = 1.");
   auto e = p->global_constant_decl();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
-  auto* p = parser("const a: f32 = if (a) {}");
+  auto p = parser("const a: f32 = if (a) {}");
   auto e = p->global_constant_decl();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
-  auto* p = parser("const a: f32 =");
+  auto p = parser("const a: f32 =");
   auto e = p->global_constant_decl();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);

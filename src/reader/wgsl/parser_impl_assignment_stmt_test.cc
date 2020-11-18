@@ -29,7 +29,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
-  auto* p = parser("a = 123");
+  auto p = parser("a = 123");
   auto e = p->assignment_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
-  auto* p = parser("a.b.c[2].d = 123");
+  auto p = parser("a.b.c[2].d = 123");
   auto e = p->assignment_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
-  auto* p = parser("a.b.c[2].d 123");
+  auto p = parser("a.b.c[2].d 123");
   auto e = p->assignment_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -118,7 +118,7 @@ TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
-  auto* p = parser("if (true) {} = 123");
+  auto p = parser("if (true) {} = 123");
   auto e = p->assignment_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
-  auto* p = parser("a.b.c[2].d = if (true) {}");
+  auto p = parser("a.b.c[2].d = if (true) {}");
   auto e = p->assignment_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

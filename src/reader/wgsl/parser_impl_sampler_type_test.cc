@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SamplerType_Invalid) {
-  auto* p = parser("1234");
+  auto p = parser("1234");
   auto t = p->sampler_type();
   EXPECT_FALSE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, SamplerType_Invalid) {
 }
 
 TEST_F(ParserImplTest, SamplerType_Sampler) {
-  auto* p = parser("sampler");
+  auto p = parser("sampler");
   auto t = p->sampler_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, SamplerType_Sampler) {
 }
 
 TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
-  auto* p = parser("sampler_comparison");
+  auto p = parser("sampler_comparison");
   auto t = p->sampler_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);

@@ -35,7 +35,7 @@ namespace {
 using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
   )"));
@@ -44,7 +44,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpName %s "mystruct"
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
@@ -54,7 +54,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
     %s2 = OpTypeStruct %uint %uint
@@ -75,7 +75,7 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
   // Runtime arrays are always in SSBO, and those are always laid out.
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
@@ -86,7 +86,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     OpDecorate %arr2 ArrayStride 8
     %uint = OpTypeInt 32 0
@@ -100,7 +100,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpName %arr "myrtarr"
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
@@ -112,7 +112,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedArray) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpName %arr "myarr"
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
@@ -126,7 +126,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
-  auto* p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     OpDecorate %arr2 ArrayStride 8
     %uint = OpTypeInt 32 0

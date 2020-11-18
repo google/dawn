@@ -33,7 +33,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident) {
-  auto* p = parser("a");
+  auto p = parser("a");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
-  auto* p = parser("vec4<i32>(1, 2, 3, 4))");
+  auto p = parser("vec4<i32>(1, 2, 3, 4))");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
-  auto* p = parser("vec4<i32>()");
+  auto p = parser("vec4<i32>()");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
-  auto* p = parser("vec4<if>(2., 3., 4., 5.)");
+  auto p = parser("vec4<if>(2., 3., 4., 5.)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -107,7 +107,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
-  auto* p = parser("vec4<f32> 2., 3., 4., 5.)");
+  auto p = parser("vec4<f32> 2., 3., 4., 5.)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
-  auto* p = parser("vec4<f32>(2., 3., 4., 5.");
+  auto p = parser("vec4<f32>(2., 3., 4., 5.");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
-  auto* p = parser("i32(if(a) {})");
+  auto p = parser("i32(if(a) {})");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
-  auto* p = parser("true");
+  auto p = parser("true");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -151,7 +151,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
-  auto* p = parser("(a == b)");
+  auto p = parser("(a == b)");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -161,7 +161,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
-  auto* p = parser("(a == b");
+  auto p = parser("(a == b");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -171,7 +171,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
-  auto* p = parser("()");
+  auto p = parser("()");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -181,7 +181,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
-  auto* p = parser("(if (a) {})");
+  auto p = parser("(if (a) {})");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -193,7 +193,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto* p = parser("f32(1)");
+  auto p = parser("f32(1)");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -213,7 +213,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto* p = parser("bitcast<f32>(1)");
+  auto p = parser("bitcast<f32>(1)");
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {
-  auto* p = parser("bitcast<f32(1)");
+  auto p = parser("bitcast<f32(1)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -239,7 +239,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
-  auto* p = parser("bitcast<>(1)");
+  auto p = parser("bitcast<>(1)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -249,7 +249,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
-  auto* p = parser("bitcast<invalid>(1)");
+  auto p = parser("bitcast<invalid>(1)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -259,7 +259,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {
-  auto* p = parser("bitcast<f32>1)");
+  auto p = parser("bitcast<f32>1)");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -269,7 +269,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
-  auto* p = parser("bitcast<f32>(1");
+  auto p = parser("bitcast<f32>(1");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -279,7 +279,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingExpression) {
-  auto* p = parser("bitcast<f32>()");
+  auto p = parser("bitcast<f32>()");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
@@ -289,7 +289,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_bitcast_InvalidExpression) {
-  auto* p = parser("bitcast<f32>(if (a) {})");
+  auto p = parser("bitcast<f32>(if (a) {})");
   auto e = p->primary_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

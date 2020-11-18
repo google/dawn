@@ -25,7 +25,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, Statement_Call) {
-  auto* p = parser("a();");
+  auto p = parser("a();");
   auto e = p->statement();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, Statement_Call) {
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams) {
-  auto* p = parser("a(1, b, 2 + 3 / b);");
+  auto p = parser("a(1, b, 2 + 3 / b);");
   auto e = p->statement();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
-  auto* p = parser("a(");
+  auto p = parser("a(");
   auto e = p->statement();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
-  auto* p = parser("a()");
+  auto p = parser("a()");
   auto e = p->statement();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
 }
 
 TEST_F(ParserImplTest, Statement_Call_Bad_ArgList) {
-  auto* p = parser("a(b c);");
+  auto p = parser("a(b c);");
   auto e = p->statement();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);

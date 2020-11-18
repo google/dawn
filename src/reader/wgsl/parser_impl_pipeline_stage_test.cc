@@ -34,7 +34,7 @@ class PipelineStageTest : public ParserImplTestWithParam<PipelineStageData> {};
 
 TEST_P(PipelineStageTest, Parses) {
   auto params = GetParam();
-  auto* p = parser(params.input);
+  auto p = parser(params.input);
 
   auto stage = p->expect_pipeline_stage();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -57,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(
         PipelineStageData{"compute", ast::PipelineStage::kCompute}));
 
 TEST_F(ParserImplTest, PipelineStage_NoMatch) {
-  auto* p = parser("not-a-stage");
+  auto p = parser("not-a-stage");
   auto stage = p->expect_pipeline_stage();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(stage.errored);

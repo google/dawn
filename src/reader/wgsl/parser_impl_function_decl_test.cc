@@ -25,7 +25,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
-  auto* p = parser("fn main(a : i32, b : f32) -> void { return; }");
+  auto p = parser("fn main(a : i32, b : f32) -> void { return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
-  auto* p = parser("[[workgroup_size(2, 3, 4)]] fn main() -> void { return; }");
+  auto p = parser("[[workgroup_size(2, 3, 4)]] fn main() -> void { return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 [[workgroup_size(2, 3, 4), workgroup_size(5, 6, 7)]]
 fn main() -> void { return; })");
   auto decos = p->decoration_list();
@@ -133,7 +133,7 @@ fn main() -> void { return; })");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 [[workgroup_size(2, 3, 4)]]
 [[workgroup_size(5, 6, 7)]]
 fn main() -> void { return; })");
@@ -178,7 +178,7 @@ fn main() -> void { return; })");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
-  auto* p = parser("fn main() -> { }");
+  auto p = parser("fn main() -> { }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -192,7 +192,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
-  auto* p = parser("fn main() -> void { return }");
+  auto p = parser("fn main() -> void { return }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -206,7 +206,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
-  auto* p = parser("fn main() -> void return; }");
+  auto p = parser("fn main() -> void return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);

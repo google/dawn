@@ -30,14 +30,14 @@ using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, Impl_Uint32VecEmpty) {
   std::vector<uint32_t> data;
-  auto* p = parser(data);
+  auto p = parser(data);
   EXPECT_FALSE(p->Parse());
   // TODO(dneto): What message?
 }
 
 TEST_F(SpvParserTest, Impl_InvalidModuleFails) {
   auto invalid_spv = test::Assemble("%ty = OpTypeInt 3 0");
-  auto* p = parser(invalid_spv);
+  auto p = parser(invalid_spv);
   EXPECT_FALSE(p->Parse());
   EXPECT_THAT(
       p->error(),
@@ -58,7 +58,7 @@ TEST_F(SpvParserTest, Impl_GenericVulkanShader_SimpleMemoryModel) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
 }
@@ -76,7 +76,7 @@ TEST_F(SpvParserTest, Impl_GenericVulkanShader_GLSL450MemoryModel) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
 }
@@ -96,7 +96,7 @@ TEST_F(SpvParserTest, Impl_GenericVulkanShader_VulkanMemoryModel) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
 }
@@ -114,7 +114,7 @@ TEST_F(SpvParserTest, Impl_OpenCLKernel_Fails) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_FALSE(p->Parse());
   EXPECT_THAT(p->error(), HasSubstr("Capability Kernel is not allowed"));
 }
@@ -134,7 +134,7 @@ TEST_F(SpvParserTest, Impl_Source_NoOpLine) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
   // Use instruction counting.
@@ -167,7 +167,7 @@ TEST_F(SpvParserTest, Impl_Source_WithOpLine_WithOpNoLine) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
   // Use the information from the OpLine that is still in scope.
@@ -197,7 +197,7 @@ TEST_F(SpvParserTest, Impl_Source_InvalidId) {
   OpReturn
   OpFunctionEnd
 )");
-  auto* p = parser(spv);
+  auto p = parser(spv);
   EXPECT_TRUE(p->Parse());
   EXPECT_TRUE(p->error().empty());
   auto s99 = p->GetSourceForResultIdForTest(99);

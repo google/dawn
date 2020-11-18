@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, Statements) {
-  auto* p = parser("discard; return;");
+  auto p = parser("discard; return;");
   auto e = p->expect_statements();
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, Statements) {
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
-  auto* p = parser("");
+  auto p = parser("");
   auto e = p->expect_statements();
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();

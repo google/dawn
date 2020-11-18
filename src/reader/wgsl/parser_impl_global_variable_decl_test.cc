@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
-  auto* p = parser("var<out> a : f32");
+  auto p = parser("var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
-  auto* p = parser("var<out> a : f32 = 1.");
+  auto p = parser("var<out> a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -75,7 +75,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto* p = parser("[[binding(2), set(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2), set(1)]] var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
-  auto* p = parser("[[binding(2)]] [[set(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2)]] [[set(1)]] var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -142,7 +142,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
-  auto* p = parser("[[binding()]] var<out> a : f32");
+  auto p = parser("[[binding()]] var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -158,7 +158,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
-  auto* p = parser("var<out> a : f32 = if (a) {}");
+  auto p = parser("var<out> a : f32 = if (a) {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -171,7 +171,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
-  auto* p = parser("var<invalid> a : f32;");
+  auto p = parser("var<invalid> a : f32;");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);

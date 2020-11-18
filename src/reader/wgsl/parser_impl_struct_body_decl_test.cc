@@ -26,7 +26,7 @@ namespace {
 TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto* p = parser("{a : i32;}");
+  auto p = parser("{a : i32;}");
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
-  auto* p = parser("{}");
+  auto p = parser("{}");
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
@@ -47,7 +47,7 @@ TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 {
   [[offset(nan)]] a : i32;
 })");
@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
-  auto* p = parser("{a : i32;");
+  auto p = parser("{a : i32;");
   auto m = p->expect_struct_body_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
-  auto* p = parser(R"(
+  auto p = parser(R"(
 {
   a : i32;
   1.23
