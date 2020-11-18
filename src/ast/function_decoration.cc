@@ -22,10 +22,17 @@
 namespace tint {
 namespace ast {
 
-FunctionDecoration::FunctionDecoration(const Source& source)
-    : Decoration(Kind, source) {}
+constexpr const DecorationKind FunctionDecoration::Kind;
+
+FunctionDecoration::FunctionDecoration(DecorationKind kind,
+                                       const Source& source)
+    : Decoration(kind, source) {}
 
 FunctionDecoration::~FunctionDecoration() = default;
+
+bool FunctionDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind;
+}
 
 bool FunctionDecoration::IsStage() const {
   return false;

@@ -25,10 +25,17 @@
 namespace tint {
 namespace ast {
 
-VariableDecoration::VariableDecoration(const Source& source)
-    : Decoration(Kind, source) {}
+constexpr const DecorationKind VariableDecoration::Kind;
+
+VariableDecoration::VariableDecoration(DecorationKind kind,
+                                       const Source& source)
+    : Decoration(kind, source) {}
 
 VariableDecoration::~VariableDecoration() = default;
+
+bool VariableDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind;
+}
 
 bool VariableDecoration::IsBinding() const {
   return false;

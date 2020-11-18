@@ -17,21 +17,27 @@
 namespace tint {
 namespace ast {
 
+constexpr const DecorationKind WorkgroupDecoration::Kind;
+
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x, const Source& source)
-    : FunctionDecoration(source), x_(x) {}
+    : FunctionDecoration(Kind, source), x_(x) {}
 
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
                                          uint32_t y,
                                          const Source& source)
-    : FunctionDecoration(source), x_(x), y_(y) {}
+    : FunctionDecoration(Kind, source), x_(x), y_(y) {}
 
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
                                          uint32_t y,
                                          uint32_t z,
                                          const Source& source)
-    : FunctionDecoration(source), x_(x), y_(y), z_(z) {}
+    : FunctionDecoration(Kind, source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
+
+bool WorkgroupDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind || FunctionDecoration::IsKind(kind);
+}
 
 bool WorkgroupDecoration::IsWorkgroup() const {
   return true;

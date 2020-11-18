@@ -21,10 +21,16 @@
 namespace tint {
 namespace ast {
 
-ArrayDecoration::ArrayDecoration(const Source& source)
-    : Decoration(Kind, source) {}
+constexpr const DecorationKind ArrayDecoration::Kind;
+
+ArrayDecoration::ArrayDecoration(DecorationKind kind, const Source& source)
+    : Decoration(kind, source) {}
 
 ArrayDecoration::~ArrayDecoration() = default;
+
+bool ArrayDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind;
+}
 
 bool ArrayDecoration::IsStride() const {
   return false;

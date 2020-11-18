@@ -30,9 +30,14 @@ class StrideDecoration;
 class ArrayDecoration : public Decoration {
  public:
   /// The kind of decoration that this type represents
-  static constexpr DecorationKind Kind = DecorationKind::kArray;
+  static constexpr const DecorationKind Kind = DecorationKind::kArray;
 
   ~ArrayDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is a stride decoration
   virtual bool IsStride() const;
@@ -42,8 +47,9 @@ class ArrayDecoration : public Decoration {
 
  protected:
   /// Constructor
+  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit ArrayDecoration(const Source& source);
+  ArrayDecoration(DecorationKind kind, const Source& source);
 };
 
 /// A list of array decorations

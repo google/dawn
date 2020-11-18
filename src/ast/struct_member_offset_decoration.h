@@ -27,11 +27,20 @@ namespace ast {
 /// A struct member offset decoration
 class StructMemberOffsetDecoration : public StructMemberDecoration {
  public:
+  /// The kind of decoration that this type represents
+  static constexpr const DecorationKind Kind =
+      DecorationKind::kStructMemberOffset;
+
   /// constructor
   /// @param offset the offset value
   /// @param source the source of this decoration
   StructMemberOffsetDecoration(uint32_t offset, const Source& source);
   ~StructMemberOffsetDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is an offset decoration
   bool IsOffset() const override;

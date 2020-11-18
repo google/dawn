@@ -17,9 +17,15 @@
 namespace tint {
 namespace ast {
 
+constexpr const DecorationKind StructMemberOffsetDecoration::Kind;
+
 StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset,
                                                            const Source& source)
-    : StructMemberDecoration(source), offset_(offset) {}
+    : StructMemberDecoration(Kind, source), offset_(offset) {}
+
+bool StructMemberOffsetDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind || StructMemberDecoration::IsKind(kind);
+}
 
 bool StructMemberOffsetDecoration::IsOffset() const {
   return true;

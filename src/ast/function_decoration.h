@@ -31,9 +31,14 @@ class WorkgroupDecoration;
 class FunctionDecoration : public Decoration {
  public:
   /// The kind of decoration that this type represents
-  static constexpr DecorationKind Kind = DecorationKind::kFunction;
+  static constexpr const DecorationKind Kind = DecorationKind::kFunction;
 
   ~FunctionDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is a stage decoration
   virtual bool IsStage() const;
@@ -47,8 +52,9 @@ class FunctionDecoration : public Decoration {
 
  protected:
   /// Constructor
+  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit FunctionDecoration(const Source& source);
+  FunctionDecoration(DecorationKind kind, const Source& source);
 };
 
 /// A list of function decorations

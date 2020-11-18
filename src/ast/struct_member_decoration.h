@@ -30,9 +30,14 @@ class StructMemberOffsetDecoration;
 class StructMemberDecoration : public Decoration {
  public:
   /// The kind of decoration that this type represents
-  static constexpr DecorationKind Kind = DecorationKind::kStructMember;
+  static constexpr const DecorationKind Kind = DecorationKind::kStructMember;
 
   ~StructMemberDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is an offset decoration
   virtual bool IsOffset() const;
@@ -42,8 +47,9 @@ class StructMemberDecoration : public Decoration {
 
  protected:
   /// Constructor
+  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit StructMemberDecoration(const Source& source);
+  explicit StructMemberDecoration(DecorationKind kind, const Source& source);
 };
 
 /// A list of struct member decorations

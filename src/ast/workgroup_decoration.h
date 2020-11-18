@@ -27,6 +27,9 @@ namespace ast {
 /// A workgroup decoration
 class WorkgroupDecoration : public FunctionDecoration {
  public:
+  /// The kind of decoration that this type represents
+  static constexpr const DecorationKind Kind = DecorationKind::kWorkgroup;
+
   /// constructor
   /// @param x the workgroup x dimension size
   /// @param source the source of this decoration
@@ -43,6 +46,11 @@ class WorkgroupDecoration : public FunctionDecoration {
   /// @param source the source of this decoration
   WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
   ~WorkgroupDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is a workgroup decoration
   bool IsWorkgroup() const override;

@@ -17,10 +17,16 @@
 namespace tint {
 namespace ast {
 
+constexpr const DecorationKind LocationDecoration::Kind;
+
 LocationDecoration::LocationDecoration(uint32_t val, const Source& source)
-    : VariableDecoration(source), value_(val) {}
+    : VariableDecoration(Kind, source), value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
+
+bool LocationDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind || VariableDecoration::IsKind(kind);
+}
 
 bool LocationDecoration::IsLocation() const {
   return true;

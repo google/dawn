@@ -17,8 +17,14 @@
 namespace tint {
 namespace ast {
 
+constexpr const DecorationKind StrideDecoration::Kind;
+
 StrideDecoration::StrideDecoration(uint32_t stride, const Source& source)
-    : ArrayDecoration(source), stride_(stride) {}
+    : ArrayDecoration(Kind, source), stride_(stride) {}
+
+bool StrideDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind || ArrayDecoration::IsKind(kind);
+}
 
 bool StrideDecoration::IsStride() const {
   return true;

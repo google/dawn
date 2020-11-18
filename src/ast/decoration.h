@@ -28,10 +28,18 @@ namespace ast {
 /// The decoration kind enumerator
 enum class DecorationKind {
   kArray,
+  /*|*/ kStride,
   kFunction,
+  /*|*/ kStage,
+  /*|*/ kWorkgroup,
   kStruct,
   kStructMember,
-  kVariable
+  /*|*/ kStructMemberOffset,
+  kVariable,
+  /*|*/ kBinding,
+  /*|*/ kBuiltin,
+  /*|*/ kConstantId,
+  /*|*/ kLocation,
 };
 
 std::ostream& operator<<(std::ostream& out, DecorationKind data);
@@ -41,14 +49,19 @@ class Decoration : public Node {
  public:
   ~Decoration() override;
 
-  /// @return the decoration kind
-  DecorationKind GetKind() const { return kind_; }
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  virtual bool IsKind(DecorationKind kind) const = 0;
 
   /// @return true if this decoration is of (or derives from) type |TO|
   template <typename TO>
   bool Is() const {
-    return GetKind() == TO::Kind;
+    return IsKind(TO::Kind);
   }
+
+  /// @return the decoration kind
+  DecorationKind GetKind() const { return kind_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;

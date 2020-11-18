@@ -28,17 +28,23 @@ namespace ast {
 class StructDecoration : public Decoration {
  public:
   /// The kind of decoration that this type represents
-  static constexpr DecorationKind Kind = DecorationKind::kStruct;
+  static constexpr const DecorationKind Kind = DecorationKind::kStruct;
 
   ~StructDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is a block struct
   virtual bool IsBlock() const = 0;
 
  protected:
   /// Constructor
+  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit StructDecoration(const Source& source);
+  explicit StructDecoration(DecorationKind kind, const Source& source);
 };
 
 /// List of struct decorations

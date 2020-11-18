@@ -24,11 +24,19 @@ namespace ast {
 /// A builtin decoration
 class BuiltinDecoration : public VariableDecoration {
  public:
+  /// The kind of decoration that this type represents
+  static constexpr const DecorationKind Kind = DecorationKind::kBuiltin;
+
   /// constructor
   /// @param builtin the builtin value
   /// @param source the source of this decoration
   BuiltinDecoration(Builtin builtin, const Source& source);
   ~BuiltinDecoration() override;
+
+  /// @param kind the decoration kind
+  /// @return true if this Decoration is of the (or derives from) the given
+  /// kind.
+  bool IsKind(DecorationKind kind) const override;
 
   /// @returns true if this is a builtin decoration
   bool IsBuiltin() const override;

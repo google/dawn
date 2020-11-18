@@ -21,10 +21,17 @@
 namespace tint {
 namespace ast {
 
-StructMemberDecoration::StructMemberDecoration(const Source& source)
-    : Decoration(DecorationKind::kStructMember, source) {}
+constexpr const DecorationKind StructMemberDecoration::Kind;
+
+StructMemberDecoration::StructMemberDecoration(DecorationKind kind,
+                                               const Source& source)
+    : Decoration(kind, source) {}
 
 StructMemberDecoration::~StructMemberDecoration() = default;
+
+bool StructMemberDecoration::IsKind(DecorationKind kind) const {
+  return kind == Kind;
+}
 
 bool StructMemberDecoration::IsOffset() const {
   return false;
