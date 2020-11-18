@@ -41,6 +41,7 @@
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
+#include "src/reader/spirv/usage.h"
 #include "src/source.h"
 
 namespace tint {
@@ -189,7 +190,8 @@ class ParserImpl : Reader {
   /// Builds the internal representation of the SPIR-V module.
   /// Assumes the module is somewhat well-formed.  Normally you
   /// would want to validate the SPIR-V module before attempting
-  /// to build this internal representation.
+  /// to build this internal representation. Also computes a topological
+  /// ordering of the functions.
   /// This is a no-op if the parser has already failed.
   /// @returns true if the parser is still successful.
   bool BuildInternalModule();
@@ -233,6 +235,12 @@ class ParserImpl : Reader {
   /// needed.  This is a no-op if the parser has already failed.
   /// @returns true if parser is still successful.
   bool RegisterTypes();
+
+  /// Register sampler and texture usage for memory object declarations.
+  /// This must be called after we've registered line numbers for all
+  /// instructions. This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool RegisterHandleUsage();
 
   /// Emit const definitions for scalar specialization constants generated
   /// by one of OpConstantTrue, OpConstantFalse, or OpSpecConstant.
@@ -375,8 +383,8 @@ class ParserImpl : Reader {
     return scalar_spec_constants_.find(id) != scalar_spec_constants_.end();
   }
 
-  /// For a SPIR-V ID that defines a sampler, image, or sampled image value,
-  /// return the SPIR-V instruction that represents the memory object
+  /// For a SPIR-V ID that might define a sampler, image, or sampled image
+  /// value, return the SPIR-V instruction that represents the memory object
   /// declaration for the object.  If we encounter an OpSampledImage along the
   /// way, follow the image operand when follow_image is true; otherwise follow
   /// the sampler operand. Returns nullptr if we can't trace back to a memory
@@ -390,6 +398,12 @@ class ParserImpl : Reader {
   const spvtools::opt::Instruction* GetMemoryObjectDeclarationForHandle(
       uint32_t id,
       bool follow_image);
+
+  /// Returns the handle usage for a memory object declaration.
+  /// @param id SPIR-V ID of a sampler or image OpVariable or
+  /// OpFunctionParameter
+  /// @returns the handle usage, or an empty usage object.
+  Usage GetHandleUsage(uint32_t id) const;
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
@@ -468,6 +482,9 @@ class ParserImpl : Reader {
   spvtools::opt::analysis::TypeManager* type_mgr_ = nullptr;
   spvtools::opt::analysis::DecorationManager* deco_mgr_ = nullptr;
 
+  // The functions ordered so that callees precede their callers.
+  std::vector<const spvtools::opt::Function*> topologically_ordered_functions_;
+
   // Maps an instruction to its source location. If no OpLine information
   // is in effect for the instruction, map the instruction to its position
   // in the SPIR-V module, counting by instructions, where the first
@@ -525,6 +542,10 @@ class ParserImpl : Reader {
   // GetMemoryObjectDeclarationForHandle.
   std::unordered_map<uint32_t, const spvtools::opt::Instruction*>
       mem_obj_decl_sampler_;
+
+  // Maps a memory-object-declaration instruction to any sampler or texture
+  // usages implied by usages of the memory-object-declaration.
+  std::unordered_map<const spvtools::opt::Instruction*, Usage> handle_usage_;
 };
 
 }  // namespace spirv

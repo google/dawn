@@ -14,6 +14,8 @@
 
 #include "src/reader/spirv/usage.h"
 
+#include <sstream>
+
 namespace tint {
 namespace reader {
 namespace spirv {
@@ -179,6 +181,12 @@ void Usage::AddMultisampledTexture() {
 void Usage::AddDepthTexture() {
   AddSampledTexture();
   is_depth_ = true;
+}
+
+std::string Usage::to_str() const {
+  std::ostringstream ss;
+  ss << *this;
+  return ss.str();
 }
 
 }  // namespace spirv

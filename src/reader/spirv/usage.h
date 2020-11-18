@@ -16,6 +16,7 @@
 #define SRC_READER_SPIRV_USAGE_H_
 
 #include <ostream>
+#include <string>
 
 namespace tint {
 namespace reader {
@@ -101,6 +102,9 @@ class Usage {
   void AddMultisampledTexture();
   /// Records usage as a depth texture.
   void AddDepthTexture();
+
+  /// Returns this usage object as a string.
+  std::string to_str() const;
 
  private:
   // Sampler properties.

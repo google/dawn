@@ -57,10 +57,15 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
@@ -74,6 +79,7 @@
 #include "src/ast/variable_decoration.h"
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/function.h"
+#include "src/reader/spirv/usage.h"
 #include "src/type_manager.h"
 
 namespace tint {
@@ -438,6 +444,9 @@ bool ParserImpl::BuildInternalModule() {
   type_mgr_ = ir_context_->get_type_mgr();
   deco_mgr_ = ir_context_->get_decoration_mgr();
 
+  topologically_ordered_functions_ =
+      FunctionTraverser(*module_).TopologicallyOrderedFunctions();
+
   return success_;
 }
 
@@ -522,6 +531,9 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
     return false;
   }
   if (!RegisterEntryPoints()) {
+    return false;
+  }
+  if (!RegisterHandleUsage()) {
     return false;
   }
   if (!RegisterTypes()) {
@@ -1479,8 +1491,7 @@ bool ParserImpl::EmitFunctions() {
   if (!success_) {
     return false;
   }
-  for (const auto* f :
-       FunctionTraverser(*module_).TopologicallyOrderedFunctions()) {
+  for (const auto* f : topologically_ordered_functions_) {
     if (!success_) {
       return false;
     }
@@ -1506,11 +1517,13 @@ bool ParserImpl::EmitFunctions() {
 const spvtools::opt::Instruction*
 ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
                                                 bool follow_image) {
-  auto local_fail = [this, id,
+  auto saved_id = id;
+  auto local_fail = [this, saved_id, id,
                      follow_image]() -> const spvtools::opt::Instruction* {
     const auto* inst = def_use_mgr_->GetDef(id);
     Fail() << "Could not find memory object declaration for the "
            << (follow_image ? "image" : "sampler") << " underlying id " << id
+           << " (from original id " << saved_id << ") "
            << (inst ? inst->PrettyPrint() : std::string());
     return nullptr;
   };
@@ -1587,6 +1600,159 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
         return nullptr;
     }
   }
+}
+
+bool ParserImpl::RegisterHandleUsage() {
+  if (!success_) {
+    return false;
+  }
+
+  // Map a function ID to the list of its function parameter instructions, in
+  // order.
+  std::unordered_map<uint32_t, std::vector<const spvtools::opt::Instruction*>>
+      function_params;
+  for (const auto* f : topologically_ordered_functions_) {
+    // Record the instructions defining this function's parameters.
+    auto& params = function_params[f->result_id()];
+    f->ForEachParam([&params](const spvtools::opt::Instruction* param) {
+      params.push_back(param);
+    });
+  }
+
+  // Returns the memory object declaration for an image underlying the first
+  // operand of the given image instruction.
+  auto get_image = [this](const spvtools::opt::Instruction& image_inst) {
+    return this->GetMemoryObjectDeclarationForHandle(
+        image_inst.GetSingleWordInOperand(0), true);
+  };
+  // Returns the memory object declaration for a sampler underlying the first
+  // operand of the given image instruction.
+  auto get_sampler = [this](const spvtools::opt::Instruction& image_inst) {
+    return this->GetMemoryObjectDeclarationForHandle(
+        image_inst.GetSingleWordInOperand(0), false);
+  };
+
+  // Scan the bodies of functions for image operations, recording their implied
+  // usage properties on the memory object declarations (i.e. variables or
+  // function parameters).  We scan the functions in an order so that callees
+  // precede callers. That way the usage on a function parameter is already
+  // computed before we see the call to that function.  So when we reach
+  // a function call, we can add the usage from the callee formal parameters.
+  for (const auto* f : topologically_ordered_functions_) {
+    for (const auto& bb : *f) {
+      for (const auto& inst : bb) {
+        switch (inst.opcode()) {
+            // Single texel reads and writes
+
+          case SpvOpImageRead:
+            handle_usage_[get_image(inst)].AddStorageReadTexture();
+            break;
+          case SpvOpImageWrite:
+            handle_usage_[get_image(inst)].AddStorageWriteTexture();
+            break;
+          case SpvOpImageFetch:
+            handle_usage_[get_image(inst)].AddSampledTexture();
+            break;
+
+            // Sampling and gathering from a sampled image.
+
+          case SpvOpImageSampleImplicitLod:
+          case SpvOpImageSampleExplicitLod:
+          case SpvOpImageSampleProjImplicitLod:
+          case SpvOpImageSampleProjExplicitLod:
+          case SpvOpImageGather:
+            handle_usage_[get_image(inst)].AddSampledTexture();
+            handle_usage_[get_sampler(inst)].AddSampler();
+            break;
+          case SpvOpImageSampleDrefImplicitLod:
+          case SpvOpImageSampleDrefExplicitLod:
+          case SpvOpImageSampleProjDrefImplicitLod:
+          case SpvOpImageSampleProjDrefExplicitLod:
+          case SpvOpImageDrefGather:
+            // Depth reference access implies usage as a depth texture, which
+            // in turn is a sampled texture.
+            handle_usage_[get_image(inst)].AddDepthTexture();
+            handle_usage_[get_sampler(inst)].AddComparisonSampler();
+            break;
+
+            // Image queries
+
+          case SpvOpImageQuerySizeLod:
+          case SpvOpImageQuerySize:
+            // Applies to NonReadable, and hence a write-only storage image
+            handle_usage_[get_image(inst)].AddStorageWriteTexture();
+            break;
+          case SpvOpImageQueryLod:
+            handle_usage_[get_image(inst)].AddSampledTexture();
+            handle_usage_[get_sampler(inst)].AddSampler();
+            break;
+          case SpvOpImageQueryLevels:
+            // We can't tell anything more than that it's an image.
+            handle_usage_[get_image(inst)].AddTexture();
+            break;
+          case SpvOpImageQuerySamples:
+            handle_usage_[get_image(inst)].AddMultisampledTexture();
+            break;
+
+            // Function calls
+
+          case SpvOpFunctionCall: {
+            // Propagate handle usages from callee function formal parameters to
+            // the matching caller parameters.  This is where we rely on the
+            // fact that callees have been processed earlier in the flow.
+            const auto num_in_operands = inst.NumInOperands();
+            // The first operand of the call is the function ID.
+            // The remaining operands are the operands to the function.
+            if (num_in_operands < 1) {
+              return Fail() << "Call instruction must have at least one operand"
+                            << inst.PrettyPrint();
+            }
+            const auto function_id = inst.GetSingleWordInOperand(0);
+            const auto& formal_params = function_params[function_id];
+            if (formal_params.size() != (num_in_operands - 1)) {
+              return Fail() << "Called function has " << formal_params.size()
+                            << " parameters, but function call has "
+                            << (num_in_operands - 1) << " parameters"
+                            << inst.PrettyPrint();
+            }
+            for (uint32_t i = 1; i < num_in_operands; ++i) {
+              auto where = handle_usage_.find(formal_params[i - 1]);
+              if (where == handle_usage_.end()) {
+                // We haven't recorded any handle usage on the formal parameter.
+                continue;
+              }
+              const Usage& formal_param_usage = where->second;
+              const auto operand_id = inst.GetSingleWordInOperand(i);
+              const auto* operand_as_sampler =
+                  GetMemoryObjectDeclarationForHandle(operand_id, false);
+              const auto* operand_as_image =
+                  GetMemoryObjectDeclarationForHandle(operand_id, true);
+              if (operand_as_sampler) {
+                handle_usage_[operand_as_sampler].Add(formal_param_usage);
+              }
+              if (operand_as_image &&
+                  (operand_as_image != operand_as_sampler)) {
+                handle_usage_[operand_as_image].Add(formal_param_usage);
+              }
+            }
+            break;
+          }
+
+          default:
+            break;
+        }
+      }
+    }
+  }
+  return success_;
+}
+
+Usage ParserImpl::GetHandleUsage(uint32_t id) const {
+  const auto where = handle_usage_.find(def_use_mgr_->GetDef(id));
+  if (where != handle_usage_.end()) {
+    return where->second;
+  }
+  return Usage();
 }
 
 }  // namespace spirv
