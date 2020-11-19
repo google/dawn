@@ -207,7 +207,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct frag_main_in {
-  vector<float, 4> coord : SV_Position;
+  float4 coord : SV_Position;
 };
 
 struct frag_main_out {
@@ -258,7 +258,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer : register(b0) {
-  vector<float, 4> coord;
+  float4 coord;
 };
 
 void frag_main() {
@@ -317,7 +317,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Uniforms {
-  vector<float, 4> coord;
+  float4 coord;
 };
 
 ConstantBuffer<Uniforms> uniforms : register(b0);
@@ -717,7 +717,7 @@ TEST_F(
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_in {
-  vector<float, 4> coord : SV_Position;
+  float4 coord : SV_Position;
 };
 
 struct ep_1_out {
@@ -789,7 +789,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer : register(b0) {
-  vector<float, 4> coord;
+  float4 coord;
 };
 
 float sub_func(float param) {

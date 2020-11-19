@@ -780,7 +780,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage_buffer> data : Data;
   // data.b = vec3<f32>(2.3f, 1.2f, 0.2f);
   //
-  // -> data.Store(16, asuint(vector<float, 3>(2.3f, 1.2f, 0.2f)));
+  // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
 
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -829,7 +829,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
   EXPECT_EQ(
       result(),
-      R"(data.Store3(16, asuint(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)));
+      R"(data.Store3(16, asuint(float3(1.00000000f, 2.00000000f, 3.00000000f)));
 )");
 }
 
@@ -1131,7 +1131,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage_buffer> data : Pre;
   // data.c[2].b = vec3<f32>(1.f, 2.f, 3.f);
   //
-  // -> data.Store3(16 + (2 * 32), asuint(vector<float, 3>(1.0f, 2.0f, 3.0f)));
+  // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
 
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -1197,7 +1197,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
   EXPECT_EQ(
       result(),
-      R"(data.Store3(16 + (32 * 2) + 0, asuint(vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)));
+      R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.00000000f, 2.00000000f, 3.00000000f)));
 )");
 }
 

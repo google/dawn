@@ -118,7 +118,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   ast::VariableDeclStatement stmt(var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
-  EXPECT_EQ(result(), R"(vector<float, 3> a = vector<float, 3>(0.0f);
+  EXPECT_EQ(result(), R"(float3 a = float3(0.0f);
 )");
 }
 

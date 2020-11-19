@@ -310,7 +310,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
   ast::type::VectorType v(&f32, 3);
 
   ASSERT_TRUE(gen.EmitType(out, &v, "")) << gen.error();
-  EXPECT_EQ(result(), "vector<float, 3>");
+  EXPECT_EQ(result(), "float3");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {

@@ -2036,11 +2036,20 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << "uint";
   } else if (type->IsVector()) {
     auto* vec = type->AsVector();
-    out << "vector<";
-    if (!EmitType(out, vec->type(), "")) {
-      return false;
+    auto size = vec->size();
+    if (vec->type()->IsF32() && size >= 1 && size <= 4) {
+      out << "float" << size;
+    } else if (vec->type()->IsI32() && size >= 1 && size <= 4) {
+      out << "int" << size;
+    } else if (vec->type()->IsU32() && size >= 1 && size <= 4) {
+      out << "uint" << size;
+    } else {
+      out << "vector<";
+      if (!EmitType(out, vec->type(), "")) {
+        return false;
+      }
+      out << ", " << size << ">";
     }
-    out << ", " << vec->size() << ">";
   } else if (type->IsVoid()) {
     out << "void";
   } else {

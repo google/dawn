@@ -364,7 +364,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // [[builtin frag_depth]] var<out> depth : f32;
   //
   // struct main_in {
-  //   vector<float, 4> coord : SV_Position;
+  //   float4 coord : SV_Position;
   // };
   //
   // struct main_out {
@@ -410,7 +410,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
-  vector<float, 4> coord : SV_Position;
+  float4 coord : SV_Position;
 };
 
 struct main_out {

@@ -140,8 +140,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
   ast::TypeConstructorExpression expr(&vec, values);
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f)");
+  EXPECT_EQ(result(), "float3(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
@@ -152,7 +151,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
   ast::TypeConstructorExpression expr(&vec, values);
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(), "vector<float, 3>(0.0f)");
+  EXPECT_EQ(result(), "float3(0.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
@@ -187,10 +186,9 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
-  EXPECT_EQ(result(),
-            std::string("matrix<float, 3, 2>(vector<float, 3>(1.00000000f, "
-                        "2.00000000f, 3.00000000f), ") +
-                "vector<float, 3>(3.00000000f, 4.00000000f, 5.00000000f))");
+  EXPECT_EQ(result(), std::string("matrix<float, 3, 2>(float3(1.00000000f, "
+                                  "2.00000000f, 3.00000000f), ") +
+                          "float3(3.00000000f, 4.00000000f, 5.00000000f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
@@ -219,11 +217,10 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
   ast::TypeConstructorExpression expr(&ary, ary_values);
 
   ASSERT_TRUE(gen.EmitConstructor(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(),
-            std::string("{") +
-                "vector<float, 3>(1.00000000f, 2.00000000f, 3.00000000f), " +
-                "vector<float, 3>(4.00000000f, 5.00000000f, 6.00000000f), " +
-                "vector<float, 3>(7.00000000f, 8.00000000f, 9.00000000f)}");
+  EXPECT_EQ(result(), std::string("{") +
+                          "float3(1.00000000f, 2.00000000f, 3.00000000f), " +
+                          "float3(4.00000000f, 5.00000000f, 6.00000000f), " +
+                          "float3(7.00000000f, 8.00000000f, 9.00000000f)}");
 }
 
 // TODO(dsinclair): Add struct constructor test.
