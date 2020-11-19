@@ -20,11 +20,15 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/validator/validator_impl.h"
 #include "src/validator/validator_test_helper.h"
 
+#include "src/ast/pipeline_stage.h"
+#include "src/ast/stage_decoration.h"
 namespace tint {
 namespace {
 
@@ -143,6 +147,30 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   ast::type::StructType struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+}
+
+TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
+  /// [[stage(vertex)]]
+  // fn func -> void { var a : array<i32>; }
+  ast::type::I32Type i32;
+  ast::type::ArrayType array(&i32);
+
+  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &array);
+  ast::VariableList params;
+  ast::type::VoidType void_type;
+  auto* body = create<ast::BlockStatement>();
+  body->append(create<ast::VariableDeclStatement>(
+      Source{Source::Location{12, 34}}, var));
+  auto* func = create<ast::Function>("func", params, &void_type, body);
+  func->add_decoration(
+      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  mod()->AddFunction(func);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "of a struct: 'a'");
 }
 
 }  // namespace

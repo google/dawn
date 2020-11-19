@@ -240,6 +240,15 @@ bool ValidatorImpl::ValidateDeclStatement(
     return false;
   }
   variable_stack_.set(name, decl->variable());
+  if (decl->variable()->type()->UnwrapAll()->IsArray()) {
+    if (decl->variable()->type()->UnwrapAll()->AsArray()->IsRuntimeArray()) {
+      set_error(decl->source(),
+                "v-0015: runtime arrays may only appear as the last "
+                "member of a struct: '" +
+                    decl->variable()->name() + "'");
+      return false;
+    }
+  }
   return true;
 }
 
