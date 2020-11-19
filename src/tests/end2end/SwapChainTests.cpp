@@ -140,6 +140,10 @@ TEST_P(SwapChainTests, SwitchPresentMode) {
     // locally.
     DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
+    // TODO(jiawei.shao@intel.com): find out why this test sometimes hangs on the latest Linux Intel
+    // Vulkan drivers.
+    DAWN_SKIP_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
+
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Fifo,
