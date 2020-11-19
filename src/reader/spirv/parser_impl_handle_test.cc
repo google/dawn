@@ -771,19 +771,20 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
 
 // Test RegisterHandleUsage, sampled image cases
 
-struct SampledImageCase {
+struct UsageSampledImageCase {
   std::string inst;
   std::string expected_sampler_usage;
   std::string expected_image_usage;
 };
-inline std::ostream& operator<<(std::ostream& out, const SampledImageCase& c) {
-  out << "SampledImageCase(" << c.inst << ", " << c.expected_sampler_usage
+inline std::ostream& operator<<(std::ostream& out,
+                                const UsageSampledImageCase& c) {
+  out << "UsageSampledImageCase(" << c.inst << ", " << c.expected_sampler_usage
       << ", " << c.expected_image_usage << ")";
   return out;
 }
 
 using SpvParserTest_RegisterHandleUsage_SampledImage =
-    SpvParserTestBase<::testing::TestWithParam<SampledImageCase>>;
+    SpvParserTestBase<::testing::TestWithParam<UsageSampledImageCase>>;
 
 TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
   const auto assembly = Preamble() + CommonTypes() + R"(
@@ -861,32 +862,35 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageGather
-        SampledImageCase{"%result = OpImageGather "
-                         "%v4float %sampled_image %coords %uint_1",
-                         "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
+        UsageSampledImageCase{"%result = OpImageGather "
+                              "%v4float %sampled_image %coords %uint_1",
+                              "Usage(Sampler( ))",
+                              "Usage(Texture( is_sampled ))"},
         // OpImageDrefGather
-        SampledImageCase{"%result = OpImageDrefGather "
-                         "%v4float %sampled_image %coords %depth",
-                         "Usage(Sampler( comparison ))",
-                         "Usage(Texture( is_sampled depth ))"},
+        UsageSampledImageCase{"%result = OpImageDrefGather "
+                              "%v4float %sampled_image %coords %depth",
+                              "Usage(Sampler( comparison ))",
+                              "Usage(Texture( is_sampled depth ))"},
 
         // Sample the texture.
 
         // OpImageSampleImplicitLod
-        SampledImageCase{"%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords",
-                         "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
+        UsageSampledImageCase{"%result = OpImageSampleImplicitLod "
+                              "%v4float %sampled_image %coords",
+                              "Usage(Sampler( ))",
+                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleExplicitLod
-        SampledImageCase{"%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords Lod %float_null",
-                         "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
+        UsageSampledImageCase{"%result = OpImageSampleExplicitLod "
+                              "%v4float %sampled_image %coords Lod %float_null",
+                              "Usage(Sampler( ))",
+                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleDrefImplicitLod
-        SampledImageCase{"%result = OpImageSampleDrefImplicitLod "
-                         "%v4float %sampled_image %coords %depth",
-                         "Usage(Sampler( comparison ))",
-                         "Usage(Texture( is_sampled depth ))"},
+        UsageSampledImageCase{"%result = OpImageSampleDrefImplicitLod "
+                              "%v4float %sampled_image %coords %depth",
+                              "Usage(Sampler( comparison ))",
+                              "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleDrefExplicitLod
-        SampledImageCase{
+        UsageSampledImageCase{
             "%result = OpImageSampleDrefExplicitLod "
             "%v4float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
@@ -896,27 +900,29 @@ INSTANTIATE_TEST_SUITE_P(
         // support them.
 
         // OpImageSampleProjImplicitLod
-        SampledImageCase{"%result = OpImageSampleProjImplicitLod "
-                         "%v4float %sampled_image %coords",
-                         "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
+        UsageSampledImageCase{"%result = OpImageSampleProjImplicitLod "
+                              "%v4float %sampled_image %coords",
+                              "Usage(Sampler( ))",
+                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjExplicitLod
-        SampledImageCase{"%result = OpImageSampleProjExplicitLod "
-                         "%v4float %sampled_image %coords Lod %float_null",
-                         "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
+        UsageSampledImageCase{"%result = OpImageSampleProjExplicitLod "
+                              "%v4float %sampled_image %coords Lod %float_null",
+                              "Usage(Sampler( ))",
+                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjDrefImplicitLod
-        SampledImageCase{"%result = OpImageSampleProjDrefImplicitLod "
-                         "%v4float %sampled_image %coords %depth",
-                         "Usage(Sampler( comparison ))",
-                         "Usage(Texture( is_sampled depth ))"},
+        UsageSampledImageCase{"%result = OpImageSampleProjDrefImplicitLod "
+                              "%v4float %sampled_image %coords %depth",
+                              "Usage(Sampler( comparison ))",
+                              "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleProjDrefExplicitLod
-        SampledImageCase{
+        UsageSampledImageCase{
             "%result = OpImageSampleProjDrefExplicitLod "
             "%v4float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
             "Usage(Texture( is_sampled depth ))"},
 
         // OpImageQueryLod
-        SampledImageCase{
+        UsageSampledImageCase{
             "%result = OpImageQueryLod %v2float %sampled_image %coords",
             "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"}));
 
@@ -924,19 +930,19 @@ INSTANTIATE_TEST_SUITE_P(
 // For these we test the use of an image value directly, and not combined
 // with the sampler. The image still could be of sampled image type.
 
-struct RawImageCase {
+struct UsageRawImageCase {
   std::string type;  // Example: f_storage_1d or f_texture_1d
   std::string inst;
   std::string expected_image_usage;
 };
-inline std::ostream& operator<<(std::ostream& out, const RawImageCase& c) {
-  out << "RawImageCase(" << c.type << ", " << c.inst << ", "
+inline std::ostream& operator<<(std::ostream& out, const UsageRawImageCase& c) {
+  out << "UsageRawImageCase(" << c.type << ", " << c.inst << ", "
       << c.expected_image_usage << ")";
   return out;
 }
 
 using SpvParserTest_RegisterHandleUsage_RawImage =
-    SpvParserTestBase<::testing::TestWithParam<RawImageCase>>;
+    SpvParserTestBase<::testing::TestWithParam<UsageRawImageCase>>;
 
 TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, Variable) {
   const auto assembly = Preamble() + CommonTypes() + R"(
@@ -1005,47 +1011,48 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageRead
-        RawImageCase{"f_storage_1d",
-                     "%result = OpImageRead %v4float %im %uint_1",
-                     "Usage(Texture( read ))"},
+        UsageRawImageCase{"f_storage_1d",
+                          "%result = OpImageRead %v4float %im %uint_1",
+                          "Usage(Texture( read ))"},
 
         // OpImageWrite
-        RawImageCase{"f_storage_1d", "OpImageWrite %im %uint_1 %v4float_null",
-                     "Usage(Texture( write ))"},
+        UsageRawImageCase{"f_storage_1d",
+                          "OpImageWrite %im %uint_1 %v4float_null",
+                          "Usage(Texture( write ))"},
 
         // OpImageFetch
-        RawImageCase{"f_texture_1d",
-                     "%result = OpImageFetch "
-                     "%v4float %im %float_null",
-                     "Usage(Texture( is_sampled ))"},
+        UsageRawImageCase{"f_texture_1d",
+                          "%result = OpImageFetch "
+                          "%v4float %im %float_null",
+                          "Usage(Texture( is_sampled ))"},
 
         // Image queries
 
         // OpImageQuerySizeLod
         // Applies to NonReadable, hence write-only storage
-        RawImageCase{"f_storage_2d",
-                     "%result = OpImageQuerySizeLod "
-                     "%v2uint %im %uint_1",
-                     "Usage(Texture( write ))"},
+        UsageRawImageCase{"f_storage_2d",
+                          "%result = OpImageQuerySizeLod "
+                          "%v2uint %im %uint_1",
+                          "Usage(Texture( write ))"},
 
         // OpImageQuerySize
         // Applies to NonReadable, hence write-only storage
-        RawImageCase{"f_storage_2d",
-                     "%result = OpImageQuerySize "
-                     "%v2uint %im",
-                     "Usage(Texture( write ))"},
+        UsageRawImageCase{"f_storage_2d",
+                          "%result = OpImageQuerySize "
+                          "%v2uint %im",
+                          "Usage(Texture( write ))"},
 
         // OpImageQueryLevels
-        RawImageCase{"f_texture_2d",
-                     "%result = OpImageQueryLevels "
-                     "%uint %im",
-                     "Usage(Texture( ))"},
+        UsageRawImageCase{"f_texture_2d",
+                          "%result = OpImageQueryLevels "
+                          "%uint %im",
+                          "Usage(Texture( ))"},
 
         // OpImageQuerySamples
-        RawImageCase{"f_texture_2d_ms",
-                     "%result = OpImageQuerySamples "
-                     "%uint %im",
-                     "Usage(Texture( is_sampled ms ))"}));
+        UsageRawImageCase{"f_texture_2d_ms",
+                          "%result = OpImageQuerySamples "
+                          "%uint %im",
+                          "Usage(Texture( is_sampled ms ))"}));
 
 }  // namespace
 }  // namespace spirv
