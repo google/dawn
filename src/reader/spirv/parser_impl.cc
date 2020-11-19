@@ -1602,6 +1602,145 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
   }
 }
 
+ast::type::Type* ParserImpl::GetTypeForHandleVar(
+    const spvtools::opt::Instruction& var) {
+  // This can be a sampler or image.
+  // Determine it from the usage inferred for the variable.
+  const Usage& usage = handle_usage_[&var];
+  if (!usage.IsValid()) {
+    Fail() << "Invalid sampler or texture usage for variable "
+           << var.PrettyPrint() << "\n"
+           << usage;
+    return nullptr;
+  }
+  if (!usage.IsComplete()) {
+    // TODO(dneto): In SPIR-V you could statically reference a texture or
+    // sampler without using it in a way that gives us a clue on how to declare
+    // it.  In that case look at the underlying OpTypeSampler or OpTypeImage; in
+    // the OpTypeImage see if it has a format.  Sampled images alway have
+    // Unknown format.  For WGSL, storage images always have a format.  And then
+    // check for NonWritable or NonReadabl
+    Fail() << "Unsupported: Incomplete usage on samper or texture usage for "
+              "variable "
+           << var.PrettyPrint() << "\n"
+           << usage;
+    return nullptr;
+  }
+  ast::type::Type* ast_store_type = nullptr;
+  if (usage.IsSampler()) {
+    ast_store_type =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
+            usage.IsComparisonSampler()
+                ? ast::type::SamplerKind::kComparisonSampler
+                : ast::type::SamplerKind::kSampler));
+  } else if (usage.IsTexture()) {
+    const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
+    if (!ptr_type) {
+      Fail() << "Invalid type for variable " << var.PrettyPrint();
+      return nullptr;
+    }
+    const auto* raw_image_type =
+        def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
+    if (!raw_image_type) {
+      Fail() << "Invalid pointer type for variable " << var.PrettyPrint();
+      return nullptr;
+    }
+    switch (raw_image_type->opcode()) {
+      case SpvOpTypeImage:  // The expected case.
+        break;
+      case SpvOpTypeArray:
+      case SpvOpTypeRuntimeArray:
+        Fail() << "arrays of textures are not supported in WGSL; can't "
+                  "translate variable "
+               << var.PrettyPrint();
+        return nullptr;
+      default:
+        Fail() << "invalid type for image variable " << var.PrettyPrint();
+        return nullptr;
+    }
+    const spvtools::opt::analysis::Image* image_type =
+        type_mgr_->GetType(raw_image_type->result_id())->AsImage();
+    if (!image_type) {
+      Fail() << "internal error: Couldn't look up image type"
+             << raw_image_type->PrettyPrint();
+      return nullptr;
+    }
+
+    const ast::type::TextureDimension dim =
+        enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
+    if (dim == ast::type::TextureDimension::kNone) {
+      return nullptr;
+    }
+
+    // WGSL textures are always formatted.  Unformatted textures are always
+    // sampled.
+    if (usage.IsSampledTexture() ||
+        (image_type->format() == SpvImageFormatUnknown)) {
+      // Make a sampled texture type.
+      auto* ast_sampled_component_type =
+          ConvertType(raw_image_type->GetSingleWordInOperand(0));
+
+      // Vulkan ignores the depth parameter on OpImage, so pay attention to the
+      // usage as well.  That is, it's valid for a Vulkan shader to use an
+      // OpImage variable with an OpImage*Dref* instruction.  In WGSL we must
+      // treat that as a depth texture.
+      if (image_type->depth() || usage.IsDepthTexture()) {
+        ast_store_type = ctx_.type_mgr().Get(
+            std::make_unique<ast::type::DepthTextureType>(dim));
+      } else if (image_type->is_multisampled()) {
+        // Multisampled textures are never depth textures.
+        ast_store_type = ctx_.type_mgr().Get(
+            std::make_unique<ast::type::MultisampledTextureType>(
+                dim, ast_sampled_component_type));
+      } else {
+        ast_store_type =
+            ctx_.type_mgr().Get(std::make_unique<ast::type::SampledTextureType>(
+                dim, ast_sampled_component_type));
+      }
+    } else {
+      // Make a storage texture.
+      bool is_nonwritable = false;
+      bool is_nonreadable = false;
+      for (const auto& deco : GetDecorationsFor(var.result_id())) {
+        if (deco.size() != 1) {
+          continue;
+        }
+        if (deco[0] == SpvDecorationNonWritable) {
+          is_nonwritable = true;
+        }
+        if (deco[0] == SpvDecorationNonReadable) {
+          is_nonreadable = true;
+        }
+      }
+      if (is_nonwritable && is_nonreadable) {
+        Fail() << "storage image variable is both NonWritable and NonReadable"
+               << var.PrettyPrint();
+      }
+      if (!is_nonwritable && !is_nonreadable) {
+        Fail()
+            << "storage image variable is neither NonWritable nor NonReadable"
+            << var.PrettyPrint();
+      }
+      const auto access = is_nonwritable ? ast::AccessControl::kReadOnly
+                                         : ast::AccessControl::kWriteOnly;
+      const auto format = enum_converter_.ToImageFormat(image_type->format());
+      if (format == ast::type::ImageFormat::kNone) {
+        return nullptr;
+      }
+      ast_store_type = ctx_.type_mgr().Get(
+          std::make_unique<ast::type::StorageTextureType>(dim, access, format));
+    }
+  } else {
+    Fail() << "unsupported: UniformConstant variable is not a recognized "
+              "sampler or texture"
+           << var.PrettyPrint();
+    return nullptr;
+  }
+  // Form the pointer type.
+  return ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+      ast_store_type, ast::StorageClass::kUniformConstant));
+}
+
 bool ParserImpl::RegisterHandleUsage() {
   if (!success_) {
     return false;

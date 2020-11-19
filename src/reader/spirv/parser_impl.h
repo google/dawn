@@ -405,6 +405,14 @@ class ParserImpl : Reader {
   /// @returns the handle usage, or an empty usage object.
   Usage GetHandleUsage(uint32_t id) const;
 
+  /// Returns the AST type for the pointer-to-sampler or pointer-to-texture type
+  /// for the given variable in UniformConstant storage class.  Returns null and
+  /// emits an error on failure.
+  /// @param var the OpVariable instruction
+  /// @returns the Tint AST type for the poiner-to-{sampler|texture} or null on
+  /// error
+  ast::type::Type* GetTypeForHandleVar(const spvtools::opt::Instruction& var);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
