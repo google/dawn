@@ -711,6 +711,15 @@ class ParserImpl {
   /// @see sync().
   bool is_sync_token(const Token& t) const;
 
+  /// without_error() calls the function |func| muting any grammatical errors
+  /// found while executing the function. This can be used as a best-effort to
+  /// produce a meaningful error message when the parser is out of sync.
+  /// @param func a function or lambda with the signature: `Expect<Result>()` or
+  /// `Maybe<Result>()`.
+  /// @return the value returned by |func|.
+  template <typename F, typename T = ReturnType<F>>
+  T without_error(F&& func);
+
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
   template <typename T>
@@ -749,6 +758,7 @@ class ParserImpl {
   std::deque<Token> token_queue_;
   bool synchronized_ = true;
   std::vector<Token::Type> sync_tokens_;
+  int silence_errors_ = 0;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
 };

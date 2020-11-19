@@ -185,11 +185,13 @@ ParserImpl::Failure::Errored ParserImpl::add_error(const Token& t,
 
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    const std::string& err) {
-  diag::Diagnostic diagnostic;
-  diagnostic.severity = diag::Severity::Error;
-  diagnostic.message = err;
-  diagnostic.source = source;
-  diags_.add(std::move(diagnostic));
+  if (silence_errors_ == 0) {
+    diag::Diagnostic diagnostic;
+    diagnostic.severity = diag::Severity::Error;
+    diagnostic.message = err;
+    diagnostic.source = source;
+    diags_.add(std::move(diagnostic));
+  }
   return Failure::kErrored;
 }
 
@@ -329,12 +331,31 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (errored)
     return Failure::kErrored;
 
-  if (decos.value.size() > 0) {
-    add_error(next(), "expected declaration after decorations");
-  } else {
-    add_error(next(), "unexpected token");
+  // Invalid syntax found - try and determine the best error message
+
+  // We have decorations parsed, but nothing to consume them?
+  if (decos.value.size() > 0)
+    return add_error(next(), "expected declaration after decorations");
+
+  // We have a statement outside of a function?
+  auto t = peek();
+  auto stat = without_error([&] { return statement(); });
+  if (stat.matched) {
+    // Attempt to jump to the next '}' - the function might have just been
+    // missing an opening line.
+    sync_to(Token::Type::kBraceRight, true);
+    return add_error(t, "statement found outside of function body");
   }
-  return Failure::kErrored;
+  if (!stat.errored) {
+    // No match, no error - the parser might not have progressed.
+    // Ensure we always make _some_ forward progress.
+    next();
+  }
+
+  // Exhausted all attempts to make sense of where we're at.
+  // Spew a generic error.
+
+  return add_error(t, "unexpected token");
 }
 
 // global_variable_decl
@@ -2999,6 +3020,14 @@ bool ParserImpl::is_sync_token(const Token& t) const {
       return true;
   }
   return false;
+}
+
+template <typename F, typename T>
+T ParserImpl::without_error(F&& body) {
+  silence_errors_++;
+  auto result = body();
+  silence_errors_--;
+  return result;
 }
 
 }  // namespace wgsl

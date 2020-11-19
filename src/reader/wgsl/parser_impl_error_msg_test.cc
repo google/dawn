@@ -449,6 +449,20 @@ TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
          "                ^\n");
 }
 
+TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
+  EXPECT(R"(const bar : vec2<f32> = vec2<f32>(1., 2.);
+  var a : f32 = bar[0];
+  return;
+})",
+         "test.wgsl:2:17 error: unknown constructed type 'bar'\n"
+         "  var a : f32 = bar[0];\n"
+         "                ^^^\n"
+         "\n"
+         "test.wgsl:3:3 error: statement found outside of function body\n"
+         "  return;\n"
+         "  ^^^^^^\n");
+}
+
 TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
   EXPECT("const ^ : i32 = 1;",
          "test.wgsl:1:7 error: expected identifier for constant declaration\n"
