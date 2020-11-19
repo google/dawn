@@ -13,6 +13,11 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
+#include "src/ast/type/access_control_type.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -24,7 +29,7 @@ namespace {
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   auto p = parser("my_var : f32");
   auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
@@ -74,6 +79,175 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
   ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  auto p = parser("my_var : [[access(read)]] S");
+  p->register_constructed("S", &s);
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_NE(decl->type, nullptr);
+  ASSERT_TRUE(decl->type->IsAccessControl());
+  EXPECT_TRUE(decl->type->AsAccessControl()->IsReadOnly());
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  auto p = parser("my_var : [[access(read_write)]] S");
+  p->register_constructed("S", &s);
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_NE(decl->type, nullptr);
+  ASSERT_TRUE(decl->type->IsAccessControl());
+  EXPECT_TRUE(decl->type->AsAccessControl()->IsReadWrite());
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  auto p = parser("my_var : [[access(read), access(read_write)]] S");
+  p->register_constructed("S", &s);
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:1: multiple access decorations not allowed");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
+  p->register_constructed("S", &s);
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:1: multiple access decorations not allowed");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoBadValue) {
+  auto p = parser("my_var : [[access(unknown)]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:19: invalid value for access decoration");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
+  auto p = parser("my_var : [[access(1)]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:19: expected identifier for access_type");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  auto p = parser("my_var : [[stride(1)]] S");
+  p->register_constructed("S", &s);
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:12: unexpected decorations");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightBlock) {
+  auto p = parser("my_var : [[access(read) S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:25: expected ']]' for decoration list");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
+  auto p = parser("my_var : [[access(read]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:23: expected ')' for access decoration");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
+  auto p = parser("my_var : [[access read)]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:19: expected '(' for access decoration");
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_DecorationEmpty) {
+  auto p = parser("my_var : [[]] S");
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(decl.errored);
+  ASSERT_EQ(p->error(), "1:12: empty decoration list");
 }
 
 }  // namespace

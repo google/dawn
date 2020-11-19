@@ -35,6 +35,8 @@ enum class DecorationKind {
   kStruct,
   kStructMember,
   /*|*/ kStructMemberOffset,
+  kType,
+  /*|*/ kAccess,
   kVariable,
   /*|*/ kBinding,
   /*|*/ kBuiltin,

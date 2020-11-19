@@ -40,6 +40,8 @@ set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/access_control.cc
   ast/access_control.h
+  ast/access_decoration.cc
+  ast/access_decoration.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
   ast/array_decoration.cc
@@ -150,6 +152,8 @@ set(TINT_LIB_SRCS
   ast/switch_statement.h
   ast/type_constructor_expression.h
   ast/type_constructor_expression.cc
+  ast/type_decoration.cc
+  ast/type_decoration.h
   ast/type/access_control_type.cc
   ast/type/access_control_type.h
   ast/type/alias_type.cc

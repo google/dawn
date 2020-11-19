@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/ast/access_decoration.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
@@ -45,6 +46,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -61,6 +63,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/type_decoration.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
@@ -797,7 +800,7 @@ Expect<ast::type::ImageFormat> ParserImpl::expect_image_storage_type(
 }
 
 // variable_ident_decl
-//   : IDENT COLON type_decl
+//   : IDENT COLON variable_decoration_list* type_decl
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     const std::string& use) {
   auto ident = expect_ident(use);
@@ -807,14 +810,47 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (!expect(use, Token::Type::kColon))
     return Failure::kErrored;
 
+  auto decos = decoration_list();
+  if (decos.errored)
+    return Failure::kErrored;
+
+  auto access_decos = take_decorations<ast::AccessDecoration>(decos.value);
+
   auto t = peek();
-  auto type = type_decl();
+  auto type = type_decl(decos.value);
   if (type.errored)
     return Failure::kErrored;
   if (!type.matched)
     return add_error(t.source(), "invalid type", use);
 
-  return TypedIdentifier{type.value, ident.value, ident.source};
+  if (!expect_decorations_consumed(decos.value))
+    return Failure::kErrored;
+
+  if (access_decos.size() > 1)
+    return add_error(ident.source, "multiple access decorations not allowed");
+
+  auto* ty = type.value;
+  for (auto* deco : access_decos) {
+    // If we have an access control decoration then we take it and wrap our
+    // type up with that decoration
+    ty = ctx_.type_mgr().Get(std::make_unique<ast::type::AccessControlType>(
+        deco->AsAccess()->value(), ty));
+  }
+
+  return TypedIdentifier{ty, ident.value, ident.source};
+}
+
+Expect<ast::AccessControl> ParserImpl::expect_access_type() {
+  auto ident = expect_ident("access_type");
+  if (ident.errored)
+    return Failure::kErrored;
+
+  if (ident.value == "read")
+    return {ast::AccessControl::kReadOnly, ident.source};
+  if (ident.value == "read_write")
+    return {ast::AccessControl::kReadWrite, ident.source};
+
+  return add_error(ident.source, "invalid value for access decoration");
 }
 
 // variable_storage_decoration
@@ -889,6 +925,23 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
 Maybe<ast::type::Type*> ParserImpl::type_decl() {
+  auto decos = decoration_list();
+  if (decos.errored)
+    return Failure::kErrored;
+
+  auto type = type_decl(decos.value);
+  if (type.errored)
+    return Failure::kErrored;
+  if (!type.matched)
+    return Failure::kNoMatch;
+
+  if (!expect_decorations_consumed(decos.value))
+    return Failure::kErrored;
+
+  return type.value;
+}
+
+Maybe<ast::type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   if (match(Token::Type::kIdentifier)) {
     auto* ty = get_constructed(t.to_str());
@@ -918,20 +971,13 @@ Maybe<ast::type::Type*> ParserImpl::type_decl() {
   if (match(Token::Type::kPtr))
     return expect_type_decl_pointer();
 
-  auto decos = decoration_list();
-  if (decos.errored)
-    return Failure::kErrored;
-
   if (match(Token::Type::kArray)) {
-    auto array_decos = cast_decorations<ast::ArrayDecoration>(decos.value);
+    auto array_decos = cast_decorations<ast::ArrayDecoration>(decos);
     if (array_decos.errored)
       return Failure::kErrored;
 
     return expect_type_decl_array(std::move(array_decos.value));
   }
-
-  if (!expect_decorations_consumed(decos.value))
-    return Failure::kErrored;
 
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
@@ -2714,6 +2760,16 @@ Expect<ast::Decoration*> ParserImpl::expect_decoration() {
 Maybe<ast::Decoration*> ParserImpl::decoration() {
   using Result = Maybe<ast::Decoration*>;
   auto t = next();
+  if (t.IsIdentifier() && t.to_str() == "access") {
+    const char* use = "access decoration";
+    return expect_paren_block(use, [&]() -> Result {
+      auto val = expect_access_type();
+      if (val.errored)
+        return Failure::kErrored;
+
+      return create<ast::AccessDecoration>(val.value, val.source);
+    });
+  }
   if (t.IsLocation()) {
     const char* use = "location decoration";
     return expect_paren_block(use, [&]() -> Result {
@@ -2817,23 +2873,37 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
 }
 
 template <typename T>
-Expect<std::vector<T*>> ParserImpl::cast_decorations(ast::DecorationList& in) {
-  bool ok = true;
+std::vector<T*> ParserImpl::take_decorations(ast::DecorationList& in) {
+  ast::DecorationList remaining;
   std::vector<T*> out;
   out.reserve(in.size());
   for (auto* deco : in) {
-    if (!deco->Is<T>()) {
-      std::stringstream msg;
-      msg << deco->GetKind() << " decoration type cannot be used for "
-          << T::Kind;
-      add_error(deco->source(), msg.str());
-      ok = false;
-      continue;
+    if (deco->Is<T>()) {
+      out.emplace_back(ast::As<T>(deco));
+    } else {
+      remaining.emplace_back(deco);
     }
-    out.emplace_back(ast::As<T>(deco));
   }
-  // clear in so that we can verify decorations were consumed with
-  // expect_decorations_consumed()
+
+  in = std::move(remaining);
+  return out;
+}
+
+template <typename T>
+Expect<std::vector<T*>> ParserImpl::cast_decorations(ast::DecorationList& in) {
+  auto out = take_decorations<T>(in);
+
+  bool ok = true;
+
+  for (auto* deco : in) {
+    std::stringstream msg;
+    msg << deco->GetKind() << " decoration type cannot be used for " << T::Kind;
+    add_error(deco->source(), msg.str());
+    ok = false;
+  }
+
+  // clear in so that expect_decorations_consumed() doesn't error again on the
+  // decorations we've already errored on.
   in.clear();
 
   if (!ok)

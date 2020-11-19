@@ -37,6 +37,10 @@ std::ostream& operator<<(std::ostream& out, DecorationKind data) {
       return out << "struct member";
     case DecorationKind::kStructMemberOffset:
       return out << "offset";
+    case DecorationKind::kType:
+      return out << "type";
+    case DecorationKind::kAccess:
+      return out << "access";
     case DecorationKind::kVariable:
       return out << "variable";
     case DecorationKind::kBinding:

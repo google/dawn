@@ -19,6 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/ast/access_decoration.h"
 #include "src/ast/array_decoration.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
@@ -31,6 +32,7 @@
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/test_helper.h"
+#include "src/ast/type_decoration.h"
 #include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 
@@ -70,6 +72,8 @@ TEST_F(DecorationTest, Kinds) {
   EXPECT_EQ(StructMemberDecoration::Kind, DecorationKind::kStructMember);
   EXPECT_EQ(StructMemberOffsetDecoration::Kind,
             DecorationKind::kStructMemberOffset);
+  EXPECT_EQ(TypeDecoration::Kind, DecorationKind::kType);
+  EXPECT_EQ(AccessDecoration::Kind, DecorationKind::kAccess);
   EXPECT_EQ(VariableDecoration::Kind, DecorationKind::kVariable);
   EXPECT_EQ(BindingDecoration::Kind, DecorationKind::kBinding);
   EXPECT_EQ(BuiltinDecoration::Kind, DecorationKind::kBuiltin);
@@ -83,6 +87,7 @@ TEST_F(DecorationTest, IsKind) {
       DecorationKind::kFunction,     DecorationKind::kStage,
       DecorationKind::kWorkgroup,    DecorationKind::kStruct,
       DecorationKind::kStructMember, DecorationKind::kStructMemberOffset,
+      DecorationKind::kType,         DecorationKind::kAccess,
       DecorationKind::kVariable,     DecorationKind::kBinding,
       DecorationKind::kBuiltin,      DecorationKind::kConstantId,
       DecorationKind::kLocation,
@@ -101,6 +106,8 @@ TEST_F(DecorationTest, IsKind) {
   //  kStruct
   //  kStructMember
   //   | kStructMemberOffset
+  //  kType
+  //   | kAccess
   //  kVariable
   //   | kBinding
   //   | kBuiltin
@@ -128,6 +135,10 @@ TEST_F(DecorationTest, IsKind) {
               DecorationKind::kStructMemberOffset,
               {DecorationKind::kStructMember,
                DecorationKind::kStructMemberOffset},
+          },
+          {
+              DecorationKind::kAccess,
+              {DecorationKind::kType, DecorationKind::kAccess},
           },
           {
               DecorationKind::kBinding,
@@ -159,6 +170,7 @@ TEST_F(DecorationTest, IsKind) {
   StageDecoration stage(PipelineStage::kNone, {});
   WorkgroupDecoration workgroup(0, {});
   StructMemberOffsetDecoration struct_member_offset(0, {});
+  AccessDecoration access(AccessControl::kReadOnly, {});
   BindingDecoration binding(0, {});
   BuiltinDecoration builtin(Builtin::kNone, {});
   ConstantIdDecoration constant_id(0, {});
@@ -168,6 +180,7 @@ TEST_F(DecorationTest, IsKind) {
   check(&stage);
   check(&workgroup);
   check(&struct_member_offset);
+  check(&access);
   check(&binding);
   check(&builtin);
   check(&constant_id);

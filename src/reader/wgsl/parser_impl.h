@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/access_control.h"
 #include "src/ast/array_decoration.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
@@ -320,6 +321,11 @@ class ParserImpl {
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<ast::type::Type*> type_decl();
+  /// Parses a `type_decl` grammar element with the given pre-parsed
+  /// decorations.
+  /// @param decos the list of decorations for the type.
+  /// @returns the parsed Type or nullptr if none matched.
+  Maybe<ast::type::Type*> type_decl(ast::DecorationList& decos);
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
@@ -383,6 +389,10 @@ class ParserImpl {
   /// not match a stage name.
   /// @returns the pipeline stage.
   Expect<ast::PipelineStage> expect_pipeline_stage();
+  /// Parses an access type identifier, erroring if the next token does not
+  /// match a valid access type name.
+  /// @returns the parsed access control.
+  Expect<ast::AccessControl> expect_access_type();
   /// Parses a builtin identifier, erroring if the next token does not match a
   /// valid builtin name.
   /// @returns the parsed builtin.
@@ -720,10 +730,16 @@ class ParserImpl {
   template <typename F, typename T = ReturnType<F>>
   T without_error(F&& func);
 
+  /// Returns all the decorations taken from |list| that matches the type |T|.
+  /// Those that do not match are kept in |list|.
+  template <typename T>
+  std::vector<T*> take_decorations(ast::DecorationList& list);
+
   /// Downcasts all the decorations in |list| to the type |T|, raising a parser
   /// error if any of the decorations aren't of the type |T|.
   template <typename T>
-  Expect<std::vector<T*>> cast_decorations(ast::DecorationList& in);
+  Expect<std::vector<T*>> cast_decorations(ast::DecorationList& list);
+
   /// Reports an error if the decoration list |list| is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
