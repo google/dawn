@@ -365,6 +365,27 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     return true;
   }
 
+  auto* lhs_type = expr->lhs()->result_type()->UnwrapAll();
+  auto* rhs_type = expr->rhs()->result_type()->UnwrapAll();
+  // Multiplying by a matrix requires the use of `mul` in order to get the
+  // type of multiply we desire.
+  if (expr->op() == ast::BinaryOp::kMultiply &&
+      ((lhs_type->IsVector() && rhs_type->IsMatrix()) ||
+       (lhs_type->IsMatrix() && rhs_type->IsVector()) ||
+       (lhs_type->IsMatrix() && rhs_type->IsMatrix()))) {
+    out << "mul(";
+    if (!EmitExpression(pre, out, expr->lhs())) {
+      return false;
+    }
+    out << ", ";
+    if (!EmitExpression(pre, out, expr->rhs())) {
+      return false;
+    }
+    out << ")";
+
+    return true;
+  }
+
   out << "(";
   if (!EmitExpression(pre, out, expr->lhs())) {
     return false;
