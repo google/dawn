@@ -404,18 +404,17 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
   if (type->IsAccessControl()) {
     auto* ac = type->AsAccessControl();
-    // TODO(dsinclair): Access control isn't supported in WGSL yet, so this
-    // is disabled for now.
-    //
-    // out_ << "[[access(";
-    // if (ac->IsReadOnly()) {
-    //   out_ << "read";
-    // } else if (ac->IsWriteOnly()) {
-    //   out_ << "write";
-    // } else {
-    //   out_ << "read_write";
-    // }
-    // out_ << ")]]" << std::endl;
+
+    out_ << "[[access(";
+    if (ac->IsReadOnly()) {
+      out_ << "read";
+    } else if (ac->IsReadWrite()) {
+      out_ << "read_write";
+    } else {
+      error_ = "invalid access control";
+      return false;
+    }
+    out_ << ")]]" << std::endl;
     if (!EmitType(ac->type())) {
       return false;
     }

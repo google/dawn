@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/access_control.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
@@ -20,6 +21,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/depth_texture_type.h"
@@ -59,6 +61,46 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "array<bool, 4>");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  ast::type::AccessControlType a(ast::AccessControl::kReadOnly, &s);
+
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "[[access(read)]]\nS");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
+  ast::type::I32Type i32;
+
+  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMemberList members;
+  members.push_back(&mem);
+
+  ast::StructBlockDecoration block_deco(Source{});
+  ast::StructDecorationList decos;
+  decos.push_back(&block_deco);
+
+  ast::Struct str(decos, members);
+  ast::type::StructType s("S", &str);
+
+  ast::type::AccessControlType a(ast::AccessControl::kReadWrite, &s);
+
+  ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
+  EXPECT_EQ(gen.result(), "[[access(read_write)]]\nS");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {

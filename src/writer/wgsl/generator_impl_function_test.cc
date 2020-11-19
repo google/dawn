@@ -240,7 +240,8 @@ struct Data {
   d : f32;
 };
 
-[[binding(0), set(0)]] var<storage_buffer> data : Data;
+[[binding(0), set(0)]] var<storage_buffer> data : [[access(read_write)]]
+Data;
 
 [[stage(compute)]]
 fn a() -> void {
