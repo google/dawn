@@ -431,7 +431,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %6 = OpTypePointer Private %7
 %5 = OpVariable %6 Private
 %11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 2
+%13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
@@ -454,14 +454,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %6 = OpTypePointer Private %7
 %5 = OpVariable %6 Private
 %11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpTypeVector %4 2
+%13 = OpTypeVector %4 4
+%14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
 %17 = OpConstant %4 3
 %18 = OpConstantComposite %14 %15 %16 %17
-%22 = OpTypeInt 32 0
-%23 = OpConstant %22 4
+%23 = OpTypeInt 32 0
+%24 = OpConstant %23 4
 )",
           R"(
 %9 = OpLoad %7 %5
@@ -469,9 +469,10 @@ expected_texture_overload_spirv expected_texture_overload(
 %12 = OpSampledImage %11 %10 %9
 %19 = OpCompositeExtract %4 %18 0
 %20 = OpCompositeExtract %4 %18 1
-%21 = OpConvertUToF %4 %23
-%24 = OpCompositeConstruct %13 %19 %20 %21
-%8 = OpImageSampleImplicitLod %4 %12 %24
+%21 = OpCompositeExtract %4 %18 2
+%22 = OpConvertUToF %4 %24
+%25 = OpCompositeConstruct %13 %19 %20 %21 %22
+%8 = OpImageSampleImplicitLod %4 %12 %25
 )"};
     case ValidTextureOverload::kSampleBias2dF32:
       return {

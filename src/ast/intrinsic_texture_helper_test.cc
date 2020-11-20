@@ -320,7 +320,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 using f32 = ast::Builder::f32;
                 return b->ExprList("texture",                     // t
                                    "sampler",                     // s
-                                   b->vec2<f32>(1.f, 2.f, 3.f));  // coords
+                                   b->vec3<f32>(1.f, 2.f, 3.f));  // coords
               },
           },
           {
@@ -338,7 +338,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 using f32 = ast::Builder::f32;
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
-                                   b->vec2<f32>(1.f, 2.f, 3.f),  // coords
+                                   b->vec3<f32>(1.f, 2.f, 3.f),  // coords
                                    4u);                          // array_index
               },
           },
