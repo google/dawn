@@ -186,9 +186,10 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
-  EXPECT_EQ(result(), std::string("matrix<float, 3, 2>(float3(1.00000000f, "
-                                  "2.00000000f, 3.00000000f), ") +
-                          "float3(3.00000000f, 4.00000000f, 5.00000000f))");
+  EXPECT_EQ(
+      result(),
+      std::string("float3x2(float3(1.00000000f, 2.00000000f, 3.00000000f), ") +
+          "float3(3.00000000f, 4.00000000f, 5.00000000f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {

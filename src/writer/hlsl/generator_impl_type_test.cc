@@ -157,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
   ast::type::MatrixType m(&f32, 3, 2);
 
   ASSERT_TRUE(gen.EmitType(out, &m, "")) << gen.error();
-  EXPECT_EQ(result(), "matrix<float, 3, 2>");
+  EXPECT_EQ(result(), "float3x2");
 }
 
 // TODO(dsinclair): How to annotate as workgroup?

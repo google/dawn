@@ -173,7 +173,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // mat2x3<f32> b;
   // data.a = b;
   //
-  // -> matrix<float, 3, 2> _tint_tmp = b;
+  // -> float3x2 _tint_tmp = b;
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
   ast::type::F32Type f32;
@@ -217,7 +217,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.DetermineResultType(&assign));
 
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
-  EXPECT_EQ(result(), R"(matrix<float, 3, 2> _tint_tmp = b;
+  EXPECT_EQ(result(), R"(float3x2 _tint_tmp = b;
 data.Store3(4 + 0, asuint(_tint_tmp[0]));
 data.Store3(4 + 16, asuint(_tint_tmp[1]));
 )");
@@ -232,7 +232,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage_buffer> data : Data;
   // data.a = mat2x3<f32>();
   //
-  // -> matrix<float, 3, 2> _tint_tmp = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f,
+  // -> float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f,
   // 0.0f, 0.0f, 0.0f);
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]);
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
@@ -275,7 +275,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
   EXPECT_EQ(
       result(),
-      R"(matrix<float, 3, 2> _tint_tmp = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+      R"(float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 data.Store3(4 + 0, asuint(_tint_tmp[0]));
 data.Store3(4 + 16, asuint(_tint_tmp[1]));
 )");
@@ -290,7 +290,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage_buffer> data : Data;
   // data.a;
   //
-  // -> asfloat(matrix<uint, 2, 3>(data.Load2(4 + 0), data.Load2(4 + 8),
+  // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
   // data.Load2(4 + 16)));
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -325,7 +325,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
-            "asfloat(matrix<uint, 2, 3>(data.Load2(4 + 0), data.Load2(4 + 8), "
+            "asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8), "
             "data.Load2(4 + 16)))");
 }
 
@@ -342,7 +342,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage_buffer> data : Outer;
   // data.b.a;
   //
-  // -> asfloat(matrix<uint, 3, 2>(data.Load3(4 + 0), data.Load3(4 + 16)));
+  // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)));
   ast::type::F32Type f32;
   ast::type::I32Type i32;
   ast::type::MatrixType mat(&f32, 3, 2);
@@ -375,9 +375,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.DetermineResultType(&expr));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      "asfloat(matrix<uint, 3, 2>(data.Load3(4 + 0), data.Load3(4 + 16)))");
+  EXPECT_EQ(result(),
+            "asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)))");
 }
 
 TEST_F(
@@ -389,7 +388,7 @@ TEST_F(
   // var<storage_buffer> data : Data;
   // data.a;
   //
-  // -> asfloat(matrix<uint, 3, 3>(data.Load3(0), data.Load3(16),
+  // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
   // data.Load3(32)));
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -420,7 +419,7 @@ TEST_F(
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
-            "asfloat(matrix<uint, 3, 3>(data.Load3(0 + 0), data.Load3(0 + 16), "
+            "asfloat(uint3x3(data.Load3(0 + 0), data.Load3(0 + 16), "
             "data.Load3(0 + 32)))");
 }
 

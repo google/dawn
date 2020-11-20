@@ -1762,7 +1762,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
       return true;
     }
 
-    out << "matrix<uint, " << mat->rows() << ", " << mat->columns() << ">(";
+    out << "uint" << mat->rows() << "x" << mat->columns() << "(";
 
     for (uint32_t i = 0; i < mat->columns(); i++) {
       if (i != 0) {
@@ -2000,11 +2000,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << "int";
   } else if (type->IsMatrix()) {
     auto* mat = type->AsMatrix();
-    out << "matrix<";
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }
-    out << ", " << mat->rows() << ", " << mat->columns() << ">";
+    out << mat->rows() << "x" << mat->columns();
   } else if (type->IsPointer()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183

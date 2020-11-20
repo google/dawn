@@ -135,9 +135,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   ast::VariableDeclStatement stmt(var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      R"(matrix<float, 3, 2> a = matrix<float, 3, 2>(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  EXPECT_EQ(result(),
+            R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
 }
 
