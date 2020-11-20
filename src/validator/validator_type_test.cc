@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/alias_type.h"
@@ -35,6 +36,34 @@ namespace {
 class ValidatorTypeTest : public ValidatorTestHelper, public testing::Test {};
 
 TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
+  // [[Block]]
+  // struct Foo {
+  //   vf: f32;
+  //   rt: array<f32>;
+  // };
+
+  ast::type::F32Type f32;
+  ast::type::ArrayType arr(&f32);
+  ast::StructMemberList members;
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>("vf", &f32, deco));
+  }
+  {
+    ast::StructMemberDecorationList deco;
+    members.push_back(create<ast::StructMember>(
+        Source{Source::Location{12, 34}}, "rt", &arr, deco));
+  }
+  ast::StructDecorationList decos;
+  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
+  auto* st = create<ast::Struct>(decos, members);
+  ast::type::StructType struct_type("Foo", st);
+
+  mod()->AddConstructedType(&struct_type);
+  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+}
+
+TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   // struct Foo {
   //   vf: f32;
   //   rt: array<f32>;
@@ -57,10 +86,14 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   ast::type::StructType struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
-  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  EXPECT_EQ(v()->error(),
+            "12:34: v-0031: a struct containing a runtime-sized array must be "
+            "in the 'storage' storage class: 'Foo'");
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
+  // [[Block]]
   // struct Foo {
   //   rt: array<f32>;
   //   vf: f32;
@@ -79,6 +112,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
     members.push_back(create<ast::StructMember>("vf", &f32, deco));
   }
   ast::StructDecorationList decos;
+  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
   ast::type::StructType struct_type("Foo", st);
 
@@ -90,6 +124,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
+  // [[Block]]
   // type RTArr = array<u32>;
   // struct s {
   //  b: RTArr;
@@ -112,6 +147,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   }
 
   ast::StructDecorationList decos;
+  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
   ast::type::StructType struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
@@ -122,6 +158,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
+  // [[Block]]
   // type RTArr = array<u32>;
   // struct s {
   //  a: u32;
@@ -143,6 +180,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
         Source{Source::Location{12, 34}}, "b", &alias, deco));
   }
   ast::StructDecorationList decos;
+  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
   ast::type::StructType struct_type("s", st);
   mod()->AddConstructedType(&struct_type);

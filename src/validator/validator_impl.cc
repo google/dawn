@@ -73,12 +73,21 @@ bool ValidatorImpl::ValidateConstructedTypes(
       for (auto* member : st->impl()->members()) {
         if (member->type()->UnwrapAll()->IsArray()) {
           auto* r = member->type()->UnwrapAll()->AsArray();
-          if (r->IsRuntimeArray() && member != st->impl()->members().back()) {
-            set_error(member->source(),
-                      "v-0015: runtime arrays may only appear as the last "
-                      "member of a struct: '" +
-                          member->name() + "'");
-            return false;
+          if (r->IsRuntimeArray()) {
+            if (member != st->impl()->members().back()) {
+              set_error(member->source(),
+                        "v-0015: runtime arrays may only appear as the last "
+                        "member of a struct: '" +
+                            member->name() + "'");
+              return false;
+            }
+            if (!st->IsBlockDecorated()) {
+              set_error(member->source(),
+                        "v-0031: a struct containing a runtime-sized array "
+                        "must be in the 'storage' storage class: '" +
+                            st->name() + "'");
+              return false;
+            }
           }
         }
       }
