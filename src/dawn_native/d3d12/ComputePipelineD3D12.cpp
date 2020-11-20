@@ -43,44 +43,14 @@ namespace dawn_native { namespace d3d12 {
 
         ShaderModule* module = ToBackend(descriptor->computeStage.module);
 
-        const char* entryPoint = descriptor->computeStage.entryPoint;
-        std::string remappedEntryPoint;
-        std::string hlslSource;
-        if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(hlslSource, module->TranslateToHLSLWithTint(
-                                            entryPoint, SingleShaderStage::Compute,
-                                            ToBackend(GetLayout()), &remappedEntryPoint));
-            entryPoint = remappedEntryPoint.c_str();
-
-        } else {
-            DAWN_TRY_ASSIGN(hlslSource,
-                            module->TranslateToHLSLWithSPIRVCross(
-                                entryPoint, SingleShaderStage::Compute, ToBackend(GetLayout())));
-
-            // Note that the HLSL will always use entryPoint "main" under SPIRV-cross.
-            entryPoint = "main";
-        }
-
         D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
         d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
-        ComPtr<IDxcBlob> compiledDXCShader;
-        ComPtr<ID3DBlob> compiledFXCShader;
-        if (device->IsToggleEnabled(Toggle::UseDXC)) {
-            DAWN_TRY_ASSIGN(compiledDXCShader,
-                            CompileShaderDXC(device, SingleShaderStage::Compute, hlslSource,
-                                             entryPoint, compileFlags));
-
-            d3dDesc.CS.pShaderBytecode = compiledDXCShader->GetBufferPointer();
-            d3dDesc.CS.BytecodeLength = compiledDXCShader->GetBufferSize();
-        } else {
-            DAWN_TRY_ASSIGN(compiledFXCShader,
-                            CompileShaderFXC(device, SingleShaderStage::Compute, hlslSource,
-                                             entryPoint, compileFlags));
-            d3dDesc.CS.pShaderBytecode = compiledFXCShader->GetBufferPointer();
-            d3dDesc.CS.BytecodeLength = compiledFXCShader->GetBufferSize();
-        }
-
+        CompiledShader compiledShader;
+        DAWN_TRY_ASSIGN(compiledShader, module->Compile(descriptor->computeStage.entryPoint,
+                                                        SingleShaderStage::Compute,
+                                                        ToBackend(GetLayout()), compileFlags));
+        d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
         device->GetD3D12Device()->CreateComputePipelineState(&d3dDesc,
                                                              IID_PPV_ARGS(&mPipelineState));
         return {};

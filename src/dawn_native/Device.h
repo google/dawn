@@ -37,6 +37,7 @@ namespace dawn_native {
     class DynamicUploader;
     class ErrorScope;
     class ErrorScopeTracker;
+    class PersistentCache;
     class StagingBufferBase;
     struct InternalPipelineStore;
 
@@ -179,6 +180,8 @@ namespace dawn_native {
         MaybeError ValidateIsAlive() const;
 
         ErrorScope* GetCurrentErrorScope();
+
+        PersistentCache* GetPersistentCache();
 
         void Reference();
         void Release();
@@ -388,6 +391,8 @@ namespace dawn_native {
         ExtensionsSet mEnabledExtensions;
 
         std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
+
+        std::unique_ptr<PersistentCache> mPersistentCache;
     };
 
 }  // namespace dawn_native

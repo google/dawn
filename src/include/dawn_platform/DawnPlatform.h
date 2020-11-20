@@ -17,7 +17,10 @@
 
 #include "dawn_platform/dawn_platform_export.h"
 
+#include <cstddef>
 #include <cstdint>
+
+#include <dawn/webgpu.h>
 
 namespace dawn_platform {
 
@@ -28,14 +31,43 @@ namespace dawn_platform {
         GPUWork,     // Actual GPU work
     };
 
+    class DAWN_PLATFORM_EXPORT CachingInterface {
+      public:
+        CachingInterface();
+        virtual ~CachingInterface();
+
+        // LoadData has two modes. The first mode is used to get a value which
+        // corresponds to the |key|. The |valueOut| is a caller provided buffer
+        // allocated to the size |valueSize| which is loaded with data of the
+        // size returned. The second mode is used to query for the existence of
+        // the |key| where |valueOut| is nullptr and |valueSize| must be 0.
+        // The return size is non-zero if the |key| exists.
+        virtual size_t LoadData(const WGPUDevice device,
+                                const void* key,
+                                size_t keySize,
+                                void* valueOut,
+                                size_t valueSize) = 0;
+
+        // StoreData puts a |value| in the cache which corresponds to the |key|.
+        virtual void StoreData(const WGPUDevice device,
+                               const void* key,
+                               size_t keySize,
+                               const void* value,
+                               size_t valueSize) = 0;
+
+      private:
+        CachingInterface(const CachingInterface&) = delete;
+        CachingInterface& operator=(const CachingInterface&) = delete;
+    };
+
     class DAWN_PLATFORM_EXPORT Platform {
       public:
         Platform();
         virtual ~Platform();
 
-        virtual const unsigned char* GetTraceCategoryEnabledFlag(TraceCategory category) = 0;
+        virtual const unsigned char* GetTraceCategoryEnabledFlag(TraceCategory category);
 
-        virtual double MonotonicallyIncreasingTime() = 0;
+        virtual double MonotonicallyIncreasingTime();
 
         virtual uint64_t AddTraceEvent(char phase,
                                        const unsigned char* categoryGroupEnabled,
@@ -46,7 +78,13 @@ namespace dawn_platform {
                                        const char** argNames,
                                        const unsigned char* argTypes,
                                        const uint64_t* argValues,
-                                       unsigned char flags) = 0;
+                                       unsigned char flags);
+
+        // The |fingerprint| is provided by Dawn to inform the client to discard the Dawn caches
+        // when the fingerprint changes. The returned CachingInterface is expected to outlive the
+        // device which uses it to persistently cache objects.
+        virtual CachingInterface* GetCachingInterface(const void* fingerprint,
+                                                      size_t fingerprintSize);
 
       private:
         Platform(const Platform&) = delete;

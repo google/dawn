@@ -306,44 +306,13 @@ namespace dawn_native { namespace d3d12 {
         shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
         shaders[SingleShaderStage::Fragment] = &descriptorD3D12.PS;
 
-        PerStage<ComPtr<ID3DBlob>> compiledFXCShader;
-        PerStage<ComPtr<IDxcBlob>> compiledDXCShader;
-
+        PerStage<CompiledShader> compiledShader;
         wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
-            std::string hlslSource;
-            const char* entryPoint = GetStage(stage).entryPoint.c_str();
-            std::string remappedEntryPoint;
-
-            if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithTint(
-                                                entryPoint, stage, ToBackend(GetLayout()),
-                                                &remappedEntryPoint));
-                entryPoint = remappedEntryPoint.c_str();
-
-            } else {
-                DAWN_TRY_ASSIGN(hlslSource, modules[stage]->TranslateToHLSLWithSPIRVCross(
-                                                entryPoint, stage, ToBackend(GetLayout())));
-
-                // Note that the HLSL will always use entryPoint "main" under SPIRV-cross.
-                entryPoint = "main";
-            }
-
-            if (device->IsToggleEnabled(Toggle::UseDXC)) {
-                DAWN_TRY_ASSIGN(
-                    compiledDXCShader[stage],
-                    CompileShaderDXC(device, stage, hlslSource, entryPoint, compileFlags));
-
-                shaders[stage]->pShaderBytecode = compiledDXCShader[stage]->GetBufferPointer();
-                shaders[stage]->BytecodeLength = compiledDXCShader[stage]->GetBufferSize();
-            } else {
-                DAWN_TRY_ASSIGN(
-                    compiledFXCShader[stage],
-                    CompileShaderFXC(device, stage, hlslSource, entryPoint, compileFlags));
-
-                shaders[stage]->pShaderBytecode = compiledFXCShader[stage]->GetBufferPointer();
-                shaders[stage]->BytecodeLength = compiledFXCShader[stage]->GetBufferSize();
-            }
+            DAWN_TRY_ASSIGN(compiledShader[stage],
+                            modules[stage]->Compile(entryPoints[stage], stage,
+                                                    ToBackend(GetLayout()), compileFlags));
+            *shaders[stage] = compiledShader[stage].GetD3D12ShaderBytecode();
         }
 
         PipelineLayout* layout = ToBackend(GetLayout());

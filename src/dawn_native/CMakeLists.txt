@@ -108,6 +108,8 @@ target_sources(dawn_native PRIVATE
     "PassResourceUsage.h"
     "PassResourceUsageTracker.cpp"
     "PassResourceUsageTracker.h"
+    "PersistentCache.cpp"
+    "PersistentCache.h"
     "PerStage.cpp"
     "PerStage.h"
     "Pipeline.cpp"

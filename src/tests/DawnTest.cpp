@@ -744,6 +744,10 @@ void DawnTestBase::SetUp() {
         mBackendAdapter = *it;
     }
 
+    // Setup the per-test platform. Tests can provide one by overloading CreateTestPlatform.
+    mTestPlatform = CreateTestPlatform();
+    gTestEnv->GetInstance()->SetPlatform(mTestPlatform.get());
+
     // Create the device from the adapter
     for (const char* forceEnabledWorkaround : mParam.forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
@@ -1078,6 +1082,10 @@ void DawnTestBase::ResolveExpectations() {
 
         EXPECT_TRUE(result);
     }
+}
+
+std::unique_ptr<dawn_platform::Platform> DawnTestBase::CreateTestPlatform() {
+    return nullptr;
 }
 
 bool RGBA8::operator==(const RGBA8& other) const {
