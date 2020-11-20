@@ -675,6 +675,7 @@ if (${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator_impl_identifier_test.cc
     writer/hlsl/generator_impl_if_test.cc
     writer/hlsl/generator_impl_intrinsic_test.cc
+    writer/hlsl/generator_impl_intrinsic_texture_test.cc
     writer/hlsl/generator_impl_import_test.cc
     writer/hlsl/generator_impl_loop_test.cc
     writer/hlsl/generator_impl_member_accessor_test.cc

@@ -103,6 +103,20 @@ uint32_t convert_swizzle_to_index(const std::string& swizzle) {
   return 0;
 }
 
+ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
+  if (!expr->IsConstructor())
+    return nullptr;
+  auto* constructor = expr->AsConstructor();
+  if (!constructor->IsTypeConstructor()) {
+    return nullptr;
+  }
+  auto* type_constructor = constructor->AsTypeConstructor();
+  if (!type_constructor->type()->IsVector()) {
+    return nullptr;
+  }
+  return type_constructor;
+}
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(Context* ctx, ast::Module* module)
@@ -634,8 +648,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       auto name = generate_intrinsic_name(ident->intrinsic());
       if (name.empty()) {
         if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-          error_ = "Textures not implemented yet";
-          return false;
+          return EmitTextureCall(pre, out, expr);
         }
         name = generate_builtin_name(expr);
         if (name.empty()) {
@@ -705,6 +718,110 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
     if (!EmitExpression(pre, out, param)) {
       return false;
+    }
+  }
+
+  out << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
+                                    std::ostream& out,
+                                    ast::CallExpression* expr) {
+  make_indent(out);
+
+  auto* ident = expr->func()->AsIdentifier();
+
+  auto params = expr->params();
+  auto* signature = static_cast<const ast::intrinsic::TextureSignature*>(
+      ident->intrinsic_signature());
+  auto& pidx = signature->params.idx;
+  auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
+
+  if (!EmitExpression(pre, out, params[pidx.texture]))
+    return false;
+
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureSample:
+      out << ".Sample(";
+      break;
+    case ast::Intrinsic::kTextureSampleBias:
+      out << ".SampleBias(";
+      break;
+    case ast::Intrinsic::kTextureSampleLevel:
+      out << ".SampleLevel(";
+      break;
+    case ast::Intrinsic::kTextureSampleGrad:
+      out << ".SampleGrad(";
+      break;
+    case ast::Intrinsic::kTextureSampleCompare:
+      out << ".SampleCmp(";
+      break;
+    default:
+      error_ = "Internal compiler error: Unhandled texture intrinsic '" +
+               ident->name() + "'";
+      break;
+  }
+
+  if (!EmitExpression(pre, out, params[pidx.sampler]))
+    return false;
+
+  out << ", ";
+
+  // TODO(ben-clayton): Refactor this with the near identical code in
+  // src/writer/spirv/builder.cc.
+  if (pidx.array_index != kNotUsed) {
+    // Array index needs to be appended to the coordinates.
+    auto* param_coords = params[pidx.coords];
+    auto* param_array_index = params[pidx.array_index];
+
+    uint32_t packed_coords_size;
+    ast::type::Type* packed_coords_el_ty;  // Currenly must be f32.
+    if (param_coords->result_type()->IsVector()) {
+      auto* vec = param_coords->result_type()->AsVector();
+      packed_coords_size = vec->size() + 1;
+      packed_coords_el_ty = vec->type();
+    } else {
+      packed_coords_size = 2;
+      packed_coords_el_ty = param_coords->result_type();
+    }
+
+    // Cast param_array_index to the vector element type
+    ast::TypeConstructorExpression array_index_cast(packed_coords_el_ty,
+                                                    {param_array_index});
+    array_index_cast.set_result_type(packed_coords_el_ty);
+
+    ast::type::VectorType packed_coords_ty(packed_coords_el_ty,
+                                           packed_coords_size);
+
+    ast::ExpressionList coords;
+    // If the coordinates are already passed in a vector constructor, extract
+    // the elements into the new vector instead of nesting a vector-in-vector.
+    if (auto* vc = AsVectorConstructor(param_coords)) {
+      coords = vc->values();
+    } else {
+      coords.emplace_back(param_coords);
+    }
+    coords.emplace_back(&array_index_cast);
+
+    ast::TypeConstructorExpression constructor{&packed_coords_ty,
+                                               std::move(coords)};
+
+    if (!EmitExpression(pre, out, &constructor))
+      return false;
+
+  } else {
+    if (!EmitExpression(pre, out, params[pidx.coords]))
+      return false;
+  }
+
+  for (auto idx : {pidx.depth_ref, pidx.bias, pidx.level, pidx.ddx, pidx.ddy,
+                   pidx.offset}) {
+    if (idx != kNotUsed) {
+      out << ", ";
+      if (!EmitExpression(pre, out, params[idx]))
+        return false;
     }
   }
 

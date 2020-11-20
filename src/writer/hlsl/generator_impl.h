@@ -130,6 +130,15 @@ class GeneratorImpl {
   bool EmitCall(std::ostream& pre,
                 std::ostream& out,
                 ast::CallExpression* expr);
+  /// Handles generating a call to a texture function (`textureSample`,
+  /// `textureSampleGrad`, etc)
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @returns true if the call expression is emitted
+  bool EmitTextureCall(std::ostream& pre,
+                       std::ostream& out,
+                       ast::CallExpression* expr);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement
