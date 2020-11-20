@@ -726,6 +726,10 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsAsan());
 
+    // TODO(http://crbug.com/dawn/579): PartitionAlloc raises an exception on OOM even with
+    // std::no_throw.
+    DAWN_SKIP_TEST_IF(IsWindows());
+
     // Test non-mappable buffer
     {
         wgpu::BufferDescriptor descriptor;
