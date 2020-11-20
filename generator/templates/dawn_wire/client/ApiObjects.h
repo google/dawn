@@ -21,7 +21,9 @@
 namespace dawn_wire { namespace client {
 
     template <typename T>
-    static constexpr ObjectType ObjectTypeToTypeEnum = static_cast<ObjectType>(-1);
+    struct ObjectTypeToTypeEnum {
+        static constexpr ObjectType value = static_cast<ObjectType>(-1);
+    };
 
     {% for type in by_category["object"] %}
         {% set Type = type.name.CamelCase() %}
@@ -41,7 +43,9 @@ namespace dawn_wire { namespace client {
         }
 
         template <>
-        static constexpr ObjectType ObjectTypeToTypeEnum<{{type.name.CamelCase()}}> = ObjectType::{{type.name.CamelCase()}};
+        struct ObjectTypeToTypeEnum<{{Type}}> {
+            static constexpr ObjectType value = ObjectType::{{Type}};
+        };
 
     {% endfor %}
 }}  // namespace dawn_wire::client

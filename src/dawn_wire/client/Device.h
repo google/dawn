@@ -65,7 +65,7 @@ namespace dawn_wire { namespace client {
 
         template <typename T>
         void TrackObject(T* object) {
-            mObjects[ObjectTypeToTypeEnum<T>].Append(object);
+            mObjects[ObjectTypeToTypeEnum<T>::value].Append(object);
         }
 
         void CancelCallbacksForDisconnect() override;
