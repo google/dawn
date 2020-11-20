@@ -43,8 +43,9 @@ TEST(FloatToStringTest, Small) {
 }
 
 TEST(FloatToStringTest, Highest) {
-  if (std::numeric_limits<float>::max() !=
-      340282346638528859811704183484516925440.0f) {
+  const auto highest = std::numeric_limits<float>::max();
+  const auto expected_highest = 340282346638528859811704183484516925440.0f;
+  if (highest < expected_highest || highest > expected_highest) {
     GTEST_SKIP() << "std::numeric_limits<float>::max() is not as expected for "
                     "this target";
   }
@@ -53,8 +54,11 @@ TEST(FloatToStringTest, Highest) {
 }
 
 TEST(FloatToStringTest, Lowest) {
-  if (std::numeric_limits<float>::lowest() !=
-      -340282346638528859811704183484516925440.0f) {
+  // Some compilers complain if you test floating point numbers for equality.
+  // So say it via two inequalities.
+  const auto lowest = std::numeric_limits<float>::lowest();
+  const auto expected_lowest = -340282346638528859811704183484516925440.0f;
+  if (lowest < expected_lowest || lowest > expected_lowest) {
     GTEST_SKIP()
         << "std::numeric_limits<float>::lowest() is not as expected for "
            "this target";
