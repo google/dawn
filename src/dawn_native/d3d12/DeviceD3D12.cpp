@@ -195,6 +195,9 @@ namespace dawn_native { namespace d3d12 {
     void Device::ApplyUseDxcToggle() {
         if (!ToBackend(GetAdapter())->GetBackend()->GetFunctions()->IsDXCAvailable()) {
             ForceSetToggle(Toggle::UseDXC, false);
+        } else if (IsExtensionEnabled(Extension::ShaderFloat16)) {
+            // Currently we can only use DXC to compile HLSL shaders using float16.
+            ForceSetToggle(Toggle::UseDXC, true);
         }
     }
 

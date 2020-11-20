@@ -91,8 +91,9 @@ namespace dawn_native { namespace d3d12 {
         MaybeError LoadD3D12();
         MaybeError LoadD3D11();
         MaybeError LoadDXGI();
-        void LoadDXIL();
-        void LoadDXCompiler();
+        void LoadDXCLibraries();
+        void LoadDXIL(const std::string& baseWindowsSDKPath);
+        void LoadDXCompiler(const std::string& baseWindowsSDKPath);
         MaybeError LoadFXCompiler();
         void LoadPIXRuntime();
 

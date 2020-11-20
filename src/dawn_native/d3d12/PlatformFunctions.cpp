@@ -16,7 +16,89 @@
 
 #include "common/DynamicLib.h"
 
+#include <comdef.h>
+#include <array>
+#include <sstream>
+
 namespace dawn_native { namespace d3d12 {
+    namespace {
+        // Extract Version from "10.0.{Version}.0" if possible, otherwise return 0.
+        uint32_t GetWindowsSDKVersionFromDirectoryName(const char* directoryName) {
+            constexpr char kPrefix[] = "10.0.";
+            constexpr char kPostfix[] = ".0";
+
+            constexpr uint32_t kPrefixLen = sizeof(kPrefix) - 1;
+            constexpr uint32_t kPostfixLen = sizeof(kPostfix) - 1;
+            const uint32_t directoryNameLen = strlen(directoryName);
+
+            if (directoryNameLen < kPrefixLen + kPostfixLen + 1) {
+                return 0;
+            }
+
+            // Check if directoryName starts with "10.0.".
+            if (strncmp(directoryName, kPrefix, kPrefixLen) != 0) {
+                return 0;
+            }
+
+            // Check if directoryName ends with ".0".
+            if (strncmp(directoryName + (directoryNameLen - kPostfixLen), kPostfix, kPostfixLen) !=
+                0) {
+                return 0;
+            }
+
+            // Extract Version from "10.0.{Version}.0" and convert Version into an integer.
+            return atoi(directoryName + kPrefixLen);
+        }
+
+        class ScopedFileHandle final {
+          public:
+            explicit ScopedFileHandle(HANDLE handle) : mHandle(handle) {
+            }
+            ~ScopedFileHandle() {
+                if (mHandle != INVALID_HANDLE_VALUE) {
+                    ASSERT(FindClose(mHandle));
+                }
+            }
+            HANDLE GetHandle() const {
+                return mHandle;
+            }
+
+          private:
+            HANDLE mHandle;
+        };
+
+        std::string GetWindowsSDKBasePath() {
+            const char* kDefaultWindowsSDKPath =
+                "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\*";
+            WIN32_FIND_DATAA fileData;
+            ScopedFileHandle handle(FindFirstFileA(kDefaultWindowsSDKPath, &fileData));
+            if (handle.GetHandle() == INVALID_HANDLE_VALUE) {
+                return "";
+            }
+
+            uint32_t highestWindowsSDKVersion = 0;
+            do {
+                if (!(fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                    continue;
+                }
+
+                highestWindowsSDKVersion =
+                    std::max(highestWindowsSDKVersion,
+                             GetWindowsSDKVersionFromDirectoryName(fileData.cFileName));
+            } while (FindNextFileA(handle.GetHandle(), &fileData));
+
+            if (highestWindowsSDKVersion == 0) {
+                return "";
+            }
+
+            // Currently we only support using DXC on x64.
+            std::ostringstream ostream;
+            ostream << "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0."
+                    << highestWindowsSDKVersion << ".0\\x64\\";
+
+            return ostream.str();
+        }
+    }  // anonymous namespace
 
     PlatformFunctions::PlatformFunctions() {
     }
@@ -26,8 +108,7 @@ namespace dawn_native { namespace d3d12 {
     MaybeError PlatformFunctions::LoadFunctions() {
         DAWN_TRY(LoadD3D12());
         DAWN_TRY(LoadDXGI());
-        LoadDXIL();
-        LoadDXCompiler();
+        LoadDXCLibraries();
         DAWN_TRY(LoadFXCompiler());
         DAWN_TRY(LoadD3D11());
         LoadPIXRuntime();
@@ -74,17 +155,48 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void PlatformFunctions::LoadDXIL() {
-        if (!mDXILLib.Open("dxil.dll", nullptr)) {
-            mDXILLib.Close();
-        }
+    void PlatformFunctions::LoadDXCLibraries() {
+        const std::string& windowsSDKBasePath = GetWindowsSDKBasePath();
+
+        LoadDXIL(windowsSDKBasePath);
+        LoadDXCompiler(windowsSDKBasePath);
     }
 
-    void PlatformFunctions::LoadDXCompiler() {
+    void PlatformFunctions::LoadDXIL(const std::string& baseWindowsSDKPath) {
+        const char* dxilDLLName = "dxil.dll";
+        const std::array<std::string, 2> kDxilDLLPaths = {
+            {dxilDLLName, baseWindowsSDKPath + dxilDLLName}};
+
+        for (const std::string& dxilDLLPath : kDxilDLLPaths) {
+            if (mDXILLib.Open(dxilDLLPath, nullptr)) {
+                return;
+            }
+        }
+        ASSERT(!mDXILLib.Valid());
+    }
+
+    void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {
         // DXIL must be loaded before DXC, otherwise shader signing is unavailable
-        if (!mDXCompilerLib.Open("dxcompiler.dll", nullptr) ||
-            !mDXCompilerLib.GetProc(&dxcCreateInstance, "DxcCreateInstance", nullptr)) {
-            mDXCompilerLib.Close();
+        if (!mDXILLib.Valid()) {
+            return;
+        }
+
+        const char* dxCompilerDLLName = "dxcompiler.dll";
+        const std::array<std::string, 2> kDxCompilerDLLPaths = {
+            {dxCompilerDLLName, baseWindowsSDKPath + dxCompilerDLLName}};
+
+        DynamicLib dxCompilerLib;
+        for (const std::string& dxCompilerDLLName : kDxCompilerDLLPaths) {
+            if (dxCompilerLib.Open(dxCompilerDLLName, nullptr)) {
+                break;
+            }
+        }
+
+        if (dxCompilerLib.Valid() &&
+            dxCompilerLib.GetProc(&dxcCreateInstance, "DxcCreateInstance", nullptr)) {
+            mDXCompilerLib = std::move(dxCompilerLib);
+        } else {
+            mDXILLib.Close();
         }
     }
 

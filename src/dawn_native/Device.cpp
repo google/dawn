@@ -1115,7 +1115,7 @@ namespace dawn_native {
     void DeviceBase::ForceSetToggle(Toggle toggle, bool isEnabled) {
         if (!mOverridenToggles.Has(toggle) && mEnabledToggles.Has(toggle) != isEnabled) {
             dawn::WarningLog() << "Forcing toggle \"" << ToggleEnumToName(toggle) << "\" to "
-                               << isEnabled << "when it was overriden to be " << !isEnabled;
+                               << isEnabled << " when it was overriden to be " << !isEnabled;
         }
         mEnabledToggles.Set(toggle, isEnabled);
     }
