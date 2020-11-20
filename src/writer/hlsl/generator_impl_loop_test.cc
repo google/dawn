@@ -173,7 +173,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       }
       tint_hlsl_is_first_1 = false;
 
-      lhs = 2.40000010f;
+      lhs = 2.400000095f;
       other = 0.0f;
     }
   }

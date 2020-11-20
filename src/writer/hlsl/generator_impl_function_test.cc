@@ -503,7 +503,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
-  coord.Store(4, asuint(2.00000000f));
+  coord.Store(4, asuint(2.0f));
   return;
 }
 
@@ -588,7 +588,7 @@ float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
 
 ep_1_out ep_1(ep_1_in tint_in) {
   ep_1_out tint_out;
-  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.00000000f);
+  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
   return tint_out;
 }
 
@@ -652,7 +652,7 @@ float sub_func(float param) {
 
 ep_1_out ep_1() {
   ep_1_out tint_out;
-  tint_out.depth = sub_func(1.00000000f);
+  tint_out.depth = sub_func(1.0f);
   return tint_out;
 }
 
@@ -731,7 +731,7 @@ float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
 
 ep_1_out ep_1(ep_1_in tint_in) {
   ep_1_out tint_out;
-  tint_out.depth = sub_func_ep_1(tint_in, tint_out, 1.00000000f);
+  tint_out.depth = sub_func_ep_1(tint_in, tint_out, 1.0f);
   return tint_out;
 }
 
@@ -797,7 +797,7 @@ float sub_func(float param) {
 }
 
 void frag_main() {
-  float v = sub_func(1.00000000f);
+  float v = sub_func(1.0f);
   return;
 }
 
@@ -861,7 +861,7 @@ float sub_func(float param) {
 }
 
 void frag_main() {
-  float v = sub_func(1.00000000f);
+  float v = sub_func(1.0f);
   return;
 }
 
@@ -916,7 +916,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
 ep_1_out ep_1() {
   ep_1_out tint_out;
-  tint_out.bar = 1.00000000f;
+  tint_out.bar = 1.0f;
   if ((1 == 1)) {
     return tint_out;
   }

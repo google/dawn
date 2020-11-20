@@ -72,7 +72,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
   ast::ScalarConstructorExpression expr(lit);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "1.07374182e+09f");
+  EXPECT_EQ(gen.result(), "1073741824.0f");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
@@ -85,7 +85,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
   ast::TypeConstructorExpression expr(&f32, values);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "float(-1.20000004e-05f)");
+  EXPECT_EQ(gen.result(), "float(-0.000012f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -142,7 +142,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
   ast::TypeConstructorExpression expr(&vec, values);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "float3(1.00000000f, 2.00000000f, 3.00000000f)");
+  EXPECT_EQ(gen.result(), "float3(1.0f, 2.0f, 3.0f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
@@ -187,10 +187,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
-  EXPECT_EQ(
-      gen.result(),
-      std::string("float2x3(float3(1.00000000f, 2.00000000f, 3.00000000f), ") +
-          "float3(3.00000000f, 4.00000000f, 5.00000000f))");
+  EXPECT_EQ(gen.result(),
+            "float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
@@ -219,10 +217,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
   ast::TypeConstructorExpression expr(&ary, ary_values);
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
   EXPECT_EQ(gen.result(),
-            std::string("{") +
-                "float3(1.00000000f, 2.00000000f, 3.00000000f), " +
-                "float3(4.00000000f, 5.00000000f, 6.00000000f), " +
-                "float3(7.00000000f, 8.00000000f, 9.00000000f)}");
+            "{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), "
+            "float3(7.0f, 8.0f, 9.0f)}");
 }
 
 // TODO(dsinclair): Add struct constructor test.

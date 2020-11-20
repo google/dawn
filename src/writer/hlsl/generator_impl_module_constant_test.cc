@@ -50,9 +50,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      "static const float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
+  EXPECT_EQ(result(), "static const float pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
@@ -70,7 +68,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
-#define WGSL_SPEC_CONSTANT_23 3.00000000f
+#define WGSL_SPEC_CONSTANT_23 3.0f
 #endif
 static const float pos = WGSL_SPEC_CONSTANT_23;
 #undef WGSL_SPEC_CONSTANT_23

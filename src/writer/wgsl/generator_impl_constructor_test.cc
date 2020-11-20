@@ -70,7 +70,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
   ast::ScalarConstructorExpression expr(lit);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "1.07374182e+09");
+  EXPECT_EQ(gen.result(), "1073741824.0");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
@@ -83,7 +83,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
   ast::TypeConstructorExpression expr(&f32, values);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "f32(-1.20000004e-05)");
+  EXPECT_EQ(gen.result(), "f32(-0.000012)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -140,7 +140,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
   ast::TypeConstructorExpression expr(&vec, values);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "vec3<f32>(1.00000000, 2.00000000, 3.00000000)");
+  EXPECT_EQ(gen.result(), "vec3<f32>(1.0, 2.0, 3.0)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
@@ -167,10 +167,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::TypeConstructorExpression expr(&mat, mat_values);
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            std::string("mat2x3<f32>(vec2<f32>(1.00000000, 2.00000000), ") +
-                "vec2<f32>(3.00000000, 4.00000000), " +
-                "vec2<f32>(5.00000000, 6.00000000))");
+  EXPECT_EQ(gen.result(), std::string("mat2x3<f32>(vec2<f32>(1.0, 2.0), ") +
+                              "vec2<f32>(3.0, 4.0), " + "vec2<f32>(5.0, 6.0))");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
@@ -200,10 +198,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
 
   ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
   EXPECT_EQ(gen.result(),
-            std::string("array<vec3<f32>, 3>(") +
-                "vec3<f32>(1.00000000, 2.00000000, 3.00000000), " +
-                "vec3<f32>(4.00000000, 5.00000000, 6.00000000), " +
-                "vec3<f32>(7.00000000, 8.00000000, 9.00000000))");
+            std::string("array<vec3<f32>, 3>(") + "vec3<f32>(1.0, 2.0, 3.0), " +
+                "vec3<f32>(4.0, 5.0, 6.0), " + "vec3<f32>(7.0, 8.0, 9.0))");
 }
 
 }  // namespace

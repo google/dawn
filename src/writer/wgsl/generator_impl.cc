@@ -67,6 +67,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/writer/float_to_string.h"
 
 namespace tint {
 namespace writer {
@@ -318,16 +319,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   if (lit->IsBool()) {
     out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
   } else if (lit->IsFloat()) {
-    auto flags = out_.flags();
-    auto precision = out_.precision();
-
-    out_.flags(flags | std::ios_base::showpoint);
-    out_.precision(std::numeric_limits<float>::max_digits10);
-
-    out_ << lit->AsFloat()->value();
-
-    out_.precision(precision);
-    out_.flags(flags);
+    out_ << FloatToString(lit->AsFloat()->value());
   } else if (lit->IsSint()) {
     out_ << lit->AsSint()->value();
   } else if (lit->IsUint()) {

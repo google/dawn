@@ -179,7 +179,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
       }
       tint_msl_is_first_1 = false;
 
-      lhs = 2.40000010f;
+      lhs = 2.400000095f;
       other = 0.0f;
     }
   }

@@ -126,8 +126,8 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
-                              "(1.00000000f, 2.00000000f)");
+  EXPECT_EQ(gen.result(),
+            std::string("metal::") + param.msl_name + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParamTest,
@@ -175,8 +175,8 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
   EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
-                              "(float3(1.00000000f, 2.00000000f, 3.00000000f), "
-                              "float3(4.00000000f, 5.00000000f, 6.00000000f))");
+                              "(float3(1.0f, 2.0f, 3.0f), "
+                              "float3(4.0f, 5.0f, 6.0f))");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_VectorTest,
@@ -225,8 +225,8 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(&expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
-                              "(1.00000000f, 2.00000000f, 3.00000000f)");
+  EXPECT_EQ(gen.result(),
+            std::string("metal::") + param.msl_name + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,

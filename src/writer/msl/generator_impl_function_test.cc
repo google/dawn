@@ -499,7 +499,7 @@ float sub_func_ep_1(thread ep_1_in& tint_in, thread ep_1_out& tint_out, float pa
 
 fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
   ep_1_out tint_out = {};
-  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.00000000f);
+  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
   return tint_out;
 }
 
@@ -567,7 +567,7 @@ float sub_func(float param) {
 
 fragment ep_1_out ep_1() {
   ep_1_out tint_out = {};
-  tint_out.depth = sub_func(1.00000000f);
+  tint_out.depth = sub_func(1.0f);
   return tint_out;
 }
 
@@ -644,7 +644,7 @@ float sub_func_ep_1(thread ep_1_out& tint_out, thread float4& coord, float param
 
 fragment ep_1_out ep_1(float4 coord [[position]]) {
   ep_1_out tint_out = {};
-  tint_out.depth = sub_func_ep_1(tint_out, coord, 1.00000000f);
+  tint_out.depth = sub_func_ep_1(tint_out, coord, 1.0f);
   return tint_out;
 }
 
@@ -709,7 +709,7 @@ float sub_func(constant float4& coord, float param) {
 }
 
 fragment void frag_main(constant float4& coord [[buffer(0)]]) {
-  float v = sub_func(coord, 1.00000000f);
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -796,7 +796,7 @@ float sub_func(device Data& coord, float param) {
 }
 
 fragment void frag_main(device Data& coord [[buffer(0)]]) {
-  float v = sub_func(coord, 1.00000000f);
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -883,7 +883,7 @@ float sub_func(const device Data& coord, float param) {
 }
 
 fragment void frag_main(const device Data& coord [[buffer(0)]]) {
-  float v = sub_func(coord, 1.00000000f);
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -941,7 +941,7 @@ struct ep_1_out {
 
 fragment ep_1_out ep_1() {
   ep_1_out tint_out = {};
-  tint_out.bar = 1.00000000f;
+  tint_out.bar = 1.0f;
   if ((1 == 1)) {
     return tint_out;
   }

@@ -166,8 +166,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
-            "(float3(1.00000000f, 1.00000000f, 1.00000000f) * "
-            "1.00000000f)");
+            "(float3(1.0f, 1.0f, 1.0f) * "
+            "1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
@@ -191,8 +191,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
   EXPECT_EQ(result(),
-            "(1.00000000f * float3(1.00000000f, 1.00000000f, "
-            "1.00000000f))");
+            "(1.0f * float3(1.0f, 1.0f, "
+            "1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
@@ -210,7 +210,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(), "(mat * 1.00000000f)");
+  EXPECT_EQ(result(), "(mat * 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
@@ -228,7 +228,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(), "(1.00000000f * mat)");
+  EXPECT_EQ(result(), "(1.0f * mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
@@ -254,8 +254,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "mul(mat, float3(1.00000000f, 1.00000000f, 1.00000000f))");
+  EXPECT_EQ(result(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
@@ -282,8 +281,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "mul(float3(1.00000000f, 1.00000000f, 1.00000000f), mat)");
+  EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {

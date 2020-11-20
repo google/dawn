@@ -51,6 +51,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/writer/float_to_string.h"
 
 namespace tint {
 namespace writer {
@@ -1455,16 +1456,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   if (lit->IsBool()) {
     out << (lit->AsBool()->IsTrue() ? "true" : "false");
   } else if (lit->IsFloat()) {
-    auto flags = out.flags();
-    auto precision = out.precision();
-
-    out.flags(flags | std::ios_base::showpoint);
-    out.precision(std::numeric_limits<float>::max_digits10);
-
-    out << lit->AsFloat()->value() << "f";
-
-    out.precision(precision);
-    out.flags(flags);
+    out << FloatToString(lit->AsFloat()->value()) << "f";
   } else if (lit->IsSint()) {
     out << lit->AsSint()->value();
   } else if (lit->IsUint()) {

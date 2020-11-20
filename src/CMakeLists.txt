@@ -245,6 +245,8 @@ set(TINT_LIB_SRCS
   validator/validator_impl.h
   validator/validator_test_helper.cc
   validator/validator_test_helper.h
+  writer/float_to_string.cc
+  writer/float_to_string.h
   writer/text.cc
   writer/text.h
   writer/text_generator.cc
@@ -423,6 +425,7 @@ set(TINT_TEST_SRCS
   validator/validator_function_test.cc
   validator/validator_test.cc
   validator/validator_type_test.cc
+  writer/float_to_string_test.cc
 )
 
 ## Tint library

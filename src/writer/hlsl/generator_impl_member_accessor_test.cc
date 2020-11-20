@@ -619,7 +619,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
-  EXPECT_EQ(result(), R"(data.Store(4, asuint(2.00000000f));
+  EXPECT_EQ(result(), R"(data.Store(4, asuint(2.0f));
 )");
 }
 
@@ -826,9 +826,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      R"(data.Store3(16, asuint(float3(1.00000000f, 2.00000000f, 3.00000000f)));
+  EXPECT_EQ(result(),
+            R"(data.Store3(16, asuint(float3(1.0f, 2.0f, 3.0f)));
 )");
 }
 
@@ -1194,9 +1193,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.00000000f, 2.00000000f, 3.00000000f)));
+  EXPECT_EQ(result(),
+            R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.0f, 2.0f, 3.0f)));
 )");
 }
 
@@ -1273,7 +1271,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
   EXPECT_EQ(result(),
-            R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.00000000f));
+            R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.0f));
 )");
 }
 

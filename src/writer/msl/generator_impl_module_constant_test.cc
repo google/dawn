@@ -52,9 +52,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(
-      gen.result(),
-      "constant float pos[3] = {1.00000000f, 2.00000000f, 3.00000000f};\n");
+  EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
