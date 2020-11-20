@@ -22,8 +22,6 @@
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
-#include "src/writer/spirv/builder.h"
-#include "src/writer/spirv/spv_dump.h"
 
 namespace tint {
 namespace writer {

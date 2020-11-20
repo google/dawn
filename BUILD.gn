@@ -885,6 +885,7 @@ source_set("tint_unittests_spv_reader_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_spv_reader_src",
+    ":tint_unittests_core_src",
   ]
 }
 
@@ -938,6 +939,7 @@ source_set("tint_unittests_spv_writer_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_spv_writer_src",
+    ":tint_unittests_core_src",
   ]
 }
 
@@ -1034,6 +1036,7 @@ source_set("tint_unittests_wgsl_reader_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_wgsl_reader_src",
+    ":tint_unittests_core_src",
   ]
 }
 
@@ -1084,6 +1087,7 @@ source_set("tint_unittests_wgsl_writer_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_wgsl_writer_src",
+    ":tint_unittests_core_src",
   ]
 }
 
@@ -1137,6 +1141,7 @@ source_set("tint_unittests_msl_writer_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_msl_writer_src",
+    ":tint_unittests_core_src",
   ]
 }
 
@@ -1191,6 +1196,7 @@ source_set("tint_unittests_hlsl_writer_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_hlsl_writer_src",
+    ":tint_unittests_core_src",
   ]
 }
 
