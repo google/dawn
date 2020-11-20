@@ -70,9 +70,9 @@ TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment) {
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment2) {
   EXPECT("fn f() -> void { a : i32; }",
-         "test.wgsl:1:20 error: expected '=' for assignment\n"
+         "test.wgsl:1:18 error: expected 'var' for variable declaration\n"
          "fn f() -> void { a : i32; }\n"
-         "                   ^\n");
+         "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingSemicolon) {
@@ -214,6 +214,13 @@ TEST_F(ParserImplErrorTest, ForLoopInitializerMissingSemicolon) {
          "test.wgsl:1:39 error: expected ';' for initializer in for loop\n"
          "fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }\n"
          "                                      ^\n");
+}
+
+TEST_F(ParserImplErrorTest, ForLoopInitializerMissingVar) {
+  EXPECT("fn f() -> void { for (i : i32 = 0; i < 8; i=i+1) {} }",
+         "test.wgsl:1:23 error: expected 'var' for variable declaration\n"
+         "fn f() -> void { for (i : i32 = 0; i < 8; i=i+1) {} }\n"
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopConditionMissingSemicolon) {

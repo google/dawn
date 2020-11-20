@@ -2577,6 +2577,14 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   auto t = peek();
   auto source = t.source();
 
+  // tint:295 - Test for `ident COLON` - this is invalid grammar, and without
+  // special casing will error as "missing = for assignment", which is less
+  // helpful than this error message:
+  if (peek(0).IsIdentifier() && peek(1).IsColon()) {
+    return add_error(peek(0).source(),
+                     "expected 'var' for variable declaration");
+  }
+
   auto lhs = unary_expression();
   if (lhs.errored)
     return Failure::kErrored;
