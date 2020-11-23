@@ -17,16 +17,16 @@
 namespace tint {
 namespace ast {
 
-TypesBuilder::TypesBuilder(TypeManager* tm)
-    : bool_(tm->Get<ast::type::BoolType>()),
-      f32(tm->Get<ast::type::F32Type>()),
-      i32(tm->Get<ast::type::I32Type>()),
-      u32(tm->Get<ast::type::U32Type>()),
-      void_(tm->Get<ast::type::VoidType>()),
-      tm_(tm) {}
+TypesBuilder::TypesBuilder(Module* mod)
+    : bool_(mod->create<ast::type::BoolType>()),
+      f32(mod->create<ast::type::F32Type>()),
+      i32(mod->create<ast::type::I32Type>()),
+      u32(mod->create<ast::type::U32Type>()),
+      void_(mod->create<ast::type::VoidType>()),
+      mod_(mod) {}
 
 Builder::Builder(tint::Context* c, tint::ast::Module* m)
-    : ctx(c), mod(m), ty(&m->type_mgr()) {}
+    : ctx(c), mod(m), ty(m) {}
 Builder::~Builder() = default;
 
 ast::Variable* Builder::Var(const std::string& name,

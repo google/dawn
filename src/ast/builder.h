@@ -47,8 +47,8 @@ namespace ast {
 class TypesBuilder {
  public:
   /// Constructor
-  /// @param tm the type manager
-  explicit TypesBuilder(TypeManager* tm);
+  /// @param mod the module
+  explicit TypesBuilder(Module* mod);
 
   /// A boolean type
   ast::type::BoolType* const bool_;
@@ -70,80 +70,80 @@ class TypesBuilder {
   /// @return the tint AST type for a 2-element vector of the C type `T`.
   template <typename T>
   ast::type::VectorType* vec2() const {
-    return tm_->Get<ast::type::VectorType>(Of<T>(), 2);
+    return mod_->create<ast::type::VectorType>(Of<T>(), 2);
   }
 
   /// @return the tint AST type for a 3-element vector of the C type `T`.
   template <typename T>
   ast::type::VectorType* vec3() const {
-    return tm_->Get<ast::type::VectorType>(Of<T>(), 3);
+    return mod_->create<ast::type::VectorType>(Of<T>(), 3);
   }
 
   /// @return the tint AST type for a 4-element vector of the C type `T`.
   template <typename T>
   ast::type::Type* vec4() const {
-    return tm_->Get<ast::type::VectorType>(Of<T>(), 4);
+    return mod_->create<ast::type::VectorType>(Of<T>(), 4);
   }
 
   /// @return the tint AST type for a 2x3 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat2x2() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 2);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 2, 2);
   }
 
   /// @return the tint AST type for a 2x3 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat2x3() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 2);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 3, 2);
   }
 
   /// @return the tint AST type for a 2x4 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat2x4() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 2);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 4, 2);
   }
 
   /// @return the tint AST type for a 3x2 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat3x2() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 3);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 2, 3);
   }
 
   /// @return the tint AST type for a 3x3 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat3x3() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 3);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 3, 3);
   }
 
   /// @return the tint AST type for a 3x4 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat3x4() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 3);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 4, 3);
   }
 
   /// @return the tint AST type for a 4x2 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat4x2() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 2, 4);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 2, 4);
   }
 
   /// @return the tint AST type for a 4x3 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat4x3() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 3, 4);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 3, 4);
   }
 
   /// @return the tint AST type for a 4x4 matrix of the C type `T`.
   template <typename T>
   ast::type::MatrixType* mat4x4() const {
-    return tm_->Get<ast::type::MatrixType>(Of<T>(), 4, 4);
+    return mod_->create<ast::type::MatrixType>(Of<T>(), 4, 4);
   }
 
   /// @param subtype the array element type
   /// @param n the array size. 0 represents unbounded
   /// @return the tint AST type for a array of size `n` of type `T`
   ast::type::ArrayType* array(ast::type::Type* subtype, uint32_t n) const {
-    return tm_->Get<ast::type::ArrayType>(subtype, n);
+    return mod_->create<ast::type::ArrayType>(subtype, n);
   }
 
   /// @return the tint AST type for an array of size `N` of type `T`
@@ -161,7 +161,7 @@ class TypesBuilder {
   template <typename T>
   struct CToAST {};
 
-  TypeManager* const tm_;
+  Module* const mod_;
 };
 
 /// Helper for building common AST constructs.

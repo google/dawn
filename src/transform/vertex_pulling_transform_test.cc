@@ -46,10 +46,9 @@ class VertexPullingTransformHelper {
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    auto* func = create<ast::Function>(
-        "main", ast::VariableList{},
-        mod_->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
-        create<ast::BlockStatement>());
+    auto* func = create<ast::Function>("main", ast::VariableList{},
+                                       mod_->create<ast::type::VoidType>(),
+                                       create<ast::BlockStatement>());
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
     mod()->AddFunction(func);
@@ -125,10 +124,9 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
-  auto* func = create<ast::Function>(
-      "main", ast::VariableList{},
-      mod()->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
-      create<ast::BlockStatement>());
+  auto* func = create<ast::Function>("main", ast::VariableList{},
+                                     mod()->create<ast::type::VoidType>(),
+                                     create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
   mod()->AddFunction(func);

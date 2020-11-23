@@ -222,7 +222,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   ary_decos.push_back(create<ast::StrideDecoration>(4u, Source{}));
   internal_array->set_decorations(std::move(ary_decos));
 
-  auto* internal_array_type = mod_->type_mgr().Get(std::move(internal_array));
+  auto* internal_array_type = mod_->unique_type(std::move(internal_array));
 
   // Creating the struct type
   ast::StructMemberList members;
@@ -235,10 +235,8 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type =
-      mod_->type_mgr().Get(std::make_unique<ast::type::StructType>(
-          kStructName,
-          create<ast::Struct>(std::move(decos), std::move(members))));
+  auto* struct_type = mod_->create<ast::type::StructType>(
+      kStructName, create<ast::Struct>(std::move(decos), std::move(members)));
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
     // The decorated variable with struct type
@@ -411,21 +409,20 @@ ast::Expression* VertexPullingTransform::AccessVec(uint32_t buffer,
   }
 
   return create<ast::TypeConstructorExpression>(
-      mod_->type_mgr().Get(
-          std::make_unique<ast::type::VectorType>(base_type, count)),
+      mod_->create<ast::type::VectorType>(base_type, count),
       std::move(expr_list));
 }
 
 ast::type::Type* VertexPullingTransform::GetU32Type() {
-  return mod_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
+  return mod_->create<ast::type::U32Type>();
 }
 
 ast::type::Type* VertexPullingTransform::GetI32Type() {
-  return mod_->type_mgr().Get(std::make_unique<ast::type::I32Type>());
+  return mod_->create<ast::type::I32Type>();
 }
 
 ast::type::Type* VertexPullingTransform::GetF32Type() {
-  return mod_->type_mgr().Get(std::make_unique<ast::type::F32Type>());
+  return mod_->create<ast::type::F32Type>();
 }
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;

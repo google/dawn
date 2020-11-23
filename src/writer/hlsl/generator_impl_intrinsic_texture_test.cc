@@ -183,14 +183,13 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   switch (param.texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       Var("texture", ast::StorageClass::kNone,
-          mod->type_mgr().Get<ast::type::SampledTextureType>(
-              param.texture_dimension, datatype));
+          mod->create<ast::type::SampledTextureType>(param.texture_dimension,
+                                                     datatype));
       break;
 
     case ast::intrinsic::test::TextureKind::kDepth:
       Var("texture", ast::StorageClass::kNone,
-          mod->type_mgr().Get<ast::type::DepthTextureType>(
-              param.texture_dimension));
+          mod->create<ast::type::DepthTextureType>(param.texture_dimension));
       break;
   }
 

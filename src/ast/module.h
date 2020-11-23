@@ -17,6 +17,8 @@
 
 #include <memory>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -30,6 +32,10 @@ namespace ast {
 
 /// Represents all the source in a given program.
 class Module {
+  template <typename T, typename BASE>
+  using EnableIfIsType =
+      typename std::enable_if<std::is_base_of<BASE, T>::value, T>::type;
+
  public:
   Module();
   /// Move constructor
@@ -78,21 +84,50 @@ class Module {
   /// @returns a string representation of the module
   std::string to_str() const;
 
-  /// @returns the Type Manager
-  ast::TypeManager& type_mgr() { return type_mgr_; }
-
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
+  EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
     static_assert(std::is_base_of<ast::Node, T>::value,
                   "T does not derive from ast::Node");
     auto uptr = std::make_unique<T>(std::forward<ARGS>(args)...);
     auto ptr = uptr.get();
     ast_nodes_.emplace_back(std::move(uptr));
     return ptr;
+  }
+
+  /// Creates a new `ast::Type` owned by the Module.
+  /// When the Module is destructed, owned Module and the returned
+  /// `ast::Type` will also be destructed.
+  /// Types are unique (de-aliased), and so `create()` for the same `T` and
+  /// arguments will return the same pointer.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the de-aliased type pointer
+  template <typename T, typename... ARGS>
+  EnableIfIsType<T, ast::type::Type>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<ast::type::Type, T>::value,
+                  "T does not derive from ast::type::Type");
+    return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
+  }
+
+  /// Moves the type `ty` to the Module, returning a pointer to the unique
+  /// (de-aliased) type.
+  /// When the Module is destructed, the returned `ast::Type` will also be
+  /// destructed.
+  /// @param ty the type to add to the module
+  /// @returns the de-aliased type pointer
+  template <typename T>
+  EnableIfIsType<T, ast::type::Type>* unique_type(std::unique_ptr<T> ty) {
+    return static_cast<T*>(type_mgr_.Get(std::move(ty)));
+  }
+
+  /// Returns all the declared types in the module
+  /// @returns the mapping from name string to type.
+  const std::unordered_map<std::string, std::unique_ptr<ast::type::Type>>&
+  types() {
+    return type_mgr_.types();
   }
 
  private:

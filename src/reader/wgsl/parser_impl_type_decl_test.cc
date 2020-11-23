@@ -48,9 +48,8 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 
   auto& mod = p->get_module();
 
-  auto* int_type = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-  auto* alias_type =
-      mod.type_mgr().Get(std::make_unique<ast::type::AliasType>("A", int_type));
+  auto* int_type = mod.create<ast::type::I32Type>();
+  auto* alias_type = mod.create<ast::type::AliasType>("A", int_type);
 
   p->register_constructed("A", alias_type);
 
@@ -81,7 +80,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   auto p = parser("bool");
 
   auto& mod = p->get_module();
-  auto* bool_type = mod.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+  auto* bool_type = mod.create<ast::type::BoolType>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -95,7 +94,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   auto p = parser("f32");
 
   auto& mod = p->get_module();
-  auto* float_type = mod.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+  auto* float_type = mod.create<ast::type::F32Type>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -109,7 +108,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   auto p = parser("i32");
 
   auto& mod = p->get_module();
-  auto* int_type = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+  auto* int_type = mod.create<ast::type::I32Type>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -123,7 +122,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   auto p = parser("u32");
 
   auto& mod = p->get_module();
-  auto* uint_type = mod.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+  auto* uint_type = mod.create<ast::type::U32Type>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -740,8 +739,8 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
 
   auto& mod = p->get_module();
-  auto* type = mod.type_mgr().Get(std::make_unique<ast::type::SamplerType>(
-      ast::type::SamplerKind::kSampler));
+  auto* type =
+      mod.create<ast::type::SamplerType>(ast::type::SamplerKind::kSampler);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -757,9 +756,8 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
 
   auto& mod = p->get_module();
   ast::type::F32Type f32;
-  auto* type =
-      mod.type_mgr().Get(std::make_unique<ast::type::SampledTextureType>(
-          ast::type::TextureDimension::kCube, &f32));
+  auto* type = mod.create<ast::type::SampledTextureType>(
+      ast::type::TextureDimension::kCube, &f32);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -776,9 +774,8 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
 
   ast::type::F32Type f32;
   auto& mod = p->get_module();
-  auto* type =
-      mod.type_mgr().Get(std::make_unique<ast::type::SampledTextureType>(
-          ast::type::TextureDimension::kCube, &f32));
+  auto* type = mod.create<ast::type::SampledTextureType>(
+      ast::type::TextureDimension::kCube, &f32);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
