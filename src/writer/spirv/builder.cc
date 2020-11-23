@@ -1481,6 +1481,8 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   }
   lhs_id = GenerateLoadIfNeeded(expr->lhs()->result_type(), lhs_id);
 
+  // Get the ID of the basic block where control flow will diverge. It's the
+  // last basic block generated for the left-hand-side of the operator.
   auto original_label_id = current_label_id_;
 
   auto type_id = GenerateTypeIfNeeded(expr->result_type());
@@ -1517,6 +1519,9 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   }
   rhs_id = GenerateLoadIfNeeded(expr->rhs()->result_type(), rhs_id);
 
+  // Get the block ID of the last basic block generated for the right-hand-side
+  // expression. That block will be an immediate predecessor to the merge block.
+  auto rhs_block_id = current_label_id_;
   push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
 
   // Output the merge block
@@ -1528,7 +1533,7 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   push_function_inst(spv::Op::OpPhi,
                      {Operand::Int(type_id), result, Operand::Int(lhs_id),
                       Operand::Int(original_label_id), Operand::Int(rhs_id),
-                      Operand::Int(block_id)});
+                      Operand::Int(rhs_block_id)});
 
   return result_id;
 }

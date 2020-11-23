@@ -903,6 +903,98 @@ OpBranch %9
 )");
 }
 
+TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
+  ast::type::BoolType bool_ty;
+
+  // Test an expression like
+  //    a || (b && c)
+  // From: crbug.com/tint/355
+
+  auto* logical_and_expr = create<ast::BinaryExpression>(
+      ast::BinaryOp::kLogicalAnd,
+      create<ast::ScalarConstructorExpression>(
+          create<ast::BoolLiteral>(&bool_ty, true)),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::BoolLiteral>(&bool_ty, false)));
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr,
+                             create<ast::ScalarConstructorExpression>(
+                                 create<ast::BoolLiteral>(&bool_ty, true)),
+                             logical_and_expr);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 10u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%3 = OpConstantTrue %2
+%8 = OpConstantFalse %2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+OpSelectionMerge %4 None
+OpBranchConditional %3 %4 %5
+%5 = OpLabel
+OpSelectionMerge %6 None
+OpBranchConditional %3 %7 %6
+%7 = OpLabel
+OpBranch %6
+%6 = OpLabel
+%9 = OpPhi %2 %3 %5 %8 %7
+OpBranch %4
+%4 = OpLabel
+%10 = OpPhi %2 %3 %1 %9 %6
+)");
+}
+
+TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
+  ast::type::BoolType bool_ty;
+
+  // Test an expression like
+  //    a && (b || c)
+  // From: crbug.com/tint/355
+
+  auto* logical_or_expr = create<ast::BinaryExpression>(
+      ast::BinaryOp::kLogicalOr,
+      create<ast::ScalarConstructorExpression>(
+          create<ast::BoolLiteral>(&bool_ty, true)),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::BoolLiteral>(&bool_ty, false)));
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd,
+                             create<ast::ScalarConstructorExpression>(
+                                 create<ast::BoolLiteral>(&bool_ty, true)),
+                             logical_or_expr);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 10u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%3 = OpConstantTrue %2
+%8 = OpConstantFalse %2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+OpSelectionMerge %4 None
+OpBranchConditional %3 %5 %4
+%5 = OpLabel
+OpSelectionMerge %6 None
+OpBranchConditional %3 %6 %7
+%7 = OpLabel
+OpBranch %6
+%6 = OpLabel
+%9 = OpPhi %2 %3 %5 %8 %7
+OpBranch %4
+%4 = OpLabel
+%10 = OpPhi %2 %3 %1 %9 %6
+)");
+}
+
 TEST_F(BuilderTest, Binary_LogicalOr) {
   ast::type::I32Type i32;
 
