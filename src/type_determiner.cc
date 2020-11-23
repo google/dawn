@@ -83,7 +83,7 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
 }
 
 bool TypeDeterminer::Determine() {
-  for (auto& iter : ctx_.type_mgr().types()) {
+  for (auto& iter : mod_->type_mgr().types()) {
     auto& type = iter.second;
     if (!type->IsTexture() || !type->AsTexture()->IsStorage()) {
       continue;
@@ -339,7 +339,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
     ret = parent_type->AsVector()->type();
   } else if (parent_type->IsMatrix()) {
     auto* m = parent_type->AsMatrix();
-    ret = ctx_.type_mgr().Get(
+    ret = mod_->type_mgr().Get(
         std::make_unique<ast::type::VectorType>(m->type(), m->rows()));
   } else {
     set_error(expr->source(), "invalid parent type (" +
@@ -350,14 +350,14 @@ bool TypeDeterminer::DetermineArrayAccessor(
 
   // If we're extracting from a pointer, we return a pointer.
   if (res->IsPointer()) {
-    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+    ret = mod_->type_mgr().Get(std::make_unique<ast::type::PointerType>(
         ret, res->AsPointer()->storage_class()));
   } else if (parent_type->IsArray() &&
              !parent_type->AsArray()->type()->is_scalar()) {
     // If we extract a non-scalar from an array then we also get a pointer. We
     // will generate a Function storage class variable to store this
     // into.
-    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+    ret = mod_->type_mgr().Get(std::make_unique<ast::type::PointerType>(
         ret, ast::StorageClass::kFunction));
   }
   expr->set_result_type(ret);
@@ -523,12 +523,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   if (ident->intrinsic() == ast::Intrinsic::kAny ||
       ident->intrinsic() == ast::Intrinsic::kAll) {
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
+        mod_->type_mgr().Get(std::make_unique<ast::type::BoolType>()));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>()));
+        mod_->type_mgr().Get(std::make_unique<ast::type::U32Type>()));
     return true;
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
@@ -539,12 +539,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     auto* bool_type =
-        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+        mod_->type_mgr().Get(std::make_unique<ast::type::BoolType>());
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     if (param_type->IsVector()) {
       expr->func()->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+          mod_->type_mgr().Get(std::make_unique<ast::type::VectorType>(
               bool_type, param_type->AsVector()->size())));
     } else {
       expr->func()->set_result_type(bool_type);
@@ -667,7 +667,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     if (texture->IsDepth()) {
       expr->func()->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+          mod_->type_mgr().Get(std::make_unique<ast::type::F32Type>()));
       return true;
     }
 
@@ -689,12 +689,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       return false;
     }
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(type, 4)));
+        mod_->type_mgr().Get(std::make_unique<ast::type::VectorType>(type, 4)));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+        mod_->type_mgr().Get(std::make_unique<ast::type::F32Type>()));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
@@ -712,8 +712,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     expr->func()->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
-            ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()),
+        mod_->type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+            mod_->type_mgr().Get(std::make_unique<ast::type::F32Type>()),
             param0_type->AsVector()->size(), param1_type->AsVector()->size())));
     return true;
   }
@@ -862,7 +862,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
       expr->set_result_type(var->type());
     } else {
       expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+          mod_->type_mgr().Get(std::make_unique<ast::type::PointerType>(
               var->type(), var->storage_class())));
     }
 
@@ -1055,7 +1055,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
 
     // If we're extracting from a pointer, we return a pointer.
     if (res->IsPointer()) {
-      ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+      ret = mod_->type_mgr().Get(std::make_unique<ast::type::PointerType>(
           ret, res->AsPointer()->storage_class()));
     }
   } else if (data_type->IsVector()) {
@@ -1067,14 +1067,14 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
       if (res->IsPointer()) {
-        ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+        ret = mod_->type_mgr().Get(std::make_unique<ast::type::PointerType>(
             ret, res->AsPointer()->storage_class()));
       }
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      ret = ctx_.type_mgr().Get(
+      ret = mod_->type_mgr().Get(
           std::make_unique<ast::type::VectorType>(vec->type(), size));
     }
   } else {
@@ -1107,11 +1107,11 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type =
-        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+        mod_->type_mgr().Get(std::make_unique<ast::type::BoolType>());
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
     if (param_type->IsVector()) {
       expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+          mod_->type_mgr().Get(std::make_unique<ast::type::VectorType>(
               bool_type, param_type->AsVector()->size())));
     } else {
       expr->set_result_type(bool_type);
@@ -1126,18 +1126,18 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     // checks having been done.
     if (lhs_type->IsMatrix() && rhs_type->IsMatrix()) {
       expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+          mod_->type_mgr().Get(std::make_unique<ast::type::MatrixType>(
               lhs_type->AsMatrix()->type(), lhs_type->AsMatrix()->rows(),
               rhs_type->AsMatrix()->columns())));
 
     } else if (lhs_type->IsMatrix() && rhs_type->IsVector()) {
       auto* mat = lhs_type->AsMatrix();
-      expr->set_result_type(ctx_.type_mgr().Get(
+      expr->set_result_type(mod_->type_mgr().Get(
           std::make_unique<ast::type::VectorType>(mat->type(), mat->rows())));
     } else if (lhs_type->IsVector() && rhs_type->IsMatrix()) {
       auto* mat = rhs_type->AsMatrix();
       expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+          mod_->type_mgr().Get(std::make_unique<ast::type::VectorType>(
               mat->type(), mat->columns())));
     } else if (lhs_type->IsMatrix()) {
       // matrix * scalar
@@ -1198,7 +1198,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRgba16Uint:
     case ast::type::ImageFormat::kRgba32Uint: {
       tex->set_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>()));
+          mod_->type_mgr().Get(std::make_unique<ast::type::U32Type>()));
       return true;
     }
 
@@ -1215,7 +1215,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRgba16Sint:
     case ast::type::ImageFormat::kRgba32Sint: {
       tex->set_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>()));
+          mod_->type_mgr().Get(std::make_unique<ast::type::I32Type>()));
       return true;
     }
 
@@ -1227,7 +1227,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRgba16Float:
     case ast::type::ImageFormat::kRgba32Float: {
       tex->set_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+          mod_->type_mgr().Get(std::make_unique<ast::type::F32Type>()));
       return true;
     }
 

@@ -22,6 +22,7 @@
 
 #include "src/ast/function.h"
 #include "src/ast/type/alias_type.h"
+#include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
 
 namespace tint {
@@ -77,6 +78,9 @@ class Module {
   /// @returns a string representation of the module
   std::string to_str() const;
 
+  /// @returns the Type Manager
+  ast::TypeManager& type_mgr() { return type_mgr_; }
+
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
@@ -99,6 +103,7 @@ class Module {
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
   std::vector<std::unique_ptr<ast::Node>> ast_nodes_;
+  ast::TypeManager type_mgr_;
 };
 
 }  // namespace ast

@@ -20,7 +20,7 @@ namespace tint {
 namespace ast {
 
 TypeManager::TypeManager() = default;
-
+TypeManager::TypeManager(TypeManager&&) = default;
 TypeManager::~TypeManager() = default;
 
 void TypeManager::Reset() {

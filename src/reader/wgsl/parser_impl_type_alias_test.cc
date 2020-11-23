@@ -26,9 +26,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
-  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
-
   auto p = parser("type a = i32");
+
+  auto& mod = p->get_module();
+  auto* i32 = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);

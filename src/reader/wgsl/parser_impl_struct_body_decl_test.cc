@@ -23,9 +23,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses) {
-  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
-
   auto p = parser("{a : i32;}");
+
+  auto& mod = p->get_module();
+  auto* i32 = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);

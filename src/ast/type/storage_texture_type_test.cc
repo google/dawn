@@ -79,10 +79,10 @@ TEST_F(StorageTextureTypeTest, TypeName) {
 
 TEST_F(StorageTextureTypeTest, F32Type) {
   Context ctx;
-  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+  ast::Module mod;
+  ast::type::Type* s = mod.type_mgr().Get(std::make_unique<StorageTextureType>(
       TextureDimension::k2dArray, AccessControl::kReadOnly,
       ImageFormat::kRgba32Float));
-  ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -93,10 +93,10 @@ TEST_F(StorageTextureTypeTest, F32Type) {
 
 TEST_F(StorageTextureTypeTest, U32Type) {
   Context ctx;
-  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+  ast::Module mod;
+  ast::type::Type* s = mod.type_mgr().Get(std::make_unique<StorageTextureType>(
       TextureDimension::k2dArray, AccessControl::kReadOnly,
       ImageFormat::kRgba8Unorm));
-  ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -107,10 +107,10 @@ TEST_F(StorageTextureTypeTest, U32Type) {
 
 TEST_F(StorageTextureTypeTest, I32Type) {
   Context ctx;
-  ast::type::Type* s = ctx.type_mgr().Get(std::make_unique<StorageTextureType>(
+  ast::Module mod;
+  ast::type::Type* s = mod.type_mgr().Get(std::make_unique<StorageTextureType>(
       TextureDimension::k2dArray, AccessControl::kReadOnly,
       ImageFormat::kRgba32Sint));
-  ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();

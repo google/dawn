@@ -26,7 +26,7 @@ TypesBuilder::TypesBuilder(TypeManager* tm)
       tm_(tm) {}
 
 Builder::Builder(tint::Context* c, tint::ast::Module* m)
-    : ctx(c), mod(m), ty(&c->type_mgr()) {}
+    : ctx(c), mod(m), ty(&m->type_mgr()) {}
 Builder::~Builder() = default;
 
 ast::Variable* Builder::Var(const std::string& name,

@@ -3253,7 +3253,7 @@ ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
     const auto* ast_ptr_type = type->AsPointer();
     const auto sc = GetStorageClassForPointerValue(result_id);
     if (ast_ptr_type->storage_class() != sc) {
-      return parser_impl_.context().type_mgr().Get(
+      return parser_impl_.get_module().type_mgr().Get(
           std::make_unique<ast::type::PointerType>(ast_ptr_type->type(), sc));
     }
   }

@@ -48,7 +48,7 @@ class VertexPullingTransformHelper {
   void InitBasicModule() {
     auto* func = create<ast::Function>(
         "main", ast::VariableList{},
-        ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()),
+        mod_->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
         create<ast::BlockStatement>());
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
@@ -81,7 +81,6 @@ class VertexPullingTransformHelper {
     mod_->AddGlobalVariable(var);
   }
 
-  Context* ctx() { return &ctx_; }
   ast::Module* mod() { return mod_.get(); }
   Manager* manager() { return manager_.get(); }
   VertexPullingTransform* transform() { return transform_; }
@@ -128,7 +127,7 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
   auto* func = create<ast::Function>(
       "main", ast::VariableList{},
-      ctx()->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
+      mod()->type_mgr().Get(std::make_unique<ast::type::VoidType>()),
       create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));

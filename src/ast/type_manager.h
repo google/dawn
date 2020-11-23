@@ -29,6 +29,8 @@ namespace ast {
 class TypeManager {
  public:
   TypeManager();
+  /// Move constructor
+  TypeManager(TypeManager&&);
   ~TypeManager();
 
   /// Clears all registered types.

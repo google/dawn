@@ -237,7 +237,7 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
       return false;
     }
   } else {
-    auto* u32 = ctx_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
+    auto* u32 = mod_->type_mgr().Get(std::make_unique<ast::type::U32Type>());
 
     ast::ExpressionList cast_expr;
     cast_expr.push_back(expr->idx_expr());

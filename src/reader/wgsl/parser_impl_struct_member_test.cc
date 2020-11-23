@@ -24,9 +24,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMember_Parses) {
-  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
-
   auto p = parser("a : i32;");
+
+  auto& mod = p->get_module();
+  auto* i32 = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -48,9 +50,11 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
-  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
-
   auto p = parser("[[offset(2)]] a : i32;");
+
+  auto& mod = p->get_module();
+  auto* i32 = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -74,10 +78,12 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
-  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
-
   auto p = parser(R"([[offset(2)]]
 [[offset(4)]] a : i32;)");
+
+  auto& mod = p->get_module();
+  auto* i32 = mod.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);

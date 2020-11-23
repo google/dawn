@@ -190,9 +190,11 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
-  auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
-
   auto p = parser("f32(1)");
+
+  auto& mod = p->get_module();
+  auto* f32 = mod.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -202,7 +204,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
 
   auto* c = e->AsConstructor()->AsTypeConstructor();
-  ASSERT_EQ(c->type(), f32_type);
+  ASSERT_EQ(c->type(), f32);
   ASSERT_EQ(c->values().size(), 1u);
 
   ASSERT_TRUE(c->values()[0]->IsConstructor());
@@ -210,9 +212,11 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
-  auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
-
   auto p = parser("bitcast<f32>(1)");
+
+  auto& mod = p->get_module();
+  auto* f32 = mod.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -221,7 +225,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   ASSERT_TRUE(e->IsBitcast());
 
   auto* c = e->AsBitcast();
-  ASSERT_EQ(c->type(), f32_type);
+  ASSERT_EQ(c->type(), f32);
 
   ASSERT_TRUE(c->expr()->IsConstructor());
   ASSERT_TRUE(c->expr()->AsConstructor()->IsScalarConstructor());

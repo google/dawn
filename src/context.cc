@@ -27,8 +27,4 @@ Context::Context(std::unique_ptr<Namer> namer) : namer_(std::move(namer)) {}
 
 Context::~Context() = default;
 
-void Context::Reset() {
-  type_mgr_.Reset();
-}
-
 }  // namespace tint

@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.global_variables().size(), 1u);
 
   auto* v = m.global_variables()[0];
@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.global_variables().size(), 1u);
 
   auto* v = m.global_variables()[0];
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
   ASSERT_TRUE(m.constructed_types()[0]->IsAlias());
   EXPECT_EQ(m.constructed_types()[0]->AsAlias()->name(), "A");
@@ -101,7 +101,7 @@ type B = A;)");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 2u);
   ASSERT_TRUE(m.constructed_types()[0]->IsStruct());
   auto* str = m.constructed_types()[0]->AsStruct();
@@ -132,7 +132,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.functions().size(), 1u);
   EXPECT_EQ(m.functions()[0]->name(), "main");
 }
@@ -142,7 +142,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.functions().size(), 1u);
   EXPECT_EQ(m.functions()[0]->name(), "main");
 }
@@ -159,7 +159,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
 
   auto* t = m.constructed_types()[0];
@@ -174,10 +174,11 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto p =
       parser("struct A { [[offset(0)]] data: [[stride(4)]] array<f32>; };");
+
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
 
   auto* t = m.constructed_types()[0];
@@ -201,7 +202,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p->module();
+  auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
 
   auto* t = m.constructed_types()[0];

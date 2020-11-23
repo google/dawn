@@ -27,9 +27,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
-  auto* v = tm()->Get(std::make_unique<ast::type::VoidType>());
-
   auto p = parser("void");
+
+  auto& mod = p->get_module();
+  auto* v = mod.type_mgr().Get(std::make_unique<ast::type::VoidType>());
+
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -38,10 +40,13 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
-  auto* f32 = tm()->Get(std::make_unique<ast::type::F32Type>());
-  auto* vec2 = tm()->Get(std::make_unique<ast::type::VectorType>(f32, 2));
-
   auto p = parser("vec2<f32>");
+
+  auto& mod = p->get_module();
+  auto* f32 = mod.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+  auto* vec2 =
+      mod.type_mgr().Get(std::make_unique<ast::type::VectorType>(f32, 2));
+
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);

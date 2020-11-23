@@ -22,7 +22,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/type_manager.h"
 #include "src/namer.h"
 
 namespace tint {
@@ -42,17 +41,11 @@ class Context {
   explicit Context(std::unique_ptr<Namer> namer);
   /// Destructor
   ~Context();
-  /// Resets the state of this context.
-  void Reset();
-
-  /// @returns the Type Manager
-  ast::TypeManager& type_mgr() { return type_mgr_; }
 
   /// @returns the namer object
   Namer* namer() const { return namer_.get(); }
 
  private:
-  ast::TypeManager type_mgr_;
   std::unique_ptr<Namer> namer_;
 };
 

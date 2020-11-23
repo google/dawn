@@ -1787,7 +1787,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto coords_type = get_coords_type(dim, &i32);
 
   ast::type::Type* texture_type =
-      ctx->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
+      mod->type_mgr().Get(std::make_unique<ast::type::StorageTextureType>(
           dim, ast::AccessControl::kReadOnly, format));
 
   ast::ExpressionList call_params;
@@ -4549,13 +4549,13 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   switch (param.texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       Var("texture", ast::StorageClass::kNone,
-          ctx->type_mgr().Get<ast::type::SampledTextureType>(
+          mod->type_mgr().Get<ast::type::SampledTextureType>(
               param.texture_dimension, datatype));
       break;
 
     case ast::intrinsic::test::TextureKind::kDepth:
       Var("texture", ast::StorageClass::kNone,
-          ctx->type_mgr().Get<ast::type::DepthTextureType>(
+          mod->type_mgr().Get<ast::type::DepthTextureType>(
               param.texture_dimension));
       break;
   }

@@ -251,6 +251,9 @@ class ParserImpl {
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() { return std::move(module_); }
 
+  /// @returns a pointer to the module, without resetting it.
+  ast::Module& get_module() { return module_; }
+
   /// @returns the next token
   Token next();
   /// @returns the next token without advancing
@@ -768,7 +771,6 @@ class ParserImpl {
     return module_.create<T>(std::forward<ARGS>(args)...);
   }
 
-  Context& ctx_;
   diag::List diags_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
