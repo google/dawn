@@ -12,6 +12,9 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
+#ifndef DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_
+#define DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_
+
 #include "dawn_native/Error.h"
 #include "dawn_native/opengl/opengl_platform.h"
 
@@ -38,3 +41,5 @@ namespace dawn_native { namespace opengl {
     };
 
 }}  // namespace dawn_native::opengl
+
+#endif // DAWNNATIVE_OPENGL_OPENGLFUNCTIONSBASE_H_

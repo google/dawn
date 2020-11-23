@@ -15,43 +15,15 @@
 #include "dawn_native/opengl/OpenGLFunctions.h"
 
 #include <cctype>
-#include <tuple>
 
 namespace dawn_native { namespace opengl {
 
     MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
-        PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
-        if (getString == nullptr) {
-            return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
-        }
-
-        std::string version = reinterpret_cast<const char*>(getString(GL_VERSION));
-
-        if (version.find("OpenGL ES") != std::string::npos) {
-            // ES spec states that the GL_VERSION string will be in the following format:
-            // "OpenGL ES N.M vendor-specific information"
-            mStandard = Standard::ES;
-            mMajorVersion = version[10] - '0';
-            mMinorVersion = version[12] - '0';
-
-            // The minor version shouldn't get to two digits.
-            ASSERT(version.size() <= 13 || !isdigit(version[13]));
-
-            DAWN_TRY(LoadOpenGLESProcs(getProc, mMajorVersion, mMinorVersion));
+        DAWN_TRY(mVersion.Initialize(getProc));
+        if (mVersion.IsES()) {
+            DAWN_TRY(LoadOpenGLESProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
         } else {
-            // OpenGL spec states the GL_VERSION string will be in the following format:
-            // <version number><space><vendor-specific information>
-            // The version number is either of the form major number.minor number or major
-            // number.minor number.release number, where the numbers all have one or more
-            // digits
-            mStandard = Standard::Desktop;
-            mMajorVersion = version[0] - '0';
-            mMinorVersion = version[2] - '0';
-
-            // The minor version shouldn't get to two digits.
-            ASSERT(version.size() <= 3 || !isdigit(version[3]));
-
-            DAWN_TRY(LoadDesktopGLProcs(getProc, mMajorVersion, mMinorVersion));
+            DAWN_TRY(LoadDesktopGLProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
         }
 
         InitializeSupportedGLExtensions();
@@ -74,14 +46,16 @@ namespace dawn_native { namespace opengl {
         return mSupportedGLExtensionsSet.count(extension) != 0;
     }
 
+    const OpenGLVersion& OpenGLFunctions::GetVersion() const {
+        return mVersion;
+    }
+
     bool OpenGLFunctions::IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const {
-        return mStandard == Standard::Desktop &&
-               std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
+        return mVersion.IsDesktop() && mVersion.IsAtLeast(majorVersion, minorVersion);
     }
 
     bool OpenGLFunctions::IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) const {
-        return mStandard == Standard::ES &&
-               std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
+        return mVersion.IsES() && mVersion.IsAtLeast(majorVersion, minorVersion);
     }
 
 }}  // namespace dawn_native::opengl
