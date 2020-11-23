@@ -1224,7 +1224,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
          result_type->AsVector()->size() == value_type->AsVector()->size());
   }
   if (can_cast_or_copy) {
-    return GenerateCastOrCopy(result_type, values[0]);
+    return GenerateCastOrCopyOrPassthrough(result_type, values[0]);
   }
 
   auto type_id = GenerateTypeIfNeeded(init->type());
@@ -1268,7 +1268,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // Both scalars, but not the same type so we need to generate a conversion
     // of the value.
     if (value_type->is_scalar() && result_type->is_scalar()) {
-      id = GenerateCastOrCopy(result_type, values[0]);
+      id = GenerateCastOrCopyOrPassthrough(result_type, values[0]);
       out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
@@ -1351,8 +1351,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   return result.to_i();
 }
 
-uint32_t Builder::GenerateCastOrCopy(ast::type::Type* to_type,
-                                     ast::Expression* from_expr) {
+uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
+                                                  ast::Expression* from_expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -1388,8 +1388,9 @@ uint32_t Builder::GenerateCastOrCopy(ast::type::Type* to_type,
   } else if ((from_type->IsBool() && to_type->IsBool()) ||
              (from_type->IsU32() && to_type->IsU32()) ||
              (from_type->IsI32() && to_type->IsI32()) ||
-             (from_type->IsF32() && to_type->IsF32())) {
-    op = spv::Op::OpCopyObject;
+             (from_type->IsF32() && to_type->IsF32()) ||
+             (from_type->IsVector() && (from_type == to_type))) {
+    return val_id;
   } else if ((from_type->IsI32() && to_type->IsU32()) ||
              (from_type->IsU32() && to_type->IsI32()) ||
              (from_type->is_signed_integer_vector() &&

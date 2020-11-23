@@ -350,12 +350,14 @@ class Builder {
   uint32_t GenerateSampledImage(ast::type::Type* texture_type,
                                 Operand texture_operand,
                                 Operand sampler_operand);
-  /// Generates a cast or object copy for the expression result
+  /// Generates a cast or object copy for the expression result,
+  /// or return the ID generated the expression if it is already
+  /// of the right type.
   /// @param to_type the type we're casting too
   /// @param from_expr the expression to cast
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateCastOrCopy(ast::type::Type* to_type,
-                              ast::Expression* from_expr);
+  uint32_t GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
+                                           ast::Expression* from_expr);
   /// Generates a loop statement
   /// @param stmt the statement to generate
   /// @returns true on successful generation
