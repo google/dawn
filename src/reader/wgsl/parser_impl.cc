@@ -2622,6 +2622,11 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
     return create<ast::UintLiteral>(type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
+    auto p = peek();
+    if (p.IsIdentifier() && p.to_str() == "f") {
+      next();  // Consume 'f'
+      add_error(p.source(), "float literals must not be suffixed with 'f'");
+    }
     auto* type = module_.create<ast::type::F32Type>();
     return create<ast::FloatLiteral>(type, t.to_f32());
   }

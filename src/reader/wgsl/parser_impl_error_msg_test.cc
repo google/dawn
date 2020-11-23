@@ -209,6 +209,13 @@ TEST_F(ParserImplErrorTest, EqualityInvalidExpr) {
          "                             ^\n");
 }
 
+TEST_F(ParserImplErrorTest, FloatLiteralSuffixedWithF) {
+  EXPECT("var f : f32 = 1.23f;",
+         "test.wgsl:1:19 error: float literals must not be suffixed with 'f'\n"
+         "var f : f32 = 1.23f;\n"
+         "                  ^\n");
+}
+
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingSemicolon) {
   EXPECT("fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }",
          "test.wgsl:1:39 error: expected ';' for initializer in for loop\n"
