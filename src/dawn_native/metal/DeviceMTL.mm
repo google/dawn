@@ -357,7 +357,16 @@ namespace dawn_native { namespace metal {
 
     void Device::WaitForCommandsToBeScheduled() {
         SubmitPendingCommandBuffer();
-        [*mLastSubmittedCommands waitUntilScheduled];
+
+        // Only lock the object while we take a reference to it, otherwise we could block further
+        // progress if the driver calls the scheduled handler (which also acquires the lock) before
+        // finishing the waitUntilScheduled.
+        NSPRef<id<MTLCommandBuffer>> lastSubmittedCommands;
+        {
+            std::lock_guard<std::mutex> lock(mLastSubmittedCommandsMutex);
+            lastSubmittedCommands = mLastSubmittedCommands;
+        }
+        [*lastSubmittedCommands waitUntilScheduled];
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
