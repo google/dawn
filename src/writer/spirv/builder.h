@@ -175,11 +175,13 @@ class Builder {
   /// @param op the operation
   /// @param operands the operands
   void push_function_inst(spv::Op op, const OperandList& operands) {
+    assert(!functions_.empty());
     functions_.back().push_inst(op, operands);
   }
   /// Pushes a variable to the current function
   /// @param operands the variable operands
   void push_function_var(const OperandList& operands) {
+    assert(!functions_.empty());
     functions_.back().push_var(operands);
   }
 
