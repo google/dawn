@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/type_manager.h"
+#include "src/ast/type_manager.h"
 
 #include "gtest/gtest.h"
 #include "src/ast/test_helper.h"
@@ -25,14 +25,14 @@ namespace {
 using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
-  TypeManager tm;
+  ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
-  TypeManager tm;
+  ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
@@ -42,7 +42,7 @@ TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
-  TypeManager tm;
+  ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
@@ -54,7 +54,7 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
 }
 
 TEST_F(TypeManagerTest, ResetClearsPreviousData) {
-  TypeManager tm;
+  ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
 

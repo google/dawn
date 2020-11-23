@@ -19,6 +19,7 @@
 //                headers will need to be moved to include/tint/.
 
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/type_manager.h"
 #include "src/context.h"
 #include "src/diagnostic/printer.h"
 #include "src/inspector/inspector.h"
@@ -28,7 +29,6 @@
 #include "src/transform/manager.h"
 #include "src/transform/vertex_pulling_transform.h"
 #include "src/type_determiner.h"
-#include "src/type_manager.h"
 #include "src/validator/validator.h"
 #include "src/writer/writer.h"
 

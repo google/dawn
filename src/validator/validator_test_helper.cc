@@ -16,8 +16,6 @@
 
 #include <memory>
 
-#include "src/type_manager.h"
-
 namespace tint {
 
 ValidatorTestHelper::ValidatorTestHelper() {

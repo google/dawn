@@ -46,7 +46,7 @@ class ParserImplTest : public testing::Test {
   }
 
   /// @returns the type manager
-  TypeManager* tm() { return &(ctx_.type_mgr()); }
+  ast::TypeManager* tm() { return &(ctx_.type_mgr()); }
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
@@ -72,7 +72,7 @@ class ParserImplTestWithParam : public testing::TestWithParam<T> {
   }
 
   /// @returns the type manager
-  TypeManager* tm() { return &(ctx_.type_mgr()); }
+  ast::TypeManager* tm() { return &(ctx_.type_mgr()); }
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;

@@ -192,6 +192,8 @@ set(TINT_LIB_SRCS
   ast/type/vector_type.h
   ast/type/void_type.cc
   ast/type/void_type.h
+  ast/type_manager.cc
+  ast/type_manager.h
   ast/uint_literal.cc
   ast/uint_literal.h
   ast/unary_op.cc
@@ -237,8 +239,6 @@ set(TINT_LIB_SRCS
   transform/vertex_pulling_transform.h
   type_determiner.cc
   type_determiner.h
-  type_manager.cc
-  type_manager.h
   validator/validator.cc
   validator/validator.h
   validator/validator_impl.cc
@@ -407,6 +407,7 @@ set(TINT_TEST_SRCS
   ast/type/u32_type_test.cc
   ast/type/vector_type_test.cc
   ast/type_constructor_expression_test.cc
+  ast/type_manager_test.cc
   ast/uint_literal_test.cc
   ast/unary_op_expression_test.cc
   ast/variable_decl_statement_test.cc
@@ -420,7 +421,6 @@ set(TINT_TEST_SRCS
   transform/bound_array_accessors_transform_test.cc
   transform/vertex_pulling_transform_test.cc
   type_determiner_test.cc
-  type_manager_test.cc
   validator/validator_control_block_test.cc
   validator/validator_function_test.cc
   validator/validator_test.cc

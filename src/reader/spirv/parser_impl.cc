@@ -80,7 +80,6 @@
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/usage.h"
-#include "src/type_manager.h"
 
 namespace tint {
 namespace reader {

@@ -41,7 +41,6 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/type_manager.h"
 
 namespace tint {
 namespace transform {

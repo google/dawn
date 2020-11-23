@@ -18,7 +18,6 @@
 
 #include "src/ast/node.h"
 #include "src/namer.h"
-#include "src/type_manager.h"
 
 namespace tint {
 

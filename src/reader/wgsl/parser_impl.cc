@@ -70,7 +70,6 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
-#include "src/type_manager.h"
 
 namespace tint {
 namespace reader {

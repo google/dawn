@@ -25,7 +25,6 @@
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
-#include "src/type_manager.h"
 
 namespace tint {
 namespace reader {

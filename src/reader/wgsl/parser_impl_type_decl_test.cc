@@ -28,7 +28,6 @@
 #include "src/ast/type/vector_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/type_manager.h"
 
 namespace tint {
 namespace reader {

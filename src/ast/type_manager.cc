@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/type_manager.h"
+#include "src/ast/type_manager.h"
 
 #include <utility>
 
 namespace tint {
+namespace ast {
 
 TypeManager::TypeManager() = default;
 
@@ -35,4 +36,5 @@ ast::type::Type* TypeManager::Get(std::unique_ptr<ast::type::Type> type) {
   return types_.find(name)->second.get();
 }
 
+}  // namespace ast
 }  // namespace tint

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TYPE_MANAGER_H_
-#define SRC_TYPE_MANAGER_H_
+#ifndef SRC_AST_TYPE_MANAGER_H_
+#define SRC_AST_TYPE_MANAGER_H_
 
 #include <memory>
 #include <string>
@@ -23,6 +23,7 @@
 #include "src/ast/type/type.h"
 
 namespace tint {
+namespace ast {
 
 /// The type manager holds all the pointers to the known types.
 class TypeManager {
@@ -58,6 +59,7 @@ class TypeManager {
   std::unordered_map<std::string, std::unique_ptr<ast::type::Type>> types_;
 };
 
+}  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_TYPE_MANAGER_H_
+#endif  // SRC_AST_TYPE_MANAGER_H_
