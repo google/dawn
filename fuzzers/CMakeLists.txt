@@ -14,20 +14,9 @@
 
 function(add_tint_fuzzer NAME)
   add_executable(${NAME} ${NAME}.cc)
-  target_link_libraries(${NAME} libtint)
+  target_link_libraries(${NAME} libtint-fuzz)
   tint_default_compile_options(${NAME})
-  target_link_options(${NAME} PRIVATE
-    -fno-omit-frame-pointer
-    -fsanitize=fuzzer,address,undefined
-    -fsanitize-address-use-after-scope
-    -O1
-    -g
-  )
-
-  target_compile_options(${NAME} PRIVATE
-    -fsanitize=fuzzer,address,undefined
-    -Wno-missing-prototypes
-  )
+  target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)
 endfunction()
 
 if (${TINT_BUILD_WGSL_READER})
