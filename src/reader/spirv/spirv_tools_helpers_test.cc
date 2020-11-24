@@ -26,8 +26,6 @@ namespace reader {
 namespace spirv {
 namespace test {
 
-/// @returns the SPIR-V module assembled from the given text.  Numeric IDs
-/// are preserved.
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly) {
   // TODO(dneto): Use ScopedTrace?
 
@@ -67,6 +65,23 @@ std::string AssembleFailure(const std::string& spirv_assembly) {
   EXPECT_FALSE(success);
 
   return errors.str();
+}
+
+std::string Disassemble(const std::vector<uint32_t>& spirv_module) {
+  spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
+  std::stringstream errors;
+  tools.SetMessageConsumer([&errors](spv_message_level_t, const char*,
+                                     const spv_position_t& position,
+                                     const char* message) {
+    errors << "disassmbly error:" << position.line << ":" << position.column
+           << ": " << message;
+  });
+
+  std::string result;
+  const auto success = tools.Disassemble(spirv_module, &result);
+  EXPECT_TRUE(success) << errors.str();
+
+  return result;
 }
 
 }  // namespace test
