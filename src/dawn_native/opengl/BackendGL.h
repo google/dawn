@@ -21,7 +21,7 @@ namespace dawn_native { namespace opengl {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance);
+        Backend(InstanceBase* instance, wgpu::BackendType backendType);
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
         ResultOrError<std::vector<std::unique_ptr<AdapterBase>>> DiscoverAdapters(

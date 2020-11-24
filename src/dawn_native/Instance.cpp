@@ -40,7 +40,7 @@ namespace dawn_native {
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
     namespace opengl {
-        BackendConnection* Connect(InstanceBase* instance);
+        BackendConnection* Connect(InstanceBase* instance, wgpu::BackendType backendType);
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
@@ -147,7 +147,8 @@ namespace dawn_native {
 #    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
 #endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-        Register(opengl::Connect(this), wgpu::BackendType::OpenGL);
+        Register(opengl::Connect(this, wgpu::BackendType::OpenGL), wgpu::BackendType::OpenGL);
+        Register(opengl::Connect(this, wgpu::BackendType::OpenGLES), wgpu::BackendType::OpenGLES);
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 #if defined(DAWN_ENABLE_BACKEND_NULL)
         Register(null::Connect(this), wgpu::BackendType::Null);

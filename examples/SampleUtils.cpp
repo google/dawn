@@ -213,12 +213,17 @@ bool InitSample(int argc, const char** argv) {
                 backendType = wgpu::BackendType::OpenGL;
                 continue;
             }
+            if (i < argc && std::string("opengles") == argv[i]) {
+                backendType = wgpu::BackendType::OpenGLES;
+                continue;
+            }
             if (i < argc && std::string("vulkan") == argv[i]) {
                 backendType = wgpu::BackendType::Vulkan;
                 continue;
             }
             fprintf(stderr,
-                    "--backend expects a backend name (opengl, metal, d3d12, null, vulkan)\n");
+                    "--backend expects a backend name (opengl, opengles, metal, d3d12, null, "
+                    "vulkan)\n");
             return false;
         }
         if (std::string("-c") == argv[i] || std::string("--command-buffer") == argv[i]) {

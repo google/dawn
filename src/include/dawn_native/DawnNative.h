@@ -45,6 +45,7 @@ namespace dawn_native {
         Metal,
         Null,
         OpenGL,
+        OpenGLES,
         Vulkan,
     };
 

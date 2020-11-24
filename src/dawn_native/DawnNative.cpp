@@ -69,9 +69,10 @@ namespace dawn_native {
                 return BackendType::OpenGL;
             case wgpu::BackendType::Vulkan:
                 return BackendType::Vulkan;
+            case wgpu::BackendType::OpenGLES:
+                return BackendType::OpenGLES;
 
             case wgpu::BackendType::D3D11:
-            case wgpu::BackendType::OpenGLES:
                 UNREACHABLE();
         }
     }

@@ -26,6 +26,12 @@ namespace dawn_native { namespace opengl {
         void* (*getProc)(const char*);
     };
 
+    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public AdapterDiscoveryOptionsBase {
+        AdapterDiscoveryOptionsES();
+
+        void* (*getProc)(const char*);
+    };
+
     using PresentCallback = void (*)(void*);
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation
     CreateNativeSwapChainImpl(WGPUDevice device, PresentCallback present, void* presentUserdata);

@@ -50,12 +50,19 @@ namespace utils {
         DAWN_UNUSED(type);
         DAWN_UNUSED(window);
 
-        if (type == wgpu::BackendType::OpenGL) {
+        if (type == wgpu::BackendType::OpenGL || type == wgpu::BackendType::OpenGLES) {
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
             glfwMakeContextCurrent(window);
-            dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
-            adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-            instance->DiscoverAdapters(&adapterOptions);
+            auto getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+            if (type == wgpu::BackendType::OpenGL) {
+                dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
+                adapterOptions.getProc = getProc;
+                instance->DiscoverAdapters(&adapterOptions);
+            } else {
+                dawn_native::opengl::AdapterDiscoveryOptionsES adapterOptions;
+                adapterOptions.getProc = getProc;
+                instance->DiscoverAdapters(&adapterOptions);
+            }
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
         } else {
             instance->DiscoverDefaultAdapters();
@@ -81,6 +88,7 @@ namespace utils {
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
             case wgpu::BackendType::OpenGL:
+            case wgpu::BackendType::OpenGLES:
                 return CreateOpenGLBinding(window, device);
 #endif
 

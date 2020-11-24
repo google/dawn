@@ -133,7 +133,7 @@ namespace dawn_native { namespace opengl {
     MaybeError Buffer::MapAtCreationImpl() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        mMappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, 0, GetSize(), GL_MAP_WRITE_BIT);
         return {};
     }
 
