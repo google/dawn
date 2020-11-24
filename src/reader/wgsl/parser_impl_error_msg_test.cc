@@ -28,6 +28,7 @@ class ParserImplErrorTest : public ParserImplTest {};
     std::string source = SOURCE;                                     \
     std::string expected = EXPECTED;                                 \
     auto p = parser(source);                                         \
+    p->set_max_errors(5);                                            \
     EXPECT_EQ(false, p->Parse());                                    \
     EXPECT_EQ(true, p->diagnostics().contains_errors());             \
     EXPECT_EQ(expected, diag::Formatter().format(p->diagnostics())); \
@@ -1166,6 +1167,26 @@ TEST_F(ParserImplErrorTest, LoopMissingRBrace) {
          "test.wgsl:1:24 error: expected '}' for loop\n"
          "fn f() -> void { loop {\n"
          "                       ^\n");
+}
+
+TEST_F(ParserImplErrorTest, MaxErrorsReached) {
+  EXPECT("x; x; x; x; x; x; x; x;",
+         "test.wgsl:1:1 error: unexpected token\n"
+         "x; x; x; x; x; x; x; x;\n"
+         "^\n\n"
+         "test.wgsl:1:4 error: unexpected token\n"
+         "x; x; x; x; x; x; x; x;\n"
+         "   ^\n\n"
+         "test.wgsl:1:7 error: unexpected token\n"
+         "x; x; x; x; x; x; x; x;\n"
+         "      ^\n\n"
+         "test.wgsl:1:10 error: unexpected token\n"
+         "x; x; x; x; x; x; x; x;\n"
+         "         ^\n\n"
+         "test.wgsl:1:13 error: unexpected token\n"
+         "x; x; x; x; x; x; x; x;\n"
+         "            ^\n\n"
+         "test.wgsl error: stopping after 5 errors");
 }
 
 TEST_F(ParserImplErrorTest, MemberExprMissingIdentifier) {

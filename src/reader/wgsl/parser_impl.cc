@@ -238,8 +238,17 @@ bool ParserImpl::Parse() {
 // translation_unit
 //  : global_decl* EOF
 void ParserImpl::translation_unit() {
-  while (!peek().IsEof() && synchronized_) {
+  while (synchronized_) {
+    auto p = peek();
+    if (p.IsEof()) {
+      break;
+    }
     expect_global_decl();
+    if (diags_.error_count() >= max_errors_) {
+      add_error(Source{{}, p.source().file},
+                "stopping after " + std::to_string(max_errors_) + " errors");
+      break;
+    }
   }
 
   assert(module_.IsValid());

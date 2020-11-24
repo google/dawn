@@ -83,13 +83,15 @@ class List {
   void add(Diagnostic&& diag) {
     entries_.emplace_back(std::move(diag));
     if (diag.severity >= Severity::Error) {
-      contains_errors_ = true;
+      error_count_++;
     }
   }
 
   /// @returns true iff the diagnostic list contains errors diagnostics (or of
   /// higher severity).
-  bool contains_errors() const { return contains_errors_; }
+  bool contains_errors() const { return error_count_ > 0; }
+  /// @returns the number of error diagnostics (or of higher severity).
+  size_t error_count() const { return error_count_; }
   /// @returns the number of entries in the list.
   size_t count() const { return entries_.size(); }
   /// @returns the first diagnostic in the list.
@@ -99,7 +101,7 @@ class List {
 
  private:
   std::vector<Diagnostic> entries_;
-  bool contains_errors_ = false;
+  size_t error_count_ = 0;
 };
 
 }  // namespace diag

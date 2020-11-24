@@ -233,6 +233,15 @@ class ParserImpl {
   /// @returns true if the parse was successful, false otherwise.
   bool Parse();
 
+  /// set_max_diagnostics sets the maximum number of reported errors before
+  /// aborting parsing.
+  /// @param limit the new maximum number of errors
+  void set_max_errors(size_t limit) { max_errors_ = limit; }
+
+  /// @return the number of maximum number of reported errors before aborting
+  /// parsing.
+  size_t get_max_errors() const { return max_errors_; }
+
   /// @returns true if an error was encountered.
   bool has_error() const { return diags_.contains_errors(); }
 
@@ -779,6 +788,7 @@ class ParserImpl {
   int silence_errors_ = 0;
   std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
   ast::Module module_;
+  size_t max_errors_ = 25;
 };
 
 }  // namespace wgsl
