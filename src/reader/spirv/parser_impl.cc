@@ -1102,16 +1102,26 @@ bool ParserImpl::EmitModuleScopeVariables() {
     if (!success_) {
       return false;
     }
-    auto* ast_type = id_to_type_[type_id];
-    if (ast_type == nullptr) {
-      return Fail() << "internal error: failed to register Tint AST type for "
-                       "SPIR-V type with ID: "
-                    << var.type_id();
+    ast::type::Type* ast_type = nullptr;
+    if (spirv_storage_class == SpvStorageClassUniformConstant) {
+      // These are opaque handles: samplers or textures
+      ast_type = GetTypeForHandleVar(var);
+      if (!ast_type) {
+        return false;
+      }
+    } else {
+      ast_type = id_to_type_[type_id];
+      if (ast_type == nullptr) {
+        return Fail() << "internal error: failed to register Tint AST type for "
+                         "SPIR-V type with ID: "
+                      << var.type_id();
+      }
+      if (!ast_type->IsPointer()) {
+        return Fail() << "variable with ID " << var.result_id()
+                      << " has non-pointer type " << var.type_id();
+      }
     }
-    if (!ast_type->IsPointer()) {
-      return Fail() << "variable with ID " << var.result_id()
-                    << " has non-pointer type " << var.type_id();
-    }
+
     auto* ast_store_type = ast_type->AsPointer()->type();
     auto ast_storage_class = ast_type->AsPointer()->storage_class();
     auto* ast_var =

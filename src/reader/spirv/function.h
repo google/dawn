@@ -259,6 +259,17 @@ struct DefInfo {
   /// that needs to be remapped to StorageBuffer storage class.
   /// This is kNone for non-pointers.
   ast::StorageClass storage_class = ast::StorageClass::kNone;
+
+  /// Should this instruction be skipped when generating code?
+  /// This is true for any intermediate value which is an sampler, image,
+  /// or sampled image, or any pointer to such object. Code is generated
+  /// for those objects only when emitting the image instructions that access
+  /// the image (read, write, sample, gather, fetch, or query). For example,
+  /// when encountering an OpImageSampleExplicitLod, a call to the
+  /// textureSampleLevel builtin function will be emitted, and the call will
+  /// directly reference the underlying texture and sampler (variable or
+  /// function parameter).
+  bool skip_generation = false;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
@@ -692,6 +703,12 @@ class FunctionEmitter {
   /// @param inst the SPIR-V instruction
   /// @returns an expression
   TypedExpression MakeIntrinsicCall(const spvtools::opt::Instruction& inst);
+
+  /// Emits a texture builtin function call for a SPIR-V instruction that
+  /// accesses a sampled image.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  bool EmitSampledImageAccess(const spvtools::opt::Instruction& inst);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return

@@ -350,6 +350,44 @@ ast::Intrinsic GetIntrinsic(SpvOp opcode) {
   return ast::Intrinsic::kNone;
 }
 
+// @param opcode a SPIR-V opcode
+// @returns true if the given instruction is an image access instruction
+// whose first input operand is an OpSampledImage value.
+bool IsSampledImageAccess(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpImageSampleImplicitLod:
+    case SpvOpImageSampleExplicitLod:
+    case SpvOpImageSampleDrefImplicitLod:
+    case SpvOpImageSampleDrefExplicitLod:
+    case SpvOpImageGather:
+    case SpvOpImageDrefGather:
+    case SpvOpImageQueryLod:
+      return true;
+    default:
+      // WGSL doesn't have *Proj* texturing.
+      break;
+  }
+  return false;
+}
+
+// @param opcode a SPIR-V opcode
+// @returns true if the given instruction is an image access instruction
+// whose first input operand is an OpImage value.
+bool IsRawImageAccess(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpImageRead:
+    case SpvOpImageWrite:
+    case SpvOpImageFetch:
+    case SpvOpImageQuerySizeLod:
+    case SpvOpImageQueryLevels:
+    case SpvOpImageQuerySamples:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 // @returns the merge block ID for the given basic block, or 0 if there is none.
 uint32_t MergeFor(const spvtools::opt::BasicBlock& bb) {
   // Get the OpSelectionMerge or OpLoopMerge instruction, if any.
@@ -2597,25 +2635,35 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
 
   // Handle combinatorial instructions.
   const auto* def_info = GetDefInfo(result_id);
-  auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
-  if (combinatorial_expr.expr != nullptr) {
-    if (def_info == nullptr) {
-      return Fail() << "internal error: result ID %" << result_id
-                    << " is missing a def_info";
+  if (def_info) {
+    if (def_info->skip_generation) {
+      return true;
     }
-    if (def_info->requires_hoisted_def || def_info->requires_named_const_def ||
-        def_info->num_uses != 1) {
-      // Generate a const definition or an assignment to a hoisted definition
-      // now and later use the const or variable name at the uses of this value.
-      return EmitConstDefOrWriteToHoistedVar(inst, combinatorial_expr);
+    auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+    if (combinatorial_expr.expr != nullptr) {
+      if (def_info->requires_hoisted_def ||
+          def_info->requires_named_const_def || def_info->num_uses != 1) {
+        // Generate a const definition or an assignment to a hoisted definition
+        // now and later use the const or variable name at the uses of this
+        // value.
+        return EmitConstDefOrWriteToHoistedVar(inst, combinatorial_expr);
+      }
+      // It is harmless to defer emitting the expression until it's used.
+      // Any supporting statements have already been emitted.
+      singly_used_values_.insert(std::make_pair(result_id, combinatorial_expr));
+      return success();
     }
-    // It is harmless to defer emitting the expression until it's used.
-    // Any supporting statements have already been emitted.
-    singly_used_values_.insert(std::make_pair(result_id, combinatorial_expr));
-    return success();
   }
   if (failed()) {
     return false;
+  }
+
+  if (IsSampledImageAccess(inst.opcode())) {
+    return EmitSampledImageAccess(inst);
+  }
+  if (IsRawImageAccess(inst.opcode())) {
+    return Fail() << "raw image access is not implemented yet:"
+                  << inst.PrettyPrint();
   }
 
   switch (inst.opcode()) {
@@ -3195,34 +3243,45 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
       }
       def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos, index);
       index++;
+      auto& info = def_info_[result_id];
 
       // Determine storage class for pointer values. Do this in order because
       // we might rely on the storage class for a previously-visited definition.
       // Logical pointers can't be transmitted through OpPhi, so remaining
       // pointer definitions are SSA values, and their definitions must be
       // visited before their uses.
-      auto& storage_class = def_info_[result_id]->storage_class;
       const auto* type = type_mgr_->GetType(inst.type_id());
-      if (type && type->AsPointer()) {
-        const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-        if (ast_type && ast_type->AsPointer()) {
-          storage_class = ast_type->AsPointer()->storage_class();
+      if (type) {
+        if (type->AsPointer()) {
+          const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+          if (ast_type && ast_type->AsPointer()) {
+            info->storage_class = ast_type->AsPointer()->storage_class();
+          }
+          switch (inst.opcode()) {
+            case SpvOpUndef:
+            case SpvOpVariable:
+              // Keep the default decision based on the result type.
+              break;
+            case SpvOpAccessChain:
+            case SpvOpCopyObject:
+              // Inherit from the first operand. We need this so we can pick up
+              // a remapped storage buffer.
+              info->storage_class = GetStorageClassForPointerValue(
+                  inst.GetSingleWordInOperand(0));
+              break;
+            default:
+              return Fail()
+                     << "pointer defined in function from unknown opcode: "
+                     << inst.PrettyPrint();
+          }
+          if (info->storage_class == ast::StorageClass::kUniformConstant) {
+            info->skip_generation = true;
+          }
         }
-        switch (inst.opcode()) {
-          case SpvOpUndef:
-          case SpvOpVariable:
-            // Keep the default decision based on the result type.
-            break;
-          case SpvOpAccessChain:
-          case SpvOpCopyObject:
-            // Inherit from the first operand. We need this so we can pick up
-            // a remapped storage buffer.
-            storage_class =
-                GetStorageClassForPointerValue(inst.GetSingleWordInOperand(0));
-            break;
-          default:
-            return Fail() << "pointer defined in function from unknown opcode: "
-                          << inst.PrettyPrint();
+        if (type->AsSampler() || type->AsImage() || type->AsSampledImage()) {
+          // Defer code generation until the instruction that actually acts on
+          // the image.
+          info->skip_generation = true;
         }
       }
     }
@@ -3561,6 +3620,99 @@ void FunctionEmitter::ApplySourceForInstruction(
   if (!HasSource(existing)) {
     node->set_source(parser_impl_.GetSourceForInst(&inst));
   }
+}
+
+bool FunctionEmitter::EmitSampledImageAccess(
+    const spvtools::opt::Instruction& inst) {
+  auto* result_type = parser_impl_.ConvertType(inst.type_id());
+
+  // The sampled image operand is always first.
+  const auto sampled_image_id = inst.GetSingleWordInOperand(0);
+  const auto* sampler =
+      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, false);
+  const auto* image =
+      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, true);
+
+  if (!sampler) {
+    return Fail() << "interal error: couldn't find sampler for "
+                  << inst.PrettyPrint();
+  }
+  if (!image) {
+    return Fail() << "interal error: couldn't find image for "
+                  << inst.PrettyPrint();
+  }
+
+  ast::ExpressionList params;
+  params.push_back(
+      create<ast::IdentifierExpression>(namer_.Name(image->result_id())));
+  params.push_back(
+      create<ast::IdentifierExpression>(namer_.Name(sampler->result_id())));
+
+  // Push the coordinates operand.
+  // TODO(dneto): For explicit-Lod variations, we may have to convert from
+  // integral coordinates to floating point coordinates.
+  // TODO(dneto): For arrayed access, split off the array layer.
+  params.push_back(MakeOperand(inst, 1).expr);
+  uint32_t arg_index = 2;
+
+  std::string builtin_name;
+  switch (inst.opcode()) {
+    case SpvOpImageSampleImplicitLod:
+    case SpvOpImageSampleExplicitLod:
+      builtin_name = "textureSample";
+      break;
+    case SpvOpImageGather:
+    case SpvOpImageDrefGather:
+      return Fail() << " image gather is not yet supported";
+    case SpvOpImageQueryLod:
+      return Fail() << " image query Lod is not yet supported";
+    default:
+      return Fail() << "internal error: sampled image access";
+  }
+
+  // Loop over the image operands, looking for extra operands to the builtin.
+  // Except we uroll the loop.
+  const auto num_args = inst.NumInOperands();
+  uint32_t image_operands_mask = 0;
+  if (arg_index < num_args) {
+    image_operands_mask = inst.GetSingleWordInOperand(arg_index);
+    arg_index++;
+  }
+  if (arg_index < num_args &&
+      (image_operands_mask & SpvImageOperandsBiasMask)) {
+    builtin_name += "Bias";
+    params.push_back(MakeOperand(inst, arg_index).expr);
+    image_operands_mask ^= SpvImageOperandsBiasMask;
+    arg_index++;
+  }
+  if (arg_index < num_args && (image_operands_mask & SpvImageOperandsLodMask)) {
+    builtin_name += "Level";
+    params.push_back(MakeOperand(inst, arg_index).expr);
+    image_operands_mask ^= SpvImageOperandsLodMask;
+    arg_index++;
+  }
+  if (arg_index + 1 < num_args &&
+      (image_operands_mask & SpvImageOperandsGradMask)) {
+    builtin_name += "Grad";
+    params.push_back(MakeOperand(inst, arg_index).expr);
+    params.push_back(MakeOperand(inst, arg_index + 1).expr);
+    image_operands_mask ^= SpvImageOperandsGradMask;
+    arg_index += 2;
+  }
+  if (arg_index < num_args &&
+      (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
+    params.push_back(MakeOperand(inst, arg_index).expr);
+    image_operands_mask ^= SpvImageOperandsConstOffsetMask;
+    arg_index++;
+  }
+  if (image_operands_mask) {
+    return Fail() << "unsupported image operands (" << image_operands_mask
+                  << "): " << inst.PrettyPrint();
+  }
+
+  auto* ident = create<ast::IdentifierExpression>(builtin_name);
+  auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
+  return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
 }
 
 }  // namespace spirv

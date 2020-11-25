@@ -48,10 +48,13 @@ std::string CommonTypes() {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
 
+    %int_3 = OpConstant %uint 3
+    %int_4 = OpConstant %uint 4
     %uint_1 = OpConstant %uint 1
     %uint_2 = OpConstant %uint 2
     %uint_100 = OpConstant %uint 100
 
+    %v2int = OpTypeVector %int 2
     %v2uint = OpTypeVector %uint 2
     %v4uint = OpTypeVector %uint 4
     %v4int = OpTypeVector %int 4
@@ -60,11 +63,13 @@ std::string CommonTypes() {
     %v4float = OpTypeVector %float 4
 
     %float_null = OpConstantNull %float
+    %float_7 = OpConstant %float 7
     %v2float_null = OpConstantNull %v2float
     %v3float_null = OpConstantNull %v3float
     %v4float_null = OpConstantNull %v4float
 
     %depth = OpConstant %float 0.2
+    %offsets2d = OpConstantComposite %v2int %int_3 %int_4
 
 ; Define types for all sampler and texture types that can map to WGSL,
 ; modulo texel formats for storage textures. For now, we limit
@@ -1053,6 +1058,472 @@ INSTANTIATE_TEST_SUITE_P(
                           "%result = OpImageQuerySamples "
                           "%uint %im",
                           "Usage(Texture( is_sampled ms ))"}));
+
+// Test emission of handle variables.
+
+struct DeclSampledImageCase {
+  std::string inst;             // The provoking image access instruction.
+  std::string var_decl;         // WGSL variable declaration
+  std::string texture_builtin;  // WGSL texture usage.
+};
+inline std::ostream& operator<<(std::ostream& out,
+                                const DeclSampledImageCase& c) {
+  out << "UsageSampledImageCase(" << c.inst << "\n"
+      << c.var_decl << "\n"
+      << c.texture_builtin << ")";
+  return out;
+}
+
+using SpvParserTest_DeclHandle_SampledImage =
+    SpvParserTestBase<::testing::TestWithParam<DeclSampledImageCase>>;
+
+TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
+  const auto assembly = Preamble() + R"(
+     OpDecorate %10 DescriptorSet 0
+     OpDecorate %10 Binding 0
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonTypes() + R"(
+     %si_ty = OpTypeSampledImage %f_texture_2d
+     %coords = OpConstantNull %v2float
+
+     %10 = OpVariable %ptr_sampler UniformConstant
+     %20 = OpVariable %ptr_f_texture_2d UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %sam = OpLoad %sampler %10
+     %im = OpLoad %f_texture_2d %20
+     %sampled_image = OpSampledImage %si_ty %im %sam
+)" + GetParam().inst + R"(
+
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty()) << p->error();
+  const auto module = p->module().to_str();
+  EXPECT_THAT(module, HasSubstr(GetParam().var_decl))
+      << "DECLARATIONS ARE BAD " << module;
+  EXPECT_THAT(module, HasSubstr(GetParam().texture_builtin))
+      << "TEXTURE BUILTIN IS BAD " << module << assembly;
+}
+
+// TODO(dneto): Test variable declaration and texture builtins provoked by
+// use of an image access instruction inside helper function.
+TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, DISABLED_FunctionParam) {
+  const auto assembly = Preamble() + CommonTypes() + R"(
+     %f_ty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_2d
+     %si_ty = OpTypeSampledImage %f_texture_2d
+     %coords = OpConstantNull %v2float
+     %component = OpConstant %uint 1
+
+     %10 = OpVariable %ptr_sampler UniformConstant
+     %20 = OpVariable %ptr_f_texture_2d UniformConstant
+
+     %func = OpFunction %void None %f_ty
+     %110 = OpFunctionParameter %ptr_sampler
+     %120 = OpFunctionParameter %ptr_f_texture_2d
+     %func_entry = OpLabel
+     %sam = OpLoad %sampler %110
+     %im = OpLoad %f_texture_2d %120
+     %sampled_image = OpSampledImage %si_ty %im %sam
+
+)" + GetParam().inst + R"(
+
+     OpReturn
+     OpFunctionEnd
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %foo = OpFunctionCall %void %func %10 %20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildInternalModule()) << p->error() << assembly << std::endl;
+  EXPECT_TRUE(p->RegisterHandleUsage()) << p->error() << assembly << std::endl;
+  EXPECT_TRUE(p->error().empty()) << p->error() << assembly << std::endl;
+  Usage su = p->GetHandleUsage(10);
+  Usage iu = p->GetHandleUsage(20);
+
+  EXPECT_THAT(su.to_str(), Eq(GetParam().expected_sampler_usage));
+  EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_ImageGather,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::ValuesIn(std::vector<DeclSampledImageCase>{
+        // TODO(dneto): OpImageGather
+        // TODO(dneto): OpImageGather with ConstOffset (signed and unsigned)
+        // TODO(dneto): OpImageGather with Offset (signed and unsigned)
+        // TODO(dneto): OpImageGather with Offsets (signed and unsigned)
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_ImageDrefGather,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::ValuesIn(std::vector<DeclSampledImageCase>{
+        // TODO(dneto): OpImageDrefGather
+        // TODO(dneto): OpImageDrefGather with ConstOffset (signed and
+        // unsigned)
+        // TODO(dneto): OpImageDrefGather with Offset (signed and unsigned)
+        // TODO(dneto): OpImageDrefGather with Offsets (signed and unsigned)
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleImplicitLod,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::Values(
+
+        // OpImageSampleImplicitLod
+        DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
+                             "%v4float %sampled_image %coords",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+            )
+          })"},
+
+        // OpImageSampleImplicitLod with ConstOffset
+        DeclSampledImageCase{
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords ConstOffset %offsets2d",
+            R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"},
+
+        // OpImageSampleImplicitLod with Bias
+        DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
+                             "%v4float %sampled_image %coords Bias %float_7",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{7.000000}
+            )
+          })"},
+
+        // OpImageSampleImplicitLod with Bias and ConstOffset
+        // TODO(dneto): OpImageSampleImplicitLod with Bias and unsigned
+        // ConstOffset
+        DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
+                             "%v4float %sampled_image %coords Bias|ConstOffset "
+                             "%float_7 %offsets2d",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{7.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}
+
+        ));
+
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_ImageSampleDrefImplicitLod,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::ValuesIn(std::vector<DeclSampledImageCase>{
+        // TODO(dneto): ImageSampleDrefImplicitLod
+        // TODO(dneto): ImageSampleDrefImplicitLod with ConstOffset (signed and
+        // unsigned)
+        // TODO(dneto): ImageSampleDrefImplicitLod with Bias
+        // TODO(dneto): ImageSampleDrefImplicitLod with Biase and ConstOffset
+        // (signed and unsigned)
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    DisabledimageSampleExplicitLod,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::Values(
+
+        // OpImageSampleExplicitLod - using Lod
+        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
+                             "%v4float %sampled_image %coords Lod %float_null",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.000000}
+            )
+          })"},
+
+        // OpImageSampleExplicitLod - using Lod and ConstOffset
+        // TODO(dneto) OpImageSampleExplicitLod - using Lod and unsigned
+        // ConstOffset
+        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
+                             "%v4float %sampled_image %coords Lod|ConstOffset "
+                             "%float_null %offsets2d",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"},
+
+        // OpImageSampleExplicitLod - using Grad
+        DeclSampledImageCase{
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords Grad %float_7 %float_null",
+            R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{7.000000}
+              ScalarConstructor[not set]{0.000000}
+            )
+          })"},
+
+        // OpImageSampleExplicitLod - using Grad and ConstOffset
+        // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
+        // ConstOffset
+        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
+                             "%v4float %sampled_image %coords Grad|ConstOffset "
+                             "%float_7 %float_null %offsets2d",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{7.000000}
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
 
 }  // namespace
 }  // namespace spirv
