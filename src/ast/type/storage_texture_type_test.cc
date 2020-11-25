@@ -96,7 +96,7 @@ TEST_F(StorageTextureTypeTest, U32Type) {
   ast::Module mod;
   ast::type::Type* s = mod.create<StorageTextureType>(
       TextureDimension::k2dArray, AccessControl::kReadOnly,
-      ImageFormat::kRgba8Unorm);
+      ImageFormat::kRg32Uint);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();

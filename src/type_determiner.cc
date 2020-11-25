@@ -1166,13 +1166,6 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
   }
 
   switch (tex->image_format()) {
-    case ast::type::ImageFormat::kR8Unorm:
-    case ast::type::ImageFormat::kRg8Unorm:
-    case ast::type::ImageFormat::kRgba8Unorm:
-    case ast::type::ImageFormat::kRgba8UnormSrgb:
-    case ast::type::ImageFormat::kBgra8Unorm:
-    case ast::type::ImageFormat::kBgra8UnormSrgb:
-    case ast::type::ImageFormat::kRgb10A2Unorm:
     case ast::type::ImageFormat::kR8Uint:
     case ast::type::ImageFormat::kR16Uint:
     case ast::type::ImageFormat::kRg8Uint:
@@ -1186,9 +1179,6 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
       return true;
     }
 
-    case ast::type::ImageFormat::kR8Snorm:
-    case ast::type::ImageFormat::kRg8Snorm:
-    case ast::type::ImageFormat::kRgba8Snorm:
     case ast::type::ImageFormat::kR8Sint:
     case ast::type::ImageFormat::kR16Sint:
     case ast::type::ImageFormat::kRg8Sint:
@@ -1202,6 +1192,16 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
       return true;
     }
 
+    case ast::type::ImageFormat::kR8Unorm:
+    case ast::type::ImageFormat::kRg8Unorm:
+    case ast::type::ImageFormat::kRgba8Unorm:
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+    case ast::type::ImageFormat::kBgra8Unorm:
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+    case ast::type::ImageFormat::kR8Snorm:
+    case ast::type::ImageFormat::kRg8Snorm:
+    case ast::type::ImageFormat::kRgba8Snorm:
     case ast::type::ImageFormat::kR16Float:
     case ast::type::ImageFormat::kR32Float:
     case ast::type::ImageFormat::kRg16Float:

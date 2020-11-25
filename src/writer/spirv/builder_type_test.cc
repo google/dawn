@@ -845,7 +845,7 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8SNorm) {
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 2 R8Snorm
 )");
 }
@@ -858,8 +858,34 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8UNorm) {
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 2 R8
+)");
+}
+
+TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8Uint) {
+  ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
+                                  ast::AccessControl::kReadOnly,
+                                  ast::type::ImageFormat::kR8Uint);
+
+  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%1 = OpTypeImage %2 1D 0 0 0 2 R8ui
+)");
+}
+
+TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8Sint) {
+  ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
+                                  ast::AccessControl::kReadOnly,
+                                  ast::type::ImageFormat::kR8Sint);
+
+  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%1 = OpTypeImage %2 1D 0 0 0 2 R8i
 )");
 }
 
