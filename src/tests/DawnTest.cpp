@@ -54,6 +54,8 @@ namespace {
                 return "Null";
             case wgpu::BackendType::OpenGL:
                 return "OpenGL";
+            case wgpu::BackendType::OpenGLES:
+                return "OpenGLES";
             case wgpu::BackendType::Vulkan:
                 return "Vulkan";
             default:
@@ -122,6 +124,12 @@ BackendTestConfig NullBackend(std::initializer_list<const char*> forceEnabledWor
 BackendTestConfig OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
                                 std::initializer_list<const char*> forceDisabledWorkarounds) {
     return BackendTestConfig(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
+}
+
+BackendTestConfig OpenGLESBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                                  std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::OpenGLES, forceEnabledWorkarounds,
                              forceDisabledWorkarounds);
 }
 
@@ -322,8 +330,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     }
 }
 
-std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters()
-    const {
+std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters() {
     auto instance = std::make_unique<dawn_native::Instance>();
     instance->EnableBackendValidation(mEnableBackendValidation);
     instance->EnableGPUBasedBackendValidation(mEnableBackendValidation);
@@ -341,16 +348,36 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    std::string windowName = "Dawn OpenGL test window";
-    GLFWwindow* window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
+    mOpenGLWindow = glfwCreateWindow(400, 400, "Dawn OpenGL test window", nullptr, nullptr);
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(mOpenGLWindow);
     dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
     adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
     instance->DiscoverAdapters(&adapterOptions);
+
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+
+    mOpenGLESWindow = glfwCreateWindow(400, 400, "Dawn OpenGLES test window", nullptr, nullptr);
+
+    glfwMakeContextCurrent(mOpenGLESWindow);
+    dawn_native::opengl::AdapterDiscoveryOptionsES adapterOptionsES;
+    adapterOptionsES.getProc = adapterOptions.getProc;
+    instance->DiscoverAdapters(&adapterOptionsES);
 #endif  // DAWN_ENABLE_BACKEND_OPENGL
 
     return instance;
+}
+
+GLFWwindow* DawnTestEnvironment::GetOpenGLWindow() const {
+    return mOpenGLWindow;
+}
+
+GLFWwindow* DawnTestEnvironment::GetOpenGLESWindow() const {
+    return mOpenGLESWindow;
 }
 
 void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::Instance* instance) {
@@ -592,6 +619,10 @@ bool DawnTestBase::IsOpenGL() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGL;
 }
 
+bool DawnTestBase::IsOpenGLES() const {
+    return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGLES;
+}
+
 bool DawnTestBase::IsVulkan() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::Vulkan;
 }
@@ -830,6 +861,13 @@ void DawnTestBase::SetUp() {
 
     device.SetUncapturedErrorCallback(OnDeviceError, this);
     device.SetDeviceLostCallback(OnDeviceLost, this);
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+    if (IsOpenGL()) {
+        glfwMakeContextCurrent(gTestEnv->GetOpenGLWindow());
+    } else if (IsOpenGLES()) {
+        glfwMakeContextCurrent(gTestEnv->GetOpenGLESWindow());
+    }
+#endif
 }
 
 void DawnTestBase::TearDown() {

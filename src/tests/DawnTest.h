@@ -152,8 +152,13 @@ BackendTestConfig NullBackend(std::initializer_list<const char*> forceEnabledWor
 BackendTestConfig OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
                                 std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
+BackendTestConfig OpenGLESBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
+                                  std::initializer_list<const char*> forceDisabledWorkarounds = {});
+
 BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
                                 std::initializer_list<const char*> forceDisabledWorkarounds = {});
+
+struct GLFWwindow;
 
 namespace utils {
     class PlatformDebugLogger;
@@ -195,6 +200,8 @@ class DawnTestEnvironment : public testing::Environment {
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
     const char* GetWireTraceDir() const;
+    GLFWwindow* GetOpenGLWindow() const;
+    GLFWwindow* GetOpenGLESWindow() const;
 
     const std::vector<std::string>& GetEnabledToggles() const;
     const std::vector<std::string>& GetDisabledToggles() const;
@@ -204,7 +211,7 @@ class DawnTestEnvironment : public testing::Environment {
 
   private:
     void ParseArgs(int argc, char** argv);
-    std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters() const;
+    std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters();
     void SelectPreferredAdapterProperties(const dawn_native::Instance* instance);
     void PrintTestConfigurationAndAdapterInfo(dawn_native::Instance* instance) const;
 
@@ -221,6 +228,8 @@ class DawnTestEnvironment : public testing::Environment {
     std::vector<TestAdapterProperties> mAdapterProperties;
 
     std::unique_ptr<utils::PlatformDebugLogger> mPlatformDebugLogger;
+    GLFWwindow* mOpenGLWindow;
+    GLFWwindow* mOpenGLESWindow;
 };
 
 class DawnTestBase {
@@ -237,6 +246,7 @@ class DawnTestBase {
     bool IsMetal() const;
     bool IsNull() const;
     bool IsOpenGL() const;
+    bool IsOpenGLES() const;
     bool IsVulkan() const;
 
     bool IsAMD() const;
