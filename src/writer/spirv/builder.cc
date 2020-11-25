@@ -2487,6 +2487,12 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   if (dim == ast::type::TextureDimension::k1dArray ||
       dim == ast::type::TextureDimension::k1d) {
     dim_literal = SpvDim1D;
+    if (texture->IsSampled()) {
+      push_capability(SpvCapabilitySampled1D);
+    } else {
+      assert(texture->IsStorage());
+      push_capability(SpvCapabilityImage1D);
+    }
   }
   if (dim == ast::type::TextureDimension::k3d) {
     dim_literal = SpvDim3D;

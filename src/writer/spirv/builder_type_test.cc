@@ -725,6 +725,10 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
             R"(%2 = OpTypeInt 32 1
 %1 = OpTypeImage %2 1D 0 0 0 1 Unknown
 )");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Sampled1D
+)");
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
@@ -736,6 +740,10 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
   EXPECT_EQ(DumpInstructions(b.types()),
             R"(%2 = OpTypeInt 32 0
 %1 = OpTypeImage %2 1D 0 0 0 1 Unknown
+)");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Sampled1D
 )");
 }
 
@@ -749,6 +757,10 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
             R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 1 Unknown
 )");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Sampled1D
+)");
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
@@ -760,6 +772,10 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
   EXPECT_EQ(DumpInstructions(b.types()),
             R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 1 0 1 Unknown
+)");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Sampled1D
 )");
 }
 
@@ -835,6 +851,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R16Float) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 2 R16f
 )");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
+)");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8SNorm) {
@@ -848,6 +869,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8SNorm) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 2 R8Snorm
 )");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
+)");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8UNorm) {
@@ -860,6 +886,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_R8UNorm) {
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 0 0 2 R8
+)");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
 )");
 }
 
@@ -899,6 +930,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateReadonly_1d_array) {
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 1D 0 1 0 2 R16f
+)");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
 )");
 }
 
@@ -952,6 +988,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_1d) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeImage %2 1D 0 0 0 2 R16f
 )");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
+)");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_1dArray) {
@@ -964,6 +1005,11 @@ TEST_F(BuilderTest_Type, StorageTexture_GenerateWriteonly_1dArray) {
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeImage %2 1D 0 1 0 2 R16f
+)");
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability Image1D
+OpCapability StorageImageExtendedFormats
 )");
 }
 
