@@ -89,7 +89,7 @@ class DrawIndexedIndirectTest : public DawnTest {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
-            pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32, indexOffset);
+            pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, indexOffset);
             pass.DrawIndexedIndirect(indirectBuffer, indirectOffset);
             pass.EndPass();
         }

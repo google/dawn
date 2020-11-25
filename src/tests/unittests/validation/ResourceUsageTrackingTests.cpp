@@ -91,7 +91,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetVertexBuffer(0, buffer);
             pass.EndPass();
             encoder.Finish();
@@ -135,7 +135,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -258,12 +258,12 @@ namespace {
             DummyRenderPass dummyRenderPass(device);
 
             wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&dummyRenderPass);
-            pass0.SetIndexBufferWithFormat(buffer0, wgpu::IndexFormat::Uint32);
+            pass0.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
             pass0.SetBindGroup(0, bg1);
             pass0.EndPass();
 
             wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
-            pass1.SetIndexBufferWithFormat(buffer1, wgpu::IndexFormat::Uint32);
+            pass1.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
             pass1.SetBindGroup(0, bg0);
             pass1.EndPass();
 
@@ -349,7 +349,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
             pass.SetPipeline(rp);
 
-            pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.Draw(3);
 
             pass.SetBindGroup(0, bg);
@@ -414,7 +414,7 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
             pass.SetPipeline(rp);
 
-            pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, writeBG);
             pass.Draw(3);
 
@@ -514,8 +514,8 @@ namespace {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBufferWithFormat(buffer0, wgpu::IndexFormat::Uint32);
-            pass.SetIndexBufferWithFormat(buffer1, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -526,8 +526,8 @@ namespace {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBufferWithFormat(buffer1, wgpu::IndexFormat::Uint32);
-            pass.SetIndexBufferWithFormat(buffer0, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -584,7 +584,7 @@ namespace {
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-                pass.SetIndexBufferWithFormat(buffer0, wgpu::IndexFormat::Uint32);
+                pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
                 pass.SetBindGroup(0, bg0);
                 pass.SetBindGroup(0, bg1);
                 pass.EndPass();
@@ -596,7 +596,7 @@ namespace {
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-                pass.SetIndexBufferWithFormat(buffer0, wgpu::IndexFormat::Uint32);
+                pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
                 pass.SetBindGroup(0, bg1);
                 pass.SetBindGroup(0, bg0);
                 pass.EndPass();
@@ -724,7 +724,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32);
+            pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());

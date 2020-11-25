@@ -94,15 +94,16 @@ namespace dawn_native {
             }
             DAWN_TRY(ValidateIndexFormat(descriptor->indexFormat));
 
-            // Pipeline descriptors using strip topologies must not have an undefined index format.
+            // Pipeline descriptors must have indexFormat != undefined IFF they are using strip
+            // topologies.
             if (IsStripPrimitiveTopology(primitiveTopology)) {
                 if (descriptor->indexFormat == wgpu::IndexFormat::Undefined) {
                     return DAWN_VALIDATION_ERROR(
                         "indexFormat must not be undefined when using strip primitive topologies");
                 }
             } else if (descriptor->indexFormat != wgpu::IndexFormat::Undefined) {
-                device->EmitDeprecationWarning(
-                    "Specifying an indexFormat when using list primitive topologies is deprecated");
+                return DAWN_VALIDATION_ERROR(
+                    "indexFormat must be undefined when using non-strip primitive topologies");
             }
 
             if (descriptor->vertexBufferCount > kMaxVertexBuffers) {

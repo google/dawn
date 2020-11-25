@@ -1030,7 +1030,9 @@ namespace dawn_native { namespace metal {
         RenderPipeline* lastPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nullptr;
         uint32_t indexBufferBaseOffset = 0;
-        wgpu::IndexFormat indexBufferFormat = wgpu::IndexFormat::Undefined;
+        MTLIndexType indexBufferType;
+        uint64_t indexTypeSize = 0;
+
         StorageBufferLengthTracker storageBufferLengths = {};
         VertexBufferTracker vertexBuffers(&storageBufferLengths);
         BindGroupTracker bindGroups(&storageBufferLengths);
@@ -1072,15 +1074,6 @@ namespace dawn_native { namespace metal {
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
 
-                    // If a index format was specified in setIndexBuffer always use it.
-                    wgpu::IndexFormat indexFormat = indexBufferFormat;
-                    if (indexFormat == wgpu::IndexFormat::Undefined) {
-                        // Otherwise use the pipeline's index format.
-                        // TODO(crbug.com/dawn/502): This path is deprecated.
-                        indexFormat = lastPipeline->GetVertexStateDescriptor()->indexFormat;
-                    }
-                    size_t formatSize = IndexFormatSize(indexFormat);
-
                     // The index and instance count must be non-zero, otherwise no-op
                     if (draw->indexCount != 0 && draw->instanceCount != 0) {
                         // MTLFeatureSet_iOS_GPUFamily3_v1 does not support baseInstance and
@@ -1088,18 +1081,18 @@ namespace dawn_native { namespace metal {
                         if (draw->baseVertex == 0 && draw->firstInstance == 0) {
                             [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                                 indexCount:draw->indexCount
-                                                 indexType:MTLIndexFormat(indexFormat)
+                                                 indexType:indexBufferType
                                                indexBuffer:indexBuffer
                                          indexBufferOffset:indexBufferBaseOffset +
-                                                           draw->firstIndex * formatSize
+                                                           draw->firstIndex * indexTypeSize
                                              instanceCount:draw->instanceCount];
                         } else {
                             [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                                 indexCount:draw->indexCount
-                                                 indexType:MTLIndexFormat(indexFormat)
+                                                 indexType:indexBufferType
                                                indexBuffer:indexBuffer
                                          indexBufferOffset:indexBufferBaseOffset +
-                                                           draw->firstIndex * formatSize
+                                                           draw->firstIndex * indexTypeSize
                                              instanceCount:draw->instanceCount
                                                 baseVertex:draw->baseVertex
                                               baseInstance:draw->firstInstance];
@@ -1130,18 +1123,10 @@ namespace dawn_native { namespace metal {
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
 
-                    // If a index format was specified in setIndexBuffer always use it.
-                    wgpu::IndexFormat indexFormat = indexBufferFormat;
-                    if (indexFormat == wgpu::IndexFormat::Undefined) {
-                        // Otherwise use the pipeline's index format.
-                        // TODO(crbug.com/dawn/502): This path is deprecated.
-                        indexFormat = lastPipeline->GetVertexStateDescriptor()->indexFormat;
-                    }
-
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                     id<MTLBuffer> indirectBuffer = buffer->GetMTLBuffer();
                     [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                         indexType:MTLIndexFormat(indexFormat)
+                                         indexType:indexBufferType
                                        indexBuffer:indexBuffer
                                  indexBufferOffset:indexBufferBaseOffset
                                     indirectBuffer:indirectBuffer
@@ -1210,9 +1195,8 @@ namespace dawn_native { namespace metal {
                     auto b = ToBackend(cmd->buffer.Get());
                     indexBuffer = b->GetMTLBuffer();
                     indexBufferBaseOffset = cmd->offset;
-                    // TODO(crbug.com/dawn/502): Once setIndexBuffer is required to specify an
-                    // index buffer format store as an MTLIndexType.
-                    indexBufferFormat = cmd->format;
+                    indexBufferType = MTLIndexFormat(cmd->format);
+                    indexTypeSize = IndexFormatSize(cmd->format);
                     break;
                 }
 

@@ -224,41 +224,6 @@ namespace dawn_native { namespace vulkan {
             }
         };
 
-        class IndexBufferTracker {
-          public:
-            void OnSetIndexBuffer(VkBuffer buffer, wgpu::IndexFormat format, VkDeviceSize offset) {
-                mIndexBuffer = buffer;
-                mOffset = offset;
-                mBufferIndexFormat = format;
-
-                mLastAppliedIndexFormat = wgpu::IndexFormat::Undefined;
-            }
-
-            void OnSetPipeline(RenderPipeline* pipeline) {
-                mPipelineIndexFormat = pipeline->GetVertexStateDescriptor()->indexFormat;
-            }
-
-            void Apply(Device* device, VkCommandBuffer commands) {
-                wgpu::IndexFormat newIndexFormat = mBufferIndexFormat;
-                if (newIndexFormat == wgpu::IndexFormat::Undefined) {
-                    newIndexFormat = mPipelineIndexFormat;
-                }
-
-                if (newIndexFormat != mLastAppliedIndexFormat) {
-                    device->fn.CmdBindIndexBuffer(commands, mIndexBuffer, mOffset,
-                                                  VulkanIndexType(newIndexFormat));
-                    mLastAppliedIndexFormat = newIndexFormat;
-                }
-            }
-
-          private:
-            wgpu::IndexFormat mBufferIndexFormat = wgpu::IndexFormat::Undefined;
-            wgpu::IndexFormat mPipelineIndexFormat = wgpu::IndexFormat::Undefined;
-            wgpu::IndexFormat mLastAppliedIndexFormat = wgpu::IndexFormat::Undefined;
-            VkBuffer mIndexBuffer = VK_NULL_HANDLE;
-            VkDeviceSize mOffset;
-        };
-
         MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                          Device* device,
                                          BeginRenderPassCmd* renderPass) {
@@ -1000,7 +965,6 @@ namespace dawn_native { namespace vulkan {
         }
 
         RenderDescriptorSetTracker descriptorSets = {};
-        IndexBufferTracker indexBufferTracker = {};
         RenderPipeline* lastPipeline = nullptr;
 
         auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
@@ -1018,7 +982,6 @@ namespace dawn_native { namespace vulkan {
                     DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    indexBufferTracker.Apply(device, commands);
                     device->fn.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                               draw->firstIndex, draw->baseVertex,
                                               draw->firstInstance);
@@ -1041,7 +1004,6 @@ namespace dawn_native { namespace vulkan {
                     VkBuffer indirectBuffer = ToBackend(draw->indirectBuffer)->GetHandle();
 
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
-                    indexBufferTracker.Apply(device, commands);
                     device->fn.CmdDrawIndexedIndirect(
                         commands, indirectBuffer, static_cast<VkDeviceSize>(draw->indirectOffset),
                         1, 0);
@@ -1115,8 +1077,8 @@ namespace dawn_native { namespace vulkan {
                     SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
                     VkBuffer indexBuffer = ToBackend(cmd->buffer)->GetHandle();
 
-                    indexBufferTracker.OnSetIndexBuffer(indexBuffer, cmd->format,
-                                                        static_cast<VkDeviceSize>(cmd->offset));
+                    device->fn.CmdBindIndexBuffer(commands, indexBuffer, cmd->offset,
+                                                  VulkanIndexType(cmd->format));
                     break;
                 }
 
@@ -1129,7 +1091,6 @@ namespace dawn_native { namespace vulkan {
                     lastPipeline = pipeline;
 
                     descriptorSets.OnSetPipeline(pipeline);
-                    indexBufferTracker.OnSetPipeline(pipeline);
                     break;
                 }
 

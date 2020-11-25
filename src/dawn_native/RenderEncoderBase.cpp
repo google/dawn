@@ -153,24 +153,25 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::SetIndexBuffer(BufferBase* buffer, uint64_t offset, uint64_t size) {
-        GetDevice()->EmitDeprecationWarning(
-            "RenderEncoderBase::SetIndexBuffer is deprecated. Use RenderEncoderBase::SetIndexBufferWithFormat instead");
-
-        SetIndexBufferCommon(buffer, wgpu::IndexFormat::Undefined, offset, size, false);
-    }
-
     void RenderEncoderBase::SetIndexBufferWithFormat(BufferBase* buffer, wgpu::IndexFormat format,
                                                      uint64_t offset, uint64_t size) {
-        SetIndexBufferCommon(buffer, format, offset, size, true);
+        GetDevice()->EmitDeprecationWarning(
+            "RenderEncoderBase::SetIndexBufferWithFormat is deprecated. Use "
+            "RenderEncoderBase::SetIndexBuffer instead.");
+        SetIndexBuffer(buffer, format, offset, size);
     }
 
-    void RenderEncoderBase::SetIndexBufferCommon(BufferBase* buffer, wgpu::IndexFormat format,
-                                                 uint64_t offset, uint64_t size,
-                                                 bool requireFormat) {
+    void RenderEncoderBase::SetIndexBuffer(BufferBase* buffer,
+                                           wgpu::IndexFormat format,
+                                           uint64_t offset,
+                                           uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
+
             DAWN_TRY(ValidateIndexFormat(format));
+            if (format == wgpu::IndexFormat::Undefined) {
+                return DAWN_VALIDATION_ERROR("Index format must be specified");
+            }
 
             uint64_t bufferSize = buffer->GetSize();
             if (offset > bufferSize) {
@@ -184,12 +185,6 @@ namespace dawn_native {
                 if (size > remainingSize) {
                     return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
                 }
-            }
-
-            if (requireFormat && format == wgpu::IndexFormat::Undefined) {
-                return DAWN_VALIDATION_ERROR("Index format must be specified");
-            } else if (!requireFormat) {
-                ASSERT(format == wgpu::IndexFormat::Undefined);
             }
 
             SetIndexBufferCmd* cmd =

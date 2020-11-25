@@ -60,7 +60,7 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
 
-        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexed(1);
 
         pass.DrawIndirect(indirectBuffer, 0);
@@ -73,7 +73,7 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&bundleDesc);
         encoder.SetPipeline(pipeline);
 
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         encoder.DrawIndexed(1);
 
         encoder.DrawIndirect(indirectBuffer, 0);
@@ -86,7 +86,7 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
 
         pass.SetPipeline(pipeline);
-        pass.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         pass.DrawIndexedIndirect(indirectBuffer, 0);
 
         pass.EndPass();
@@ -98,7 +98,7 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&bundleDesc);
 
         encoder.SetPipeline(pipeline);
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         encoder.DrawIndexedIndirect(indirectBuffer, 0);
 
         ASSERT_DEVICE_ERROR(encoder.Finish());

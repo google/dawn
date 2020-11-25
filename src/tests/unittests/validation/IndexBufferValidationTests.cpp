@@ -48,6 +48,21 @@ class IndexBufferValidationTest : public ValidationTest {
     }
 };
 
+// Test that IndexFormat::Undefined is disallowed.
+TEST_F(IndexBufferValidationTest, UndefinedIndexFormat) {
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.usage = wgpu::BufferUsage::Index;
+    bufferDesc.size = 256;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    DummyRenderPass renderPass(device);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Undefined);
+    pass.EndPass();
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 // Test that for OOB validation of index buffer offset and size.
 TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     wgpu::BufferDescriptor bufferDesc;
@@ -61,13 +76,13 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         // Explicit size
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 0, 256);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 256);
         // Implicit size
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 0, 0);
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256 - 4, 0);
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 4, 0);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 0);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256 - 4, 0);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, 0);
         // Implicit size of zero
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256, 0);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256, 0);
         pass.EndPass();
         encoder.Finish();
     }
@@ -76,7 +91,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 4, 256);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, 256);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -85,7 +100,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256 + 4, 0);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256 + 4, 0);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -98,27 +113,27 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
         // Explicit size
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 0, 256);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 256);
         // Implicit size
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 0, 0);
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256 - 4, 0);
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 4, 0);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 0);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256 - 4, 0);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, 0);
         // Implicit size of zero
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256, 0);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256, 0);
         encoder.Finish();
     }
 
     // Bad case, offset + size is larger than the buffer
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 4, 256);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 4, 256);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Bad case, size is 0 but the offset is larger than the buffer
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(buffer, wgpu::IndexFormat::Uint32, 256 + 4, 0);
+        encoder.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 256 + 4, 0);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -141,7 +156,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
     // Expected to fail because pipeline and index formats don't match.
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint16);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         encoder.SetPipeline(pipeline32);
         encoder.DrawIndexed(3);
         ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -149,7 +164,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
 
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         encoder.SetPipeline(pipeline16);
         encoder.DrawIndexed(3);
         ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -158,7 +173,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
     // Expected to succeed because pipeline and index formats match.
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint16);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint16);
         encoder.SetPipeline(pipeline16);
         encoder.DrawIndexed(3);
         encoder.Finish();
@@ -166,7 +181,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
 
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
-        encoder.SetIndexBufferWithFormat(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
         encoder.SetPipeline(pipeline32);
         encoder.DrawIndexed(3);
         encoder.Finish();

@@ -582,10 +582,7 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
                 // primitive topology isn't a strip type.
                 device.CreateRenderPipeline(&descriptor);
             } else {
-                // TODO(crbug.com/dawn/502): Once setIndexBuffer requires an
-                // indexFormat. this should fail. For now it succeeds to allow
-                // backwards compatibility during the deprecation period.
-                EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
             }
         }
     }
