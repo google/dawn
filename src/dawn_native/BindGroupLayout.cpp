@@ -81,23 +81,6 @@ namespace dawn_native {
                 viewDimension = entry.viewDimension;
             }
 
-            // Fixup multisampled=true to use MultisampledTexture instead.
-            // TODO(dawn:527): Remove once the deprecation of multisampled is done.
-            wgpu::BindingType type = entry.type;
-            if (entry.multisampled) {
-                if (type == wgpu::BindingType::MultisampledTexture) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Cannot use multisampled = true and MultisampledTexture at the same time.");
-                } else if (type == wgpu::BindingType::SampledTexture) {
-                    device->EmitDeprecationWarning(
-                        "BGLEntry::multisampled is deprecated, use "
-                        "wgpu::BindingType::MultisampledTexture instead.");
-                    type = wgpu::BindingType::MultisampledTexture;
-                } else {
-                    return DAWN_VALIDATION_ERROR("Binding type cannot be multisampled");
-                }
-            }
-
             if (bindingsSet.count(bindingNumber) != 0) {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
@@ -105,7 +88,7 @@ namespace dawn_native {
             bool canBeDynamic = false;
             wgpu::ShaderStage allowedStages = kAllStages;
 
-            switch (type) {
+            switch (entry.type) {
                 case wgpu::BindingType::StorageBuffer:
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                     DAWN_FALLTHROUGH;
@@ -275,16 +258,6 @@ namespace dawn_native {
         : CachedObject(device), mBindingInfo(BindingIndex(descriptor->entryCount)) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
             descriptor->entries, descriptor->entries + descriptor->entryCount);
-
-        // Fixup multisampled=true to use MultisampledTexture instead.
-        // TODO(dawn:527): Remove once multisampled=true deprecation is finished.
-        for (BindGroupLayoutEntry& entry : sortedBindings) {
-            if (entry.multisampled) {
-                ASSERT(entry.type == wgpu::BindingType::SampledTexture);
-                entry.multisampled = false;
-                entry.type = wgpu::BindingType::MultisampledTexture;
-            }
-        }
 
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
 

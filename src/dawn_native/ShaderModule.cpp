@@ -433,22 +433,10 @@ namespace dawn_native {
                     case wgpu::BindingType::SampledTexture:
                     case wgpu::BindingType::MultisampledTexture: {
                         if (layoutInfo.textureComponentType != shaderInfo.textureComponentType) {
-                            // TODO(dawn:527): Remove once the deprecation timeline is complete.
-                            if (layoutInfo.textureComponentType ==
-                                    wgpu::TextureComponentType::Float &&
-                                shaderInfo.textureComponentType ==
-                                    wgpu::TextureComponentType::DepthComparison) {
-                                device->EmitDeprecationWarning(
-                                    "Using depth texture in the shader with "
-                                    "TextureComponentType::Float is deprecated use "
-                                    "TextureComponentType::DepthComparison in the bind group "
-                                    "layout instead.");
-                            } else {
-                                return DAWN_VALIDATION_ERROR(
-                                    "The textureComponentType of the bind group layout entry is "
-                                    "different from " +
-                                    GetShaderDeclarationString(group, bindingNumber));
-                            }
+                            return DAWN_VALIDATION_ERROR(
+                                "The textureComponentType of the bind group layout entry is "
+                                "different from " +
+                                GetShaderDeclarationString(group, bindingNumber));
                         }
 
                         if (layoutInfo.viewDimension != shaderInfo.viewDimension) {

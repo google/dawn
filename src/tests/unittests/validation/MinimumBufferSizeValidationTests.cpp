@@ -394,8 +394,8 @@ TEST_F(MinBufferSizeBindGroupCreationTests, LayoutEquality) {
     auto MakeLayout = [&](uint64_t size) {
         return utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, false, size,
-                      false, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureComponentType::Float, wgpu::TextureFormat::Undefined}});
+                      wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                      wgpu::TextureFormat::Undefined}});
     };
 
     EXPECT_EQ(MakeLayout(0).Get(), MakeLayout(0).Get());

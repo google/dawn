@@ -104,7 +104,6 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::UniformBuffer;
-    binding.multisampled = false;
     binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
@@ -166,7 +165,6 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.hasDynamicOffset = false;
-    binding.multisampled = false;
     binding.minBufferBindingSize = 4 * sizeof(float);
     binding.visibility = wgpu::ShaderStage::Fragment;
 
@@ -243,54 +241,6 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     }
 }
 
-// Test that multisampling matches the shader.
-TEST_F(GetBindGroupLayoutTests, Multisampled) {
-    wgpu::BindGroupLayoutEntry binding = {};
-    binding.binding = 0;
-    binding.visibility = wgpu::ShaderStage::Fragment;
-    binding.hasDynamicOffset = false;
-
-    wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.entryCount = 1;
-    desc.entries = &binding;
-
-    {
-        binding.type = wgpu::BindingType::SampledTexture;
-        binding.multisampled = false;
-        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2D tex;
-
-        void main() {})");
-        EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
-    }
-
-    {
-        binding.type = wgpu::BindingType::MultisampledTexture;
-        binding.multisampled = false;
-        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2DMS tex;
-
-        void main() {})");
-        EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
-    }
-
-    // TODO(crbug.com/dawn/527): Remove this block when multisampled=true is removed.
-    {
-        binding.type = wgpu::BindingType::SampledTexture;
-        binding.multisampled = true;
-        wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2DMS tex;
-
-        void main() {})");
-        wgpu::BindGroupLayout bgl;
-        EXPECT_DEPRECATION_WARNING(bgl = device.CreateBindGroupLayout(&desc));
-        EXPECT_EQ(bgl.Get(), pipeline.GetBindGroupLayout(0).Get());
-    }
-}
-
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     wgpu::BindGroupLayoutEntry binding = {};
@@ -298,7 +248,6 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = wgpu::ShaderStage::Fragment;
     binding.hasDynamicOffset = false;
-    binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -372,7 +321,6 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = wgpu::ShaderStage::Fragment;
     binding.hasDynamicOffset = false;
-    binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -415,7 +363,6 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.visibility = wgpu::ShaderStage::Fragment;
     binding.hasDynamicOffset = false;
-    binding.multisampled = false;
     binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
