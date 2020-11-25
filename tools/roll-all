@@ -36,7 +36,7 @@ fi
 
 old_head=$(git rev-parse HEAD)
 
-for i in $(find third_party -type d -maxdepth 1 -depth 1); do
+for i in $(find third_party -maxdepth 1 -mindepth 1 -type d); do
   name=`echo "${i%%/}" | cut -f2 -d'/' | tr '-' '_'`
 
   if [ "x${name}" == "xcpplint" ]; then
