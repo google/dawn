@@ -590,7 +590,7 @@ namespace dawn_native { namespace vulkan {
 
         // In the happy path we can use the swapchain image directly.
         if (!mConfig.needsBlit) {
-            return mTexture->CreateView(nullptr);
+            return mTexture->CreateView();
         }
 
         // The blit texture always perfectly matches what the user requested for the swapchain.
@@ -598,7 +598,7 @@ namespace dawn_native { namespace vulkan {
         TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
         DAWN_TRY_ASSIGN(mBlitTexture,
                         Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-        return mBlitTexture->CreateView(nullptr);
+        return mBlitTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {

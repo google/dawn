@@ -383,7 +383,7 @@ namespace dawn_native { namespace null {
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
         mTexture = AcquireRef(
             new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
-        return mTexture->CreateView(nullptr);
+        return mTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {

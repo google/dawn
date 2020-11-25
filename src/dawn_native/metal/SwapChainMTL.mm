@@ -129,7 +129,7 @@ namespace dawn_native { namespace metal {
 
         mTexture = AcquireRef(
             new Texture(ToBackend(GetDevice()), &textureDesc, [*mCurrentDrawable texture]));
-        return mTexture->CreateView(nullptr);
+        return mTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {

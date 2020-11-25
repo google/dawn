@@ -189,7 +189,7 @@ namespace dawn_native {
         // of dawn_native
         mCurrentTexture = AcquireRef(GetNextTextureImpl(&descriptor));
 
-        mCurrentTextureView = mCurrentTexture->CreateView(nullptr);
+        mCurrentTextureView = mCurrentTexture->CreateView();
         return mCurrentTextureView.Get();
     }
 
