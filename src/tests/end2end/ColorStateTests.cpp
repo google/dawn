@@ -33,8 +33,7 @@ class ColorStateTest : public DawnTest {
                 [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
-                [[stage(vertex)]]
-                fn main() -> void {
+                [[stage(vertex)]] fn main() -> void {
                     const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                         vec2<f32>(-1.0, -1.0),
                         vec2<f32>(3.0, -1.0),
@@ -64,8 +63,7 @@ class ColorStateTest : public DawnTest {
 
                 [[location(0)]] var<out> fragColor : vec4<f32>;
 
-                [[stage(fragment)]]
-                fn main() -> void {
+                [[stage(fragment)]] fn main() -> void {
                     fragColor = myUbo.color;
                     return;
                 }
@@ -785,8 +783,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
         [[location(2)]] var<out> fragColor2 : vec4<f32>;
         [[location(3)]] var<out> fragColor3 : vec4<f32>;
 
-        [[stage(fragment)]]
-        fn main() -> void {
+        [[stage(fragment)]] fn main() -> void {
             fragColor0 = myUbo.color0;
             fragColor1 = myUbo.color1;
             fragColor2 = myUbo.color2;
@@ -890,8 +887,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]]
-        fn main() -> void {
+        [[stage(fragment)]] fn main() -> void {
             fragColor = myUbo.color;
             return;
         }
@@ -1014,8 +1010,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]]
-        fn main() -> void {
+        [[stage(fragment)]] fn main() -> void {
             fragColor = myUbo.color;
             return;
         }

@@ -27,16 +27,14 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]]
-        fn vertex_main() -> void {
+        [[stage(vertex)]] fn vertex_main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
 
         [[location(0)]] var<out> outColor : vec4<f32>;
 
-        [[stage(fragment)]]
-        fn fragment_main() -> void {
+        [[stage(fragment)]] fn fragment_main() -> void {
           outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
           return;
         }
@@ -82,14 +80,12 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         };
         [[binding(0), set(0)]] var<storage_buffer> data : Data;
 
-        [[stage(compute)]]
-        fn write1() -> void {
+        [[stage(compute)]] fn write1() -> void {
             data.data = 1u;
             return;
         }
 
-        [[stage(compute)]]
-        fn write42() -> void {
+        [[stage(compute)]] fn write42() -> void {
             data.data = 42u;
             return;
         }

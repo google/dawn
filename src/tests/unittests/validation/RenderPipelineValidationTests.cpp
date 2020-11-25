@@ -594,15 +594,13 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
-        [[stage(vertex)]]
-        fn vertex_main() -> void {
+        [[stage(vertex)]] fn vertex_main() -> void {
             position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
 
         [[location(0)]] var<out> color : vec4<f32>;
-        [[stage(fragment)]]
-        fn fragment_main() -> void {
+        [[stage(fragment)]] fn fragment_main() -> void {
             color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             return;
         }
@@ -651,13 +649,11 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
         [[location(0)]] var<in> attrib0 : vec4<f32>;
         [[location(1)]] var<in> attrib1 : vec4<f32>;
 
-        [[stage(vertex)]]
-        fn vertex0() -> void {
+        [[stage(vertex)]] fn vertex0() -> void {
             position = attrib0;
             return;
         }
-        [[stage(vertex)]]
-        fn vertex1() -> void {
+        [[stage(vertex)]] fn vertex1() -> void {
             position = attrib1;
             return;
         }
@@ -700,13 +696,11 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
         [[location(0)]] var<out> colorFloat : vec4<f32>;
         [[location(0)]] var<out> colorUint : vec4<u32>;
 
-        [[stage(fragment)]]
-        fn fragmentFloat() -> void {
+        [[stage(fragment)]] fn fragmentFloat() -> void {
             colorFloat = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             return;
         }
-        [[stage(fragment)]]
-        fn fragmentUint() -> void {
+        [[stage(fragment)]] fn fragmentUint() -> void {
             colorUint = vec4<u32>(0, 0, 0, 0);
             return;
         }
