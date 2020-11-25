@@ -620,6 +620,46 @@ OpName %5 "tint_63"
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
+  // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k2d,
+                                     ast::AccessControl::kReadOnly,
+                                     ast::type::ImageFormat::kR32Uint);
+  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
+
+  ast::Variable var_a("a", ast::StorageClass::kUniformConstant, &type);
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var_a)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeImage %4 2D 0 0 0 2 R32ui
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
+  // var<uniform_constant> a : texture_storage_wo_2d<r32uint>;
+  ast::type::StorageTextureType type(ast::type::TextureDimension::k2d,
+                                     ast::AccessControl::kWriteOnly,
+                                     ast::type::ImageFormat::kR32Uint);
+  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
+
+  ast::Variable var_a("a", ast::StorageClass::kUniformConstant, &type);
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(&var_a)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeVoid
+%3 = OpTypeImage %4 2D 0 0 0 2 R32ui
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

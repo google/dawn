@@ -710,7 +710,25 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                      Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (!type->IsTexture() && !type->IsSampler()) {
+  } else if (type->IsTexture()) {
+    // Decorate storage texture variables with NonRead/Writeable if needed.
+    if (type->AsTexture()->IsStorage()) {
+      switch (type->AsTexture()->AsStorage()->access()) {
+        case ast::AccessControl::kWriteOnly:
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
+          break;
+        case ast::AccessControl::kReadOnly:
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
+          break;
+        case ast::AccessControl::kReadWrite:
+          break;
+      }
+    }
+  } else if (!type->IsSampler()) {
     // Certain cases require us to generate a constructor value.
     //
     // 1- ConstantId's must be attached to the OpConstant, if we have a
