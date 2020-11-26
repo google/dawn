@@ -95,6 +95,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitCall(ast::CallExpression* expr);
+  /// Handles generating a call to a texture function (`textureSample`,
+  /// `textureSampleGrad`, etc)
+  /// @param expr the call expression
+  /// @returns true if the call expression is emitted
+  bool EmitTextureCall(ast::CallExpression* expr);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully

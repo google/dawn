@@ -545,8 +545,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       auto name = generate_intrinsic_name(ident->intrinsic());
       if (name.empty()) {
         if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-          error_ = "Textures not implemented yet";
-          return false;
+          return EmitTextureCall(expr);
         }
         name = generate_builtin_name(ident);
         if (name.empty()) {
@@ -645,6 +644,107 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     first = false;
 
     if (!EmitExpression(param)) {
+      return false;
+    }
+  }
+
+  out_ << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
+  auto* ident = expr->func()->AsIdentifier();
+
+  auto params = expr->params();
+  auto* signature = static_cast<const ast::intrinsic::TextureSignature*>(
+      ident->intrinsic_signature());
+  auto& pidx = signature->params.idx;
+  auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
+
+  if (!EmitExpression(params[pidx.texture]))
+    return false;
+
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureSample:
+    case ast::Intrinsic::kTextureSampleBias:
+    case ast::Intrinsic::kTextureSampleLevel:
+    case ast::Intrinsic::kTextureSampleGrad:
+      out_ << ".sample(";
+      break;
+    case ast::Intrinsic::kTextureSampleCompare:
+      out_ << ".sample_compare(";
+      break;
+    default:
+      error_ = "Internal compiler error: Unhandled texture intrinsic '" +
+               ident->name() + "'";
+      break;
+  }
+
+  if (!EmitExpression(params[pidx.sampler])) {
+    return false;
+  }
+
+  for (auto idx : {pidx.coords, pidx.array_index, pidx.depth_ref}) {
+    if (idx != kNotUsed) {
+      out_ << ", ";
+      if (!EmitExpression(params[idx]))
+        return false;
+    }
+  }
+
+  if (pidx.bias != kNotUsed) {
+    out_ << ", bias(";
+    if (!EmitExpression(params[pidx.bias])) {
+      return false;
+    }
+    out_ << ")";
+  }
+  if (pidx.level != kNotUsed) {
+    out_ << ", level(";
+    if (!EmitExpression(params[pidx.level])) {
+      return false;
+    }
+    out_ << ")";
+  }
+  if (pidx.ddx != kNotUsed) {
+    auto dim = params[pidx.texture]
+                   ->result_type()
+                   ->UnwrapPtrIfNeeded()
+                   ->AsTexture()
+                   ->dim();
+    switch (dim) {
+      case ast::type::TextureDimension::k2d:
+      case ast::type::TextureDimension::k2dArray:
+        out_ << ", gradient2d(";
+        break;
+      case ast::type::TextureDimension::k3d:
+        out_ << ", gradient3d(";
+        break;
+      case ast::type::TextureDimension::kCube:
+      case ast::type::TextureDimension::kCubeArray:
+        out_ << ", gradientcube(";
+        break;
+      default: {
+        std::stringstream err;
+        err << "MSL does not support gradients for " << dim << " textures";
+        error_ = err.str();
+        return false;
+      }
+    }
+    if (!EmitExpression(params[pidx.ddx])) {
+      return false;
+    }
+    out_ << ", ";
+    if (!EmitExpression(params[pidx.ddy])) {
+      return false;
+    }
+    out_ << ")";
+  }
+
+  if (pidx.offset != kNotUsed) {
+    out_ << ", ";
+    if (!EmitExpression(params[pidx.offset])) {
       return false;
     }
   }
