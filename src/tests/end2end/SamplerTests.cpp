@@ -54,28 +54,32 @@ class SamplerTest : public DawnTest {
         DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        auto vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
-                                            vec2(-2.f,  2.f),
-                                            vec2( 2.f, -2.f),
-                                            vec2(-2.f,  2.f),
-                                            vec2( 2.f, -2.f),
-                                            vec2( 2.f,  2.f));
-                gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-            }
-        )");
-        auto fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2D texture0;
-            layout(location = 0) out vec4 fragColor;
+        auto vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            void main() {
-                fragColor = texture(sampler2D(texture0, sampler0), gl_FragCoord.xy / 2.0);
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                    vec2<f32>(-2.0, -2.0),
+                    vec2<f32>(-2.0,  2.0),
+                    vec2<f32>( 2.0, -2.0),
+                    vec2<f32>(-2.0,  2.0),
+                    vec2<f32>( 2.0, -2.0),
+                    vec2<f32>( 2.0,  2.0));
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             }
         )");
+        auto fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
+            [[set(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
+
+            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
+
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureSample(texture0, sampler0, FragCoord.xy / vec2<f32>(2.0, 2.0));
+            })");
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = vsModule;
