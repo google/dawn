@@ -1165,9 +1165,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
     x_10
     uniform_constant
     __storage_texture_write_only_1d_rg32float
-  })"}
-
-                             ));
+  })"}));
 
 // Test emission of variables when we have sampled image accesses in
 // executable code.
@@ -1450,9 +1448,7 @@ INSTANTIATE_TEST_SUITE_P(
                 ScalarConstructor[not set]{4}
               }
             )
-          })"}
-
-        ));
+          })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefImplicitLod,
