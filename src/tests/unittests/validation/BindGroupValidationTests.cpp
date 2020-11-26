@@ -1063,29 +1063,21 @@ class SetBindGroupValidationTest : public ValidationTest {
     wgpu::BindGroupLayout mBindGroupLayout;
 
     wgpu::RenderPipeline CreateRenderPipeline() {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[stage(vertex)]] fn main() -> void {
                 })");
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(std140, set = 0, binding = 0) uniform uBufferDynamic {
-                    vec2 value0;
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[block]] struct S {
+                    [[offset(0)]] value : vec2<f32>;
                 };
-                layout(std140, set = 0, binding = 1) uniform uBuffer {
-                    vec2 value1;
-                };
-                layout(std140, set = 0, binding = 2) buffer SBufferDynamic {
-                    vec2 value2;
-                } sBuffer;
-                layout(std140, set = 0, binding = 3) readonly buffer RBufferDynamic {
-                    vec2 value3;
-                } rBuffer;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
+
+                [[set(0), binding(0)]] var<uniform> uBufferDynamic : S;
+                [[set(0), binding(1)]] var<uniform> uBuffer : S;
+                [[set(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+                [[set(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+
+                [[stage(fragment)]] fn main() -> void {
                 })");
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
@@ -1098,26 +1090,17 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     wgpu::ComputePipeline CreateComputePipeline() {
-        wgpu::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-                #version 450
-                const uint kTileSize = 4;
-                const uint kInstances = 11;
+        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[block]] struct S {
+                    [[offset(0)]] value : vec2<f32>;
+                };
 
-                layout(local_size_x = kTileSize, local_size_y = kTileSize, local_size_z = 1) in;
-                layout(std140, set = 0, binding = 0) uniform UniformBufferDynamic {
-                    float value0;
-                };
-                layout(std140, set = 0, binding = 1) uniform UniformBuffer {
-                    float value1;
-                };
-                layout(std140, set = 0, binding = 2) buffer SBufferDynamic {
-                    float value2;
-                } dst;
-                layout(std140, set = 0, binding = 3) readonly buffer RBufferDynamic {
-                    readonly float value3;
-                } rdst;
-                void main() {
+                [[set(0), binding(0)]] var<uniform> uBufferDynamic : S;
+                [[set(0), binding(1)]] var<uniform> uBuffer : S;
+                [[set(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+                [[set(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+
+                [[stage(compute), workgroup_size(4, 4, 1)]] fn main() -> void {
                 })");
 
         wgpu::PipelineLayout pipelineLayout =
@@ -1483,10 +1466,9 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        mVsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-            })");
+        mVsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[stage(vertex)]] fn main() -> void {
+                })");
     }
 
     wgpu::Buffer CreateBuffer(uint64_t bufferSize, wgpu::BufferUsage usage) {
@@ -1529,7 +1511,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
             device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
         std::stringstream ss;
-        ss << "#version 450\n";
+        ss << "[[block]] struct S { [[offset(0)]] value : vec2<f32>; };";
 
         // Build a shader which has bindings that match the pipeline layout.
         for (uint32_t l = 0; l < layouts.size(); ++l) {
@@ -1537,26 +1519,24 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
 
             for (uint32_t b = 0; b < layout.size(); ++b) {
                 wgpu::BindingType binding = layout[b];
-                ss << "layout(std140, set = " << l << ", binding = " << b << ") ";
+                ss << "[[set(" << l << "), binding(" << b << ")]] ";
                 switch (binding) {
                     case wgpu::BindingType::StorageBuffer:
-                        ss << "buffer SBuffer";
+                        ss << "var<storage_buffer> set" << l << "_binding" << b
+                           << " : [[access(read_write)]] S;";
                         break;
                     case wgpu::BindingType::UniformBuffer:
-                        ss << "uniform UBuffer";
+                        ss << "var<uniform> set" << l << "_binding" << b << " : S;";
                         break;
                     default:
                         UNREACHABLE();
                 }
-                ss << l << "_" << b << " { vec2 set" << l << "_binding" << b << "; };\n";
             }
         }
 
-        ss << "layout(location = 0) out vec4 fragColor;\n";
-        ss << "void main() { fragColor = vec4(0.0, 1.0, 0.0, 1.0); }\n";
+        ss << "[[stage(fragment)]] fn main() -> void {}";
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, ss.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, ss.str().c_str());
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = mVsModule;
@@ -1687,14 +1667,11 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     wgpu::RenderPipeline CreateFSRenderPipeline(
         const char* fsShader,
         std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[stage(vertex)]] fn main() -> void {
                 })");
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsShader);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fsShader);
 
         wgpu::PipelineLayoutDescriptor descriptor;
         descriptor.bindGroupLayoutCount = bindGroupLayout.size();
@@ -1707,26 +1684,24 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    wgpu::RenderPipeline CreateRenderPipeline(std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
+    wgpu::RenderPipeline CreateRenderPipeline(std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateFSRenderPipeline(R"(
-                #version 450
-                layout(std140, set = 0, binding = 0) buffer SBuffer {
-                    vec2 value2;
-                } sBuffer;
-                layout(std140, set = 1, binding = 0) readonly buffer RBuffer {
-                    vec2 value3;
-                } rBuffer;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                })",
-                                      std::move(bindGroupLayout));
+            [[block]] struct S {
+                [[offset(0)]] value : vec2<f32>;
+            };
+
+            [[set(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+            [[set(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+
+            [[stage(fragment)]] fn main() -> void {
+            })",
+                                      std::move(bindGroupLayouts));
     }
 
     wgpu::ComputePipeline CreateComputePipeline(
         const char* shader,
         std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
-        wgpu::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader);
+        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, shader);
 
         wgpu::PipelineLayoutDescriptor descriptor;
         descriptor.bindGroupLayoutCount = bindGroupLayout.size();
@@ -1742,22 +1717,18 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     }
 
     wgpu::ComputePipeline CreateComputePipeline(
-        std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
+        std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateComputePipeline(R"(
-                #version 450
-                const uint kTileSize = 4;
-                const uint kInstances = 11;
+            [[block]] struct S {
+                [[offset(0)]] value : vec2<f32>;
+            };
 
-                layout(local_size_x = kTileSize, local_size_y = kTileSize, local_size_z = 1) in;
-                layout(std140, set = 0, binding = 0) buffer SBuffer {
-                    float value2;
-                } dst;
-                layout(std140, set = 1, binding = 0) readonly buffer RBuffer {
-                    readonly float value3;
-                } rdst;
-                void main() {
-                })",
-                                     std::move(bindGroupLayout));
+            [[set(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+            [[set(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+
+            [[stage(compute), workgroup_size(4, 4, 1)]] fn main() -> void {
+            })",
+                                     std::move(bindGroupLayouts));
     }
 };
 
@@ -1794,70 +1765,76 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 }
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
-    constexpr char kTexture2DShader[] = R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2D texture;
-        void main() {
+    constexpr char kTexture2DShaderFS[] = R"(
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d<f32>;
+        [[stage(fragment)]] fn main() -> void {
+        })";
+    constexpr char kTexture2DShaderCS[] = R"(
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d<f32>;
+        [[stage(compute)]] fn main() -> void {
         })";
 
     // Render: Test that 2D texture with 2D view dimension works
     CreateFSRenderPipeline(
-        kTexture2DShader,
+        kTexture2DShaderFS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2D}})});
 
     // Render: Test that 2D texture with 2D array view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(
-        kTexture2DShader,
+        kTexture2DShaderFS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2DArray}})}));
 
     // Compute: Test that 2D texture with 2D view dimension works
     CreateComputePipeline(
-        kTexture2DShader,
+        kTexture2DShaderCS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2D}})});
 
     // Compute: Test that 2D texture with 2D array view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateComputePipeline(
-        kTexture2DShader,
+        kTexture2DShaderCS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2DArray}})}));
 
-    constexpr char kTexture2DArrayShader[] = R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2DArray texture;
-        void main() {
+    constexpr char kTexture2DArrayShaderFS[] = R"(
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d_array<f32>;
+        [[stage(fragment)]] fn main() -> void {
+        })";
+    constexpr char kTexture2DArrayShaderCS[] = R"(
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d_array<f32>;
+        [[stage(compute)]] fn main() -> void {
         })";
 
     // Render: Test that 2D texture array with 2D array view dimension works
     CreateFSRenderPipeline(
-        kTexture2DArrayShader,
+        kTexture2DArrayShaderFS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2DArray}})});
 
     // Render: Test that 2D texture array with 2D view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(
-        kTexture2DArrayShader,
+        kTexture2DArrayShaderFS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2D}})}));
 
     // Compute: Test that 2D texture array with 2D array view dimension works
     CreateComputePipeline(
-        kTexture2DArrayShader,
+        kTexture2DArrayShaderCS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2DArray}})});
 
     // Compute: Test that 2D texture array with 2D view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateComputePipeline(
-        kTexture2DArrayShader,
+        kTexture2DArrayShaderCS,
         {utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       wgpu::TextureViewDimension::e2D}})}));
@@ -2054,14 +2031,11 @@ class ComparisonSamplerBindingTest : public ValidationTest {
   protected:
     wgpu::RenderPipeline CreateFragmentPipeline(wgpu::BindGroupLayout* bindGroupLayout,
                                                 const char* fragmentSource) {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
-                })");
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[stage(vertex)]] fn main() -> void {
+            })");
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentSource);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragmentSource);
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = vsModule;
@@ -2082,11 +2056,9 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform sampler samp;
-
-        void main() {
-        })");
+            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[stage(fragment)]] fn main() -> void {
+            })");
     }
 
     // Test that comparison sampler binding works with shadow sampler in the shader.
@@ -2095,11 +2067,9 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform samplerShadow samp;
-
-        void main() {
-        })");
+            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[stage(fragment)]] fn main() -> void {
+            })");
     }
 
     // Test that sampler binding does not work with comparison sampler in the shader.
@@ -2108,11 +2078,9 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform samplerShadow samp;
-
-        void main() {
-        })"));
+            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[stage(fragment)]] fn main() -> void {
+            })"));
     }
 
     // Test that comparison sampler binding does not work with normal sampler in the shader.
@@ -2121,11 +2089,9 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform sampler samp;
-
-        void main() {
-        })"));
+            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[stage(fragment)]] fn main() -> void {
+            })"));
     }
 }
 
