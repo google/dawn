@@ -110,14 +110,13 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 
 // Test that GetBindGroupLayout fails when device is lost
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
-    wgpu::ShaderModule csModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-    #version 450
-    layout(set = 0, binding = 0) uniform UniformBuffer {
-        vec4 pos;
-    };
-    void main() {
-    })");
+    wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct UniformBuffer {
+            [[offset(0)]] pos : vec4<f32>;
+        };
+        [[set(0), binding(0)]] var<uniform> ubo : UniformBuffer;
+        [[stage(compute)]] fn main() -> void {
+        })");
 
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.layout = nullptr;
@@ -199,13 +198,12 @@ TEST_P(DeviceLostTest, CreateSamplerFails) {
 TEST_P(DeviceLostTest, CreateShaderModuleFails) {
     SetCallbackAndLoseForTesting();
 
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) in vec4 color;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = color;
-                })"));
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<in> color : vec4<f32>;
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = color;
+        })"));
 }
 
 // Tests that CreateSwapChain fails when device is lost
