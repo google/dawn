@@ -27,25 +27,30 @@ namespace {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-              #version 450
-              layout(location = 0) in vec2 pos;
-              layout (set = 0, binding = 0) uniform vertexUniformBuffer {
-                  mat2 transform;
-              };
-              void main() {
-              })");
+            vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[location(0)]] var<in> pos : vec2<f32>;
 
-            fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-              #version 450
-              layout (set = 1, binding = 0) uniform fragmentUniformBuffer {
-                  vec4 color;
-              };
-              layout (set = 1, binding = 1) buffer storageBuffer {
-                  float dummy[];
-              };
-              void main() {
-              })");
+                [[block]] struct S {
+                    [[offset(0)]] transform : mat2x2<f32>;
+                };
+                [[set(0), binding(0)]] var<uniform> uniforms : S;
+
+                [[stage(vertex)]] fn main() -> void {
+                })");
+
+            fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[block]] struct Uniforms {
+                    [[offset(0)]] color : vec4<f32>;
+                };
+                [[set(1), binding(0)]] var<uniform> uniforms : Uniforms;
+
+                [[block]] struct Storage {
+                    [[offset(0)]] dummy : [[stride(4)]] array<f32>;
+                };
+                [[set(1), binding(1)]] var<storage_buffer> ssbo : [[access(read_write)]] Storage;
+
+                [[stage(fragment)]] fn main() -> void {
+                })");
 
             wgpu::BindGroupLayout bgls[] = {
                 utils::MakeBindGroupLayout(
