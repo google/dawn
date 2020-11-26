@@ -48,10 +48,10 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
     bundleDesc.cColorFormats[0] = renderPass.attachmentFormat;
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.vertexStage.module = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
-                                                        "#version 450\nvoid main() {}");
-    desc.cFragmentStage.module = utils::CreateShaderModule(
-        device, utils::SingleShaderStage::Fragment, "#version 450\nvoid main() {}");
+    desc.vertexStage.module =
+        utils::CreateShaderModuleFromWGSL(device, "[[stage(vertex)]] fn main() -> void {}");
+    desc.cFragmentStage.module =
+        utils::CreateShaderModuleFromWGSL(device, "[[stage(fragment)]] fn main() -> void {}");
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
 
     // Control cases: DrawIndirect and DrawIndexed are allowed inside a render pass.
@@ -116,8 +116,8 @@ TEST_F(UnsafeAPIValidationTest, DispatchIndirectDisallowed) {
     // Create the dummy compute pipeline.
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module = utils::CreateShaderModule(
-        device, utils::SingleShaderStage::Compute, "#version 450\nvoid main() {}");
+    pipelineDesc.computeStage.module =
+        utils::CreateShaderModuleFromWGSL(device, "[[stage(compute)]] fn main() -> void {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Control case: dispatch is allowed.
