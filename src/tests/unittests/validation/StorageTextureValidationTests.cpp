@@ -23,17 +23,16 @@ class StorageTextureValidationTests : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        mDefaultVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-        })");
-        mDefaultFSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(location = 0) out vec4 fragColor;
-        void main() {
-            fragColor = vec4(1.f, 0.f, 0.f, 1.f);
-        })");
+        mDefaultVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })");
+        mDefaultFSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            })");
     }
 
     static const char* GetGLSLFloatImageTypeDeclaration(wgpu::TextureViewDimension dimension) {
@@ -125,12 +124,12 @@ class StorageTextureValidationTests : public ValidationTest {
 TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Readonly storage texture can be declared in a vertex shader.
     {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            layout(set = 0, binding = 0, rgba8) uniform readonly image2D image0;
-            void main() {
-                gl_Position = imageLoad(image0, ivec2(gl_VertexIndex, 0));
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> image0 : texture_storage_ro_2d<rgba8unorm>;
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = textureLoad(image0, vec2<i32>(i32(VertexIndex), 0));
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -142,13 +141,12 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
 
     // Read-only storage textures can be declared in a fragment shader.
     {
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(set = 0, binding = 0, rgba8) uniform readonly image2D image0;
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = imageLoad(image0, ivec2(gl_FragCoord.xy));
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> image0 : texture_storage_ro_2d<rgba8unorm>;
+            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureLoad(image0, vec2<i32>(FragCoord.xy));
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -198,14 +196,17 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
 TEST_F(StorageTextureValidationTests, ComputePipeline) {
     // Read-only storage textures can be declared in a compute shader.
     {
-        wgpu::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-            #version 450
-            layout(set = 0, binding = 0, rgba8) uniform readonly image2D image0;
-            layout(std430, set = 0, binding = 1) buffer Buf { uint buf; };
-            void main() {
-                vec4 pixel = imageLoad(image0, ivec2(gl_LocalInvocationID.xy));
-                buf = uint(pixel.x);
+        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> image0 : texture_storage_ro_2d<rgba8unorm>;
+            [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
+
+            [[block]] struct Buf {
+                [[offset(0)]] data : f32;
+            };
+            [[set(0), binding(1)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
+
+            [[stage(compute)]] fn main() -> void {
+                 buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;
             })");
 
         wgpu::ComputePipelineDescriptor descriptor;
@@ -236,6 +237,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 }
 
 // Validate read-write storage textures have not been supported yet.
+// TODO(cwallez@chromium.org): Convert them to SPIRV ASM to remove the dependency on glslang.
 TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     // Read-write storage textures cannot be declared in a vertex shader by default.
     {
