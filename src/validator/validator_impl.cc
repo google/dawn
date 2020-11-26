@@ -39,6 +39,17 @@ ValidatorImpl::ValidatorImpl() = default;
 
 ValidatorImpl::~ValidatorImpl() = default;
 
+void ValidatorImpl::add_error(const Source& src,
+                              const char* code,
+                              const std::string& msg) {
+  diag::Diagnostic diag;
+  diag.severity = diag::Severity::Error;
+  diag.source = src;
+  diag.message = msg;
+  diag.code = code;
+  diags_.add(std::move(diag));
+}
+
 void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
   diag::Diagnostic diag;
   diag.severity = diag::Severity::Error;
@@ -79,15 +90,15 @@ bool ValidatorImpl::ValidateConstructedTypes(
           auto* r = member->type()->UnwrapAll()->AsArray();
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
-              add_error(member->source(),
-                        "v-0015: runtime arrays may only appear as the last "
+              add_error(member->source(), "v-0015",
+                        "runtime arrays may only appear as the last "
                         "member of a struct: '" +
                             member->name() + "'");
               return false;
             }
             if (!st->IsBlockDecorated()) {
-              add_error(member->source(),
-                        "v-0031: a struct containing a runtime-sized array "
+              add_error(member->source(), "v-0031",
+                        "a struct containing a runtime-sized array "
                         "must be in the 'storage' storage class: '" +
                             st->name() + "'");
               return false;
@@ -104,19 +115,19 @@ bool ValidatorImpl::ValidateGlobalVariables(
     const ast::VariableList& global_vars) {
   for (auto* var : global_vars) {
     if (variable_stack_.has(var->name())) {
-      add_error(var->source(),
-                "v-0011: redeclared global identifier '" + var->name() + "'");
+      add_error(var->source(), "v-0011",
+                "redeclared global identifier '" + var->name() + "'");
       return false;
     }
     if (!var->is_const() && var->storage_class() == ast::StorageClass::kNone) {
-      add_error(var->source(),
-                "v-0022: global variables must have a storage class");
+      add_error(var->source(), "v-0022",
+                "global variables must have a storage class");
       return false;
     }
     if (var->is_const() &&
         !(var->storage_class() == ast::StorageClass::kNone)) {
-      add_error(var->source(),
-                "v-global01: global constants shouldn't have a storage class");
+      add_error(var->source(), "v-global01",
+                "global constants shouldn't have a storage class");
       return false;
     }
     variable_stack_.set_global(var->name(), var);
@@ -127,8 +138,8 @@ bool ValidatorImpl::ValidateGlobalVariables(
 bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
   for (auto* func : funcs) {
     if (function_stack_.has(func->name())) {
-      add_error(func->source(),
-                "v-0016: function names must be unique '" + func->name() + "'");
+      add_error(func->source(), "v-0016",
+                "function names must be unique '" + func->name() + "'");
       return false;
     }
 
@@ -149,16 +160,16 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
     if (func->IsEntryPoint()) {
       shader_is_present = true;
       if (!func->params().empty()) {
-        add_error(func->source(),
-                  "v-0023: Entry point function must accept no parameters: '" +
+        add_error(func->source(), "v-0023",
+                  "Entry point function must accept no parameters: '" +
                       func->name() + "'");
         return false;
       }
 
       if (!func->return_type()->IsVoid()) {
-        add_error(func->source(),
-                  "v-0024: Entry point function must return void: '" +
-                      func->name() + "'");
+        add_error(
+            func->source(), "v-0024",
+            "Entry point function must return void: '" + func->name() + "'");
         return false;
       }
       auto stage_deco_count = 0;
@@ -168,16 +179,15 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         }
       }
       if (stage_deco_count > 1) {
-        add_error(
-            func->source(),
-            "v-0020: only one stage decoration permitted per entry point");
+        add_error(func->source(), "v-0020",
+                  "only one stage decoration permitted per entry point");
         return false;
       }
     }
   }
   if (!shader_is_present) {
-    add_error(Source{},
-              "v-0003: At least one of vertex, fragment or compute shader must "
+    add_error(Source{}, "v-0003",
+              "At least one of vertex, fragment or compute shader must "
               "be present");
     return false;
   }
@@ -198,8 +208,8 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   if (!current_function_->return_type()->IsVoid()) {
     if (!func->get_last_statement() ||
         !func->get_last_statement()->IsReturn()) {
-      add_error(func->source(),
-                "v-0002: non-void function must end with a return statement");
+      add_error(func->source(), "v-0002",
+                "non-void function must end with a return statement");
       return false;
     }
   }
@@ -216,8 +226,8 @@ bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
       ret->has_value() ? ret->value()->result_type()->UnwrapAll() : &void_type;
 
   if (func_type->type_name() != ret_type->type_name()) {
-    add_error(ret->source(),
-              "v-000y: return statement type must match its function return "
+    add_error(ret->source(), "v-000y",
+              "return statement type must match its function return "
               "type, returned '" +
                   ret_type->type_name() + "', expected '" +
                   func_type->type_name() + "'");
@@ -244,19 +254,19 @@ bool ValidatorImpl::ValidateDeclStatement(
   auto name = decl->variable()->name();
   bool is_global = false;
   if (variable_stack_.get(name, nullptr, &is_global)) {
-    std::string error_number = "v-0014: ";
+    const char* error_code = "v-0014";
     if (is_global) {
-      error_number = "v-0013: ";
+      error_code = "v-0013";
     }
-    add_error(decl->source(),
-              error_number + "redeclared identifier '" + name + "'");
+    add_error(decl->source(), error_code,
+              "redeclared identifier '" + name + "'");
     return false;
   }
   variable_stack_.set(name, decl->variable());
   if (decl->variable()->type()->UnwrapAll()->IsArray()) {
     if (decl->variable()->type()->UnwrapAll()->AsArray()->IsRuntimeArray()) {
-      add_error(decl->source(),
-                "v-0015: runtime arrays may only appear as the last "
+      add_error(decl->source(), "v-0015",
+                "runtime arrays may only appear as the last "
                 "member of a struct: '" +
                     decl->variable()->name() + "'");
       return false;
@@ -303,8 +313,8 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
 
   auto* cond_type = s->condition()->result_type()->UnwrapAll();
   if (!(cond_type->IsI32() || cond_type->IsU32())) {
-    add_error(s->condition()->source(),
-              "v-0025: switch statement selector expression must be of a "
+    add_error(s->condition()->source(), "v-0025",
+              "switch statement selector expression must be of a "
               "scalar integer type");
     return false;
   }
@@ -322,8 +332,8 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
 
     for (auto* selector : case_stmt->selectors()) {
       if (cond_type != selector->type()) {
-        add_error(case_stmt->source(),
-                  "v-0026: the case selector values must have the same "
+        add_error(case_stmt->source(), "v-0026",
+                  "the case selector values must have the same "
                   "type as the selector expression.");
         return false;
       }
@@ -334,8 +344,8 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
       if (selector_set.count(v)) {
         auto v_str = selector->type()->IsU32() ? selector->AsUint()->to_str()
                                                : selector->AsSint()->to_str();
-        add_error(case_stmt->source(),
-                  "v-0027: a literal value must not appear more than once in "
+        add_error(case_stmt->source(), "v-0027",
+                  "a literal value must not appear more than once in "
                   "the case selectors for a switch statement: '" +
                       v_str + "'");
         return false;
@@ -345,16 +355,16 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   if (default_counter != 1) {
-    add_error(s->source(),
-              "v-0008: switch statement must have exactly one default clause");
+    add_error(s->source(), "v-0008",
+              "switch statement must have exactly one default clause");
     return false;
   }
 
   auto* last_clause = s->body().back();
   auto* last_stmt_of_last_clause = last_clause->AsCase()->body()->last();
   if (last_stmt_of_last_clause && last_stmt_of_last_clause->IsFallthrough()) {
-    add_error(last_stmt_of_last_clause->source(),
-              "v-0028: a fallthrough statement must not appear as "
+    add_error(last_stmt_of_last_clause->source(), "v-0028",
+              "a fallthrough statement must not appear as "
               "the last statement in last clause of a switch");
     return false;
   }
@@ -382,14 +392,13 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
       // TODO(sarahM0): validate intrinsics - tied with type-determiner
     } else {
       if (!function_stack_.has(func_name)) {
-        add_error(expr->source(),
-                  "v-0005: function must be declared before use: '" +
-                      func_name + "'");
+        add_error(expr->source(), "v-0005",
+                  "function must be declared before use: '" + func_name + "'");
         return false;
       }
       if (func_name == current_function_->name()) {
-        add_error(expr->source(),
-                  "v-0004: recursion is not allowed: '" + func_name + "'");
+        add_error(expr->source(), "v-0004",
+                  "recursion is not allowed: '" + func_name + "'");
         return false;
       }
     }
@@ -428,8 +437,8 @@ bool ValidatorImpl::ValidateConstant(const ast::AssignmentStatement* assign) {
     auto* ident = assign->lhs()->AsIdentifier();
     if (variable_stack_.get(ident->name(), &var)) {
       if (var->is_const()) {
-        add_error(assign->source(), "v-0021: cannot re-assign a constant: '" +
-                                        ident->name() + "'");
+        add_error(assign->source(), "v-0021",
+                  "cannot re-assign a constant: '" + ident->name() + "'");
         return false;
       }
     }
@@ -447,9 +456,9 @@ bool ValidatorImpl::ValidateResultTypes(const ast::AssignmentStatement* a) {
   auto* rhs_result_type = a->rhs()->result_type()->UnwrapAll();
   if (lhs_result_type != rhs_result_type) {
     // TODO(sarahM0): figur out what should be the error number.
-    add_error(a->source(), "v-000x: invalid assignment of '" +
-                               lhs_result_type->type_name() + "' to '" +
-                               rhs_result_type->type_name() + "'");
+    add_error(a->source(), "v-000x",
+              "invalid assignment of '" + lhs_result_type->type_name() +
+                  "' to '" + rhs_result_type->type_name() + "'");
     return false;
   }
   return true;
@@ -472,8 +481,8 @@ bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
 bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
   ast::Variable* var;
   if (!variable_stack_.get(ident->name(), &var)) {
-    add_error(ident->source(),
-              "v-0006: '" + ident->name() + "' is not declared");
+    add_error(ident->source(), "v-0006",
+              "'" + ident->name() + "' is not declared");
     return false;
   }
   return true;

@@ -37,7 +37,8 @@ class DiagFormatterTest : public testing::Test {
   Diagnostic diag_warn{Severity::Warning,
                        Source{Source::Range{{2, 14}, {2, 18}}, &file}, "grrr"};
   Diagnostic diag_err{Severity::Error,
-                      Source{Source::Range{{3, 16}, {3, 21}}, &file}, "hiss"};
+                      Source{Source::Range{{3, 16}, {3, 21}}, &file}, "hiss",
+                      "abc123"};
   Diagnostic diag_fatal{Severity::Fatal,
                         Source{Source::Range{{4, 16}, {4, 19}}, &file},
                         "nothing"};
@@ -48,7 +49,7 @@ TEST_F(DiagFormatterTest, Simple) {
   auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(1:14: purr
 2:14: grrr
-3:16: hiss
+3:16 abc123: hiss
 4:16: nothing)";
   ASSERT_EQ(expect, got);
 }
@@ -66,7 +67,7 @@ TEST_F(DiagFormatterTest, WithFile) {
   auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(file.name:1:14: purr
 file.name:2:14: grrr
-file.name:3:16: hiss
+file.name:3:16 abc123: hiss
 file.name:4:16: nothing)";
   ASSERT_EQ(expect, got);
 }
@@ -76,7 +77,7 @@ TEST_F(DiagFormatterTest, WithSeverity) {
   auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
   auto* expect = R"(1:14 info: purr
 2:14 warning: grrr
-3:16 error: hiss
+3:16 error abc123: hiss
 4:16 fatal: nothing)";
   ASSERT_EQ(expect, got);
 }
@@ -92,7 +93,7 @@ the cat says meow
 the dog says woof
              ^^^^
 
-3:16: hiss
+3:16 abc123: hiss
 the snake says quack
                ^^^^^
 
@@ -114,7 +115,7 @@ file.name:2:14 warning: grrr
 the dog says woof
              ^^^^
 
-file.name:3:16 error: hiss
+file.name:3:16 error abc123: hiss
 the snake says quack
                ^^^^^
 

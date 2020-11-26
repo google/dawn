@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <vector>
 
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/printer.h"
@@ -24,38 +25,29 @@ namespace tint {
 namespace diag {
 namespace {
 
-template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits>& operator<<(
-    std::basic_ostream<CharT, Traits>& stream,
-    Severity severity) {
+const char* to_str(Severity severity) {
   switch (severity) {
     case Severity::Info:
-      stream << "info";
-      break;
+      return "info";
     case Severity::Warning:
-      stream << "warning";
-      break;
+      return "warning";
     case Severity::Error:
-      stream << "error";
-      break;
+      return "error";
     case Severity::Fatal:
-      stream << "fatal";
-      break;
+      return "fatal";
   }
-  return stream;
+  return "";
 }
 
-template <typename CharT, typename Traits>
-std::basic_ostream<CharT, Traits>& operator<<(
-    std::basic_ostream<CharT, Traits>& stream,
-    const Source::Location& location) {
+std::string to_str(const Source::Location& location) {
+  std::stringstream ss;
   if (location.line > 0) {
-    stream << location.line;
+    ss << location.line;
     if (location.column > 0) {
-      stream << ":" << location.column;
+      ss << ":" << location.column;
     }
   }
-  return stream;
+  return ss.str();
 }
 
 }  // namespace
@@ -134,40 +126,59 @@ void Formatter::format(const List& list, Printer* printer) const {
 void Formatter::format(const Diagnostic& diag, State& state) const {
   auto const& src = diag.source;
   auto const& rng = src.range;
+  bool has_code = diag.code != nullptr && diag.code[0] != '\0';
 
   state.set_style({Color::kDefault, true});
 
-  bool emit_colon = true;
+  struct TextAndColor {
+    std::string text;
+    Color color;
+    bool bold = false;
+  };
+  std::vector<TextAndColor> prefix;
+  prefix.reserve(6);
+
   if (style_.print_file && src.file != nullptr && !src.file->path.empty()) {
-    state << src.file->path;
     if (rng.begin.line > 0) {
-      state << ":" << rng.begin;
+      prefix.emplace_back(TextAndColor{src.file->path + ":" + to_str(rng.begin),
+                                       Color::kDefault});
+    } else {
+      prefix.emplace_back(TextAndColor{src.file->path, Color::kDefault});
     }
   } else if (rng.begin.line > 0) {
-    state << rng.begin;
-  } else {
-    // No position infomation was printed, so don't start the line with a colon.
-    emit_colon = false;
+    prefix.emplace_back(TextAndColor{to_str(rng.begin), Color::kDefault});
+  }
+
+  Color severity_color = Color::kDefault;
+  switch (diag.severity) {
+    case Severity::Warning:
+      severity_color = Color::kYellow;
+      break;
+    case Severity::Error:
+    case Severity::Fatal:
+      severity_color = Color::kRed;
+      break;
+    default:
+      break;
   }
   if (style_.print_severity) {
-    switch (diag.severity) {
-      case Severity::Warning:
-        state.set_style({Color::kYellow, true});
-        break;
-      case Severity::Error:
-      case Severity::Fatal:
-        state.set_style({Color::kRed, true});
-        break;
-      default:
-        break;
+    prefix.emplace_back(
+        TextAndColor{to_str(diag.severity), severity_color, true});
+  }
+  if (has_code) {
+    prefix.emplace_back(TextAndColor{diag.code, severity_color});
+  }
+
+  for (size_t i = 0; i < prefix.size(); i++) {
+    if (i > 0) {
+      state << " ";
     }
-    state << " " << diag.severity << ": ";
-    // A colon was just printed, don't repeat it.
-    emit_colon = false;
+    state.set_style({prefix[i].color, prefix[i].bold});
+    state << prefix[i].text;
   }
 
   state.set_style({Color::kDefault, true});
-  if (emit_colon) {
+  if (!prefix.empty()) {
     state << ": ";
   }
   state << diag.message;

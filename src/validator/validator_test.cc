@@ -72,7 +72,7 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   // TODO(sarahM0): Invalidate assignment to scalar.
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
-  EXPECT_EQ(v()->error(), "12:34: v-000x: invalid assignment");
+  EXPECT_EQ(v()->error(), "12:34 v-000x: invalid assignment");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
@@ -156,7 +156,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
   EXPECT_EQ(v()->error(),
-            "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
+            "12:34 v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
@@ -213,7 +213,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
   EXPECT_EQ(v()->error(),
-            "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
+            "12:34 v-000x: invalid assignment of '__i32' to '__f32'");
 }
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
@@ -237,7 +237,7 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0022: global variables must have a storage class");
+            "12:34 v-0022: global variables must have a storage class");
 }
 TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
@@ -252,7 +252,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(
       v()->error(),
-      "12:34: v-global01: global constants shouldn't have a storage class");
+      "12:34 v-global01: global constants shouldn't have a storage class");
 }
 
 TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
@@ -294,7 +294,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   mod()->AddFunction(func);
 
   EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(), "12:34: v-0006: 'not_global_var' is not declared");
+  EXPECT_EQ(v()->error(), "12:34 v-0006: 'not_global_var' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -361,7 +361,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_FALSE(v()->ValidateStatements(outer_body));
-  EXPECT_EQ(v()->error(), "12:34: v-0006: 'a' is not declared");
+  EXPECT_EQ(v()->error(), "12:34 v-0006: 'a' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -437,7 +437,7 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
 
   EXPECT_FALSE(v()->ValidateGlobalVariables(mod()->global_variables()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0011: redeclared global identifier 'global_var'");
+            "12:34 v-0011: redeclared global identifier 'global_var'");
 }
 
 TEST_F(ValidatorTest, AssignToConstant_Fail) {
@@ -465,7 +465,7 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_FALSE(v()->ValidateStatements(body));
-  EXPECT_EQ(v()->error(), "12:34: v-0021: cannot re-assign a constant: 'a'");
+  EXPECT_EQ(v()->error(), "12:34 v-0021: cannot re-assign a constant: 'a'");
 }
 
 TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
@@ -497,7 +497,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
   EXPECT_FALSE(v()->Validate(mod())) << v()->error();
-  EXPECT_EQ(v()->error(), "12:34: v-0013: redeclared identifier 'a'");
+  EXPECT_EQ(v()->error(), "12:34 v-0013: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
@@ -529,7 +529,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
-  EXPECT_EQ(v()->error(), "12:34: v-0014: redeclared identifier 'a'");
+  EXPECT_EQ(v()->error(), "12:34 v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
@@ -592,7 +592,7 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(outer_body));
-  EXPECT_EQ(v()->error(), "12:34: v-0014: redeclared identifier 'a'");
+  EXPECT_EQ(v()->error(), "12:34 v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {

@@ -43,6 +43,9 @@ class Diagnostic {
   Source source;
   /// message is the text associated with the diagnostic.
   std::string message;
+  /// code is the error code, for example a validation error might have the code
+  /// `"v-0001"`.
+  const char* code = nullptr;
 };
 
 /// List is a container of Diagnostic messages.

@@ -58,6 +58,12 @@ class ValidatorImpl {
   /// @returns true if an error was encountered
   bool has_error() const { return diags_.contains_errors(); }
 
+  /// Appends an error at @p src with the code @p code and message @p msg
+  /// @param src the source causing the error
+  /// @param code the validation error code
+  /// @param msg the error message
+  void add_error(const Source& src, const char* code, const std::string& msg);
+
   /// Appends an error at @p src with the message @p msg
   /// @param src the source causing the error
   /// @param msg the error message

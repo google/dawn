@@ -88,7 +88,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0031: a struct containing a runtime-sized array must be "
+            "12:34 v-0031: a struct containing a runtime-sized array must be "
             "in the 'storage' storage class: 'Foo'");
 }
 
@@ -119,7 +119,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'rt'");
 }
 
@@ -153,7 +153,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'b'");
 }
 
@@ -207,7 +207,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
-            "12:34: v-0015: runtime arrays may only appear as the last member "
+            "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'a'");
 }
 
