@@ -1061,6 +1061,117 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Test emission of handle variables.
 
+// Test emission of variables where we don't have enough clues from their
+// use in image access instructions in executable code.  For these we have
+// to infer usage from the SPIR-V sampler or image type.
+struct DeclUnderspecifiedHandleCase {
+  std::string decorations;  // SPIR-V decorations
+  std::string inst;         // SPIR-V variable declarations
+  std::string var_decl;     // WGSL variable declaration
+};
+inline std::ostream& operator<<(std::ostream& out,
+                                const DeclUnderspecifiedHandleCase& c) {
+  out << "DeclUnderspecifiedHandleCase(" << c.inst << "\n" << c.var_decl << ")";
+  return out;
+}
+
+using SpvParserTest_DeclUnderspecifiedHandle =
+    SpvParserTestBase<::testing::TestWithParam<DeclUnderspecifiedHandleCase>>;
+
+TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
+  const auto assembly = Preamble() + R"(
+     OpDecorate %10 DescriptorSet 0
+     OpDecorate %10 Binding 0
+)" + GetParam().decorations +
+                        CommonTypes() + GetParam().inst +
+                        R"(
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty()) << p->error();
+  const auto module = p->module().to_str();
+  EXPECT_THAT(module, HasSubstr(GetParam().var_decl)) << module;
+}
+
+INSTANTIATE_TEST_SUITE_P(Samplers,
+                         SpvParserTest_DeclUnderspecifiedHandle,
+                         ::testing::Values(
+
+                             DeclUnderspecifiedHandleCase{"", R"(
+         %ptr = OpTypePointer UniformConstant %sampler
+         %10 = OpVariable %ptr UniformConstant
+)",
+                                                          R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  })"}));
+
+INSTANTIATE_TEST_SUITE_P(Images,
+                         SpvParserTest_DeclUnderspecifiedHandle,
+                         ::testing::Values(
+
+                             DeclUnderspecifiedHandleCase{"", R"(
+         %10 = OpVariable %ptr_f_texture_1d UniformConstant
+)",
+                                                          R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampled_texture_1d__f32
+  })"},
+                             DeclUnderspecifiedHandleCase{R"(
+         OpDecorate %10 NonWritable
+)",
+                                                          R"(
+         %10 = OpVariable %ptr_f_storage_1d UniformConstant
+)",
+                                                          R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __storage_texture_read_only_1d_rg32float
+  })"},
+                             DeclUnderspecifiedHandleCase{R"(
+         OpDecorate %10 NonReadable
+)",
+                                                          R"(
+         %10 = OpVariable %ptr_f_storage_1d UniformConstant
+)",
+                                                          R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __storage_texture_write_only_1d_rg32float
+  })"}
+
+                             ));
+
+// Test emission of variables when we have sampled image accesses in
+// executable code.
+
 struct DeclSampledImageCase {
   std::string inst;             // The provoking image access instruction.
   std::string var_decl;         // WGSL variable declaration
@@ -1068,7 +1179,7 @@ struct DeclSampledImageCase {
 };
 inline std::ostream& operator<<(std::ostream& out,
                                 const DeclSampledImageCase& c) {
-  out << "UsageSampledImageCase(" << c.inst << "\n"
+  out << "DeclSampledImageCase(" << c.inst << "\n"
       << c.var_decl << "\n"
       << c.texture_builtin << ")";
   return out;

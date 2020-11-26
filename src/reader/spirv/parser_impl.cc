@@ -1604,63 +1604,128 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
 
 ast::type::Type* ParserImpl::GetTypeForHandleVar(
     const spvtools::opt::Instruction& var) {
-  // This can be a sampler or image.
-  // Determine it from the usage inferred for the variable.
-  const Usage& usage = handle_usage_[&var];
+  // The WGSL handle type is determined by looking at information from
+  // several sources:
+  //    - the usage of the handle by image access instructions
+  //    - the SPIR-V type declaration
+  // Each source does not have enough information to completely determine
+  // the result.
+
+  // Messages are phrased in terms of images and samplers because those
+  // are the only SPIR-V handles supported by WGSL.
+
+  // Get the SPIR-V handle type.
+  const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
+  if (!ptr_type) {
+    Fail() << "Invalid type for variable " << var.PrettyPrint();
+    return nullptr;
+  }
+  const auto* raw_handle_type =
+      def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
+  if (!raw_handle_type) {
+    Fail() << "Invalid pointer type for variable " << var.PrettyPrint();
+    return nullptr;
+  }
+  switch (raw_handle_type->opcode()) {
+    case SpvOpTypeSampler:
+    case SpvOpTypeImage:
+      // The expected cases.
+      break;
+    case SpvOpTypeArray:
+    case SpvOpTypeRuntimeArray:
+      Fail()
+          << "arrays of textures or samplers are not supported in WGSL; can't "
+             "translate variable "
+          << var.PrettyPrint();
+      return nullptr;
+    default:
+      Fail() << "invalid type for image or sampler variable "
+             << var.PrettyPrint();
+      return nullptr;
+  }
+
+  // The variable could be a sampler or image.
+  // Where possible, determine which one it is from the usage inferred
+  // for the variable.
+  Usage usage = handle_usage_[&var];
   if (!usage.IsValid()) {
     Fail() << "Invalid sampler or texture usage for variable "
            << var.PrettyPrint() << "\n"
            << usage;
     return nullptr;
   }
+  // Infer a handle type, if usage didn't already tell us.
   if (!usage.IsComplete()) {
-    // TODO(dneto): In SPIR-V you could statically reference a texture or
-    // sampler without using it in a way that gives us a clue on how to declare
-    // it.  In that case look at the underlying OpTypeSampler or OpTypeImage; in
-    // the OpTypeImage see if it has a format.  Sampled images alway have
-    // Unknown format.  For WGSL, storage images always have a format.  And then
-    // check for NonWritable or NonReadabl
-    Fail() << "Unsupported: Incomplete usage on samper or texture usage for "
-              "variable "
-           << var.PrettyPrint() << "\n"
-           << usage;
-    return nullptr;
+    // In SPIR-V you could statically reference a texture or sampler without
+    // using it in a way that gives us a clue on how to declare it.  Look inside
+    // the store type to infer a usage.
+    if (raw_handle_type->opcode() == SpvOpTypeSampler) {
+      usage.AddSampler();
+    } else {
+      // It's a texture.
+      if (raw_handle_type->NumInOperands() != 7) {
+        Fail() << "invalid SPIR-V image type: expected 7 operands: "
+               << raw_handle_type->PrettyPrint();
+        return nullptr;
+      }
+      const auto sampled_param = raw_handle_type->GetSingleWordInOperand(5);
+      const auto format_param = raw_handle_type->GetSingleWordInOperand(6);
+      // Only storage images have a format.
+      if ((format_param != SpvImageFormatUnknown) ||
+          sampled_param == 2 /* without sampler */) {
+        // Get NonWritable and NonReadable attributes of the variable.
+        bool is_nonwritable = false;
+        bool is_nonreadable = false;
+        for (const auto& deco : GetDecorationsFor(var.result_id())) {
+          if (deco.size() != 1) {
+            continue;
+          }
+          if (deco[0] == SpvDecorationNonWritable) {
+            is_nonwritable = true;
+          }
+          if (deco[0] == SpvDecorationNonReadable) {
+            is_nonreadable = true;
+          }
+        }
+        if (is_nonwritable && is_nonreadable) {
+          Fail() << "storage image variable is both NonWritable and NonReadable"
+                 << var.PrettyPrint();
+        }
+        if (!is_nonwritable && !is_nonreadable) {
+          Fail()
+              << "storage image variable is neither NonWritable nor NonReadable"
+              << var.PrettyPrint();
+        }
+        // Let's make it one of the storage textures.
+        if (is_nonwritable) {
+          usage.AddStorageReadTexture();
+        } else {
+          usage.AddStorageWriteTexture();
+        }
+      } else {
+        usage.AddSampledTexture();
+      }
+    }
+    if (!usage.IsComplete()) {
+      Fail()
+          << "internal error: should have inferred a complete handle type. got "
+          << usage.to_str();
+      return nullptr;
+    }
   }
+
+  // Construct the Tint handle type.
   ast::type::Type* ast_store_type = nullptr;
   if (usage.IsSampler()) {
     ast_store_type = ast_module_.create<ast::type::SamplerType>(
         usage.IsComparisonSampler() ? ast::type::SamplerKind::kComparisonSampler
                                     : ast::type::SamplerKind::kSampler);
   } else if (usage.IsTexture()) {
-    const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
-    if (!ptr_type) {
-      Fail() << "Invalid type for variable " << var.PrettyPrint();
-      return nullptr;
-    }
-    const auto* raw_image_type =
-        def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
-    if (!raw_image_type) {
-      Fail() << "Invalid pointer type for variable " << var.PrettyPrint();
-      return nullptr;
-    }
-    switch (raw_image_type->opcode()) {
-      case SpvOpTypeImage:  // The expected case.
-        break;
-      case SpvOpTypeArray:
-      case SpvOpTypeRuntimeArray:
-        Fail() << "arrays of textures are not supported in WGSL; can't "
-                  "translate variable "
-               << var.PrettyPrint();
-        return nullptr;
-      default:
-        Fail() << "invalid type for image variable " << var.PrettyPrint();
-        return nullptr;
-    }
     const spvtools::opt::analysis::Image* image_type =
-        type_mgr_->GetType(raw_image_type->result_id())->AsImage();
+        type_mgr_->GetType(raw_handle_type->result_id())->AsImage();
     if (!image_type) {
       Fail() << "internal error: Couldn't look up image type"
-             << raw_image_type->PrettyPrint();
+             << raw_handle_type->PrettyPrint();
       return nullptr;
     }
 
@@ -1676,7 +1741,7 @@ ast::type::Type* ParserImpl::GetTypeForHandleVar(
         (image_type->format() == SpvImageFormatUnknown)) {
       // Make a sampled texture type.
       auto* ast_sampled_component_type =
-          ConvertType(raw_image_type->GetSingleWordInOperand(0));
+          ConvertType(raw_handle_type->GetSingleWordInOperand(0));
 
       // Vulkan ignores the depth parameter on OpImage, so pay attention to the
       // usage as well.  That is, it's valid for a Vulkan shader to use an
@@ -1693,31 +1758,9 @@ ast::type::Type* ParserImpl::GetTypeForHandleVar(
             dim, ast_sampled_component_type);
       }
     } else {
-      // Make a storage texture.
-      bool is_nonwritable = false;
-      bool is_nonreadable = false;
-      for (const auto& deco : GetDecorationsFor(var.result_id())) {
-        if (deco.size() != 1) {
-          continue;
-        }
-        if (deco[0] == SpvDecorationNonWritable) {
-          is_nonwritable = true;
-        }
-        if (deco[0] == SpvDecorationNonReadable) {
-          is_nonreadable = true;
-        }
-      }
-      if (is_nonwritable && is_nonreadable) {
-        Fail() << "storage image variable is both NonWritable and NonReadable"
-               << var.PrettyPrint();
-      }
-      if (!is_nonwritable && !is_nonreadable) {
-        Fail()
-            << "storage image variable is neither NonWritable nor NonReadable"
-            << var.PrettyPrint();
-      }
-      const auto access = is_nonwritable ? ast::AccessControl::kReadOnly
-                                         : ast::AccessControl::kWriteOnly;
+      const auto access = usage.IsStorageReadTexture()
+                              ? ast::AccessControl::kReadOnly
+                              : ast::AccessControl::kWriteOnly;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
       if (format == ast::type::ImageFormat::kNone) {
         return nullptr;
@@ -1731,6 +1774,7 @@ ast::type::Type* ParserImpl::GetTypeForHandleVar(
            << var.PrettyPrint();
     return nullptr;
   }
+
   // Form the pointer type.
   return ast_module_.create<ast::type::PointerType>(
       ast_store_type, ast::StorageClass::kUniformConstant);

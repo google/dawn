@@ -44,6 +44,23 @@
 #include "src/reader/spirv/usage.h"
 #include "src/source.h"
 
+/// This is the implementation of the SPIR-V parser for Tint.
+
+/// Notes on terminology:
+///
+/// A WGSL "handle" is an opaque object used for accessing a resource via
+/// special builtins.  In SPIR-V, a handle is stored a variable in the
+/// UniformConstant storage class.  The handles supported by SPIR-V are:
+///   - images, both sampled texture and storage image
+///   - samplers
+///   - combined image+sampler
+///   - acceleration structures for raytracing.
+///
+/// WGSL only supports samplers and images, but calls images "textures".
+/// When emitting errors, we aim to use terminology most likely to be
+/// familiar to Vulkan SPIR-V developers.  We will tend to use "image"
+/// and "sampler" instead of "handle".
+
 namespace tint {
 namespace reader {
 namespace spirv {
