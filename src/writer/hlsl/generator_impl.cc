@@ -52,6 +52,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/float_to_string.h"
+#include "src/writer/pack_coord_arrayidx.h"
 
 namespace tint {
 namespace writer {
@@ -101,20 +102,6 @@ uint32_t convert_swizzle_to_index(const std::string& swizzle) {
     return 3;
   }
   return 0;
-}
-
-ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
-  if (!expr->IsConstructor())
-    return nullptr;
-  auto* constructor = expr->AsConstructor();
-  if (!constructor->IsTypeConstructor()) {
-    return nullptr;
-  }
-  auto* type_constructor = constructor->AsTypeConstructor();
-  if (!type_constructor->type()->IsVector()) {
-    return nullptr;
-  }
-  return type_constructor;
 }
 
 }  // namespace
@@ -775,41 +762,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     // Array index needs to be appended to the coordinates.
     auto* param_coords = params[pidx.coords];
     auto* param_array_index = params[pidx.array_index];
-
-    uint32_t packed_coords_size;
-    ast::type::Type* packed_coords_el_ty;  // Currenly must be f32.
-    if (param_coords->result_type()->IsVector()) {
-      auto* vec = param_coords->result_type()->AsVector();
-      packed_coords_size = vec->size() + 1;
-      packed_coords_el_ty = vec->type();
-    } else {
-      packed_coords_size = 2;
-      packed_coords_el_ty = param_coords->result_type();
-    }
-
-    // Cast param_array_index to the vector element type
-    ast::TypeConstructorExpression array_index_cast(packed_coords_el_ty,
-                                                    {param_array_index});
-    array_index_cast.set_result_type(packed_coords_el_ty);
-
-    ast::type::VectorType packed_coords_ty(packed_coords_el_ty,
-                                           packed_coords_size);
-
-    ast::ExpressionList coords;
-    // If the coordinates are already passed in a vector constructor, extract
-    // the elements into the new vector instead of nesting a vector-in-vector.
-    if (auto* vc = AsVectorConstructor(param_coords)) {
-      coords = vc->values();
-    } else {
-      coords.emplace_back(param_coords);
-    }
-    coords.emplace_back(&array_index_cast);
-
-    ast::TypeConstructorExpression constructor{&packed_coords_ty,
-                                               std::move(coords)};
-
-    if (!EmitExpression(pre, out, &constructor))
+    if (!PackCoordAndArrayIndex(param_coords, param_array_index,
+                                [&](ast::TypeConstructorExpression* packed) {
+                                  return EmitExpression(pre, out, packed);
+                                })) {
       return false;
+    }
 
   } else {
     if (!EmitExpression(pre, out, params[pidx.coords]))

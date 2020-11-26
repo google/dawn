@@ -247,6 +247,8 @@ set(TINT_LIB_SRCS
   validator/validator_test_helper.h
   writer/float_to_string.cc
   writer/float_to_string.h
+  writer/pack_coord_arrayidx.cc
+  writer/pack_coord_arrayidx.h
   writer/text.cc
   writer/text.h
   writer/text_generator.cc
