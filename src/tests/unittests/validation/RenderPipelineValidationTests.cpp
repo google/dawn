@@ -26,18 +26,17 @@ class RenderPipelineValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
-                    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
-                })");
+        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })");
 
-        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                })");
+        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            })");
     }
 
     wgpu::ShaderModule vsModule;
@@ -165,7 +164,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
 // Tests that the format of the color state descriptor must match the output of the fragment shader.
 TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
     constexpr uint32_t kNumTextureFormatBaseType = 3u;
-    std::array<const char*, kNumTextureFormatBaseType> kVecPreFix = {{"", "i", "u"}};
+    std::array<const char*, kNumTextureFormatBaseType> kScalarTypes = {{"f32", "i32", "u32"}};
     std::array<wgpu::TextureFormat, kNumTextureFormatBaseType> kColorFormats = {
         {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8Sint,
          wgpu::TextureFormat::RGBA8Uint}};
@@ -178,13 +177,12 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                #version 450
-                layout(location = 0) out )"
-                   << kVecPreFix[i] << R"(vec4 fragColor;
-                void main() {
+                [[location(0)]] var<out> fragColor : vec4<)"
+                   << kScalarTypes[i] << R"(>;
+                [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module = utils::CreateShaderModule(
-                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+            descriptor.cFragmentStage.module =
+                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             if (i == j) {
                 device.CreateRenderPipeline(&descriptor);
@@ -394,7 +392,7 @@ TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleCount) {
 // Tests that the texture component type in shader must match the bind group layout.
 TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
     constexpr uint32_t kNumTextureComponentType = 3u;
-    std::array<const char*, kNumTextureComponentType> kTexturePrefix = {{"", "i", "u"}};
+    std::array<const char*, kNumTextureComponentType> kScalarTypes = {{"f32", "i32", "u32"}};
     std::array<wgpu::TextureComponentType, kNumTextureComponentType> kTextureComponentTypes = {{
         wgpu::TextureComponentType::Float,
         wgpu::TextureComponentType::Sint,
@@ -408,13 +406,13 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform )"
-                   << kTexturePrefix[i] << R"(texture2D tex;
-                void main() {
+                [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d<)"
+                   << kScalarTypes[i] << R"(>;
+
+                [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module = utils::CreateShaderModule(
-                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+            descriptor.cFragmentStage.module =
+                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
@@ -434,12 +432,12 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
     constexpr uint32_t kNumTextureViewDimensions = 6u;
     std::array<const char*, kNumTextureViewDimensions> kTextureKeywords = {{
-        "texture1D",
-        "texture2D",
-        "texture2DArray",
-        "textureCube",
-        "textureCubeArray",
-        "texture3D",
+        "texture_sampled_1d",
+        "texture_sampled_2d",
+        "texture_sampled_2d_array",
+        "texture_sampled_cube",
+        "texture_sampled_cube_array",
+        "texture_sampled_3d",
     }};
 
     std::array<wgpu::TextureViewDimension, kNumTextureViewDimensions> kTextureViewDimensions = {{
@@ -458,13 +456,12 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform )"
-                   << kTextureKeywords[i] << R"( tex;
-                void main() {
+                [[set(0), binding(0)]] var<uniform_constant> myTexture : )"
+                   << kTextureKeywords[i] << R"(<f32>;
+                [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module = utils::CreateShaderModule(
-                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+            descriptor.cFragmentStage.module =
+                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
@@ -483,15 +480,14 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 // Test that declaring a storage buffer in the vertex shader without setting pipeline layout won't
 // cause crash.
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
-    wgpu::ShaderModule vsModuleWithStorageBuffer =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        #define kNumValues 100
-        layout(std430, set = 0, binding = 0) buffer Dst { uint dst[kNumValues]; };
-        void main() {
-            uint index = gl_VertexIndex;
-            dst[index] = 0x1234;
-            gl_Position = vec4(1.f, 0.f, 0.f, 1.f);
+    wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct Dst {
+            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+        };
+        [[set(0), binding(0)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
+        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[stage(vertex)]] fn main() -> void {
+            dst.data[VertexIndex] = 0x1234u;
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -503,6 +499,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
 
 // Test that a pipeline with defaulted layout may not have multisampled array textures
 // TODO(enga): Also test multisampled cube, cube array, and 3D. These have no GLSL keywords.
+// TODO(cwallez@chromium.org): Convert them to SPIRV ASM to remove the dependency on glslang.
 TEST_F(RenderPipelineValidationTest, MultisampledTexture) {
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = nullptr;
