@@ -1192,6 +1192,8 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
      OpDecorate %10 Binding 0
      OpDecorate %20 DescriptorSet 2
      OpDecorate %20 Binding 1
+     OpDecorate %30 DescriptorSet 0
+     OpDecorate %30 Binding 1
 )" + CommonTypes() + R"(
      ; Vulkan ignores the "depth" parameter on OpTypeImage.
      ; So this image type can serve for both regular sampling and depth-compare.
@@ -1200,6 +1202,7 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_2d UniformConstant
+     %30 = OpVariable %ptr_sampler UniformConstant ; comparison sampler, when needed
 
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -1207,6 +1210,7 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
      %sam = OpLoad %sampler %10
      %im = OpLoad %f_texture_2d %20
      %sampled_image = OpSampledImage %si_ty %im %sam
+
 )" + GetParam().inst + R"(
 
      OpReturn
@@ -1449,6 +1453,95 @@ INSTANTIATE_TEST_SUITE_P(
               }
             )
           })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // This test shows the use of a sampled image used with both regular
+    // sampling and depth-refernce sampling.  The texture is a depth-texture,
+    // and we use builtins textureSample and textureSampleCompare
+    ImageSampleImplicitLod_BothDrefAndNonDref,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::Values(
+
+        // OpImageSampleImplicitLod
+        DeclSampledImageCase{R"(
+     %sam_dref = OpLoad %sampler %30
+     %sampled_dref_image = OpSampledImage %si_ty %im %sam_dref
+
+     %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords
+     %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords %depth
+)",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{1}
+    }
+    x_30
+    uniform_constant
+    __sampler_comparison
+  })",
+                             R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_200
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+            )
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_210
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_30}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.200000}
+            )
+          }
+        }
+      }
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefImplicitLod,
