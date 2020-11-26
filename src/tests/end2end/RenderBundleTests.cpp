@@ -31,24 +31,23 @@ class RenderBundleTest : public DawnTest {
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                layout(location = 0) in vec4 pos;
-                void main() {
-                    gl_Position = pos;
-                })");
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<in> pos : vec4<f32>;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = pos;
+            })");
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) out vec4 fragColor;
-                layout (set = 0, binding = 0) uniform fragmentUniformBuffer {
-                    vec4 color;
-                };
-                void main() {
-                    fragColor = color;
-                })");
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[block]] struct Ubo {
+                [[offset(0)]] color : vec4<f32>;
+            };
+            [[set(0), binding(0)]] var<uniform> fragmentUniformBuffer : Ubo;
+
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = fragmentUniformBuffer.color;
+            })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
