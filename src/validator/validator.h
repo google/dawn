@@ -22,7 +22,8 @@
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
-#include "src/validator/validator_impl.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/diagnostic/formatter.h"
 
 namespace tint {
 
@@ -41,16 +42,18 @@ class Validator {
   bool Validate(const ast::Module* module);
 
   /// @returns error messages from the validator
-  const std::string& error() { return error_; }
+  std::string error() {
+    diag::Formatter formatter{{false, false, false}};
+    return formatter.format(diags_);
+  }
   /// @returns true if an error was encountered
-  bool has_error() const { return error_.size() > 0; }
-  /// Sets the error string
-  /// @param msg the error message
-  void set_error(const std::string& msg) { error_ = msg; }
+  bool has_error() const { return diags_.contains_errors(); }
+  /// @returns the full list of diagnostic messages.
+  const diag::List& diagnostics() const { return diags_; }
 
  private:
   std::unique_ptr<ValidatorImpl> impl_;
-  std::string error_;
+  diag::List diags_;
 };
 
 }  // namespace tint

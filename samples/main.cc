@@ -420,6 +420,9 @@ int main(int argc, const char** argv) {
 
   tint::Context ctx(std::make_unique<tint::NoopNamer>());
 
+  auto diag_printer = tint::diag::Printer::create(stderr, true);
+  tint::diag::Formatter diag_formatter;
+
   std::unique_ptr<tint::reader::Reader> reader;
   std::unique_ptr<tint::Source::File> source_file;
 #if TINT_BUILD_WGSL_READER
@@ -478,8 +481,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
   if (!reader->Parse()) {
-    auto printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter().format(reader->diagnostics(), printer.get());
+    diag_formatter.format(reader->diagnostics(), diag_printer.get());
     return 1;
   }
   auto mod = reader->module();
@@ -503,7 +505,7 @@ int main(int argc, const char** argv) {
 
   tint::Validator v;
   if (!v.Validate(&mod)) {
-    std::cerr << "Validation: " << v.error() << std::endl;
+    diag_formatter.format(v.diagnostics(), diag_printer.get());
     return 1;
   }
 

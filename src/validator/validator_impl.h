@@ -27,6 +27,8 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/ast/variable.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/diagnostic/formatter.h"
 #include "src/scope_stack.h"
 
 namespace tint {
@@ -43,16 +45,24 @@ class ValidatorImpl {
   /// @returns true if the validation was successful
   bool Validate(const ast::Module* module);
 
+  /// @returns the diagnostic messages
+  const diag::List& diagnostics() const { return diags_; }
+  /// @returns the diagnostic messages
+  diag::List& diagnostics() { return diags_; }
+
   /// @returns error messages from the validator
-  const std::string& error() { return error_; }
-
+  std::string error() {
+    diag::Formatter formatter{{false, false, false}};
+    return formatter.format(diags_);
+  }
   /// @returns true if an error was encountered
-  bool has_error() const { return error_.size() > 0; }
+  bool has_error() const { return diags_.contains_errors(); }
 
-  /// Sets the error string
+  /// Appends an error at @p src with the message @p msg
   /// @param src the source causing the error
   /// @param msg the error message
-  void set_error(const Source& src, const std::string& msg);
+  void add_error(const Source& src, const std::string& msg);
+
   /// Validate global variables
   /// @param global_vars list of global variables to check
   /// @returns true if the validation was successful
@@ -126,7 +136,7 @@ class ValidatorImpl {
       const std::vector<ast::type::Type*>& constructed_types);
 
  private:
-  std::string error_;
+  diag::List diags_;
   ScopeStack<ast::Variable*> variable_stack_;
   ScopeStack<ast::Function*> function_stack_;
   ast::Function* current_function_ = nullptr;

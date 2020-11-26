@@ -345,8 +345,8 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
-            "0:0: v-0003: At least one of vertex, fragment or compute shader "
-            "must be present");
+            "v-0003: At least one of vertex, fragment or compute shader must "
+            "be present");
 }
 
 }  // namespace

@@ -25,8 +25,7 @@ Validator::~Validator() = default;
 bool Validator::Validate(const ast::Module* module) {
   bool ret = impl_->Validate(module);
 
-  if (impl_->has_error())
-    set_error(impl_->error());
+  diags_ = impl_->diagnostics();
 
   return ret;
 }
