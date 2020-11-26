@@ -69,6 +69,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/writer/pack_coord_arrayidx.h"
 
 namespace tint {
 namespace writer {
@@ -1971,32 +1972,18 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       auto* param_coords = call->params()[pidx.coords];
       auto* param_array_index = call->params()[pidx.array_index];
 
-      uint32_t packed_coords_size;
-      ast::type::Type* packed_coords_el_ty;  // Currenly must be f32.
-      if (param_coords->result_type()->IsVector()) {
-        auto* vec = param_coords->result_type()->AsVector();
-        packed_coords_size = vec->size() + 1;
-        packed_coords_el_ty = vec->type();
-      } else {
-        packed_coords_size = 2;
-        packed_coords_el_ty = param_coords->result_type();
+      if (!PackCoordAndArrayIndex(
+              param_coords, param_array_index,
+              [&](ast::TypeConstructorExpression* packed) {
+                auto param = GenerateTypeConstructorExpression(packed, false);
+                if (param == 0) {
+                  return false;
+                }
+                spirv_params.emplace_back(Operand::Int(param));
+                return true;
+              })) {
+        return;
       }
-
-      // Cast param_array_index to the vector element type
-      ast::TypeConstructorExpression array_index_cast(packed_coords_el_ty,
-                                                      {param_array_index});
-      array_index_cast.set_result_type(packed_coords_el_ty);
-
-      ast::type::VectorType packed_coords_ty(packed_coords_el_ty,
-                                             packed_coords_size);
-
-      ast::TypeConstructorExpression constructor{
-          &packed_coords_ty, {param_coords, &array_index_cast}};
-      auto packed_coords =
-          GenerateTypeConstructorExpression(&constructor, false);
-
-      spirv_params.emplace_back(Operand::Int(packed_coords));  // coordinates
-
     } else {
       spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
     }

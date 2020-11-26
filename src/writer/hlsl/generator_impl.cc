@@ -756,8 +756,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   out << ", ";
 
-  // TODO(ben-clayton): Refactor this with the near identical code in
-  // src/writer/spirv/builder.cc.
   if (pidx.array_index != kNotUsed) {
     // Array index needs to be appended to the coordinates.
     auto* param_coords = params[pidx.coords];
