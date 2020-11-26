@@ -1195,6 +1195,8 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
      OpDecorate %20 DescriptorSet 2
      OpDecorate %20 Binding 1
 )" + CommonTypes() + R"(
+     ; Vulkan ignores the "depth" parameter on OpTypeImage.
+     ; So this image type can serve for both regular sampling and depth-compare.
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
 
@@ -1453,19 +1455,93 @@ INSTANTIATE_TEST_SUITE_P(
         ));
 
 INSTANTIATE_TEST_SUITE_P(
-    DISABLED_ImageSampleDrefImplicitLod,
+    ImageSampleDrefImplicitLod,
     SpvParserTest_DeclHandle_SampledImage,
-    ::testing::ValuesIn(std::vector<DeclSampledImageCase>{
-        // TODO(dneto): ImageSampleDrefImplicitLod
-        // TODO(dneto): ImageSampleDrefImplicitLod with ConstOffset (signed and
-        // unsigned)
-        // TODO(dneto): ImageSampleDrefImplicitLod with Bias
-        // TODO(dneto): ImageSampleDrefImplicitLod with Biase and ConstOffset
-        // (signed and unsigned)
-    }));
+    ::testing::Values(
+        // ImageSampleDrefImplicitLod
+        DeclSampledImageCase{"%result = OpImageSampleDrefImplicitLod "
+                             "%v4float %sampled_image %coords %depth",
+                             R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_comparison
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+                             R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.200000}
+            )
+          })"},
+
+        // ImageSampleDrefImplicitLod with ConstOffset
+        DeclSampledImageCase{
+            "%result = OpImageSampleDrefImplicitLod %v4float "
+            "%sampled_image %coords %depth ConstOffset %offsets2d",
+            R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_comparison
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              TypeConstructor[not set]{
+                __vec_2__f32
+                ScalarConstructor[not set]{0.000000}
+                ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.200000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}
+
+        ));
 
 INSTANTIATE_TEST_SUITE_P(
-    DisabledimageSampleExplicitLod,
+    ImageSampleExplicitLod,
     SpvParserTest_DeclHandle_SampledImage,
     ::testing::Values(
 

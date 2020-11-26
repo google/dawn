@@ -3654,12 +3654,25 @@ bool FunctionEmitter::EmitSampledImageAccess(
   // TODO(dneto): For arrayed access, split off the array layer.
   params.push_back(MakeOperand(inst, 1).expr);
   uint32_t arg_index = 2;
+  const auto num_args = inst.NumInOperands();
 
   std::string builtin_name;
   switch (inst.opcode()) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
       builtin_name = "textureSample";
+      break;
+    case SpvOpImageSampleDrefImplicitLod:
+    case SpvOpImageSampleDrefExplicitLod:
+      builtin_name = "textureSampleCompare";
+      if (arg_index < num_args) {
+        params.push_back(MakeOperand(inst, arg_index).expr);
+        arg_index++;
+      } else {
+        return Fail()
+               << "image depth-compare instruction is missing a Dref operand: "
+               << inst.PrettyPrint();
+      }
       break;
     case SpvOpImageGather:
     case SpvOpImageDrefGather:
@@ -3672,7 +3685,6 @@ bool FunctionEmitter::EmitSampledImageAccess(
 
   // Loop over the image operands, looking for extra operands to the builtin.
   // Except we uroll the loop.
-  const auto num_args = inst.NumInOperands();
   uint32_t image_operands_mask = 0;
   if (arg_index < num_args) {
     image_operands_mask = inst.GetSingleWordInOperand(arg_index);
