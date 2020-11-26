@@ -25,12 +25,11 @@ class VertexBufferValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                })");
+        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            })");
     }
 
     wgpu::Buffer MakeVertexBuffer() {
@@ -43,13 +42,13 @@ class VertexBufferValidationTest : public ValidationTest {
 
     wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
         std::ostringstream vs;
-        vs << "#version 450\n";
         for (unsigned int i = 0; i < bufferCount; ++i) {
-            vs << "layout(location = " << i << ") in vec3 a_position" << i << ";\n";
+            vs << "[[location(" << i << ")]] var<in> a_position" << i << " : vec3<f32>;\n";
         }
-        vs << "void main() {\n";
+        vs << "[[builtin(position)]] var<out> Position : vec4<f32>;";
+        vs << "[[stage(vertex)]] fn main() -> void {\n";
 
-        vs << "gl_Position = vec4(";
+        vs << "Position = vec4<f32>(";
         for (unsigned int i = 0; i < bufferCount; ++i) {
             vs << "a_position" << i;
             if (i != bufferCount - 1) {
@@ -60,8 +59,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
         vs << "}\n";
 
-        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
-                                         vs.str().c_str());
+        return utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
     }
 
     wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
