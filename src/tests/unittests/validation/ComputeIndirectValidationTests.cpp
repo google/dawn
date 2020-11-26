@@ -22,12 +22,9 @@ class ComputeIndirectValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        wgpu::ShaderModule computeModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-                #version 450
-                layout(local_size_x = 1) in;
-                void main() {
-                })");
+        wgpu::ShaderModule computeModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[stage(compute), workgroup_size(1)]] fn main() -> void {
+            })");
 
         // Set up compute pipeline
         wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
