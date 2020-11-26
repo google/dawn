@@ -2479,7 +2479,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
 bool Builder::GenerateTextureType(ast::type::TextureType* texture,
                                   const Operand& result) {
   uint32_t array_literal = 0u;
-  auto dim = texture->dim();
+  const auto dim = texture->dim();
   if (dim == ast::type::TextureDimension::k1dArray ||
       dim == ast::type::TextureDimension::k2dArray ||
       dim == ast::type::TextureDimension::kCubeArray) {
@@ -2518,6 +2518,12 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   uint32_t sampled_literal = 2u;
   if (texture->IsMultisampled() || texture->IsSampled() || texture->IsDepth()) {
     sampled_literal = 1u;
+  }
+
+  if (dim == ast::type::TextureDimension::kCubeArray) {
+    if (texture->IsSampled() || texture->IsDepth()) {
+      push_capability(SpvCapabilitySampledCubeArray);
+    }
   }
 
   uint32_t type_id = 0u;

@@ -665,6 +665,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 Cube 1 0 0 1 Unknown
 )");
+  EXPECT_EQ(DumpInstructions(b.capabilities()), "");
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
@@ -677,6 +678,9 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 Cube 1 1 0 1 Unknown
+)");
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability SampledCubeArray
 )");
 }
 
@@ -825,6 +829,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
             R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 Cube 0 0 0 1 Unknown
 )");
+  EXPECT_EQ(DumpInstructions(b.capabilities()), "");
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
@@ -837,6 +842,9 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
   EXPECT_EQ(DumpInstructions(b.types()),
             R"(%2 = OpTypeFloat 32
 %1 = OpTypeImage %2 Cube 0 1 0 1 Unknown
+)");
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            R"(OpCapability SampledCubeArray
 )");
 }
 
