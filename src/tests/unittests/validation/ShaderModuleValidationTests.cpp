@@ -97,14 +97,11 @@ TEST_F(ShaderModuleValidationTest, DISABLED_OpUndef) {
 // be compiled.
 TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachments) {
     std::ostringstream stream;
-    stream << R"(#version 450
-              layout(location = )"
-           << static_cast<unsigned>(kMaxColorAttachments) << R"() out vec4 fragColor;
-              void main() {
-                  fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-              })";
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
-                                                  stream.str().c_str()));
+    stream << "[[location(" << kMaxColorAttachments << R"()]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })";
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, stream.str().c_str()));
 }
 
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be
@@ -115,6 +112,7 @@ TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
 }
 
 // Test that it is not allowed to use combined texture and sampler.
+// TODO(cwallez@chromium.org): Convert them to SPIRV ASM to remove the dependency on glslang.
 TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
     const char* shader = R"(
         #version 450
