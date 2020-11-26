@@ -247,37 +247,41 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         // The simplest texture sampling pipeline.
         wgpu::RenderPipeline pipeline;
         {
-            wgpu::ShaderModule vs =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                layout (location = 0) out vec2 o_texCoord;
-                void main() {
-                    const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
-                                                vec2(-2.f,  2.f),
-                                                vec2( 2.f, -2.f),
-                                                vec2(-2.f,  2.f),
-                                                vec2( 2.f, -2.f),
-                                                vec2( 2.f,  2.f));
-                    const vec2 texCoord[6] = vec2[6](vec2(0.f, 0.f),
-                                                     vec2(0.f, 1.f),
-                                                     vec2(1.f, 0.f),
-                                                     vec2(0.f, 1.f),
-                                                     vec2(1.f, 0.f),
-                                                     vec2(1.f, 1.f));
-                    gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-                    o_texCoord = texCoord[gl_VertexIndex];
+            wgpu::ShaderModule vs = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+                [[location(0)]] var<out> o_texCoord : vec2<f32>;
+                [[builtin(position)]] var<out> Position : vec4<f32>;
+
+                [[stage(vertex)]] fn main() -> void {
+                    const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                        vec2<f32>(-2.0, -2.0),
+                        vec2<f32>(-2.0,  2.0),
+                        vec2<f32>( 2.0, -2.0),
+                        vec2<f32>(-2.0,  2.0),
+                        vec2<f32>( 2.0, -2.0),
+                        vec2<f32>( 2.0,  2.0));
+
+                    const texCoord : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                        vec2<f32>(0.0, 0.0),
+                        vec2<f32>(0.0, 1.0),
+                        vec2<f32>(1.0, 0.0),
+                        vec2<f32>(0.0, 1.0),
+                        vec2<f32>(1.0, 0.0),
+                        vec2<f32>(1.0, 1.0));
+
+                    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                    o_texCoord = texCoord[VertexIndex];
                 }
             )");
-            wgpu::ShaderModule fs =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform sampler sampler0;
-                layout(set = 0, binding = 1) uniform texture2D texture0;
-                layout(location = 0) in vec2 texCoord;
-                layout(location = 0) out vec4 fragColor;
+            wgpu::ShaderModule fs = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
+                [[set(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
 
-                void main() {
-                    fragColor = texture(sampler2D(texture0, sampler0), texCoord);
+                [[location(0)]] var<in> texCoord : vec2<f32>;
+                [[location(0)]] var<out> fragColor : vec4<f32>;
+
+                [[stage(fragment)]] fn main() -> void {
+                    fragColor = textureSample(texture0, sampler0, texCoord);
                 }
             )");
 
