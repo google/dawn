@@ -312,19 +312,23 @@ int main(int argc, const char* argv[]) {
 
     // The hacky pipeline to render a triangle.
     utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-    pipelineDesc.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
-        void main() {
-           gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
+    pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            vec2<f32>( 0.0,  0.5),
+            vec2<f32>(-0.5, -0.5),
+            vec2<f32>( 0.5, -0.5)
+        );
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            return;
         })");
-    pipelineDesc.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(location = 0) out vec4 fragColor;
-        void main() {
-           fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            return;
         })");
     pipelineDesc.colorStateCount = 1;
     // BGRA shouldn't be hardcoded. Consider having a map[format -> pipeline].

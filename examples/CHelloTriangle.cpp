@@ -37,23 +37,26 @@ void init() {
     wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_RenderAttachment, 640, 480);
 
     const char* vs =
-        "#version 450\n"
-        "const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));\n"
-        "void main() {\n"
-        "   gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n"
+        "[[builtin(vertex_idx)]] var<in> VertexIndex : u32;\n"
+        "[[builtin(position)]] var<out> Position : vec4<f32>;\n"
+        "const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
+        "    vec2<f32>( 0.0,  0.5),\n"
+        "    vec2<f32>(-0.5, -0.5),\n"
+        "    vec2<f32>( 0.5, -0.5)\n"
+        ");\n"
+        "[[stage(vertex)]] fn main() -> void {\n"
+        "    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);\n"
+        "    return;\n"
         "}\n";
-    WGPUShaderModule vsModule =
-        utils::CreateShaderModule(wgpu::Device(device), utils::SingleShaderStage::Vertex, vs)
-            .Release();
+    WGPUShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs).Release();
 
     const char* fs =
-        "#version 450\n"
-        "layout(location = 0) out vec4 fragColor;\n"
-        "void main() {\n"
-        "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "[[location(0)]] var<out> fragColor : vec4<f32>;\n"
+        "[[stage(fragment)]] fn main() -> void {\n"
+        "    fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);\n"
+        "    return;\n"
         "}\n";
-    WGPUShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs).Release();
+    WGPUShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fs).Release();
 
     {
         WGPURenderPipelineDescriptor descriptor = {};
@@ -87,7 +90,7 @@ void init() {
         descriptor.layout = wgpuDeviceCreatePipelineLayout(device, &pl);
 
         WGPUVertexStateDescriptor vertexState = {};
-        vertexState.indexFormat = WGPUIndexFormat_Uint32;
+        vertexState.indexFormat = WGPUIndexFormat_Undefined;
         vertexState.vertexBufferCount = 0;
         vertexState.vertexBuffers = nullptr;
         descriptor.vertexState = &vertexState;

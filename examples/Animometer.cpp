@@ -103,13 +103,13 @@ void init() {
             gl_Position = vec4(xpos, ypos, 0.0, 1.0);
         })");
 
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(location = 0) out vec4 fragColor;
-        layout(location = 0) in vec4 v_color;
-        void main() {
-            fragColor = v_color;
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> FragColor : vec4<f32>;
+        [[location(0)]] var<in> v_color : vec4<f32>;
+
+        [[stage(fragment)]] fn main() -> void {
+            FragColor = v_color;
+            return;
         })");
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
