@@ -357,8 +357,11 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
 }
 
 void Builder::push_capability(uint32_t cap) {
-  capabilities_.push_back(
-      Instruction{spv::Op::OpCapability, {Operand::Int(cap)}});
+  if (capability_set_.count(cap) == 0) {
+    capability_set_.insert(cap);
+    capabilities_.push_back(
+        Instruction{spv::Op::OpCapability, {Operand::Int(cap)}});
+  }
 }
 
 void Builder::GenerateLabel(uint32_t id) {

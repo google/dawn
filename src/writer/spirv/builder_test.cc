@@ -45,6 +45,14 @@ TEST_F(BuilderTest, TracksIdBounds) {
   EXPECT_EQ(6u, b.id_bound());
 }
 
+TEST_F(BuilderTest, Capabilities_Dedup) {
+  b.push_capability(SpvCapabilityShader);
+  b.push_capability(SpvCapabilityShader);
+  b.push_capability(SpvCapabilityShader);
+
+  EXPECT_EQ(DumpInstructions(b.capabilities()), "OpCapability Shader\n");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

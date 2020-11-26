@@ -18,6 +18,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "spirv/unified1/spirv.h"
@@ -93,7 +94,8 @@ class Builder {
   /// @param cb the callback to execute
   void iterate(std::function<void(const Instruction&)> cb) const;
 
-  /// Adds an instruction to the list of capabilities
+  /// Adds an instruction to the list of capabilities, if the capability
+  /// hasn't already been added.
   /// @param cap the capability to set
   void push_capability(uint32_t cap);
   /// @returns the capabilities
@@ -500,6 +502,7 @@ class Builder {
   std::unordered_map<uint32_t, ast::Variable*> spirv_id_to_variable_;
   std::vector<uint32_t> merge_stack_;
   std::vector<uint32_t> continue_stack_;
+  std::unordered_set<uint32_t> capability_set_;
 };
 
 }  // namespace spirv
