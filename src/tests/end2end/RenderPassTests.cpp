@@ -26,21 +26,24 @@ class RenderPassTest : public DawnTest {
         DawnTest::SetUp();
 
         // Shaders to draw a bottom-left triangle in blue.
-        mVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                void main() {
-                    const vec2 pos[3] = vec2[3](
-                        vec2(-1.f, 1.f), vec2(1.f, -1.f), vec2(-1.f, -1.f));
-                    gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-                 })");
+        mVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(0.0, 0.0, 1.0, 1.0);
-                })");
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0,  1.0),
+                    vec2<f32>( 1.0, -1.0),
+                    vec2<f32>(-1.0, -1.0));
+
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+            })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
@@ -137,11 +140,9 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 
     {
         // Next we use a pipeline whose fragment shader has no outputs.
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                void main() {
-                })");
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[stage(fragment)]] fn main() -> void {
+            })");
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
