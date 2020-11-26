@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/ast/identifier_expression.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -294,6 +295,53 @@ TEST_F(SpvParserTestMiscInstruction, OpNop) {
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Return{}
 )")) << ToString(fe.ast_body());
 }
+
+// Test swizzle generation.
+
+struct SwizzleCase {
+  uint32_t index;
+  std::string expected_expr;
+  std::string expected_error;
+};
+using SpvParserSwizzleTest =
+    SpvParserTestBase<::testing::TestWithParam<SwizzleCase>>;
+
+TEST_P(SpvParserSwizzleTest, Sample) {
+  // We need a function so we can get a FunctionEmitter.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+
+  auto* result = fe.Swizzle(GetParam().index);
+  if (GetParam().expected_error.empty()) {
+    EXPECT_TRUE(fe.success());
+    ASSERT_NE(result, nullptr);
+    std::ostringstream ss;
+    result->to_str(ss, 0);
+    EXPECT_THAT(ss.str(), Eq(GetParam().expected_expr));
+  } else {
+    EXPECT_EQ(result, nullptr);
+    EXPECT_FALSE(fe.success());
+    EXPECT_THAT(p->error(), Eq(GetParam().expected_error));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ValidIndex,
+    SpvParserSwizzleTest,
+    ::testing::ValuesIn(std::vector<SwizzleCase>{
+        {0, "Identifier[not set]{x}\n", ""},
+        {1, "Identifier[not set]{y}\n", ""},
+        {2, "Identifier[not set]{z}\n", ""},
+        {3, "Identifier[not set]{w}\n", ""},
+        {4, "", "vector component index is larger than 3: 4"},
+        {99999, "", "vector component index is larger than 3: 99999"}}));
 
 // TODO(dneto): OpSizeof : requires Kernel (OpenCL)
 

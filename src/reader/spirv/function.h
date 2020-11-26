@@ -672,6 +672,13 @@ class FunctionEmitter {
   /// @returns the associated loop construct, or nullptr
   const Construct* SiblingLoopConstruct(const Construct* c) const;
 
+  /// Returns an identifier expression for the swizzle name of the given
+  /// index into a vector.  Emits an error and returns nullptr if the
+  /// index is out of range, i.e. 4 or higher.
+  /// @param i index of the subcomponent
+  /// @returns the identifier expression for the @p i'th component
+  ast::IdentifierExpression* Swizzle(uint32_t i);
+
  private:
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
