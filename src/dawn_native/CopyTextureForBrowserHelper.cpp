@@ -57,7 +57,7 @@ namespace dawn_native {
 
             [[location(0)]] var<out> texCoord: vec2<f32>;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_idx)]] var<in> VertexIndex : i32;
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
             [[binding(0), set(0)]] var<uniform> uniforms : Uniforms;
             [[stage(vertex)]]
             fn main() -> void {
