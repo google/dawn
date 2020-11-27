@@ -79,7 +79,6 @@ std::string CommonBasicTypes() {
     %vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
 
     %depth = OpConstant %float 0.2
-    %offsets2d = OpConstantComposite %v2int %int_3 %int_4
   )";
 }
 
@@ -1207,6 +1206,11 @@ using SpvParserTest_DeclHandle_SampledImage =
 
 TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
   const auto assembly = Preamble() + R"(
+     OpName %coords1 "coords1"
+     OpName %coords12 "coords12"
+     OpName %coords123 "coords123"
+     OpName %coords1234 "coords1234"
+     OpName %offsets2d "offsets2d"
      OpDecorate %10 DescriptorSet 0
      OpDecorate %10 Binding 0
      OpDecorate %20 DescriptorSet 2
@@ -1217,7 +1221,6 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
      ; Vulkan ignores the "depth" parameter on OpTypeImage.
      ; So this image type can serve for both regular sampling and depth-compare.
      %si_ty = OpTypeSampledImage %f_texture_2d
-     %coords = OpConstantNull %v2float
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_2d UniformConstant
@@ -1225,6 +1228,20 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
 
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
+
+     ; create some names that will become WGSL variables x_1, x_12, and so on.
+     %1 = OpCopyObject %float %float_1
+     %12 = OpCopyObject %v2float %vf12
+     %123 = OpCopyObject %v3float %vf123
+     %1234 = OpCopyObject %v4float %vf1234
+
+     %coords1 = OpCopyObject %float %float_1
+     %coords12 = OpCopyObject %v2float %vf12
+     %coords123 = OpCopyObject %v3float %vf123
+     %coords1234 = OpCopyObject %v4float %vf1234
+
+     %value_offset = OpCompositeConstruct %v2int %int_3 %int_4
+     %offsets2d = OpCopyObject %v2int %value_offset
 
      %sam = OpLoad %sampler %10
      %im = OpLoad %f_texture_2d %20
@@ -1315,7 +1332,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageSampleImplicitLod
         DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
-                             "%v4float %sampled_image %coords",
+                             "%v4float %sampled_image %coords12",
                              R"(
   DecoratedVariable{
     Decorations{
@@ -1341,18 +1358,14 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
             )
           })"},
 
         // OpImageSampleImplicitLod with ConstOffset
         DeclSampledImageCase{
             "%result = OpImageSampleImplicitLod "
-            "%v4float %sampled_image %coords ConstOffset %offsets2d",
+            "%v4float %sampled_image %coords12 ConstOffset %offsets2d",
             R"(
   DecoratedVariable{
     Decorations{
@@ -1378,22 +1391,14 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
+              Identifier[not set]{coords12}
+              Identifier[not set]{offsets2d}
             )
           })"},
 
         // OpImageSampleImplicitLod with Bias
         DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
-                             "%v4float %sampled_image %coords Bias %float_7",
+                             "%v4float %sampled_image %coords12 Bias %float_7",
                              R"(
   DecoratedVariable{
     Decorations{
@@ -1419,11 +1424,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
             )
           })"},
@@ -1431,10 +1432,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleImplicitLod with Bias and ConstOffset
         // TODO(dneto): OpImageSampleImplicitLod with Bias and unsigned
         // ConstOffset
-        DeclSampledImageCase{"%result = OpImageSampleImplicitLod "
-                             "%v4float %sampled_image %coords Bias|ConstOffset "
-                             "%float_7 %offsets2d",
-                             R"(
+        DeclSampledImageCase{
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords12 Bias|ConstOffset "
+            "%float_7 %offsets2d",
+            R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1453,23 +1455,15 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                             R"(
+            R"(
           Call[not set]{
             Identifier[not set]{textureSampleBias}
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
+              Identifier[not set]{offsets2d}
             )
           })"}));
 
@@ -1486,8 +1480,8 @@ INSTANTIATE_TEST_SUITE_P(
      %sam_dref = OpLoad %sampler %30
      %sampled_dref_image = OpSampledImage %si_ty %im %sam_dref
 
-     %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords
-     %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords %depth
+     %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords12
+     %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords12 %depth
 )",
                              R"(
   DecoratedVariable{
@@ -1529,11 +1523,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
             )
           }
         }
@@ -1550,11 +1540,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_30}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.200000}
             )
           }
@@ -1568,7 +1554,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // ImageSampleDrefImplicitLod
         DeclSampledImageCase{"%result = OpImageSampleDrefImplicitLod "
-                             "%v4float %sampled_image %coords %depth",
+                             "%v4float %sampled_image %coords12 %depth",
                              R"(
   DecoratedVariable{
     Decorations{
@@ -1594,11 +1580,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.200000}
             )
           })"},
@@ -1606,7 +1588,7 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageSampleDrefImplicitLod with ConstOffset
         DeclSampledImageCase{
             "%result = OpImageSampleDrefImplicitLod %v4float "
-            "%sampled_image %coords %depth ConstOffset %offsets2d",
+            "%sampled_image %coords12 %depth ConstOffset %offsets2d",
             R"(
   DecoratedVariable{
     Decorations{
@@ -1632,17 +1614,9 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.200000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
+              Identifier[not set]{offsets2d}
             )
           })"}
 
@@ -1654,9 +1628,10 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleExplicitLod - using Lod
-        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
-                             "%v4float %sampled_image %coords Lod %float_null",
-                             R"(
+        DeclSampledImageCase{
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Lod %float_null",
+            R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1675,17 +1650,13 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                             R"(
+            R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.000000}
             )
           })"},
@@ -1693,10 +1664,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleExplicitLod - using Lod and ConstOffset
         // TODO(dneto) OpImageSampleExplicitLod - using Lod and unsigned
         // ConstOffset
-        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
-                             "%v4float %sampled_image %coords Lod|ConstOffset "
-                             "%float_null %offsets2d",
-                             R"(
+        DeclSampledImageCase{
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Lod|ConstOffset "
+            "%float_null %offsets2d",
+            R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1715,30 +1687,22 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                             R"(
+            R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
+              Identifier[not set]{offsets2d}
             )
           })"},
 
         // OpImageSampleExplicitLod - using Grad
         DeclSampledImageCase{
             "%result = OpImageSampleExplicitLod "
-            "%v4float %sampled_image %coords Grad %float_7 %float_null",
+            "%v4float %sampled_image %coords12 Grad %float_7 %float_null",
             R"(
   DecoratedVariable{
     Decorations{
@@ -1764,11 +1728,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
               ScalarConstructor[not set]{0.000000}
             )
@@ -1777,10 +1737,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleExplicitLod - using Grad and ConstOffset
         // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
         // ConstOffset
-        DeclSampledImageCase{"%result = OpImageSampleExplicitLod "
-                             "%v4float %sampled_image %coords Grad|ConstOffset "
-                             "%float_7 %float_null %offsets2d",
-                             R"(
+        DeclSampledImageCase{
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Grad|ConstOffset "
+            "%float_7 %float_null %offsets2d",
+            R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1799,24 +1760,16 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                             R"(
+            R"(
           Call[not set]{
             Identifier[not set]{textureSampleGrad}
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              TypeConstructor[not set]{
-                __vec_2__f32
-                ScalarConstructor[not set]{0.000000}
-                ScalarConstructor[not set]{0.000000}
-              }
+              Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
               ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
+              Identifier[not set]{offsets2d}
             )
           })"}));
 
@@ -1863,7 +1816,6 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
      %ptr_im_ty = OpTypePointer UniformConstant %im_ty
 
      %si_ty = OpTypeSampledImage %im_ty
-     %coords = OpConstantNull %v2float
 
      %ptr_float = OpTypePointer Function %float
 
@@ -1881,7 +1833,6 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
      %12 = OpCopyObject %v2float %vf12
      %123 = OpCopyObject %v3float %vf123
      %1234 = OpCopyObject %v4float %vf1234
-
 
      %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
@@ -2163,7 +2114,7 @@ INSTANTIATE_TEST_SUITE_P(BadInstructions,
                               "instruction: OpNop",
                               {}},
                              {"%float 1D 0 0 0 1 Unknown",
-                              "%foo = OpCopyObject %float %float_1",
+                              "%50 = OpCopyObject %float %float_1",
                               "internal error: couldn't find image for "
                               "%50 = OpCopyObject %6 %26",
                               {}},
@@ -2184,36 +2135,36 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleImplicitLod "
          // bad type for coordinate: not a number
          "%v4float %sampled_image %float_var",
-         "bad or unsupported coordinate type for image access: %50 = "
-         "OpImageSampleImplicitLod %24 %49 %2",
+         "bad or unsupported coordinate type for image access: %48 = "
+         "OpImageSampleImplicitLod %24 %47 %2",
          {}},
         {"%float 1D 0 1 0 1 Unknown",  // 1DArray
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %50 = OpImageSampleImplicitLod %24 %49 %1",
+         "in: %48 = OpImageSampleImplicitLod %24 %47 %1",
          {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %50 = OpImageSampleImplicitLod %24 %49 %1",
+         "in: %48 = OpImageSampleImplicitLod %24 %47 %1",
          {}},
         {"%float 2D 0 1 0 1 Unknown",  // 2DArray
          "%result = OpImageSampleImplicitLod "
          // 2 component, but need 3
          "%v4float %sampled_image %12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %50 = OpImageSampleImplicitLod %24 %49 %12",
+         "in: %48 = OpImageSampleImplicitLod %24 %47 %12",
          {}},
         {"%float 3D 0 0 0 1 Unknown",  // 3D
          "%result = OpImageSampleImplicitLod "
          // 2 components, but need 3
          "%v4float %sampled_image %12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %50 = OpImageSampleImplicitLod %24 %49 %12",
+         "in: %48 = OpImageSampleImplicitLod %24 %47 %12",
          {}},
     }));
 
