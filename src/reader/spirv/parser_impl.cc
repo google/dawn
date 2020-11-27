@@ -431,10 +431,8 @@ bool ParserImpl::BuildInternalModule() {
   }
 
   const spv_context& context = tools_context_.CContext();
-  const bool insert_extra_opline = false;
   ir_context_ = spvtools::BuildModule(context->target_env, context->consumer,
-                                      spv_binary_.data(), spv_binary_.size(),
-                                      insert_extra_opline);
+                                      spv_binary_.data(), spv_binary_.size());
   if (!ir_context_) {
     return Fail() << "internal error: couldn't build the internal "
                      "representation of the module";

@@ -179,7 +179,7 @@ TEST_F(SpvParserTest, Impl_Source_WithOpLine_WithOpNoLine) {
   EXPECT_EQ(53u, s60.range.begin.column);
   // After OpNoLine, revert back to instruction counting.
   auto s1 = p->GetSourceForResultIdForTest(1);
-  EXPECT_EQ(13u, s1.range.begin.line);
+  EXPECT_EQ(14u, s1.range.begin.line);
   EXPECT_EQ(0u, s1.range.begin.column);
 }
 
