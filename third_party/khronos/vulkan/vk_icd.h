@@ -116,6 +116,7 @@ typedef enum {
     VK_ICD_WSI_PLATFORM_ANDROID,
     VK_ICD_WSI_PLATFORM_MACOS,
     VK_ICD_WSI_PLATFORM_IOS,
+    VK_ICD_WSI_PLATFORM_GGP,
     VK_ICD_WSI_PLATFORM_DISPLAY,
     VK_ICD_WSI_PLATFORM_HEADLESS,
     VK_ICD_WSI_PLATFORM_METAL,
@@ -195,6 +196,13 @@ typedef struct {
     const void *pView;
 } VkIcdSurfaceIOS;
 #endif  // VK_USE_PLATFORM_IOS_MVK
+
+#ifdef VK_USE_PLATFORM_GGP
+typedef struct {
+    VkIcdSurfaceBase base;
+    GgpStreamDescriptor streamDescriptor;
+} VkIcdSurfaceGgp;
+#endif  // VK_USE_PLATFORM_GGP
 
 typedef struct {
     VkIcdSurfaceBase base;
