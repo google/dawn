@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -53,6 +54,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -3630,7 +3632,6 @@ bool FunctionEmitter::EmitSampledImageAccess(
       parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, false);
   const auto* image =
       parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, true);
-
   if (!sampler) {
     return Fail() << "interal error: couldn't find sampler for "
                   << inst.PrettyPrint();
@@ -3646,12 +3647,18 @@ bool FunctionEmitter::EmitSampledImageAccess(
   params.push_back(
       create<ast::IdentifierExpression>(namer_.Name(sampler->result_id())));
 
-  // Push the coordinates operand.
+  // Push the coordinates operands.
   // TODO(dneto): For explicit-Lod variations, we may have to convert from
   // integral coordinates to floating point coordinates.
-  // TODO(dneto): For arrayed access, split off the array layer.
-  params.push_back(MakeOperand(inst, 1).expr);
-  uint32_t arg_index = 2;
+  // In WGSL, integer (unnormalized) coordinates are only used for texture
+  // fetch (textureLoad on sampled image) or textureLoad or textureStore
+  // on storage images.
+  auto coords = MakeCoordinateOperandsForImageAccess(inst);
+  if (coords.empty()) {
+    return false;
+  }
+  params.insert(params.end(), coords.begin(), coords.end());
+  uint32_t arg_index = 2;  // Skip over texture and coordinate params
   const auto num_args = inst.NumInOperands();
 
   std::string builtin_name;
@@ -3723,6 +3730,137 @@ bool FunctionEmitter::EmitSampledImageAccess(
   auto* ident = create<ast::IdentifierExpression>(builtin_name);
   auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
   return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
+}
+
+ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
+    const spvtools::opt::Instruction& inst) {
+  if (!parser_impl_.success()) {
+    Fail();
+    return {};
+  }
+  if (inst.NumInOperands() == 0) {
+    Fail() << "internal error: not an image access instruction: "
+           << inst.PrettyPrint();
+    return {};
+  }
+  const auto sampled_image_id = inst.GetSingleWordInOperand(0);
+  const auto* image =
+      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, true);
+  if (!image) {
+    Fail() << "internal error: couldn't find image for " << inst.PrettyPrint();
+    return {};
+  }
+  if (image->NumInOperands() < 1) {
+    Fail() << "image access is missing a coordinate parameter: "
+           << inst.PrettyPrint();
+    return {};
+  }
+
+  // The coordinates parameter is always in position 1.
+  TypedExpression raw_coords(MakeOperand(inst, 1));
+  if (!raw_coords.type) {
+    return {};
+  }
+  ast::type::PointerType* type = parser_impl_.GetTypeForHandleVar(*image);
+  if (!parser_impl_.success()) {
+    Fail();
+    return {};
+  }
+  if (!type || !type->type()->IsTexture()) {
+    Fail() << "invalid texture type for " << image->PrettyPrint();
+    return {};
+  }
+  ast::type::TextureDimension dim = type->type()->AsTexture()->dim();
+  // Number of regular coordinates.
+  uint32_t num_axes = 0;
+  bool is_arrayed = false;
+  switch (dim) {
+    case ast::type::TextureDimension::k1d:
+      num_axes = 1;
+      break;
+    case ast::type::TextureDimension::k1dArray:
+      num_axes = 1;
+      is_arrayed = true;
+      break;
+    case ast::type::TextureDimension::k2d:
+      num_axes = 2;
+      break;
+    case ast::type::TextureDimension::k2dArray:
+      num_axes = 2;
+      is_arrayed = true;
+      break;
+    case ast::type::TextureDimension::k3d:
+      num_axes = 3;
+      break;
+    case ast::type::TextureDimension::kCube:
+      // For cubes, 3 coordinates form a direction vector.
+      num_axes = 3;
+      break;
+    case ast::type::TextureDimension::kCubeArray:
+      // For cubes, 3 coordinates form a direction vector.
+      num_axes = 3;
+      is_arrayed = true;
+      break;
+    default:
+      Fail() << "unsupported image dimensionality for " << type->type_name()
+             << " prompted by " << inst.PrettyPrint();
+      return {};
+  }
+  assert(num_axes <= 3);
+  const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
+  uint32_t num_coords_supplied = 0;
+  if (raw_coords.type->IsF32()) {
+    num_coords_supplied = 1;
+  } else if (raw_coords.type->IsVector()) {
+    num_coords_supplied = raw_coords.type->AsVector()->size();
+  }
+  if (num_coords_supplied == 0) {
+    Fail() << "bad or unsupported coordinate type for image access: "
+           << inst.PrettyPrint();
+    return {};
+  }
+  if (num_coords_required > num_coords_supplied) {
+    Fail() << "image access required " << num_coords_required
+           << " coordinate components, but only " << num_coords_supplied
+           << " provided, in: " << inst.PrettyPrint();
+    return {};
+  }
+
+  auto prefix_swizzle = [this](uint32_t i) {
+    const char* prefix_name[] = {"", "x", "xy", "xyz"};
+    return ast_module_.create<ast::IdentifierExpression>(prefix_name[i & 3]);
+  };
+
+  ast::ExpressionList result;
+
+  // TODO(dneto): Convert component type if needed.
+  if (is_arrayed) {
+    // The source must be a vector, because it has enough components and has an
+    // array component. Use a vector swizzle to get the first `num_axes`
+    // components.
+    result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
+        raw_coords.expr, prefix_swizzle(num_axes)));
+
+    // Now get the array index.
+    ast::Expression* array_index =
+        ast_module_.create<ast::MemberAccessorExpression>(raw_coords.expr,
+                                                          Swizzle(num_axes));
+    // Convert it to an unsigned integer type.
+    result.push_back(ast_module_.create<ast::TypeConstructorExpression>(
+        ast_module_.create<ast::type::U32Type>(),
+        ast::ExpressionList{array_index}));
+  } else {
+    if (num_coords_supplied == num_coords_required) {
+      // Pass the value through.
+      result.push_back(std::move(raw_coords.expr));
+    } else {
+      // There are more coordinates supplied than needed. So the source type is
+      // a vector. Use a vector swizzle to get the first `num_axes` components.
+      result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
+          raw_coords.expr, prefix_swizzle(num_axes)));
+    }
+  }
+  return result;
 }
 
 }  // namespace spirv

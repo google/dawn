@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "src/reader/spirv/function.h"
@@ -39,7 +40,7 @@ std::string Preamble() {
   )";
 }
 
-std::string CommonTypes() {
+std::string CommonBasicTypes() {
   return R"(
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -50,6 +51,7 @@ std::string CommonTypes() {
 
     %int_3 = OpConstant %uint 3
     %int_4 = OpConstant %uint 4
+    %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %uint_2 = OpConstant %uint 2
     %uint_100 = OpConstant %uint 100
@@ -63,13 +65,26 @@ std::string CommonTypes() {
     %v4float = OpTypeVector %float 4
 
     %float_null = OpConstantNull %float
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
     %float_7 = OpConstant %float 7
     %v2float_null = OpConstantNull %v2float
     %v3float_null = OpConstantNull %v3float
     %v4float_null = OpConstantNull %v4float
 
+    %vf12 = OpConstantComposite %v2float %float_1 %float_2
+    %vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+    %vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+
     %depth = OpConstant %float 0.2
     %offsets2d = OpConstantComposite %v2int %int_3 %int_4
+  )";
+}
+
+std::string CommonImageTypes() {
+  return R"(
 
 ; Define types for all sampler and texture types that can map to WGSL,
 ; modulo texel formats for storage textures. For now, we limit
@@ -192,6 +207,10 @@ std::string CommonTypes() {
     %ptr_i_storage_3d         = OpTypePointer UniformConstant %i_storage_3d
 
   )";
+}
+
+std::string CommonTypes() {
+  return CommonBasicTypes() + CommonImageTypes();
 }
 
 TEST_F(SpvParserTest,
@@ -1800,6 +1819,403 @@ INSTANTIATE_TEST_SUITE_P(
               }
             )
           })"}));
+
+struct ImageCoordsCase {
+  std::string spirv_image_type_details;  // SPIR-V image type, excluding result
+                                         // ID and opcode
+  std::string spirv_image_access;
+  std::string expected_error;
+  std::vector<std::string> expected_expressions;
+};
+
+inline std::ostream& operator<<(std::ostream& out, const ImageCoordsCase& c) {
+  out << "ImageAccessCase(" << c.spirv_image_type_details << "\n"
+      << c.spirv_image_access << "\n";
+
+  for (auto e : c.expected_expressions) {
+    out << e << ",";
+  }
+  out << ")" << std::endl;
+  return out;
+}
+
+using SpvParserTest_ImageCoordsTest =
+    SpvParserTestBase<::testing::TestWithParam<ImageCoordsCase>>;
+
+TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
+     OpName %float_var "float_var"
+     OpName %ptr_float "ptr_float"
+     OpDecorate %10 DescriptorSet 0
+     OpDecorate %10 Binding 0
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+     OpDecorate %30 DescriptorSet 0
+     OpDecorate %30 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %sampler = OpTypeSampler
+     %ptr_sampler = OpTypePointer UniformConstant %sampler
+     %im_ty = OpTypeImage )" +
+                        GetParam().spirv_image_type_details + R"(
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+
+     %si_ty = OpTypeSampledImage %im_ty
+     %coords = OpConstantNull %v2float
+
+     %ptr_float = OpTypePointer Function %float
+
+     %10 = OpVariable %ptr_sampler UniformConstant
+     %20 = OpVariable %ptr_im_ty UniformConstant
+     %30 = OpVariable %ptr_sampler UniformConstant ; comparison sampler, when needed
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %float_var = OpVariable %ptr_float Function
+
+     ; create some names that will become WGSL variables x_1, x_12, and so on.
+     %1 = OpCopyObject %float %float_1
+     %12 = OpCopyObject %v2float %vf12
+     %123 = OpCopyObject %v3float %vf123
+     %1234 = OpCopyObject %v4float %vf1234
+
+
+     %sam = OpLoad %sampler %10
+     %im = OpLoad %im_ty %20
+     %sampled_image = OpSampledImage %si_ty %im %sam
+
+)" + GetParam().spirv_image_access +
+                        R"(
+     ; Use an anchor for the cases when the image access doesn't have a result ID.
+     %1000 = OpCopyObject %uint %uint_0
+
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  if (!p->BuildAndParseInternalModule()) {
+    EXPECT_THAT(p->error(), Eq(GetParam().expected_error));
+  } else {
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+    // We actually have to generate the module to cache expressions for the
+    // result IDs, particularly the OpCopyObject
+    fe.Emit();
+
+    const spvtools::opt::Instruction* anchor = p->GetInstructionForTest(1000);
+    ASSERT_NE(anchor, nullptr);
+    const spvtools::opt::Instruction& image_access = *(anchor->PreviousNode());
+
+    ast::ExpressionList result =
+        fe.MakeCoordinateOperandsForImageAccess(image_access);
+    if (GetParam().expected_error.empty()) {
+      EXPECT_TRUE(fe.success()) << p->error();
+      EXPECT_TRUE(p->error().empty());
+      std::vector<std::string> result_strings;
+      for (auto* expr : result) {
+        ASSERT_NE(expr, nullptr);
+        result_strings.push_back(expr->str());
+      }
+      EXPECT_THAT(result_strings,
+                  ::testing::ContainerEq(GetParam().expected_expressions));
+    } else {
+      EXPECT_FALSE(fe.success());
+      EXPECT_THAT(p->error(), Eq(GetParam().expected_error));
+      EXPECT_TRUE(result.empty());
+    }
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(Good_1D,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %1",
+                              "",
+                              {"Identifier[not set]{x_1}\n"}},
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %12",  // one excess arg
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_12}
+  Identifier[not set]{x}
+}
+)"}},
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %123",  // two excess args
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_123}
+  Identifier[not set]{x}
+}
+)"}},
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %1234",  // three excess args
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{x}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_1DArray,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 1D 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %12",
+                              "",
+                              {
+                                  R"(MemberAccessor[not set]{
+  Identifier[not set]{x_12}
+  Identifier[not set]{x}
+}
+)",
+                                  R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_12}
+    Identifier[not set]{y}
+  }
+}
+)"}},
+                             {"%float 1D 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %123",  // one excess arg
+                              "",
+                              {
+                                  R"(MemberAccessor[not set]{
+  Identifier[not set]{x_123}
+  Identifier[not set]{x}
+}
+)",
+                                  R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_123}
+    Identifier[not set]{y}
+  }
+}
+)"}},
+                             {"%float 1D 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %1234",  // two excess args
+                              "",
+                              {
+                                  R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{x}
+}
+)",
+                                  R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_1234}
+    Identifier[not set]{y}
+  }
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_2D,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 2D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %12",
+                              "",
+                              {"Identifier[not set]{x_12}\n"}},
+                             {"%float 2D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %123",  // one excess arg
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_123}
+  Identifier[not set]{xy}
+}
+)"}},
+                             {"%float 2D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %1234",  // two excess args
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{xy}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_2DArray,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 2D 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %123",
+                              "",
+                              {
+                                  R"(MemberAccessor[not set]{
+  Identifier[not set]{x_123}
+  Identifier[not set]{xy}
+}
+)",
+                                  R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+                             {"%float 2D 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod %v4float "
+                              "%sampled_image %1234",  // one excess arg
+                              "",
+                              {
+                                  R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{xy}
+}
+)",
+                                  R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_1234}
+    Identifier[not set]{z}
+  }
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_3D,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 3D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod "
+                              "%v4float "
+                              "%sampled_image %123",
+                              "",
+                              {"Identifier[not set]{x_123}\n"}},
+                             {"%float 3D 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod "
+                              "%v4float "
+                              "%sampled_image %1234",  // one excess
+                                                       // arg
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{xyz}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_Cube,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float Cube 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod "
+                              "%v4float "
+                              "%sampled_image %123",
+                              "",
+                              {"Identifier[not set]{x_123}\n"}},
+                             {"%float Cube 0 0 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod "
+                              "%v4float "
+                              "%sampled_image %1234",  // one excess
+                                                       // arg
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{xyz}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float Cube 0 1 0 1 Unknown",
+                              "%result = OpImageSampleImplicitLod "
+                              "%v4float "
+                              "%sampled_image %1234",
+                              "",
+                              {R"(MemberAccessor[not set]{
+  Identifier[not set]{x_1234}
+  Identifier[not set]{xyz}
+}
+)",
+                               R"(TypeConstructor[not set]{
+  __u32
+  MemberAccessor[not set]{
+    Identifier[not set]{x_1234}
+    Identifier[not set]{w}
+  }
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(BadInstructions,
+                         SpvParserTest_ImageCoordsTest,
+                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "OpNop",
+                              "internal error: not an image access "
+                              "instruction: OpNop",
+                              {}},
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%foo = OpCopyObject %float %float_1",
+                              "internal error: couldn't find image for "
+                              "%50 = OpCopyObject %6 %26",
+                              {}},
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "OpStore %float_var %float_1",
+                              "invalid type for image or sampler "
+                              "variable: %2 = OpVariable %3 Function",
+                              {}},
+                             // An example with a missing coordinate
+                             // won't assemble, so we skip it.
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(
+    Bad_Coordinate,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod "
+         // bad type for coordinate: not a number
+         "%v4float %sampled_image %float_var",
+         "bad or unsupported coordinate type for image access: %50 = "
+         "OpImageSampleImplicitLod %24 %49 %2",
+         {}},
+        {"%float 1D 0 1 0 1 Unknown",  // 1DArray
+         "%result = OpImageSampleImplicitLod "
+         // 1 component, but need 2
+         "%v4float %sampled_image %1",
+         "image access required 2 coordinate components, but only 1 provided, "
+         "in: %50 = OpImageSampleImplicitLod %24 %49 %1",
+         {}},
+        {"%float 2D 0 0 0 1 Unknown",  // 2D
+         "%result = OpImageSampleImplicitLod "
+         // 1 component, but need 2
+         "%v4float %sampled_image %1",
+         "image access required 2 coordinate components, but only 1 provided, "
+         "in: %50 = OpImageSampleImplicitLod %24 %49 %1",
+         {}},
+        {"%float 2D 0 1 0 1 Unknown",  // 2DArray
+         "%result = OpImageSampleImplicitLod "
+         // 2 component, but need 3
+         "%v4float %sampled_image %12",
+         "image access required 3 coordinate components, but only 2 provided, "
+         "in: %50 = OpImageSampleImplicitLod %24 %49 %12",
+         {}},
+        {"%float 3D 0 0 0 1 Unknown",  // 3D
+         "%result = OpImageSampleImplicitLod "
+         // 2 components, but need 3
+         "%v4float %sampled_image %12",
+         "image access required 3 coordinate components, but only 2 provided, "
+         "in: %50 = OpImageSampleImplicitLod %24 %49 %12",
+         {}},
+    }));
 
 }  // namespace
 }  // namespace spirv

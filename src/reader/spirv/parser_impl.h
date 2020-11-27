@@ -115,6 +115,9 @@ class ParserImpl : Reader {
     return fail_stream_;
   }
 
+  /// @return true if failure has not yet occurred
+  bool success() const { return success_; }
+
   /// @returns the accumulated error string
   const std::string error() { return errors_.str(); }
 
@@ -383,7 +386,7 @@ class ParserImpl : Reader {
   /// @param id the SPIR-V result id.
   /// @return the Source record, or a default one
   Source GetSourceForResultIdForTest(uint32_t id) const;
-  /// Returns the soruce record for the given instruction.
+  /// Returns the source record for the given instruction.
   /// @param inst the SPIR-V instruction
   /// @return the Source record, or a default one
   Source GetSourceForInst(const spvtools::opt::Instruction* inst) const;
@@ -428,7 +431,13 @@ class ParserImpl : Reader {
   /// @param var the OpVariable instruction
   /// @returns the Tint AST type for the poiner-to-{sampler|texture} or null on
   /// error
-  ast::type::Type* GetTypeForHandleVar(const spvtools::opt::Instruction& var);
+  ast::type::PointerType* GetTypeForHandleVar(
+      const spvtools::opt::Instruction& var);
+
+  /// Returns the SPIR-V instruction with the given ID, or nullptr.
+  /// @param id the SPIR-V result ID
+  /// @returns the instruction, or nullptr on error
+  const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const;
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
@@ -580,6 +589,9 @@ class ParserImpl : Reader {
   // Maps a memory-object-declaration instruction to any sampler or texture
   // usages implied by usages of the memory-object-declaration.
   std::unordered_map<const spvtools::opt::Instruction*, Usage> handle_usage_;
+  // The inferred pointer type for the given handle variable.
+  std::unordered_map<const spvtools::opt::Instruction*, ast::type::PointerType*>
+      handle_type_;
 };
 
 }  // namespace spirv

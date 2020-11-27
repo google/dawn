@@ -1600,8 +1600,16 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
   }
 }
 
-ast::type::Type* ParserImpl::GetTypeForHandleVar(
+ast::type::PointerType* ParserImpl::GetTypeForHandleVar(
     const spvtools::opt::Instruction& var) {
+  if (!success()) {
+    return nullptr;
+  }
+  auto where = handle_type_.find(&var);
+  if (where != handle_type_.end()) {
+    return where->second;
+  }
+
   // The WGSL handle type is determined by looking at information from
   // several sources:
   //    - the usage of the handle by image access instructions
@@ -1637,7 +1645,7 @@ ast::type::Type* ParserImpl::GetTypeForHandleVar(
           << var.PrettyPrint();
       return nullptr;
     default:
-      Fail() << "invalid type for image or sampler variable "
+      Fail() << "invalid type for image or sampler variable: "
              << var.PrettyPrint();
       return nullptr;
   }
@@ -1774,8 +1782,11 @@ ast::type::Type* ParserImpl::GetTypeForHandleVar(
   }
 
   // Form the pointer type.
-  return ast_module_.create<ast::type::PointerType>(
+  auto* result = ast_module_.create<ast::type::PointerType>(
       ast_store_type, ast::StorageClass::kUniformConstant);
+  // Remember it for later.
+  handle_type_[&var] = result;
+  return result;
 }
 
 bool ParserImpl::RegisterHandleUsage() {
@@ -1929,6 +1940,11 @@ Usage ParserImpl::GetHandleUsage(uint32_t id) const {
     return where->second;
   }
   return Usage();
+}
+
+const spvtools::opt::Instruction* ParserImpl::GetInstructionForTest(
+    uint32_t id) const {
+  return def_use_mgr_ ? def_use_mgr_->GetDef(id) : nullptr;
 }
 
 }  // namespace spirv

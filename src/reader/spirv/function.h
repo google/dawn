@@ -679,6 +679,20 @@ class FunctionEmitter {
   /// @returns the identifier expression for the @p i'th component
   ast::IdentifierExpression* Swizzle(uint32_t i);
 
+  /// Converts SPIR-V image coordinates from an image access instruction
+  /// (e.g. OpImageSampledImplicitLod) into an expression list consisting of
+  /// the texture coordinates, and an integral array index if the texture is
+  /// arrayed. The texture coordinate is a scalar for 1D textures, a vector of
+  /// 2 elements for a 2D texture, and a vector of 3 elements for a 3D or
+  /// Cube texture. Excess components are ignored, e.g. if the SPIR-V
+  /// coordinate is a 4-element vector but the image is a 2D non-arrayed
+  /// texture then the 3rd and 4th components are ignored.
+  /// On failure, issues an error and returns an empty expression list.
+  /// @param image_access the image access instruction
+  /// @returns an ExpressionList of the coordinate and array index (if any)
+  ast::ExpressionList MakeCoordinateOperandsForImageAccess(
+      const spvtools::opt::Instruction& image_access);
+
  private:
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
