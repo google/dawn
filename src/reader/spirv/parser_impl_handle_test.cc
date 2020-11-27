@@ -74,9 +74,9 @@ std::string CommonBasicTypes() {
     %v3float_null = OpConstantNull %v3float
     %v4float_null = OpConstantNull %v4float
 
-    %vf12 = OpConstantComposite %v2float %float_1 %float_2
-    %vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
-    %vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+    %the_vf12 = OpConstantComposite %v2float %float_1 %float_2
+    %the_vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+    %the_vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
 
     %depth = OpConstant %float 0.2
   )";
@@ -1208,6 +1208,10 @@ using SpvParserTest_DeclHandle_SampledImage =
 
 TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
   const auto assembly = Preamble() + R"(
+     OpName %f1 "f1"
+     OpName %vf12 "vf12"
+     OpName %vf123 "vf123"
+     OpName %vf1234 "vf1234"
      OpName %coords1 "coords1"
      OpName %coords12 "coords12"
      OpName %coords123 "coords123"
@@ -1235,11 +1239,10 @@ TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
 
-     ; create some names that will become WGSL variables x_1, x_12, and so on.
-     %1 = OpCopyObject %float %float_1
-     %12 = OpCopyObject %v2float %vf12
-     %123 = OpCopyObject %v3float %vf123
-     %1234 = OpCopyObject %v4float %vf1234
+     %f1 = OpCopyObject %float %float_1
+     %vf12 = OpCopyObject %v2float %the_vf12
+     %vf123 = OpCopyObject %v3float %the_vf123
+     %vf1234 = OpCopyObject %v4float %the_vf1234
 
      %coords1 = OpCopyObject %float %float_1
      %coords12 = OpCopyObject %v2float %vf12
@@ -2223,6 +2226,10 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
      OpExecutionMode %100 OriginUpperLeft
      OpName %float_var "float_var"
      OpName %ptr_float "ptr_float"
+     OpName %f1 "f1"
+     OpName %vf12 "vf12"
+     OpName %vf123 "vf123"
+     OpName %vf1234 "vf1234"
      OpDecorate %10 DescriptorSet 0
      OpDecorate %10 Binding 0
      OpDecorate %20 DescriptorSet 2
@@ -2250,11 +2257,10 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
 
      %float_var = OpVariable %ptr_float Function
 
-     ; create some names that will become WGSL variables x_1, x_12, and so on.
-     %1 = OpCopyObject %float %float_1
-     %12 = OpCopyObject %v2float %vf12
-     %123 = OpCopyObject %v3float %vf123
-     %1234 = OpCopyObject %v4float %vf1234
+     %f1 = OpCopyObject %float %float_1
+     %vf12 = OpCopyObject %v2float %the_vf12
+     %vf123 = OpCopyObject %v3float %the_vf123
+     %vf1234 = OpCopyObject %v4float %the_vf1234
 
      %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
@@ -2307,33 +2313,33 @@ INSTANTIATE_TEST_SUITE_P(Good_1D,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %1",
+                              "%sampled_image %f1",
                               "",
-                              {"Identifier[not set]{x_1}\n"}},
+                              {"Identifier[not set]{f1}\n"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %12",  // one excess arg
+                              "%sampled_image %vf12",  // one excess arg
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_12}
+  Identifier[not set]{vf12}
   Identifier[not set]{x}
 }
 )"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %123",  // two excess args
+                              "%sampled_image %vf123",  // two excess args
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_123}
+  Identifier[not set]{vf123}
   Identifier[not set]{x}
 }
 )"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %1234",  // three excess args
+                              "%sampled_image %vf1234",  // three excess args
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{x}
 }
 )"}}}));
@@ -2343,54 +2349,54 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %12",
+                              "%sampled_image %vf12",
                               "",
                               {
                                   R"(MemberAccessor[not set]{
-  Identifier[not set]{x_12}
+  Identifier[not set]{vf12}
   Identifier[not set]{x}
 }
 )",
                                   R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_12}
+    Identifier[not set]{vf12}
     Identifier[not set]{y}
   }
 }
 )"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %123",  // one excess arg
+                              "%sampled_image %vf123",  // one excess arg
                               "",
                               {
                                   R"(MemberAccessor[not set]{
-  Identifier[not set]{x_123}
+  Identifier[not set]{vf123}
   Identifier[not set]{x}
 }
 )",
                                   R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_123}
+    Identifier[not set]{vf123}
     Identifier[not set]{y}
   }
 }
 )"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %1234",  // two excess args
+                              "%sampled_image %vf1234",  // two excess args
                               "",
                               {
                                   R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{x}
 }
 )",
                                   R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_1234}
+    Identifier[not set]{vf1234}
     Identifier[not set]{y}
   }
 }
@@ -2401,24 +2407,24 @@ INSTANTIATE_TEST_SUITE_P(Good_2D,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %12",
+                              "%sampled_image %vf12",
                               "",
-                              {"Identifier[not set]{x_12}\n"}},
+                              {"Identifier[not set]{vf12}\n"}},
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %123",  // one excess arg
+                              "%sampled_image %vf123",  // one excess arg
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_123}
+  Identifier[not set]{vf123}
   Identifier[not set]{xy}
 }
 )"}},
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %1234",  // two excess args
+                              "%sampled_image %vf1234",  // two excess args
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{xy}
 }
 )"}}}));
@@ -2428,36 +2434,36 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 2D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %123",
+                              "%sampled_image %vf123",
                               "",
                               {
                                   R"(MemberAccessor[not set]{
-  Identifier[not set]{x_123}
+  Identifier[not set]{vf123}
   Identifier[not set]{xy}
 }
 )",
                                   R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_123}
+    Identifier[not set]{vf123}
     Identifier[not set]{z}
   }
 }
 )"}},
                              {"%float 2D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
-                              "%sampled_image %1234",  // one excess arg
+                              "%sampled_image %vf1234",  // one excess arg
                               "",
                               {
                                   R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{xy}
 }
 )",
                                   R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_1234}
+    Identifier[not set]{vf1234}
     Identifier[not set]{z}
   }
 }
@@ -2469,17 +2475,17 @@ INSTANTIATE_TEST_SUITE_P(Good_3D,
                              {"%float 3D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
-                              "%sampled_image %123",
+                              "%sampled_image %vf123",
                               "",
-                              {"Identifier[not set]{x_123}\n"}},
+                              {"Identifier[not set]{vf123}\n"}},
                              {"%float 3D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
-                              "%sampled_image %1234",  // one excess
-                                                       // arg
+                              "%sampled_image %vf1234",  // one excess
+                                                         // arg
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{xyz}
 }
 )"}}}));
@@ -2490,17 +2496,17 @@ INSTANTIATE_TEST_SUITE_P(Good_Cube,
                              {"%float Cube 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
-                              "%sampled_image %123",
+                              "%sampled_image %vf123",
                               "",
-                              {"Identifier[not set]{x_123}\n"}},
+                              {"Identifier[not set]{vf123}\n"}},
                              {"%float Cube 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
-                              "%sampled_image %1234",  // one excess
-                                                       // arg
+                              "%sampled_image %vf1234",  // one excess
+                                                         // arg
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{xyz}
 }
 )"}}}));
@@ -2511,17 +2517,17 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
                              {"%float Cube 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
-                              "%sampled_image %1234",
+                              "%sampled_image %vf1234",
                               "",
                               {R"(MemberAccessor[not set]{
-  Identifier[not set]{x_1234}
+  Identifier[not set]{vf1234}
   Identifier[not set]{xyz}
 }
 )",
                                R"(TypeConstructor[not set]{
   __u32
   MemberAccessor[not set]{
-    Identifier[not set]{x_1234}
+    Identifier[not set]{vf1234}
     Identifier[not set]{w}
   }
 }
@@ -2538,12 +2544,12 @@ INSTANTIATE_TEST_SUITE_P(BadInstructions,
                              {"%float 1D 0 0 0 1 Unknown",
                               "%50 = OpCopyObject %float %float_1",
                               "internal error: couldn't find image for "
-                              "%50 = OpCopyObject %6 %26",
+                              "%50 = OpCopyObject %9 %28",
                               {}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "OpStore %float_var %float_1",
                               "invalid type for image or sampler "
-                              "variable: %2 = OpVariable %3 Function",
+                              "variable: %1 = OpVariable %2 Function",
                               {}},
                              // An example with a missing coordinate
                              // won't assemble, so we skip it.
@@ -2557,36 +2563,36 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleImplicitLod "
          // bad type for coordinate: not a number
          "%v4float %sampled_image %float_var",
-         "bad or unsupported coordinate type for image access: %48 = "
-         "OpImageSampleImplicitLod %24 %47 %2",
+         "bad or unsupported coordinate type for image access: %50 = "
+         "OpImageSampleImplicitLod %26 %49 %1",
          {}},
         {"%float 1D 0 1 0 1 Unknown",  // 1DArray
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
-         "%v4float %sampled_image %1",
+         "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %48 = OpImageSampleImplicitLod %24 %47 %1",
+         "in: %50 = OpImageSampleImplicitLod %26 %49 %3",
          {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
-         "%v4float %sampled_image %1",
+         "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %48 = OpImageSampleImplicitLod %24 %47 %1",
+         "in: %50 = OpImageSampleImplicitLod %26 %49 %3",
          {}},
         {"%float 2D 0 1 0 1 Unknown",  // 2DArray
          "%result = OpImageSampleImplicitLod "
          // 2 component, but need 3
-         "%v4float %sampled_image %12",
+         "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %48 = OpImageSampleImplicitLod %24 %47 %12",
+         "in: %50 = OpImageSampleImplicitLod %26 %49 %4",
          {}},
         {"%float 3D 0 0 0 1 Unknown",  // 3D
          "%result = OpImageSampleImplicitLod "
          // 2 components, but need 3
-         "%v4float %sampled_image %12",
+         "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %48 = OpImageSampleImplicitLod %24 %47 %12",
+         "in: %50 = OpImageSampleImplicitLod %26 %49 %4",
          {}},
     }));
 
