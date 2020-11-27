@@ -3704,7 +3704,21 @@ bool FunctionEmitter::EmitSampledImageAccess(
   }
   if (arg_index < num_args && (image_operands_mask & SpvImageOperandsLodMask)) {
     builtin_name += "Level";
-    params.push_back(MakeOperand(inst, arg_index).expr);
+    auto* lod_operand = MakeOperand(inst, arg_index).expr;
+    // When sampling from a depth texture, the Lod operand must be an unsigned
+    // integer.
+    if (ast::type::PointerType* type =
+            parser_impl_.GetTypeForHandleVar(*image)) {
+      if (ast::type::TextureType* texture_type = type->type()->AsTexture()) {
+        if (texture_type->IsDepth()) {
+          // Convert it to an unsigned integer type.
+          lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
+              ast_module_.create<ast::type::U32Type>(),
+              ast::ExpressionList{lod_operand});
+        }
+      }
+    }
+    params.push_back(lod_operand);
     image_operands_mask ^= SpvImageOperandsLodMask;
     arg_index++;
   }

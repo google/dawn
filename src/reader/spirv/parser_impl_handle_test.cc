@@ -2198,6 +2198,86 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"}));
 
+// Test crbug.com/378:
+// In WGSL, sampling from depth texture with explicit level of detail
+// requires the Lod parameter as an unsigned integer.
+// This corresponds to SPIR-V OpSampleExplicitLod and WGSL textureSampleLevel.
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleExplicitLod_DepthTexture,
+    SpvParserTest_DeclHandle_SampledImage,
+    ::testing::ValuesIn(std::vector<SampledImageCase>{
+        // Test a non-depth case.
+        // (This is already tested above in the ImageSampleExplicitLod suite,
+        // but I'm repeating here for the contrast with the depth case.)
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4float "
+         "%sampled_image %vf12 Lod %f1",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{vf12}
+              Identifier[not set]{f1}
+            )
+          })"},
+        // Test a depth case
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4float "
+         "%sampled_image %vf12 Lod %f1",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+         R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{vf12}
+              TypeConstructor[not set]{
+                __u32
+                Identifier[not set]{f1}
+              }
+            )
+          })"}}));
+
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;
