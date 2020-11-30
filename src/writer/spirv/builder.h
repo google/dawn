@@ -27,6 +27,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type_constructor_expression.h"

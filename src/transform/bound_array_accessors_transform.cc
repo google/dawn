@@ -184,13 +184,15 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
   }
 
   auto* ret_type = expr->array()->result_type()->UnwrapAll();
-  if (!ret_type->IsArray() && !ret_type->IsMatrix() && !ret_type->IsVector()) {
+  if (!ret_type->Is<ast::type::ArrayType>() && !ret_type->IsMatrix() &&
+      !ret_type->IsVector()) {
     return true;
   }
 
-  if (ret_type->IsVector() || ret_type->IsArray()) {
-    uint32_t size = ret_type->IsVector() ? ret_type->AsVector()->size()
-                                         : ret_type->AsArray()->size();
+  if (ret_type->IsVector() || ret_type->Is<ast::type::ArrayType>()) {
+    uint32_t size = ret_type->IsVector()
+                        ? ret_type->AsVector()->size()
+                        : ret_type->As<ast::type::ArrayType>()->size();
     if (size == 0) {
       error_ = "invalid 0 size for array or vector";
       return false;

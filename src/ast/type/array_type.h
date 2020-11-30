@@ -41,8 +41,6 @@ class ArrayType : public Castable<ArrayType, Type> {
   ArrayType(ArrayType&&);
   ~ArrayType() override;
 
-  /// @returns true if the type is an array type
-  bool IsArray() const override;
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }

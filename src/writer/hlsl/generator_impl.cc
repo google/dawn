@@ -909,7 +909,7 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsArray()) {
+  if (expr->type()->Is<ast::type::ArrayType>()) {
     out << "{";
   } else {
     if (!EmitType(out, expr->type(), "")) {
@@ -938,7 +938,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     }
   }
 
-  if (expr->type()->IsArray()) {
+  if (expr->type()->Is<ast::type::ArrayType>()) {
     out << "}";
   } else {
     out << ")";
@@ -1219,7 +1219,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->IsArray()) {
+    if (!v->type()->Is<ast::type::ArrayType>()) {
       out << " " << v->name();
     }
   }
@@ -1718,8 +1718,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       auto* ary_type = ary->array()->result_type()->UnwrapAll();
 
       out << "(";
-      if (ary_type->IsArray()) {
-        out << ary_type->AsArray()->array_stride();
+      if (ary_type->Is<ast::type::ArrayType>()) {
+        out << ary_type->As<ast::type::ArrayType>()->array_stride();
       } else if (ary_type->IsVector()) {
         // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
@@ -2032,21 +2032,21 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   if (type->Is<ast::type::AliasType>()) {
     auto* alias = type->As<ast::type::AliasType>();
     out << namer_.NameFor(alias->name());
-  } else if (type->IsArray()) {
-    auto* ary = type->AsArray();
+  } else if (type->Is<ast::type::ArrayType>()) {
+    auto* ary = type->As<ast::type::ArrayType>();
 
     ast::type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (base_type->IsArray()) {
-      if (base_type->AsArray()->IsRuntimeArray()) {
+    while (base_type->Is<ast::type::ArrayType>()) {
+      if (base_type->As<ast::type::ArrayType>()->IsRuntimeArray()) {
         // TODO(dsinclair): Support runtime arrays
         // https://bugs.chromium.org/p/tint/issues/detail?id=185
         error_ = "runtime array not supported yet.";
         return false;
       } else {
-        sizes.push_back(base_type->AsArray()->size());
+        sizes.push_back(base_type->As<ast::type::ArrayType>()->size());
       }
-      base_type = base_type->AsArray()->type();
+      base_type = base_type->As<ast::type::ArrayType>()->type();
     }
     if (!EmitType(out, base_type, "")) {
       return false;
@@ -2163,7 +2163,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->type()->IsArray()) {
+    if (!mem->type()->Is<ast::type::ArrayType>()) {
       out << " " << namer_.NameFor(mem->name());
     }
     out << ";" << std::endl;
@@ -2226,7 +2226,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (!EmitType(out, var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->IsArray()) {
+  if (!var->type()->Is<ast::type::ArrayType>()) {
     out << " " << var->name();
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2281,7 +2281,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     if (!EmitType(out, var->type(), var->name())) {
       return false;
     }
-    if (!var->type()->IsArray()) {
+    if (!var->type()->Is<ast::type::ArrayType>()) {
       out << " " << var->name();
     }
 

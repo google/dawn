@@ -351,9 +351,9 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
@@ -367,9 +367,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
@@ -384,9 +384,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
   ASSERT_TRUE(a->has_array_stride());
@@ -400,9 +400,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
 
@@ -421,9 +421,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsF32());
 
@@ -524,9 +524,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsArray());
+  ASSERT_TRUE(t->Is<ast::type::ArrayType>());
 
-  auto* a = t->AsArray();
+  auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsU32());
 }

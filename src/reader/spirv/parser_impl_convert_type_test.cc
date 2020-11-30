@@ -338,8 +338,8 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsArray());
-  auto* arr_type = type->AsArray();
+  EXPECT_TRUE(type->Is<ast::type::ArrayType>());
+  auto* arr_type = type->As<ast::type::ArrayType>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 0u);
@@ -374,7 +374,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_Valid) {
   EXPECT_TRUE(p->BuildInternalModule());
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  auto* arr_type = type->AsArray();
+  auto* arr_type = type->As<ast::type::ArrayType>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->array_stride(), 64u);
@@ -420,8 +420,8 @@ TEST_F(SpvParserTest, ConvertType_Array) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsArray());
-  auto* arr_type = type->AsArray();
+  EXPECT_TRUE(type->Is<ast::type::ArrayType>());
+  auto* arr_type = type->As<ast::type::ArrayType>();
   EXPECT_FALSE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 42u);
@@ -508,8 +508,8 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_Valid) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsArray());
-  auto* arr_type = type->AsArray();
+  EXPECT_TRUE(type->Is<ast::type::ArrayType>());
+  auto* arr_type = type->As<ast::type::ArrayType>();
   ASSERT_NE(arr_type, nullptr);
   ASSERT_EQ(arr_type->array_stride(), 8u);
   EXPECT_TRUE(arr_type->has_array_stride());

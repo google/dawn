@@ -35,7 +35,7 @@ TEST_F(ArrayTypeTest, CreateSizedArray) {
   ArrayType arr{&u32, 3};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 3u);
-  EXPECT_TRUE(arr.IsArray());
+  EXPECT_TRUE(arr.Is<ArrayType>());
   EXPECT_FALSE(arr.IsRuntimeArray());
 }
 
@@ -44,7 +44,7 @@ TEST_F(ArrayTypeTest, CreateRuntimeArray) {
   ArrayType arr{&u32};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 0u);
-  EXPECT_TRUE(arr.IsArray());
+  EXPECT_TRUE(arr.Is<ArrayType>());
   EXPECT_TRUE(arr.IsRuntimeArray());
 }
 
@@ -55,7 +55,7 @@ TEST_F(ArrayTypeTest, Is) {
   Type* ty = &arr;
   EXPECT_FALSE(ty->Is<AccessControlType>());
   EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_TRUE(ty->IsArray());
+  EXPECT_TRUE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());
   EXPECT_FALSE(ty->IsI32());

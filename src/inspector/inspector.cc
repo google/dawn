@@ -383,8 +383,8 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       base_type = texture_type->AsSampled()->type()->UnwrapIfNeeded();
     }
 
-    if (base_type->IsArray()) {
-      base_type = base_type->AsArray()->type();
+    if (base_type->Is<ast::type::ArrayType>()) {
+      base_type = base_type->As<ast::type::ArrayType>()->type();
     } else if (base_type->IsMatrix()) {
       base_type = base_type->AsMatrix()->type();
     } else if (base_type->IsVector()) {

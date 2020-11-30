@@ -412,8 +412,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     }
   } else if (type->Is<ast::type::AliasType>()) {
     out_ << type->As<ast::type::AliasType>()->name();
-  } else if (type->IsArray()) {
-    auto* ary = type->AsArray();
+  } else if (type->Is<ast::type::ArrayType>()) {
+    auto* ary = type->As<ast::type::ArrayType>();
 
     for (auto* deco : ary->decorations()) {
       if (deco->IsStride()) {

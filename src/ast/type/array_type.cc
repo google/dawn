@@ -32,10 +32,6 @@ ArrayType::ArrayType(ArrayType&&) = default;
 
 ArrayType::~ArrayType() = default;
 
-bool ArrayType::IsArray() const {
-  return true;
-}
-
 uint64_t ArrayType::MinBufferBindingSize(MemoryLayout mem_layout) const {
   if (!has_array_stride()) {
     // Arrays in buffers are required to have a stride.

@@ -50,7 +50,7 @@ TEST_F(AccessControlTypeTest, Is) {
   Type* ty = &at;
   EXPECT_TRUE(ty->Is<AccessControlType>());
   EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());
   EXPECT_FALSE(ty->IsI32());

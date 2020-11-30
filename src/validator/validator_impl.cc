@@ -86,8 +86,8 @@ bool ValidatorImpl::ValidateConstructedTypes(
     if (ct->IsStruct()) {
       auto* st = ct->AsStruct();
       for (auto* member : st->impl()->members()) {
-        if (member->type()->UnwrapAll()->IsArray()) {
-          auto* r = member->type()->UnwrapAll()->AsArray();
+        if (member->type()->UnwrapAll()->Is<ast::type::ArrayType>()) {
+          auto* r = member->type()->UnwrapAll()->As<ast::type::ArrayType>();
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
               add_error(member->source(), "v-0015",
@@ -263,8 +263,12 @@ bool ValidatorImpl::ValidateDeclStatement(
     return false;
   }
   variable_stack_.set(name, decl->variable());
-  if (decl->variable()->type()->UnwrapAll()->IsArray()) {
-    if (decl->variable()->type()->UnwrapAll()->AsArray()->IsRuntimeArray()) {
+  if (decl->variable()->type()->UnwrapAll()->Is<ast::type::ArrayType>()) {
+    if (decl->variable()
+            ->type()
+            ->UnwrapAll()
+            ->As<ast::type::ArrayType>()
+            ->IsRuntimeArray()) {
       add_error(decl->source(), "v-0015",
                 "runtime arrays may only appear as the last "
                 "member of a struct: '" +

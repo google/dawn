@@ -1371,8 +1371,8 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(type,
                                                   std::move(ast_components));
   }
-  if (type->IsArray()) {
-    auto* arr_ty = type->AsArray();
+  if (type->Is<ast::type::ArrayType>()) {
+    auto* arr_ty = type->As<ast::type::ArrayType>();
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));

@@ -146,8 +146,8 @@ uint32_t IndexFromName(char name) {
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
 ast::type::MatrixType* GetNestedMatrixType(ast::type::Type* type) {
-  while (type->IsArray()) {
-    type = type->AsArray()->type();
+  while (type->Is<ast::type::ArrayType>()) {
+    type = type->As<ast::type::ArrayType>()->type();
   }
   return type->IsMatrix() ? type->AsMatrix() : nullptr;
 }
@@ -818,8 +818,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   // If the source is a pointer we access chain into it. We also access chain
   // into an array of non-scalar types.
   if (info->source_type->IsPointer() ||
-      (info->source_type->IsArray() &&
-       !info->source_type->AsArray()->type()->is_scalar())) {
+      (info->source_type->Is<ast::type::ArrayType>() &&
+       !info->source_type->As<ast::type::ArrayType>()->type()->is_scalar())) {
     info->access_chain_indices.push_back(idx_id);
     info->source_type = expr->result_type();
     return true;
@@ -1008,8 +1008,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
         accessors[0]->AsArrayAccessor()->array()->result_type();
 
     if (!ary_res_type->IsPointer() &&
-        (ary_res_type->IsArray() &&
-         !ary_res_type->AsArray()->type()->is_scalar())) {
+        (ary_res_type->Is<ast::type::ArrayType>() &&
+         !ary_res_type->As<ast::type::ArrayType>()->type()->is_scalar())) {
       ast::type::PointerType ptr(ary_res_type, ast::StorageClass::kFunction);
       auto result_type_id = GenerateTypeIfNeeded(&ptr);
       if (result_type_id == 0) {
@@ -1204,8 +1204,8 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       subtype = subtype->AsVector()->type()->UnwrapAll();
     } else if (subtype->IsMatrix()) {
       subtype = subtype->AsMatrix()->type()->UnwrapAll();
-    } else if (subtype->IsArray()) {
-      subtype = subtype->AsArray()->type()->UnwrapAll();
+    } else if (subtype->Is<ast::type::ArrayType>()) {
+      subtype = subtype->As<ast::type::ArrayType>()->type()->UnwrapAll();
     } else if (subtype->IsStruct()) {
       subtype = subtype->AsStruct()->impl()->members()[i]->type()->UnwrapAll();
     }
@@ -1280,7 +1280,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->IsMatrix() ||
-        result_type->IsArray() || result_type->IsStruct()) {
+        result_type->Is<ast::type::ArrayType>() || result_type->IsStruct()) {
       out << "_" << id;
 
       ops.push_back(Operand::Int(id));
@@ -2410,8 +2410,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
                             result)) {
       return 0;
     }
-  } else if (type->IsArray()) {
-    if (!GenerateArrayType(type->AsArray(), result)) {
+  } else if (type->Is<ast::type::ArrayType>()) {
+    if (!GenerateArrayType(type->As<ast::type::ArrayType>(), result)) {
       return 0;
     }
   } else if (type->IsBool()) {

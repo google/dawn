@@ -16,6 +16,7 @@
 
 #include "src/ast/test_helper.h"
 #include "src/ast/type/access_control_type.h"
+#include "src/ast/type/array_type.h"
 
 namespace tint {
 namespace ast {
@@ -29,7 +30,7 @@ TEST_F(F32TypeTest, Is) {
   Type* ty = &f;
   EXPECT_FALSE(ty->Is<AccessControlType>());
   EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_TRUE(ty->IsF32());
   EXPECT_FALSE(ty->IsI32());

@@ -333,8 +333,8 @@ bool TypeDeterminer::DetermineArrayAccessor(
   auto* res = expr->array()->result_type();
   auto* parent_type = res->UnwrapAll();
   ast::type::Type* ret = nullptr;
-  if (parent_type->IsArray()) {
-    ret = parent_type->AsArray()->type();
+  if (parent_type->Is<ast::type::ArrayType>()) {
+    ret = parent_type->As<ast::type::ArrayType>()->type();
   } else if (parent_type->IsVector()) {
     ret = parent_type->AsVector()->type();
   } else if (parent_type->IsMatrix()) {
@@ -351,8 +351,8 @@ bool TypeDeterminer::DetermineArrayAccessor(
   if (res->IsPointer()) {
     ret = mod_->create<ast::type::PointerType>(
         ret, res->AsPointer()->storage_class());
-  } else if (parent_type->IsArray() &&
-             !parent_type->AsArray()->type()->is_scalar()) {
+  } else if (parent_type->Is<ast::type::ArrayType>() &&
+             !parent_type->As<ast::type::ArrayType>()->type()->is_scalar()) {
     // If we extract a non-scalar from an array then we also get a pointer. We
     // will generate a Function storage class variable to store this
     // into.

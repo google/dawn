@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsArray() const {
-  return false;
-}
-
 bool Type::IsBool() const {
   return false;
 }
@@ -166,11 +162,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const ArrayType* Type::AsArray() const {
-  assert(IsArray());
-  return static_cast<const ArrayType*>(this);
-}
-
 const BoolType* Type::AsBool() const {
   assert(IsBool());
   return static_cast<const BoolType*>(this);
@@ -224,11 +215,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-ArrayType* Type::AsArray() {
-  assert(IsArray());
-  return static_cast<ArrayType*>(this);
 }
 
 BoolType* Type::AsBool() {

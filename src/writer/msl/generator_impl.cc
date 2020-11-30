@@ -188,8 +188,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
   if (type->Is<ast::type::AliasType>()) {
     return calculate_alignment_size(type->As<ast::type::AliasType>()->type());
   }
-  if (type->IsArray()) {
-    auto* ary = type->AsArray();
+  if (type->Is<ast::type::ArrayType>()) {
+    auto* ary = type->As<ast::type::ArrayType>();
     // TODO(dsinclair): Handle array stride and adjust for alignment.
     uint32_t type_size = calculate_alignment_size(ary->type());
     return ary->size() * type_size;
@@ -890,7 +890,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsArray()) {
+  if (expr->type()->Is<ast::type::ArrayType>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -919,7 +919,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->IsArray()) {
+  if (expr->type()->Is<ast::type::ArrayType>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -940,9 +940,9 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     return EmitZeroValue(type->AsVector()->type());
   } else if (type->IsMatrix()) {
     return EmitZeroValue(type->AsMatrix()->type());
-  } else if (type->IsArray()) {
+  } else if (type->Is<ast::type::ArrayType>()) {
     out_ << "{";
-    if (!EmitZeroValue(type->AsArray()->type())) {
+    if (!EmitZeroValue(type->As<ast::type::ArrayType>()->type())) {
       return false;
     }
     out_ << "}";
@@ -1308,7 +1308,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->IsArray()) {
+    if (!v->type()->Is<ast::type::ArrayType>()) {
       out_ << " " << v->name();
     }
   }
@@ -1790,18 +1790,18 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   if (type->Is<ast::type::AliasType>()) {
     auto* alias = type->As<ast::type::AliasType>();
     out_ << namer_.NameFor(alias->name());
-  } else if (type->IsArray()) {
-    auto* ary = type->AsArray();
+  } else if (type->Is<ast::type::ArrayType>()) {
+    auto* ary = type->As<ast::type::ArrayType>();
 
     ast::type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (base_type->IsArray()) {
-      if (base_type->AsArray()->IsRuntimeArray()) {
+    while (base_type->Is<ast::type::ArrayType>()) {
+      if (base_type->As<ast::type::ArrayType>()->IsRuntimeArray()) {
         sizes.push_back(1);
       } else {
-        sizes.push_back(base_type->AsArray()->size());
+        sizes.push_back(base_type->As<ast::type::ArrayType>()->size());
       }
-      base_type = base_type->AsArray()->type();
+      base_type = base_type->As<ast::type::ArrayType>()->type();
     }
     if (!EmitType(base_type, "")) {
       return false;
@@ -1964,7 +1964,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
     current_offset += size;
 
     // Array member name will be output with the type
-    if (!mem->type()->IsArray()) {
+    if (!mem->type()->Is<ast::type::ArrayType>()) {
       out_ << " " << namer_.NameFor(mem->name());
     }
     out_ << ";" << std::endl;
@@ -2011,7 +2011,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
   if (!EmitType(var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->IsArray()) {
+  if (!var->type()->Is<ast::type::ArrayType>()) {
     out_ << " " << var->name();
   }
 
@@ -2051,7 +2051,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   if (!EmitType(var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->IsArray()) {
+  if (!var->type()->Is<ast::type::ArrayType>()) {
     out_ << " " << var->name();
   }
 
