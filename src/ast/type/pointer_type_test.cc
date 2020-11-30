@@ -37,7 +37,7 @@ TEST_F(PointerTypeTest, Is) {
   PointerType p{&i32, StorageClass::kFunction};
   Type* ty = &p;
   EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->IsArray());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());

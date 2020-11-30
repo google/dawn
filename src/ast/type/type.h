@@ -23,7 +23,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class AliasType;
 class ArrayType;
 class BoolType;
 class F32Type;
@@ -47,8 +46,6 @@ class Type : public Castable<Type> {
   Type(Type&&);
   ~Type() override;
 
-  /// @returns true if the type is an alias type
-  virtual bool IsAlias() const;
   /// @returns true if the type is an array type
   virtual bool IsArray() const;
   /// @returns true if the type is a bool type
@@ -128,8 +125,6 @@ class Type : public Castable<Type> {
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector();
 
-  /// @returns the type as an alias type
-  const AliasType* AsAlias() const;
   /// @returns the type as an array type
   const ArrayType* AsArray() const;
   /// @returns the type as a bool type
@@ -155,8 +150,6 @@ class Type : public Castable<Type> {
   /// @returns the type as a void type
   const VoidType* AsVoid() const;
 
-  /// @returns the type as an alias type
-  AliasType* AsAlias();
   /// @returns the type as an array type
   ArrayType* AsArray();
   /// @returns the type as a bool type

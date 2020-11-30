@@ -54,7 +54,7 @@ TEST_F(ArrayTypeTest, Is) {
   ArrayType arr{&i32, 3};
   Type* ty = &arr;
   EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_TRUE(ty->IsArray());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());

@@ -38,7 +38,7 @@ TEST_F(MatrixTypeTest, Is) {
   MatrixType m{&i32, 2, 3};
   Type* ty = &m;
   EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->IsArray());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());

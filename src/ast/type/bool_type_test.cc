@@ -28,7 +28,7 @@ TEST_F(BoolTypeTest, Is) {
   BoolType b;
   Type* ty = &b;
   EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->IsArray());
   EXPECT_TRUE(ty->IsBool());
   EXPECT_FALSE(ty->IsF32());

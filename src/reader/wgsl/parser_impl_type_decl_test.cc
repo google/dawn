@@ -58,9 +58,9 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, alias_type);
-  ASSERT_TRUE(t->IsAlias());
+  ASSERT_TRUE(t->Is<ast::type::AliasType>());
 
-  auto* alias = t->AsAlias();
+  auto* alias = t->As<ast::type::AliasType>();
   EXPECT_EQ(alias->name(), "A");
   EXPECT_EQ(alias->type(), int_type);
 }

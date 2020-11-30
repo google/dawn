@@ -51,8 +51,8 @@ Type* Type::UnwrapPtrIfNeeded() {
 Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
-    if (where->IsAlias()) {
-      where = where->AsAlias()->type();
+    if (where->Is<AliasType>()) {
+      where = where->As<AliasType>()->type();
     } else if (where->Is<AccessControlType>()) {
       where = where->As<AccessControlType>()->type();
     } else {
@@ -64,10 +64,6 @@ Type* Type::UnwrapIfNeeded() {
 
 Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
-}
-
-bool Type::IsAlias() const {
-  return false;
 }
 
 bool Type::IsArray() const {
@@ -170,11 +166,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const AliasType* Type::AsAlias() const {
-  assert(IsAlias());
-  return static_cast<const AliasType*>(this);
-}
-
 const ArrayType* Type::AsArray() const {
   assert(IsArray());
   return static_cast<const ArrayType*>(this);
@@ -233,11 +224,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-AliasType* Type::AsAlias() {
-  assert(IsAlias());
-  return static_cast<AliasType*>(this);
 }
 
 ArrayType* Type::AsArray() {

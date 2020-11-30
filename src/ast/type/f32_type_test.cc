@@ -28,7 +28,7 @@ TEST_F(F32TypeTest, Is) {
   F32Type f;
   Type* ty = &f;
   EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->IsArray());
   EXPECT_FALSE(ty->IsBool());
   EXPECT_TRUE(ty->IsF32());

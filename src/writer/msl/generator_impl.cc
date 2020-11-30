@@ -185,8 +185,8 @@ uint32_t GeneratorImpl::calculate_largest_alignment(
 }
 
 uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
-  if (type->IsAlias()) {
-    return calculate_alignment_size(type->AsAlias()->type());
+  if (type->Is<ast::type::AliasType>()) {
+    return calculate_alignment_size(type->As<ast::type::AliasType>()->type());
   }
   if (type->IsArray()) {
     auto* ary = type->AsArray();
@@ -255,8 +255,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
 
-  if (ty->IsAlias()) {
-    auto* alias = ty->AsAlias();
+  if (ty->Is<ast::type::AliasType>()) {
+    auto* alias = ty->As<ast::type::AliasType>();
 
     out_ << "typedef ";
     if (!EmitType(alias->type(), "")) {
@@ -1787,8 +1787,8 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
-  if (type->IsAlias()) {
-    auto* alias = type->AsAlias();
+  if (type->Is<ast::type::AliasType>()) {
+    auto* alias = type->As<ast::type::AliasType>();
     out_ << namer_.NameFor(alias->name());
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();

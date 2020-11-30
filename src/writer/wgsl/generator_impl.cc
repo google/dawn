@@ -168,8 +168,8 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
 
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
-  if (ty->IsAlias()) {
-    auto* alias = ty->AsAlias();
+  if (ty->Is<ast::type::AliasType>()) {
+    auto* alias = ty->As<ast::type::AliasType>();
     out_ << "type " << alias->name() << " = ";
     if (!EmitType(alias->type())) {
       return false;
@@ -410,8 +410,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     if (!EmitType(ac->type())) {
       return false;
     }
-  } else if (type->IsAlias()) {
-    out_ << type->AsAlias()->name();
+  } else if (type->Is<ast::type::AliasType>()) {
+    out_ << type->As<ast::type::AliasType>()->name();
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 

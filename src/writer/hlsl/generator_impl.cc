@@ -212,8 +212,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
                                         const ast::type::Type* ty) {
   make_indent(out);
 
-  if (ty->IsAlias()) {
-    auto* alias = ty->AsAlias();
+  if (ty->Is<ast::type::AliasType>()) {
+    auto* alias = ty->As<ast::type::AliasType>();
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
     if (alias->type()->IsStruct()) {
@@ -2029,8 +2029,8 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              ast::type::Type* type,
                              const std::string& name) {
-  if (type->IsAlias()) {
-    auto* alias = type->AsAlias();
+  if (type->Is<ast::type::AliasType>()) {
+    auto* alias = type->As<ast::type::AliasType>();
     out << namer_.NameFor(alias->name());
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();

@@ -56,8 +56,8 @@ bool Module::IsValid() const {
     if (ty == nullptr) {
       return false;
     }
-    if (ty->IsAlias()) {
-      auto* alias = ty->AsAlias();
+    if (ty->Is<ast::type::AliasType>()) {
+      auto* alias = ty->As<ast::type::AliasType>();
       if (alias->type() == nullptr) {
         return false;
       }
@@ -91,8 +91,8 @@ std::string Module::to_str() const {
     for (size_t i = 0; i < indent; ++i) {
       out << " ";
     }
-    if (ty->IsAlias()) {
-      auto* alias = ty->AsAlias();
+    if (ty->Is<ast::type::AliasType>()) {
+      auto* alias = ty->As<ast::type::AliasType>();
       out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
       if (alias->type()->IsStruct()) {
         alias->type()->AsStruct()->impl()->to_str(out, indent);

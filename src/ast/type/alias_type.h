@@ -34,9 +34,6 @@ class AliasType : public Castable<AliasType, Type> {
   AliasType(AliasType&&);
   ~AliasType() override;
 
-  /// @returns true if the type is an alias type
-  bool IsAlias() const override;
-
   /// @returns the alias name
   const std::string& name() const { return name_; }
   /// @returns the alias type

@@ -903,7 +903,7 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
   auto* alias = module_.create<ast::type::AliasType>(name.value, type.value);
   register_constructed(name.value, alias);
 
-  return alias->AsAlias();
+  return alias;
 }
 
 // type_decl

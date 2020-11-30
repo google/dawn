@@ -2387,8 +2387,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   }
 
   // The alias is a wrapper around the subtype, so emit the subtype
-  if (type->IsAlias()) {
-    return GenerateTypeIfNeeded(type->AsAlias()->type());
+  if (type->Is<ast::type::AliasType>()) {
+    return GenerateTypeIfNeeded(type->As<ast::type::AliasType>()->type());
   }
 
   auto val = type_name_to_id_.find(type->type_name());

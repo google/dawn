@@ -29,10 +29,6 @@ AliasType::AliasType(AliasType&&) = default;
 
 AliasType::~AliasType() = default;
 
-bool AliasType::IsAlias() const {
-  return true;
-}
-
 std::string AliasType::type_name() const {
   return "__alias_" + name_ + subtype_->type_name();
 }

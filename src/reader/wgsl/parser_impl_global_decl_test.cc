@@ -88,8 +88,8 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
-  ASSERT_TRUE(m.constructed_types()[0]->IsAlias());
-  EXPECT_EQ(m.constructed_types()[0]->AsAlias()->name(), "A");
+  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::AliasType>());
+  EXPECT_EQ(m.constructed_types()[0]->As<ast::type::AliasType>()->name(), "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -107,8 +107,8 @@ type B = A;)");
   auto* str = m.constructed_types()[0]->AsStruct();
   EXPECT_EQ(str->name(), "A");
 
-  ASSERT_TRUE(m.constructed_types()[1]->IsAlias());
-  auto* alias = m.constructed_types()[1]->AsAlias();
+  ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::AliasType>());
+  auto* alias = m.constructed_types()[1]->As<ast::type::AliasType>();
   EXPECT_EQ(alias->name(), "B");
   EXPECT_EQ(alias->type(), str);
 }
