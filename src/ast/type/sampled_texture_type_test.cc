@@ -35,7 +35,7 @@ TEST_F(SampledTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->Is<F32Type>());
   EXPECT_FALSE(ty->IsI32());
   EXPECT_FALSE(ty->IsMatrix());
   EXPECT_FALSE(ty->IsPointer());

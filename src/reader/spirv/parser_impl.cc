@@ -983,7 +983,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
                   ast_type, static_cast<uint32_t>(literal_value)));
-        } else if (ast_type->IsF32()) {
+        } else if (ast_type->Is<ast::type::F32Type>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
@@ -1272,7 +1272,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
             create<ast::ScalarConstructorExpression>(
                 create<ast::SintLiteral>(ast_type, spirv_const->GetS32()))};
   }
-  if (ast_type->IsF32()) {
+  if (ast_type->Is<ast::type::F32Type>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 create<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()))};
@@ -1346,7 +1346,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::SintLiteral>(type, 0));
   }
-  if (type->IsF32()) {
+  if (type->Is<ast::type::F32Type>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::FloatLiteral>(type, 0.0f));
   }
@@ -1445,7 +1445,7 @@ ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
     Fail() << "no type provided";
   }
   auto* i32 = ast_module_.create<ast::type::I32Type>();
-  if (other->IsF32() || other->IsU32() || other->IsI32()) {
+  if (other->Is<ast::type::F32Type>() || other->IsU32() || other->IsI32()) {
     return i32;
   }
   auto* vec_ty = other->AsVector();
@@ -1463,7 +1463,7 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
     return nullptr;
   }
   auto* u32 = ast_module_.create<ast::type::U32Type>();
-  if (other->IsF32() || other->IsU32() || other->IsI32()) {
+  if (other->Is<ast::type::F32Type>() || other->IsU32() || other->IsI32()) {
     return u32;
   }
   auto* vec_ty = other->AsVector();

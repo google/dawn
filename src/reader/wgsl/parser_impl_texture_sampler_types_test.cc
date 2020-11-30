@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -76,7 +77,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
 }
 
@@ -156,7 +157,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k1d);
 }
 

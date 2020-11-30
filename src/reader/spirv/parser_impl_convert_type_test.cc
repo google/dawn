@@ -20,6 +20,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
@@ -124,7 +125,7 @@ TEST_F(SpvParserTest, ConvertType_F32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(4);
-  EXPECT_TRUE(type->IsF32());
+  EXPECT_TRUE(type->Is<ast::type::F32Type>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -169,17 +170,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverF32) {
 
   auto* v2xf32 = p->ConvertType(20);
   EXPECT_TRUE(v2xf32->IsVector());
-  EXPECT_TRUE(v2xf32->AsVector()->type()->IsF32());
+  EXPECT_TRUE(v2xf32->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(v2xf32->AsVector()->size(), 2u);
 
   auto* v3xf32 = p->ConvertType(30);
   EXPECT_TRUE(v3xf32->IsVector());
-  EXPECT_TRUE(v3xf32->AsVector()->type()->IsF32());
+  EXPECT_TRUE(v3xf32->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(v3xf32->AsVector()->size(), 3u);
 
   auto* v4xf32 = p->ConvertType(40);
   EXPECT_TRUE(v4xf32->IsVector());
-  EXPECT_TRUE(v4xf32->AsVector()->type()->IsF32());
+  EXPECT_TRUE(v4xf32->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(v4xf32->AsVector()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
@@ -275,55 +276,55 @@ TEST_F(SpvParserTest, ConvertType_MatrixOverF32) {
 
   auto* m22 = p->ConvertType(22);
   EXPECT_TRUE(m22->IsMatrix());
-  EXPECT_TRUE(m22->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m22->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m22->AsMatrix()->rows(), 2u);
   EXPECT_EQ(m22->AsMatrix()->columns(), 2u);
 
   auto* m23 = p->ConvertType(23);
   EXPECT_TRUE(m23->IsMatrix());
-  EXPECT_TRUE(m23->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m23->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m23->AsMatrix()->rows(), 2u);
   EXPECT_EQ(m23->AsMatrix()->columns(), 3u);
 
   auto* m24 = p->ConvertType(24);
   EXPECT_TRUE(m24->IsMatrix());
-  EXPECT_TRUE(m24->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m24->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m24->AsMatrix()->rows(), 2u);
   EXPECT_EQ(m24->AsMatrix()->columns(), 4u);
 
   auto* m32 = p->ConvertType(32);
   EXPECT_TRUE(m32->IsMatrix());
-  EXPECT_TRUE(m32->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m32->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m32->AsMatrix()->rows(), 3u);
   EXPECT_EQ(m32->AsMatrix()->columns(), 2u);
 
   auto* m33 = p->ConvertType(33);
   EXPECT_TRUE(m33->IsMatrix());
-  EXPECT_TRUE(m33->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m33->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m33->AsMatrix()->rows(), 3u);
   EXPECT_EQ(m33->AsMatrix()->columns(), 3u);
 
   auto* m34 = p->ConvertType(34);
   EXPECT_TRUE(m34->IsMatrix());
-  EXPECT_TRUE(m34->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m34->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m34->AsMatrix()->rows(), 3u);
   EXPECT_EQ(m34->AsMatrix()->columns(), 4u);
 
   auto* m42 = p->ConvertType(42);
   EXPECT_TRUE(m42->IsMatrix());
-  EXPECT_TRUE(m42->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m42->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m42->AsMatrix()->rows(), 4u);
   EXPECT_EQ(m42->AsMatrix()->columns(), 2u);
 
   auto* m43 = p->ConvertType(43);
   EXPECT_TRUE(m43->IsMatrix());
-  EXPECT_TRUE(m43->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m43->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m43->AsMatrix()->rows(), 4u);
   EXPECT_EQ(m43->AsMatrix()->columns(), 3u);
 
   auto* m44 = p->ConvertType(44);
   EXPECT_TRUE(m44->IsMatrix());
-  EXPECT_TRUE(m44->AsMatrix()->type()->IsF32());
+  EXPECT_TRUE(m44->AsMatrix()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(m44->AsMatrix()->rows(), 4u);
   EXPECT_EQ(m44->AsMatrix()->columns(), 4u);
 
@@ -657,7 +658,7 @@ TEST_F(SpvParserTest, ConvertType_PointerInput) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kInput);
   EXPECT_TRUE(p->error().empty());
 }
@@ -673,7 +674,7 @@ TEST_F(SpvParserTest, ConvertType_PointerOutput) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kOutput);
   EXPECT_TRUE(p->error().empty());
 }
@@ -689,7 +690,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniform) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniform);
   EXPECT_TRUE(p->error().empty());
 }
@@ -705,7 +706,7 @@ TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kWorkgroup);
   EXPECT_TRUE(p->error().empty());
 }
@@ -721,7 +722,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniformConstant);
   EXPECT_TRUE(p->error().empty());
 }
@@ -737,7 +738,7 @@ TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kStorageBuffer);
   EXPECT_TRUE(p->error().empty());
 }
@@ -753,7 +754,7 @@ TEST_F(SpvParserTest, ConvertType_PointerImage) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kImage);
   EXPECT_TRUE(p->error().empty());
 }
@@ -769,7 +770,7 @@ TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kPrivate);
   EXPECT_TRUE(p->error().empty());
 }
@@ -785,7 +786,7 @@ TEST_F(SpvParserTest, ConvertType_PointerFunction) {
   EXPECT_TRUE(type->IsPointer());
   auto* ptr_ty = type->AsPointer();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kFunction);
   EXPECT_TRUE(p->error().empty());
 }
@@ -811,7 +812,7 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
   auto* ptr_ptr_ty = ptr_ty->type()->AsPointer();
   EXPECT_NE(ptr_ptr_ty, nullptr);
   EXPECT_EQ(ptr_ptr_ty->storage_class(), ast::StorageClass::kOutput);
-  EXPECT_TRUE(ptr_ptr_ty->type()->IsF32());
+  EXPECT_TRUE(ptr_ptr_ty->type()->Is<ast::type::F32Type>());
 
   EXPECT_TRUE(p->error().empty());
 }

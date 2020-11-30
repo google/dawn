@@ -53,6 +53,7 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
@@ -3823,7 +3824,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   assert(num_axes <= 3);
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
-  if (raw_coords.type->IsF32()) {
+  if (raw_coords.type->Is<ast::type::F32Type>()) {
     num_coords_supplied = 1;
   } else if (raw_coords.type->IsVector()) {
     num_coords_supplied = raw_coords.type->AsVector()->size();

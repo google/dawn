@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -31,7 +32,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   ASSERT_NE(var.value, nullptr);
   EXPECT_EQ(var->name(), "my_var");
   EXPECT_NE(var->type(), nullptr);
-  EXPECT_TRUE(var->type()->IsF32());
+  EXPECT_TRUE(var->type()->Is<ast::type::F32Type>());
 
   EXPECT_EQ(var->source().range.begin.line, 1u);
   EXPECT_EQ(var->source().range.begin.column, 5u);
@@ -69,7 +70,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(v.value, nullptr);
   EXPECT_EQ(v->name(), "my_var");
-  EXPECT_TRUE(v->type()->IsF32());
+  EXPECT_TRUE(v->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(v->storage_class(), ast::StorageClass::kPrivate);
 
   EXPECT_EQ(v->source().range.begin.line, 1u);

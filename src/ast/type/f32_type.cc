@@ -24,10 +24,6 @@ F32Type::F32Type(F32Type&&) = default;
 
 F32Type::~F32Type() = default;
 
-bool F32Type::IsF32() const {
-  return true;
-}
-
 std::string F32Type::type_name() const {
   return "__f32";
 }

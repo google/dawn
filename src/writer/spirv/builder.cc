@@ -742,7 +742,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
     if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
-      if (type->IsF32()) {
+      if (type->Is<ast::type::F32Type>()) {
         ast::FloatLiteral l(type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->IsU32()) {
@@ -1393,18 +1393,18 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
   auto* from_type = from_expr->result_type()->UnwrapPtrIfNeeded();
 
   spv::Op op = spv::Op::OpNop;
-  if ((from_type->IsI32() && to_type->IsF32()) ||
+  if ((from_type->IsI32() && to_type->Is<ast::type::F32Type>()) ||
       (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
     op = spv::Op::OpConvertSToF;
-  } else if ((from_type->IsU32() && to_type->IsF32()) ||
+  } else if ((from_type->IsU32() && to_type->Is<ast::type::F32Type>()) ||
              (from_type->is_unsigned_integer_vector() &&
               to_type->is_float_vector())) {
     op = spv::Op::OpConvertUToF;
-  } else if ((from_type->IsF32() && to_type->IsI32()) ||
+  } else if ((from_type->Is<ast::type::F32Type>() && to_type->IsI32()) ||
              (from_type->is_float_vector() &&
               to_type->is_signed_integer_vector())) {
     op = spv::Op::OpConvertFToS;
-  } else if ((from_type->IsF32() && to_type->IsU32()) ||
+  } else if ((from_type->Is<ast::type::F32Type>() && to_type->IsU32()) ||
              (from_type->is_float_vector() &&
               to_type->is_unsigned_integer_vector())) {
     op = spv::Op::OpConvertFToU;
@@ -1412,7 +1412,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
               to_type->Is<ast::type::BoolType>()) ||
              (from_type->IsU32() && to_type->IsU32()) ||
              (from_type->IsI32() && to_type->IsI32()) ||
-             (from_type->IsF32() && to_type->IsF32()) ||
+             (from_type->Is<ast::type::F32Type>() &&
+              to_type->Is<ast::type::F32Type>()) ||
              (from_type->IsVector() && (from_type == to_type))) {
     return val_id;
   } else if ((from_type->IsI32() && to_type->IsU32()) ||
@@ -2418,7 +2419,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     }
   } else if (type->Is<ast::type::BoolType>()) {
     push_type(spv::Op::OpTypeBool, {result});
-  } else if (type->IsF32()) {
+  } else if (type->Is<ast::type::F32Type>()) {
     push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
   } else if (type->IsI32()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
@@ -2685,7 +2686,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
       push_annot(spv::Op::OpMemberDecorate,
                  {Operand::Int(struct_id), Operand::Int(idx),
                   Operand::Int(SpvDecorationColMajor)});
-      if (!matrix_type->type()->IsF32()) {
+      if (!matrix_type->type()->Is<ast::type::F32Type>()) {
         error_ = "matrix scalar element type must be f32";
         return 0;
       }

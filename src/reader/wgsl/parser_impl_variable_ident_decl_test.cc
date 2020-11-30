@@ -16,6 +16,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/type/access_control_type.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
@@ -33,7 +34,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->IsF32());
+  ASSERT_TRUE(decl->type->Is<ast::type::F32Type>());
 
   ASSERT_EQ(decl->source.range.begin.line, 1u);
   ASSERT_EQ(decl->source.range.begin.column, 1u);

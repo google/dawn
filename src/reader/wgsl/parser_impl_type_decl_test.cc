@@ -101,7 +101,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, float_type);
-  ASSERT_TRUE(t->IsF32());
+  ASSERT_TRUE(t->Is<ast::type::F32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
@@ -242,7 +242,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   ASSERT_TRUE(t->IsPointer());
 
   auto* ptr = t->AsPointer();
-  ASSERT_TRUE(ptr->type()->IsF32());
+  ASSERT_TRUE(ptr->type()->Is<ast::type::F32Type>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 }
 
@@ -261,7 +261,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
 
   auto* vec = ptr->type()->AsVector();
   ASSERT_EQ(vec->size(), 2u);
-  ASSERT_TRUE(vec->type()->IsF32());
+  ASSERT_TRUE(vec->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
@@ -356,7 +356,7 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->type()->Is<ast::type::F32Type>());
   ASSERT_FALSE(a->has_array_stride());
 }
 
@@ -372,7 +372,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->type()->Is<ast::type::F32Type>());
   ASSERT_TRUE(a->has_array_stride());
   EXPECT_EQ(a->array_stride(), 16u);
 }
@@ -388,7 +388,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
 
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->type()->Is<ast::type::F32Type>());
   ASSERT_TRUE(a->has_array_stride());
   EXPECT_EQ(a->array_stride(), 16u);
 }
@@ -404,7 +404,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
 
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->type()->Is<ast::type::F32Type>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -425,7 +425,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
 
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->IsF32());
+  ASSERT_TRUE(a->type()->Is<ast::type::F32Type>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -766,7 +766,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
   EXPECT_EQ(t.value, type);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
@@ -784,7 +784,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   EXPECT_EQ(t.value, type);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsF32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::F32Type>());
 }
 
 }  // namespace

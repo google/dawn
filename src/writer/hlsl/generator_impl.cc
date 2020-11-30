@@ -265,7 +265,7 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& pre,
 bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 std::ostream& out,
                                 ast::BitcastExpression* expr) {
-  if (!expr->type()->IsF32() && !expr->type()->IsI32() &&
+  if (!expr->type()->Is<ast::type::F32Type>() && !expr->type()->IsI32() &&
       !expr->type()->IsU32()) {
     error_ = "Unable to do bitcast to type " + expr->type()->type_name();
     return false;
@@ -1545,7 +1545,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
   if (type->Is<ast::type::BoolType>()) {
     out << "false";
-  } else if (type->IsF32()) {
+  } else if (type->Is<ast::type::F32Type>()) {
     out << "0.0f";
   } else if (type->IsI32()) {
     out << "0";
@@ -2060,7 +2060,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
   } else if (type->Is<ast::type::BoolType>()) {
     out << "bool";
-  } else if (type->IsF32()) {
+  } else if (type->Is<ast::type::F32Type>()) {
     out << "float";
   } else if (type->IsI32()) {
     out << "int";
@@ -2123,7 +2123,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->IsVector()) {
     auto* vec = type->AsVector();
     auto size = vec->size();
-    if (vec->type()->IsF32() && size >= 1 && size <= 4) {
+    if (vec->type()->Is<ast::type::F32Type>() && size >= 1 && size <= 4) {
       out << "float" << size;
     } else if (vec->type()->IsI32() && size >= 1 && size <= 4) {
       out << "int" << size;

@@ -54,6 +54,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
@@ -433,7 +434,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     out_ << ">";
   } else if (type->Is<ast::type::BoolType>()) {
     out_ << "bool";
-  } else if (type->IsF32()) {
+  } else if (type->Is<ast::type::F32Type>()) {
     out_ << "f32";
   } else if (type->IsI32()) {
     out_ << "i32";

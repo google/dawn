@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsF32() const {
-  return false;
-}
-
 bool Type::IsI32() const {
   return false;
 }
@@ -119,7 +115,7 @@ bool Type::is_scalar() {
 }
 
 bool Type::is_float_scalar() {
-  return IsF32();
+  return Is<F32Type>();
 }
 
 bool Type::is_float_matrix() {
@@ -156,11 +152,6 @@ bool Type::is_signed_scalar_or_vector() {
 
 bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
-}
-
-const F32Type* Type::AsF32() const {
-  assert(IsF32());
-  return static_cast<const F32Type*>(this);
 }
 
 const I32Type* Type::AsI32() const {
@@ -206,11 +197,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-F32Type* Type::AsF32() {
-  assert(IsF32());
-  return static_cast<F32Type*>(this);
 }
 
 I32Type* Type::AsI32() {

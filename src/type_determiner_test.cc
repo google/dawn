@@ -136,7 +136,7 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   ASSERT_NE(rhs->result_type(), nullptr);
 
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Case) {
@@ -159,7 +159,7 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Block) {
@@ -178,7 +178,7 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Else) {
@@ -203,7 +203,7 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_If) {
@@ -247,9 +247,9 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   ASSERT_NE(rhs->result_type(), nullptr);
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
   EXPECT_TRUE(else_lhs->result_type()->IsI32());
-  EXPECT_TRUE(else_rhs->result_type()->IsF32());
+  EXPECT_TRUE(else_rhs->result_type()->Is<ast::type::F32Type>());
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Loop) {
@@ -281,9 +281,9 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   ASSERT_NE(continuing_lhs->result_type(), nullptr);
   ASSERT_NE(continuing_rhs->result_type(), nullptr);
   EXPECT_TRUE(body_lhs->result_type()->IsI32());
-  EXPECT_TRUE(body_rhs->result_type()->IsF32());
+  EXPECT_TRUE(body_rhs->result_type()->Is<ast::type::F32Type>());
   EXPECT_TRUE(continuing_lhs->result_type()->IsI32());
-  EXPECT_TRUE(continuing_rhs->result_type()->IsF32());
+  EXPECT_TRUE(continuing_rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Return) {
@@ -334,7 +334,7 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
 
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs->result_type()->IsI32());
-  EXPECT_TRUE(rhs->result_type()->IsF32());
+  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Call) {
@@ -355,7 +355,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::CallStatement call(expr);
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->IsF32());
+  EXPECT_TRUE(expr->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
@@ -441,7 +441,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   ASSERT_TRUE(acc.result_type()->IsPointer());
 
   auto* ptr = acc.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
@@ -466,7 +466,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   ASSERT_TRUE(acc.result_type()->IsPointer());
 
   auto* ptr = acc.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
@@ -488,7 +488,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  EXPECT_TRUE(acc.result_type()->IsF32()) << acc.result_type()->type_name();
+  EXPECT_TRUE(acc.result_type()->Is<ast::type::F32Type>())
+      << acc.result_type()->type_name();
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
@@ -540,7 +541,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   ASSERT_TRUE(acc.result_type()->IsPointer());
 
   auto* ptr = acc.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
@@ -563,7 +564,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   ASSERT_TRUE(acc.result_type()->IsPointer());
 
   auto* ptr = acc.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Bitcast) {
@@ -576,7 +577,7 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
 
   EXPECT_TRUE(td()->DetermineResultType(&bitcast));
   ASSERT_NE(bitcast.result_type(), nullptr);
-  EXPECT_TRUE(bitcast.result_type()->IsF32());
+  EXPECT_TRUE(bitcast.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call) {
@@ -595,7 +596,7 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
                            call_params);
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(call.result_type(), nullptr);
-  EXPECT_TRUE(call.result_type()->IsF32());
+  EXPECT_TRUE(call.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
@@ -619,7 +620,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
                            call_params);
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(param->result_type(), nullptr);
-  EXPECT_TRUE(param->result_type()->IsF32());
+  EXPECT_TRUE(param->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
@@ -637,7 +638,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(call.result_type(), nullptr);
-  EXPECT_TRUE(call.result_type()->IsF32());
+  EXPECT_TRUE(call.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
@@ -652,7 +653,7 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
 
   EXPECT_TRUE(td()->DetermineResultType(&cast));
   ASSERT_NE(cast.result_type(), nullptr);
-  EXPECT_TRUE(cast.result_type()->IsF32());
+  EXPECT_TRUE(cast.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
@@ -661,7 +662,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(&s));
   ASSERT_NE(s.result_type(), nullptr);
-  EXPECT_TRUE(s.result_type()->IsF32());
+  EXPECT_TRUE(s.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
@@ -681,7 +682,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
   EXPECT_TRUE(td()->DetermineResultType(&tc));
   ASSERT_NE(tc.result_type(), nullptr);
   ASSERT_TRUE(tc.result_type()->IsVector());
-  EXPECT_TRUE(tc.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(tc.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(tc.result_type()->AsVector()->size(), 3u);
 }
 
@@ -697,7 +698,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
   EXPECT_TRUE(ident.result_type()->IsPointer());
-  EXPECT_TRUE(ident.result_type()->AsPointer()->type()->IsF32());
+  EXPECT_TRUE(
+      ident.result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
@@ -712,7 +714,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
   ast::IdentifierExpression ident("my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
-  EXPECT_TRUE(ident.result_type()->IsF32());
+  EXPECT_TRUE(ident.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
@@ -733,7 +735,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->IsF32());
+  EXPECT_TRUE(my_var->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
@@ -754,7 +756,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
 
   ASSERT_NE(my_var->result_type(), nullptr);
   EXPECT_TRUE(my_var->result_type()->IsPointer());
-  EXPECT_TRUE(my_var->result_type()->AsPointer()->type()->IsF32());
+  EXPECT_TRUE(
+      my_var->result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
@@ -776,7 +779,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
 
   ASSERT_NE(my_var->result_type(), nullptr);
   EXPECT_TRUE(my_var->result_type()->IsPointer());
-  EXPECT_TRUE(my_var->result_type()->AsPointer()->type()->IsF32());
+  EXPECT_TRUE(
+      my_var->result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
@@ -793,7 +797,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::IdentifierExpression ident("my_func");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
-  EXPECT_TRUE(ident.result_type()->IsF32());
+  EXPECT_TRUE(ident.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
@@ -966,7 +970,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   ASSERT_TRUE(mem.result_type()->IsPointer());
 
   auto* ptr = mem.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
@@ -1000,7 +1004,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   ASSERT_TRUE(mem.result_type()->IsPointer());
 
   auto* ptr = mem.result_type()->AsPointer();
-  EXPECT_TRUE(ptr->type()->IsF32());
+  EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
@@ -1020,7 +1024,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
   ASSERT_NE(mem.result_type(), nullptr);
   ASSERT_TRUE(mem.result_type()->IsVector());
-  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(mem.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
@@ -1043,7 +1047,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ASSERT_TRUE(mem.result_type()->IsPointer());
 
   auto* ptr = mem.result_type()->AsPointer();
-  ASSERT_TRUE(ptr->type()->IsF32());
+  ASSERT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
@@ -1115,7 +1119,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
 
   ASSERT_NE(mem.result_type(), nullptr);
   ASSERT_TRUE(mem.result_type()->IsVector());
-  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(mem.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
@@ -1310,7 +1314,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
@@ -1335,7 +1339,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
@@ -1357,7 +1361,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
@@ -1384,7 +1388,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
   auto* mat = expr.result_type()->AsMatrix();
-  EXPECT_TRUE(mat->type()->IsF32());
+  EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
 }
@@ -1412,7 +1416,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
   auto* mat = expr.result_type()->AsMatrix();
-  EXPECT_TRUE(mat->type()->IsF32());
+  EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
 }
@@ -1439,7 +1443,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
@@ -1465,7 +1469,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 2u);
 }
 
@@ -1493,7 +1497,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
   auto* mat = expr.result_type()->AsMatrix();
-  EXPECT_TRUE(mat->type()->IsF32());
+  EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 4u);
   EXPECT_EQ(mat->columns(), 4u);
 }
@@ -1518,7 +1522,7 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   EXPECT_TRUE(td()->DetermineResultType(&expr));
 
   ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsF32());
+  ASSERT_TRUE(expr.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_P(IntrinsicDerivativeTest, Vector) {
@@ -1542,7 +1546,7 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
 
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
 }
 
@@ -1807,7 +1811,8 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   if (type == TextureType::kF32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+    EXPECT_TRUE(
+        expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   } else if (type == TextureType::kI32) {
     EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
   } else {
@@ -1877,7 +1882,8 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   if (type == TextureType::kF32) {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+    EXPECT_TRUE(
+        expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   } else if (type == TextureType::kI32) {
     EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
   } else {
@@ -1913,7 +1919,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(&expr));
   ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select) {
@@ -1942,7 +1948,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   ASSERT_NE(expr.result_type(), nullptr);
   EXPECT_TRUE(expr.result_type()->IsVector());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
@@ -2013,7 +2019,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
   auto* mat = expr.result_type()->AsMatrix();
-  EXPECT_TRUE(mat->type()->IsF32());
+  EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
 }
@@ -2078,7 +2084,7 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   EXPECT_TRUE(td()->DetermineResultType(&der));
   ASSERT_NE(der.result_type(), nullptr);
   ASSERT_TRUE(der.result_type()->IsVector());
-  EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
+  EXPECT_TRUE(der.result_type()->AsVector()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(der.result_type()->AsVector()->size(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -2880,7 +2886,7 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsF32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
@@ -3928,7 +3934,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsF32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32Type>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
@@ -4193,7 +4199,7 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsF32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32Type>());
 }
 
 using ImportData_Matrix_OneParam_Test =
