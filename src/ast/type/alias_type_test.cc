@@ -25,6 +25,7 @@
 #include "src/ast/test_helper.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
@@ -52,7 +53,7 @@ TEST_F(AliasTypeTest, Is) {
   EXPECT_FALSE(ty->Is<AccessControlType>());
   EXPECT_TRUE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->Is<BoolType>());
   EXPECT_FALSE(ty->IsF32());
   EXPECT_FALSE(ty->IsI32());
   EXPECT_FALSE(ty->IsMatrix());

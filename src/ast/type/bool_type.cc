@@ -24,10 +24,6 @@ BoolType::BoolType(BoolType&&) = default;
 
 BoolType::~BoolType() = default;
 
-bool BoolType::IsBool() const {
-  return true;
-}
-
 std::string BoolType::type_name() const {
   return "__bool";
 }

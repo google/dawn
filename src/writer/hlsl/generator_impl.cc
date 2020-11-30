@@ -41,6 +41,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -1542,7 +1543,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
-  if (type->IsBool()) {
+  if (type->Is<ast::type::BoolType>()) {
     out << "false";
   } else if (type->IsF32()) {
     out << "0.0f";
@@ -2057,7 +2058,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
     }
-  } else if (type->IsBool()) {
+  } else if (type->Is<ast::type::BoolType>()) {
     out << "bool";
   } else if (type->IsF32()) {
     out << "float";

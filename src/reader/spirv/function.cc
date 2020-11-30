@@ -3597,7 +3597,7 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
   //   a VariablePointers* capability, which is not allowed in by WebGPU.
   auto* op_ty = operand1.type;
   if (op_ty->IsVector() || op_ty->is_float_scalar() ||
-      op_ty->is_integer_scalar() || op_ty->IsBool()) {
+      op_ty->is_integer_scalar() || op_ty->Is<ast::type::BoolType>()) {
     ast::ExpressionList params;
     params.push_back(operand1.expr);
     params.push_back(operand2.expr);

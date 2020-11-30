@@ -1190,7 +1190,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsBool());
+  EXPECT_TRUE(expr.result_type()->Is<ast::type::BoolType>());
 }
 
 TEST_P(Expr_Binary_LogicalTest, Vector) {
@@ -1211,7 +1211,8 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
+  EXPECT_TRUE(
+      expr.result_type()->AsVector()->type()->Is<ast::type::BoolType>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -1236,7 +1237,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsBool());
+  EXPECT_TRUE(expr.result_type()->Is<ast::type::BoolType>());
 }
 
 TEST_P(Expr_Binary_CompareTest, Vector) {
@@ -1257,7 +1258,8 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
+  EXPECT_TRUE(
+      expr.result_type()->AsVector()->type()->Is<ast::type::BoolType>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -1616,7 +1618,7 @@ TEST_P(Intrinsic, Test) {
 
   EXPECT_TRUE(td()->DetermineResultType(&expr));
   ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsBool());
+  EXPECT_TRUE(expr.result_type()->Is<ast::type::BoolType>());
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Intrinsic,
@@ -1644,7 +1646,8 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
 
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
-  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
+  EXPECT_TRUE(
+      expr.result_type()->AsVector()->type()->Is<ast::type::BoolType>());
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
@@ -1666,7 +1669,7 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(&expr));
   ASSERT_NE(expr.result_type(), nullptr);
-  EXPECT_TRUE(expr.result_type()->IsBool());
+  EXPECT_TRUE(expr.result_type()->Is<ast::type::BoolType>());
 }
 
 TEST_P(Intrinsic_FloatMethod, MissingParam) {

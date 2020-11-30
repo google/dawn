@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/struct.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
@@ -96,7 +97,7 @@ TEST_F(SpvParserTest, ConvertType_Bool) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(100);
-  EXPECT_TRUE(type->IsBool());
+  EXPECT_TRUE(type->Is<ast::type::BoolType>());
   EXPECT_TRUE(p->error().empty());
 }
 

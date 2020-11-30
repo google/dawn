@@ -52,6 +52,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -750,7 +751,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       } else if (type->IsI32()) {
         ast::SintLiteral l(type, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type->IsBool()) {
+      } else if (type->Is<ast::type::BoolType>()) {
         ast::BoolLiteral l(type, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
@@ -1407,7 +1408,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
              (from_type->is_float_vector() &&
               to_type->is_unsigned_integer_vector())) {
     op = spv::Op::OpConvertFToU;
-  } else if ((from_type->IsBool() && to_type->IsBool()) ||
+  } else if ((from_type->Is<ast::type::BoolType>() &&
+              to_type->Is<ast::type::BoolType>()) ||
              (from_type->IsU32() && to_type->IsU32()) ||
              (from_type->IsI32() && to_type->IsI32()) ||
              (from_type->IsF32() && to_type->IsF32()) ||
@@ -2414,7 +2416,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateArrayType(type->As<ast::type::ArrayType>(), result)) {
       return 0;
     }
-  } else if (type->IsBool()) {
+  } else if (type->Is<ast::type::BoolType>()) {
     push_type(spv::Op::OpTypeBool, {result});
   } else if (type->IsF32()) {
     push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});

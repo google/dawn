@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsBool() const {
-  return false;
-}
-
 bool Type::IsF32() const {
   return false;
 }
@@ -119,7 +115,7 @@ uint64_t Type::BaseAlignment(MemoryLayout) const {
 }
 
 bool Type::is_scalar() {
-  return is_float_scalar() || is_integer_scalar() || IsBool();
+  return is_float_scalar() || is_integer_scalar() || Is<BoolType>();
 }
 
 bool Type::is_float_scalar() {
@@ -160,11 +156,6 @@ bool Type::is_signed_scalar_or_vector() {
 
 bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
-}
-
-const BoolType* Type::AsBool() const {
-  assert(IsBool());
-  return static_cast<const BoolType*>(this);
 }
 
 const F32Type* Type::AsF32() const {
@@ -215,11 +206,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-BoolType* Type::AsBool() {
-  assert(IsBool());
-  return static_cast<BoolType*>(this);
 }
 
 F32Type* Type::AsF32() {

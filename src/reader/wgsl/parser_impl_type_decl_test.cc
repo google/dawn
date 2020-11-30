@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, bool_type);
-  ASSERT_TRUE(t->IsBool());
+  ASSERT_TRUE(t->Is<ast::type::BoolType>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {

@@ -31,7 +31,7 @@ TEST_F(BoolTypeTest, Is) {
   EXPECT_FALSE(ty->Is<AccessControlType>());
   EXPECT_FALSE(ty->Is<AliasType>());
   EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_TRUE(ty->IsBool());
+  EXPECT_TRUE(ty->Is<BoolType>());
   EXPECT_FALSE(ty->IsF32());
   EXPECT_FALSE(ty->IsI32());
   EXPECT_FALSE(ty->IsMatrix());

@@ -194,7 +194,7 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     uint32_t type_size = calculate_alignment_size(ary->type());
     return ary->size() * type_size;
   }
-  if (type->IsBool()) {
+  if (type->Is<ast::type::BoolType>()) {
     return 1;
   }
   if (type->IsPointer()) {
@@ -928,7 +928,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
 }
 
 bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
-  if (type->IsBool()) {
+  if (type->Is<ast::type::BoolType>()) {
     out_ << "false";
   } else if (type->IsF32()) {
     out_ << "0.0f";
@@ -1812,7 +1812,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     for (uint32_t size : sizes) {
       out_ << "[" << size << "]";
     }
-  } else if (type->IsBool()) {
+  } else if (type->Is<ast::type::BoolType>()) {
     out_ << "bool";
   } else if (type->IsF32()) {
     out_ << "float";

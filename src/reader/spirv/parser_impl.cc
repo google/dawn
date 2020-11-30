@@ -1277,7 +1277,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
             create<ast::ScalarConstructorExpression>(
                 create<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()))};
   }
-  if (ast_type->IsBool()) {
+  if (ast_type->Is<ast::type::BoolType>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
@@ -1334,7 +1334,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
   auto* original_type = type;
   type = type->UnwrapIfNeeded();
 
-  if (type->IsBool()) {
+  if (type->Is<ast::type::BoolType>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::BoolLiteral>(type, false));
   }

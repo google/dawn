@@ -32,9 +32,6 @@ class BoolType : public Castable<BoolType, Type> {
   BoolType(BoolType&&);
   ~BoolType() override;
 
-  /// @returns true if the type is a bool type
-  bool IsBool() const override;
-
   /// @returns the name for this type
   std::string type_name() const override;
 };
