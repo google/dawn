@@ -31,9 +31,6 @@ class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
   SetDecoration(uint32_t value, const Source& source);
   ~SetDecoration() override;
 
-  /// @returns true if this is a set decoration
-  bool IsSet() const override;
-
   /// @returns the set value
   uint32_t value() const { return value_; }
 

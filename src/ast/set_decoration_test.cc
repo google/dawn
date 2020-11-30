@@ -35,7 +35,7 @@ TEST_F(SetDecorationTest, Is) {
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(d->Is<ConstantIdDecoration>());
   EXPECT_FALSE(d->Is<LocationDecoration>());
-  EXPECT_TRUE(sd.IsSet());
+  EXPECT_TRUE(d->Is<SetDecoration>());
 }
 
 TEST_F(SetDecorationTest, ToStr) {

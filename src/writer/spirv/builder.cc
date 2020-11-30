@@ -792,11 +792,11 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
                     Operand::Int(binding->value())});
-      } else if (deco->IsSet()) {
+      } else if (auto* set = deco->As<ast::SetDecoration>()) {
         push_annot(
             spv::Op::OpDecorate,
             {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
-             Operand::Int(deco->AsSet()->value())});
+             Operand::Int(set->value())});
       } else if (deco->Is<ast::ConstantIdDecoration>()) {
         // Spec constants are handled elsewhere
       } else {

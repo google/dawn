@@ -16,8 +16,6 @@
 
 #include <assert.h>
 
-#include "src/ast/set_decoration.h"
-
 namespace tint {
 namespace ast {
 
@@ -29,15 +27,6 @@ VariableDecoration::~VariableDecoration() = default;
 
 DecorationKind VariableDecoration::GetKind() const {
   return Kind;
-}
-
-bool VariableDecoration::IsSet() const {
-  return false;
-}
-
-SetDecoration* VariableDecoration::AsSet() {
-  assert(IsSet());
-  return static_cast<SetDecoration*>(this);
 }
 
 }  // namespace ast

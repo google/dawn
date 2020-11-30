@@ -240,9 +240,9 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
   auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var_deco, nullptr);
-  ASSERT_TRUE(var_deco->IsSet());
+  ASSERT_TRUE(var_deco->Is<ast::SetDecoration>());
 
-  auto* set = var_deco->AsSet();
+  auto* set = var_deco->As<ast::SetDecoration>();
   EXPECT_EQ(set->value(), 4u);
 }
 

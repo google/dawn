@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);
   ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->IsSet());
+  ASSERT_TRUE(decorations[1]->Is<ast::SetDecoration>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);
   ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->IsSet());
+  ASSERT_TRUE(decorations[1]->Is<ast::SetDecoration>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {

@@ -37,7 +37,7 @@ TEST_F(LocationDecorationTest, Is) {
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(d->Is<ConstantIdDecoration>());
   EXPECT_TRUE(d->Is<LocationDecoration>());
-  EXPECT_FALSE(ld.IsSet());
+  EXPECT_FALSE(d->Is<SetDecoration>());
 }
 
 TEST_F(LocationDecorationTest, ToStr) {

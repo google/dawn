@@ -25,8 +25,6 @@
 namespace tint {
 namespace ast {
 
-class SetDecoration;
-
 /// A decoration attached to a variable
 class VariableDecoration : public Castable<VariableDecoration, Decoration> {
  public:
@@ -37,12 +35,6 @@ class VariableDecoration : public Castable<VariableDecoration, Decoration> {
 
   /// @return the decoration kind
   DecorationKind GetKind() const override;
-
-  /// @returns true if this is a set decoration
-  virtual bool IsSet() const;
-
-  /// @returns the decoration as a set decoration
-  SetDecoration* AsSet();
 
  protected:
   /// Constructor
