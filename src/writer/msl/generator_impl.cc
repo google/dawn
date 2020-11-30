@@ -242,8 +242,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     count = adjust_for_alignment(count, largest_alignment);
     return count;
   }
-  if (type->IsVector()) {
-    auto* vec = type->AsVector();
+  if (type->Is<ast::type::VectorType>()) {
+    auto* vec = type->As<ast::type::VectorType>();
     uint32_t type_size = calculate_alignment_size(vec->type());
     if (vec->size() == 2) {
       return 2 * type_size;
@@ -519,13 +519,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       // out_ << "(";
 
       // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
-      // if (!param1_type->IsVector()) {
+      // if (!param1_type->Is<ast::type::VectorType>()) {
       //   error_ = "invalid param type in outer_product got: " +
       //            param1_type->type_name();
       //   return false;
       // }
 
-      // for (uint32_t i = 0; i < param1_type->AsVector()->size(); ++i) {
+      // for (uint32_t i = 0; i <
+      // param1_type->As<ast::type::VectorType>()->size(); ++i) {
       //   if (i > 0) {
       //     out_ << ", ";
       //   }
@@ -937,8 +938,8 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     out_ << "0";
   } else if (type->Is<ast::type::U32Type>()) {
     out_ << "0u";
-  } else if (type->IsVector()) {
-    return EmitZeroValue(type->AsVector()->type());
+  } else if (type->Is<ast::type::VectorType>()) {
+    return EmitZeroValue(type->As<ast::type::VectorType>()->type());
   } else if (type->Is<ast::type::MatrixType>()) {
     return EmitZeroValue(type->As<ast::type::MatrixType>()->type());
   } else if (type->Is<ast::type::ArrayType>()) {
@@ -1911,8 +1912,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
 
   } else if (type->Is<ast::type::U32Type>()) {
     out_ << "uint";
-  } else if (type->IsVector()) {
-    auto* vec = type->AsVector();
+  } else if (type->Is<ast::type::VectorType>()) {
+    auto* vec = type->As<ast::type::VectorType>();
     if (!EmitType(vec->type(), "")) {
       return false;
     }

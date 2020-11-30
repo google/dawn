@@ -881,7 +881,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return true;
   }
 
-  if (!data_type->IsVector()) {
+  if (!data_type->Is<ast::type::VectorType>()) {
     error_ = "Member accessor without a struct or vector. Something is wrong";
     return false;
   }
@@ -1191,7 +1191,8 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       return false;
     }
 
-    if (result_type->IsVector() && !e->AsConstructor()->IsScalarConstructor()) {
+    if (result_type->Is<ast::type::VectorType>() &&
+        !e->AsConstructor()->IsScalarConstructor()) {
       return false;
     }
 
@@ -1202,8 +1203,8 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
 
     auto* sc = e->AsConstructor()->AsScalarConstructor();
     ast::type::Type* subtype = result_type->UnwrapAll();
-    if (subtype->IsVector()) {
-      subtype = subtype->AsVector()->type()->UnwrapAll();
+    if (subtype->Is<ast::type::VectorType>()) {
+      subtype = subtype->As<ast::type::VectorType>()->type()->UnwrapAll();
     } else if (subtype->Is<ast::type::MatrixType>()) {
       subtype = subtype->As<ast::type::MatrixType>()->type()->UnwrapAll();
     } else if (subtype->Is<ast::type::ArrayType>()) {
@@ -1244,12 +1245,14 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   bool can_cast_or_copy = result_type->is_scalar();
 
-  if (result_type->IsVector() && result_type->AsVector()->type()->is_scalar()) {
+  if (result_type->Is<ast::type::VectorType>() &&
+      result_type->As<ast::type::VectorType>()->type()->is_scalar()) {
     auto* value_type = values[0]->result_type()->UnwrapAll();
     can_cast_or_copy =
-        (value_type->IsVector() &&
-         value_type->AsVector()->type()->is_scalar() &&
-         result_type->AsVector()->size() == value_type->AsVector()->size());
+        (value_type->Is<ast::type::VectorType>() &&
+         value_type->As<ast::type::VectorType>()->type()->is_scalar() &&
+         result_type->As<ast::type::VectorType>()->size() ==
+             value_type->As<ast::type::VectorType>()->size());
   }
   if (can_cast_or_copy) {
     return GenerateCastOrCopyOrPassthrough(result_type, values[0]);
@@ -1263,8 +1266,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   bool result_is_constant_composite = constructor_is_const;
   bool result_is_spec_composite = false;
 
-  if (result_type->IsVector()) {
-    result_type = result_type->AsVector()->type();
+  if (result_type->Is<ast::type::VectorType>()) {
+    result_type = result_type->As<ast::type::VectorType>()->type();
   }
 
   OperandList ops;
@@ -1312,8 +1315,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     //
     // For cases 1 and 2, if the type is different we also may need to insert
     // a type cast.
-    if (value_type->IsVector()) {
-      auto* vec = value_type->AsVector();
+    if (value_type->Is<ast::type::VectorType>()) {
+      auto* vec = value_type->As<ast::type::VectorType>();
       auto* vec_type = vec->type();
 
       auto value_type_id = GenerateTypeIfNeeded(vec_type);
@@ -1426,7 +1429,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
               to_type->Is<ast::type::I32Type>()) ||
              (from_type->Is<ast::type::F32Type>() &&
               to_type->Is<ast::type::F32Type>()) ||
-             (from_type->IsVector() && (from_type == to_type))) {
+             (from_type->Is<ast::type::VectorType>() &&
+              (from_type == to_type))) {
     return val_id;
   } else if ((from_type->Is<ast::type::I32Type>() &&
               to_type->Is<ast::type::U32Type>()) ||
@@ -2454,8 +2458,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     }
   } else if (type->Is<ast::type::U32Type>()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
-  } else if (type->IsVector()) {
-    if (!GenerateVectorType(type->AsVector(), result)) {
+  } else if (type->Is<ast::type::VectorType>()) {
+    if (!GenerateVectorType(type->As<ast::type::VectorType>(), result)) {
       return 0;
     }
   } else if (type->IsVoid()) {

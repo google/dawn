@@ -377,8 +377,10 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
-      ((lhs_type->IsVector() && rhs_type->Is<ast::type::MatrixType>()) ||
-       (lhs_type->Is<ast::type::MatrixType>() && rhs_type->IsVector()) ||
+      ((lhs_type->Is<ast::type::VectorType>() &&
+        rhs_type->Is<ast::type::MatrixType>()) ||
+       (lhs_type->Is<ast::type::MatrixType>() &&
+        rhs_type->Is<ast::type::VectorType>()) ||
        (lhs_type->Is<ast::type::MatrixType>() &&
         rhs_type->Is<ast::type::MatrixType>()))) {
     out << "mul(";
@@ -614,13 +616,14 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       // out << "(";
 
       // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
-      // if (!param1_type->IsVector()) {
+      // if (!param1_type->Is<ast::type::VectorType>()) {
       //   error_ = "invalid param type in outer_product got: " +
       //            param1_type->type_name();
       //   return false;
       // }
 
-      // for (uint32_t i = 0; i < param1_type->AsVector()->size(); ++i) {
+      // for (uint32_t i = 0; i <
+      // param1_type->As<ast::type::VectorType>()->size(); ++i) {
       //   if (i > 0) {
       //     out << ", ";
       //   }
@@ -1556,8 +1559,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
     out << "0";
   } else if (type->Is<ast::type::U32Type>()) {
     out << "0u";
-  } else if (type->IsVector()) {
-    return EmitZeroValue(out, type->AsVector()->type());
+  } else if (type->Is<ast::type::VectorType>()) {
+    return EmitZeroValue(out, type->As<ast::type::VectorType>()->type());
   } else if (type->Is<ast::type::MatrixType>()) {
     auto* mat = type->As<ast::type::MatrixType>();
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
@@ -1697,7 +1700,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         }
         out << str_member->offset();
 
-      } else if (res_type->IsVector()) {
+      } else if (res_type->Is<ast::type::VectorType>()) {
         // This must be a single element swizzle if we've got a vector at this
         // point.
         if (mem->member()->name().size() != 1) {
@@ -1726,7 +1729,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       out << "(";
       if (ary_type->Is<ast::type::ArrayType>()) {
         out << ary_type->As<ast::type::ArrayType>()->array_stride();
-      } else if (ary_type->IsVector()) {
+      } else if (ary_type->Is<ast::type::VectorType>()) {
         // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
         // have to ask the type for the byte size.
@@ -1773,8 +1776,9 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
   bool is_store = rhs != nullptr;
 
   std::string access_method = is_store ? "Store" : "Load";
-  if (result_type->IsVector()) {
-    access_method += std::to_string(result_type->AsVector()->size());
+  if (result_type->Is<ast::type::VectorType>()) {
+    access_method +=
+        std::to_string(result_type->As<ast::type::VectorType>()->size());
   } else if (result_type->Is<ast::type::MatrixType>()) {
     access_method +=
         std::to_string(result_type->As<ast::type::MatrixType>()->rows());
@@ -1891,7 +1895,8 @@ bool GeneratorImpl::is_storage_buffer_access(
   auto* data_type = structure->result_type()->UnwrapAll();
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
-  if (data_type->IsVector() && expr->member()->name().size() > 1) {
+  if (data_type->Is<ast::type::VectorType>() &&
+      expr->member()->name().size() > 1) {
     return false;
   }
 
@@ -2127,8 +2132,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
   } else if (type->Is<ast::type::U32Type>()) {
     out << "uint";
-  } else if (type->IsVector()) {
-    auto* vec = type->AsVector();
+  } else if (type->Is<ast::type::VectorType>()) {
+    auto* vec = type->As<ast::type::VectorType>();
     auto size = vec->size();
     if (vec->type()->Is<ast::type::F32Type>() && size >= 1 && size <= 4) {
       out << "float" << size;

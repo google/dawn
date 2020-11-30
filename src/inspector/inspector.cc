@@ -391,8 +391,8 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       base_type = base_type->As<ast::type::ArrayType>()->type();
     } else if (base_type->Is<ast::type::MatrixType>()) {
       base_type = base_type->As<ast::type::MatrixType>()->type();
-    } else if (base_type->IsVector()) {
-      base_type = base_type->AsVector()->type();
+    } else if (base_type->Is<ast::type::VectorType>()) {
+      base_type = base_type->As<ast::type::VectorType>()->type();
     }
 
     if (base_type->Is<ast::type::F32Type>()) {

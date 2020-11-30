@@ -337,8 +337,8 @@ bool TypeDeterminer::DetermineArrayAccessor(
   ast::type::Type* ret = nullptr;
   if (parent_type->Is<ast::type::ArrayType>()) {
     ret = parent_type->As<ast::type::ArrayType>()->type();
-  } else if (parent_type->IsVector()) {
-    ret = parent_type->AsVector()->type();
+  } else if (parent_type->Is<ast::type::VectorType>()) {
+    ret = parent_type->As<ast::type::VectorType>()->type();
   } else if (parent_type->Is<ast::type::MatrixType>()) {
     auto* m = parent_type->As<ast::type::MatrixType>();
     ret = mod_->create<ast::type::VectorType>(m->type(), m->rows());
@@ -540,9 +540,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     auto* bool_type = mod_->create<ast::type::BoolType>();
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->IsVector()) {
+    if (param_type->Is<ast::type::VectorType>()) {
       expr->func()->set_result_type(mod_->create<ast::type::VectorType>(
-          bool_type, param_type->AsVector()->size()));
+          bool_type, param_type->As<ast::type::VectorType>()->size()));
     } else {
       expr->func()->set_result_type(bool_type);
     }
@@ -703,14 +703,16 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
-    if (!param0_type->IsVector() || !param1_type->IsVector()) {
+    if (!param0_type->Is<ast::type::VectorType>() ||
+        !param1_type->Is<ast::type::VectorType>()) {
       set_error(expr->source(), "invalid parameter type for " + ident->name());
       return false;
     }
 
     expr->func()->set_result_type(mod_->create<ast::type::MatrixType>(
-        mod_->create<ast::type::F32Type>(), param0_type->AsVector()->size(),
-        param1_type->AsVector()->size()));
+        mod_->create<ast::type::F32Type>(),
+        param0_type->As<ast::type::VectorType>()->size(),
+        param1_type->As<ast::type::VectorType>()->size()));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
@@ -786,7 +788,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           return false;
         }
         if (data->vector_size > 0 &&
-            result_types.back()->AsVector()->size() != data->vector_size) {
+            result_types.back()->As<ast::type::VectorType>()->size() !=
+                data->vector_size) {
           set_error(expr->source(), "incorrect vector size for " +
                                         ident->name() + ". " + "Requires " +
                                         std::to_string(data->vector_size) +
@@ -817,9 +820,10 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   // provided.
   if (ident->intrinsic() == ast::Intrinsic::kLength ||
       ident->intrinsic() == ast::Intrinsic::kDistance) {
-    expr->func()->set_result_type(result_types[0]->is_float_scalar()
-                                      ? result_types[0]
-                                      : result_types[0]->AsVector()->type());
+    expr->func()->set_result_type(
+        result_types[0]->is_float_scalar()
+            ? result_types[0]
+            : result_types[0]->As<ast::type::VectorType>()->type());
     return true;
   }
   // The determinant returns the component type of the columns
@@ -1054,8 +1058,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = mod_->create<ast::type::PointerType>(
           ret, res->As<ast::type::PointerType>()->storage_class());
     }
-  } else if (data_type->IsVector()) {
-    auto* vec = data_type->AsVector();
+  } else if (data_type->Is<ast::type::VectorType>()) {
+    auto* vec = data_type->As<ast::type::VectorType>();
 
     auto size = expr->member()->name().size();
     if (size == 1) {
@@ -1103,9 +1107,9 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type = mod_->create<ast::type::BoolType>();
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->IsVector()) {
+    if (param_type->Is<ast::type::VectorType>()) {
       expr->set_result_type(mod_->create<ast::type::VectorType>(
-          bool_type, param_type->AsVector()->size()));
+          bool_type, param_type->As<ast::type::VectorType>()->size()));
     } else {
       expr->set_result_type(bool_type);
     }
@@ -1124,11 +1128,13 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
           lhs_type->As<ast::type::MatrixType>()->rows(),
           rhs_type->As<ast::type::MatrixType>()->columns()));
 
-    } else if (lhs_type->Is<ast::type::MatrixType>() && rhs_type->IsVector()) {
+    } else if (lhs_type->Is<ast::type::MatrixType>() &&
+               rhs_type->Is<ast::type::VectorType>()) {
       auto* mat = lhs_type->As<ast::type::MatrixType>();
       expr->set_result_type(
           mod_->create<ast::type::VectorType>(mat->type(), mat->rows()));
-    } else if (lhs_type->IsVector() && rhs_type->Is<ast::type::MatrixType>()) {
+    } else if (lhs_type->Is<ast::type::VectorType>() &&
+               rhs_type->Is<ast::type::MatrixType>()) {
       auto* mat = rhs_type->As<ast::type::MatrixType>();
       expr->set_result_type(
           mod_->create<ast::type::VectorType>(mat->type(), mat->columns()));
@@ -1138,12 +1144,13 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     } else if (rhs_type->Is<ast::type::MatrixType>()) {
       // scalar * matrix
       expr->set_result_type(rhs_type);
-    } else if (lhs_type->IsVector() && rhs_type->IsVector()) {
+    } else if (lhs_type->Is<ast::type::VectorType>() &&
+               rhs_type->Is<ast::type::VectorType>()) {
       expr->set_result_type(lhs_type);
-    } else if (lhs_type->IsVector()) {
+    } else if (lhs_type->Is<ast::type::VectorType>()) {
       // Vector * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->IsVector()) {
+    } else if (rhs_type->Is<ast::type::VectorType>()) {
       // Scalar * vector
       expr->set_result_type(rhs_type);
     } else {

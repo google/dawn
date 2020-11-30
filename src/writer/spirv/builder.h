@@ -33,6 +33,7 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/context.h"
 #include "src/scope_stack.h"

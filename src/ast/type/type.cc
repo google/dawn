@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsVector() const {
-  return false;
-}
-
 bool Type::IsVoid() const {
   return false;
 }
@@ -95,7 +91,7 @@ bool Type::is_float_matrix() {
 }
 
 bool Type::is_float_vector() {
-  return IsVector() && AsVector()->type()->is_float_scalar();
+  return Is<VectorType>() && As<VectorType>()->type()->is_float_scalar();
 }
 
 bool Type::is_float_scalar_or_vector() {
@@ -107,38 +103,30 @@ bool Type::is_integer_scalar() {
 }
 
 bool Type::is_unsigned_integer_vector() {
-  return IsVector() && AsVector()->type()->Is<U32Type>();
+  return Is<VectorType>() && As<VectorType>()->type()->Is<U32Type>();
 }
 
 bool Type::is_signed_integer_vector() {
-  return IsVector() && AsVector()->type()->Is<I32Type>();
+  return Is<VectorType>() && As<VectorType>()->type()->Is<I32Type>();
 }
 
 bool Type::is_unsigned_scalar_or_vector() {
-  return Is<U32Type>() || (IsVector() && AsVector()->type()->Is<U32Type>());
+  return Is<U32Type>() ||
+         (Is<VectorType>() && As<VectorType>()->type()->Is<U32Type>());
 }
 
 bool Type::is_signed_scalar_or_vector() {
-  return Is<I32Type>() || (IsVector() && AsVector()->type()->Is<I32Type>());
+  return Is<I32Type>() ||
+         (Is<VectorType>() && As<VectorType>()->type()->Is<I32Type>());
 }
 
 bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const VectorType* Type::AsVector() const {
-  assert(IsVector());
-  return static_cast<const VectorType*>(this);
-}
-
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-VectorType* Type::AsVector() {
-  assert(IsVector());
-  return static_cast<VectorType*>(this);
 }
 
 VoidType* Type::AsVoid() {

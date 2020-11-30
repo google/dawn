@@ -34,9 +34,6 @@ class VectorType : public Castable<VectorType, Type> {
   VectorType(VectorType&&);
   ~VectorType() override;
 
-  /// @returns true if the type is a vector type
-  bool IsVector() const override;
-
   /// @returns the type of the vector elements
   Type* type() const { return subtype_; }
   /// @returns the size of the vector

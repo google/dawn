@@ -31,10 +31,6 @@ VectorType::VectorType(VectorType&&) = default;
 
 VectorType::~VectorType() = default;
 
-bool VectorType::IsVector() const {
-  return true;
-}
-
 std::string VectorType::type_name() const {
   return "__vec_" + std::to_string(size_) + subtype_->type_name();
 }

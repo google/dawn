@@ -56,7 +56,7 @@ TEST_F(VectorTypeTest, Is) {
   EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_FALSE(ty->Is<TextureType>());
   EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_TRUE(ty->IsVector());
+  EXPECT_TRUE(ty->Is<VectorType>());
 }
 
 TEST_F(VectorTypeTest, TypeName) {

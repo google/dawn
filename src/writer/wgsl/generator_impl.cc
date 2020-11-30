@@ -547,8 +547,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
   } else if (type->Is<ast::type::U32Type>()) {
     out_ << "u32";
-  } else if (type->IsVector()) {
-    auto* vec = type->AsVector();
+  } else if (type->Is<ast::type::VectorType>()) {
+    auto* vec = type->As<ast::type::VectorType>();
     out_ << "vec" << vec->size() << "<";
     if (!EmitType(vec->type())) {
       return false;

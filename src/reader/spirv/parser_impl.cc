@@ -1351,8 +1351,8 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::FloatLiteral>(type, 0.0f));
   }
-  if (type->IsVector()) {
-    const auto* vec_ty = type->AsVector();
+  if (type->Is<ast::type::VectorType>()) {
+    const auto* vec_ty = type->As<ast::type::VectorType>();
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(vec_ty->type()));
@@ -1450,7 +1450,7 @@ ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
       other->Is<ast::type::I32Type>()) {
     return i32;
   }
-  auto* vec_ty = other->AsVector();
+  auto* vec_ty = other->As<ast::type::VectorType>();
   if (vec_ty) {
     return ast_module_.create<ast::type::VectorType>(i32, vec_ty->size());
   }
@@ -1469,7 +1469,7 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
       other->Is<ast::type::I32Type>()) {
     return u32;
   }
-  auto* vec_ty = other->AsVector();
+  auto* vec_ty = other->As<ast::type::VectorType>();
   if (vec_ty) {
     return ast_module_.create<ast::type::VectorType>(u32, vec_ty->size());
   }

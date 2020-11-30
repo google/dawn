@@ -33,7 +33,7 @@ ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
     return nullptr;
   }
   auto* type_constructor = constructor->AsTypeConstructor();
-  if (!type_constructor->type()->IsVector()) {
+  if (!type_constructor->type()->Is<ast::type::VectorType>()) {
     return nullptr;
   }
   return type_constructor;
@@ -47,8 +47,8 @@ bool PackCoordAndArrayIndex(
     std::function<bool(ast::TypeConstructorExpression*)> callback) {
   uint32_t packed_size;
   ast::type::Type* packed_el_ty;  // Currenly must be f32.
-  if (coords->result_type()->IsVector()) {
-    auto* vec = coords->result_type()->AsVector();
+  if (coords->result_type()->Is<ast::type::VectorType>()) {
+    auto* vec = coords->result_type()->As<ast::type::VectorType>();
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {

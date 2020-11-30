@@ -3206,7 +3206,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
   // Generate an ast::TypeConstructor expression.
   // Assume the literal indices are valid, and there is a valid number of them.
   ast::type::VectorType* result_type =
-      parser_impl_.ConvertType(inst.type_id())->AsVector();
+      parser_impl_.ConvertType(inst.type_id())->As<ast::type::VectorType>();
   ast::ExpressionList values;
   for (uint32_t i = 2; i < inst.NumInOperands(); ++i) {
     const auto index = inst.GetSingleWordInOperand(i);
@@ -3598,7 +3598,7 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
   // - you can't select over pointers or pointer vectors, unless you also have
   //   a VariablePointers* capability, which is not allowed in by WebGPU.
   auto* op_ty = operand1.type;
-  if (op_ty->IsVector() || op_ty->is_float_scalar() ||
+  if (op_ty->Is<ast::type::VectorType>() || op_ty->is_float_scalar() ||
       op_ty->is_integer_scalar() || op_ty->Is<ast::type::BoolType>()) {
     ast::ExpressionList params;
     params.push_back(operand1.expr);
@@ -3829,8 +3829,8 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   uint32_t num_coords_supplied = 0;
   if (raw_coords.type->Is<ast::type::F32Type>()) {
     num_coords_supplied = 1;
-  } else if (raw_coords.type->IsVector()) {
-    num_coords_supplied = raw_coords.type->AsVector()->size();
+  } else if (raw_coords.type->Is<ast::type::VectorType>()) {
+    num_coords_supplied = raw_coords.type->As<ast::type::VectorType>()->size();
   }
   if (num_coords_supplied == 0) {
     Fail() << "bad or unsupported coordinate type for image access: "

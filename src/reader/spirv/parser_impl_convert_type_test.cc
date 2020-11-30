@@ -171,19 +171,22 @@ TEST_F(SpvParserTest, ConvertType_VecOverF32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* v2xf32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xf32->IsVector());
-  EXPECT_TRUE(v2xf32->AsVector()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(v2xf32->AsVector()->size(), 2u);
+  EXPECT_TRUE(v2xf32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v2xf32->As<ast::type::VectorType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(v2xf32->As<ast::type::VectorType>()->size(), 2u);
 
   auto* v3xf32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xf32->IsVector());
-  EXPECT_TRUE(v3xf32->AsVector()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(v3xf32->AsVector()->size(), 3u);
+  EXPECT_TRUE(v3xf32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v3xf32->As<ast::type::VectorType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(v3xf32->As<ast::type::VectorType>()->size(), 3u);
 
   auto* v4xf32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xf32->IsVector());
-  EXPECT_TRUE(v4xf32->AsVector()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(v4xf32->AsVector()->size(), 4u);
+  EXPECT_TRUE(v4xf32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v4xf32->As<ast::type::VectorType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(v4xf32->As<ast::type::VectorType>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -198,19 +201,22 @@ TEST_F(SpvParserTest, ConvertType_VecOverI32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* v2xi32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xi32->IsVector());
-  EXPECT_TRUE(v2xi32->AsVector()->type()->Is<ast::type::I32Type>());
-  EXPECT_EQ(v2xi32->AsVector()->size(), 2u);
+  EXPECT_TRUE(v2xi32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v2xi32->As<ast::type::VectorType>()->type()->Is<ast::type::I32Type>());
+  EXPECT_EQ(v2xi32->As<ast::type::VectorType>()->size(), 2u);
 
   auto* v3xi32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xi32->IsVector());
-  EXPECT_TRUE(v3xi32->AsVector()->type()->Is<ast::type::I32Type>());
-  EXPECT_EQ(v3xi32->AsVector()->size(), 3u);
+  EXPECT_TRUE(v3xi32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v3xi32->As<ast::type::VectorType>()->type()->Is<ast::type::I32Type>());
+  EXPECT_EQ(v3xi32->As<ast::type::VectorType>()->size(), 3u);
 
   auto* v4xi32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xi32->IsVector());
-  EXPECT_TRUE(v4xi32->AsVector()->type()->Is<ast::type::I32Type>());
-  EXPECT_EQ(v4xi32->AsVector()->size(), 4u);
+  EXPECT_TRUE(v4xi32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v4xi32->As<ast::type::VectorType>()->type()->Is<ast::type::I32Type>());
+  EXPECT_EQ(v4xi32->As<ast::type::VectorType>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -225,19 +231,22 @@ TEST_F(SpvParserTest, ConvertType_VecOverU32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* v2xu32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xu32->IsVector());
-  EXPECT_TRUE(v2xu32->AsVector()->type()->Is<ast::type::U32Type>());
-  EXPECT_EQ(v2xu32->AsVector()->size(), 2u);
+  EXPECT_TRUE(v2xu32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v2xu32->As<ast::type::VectorType>()->type()->Is<ast::type::U32Type>());
+  EXPECT_EQ(v2xu32->As<ast::type::VectorType>()->size(), 2u);
 
   auto* v3xu32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xu32->IsVector());
-  EXPECT_TRUE(v3xu32->AsVector()->type()->Is<ast::type::U32Type>());
-  EXPECT_EQ(v3xu32->AsVector()->size(), 3u);
+  EXPECT_TRUE(v3xu32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v3xu32->As<ast::type::VectorType>()->type()->Is<ast::type::U32Type>());
+  EXPECT_EQ(v3xu32->As<ast::type::VectorType>()->size(), 3u);
 
   auto* v4xu32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xu32->IsVector());
-  EXPECT_TRUE(v4xu32->AsVector()->type()->Is<ast::type::U32Type>());
-  EXPECT_EQ(v4xu32->AsVector()->size(), 4u);
+  EXPECT_TRUE(v4xu32->Is<ast::type::VectorType>());
+  EXPECT_TRUE(
+      v4xu32->As<ast::type::VectorType>()->type()->Is<ast::type::U32Type>());
+  EXPECT_EQ(v4xu32->As<ast::type::VectorType>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }

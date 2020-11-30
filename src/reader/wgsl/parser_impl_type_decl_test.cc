@@ -151,8 +151,8 @@ TEST_P(VecTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->IsVector());
-  EXPECT_EQ(t->AsVector()->size(), params.count);
+  EXPECT_TRUE(t->Is<ast::type::VectorType>());
+  EXPECT_EQ(t->As<ast::type::VectorType>()->size(), params.count);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecTest,
@@ -256,10 +256,10 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   ASSERT_TRUE(t->Is<ast::type::PointerType>());
 
   auto* ptr = t->As<ast::type::PointerType>();
-  ASSERT_TRUE(ptr->type()->IsVector());
+  ASSERT_TRUE(ptr->type()->Is<ast::type::VectorType>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 
-  auto* vec = ptr->type()->AsVector();
+  auto* vec = ptr->type()->As<ast::type::VectorType>();
   ASSERT_EQ(vec->size(), 2u);
   ASSERT_TRUE(vec->type()->Is<ast::type::F32Type>());
 }
