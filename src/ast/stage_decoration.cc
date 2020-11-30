@@ -20,9 +20,13 @@ namespace ast {
 constexpr const DecorationKind StageDecoration::Kind;
 
 StageDecoration::StageDecoration(ast::PipelineStage stage, const Source& source)
-    : FunctionDecoration(Kind, source), stage_(stage) {}
+    : FunctionDecoration(source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
+
+DecorationKind StageDecoration::GetKind() const {
+  return Kind;
+}
 
 bool StageDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || FunctionDecoration::IsKind(kind);

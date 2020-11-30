@@ -36,6 +36,9 @@ class StrideDecoration : public ArrayDecoration {
   StrideDecoration(uint32_t stride, const Source& source);
   ~StrideDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.

@@ -23,11 +23,14 @@ namespace ast {
 
 constexpr const DecorationKind StructMemberDecoration::Kind;
 
-StructMemberDecoration::StructMemberDecoration(DecorationKind kind,
-                                               const Source& source)
-    : Decoration(kind, source) {}
+StructMemberDecoration::StructMemberDecoration(const Source& source)
+    : Decoration(source) {}
 
 StructMemberDecoration::~StructMemberDecoration() = default;
+
+DecorationKind StructMemberDecoration::GetKind() const {
+  return Kind;
+}
 
 bool StructMemberDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind;

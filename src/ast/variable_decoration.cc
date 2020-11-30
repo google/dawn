@@ -27,11 +27,14 @@ namespace ast {
 
 constexpr const DecorationKind VariableDecoration::Kind;
 
-VariableDecoration::VariableDecoration(DecorationKind kind,
-                                       const Source& source)
-    : Decoration(kind, source) {}
+VariableDecoration::VariableDecoration(const Source& source)
+    : Decoration(source) {}
 
 VariableDecoration::~VariableDecoration() = default;
+
+DecorationKind VariableDecoration::GetKind() const {
+  return Kind;
+}
 
 bool VariableDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind;

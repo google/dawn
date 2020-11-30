@@ -35,6 +35,9 @@ class TypeDecoration : public Decoration {
 
   ~TypeDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.
@@ -48,9 +51,8 @@ class TypeDecoration : public Decoration {
 
  protected:
   /// Constructor
-  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit TypeDecoration(DecorationKind kind, const Source& source);
+  explicit TypeDecoration(const Source& source);
 };
 
 /// A list of type decorations

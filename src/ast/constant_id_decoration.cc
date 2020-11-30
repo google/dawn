@@ -20,9 +20,13 @@ namespace ast {
 constexpr const DecorationKind ConstantIdDecoration::Kind;
 
 ConstantIdDecoration::ConstantIdDecoration(uint32_t val, const Source& source)
-    : VariableDecoration(Kind, source), value_(val) {}
+    : VariableDecoration(source), value_(val) {}
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
+
+DecorationKind ConstantIdDecoration::GetKind() const {
+  return Kind;
+}
 
 bool ConstantIdDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || VariableDecoration::IsKind(kind);

@@ -47,6 +47,9 @@ class WorkgroupDecoration : public FunctionDecoration {
   WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
   ~WorkgroupDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.

@@ -24,11 +24,14 @@ namespace ast {
 
 constexpr const DecorationKind FunctionDecoration::Kind;
 
-FunctionDecoration::FunctionDecoration(DecorationKind kind,
-                                       const Source& source)
-    : Decoration(kind, source) {}
+FunctionDecoration::FunctionDecoration(const Source& source)
+    : Decoration(source) {}
 
 FunctionDecoration::~FunctionDecoration() = default;
+
+DecorationKind FunctionDecoration::GetKind() const {
+  return Kind;
+}
 
 bool FunctionDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind;

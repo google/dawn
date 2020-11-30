@@ -20,9 +20,13 @@ namespace ast {
 constexpr const DecorationKind BindingDecoration::Kind;
 
 BindingDecoration::BindingDecoration(uint32_t val, const Source& source)
-    : VariableDecoration(Kind, source), value_(val) {}
+    : VariableDecoration(source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
+
+DecorationKind BindingDecoration::GetKind() const {
+  return Kind;
+}
 
 bool BindingDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || VariableDecoration::IsKind(kind);

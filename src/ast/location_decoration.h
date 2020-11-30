@@ -34,6 +34,9 @@ class LocationDecoration : public VariableDecoration {
   explicit LocationDecoration(uint32_t value, const Source& source);
   ~LocationDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.

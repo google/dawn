@@ -35,6 +35,9 @@ class FunctionDecoration : public Decoration {
 
   ~FunctionDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.
@@ -52,9 +55,8 @@ class FunctionDecoration : public Decoration {
 
  protected:
   /// Constructor
-  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  FunctionDecoration(DecorationKind kind, const Source& source);
+  explicit FunctionDecoration(const Source& source);
 };
 
 /// A list of function decorations

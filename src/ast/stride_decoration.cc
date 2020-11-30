@@ -20,7 +20,11 @@ namespace ast {
 constexpr const DecorationKind StrideDecoration::Kind;
 
 StrideDecoration::StrideDecoration(uint32_t stride, const Source& source)
-    : ArrayDecoration(Kind, source), stride_(stride) {}
+    : ArrayDecoration(source), stride_(stride) {}
+
+DecorationKind StrideDecoration::GetKind() const {
+  return Kind;
+}
 
 bool StrideDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || ArrayDecoration::IsKind(kind);

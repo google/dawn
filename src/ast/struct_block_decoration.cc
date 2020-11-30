@@ -18,7 +18,7 @@ namespace tint {
 namespace ast {
 
 StructBlockDecoration::StructBlockDecoration(const Source& source)
-    : StructDecoration(Kind, source) {}
+    : StructDecoration(source) {}
 
 StructBlockDecoration::~StructBlockDecoration() = default;
 

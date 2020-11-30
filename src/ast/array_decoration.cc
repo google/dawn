@@ -23,10 +23,13 @@ namespace ast {
 
 constexpr const DecorationKind ArrayDecoration::Kind;
 
-ArrayDecoration::ArrayDecoration(DecorationKind kind, const Source& source)
-    : Decoration(kind, source) {}
+ArrayDecoration::ArrayDecoration(const Source& source) : Decoration(source) {}
 
 ArrayDecoration::~ArrayDecoration() = default;
+
+DecorationKind ArrayDecoration::GetKind() const {
+  return Kind;
+}
 
 bool ArrayDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind;

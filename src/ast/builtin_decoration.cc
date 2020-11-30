@@ -20,9 +20,13 @@ namespace ast {
 constexpr const DecorationKind BuiltinDecoration::Kind;
 
 BuiltinDecoration::BuiltinDecoration(Builtin builtin, const Source& source)
-    : VariableDecoration(Kind, source), builtin_(builtin) {}
+    : VariableDecoration(source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
+
+DecorationKind BuiltinDecoration::GetKind() const {
+  return Kind;
+}
 
 bool BuiltinDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || VariableDecoration::IsKind(kind);

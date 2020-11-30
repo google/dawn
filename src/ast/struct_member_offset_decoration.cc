@@ -21,7 +21,11 @@ constexpr const DecorationKind StructMemberOffsetDecoration::Kind;
 
 StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset,
                                                            const Source& source)
-    : StructMemberDecoration(Kind, source), offset_(offset) {}
+    : StructMemberDecoration(source), offset_(offset) {}
+
+DecorationKind StructMemberOffsetDecoration::GetKind() const {
+  return Kind;
+}
 
 bool StructMemberOffsetDecoration::IsKind(DecorationKind kind) const {
   return kind == Kind || StructMemberDecoration::IsKind(kind);

@@ -34,6 +34,9 @@ class StructMemberDecoration : public Decoration {
 
   ~StructMemberDecoration() override;
 
+  /// @return the decoration kind
+  DecorationKind GetKind() const override;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.
@@ -47,9 +50,8 @@ class StructMemberDecoration : public Decoration {
 
  protected:
   /// Constructor
-  /// @param kind the decoration kind
   /// @param source the source of this decoration
-  explicit StructMemberDecoration(DecorationKind kind, const Source& source);
+  explicit StructMemberDecoration(const Source& source);
 };
 
 /// A list of struct member decorations

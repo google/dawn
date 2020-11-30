@@ -51,6 +51,9 @@ class Decoration : public Node {
  public:
   ~Decoration() override;
 
+  /// @return the decoration kind
+  virtual DecorationKind GetKind() const = 0;
+
   /// @param kind the decoration kind
   /// @return true if this Decoration is of the (or derives from) the given
   /// kind.
@@ -62,21 +65,13 @@ class Decoration : public Node {
     return IsKind(TO::Kind);
   }
 
-  /// @return the decoration kind
-  DecorationKind GetKind() const { return kind_; }
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 
  protected:
   /// Constructor
-  /// @param kind represents the derived type
   /// @param source the source of this decoration
-  Decoration(DecorationKind kind, const Source& source)
-      : Node(source), kind_(kind) {}
-
- private:
-  DecorationKind const kind_;
+  explicit Decoration(const Source& source) : Node(source) {}
 };
 
 /// As dynamically casts |deco| to the target type |TO|.

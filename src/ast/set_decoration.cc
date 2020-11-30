@@ -18,7 +18,7 @@ namespace tint {
 namespace ast {
 
 SetDecoration::SetDecoration(uint32_t val, const Source& source)
-    : VariableDecoration(Kind, source), value_(val) {}
+    : VariableDecoration(source), value_(val) {}
 
 SetDecoration::~SetDecoration() = default;
 
