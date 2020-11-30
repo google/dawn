@@ -26,8 +26,8 @@ class DrawQuad {
     DrawQuad() {
     }
     DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
-        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsSource);
-        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource);
+        vsModule = utils::CreateShaderModuleFromWGSL(device, vsSource);
+        fsModule = utils::CreateShaderModuleFromWGSL(device, fsSource);
 
         pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
     }
@@ -77,21 +77,26 @@ class RenderPassLoadOpTests : public DawnTest {
 
         // draws a blue quad on the right half of the screen
         const char* vsSource = R"(
-                #version 450
-                void main() {
-                    const vec2 pos[6] = vec2[6](
-                        vec2(0, -1), vec2(1, -1), vec2(0, 1),
-                        vec2(0,  1), vec2(1, -1), vec2(1, 1));
-                    gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-                }
-                )";
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                    vec2<f32>( 0.0, -1.0),
+                    vec2<f32>( 1.0, -1.0),
+                    vec2<f32>( 0.0,  1.0),
+                    vec2<f32>( 0.0,  1.0),
+                    vec2<f32>( 1.0, -1.0),
+                    vec2<f32>( 1.0,  1.0));
+
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })";
+
         const char* fsSource = R"(
-                #version 450
-                layout(location = 0) out vec4 color;
-                void main() {
-                    color = vec4(0.f, 0.f, 1.f, 1.f);
-                }
-                )";
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+            })";
         blueQuad = DrawQuad(device, vsSource, fsSource);
     }
 
