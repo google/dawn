@@ -183,9 +183,9 @@ TEST_F(ParserImplTest, VariableDecoration_Binding) {
   auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(var_deco->IsBinding());
+  ASSERT_TRUE(var_deco->Is<ast::BindingDecoration>());
 
-  auto* binding = var_deco->AsBinding();
+  auto* binding = var_deco->As<ast::BindingDecoration>();
   EXPECT_EQ(binding->value(), 4u);
 }
 

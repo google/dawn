@@ -35,10 +35,6 @@ DecorationKind VariableDecoration::GetKind() const {
   return Kind;
 }
 
-bool VariableDecoration::IsBinding() const {
-  return false;
-}
-
 bool VariableDecoration::IsBuiltin() const {
   return false;
 }
@@ -53,11 +49,6 @@ bool VariableDecoration::IsConstantId() const {
 
 bool VariableDecoration::IsSet() const {
   return false;
-}
-
-BindingDecoration* VariableDecoration::AsBinding() {
-  assert(IsBinding());
-  return static_cast<BindingDecoration*>(this);
 }
 
 BuiltinDecoration* VariableDecoration::AsBuiltin() {

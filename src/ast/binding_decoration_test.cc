@@ -29,7 +29,7 @@ TEST_F(BindingDecorationTest, Creation) {
 
 TEST_F(BindingDecorationTest, Is) {
   BindingDecoration d{2, Source{}};
-  EXPECT_TRUE(d.IsBinding());
+  EXPECT_TRUE(d.Is<BindingDecoration>());
   EXPECT_FALSE(d.IsBuiltin());
   EXPECT_FALSE(d.IsConstantId());
   EXPECT_FALSE(d.IsLocation());

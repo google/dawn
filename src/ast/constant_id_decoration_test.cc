@@ -28,12 +28,13 @@ TEST_F(ConstantIdDecorationTest, Creation) {
 }
 
 TEST_F(ConstantIdDecorationTest, Is) {
-  ConstantIdDecoration d{27, Source{}};
-  EXPECT_FALSE(d.IsBinding());
-  EXPECT_FALSE(d.IsBuiltin());
-  EXPECT_TRUE(d.IsConstantId());
-  EXPECT_FALSE(d.IsLocation());
-  EXPECT_FALSE(d.IsSet());
+  ConstantIdDecoration cd{27, Source{}};
+  Decoration* d = &cd;
+  EXPECT_FALSE(d->Is<BindingDecoration>());
+  EXPECT_FALSE(cd.IsBuiltin());
+  EXPECT_TRUE(cd.IsConstantId());
+  EXPECT_FALSE(cd.IsLocation());
+  EXPECT_FALSE(cd.IsSet());
 }
 
 TEST_F(ConstantIdDecorationTest, ToStr) {

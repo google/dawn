@@ -22,10 +22,6 @@ BindingDecoration::BindingDecoration(uint32_t val, const Source& source)
 
 BindingDecoration::~BindingDecoration() = default;
 
-bool BindingDecoration::IsBinding() const {
-  return true;
-}
-
 void BindingDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "BindingDecoration{" << value_ << "}" << std::endl;

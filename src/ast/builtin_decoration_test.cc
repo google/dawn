@@ -28,12 +28,13 @@ TEST_F(BuiltinDecorationTest, Creation) {
 }
 
 TEST_F(BuiltinDecorationTest, Is) {
-  BuiltinDecoration d{Builtin::kFragDepth, Source{}};
-  EXPECT_FALSE(d.IsBinding());
-  EXPECT_TRUE(d.IsBuiltin());
-  EXPECT_FALSE(d.IsConstantId());
-  EXPECT_FALSE(d.IsLocation());
-  EXPECT_FALSE(d.IsSet());
+  BuiltinDecoration bd{Builtin::kFragDepth, Source{}};
+  Decoration* d = &bd;
+  EXPECT_FALSE(d->Is<BindingDecoration>());
+  EXPECT_TRUE(bd.IsBuiltin());
+  EXPECT_FALSE(bd.IsConstantId());
+  EXPECT_FALSE(bd.IsLocation());
+  EXPECT_FALSE(bd.IsSet());
 }
 
 TEST_F(BuiltinDecorationTest, ToStr) {

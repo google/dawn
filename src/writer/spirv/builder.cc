@@ -787,10 +787,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                     Operand::Int(deco->AsLocation()->value())});
-      } else if (deco->IsBinding()) {
+      } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
-                    Operand::Int(deco->AsBinding()->value())});
+                    Operand::Int(binding->value())});
       } else if (deco->IsSet()) {
         push_annot(
             spv::Op::OpDecorate,

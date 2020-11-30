@@ -111,10 +111,10 @@ Function::referenced_uniform_variables() const {
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsBinding()) {
-        binding = deco->AsBinding();
-      } else if (deco->IsSet()) {
-        set = deco->AsSet();
+      if (auto* b = deco->As<ast::BindingDecoration>()) {
+        binding = b;
+      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+        set = s;
       }
     }
     if (binding == nullptr || set == nullptr) {
@@ -139,10 +139,10 @@ Function::referenced_storagebuffer_variables() const {
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsBinding()) {
-        binding = deco->AsBinding();
-      } else if (deco->IsSet()) {
-        set = deco->AsSet();
+      if (auto* b = deco->As<ast::BindingDecoration>()) {
+        binding = b;
+      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+        set = s;
       }
     }
     if (binding == nullptr || set == nullptr) {
@@ -291,10 +291,10 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsBinding()) {
-        binding = deco->AsBinding();
-      } else if (deco->IsSet()) {
-        set = deco->AsSet();
+      if (auto* b = deco->As<ast::BindingDecoration>()) {
+        binding = b;
+      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+        set = s;
       }
     }
     if (binding == nullptr || set == nullptr) {
@@ -326,10 +326,10 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsBinding()) {
-        binding = deco->AsBinding();
-      } else if (deco->IsSet()) {
-        set = deco->AsSet();
+      if (auto* b = deco->As<ast::BindingDecoration>()) {
+        binding = b;
+      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+        set = s;
       }
     }
     if (binding == nullptr || set == nullptr) {

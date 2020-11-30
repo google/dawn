@@ -30,12 +30,13 @@ TEST_F(LocationDecorationTest, Creation) {
 }
 
 TEST_F(LocationDecorationTest, Is) {
-  LocationDecoration d{2, Source{}};
-  EXPECT_FALSE(d.IsBinding());
-  EXPECT_FALSE(d.IsBuiltin());
-  EXPECT_FALSE(d.IsConstantId());
-  EXPECT_TRUE(d.IsLocation());
-  EXPECT_FALSE(d.IsSet());
+  LocationDecoration ld{2, Source{}};
+  Decoration* d = &ld;
+  EXPECT_FALSE(d->Is<BindingDecoration>());
+  EXPECT_FALSE(ld.IsBuiltin());
+  EXPECT_FALSE(ld.IsConstantId());
+  EXPECT_TRUE(ld.IsLocation());
+  EXPECT_FALSE(ld.IsSet());
 }
 
 TEST_F(LocationDecorationTest, ToStr) {
