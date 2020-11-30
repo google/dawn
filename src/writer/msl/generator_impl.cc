@@ -1070,8 +1070,9 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
           error_ = "invalid location variable for pipeline stage";
           return false;
         }
-      } else if (deco->IsBuiltin()) {
-        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+      } else if (deco->Is<ast::BuiltinDecoration>()) {
+        auto attr =
+            builtin_to_attribute(deco->As<ast::BuiltinDecoration>()->value());
         if (attr.empty()) {
           error_ = "unsupported builtin";
           return false;

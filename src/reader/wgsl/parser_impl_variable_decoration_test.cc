@@ -104,9 +104,9 @@ TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(var_deco, nullptr);
-  ASSERT_TRUE(var_deco->IsBuiltin());
+  ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
 
-  auto* builtin = var_deco->AsBuiltin();
+  auto* builtin = var_deco->As<ast::BuiltinDecoration>();
   EXPECT_EQ(builtin->value(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

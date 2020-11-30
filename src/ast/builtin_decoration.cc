@@ -22,10 +22,6 @@ BuiltinDecoration::BuiltinDecoration(Builtin builtin, const Source& source)
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 
-bool BuiltinDecoration::IsBuiltin() const {
-  return true;
-}
-
 void BuiltinDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "BuiltinDecoration{" << builtin_ << "}" << std::endl;

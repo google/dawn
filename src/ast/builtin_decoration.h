@@ -31,9 +31,6 @@ class BuiltinDecoration
   BuiltinDecoration(Builtin builtin, const Source& source);
   ~BuiltinDecoration() override;
 
-  /// @returns true if this is a builtin decoration
-  bool IsBuiltin() const override;
-
   /// @returns the builtin value
   Builtin value() const { return builtin_; }
 

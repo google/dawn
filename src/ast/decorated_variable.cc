@@ -16,6 +16,7 @@
 
 #include <cassert>
 
+#include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
 
 namespace tint {
@@ -41,7 +42,7 @@ bool DecoratedVariable::HasLocationDecoration() const {
 
 bool DecoratedVariable::HasBuiltinDecoration() const {
   for (auto* deco : decorations_) {
-    if (deco->IsBuiltin()) {
+    if (deco->Is<BuiltinDecoration>()) {
       return true;
     }
   }

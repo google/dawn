@@ -31,7 +31,7 @@ TEST_F(SetDecorationTest, Is) {
   SetDecoration sd{2, Source{}};
   Decoration* d = &sd;
   EXPECT_FALSE(d->Is<BindingDecoration>());
-  EXPECT_FALSE(sd.IsBuiltin());
+  EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(sd.IsConstantId());
   EXPECT_FALSE(sd.IsLocation());
   EXPECT_TRUE(sd.IsSet());

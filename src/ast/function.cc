@@ -163,8 +163,8 @@ Function::referenced_builtin_variables() const {
       continue;
     }
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsBuiltin()) {
-        ret.push_back({var, deco->AsBuiltin()});
+      if (auto* builtin = deco->As<BuiltinDecoration>()) {
+        ret.push_back({var, builtin});
         break;
       }
     }
