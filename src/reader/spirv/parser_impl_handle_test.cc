@@ -49,8 +49,8 @@ std::string CommonBasicTypes() {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
 
-    %int_3 = OpConstant %uint 3
-    %int_4 = OpConstant %uint 4
+    %int_3 = OpConstant %int 3
+    %int_4 = OpConstant %int 4
     %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %uint_2 = OpConstant %uint 2
