@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -29,7 +30,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 1u);
   auto* struct_deco = decos.value[0]->As<ast::StructDecoration>();
-  EXPECT_TRUE(struct_deco->IsBlock());
+  EXPECT_TRUE(struct_deco->Is<ast::StructBlockDecoration>());
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {

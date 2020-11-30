@@ -33,9 +33,6 @@ class StructBlockDecoration
   explicit StructBlockDecoration(const Source& source);
   ~StructBlockDecoration() override;
 
-  /// @returns true if this is a block struct
-  bool IsBlock() const override;
-
   /// Outputs the decoration to the given stream
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing

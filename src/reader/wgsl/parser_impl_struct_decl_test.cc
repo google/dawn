@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -65,7 +66,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
   ASSERT_EQ(s->impl()->decorations().size(), 1u);
-  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
+  EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
@@ -90,8 +91,8 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
   ASSERT_EQ(s->impl()->decorations().size(), 2u);
-  EXPECT_TRUE(s->impl()->decorations()[0]->IsBlock());
-  EXPECT_TRUE(s->impl()->decorations()[1]->IsBlock());
+  EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
+  EXPECT_TRUE(s->impl()->decorations()[1]->Is<ast::StructBlockDecoration>());
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {

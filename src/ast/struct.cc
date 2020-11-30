@@ -14,6 +14,8 @@
 
 #include "src/ast/struct.h"
 
+#include "src/ast/struct_block_decoration.h"
+
 namespace tint {
 namespace ast {
 
@@ -52,7 +54,7 @@ StructMember* Struct::get_member(const std::string& name) const {
 
 bool Struct::IsBlockDecorated() const {
   for (auto* deco : decorations_) {
-    if (deco->IsBlock()) {
+    if (deco->Is<StructBlockDecoration>()) {
       return true;
     }
   }

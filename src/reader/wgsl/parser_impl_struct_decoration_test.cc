@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -45,7 +46,7 @@ TEST_P(StructDecorationTest, Parses) {
   ASSERT_NE(deco.value, nullptr);
   auto* struct_deco = deco.value->As<ast::StructDecoration>();
   ASSERT_NE(struct_deco, nullptr);
-  EXPECT_EQ(struct_deco->IsBlock(), params.is_block);
+  EXPECT_EQ(struct_deco->Is<ast::StructBlockDecoration>(), params.is_block);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          StructDecorationTest,

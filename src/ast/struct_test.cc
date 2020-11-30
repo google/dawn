@@ -57,7 +57,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
   Struct s{decos, members};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_TRUE(s.decorations()[0]->IsBlock());
+  EXPECT_TRUE(s.decorations()[0]->Is<StructBlockDecoration>());
   EXPECT_EQ(s.source().range.begin.line, 0u);
   EXPECT_EQ(s.source().range.begin.column, 0u);
   EXPECT_EQ(s.source().range.end.line, 0u);
@@ -79,7 +79,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
       decos, members};
   EXPECT_EQ(s.members().size(), 1u);
   ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_TRUE(s.decorations()[0]->IsBlock());
+  EXPECT_TRUE(s.decorations()[0]->Is<StructBlockDecoration>());
   EXPECT_EQ(s.source().range.begin.line, 27u);
   EXPECT_EQ(s.source().range.begin.column, 4u);
   EXPECT_EQ(s.source().range.end.line, 27u);

@@ -35,9 +35,6 @@ class StructDecoration : public Castable<StructDecoration, Decoration> {
   /// @return the decoration kind
   DecorationKind GetKind() const override;
 
-  /// @returns true if this is a block struct
-  virtual bool IsBlock() const = 0;
-
  protected:
   /// Constructor
   /// @param source the source of this decoration
