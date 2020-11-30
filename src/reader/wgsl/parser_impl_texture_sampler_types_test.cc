@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
@@ -66,7 +67,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsDepth());
+  ASSERT_TRUE(t->Is<ast::type::DepthTextureType>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k2d);
 }

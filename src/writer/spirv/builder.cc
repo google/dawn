@@ -2521,23 +2521,24 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t depth_literal = 0u;
-  if (texture->IsDepth()) {
+  if (texture->Is<ast::type::DepthTextureType>()) {
     depth_literal = 1u;
   }
 
   uint32_t sampled_literal = 2u;
-  if (texture->IsMultisampled() || texture->IsSampled() || texture->IsDepth()) {
+  if (texture->IsMultisampled() || texture->IsSampled() ||
+      texture->Is<ast::type::DepthTextureType>()) {
     sampled_literal = 1u;
   }
 
   if (dim == ast::type::TextureDimension::kCubeArray) {
-    if (texture->IsSampled() || texture->IsDepth()) {
+    if (texture->IsSampled() || texture->Is<ast::type::DepthTextureType>()) {
       push_capability(SpvCapabilitySampledCubeArray);
     }
   }
 
   uint32_t type_id = 0u;
-  if (texture->IsDepth()) {
+  if (texture->Is<ast::type::DepthTextureType>()) {
     ast::type::F32Type f32;
     type_id = GenerateTypeIfNeeded(&f32);
   } else if (texture->IsSampled()) {

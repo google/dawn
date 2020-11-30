@@ -38,6 +38,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -665,7 +666,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ident->set_intrinsic_signature(
         std::make_unique<ast::intrinsic::TextureSignature>(param));
 
-    if (texture->IsDepth()) {
+    if (texture->Is<ast::type::DepthTextureType>()) {
       expr->func()->set_result_type(mod_->create<ast::type::F32Type>());
       return true;
     }

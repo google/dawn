@@ -54,7 +54,7 @@ TEST_F(DepthTextureTypeTest, Is) {
 
 TEST_F(DepthTextureTypeTest, IsTextureType) {
   DepthTextureType d(TextureDimension::kCube);
-  EXPECT_TRUE(d.IsDepth());
+  EXPECT_TRUE(d.Is<DepthTextureType>());
   EXPECT_FALSE(d.IsSampled());
   EXPECT_FALSE(d.IsStorage());
 }

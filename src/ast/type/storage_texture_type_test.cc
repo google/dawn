@@ -21,6 +21,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -59,9 +60,10 @@ TEST_F(StorageTextureTypeTest, Is) {
 TEST_F(StorageTextureTypeTest, IsTextureType) {
   StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
                        ImageFormat::kRgba32Float);
-  EXPECT_FALSE(s.IsDepth());
-  EXPECT_FALSE(s.IsSampled());
-  EXPECT_TRUE(s.IsStorage());
+  TextureType* ty = &s;
+  EXPECT_FALSE(ty->Is<DepthTextureType>());
+  EXPECT_FALSE(ty->IsSampled());
+  EXPECT_TRUE(ty->IsStorage());
 }
 
 TEST_F(StorageTextureTypeTest, Dim) {

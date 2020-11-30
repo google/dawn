@@ -16,7 +16,6 @@
 
 #include <cassert>
 
-#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/storage_texture_type.h"
@@ -61,9 +60,6 @@ TextureType::TextureType(TextureType&&) = default;
 
 TextureType::~TextureType() = default;
 
-bool TextureType::IsDepth() const {
-  return false;
-}
 bool TextureType::IsMultisampled() const {
   return false;
 }
@@ -72,11 +68,6 @@ bool TextureType::IsStorage() const {
 }
 bool TextureType::IsSampled() const {
   return false;
-}
-
-const DepthTextureType* TextureType::AsDepth() const {
-  assert(IsDepth());
-  return static_cast<const DepthTextureType*>(this);
 }
 
 const MultisampledTextureType* TextureType::AsMultisampled() const {
@@ -92,11 +83,6 @@ const SampledTextureType* TextureType::AsSampled() const {
 const StorageTextureType* TextureType::AsStorage() const {
   assert(IsStorage());
   return static_cast<const StorageTextureType*>(this);
-}
-
-DepthTextureType* TextureType::AsDepth() {
-  assert(IsDepth());
-  return static_cast<DepthTextureType*>(this);
 }
 
 MultisampledTextureType* TextureType::AsMultisampled() {

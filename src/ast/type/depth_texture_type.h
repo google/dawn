@@ -33,9 +33,6 @@ class DepthTextureType : public Castable<DepthTextureType, TextureType> {
   DepthTextureType(DepthTextureType&&);
   ~DepthTextureType() override;
 
-  /// @returns true if the type is a depth texture type
-  bool IsDepth() const override;
-
   /// @returns the name for this type
   std::string type_name() const override;
 };

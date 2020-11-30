@@ -41,10 +41,6 @@ DepthTextureType::DepthTextureType(DepthTextureType&&) = default;
 
 DepthTextureType::~DepthTextureType() = default;
 
-bool DepthTextureType::IsDepth() const {
-  return true;
-}
-
 std::string DepthTextureType::type_name() const {
   std::ostringstream out;
   out << "__depth_texture_" << dim();

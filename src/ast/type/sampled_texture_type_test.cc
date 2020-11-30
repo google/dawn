@@ -18,6 +18,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -55,9 +56,10 @@ TEST_F(SampledTextureTypeTest, Is) {
 TEST_F(SampledTextureTypeTest, IsTextureType) {
   F32Type f32;
   SampledTextureType s(TextureDimension::kCube, &f32);
-  EXPECT_FALSE(s.IsDepth());
-  EXPECT_TRUE(s.IsSampled());
-  EXPECT_FALSE(s.IsStorage());
+  TextureType* ty = &s;
+  EXPECT_FALSE(ty->Is<DepthTextureType>());
+  EXPECT_TRUE(ty->IsSampled());
+  EXPECT_FALSE(ty->IsStorage());
 }
 
 TEST_F(SampledTextureTypeTest, Dim) {

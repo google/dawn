@@ -53,6 +53,7 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/texture_type.h"
@@ -3714,7 +3715,7 @@ bool FunctionEmitter::EmitSampledImageAccess(
             parser_impl_.GetTypeForHandleVar(*image)) {
       if (ast::type::TextureType* texture_type =
               type->type()->As<ast::type::TextureType>()) {
-        if (texture_type->IsDepth()) {
+        if (texture_type->Is<ast::type::DepthTextureType>()) {
           // Convert it to an unsigned integer type.
           lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
               ast_module_.create<ast::type::U32Type>(),

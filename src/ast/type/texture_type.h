@@ -63,8 +63,6 @@ class TextureType : public Castable<TextureType, Type> {
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }
 
-  /// @returns true if this is a depth texture
-  virtual bool IsDepth() const;
   /// @returns ture if this is a multisampled texture
   virtual bool IsMultisampled() const;
   /// @returns true if this is a storage texture
@@ -72,8 +70,6 @@ class TextureType : public Castable<TextureType, Type> {
   /// @returns true if this is a sampled texture
   virtual bool IsSampled() const;
 
-  /// @returns the texture as a depth texture
-  const DepthTextureType* AsDepth() const;
   /// @returns the texture as a multisampled texture
   const MultisampledTextureType* AsMultisampled() const;
   /// @returns the texture as a sampled texture
@@ -81,8 +77,6 @@ class TextureType : public Castable<TextureType, Type> {
   /// @returns the texture as a storage texture
   const StorageTextureType* AsStorage() const;
 
-  /// @returns the texture as a depth texture
-  DepthTextureType* AsDepth();
   /// @returns the texture as a multisampled texture
   MultisampledTextureType* AsMultisampled();
   /// @returns the texture as a sampled texture

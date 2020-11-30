@@ -470,7 +470,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     auto* texture = type->As<ast::type::TextureType>();
 
     out_ << "texture_";
-    if (texture->IsDepth()) {
+    if (texture->Is<ast::type::DepthTextureType>()) {
       out_ << "depth_";
     } else if (texture->IsSampled()) {
       /* nothing to emit */
