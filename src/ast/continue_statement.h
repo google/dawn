@@ -35,9 +35,6 @@ class ContinueStatement : public Castable<ContinueStatement, Statement> {
   ContinueStatement(ContinueStatement&&);
   ~ContinueStatement() override;
 
-  /// @returns true if this is an continue statement
-  bool IsContinue() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

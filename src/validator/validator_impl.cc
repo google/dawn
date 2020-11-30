@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/ast/call_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/intrinsic.h"
@@ -208,7 +209,7 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
 
   if (!current_function_->return_type()->Is<ast::type::VoidType>()) {
     if (!func->get_last_statement() ||
-        !func->get_last_statement()->IsReturn()) {
+        !func->get_last_statement()->Is<ast::ReturnStatement>()) {
       add_error(func->source(), "v-0002",
                 "non-void function must end with a return statement");
       return false;
@@ -284,29 +285,28 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   if (!stmt) {
     return false;
   }
-  if (stmt->IsVariableDecl()) {
-    auto* v = stmt->AsVariableDecl();
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     bool constructor_valid =
         v->variable()->has_constructor()
             ? ValidateExpression(v->variable()->constructor())
             : true;
 
-    return constructor_valid && ValidateDeclStatement(stmt->AsVariableDecl());
+    return constructor_valid && ValidateDeclStatement(v);
   }
-  if (stmt->IsAssign()) {
-    return ValidateAssign(stmt->AsAssign());
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
+    return ValidateAssign(a);
   }
-  if (stmt->IsReturn()) {
-    return ValidateReturnStatement(stmt->AsReturn());
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    return ValidateReturnStatement(r);
   }
-  if (stmt->IsCall()) {
-    return ValidateCallExpr(stmt->AsCall()->expr());
+  if (auto* c = stmt->As<ast::CallStatement>()) {
+    return ValidateCallExpr(c->expr());
   }
-  if (stmt->IsSwitch()) {
-    return ValidateSwitch(stmt->AsSwitch());
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return ValidateSwitch(s);
   }
-  if (stmt->IsCase()) {
-    return ValidateCase(stmt->AsCase());
+  if (auto* c = stmt->As<ast::CaseStatement>()) {
+    return ValidateCase(c);
   }
   return true;
 }
@@ -368,8 +368,10 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   auto* last_clause = s->body().back();
-  auto* last_stmt_of_last_clause = last_clause->AsCase()->body()->last();
-  if (last_stmt_of_last_clause && last_stmt_of_last_clause->IsFallthrough()) {
+  auto* last_stmt_of_last_clause =
+      last_clause->As<ast::CaseStatement>()->body()->last();
+  if (last_stmt_of_last_clause &&
+      last_stmt_of_last_clause->Is<ast::FallthroughStatement>()) {
     add_error(last_stmt_of_last_clause->source(), "v-0028",
               "a fallthrough statement must not appear as "
               "the last statement in last clause of a switch");

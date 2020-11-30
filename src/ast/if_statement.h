@@ -71,9 +71,6 @@ class IfStatement : public Castable<IfStatement, Statement> {
   /// @returns true if there are else statements
   bool has_else_statements() const { return !else_statements_.empty(); }
 
-  /// @returns true if this is a if statement
-  bool IsIf() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

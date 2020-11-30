@@ -29,10 +29,6 @@ LoopStatement::LoopStatement(LoopStatement&&) = default;
 
 LoopStatement::~LoopStatement() = default;
 
-bool LoopStatement::IsLoop() const {
-  return true;
-}
-
 bool LoopStatement::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {
     return false;

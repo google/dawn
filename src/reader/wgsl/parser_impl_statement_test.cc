@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
@@ -29,7 +30,7 @@ TEST_F(ParserImplTest, Statement) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsReturn());
+  ASSERT_TRUE(e->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Semicolon) {
@@ -44,8 +45,8 @@ TEST_F(ParserImplTest, Statement_Return_NoValue) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsReturn());
-  auto* ret = e->AsReturn();
+  ASSERT_TRUE(e->Is<ast::ReturnStatement>());
+  auto* ret = e->As<ast::ReturnStatement>();
   ASSERT_EQ(ret->value(), nullptr);
 }
 
@@ -56,8 +57,8 @@ TEST_F(ParserImplTest, Statement_Return_Value) {
 
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsReturn());
-  auto* ret = e->AsReturn();
+  ASSERT_TRUE(e->Is<ast::ReturnStatement>());
+  auto* ret = e->As<ast::ReturnStatement>();
   ASSERT_NE(ret->value(), nullptr);
   EXPECT_TRUE(ret->value()->IsBinary());
 }
@@ -88,7 +89,7 @@ TEST_F(ParserImplTest, Statement_If) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsIf());
+  ASSERT_TRUE(e->Is<ast::IfStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_If_Invalid) {
@@ -107,7 +108,7 @@ TEST_F(ParserImplTest, Statement_Variable) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsVariableDecl());
+  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Variable_Invalid) {
@@ -136,7 +137,7 @@ TEST_F(ParserImplTest, Statement_Switch) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsSwitch());
+  ASSERT_TRUE(e->Is<ast::SwitchStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Switch_Invalid) {
@@ -155,7 +156,7 @@ TEST_F(ParserImplTest, Statement_Loop) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsLoop());
+  ASSERT_TRUE(e->Is<ast::LoopStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Loop_Invalid) {
@@ -174,7 +175,7 @@ TEST_F(ParserImplTest, Statement_Assignment) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsAssign());
+  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Assignment_Invalid) {
@@ -203,7 +204,7 @@ TEST_F(ParserImplTest, Statement_Break) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsBreak());
+  ASSERT_TRUE(e->Is<ast::BreakStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Break_MissingSemicolon) {
@@ -222,7 +223,7 @@ TEST_F(ParserImplTest, Statement_Continue) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsContinue());
+  ASSERT_TRUE(e->Is<ast::ContinueStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Continue_MissingSemicolon) {
@@ -242,7 +243,7 @@ TEST_F(ParserImplTest, Statement_Discard) {
   ASSERT_NE(e.value, nullptr);
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsDiscard());
+  ASSERT_TRUE(e->Is<ast::DiscardStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Discard_MissingSemicolon) {
@@ -261,8 +262,9 @@ TEST_F(ParserImplTest, Statement_Body) {
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsBlock());
-  EXPECT_TRUE(e->AsBlock()->get(0)->IsVariableDecl());
+  ASSERT_TRUE(e->Is<ast::BlockStatement>());
+  EXPECT_TRUE(
+      e->As<ast::BlockStatement>()->get(0)->Is<ast::VariableDeclStatement>());
 }
 
 TEST_F(ParserImplTest, Statement_Body_Invalid) {

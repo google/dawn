@@ -42,9 +42,6 @@ class CallStatement : public Castable<CallStatement, Statement> {
   /// @returns the call expression
   CallExpression* expr() const { return call_; }
 
-  /// @returns true if this is a call statement
-  bool IsCall() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

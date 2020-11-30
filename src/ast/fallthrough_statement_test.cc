@@ -39,7 +39,7 @@ TEST_F(FallthroughStatementTest, Creation_WithSource) {
 
 TEST_F(FallthroughStatementTest, IsFallthrough) {
   FallthroughStatement stmt;
-  EXPECT_TRUE(stmt.IsFallthrough());
+  EXPECT_TRUE(stmt.Is<FallthroughStatement>());
 }
 
 TEST_F(FallthroughStatementTest, IsValid) {

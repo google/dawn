@@ -25,10 +25,6 @@ ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 
 ContinueStatement::~ContinueStatement() = default;
 
-bool ContinueStatement::IsContinue() const {
-  return true;
-}
-
 bool ContinueStatement::IsValid() const {
   return true;
 }

@@ -25,10 +25,6 @@ BreakStatement::BreakStatement(BreakStatement&&) = default;
 
 BreakStatement::~BreakStatement() = default;
 
-bool BreakStatement::IsBreak() const {
-  return true;
-}
-
 bool BreakStatement::IsValid() const {
   return true;
 }

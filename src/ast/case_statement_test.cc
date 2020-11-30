@@ -99,7 +99,7 @@ TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
 
 TEST_F(CaseStatementTest, IsCase) {
   CaseStatement c(create<ast::BlockStatement>());
-  EXPECT_TRUE(c.IsCase());
+  EXPECT_TRUE(c.Is<ast::CaseStatement>());
 }
 
 TEST_F(CaseStatementTest, IsValid) {

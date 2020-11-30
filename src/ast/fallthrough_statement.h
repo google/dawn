@@ -32,9 +32,6 @@ class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
   FallthroughStatement(FallthroughStatement&&);
   ~FallthroughStatement() override;
 
-  /// @returns true if this is an fallthrough statement
-  bool IsFallthrough() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

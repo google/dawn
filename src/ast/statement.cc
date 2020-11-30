@@ -42,246 +42,50 @@ Statement::Statement(Statement&&) = default;
 
 Statement::~Statement() = default;
 
-bool Statement::IsAssign() const {
-  return false;
-}
-
-bool Statement::IsBlock() const {
-  return false;
-}
-
-bool Statement::IsBreak() const {
-  return false;
-}
-
-bool Statement::IsCase() const {
-  return false;
-}
-
-bool Statement::IsCall() const {
-  return false;
-}
-
-bool Statement::IsContinue() const {
-  return false;
-}
-
-bool Statement::IsDiscard() const {
-  return false;
-}
-
-bool Statement::IsElse() const {
-  return false;
-}
-
-bool Statement::IsFallthrough() const {
-  return false;
-}
-
-bool Statement::IsIf() const {
-  return false;
-}
-
-bool Statement::IsLoop() const {
-  return false;
-}
-
-bool Statement::IsReturn() const {
-  return false;
-}
-
-bool Statement::IsSwitch() const {
-  return false;
-}
-
-bool Statement::IsVariableDecl() const {
-  return false;
-}
-
 const char* Statement::Name() const {
-  if (IsAssign()) {
+  if (Is<AssignmentStatement>()) {
     return "assignment statement";
   }
-  if (IsBlock()) {
+  if (Is<BlockStatement>()) {
     return "block statement";
   }
-  if (IsBreak()) {
+  if (Is<BreakStatement>()) {
     return "break statement";
   }
-  if (IsCase()) {
+  if (Is<CaseStatement>()) {
     return "case statement";
   }
-  if (IsCall()) {
+  if (Is<CallStatement>()) {
     return "function call";
   }
-  if (IsContinue()) {
+  if (Is<ContinueStatement>()) {
     return "continue statement";
   }
-  if (IsDiscard()) {
+  if (Is<DiscardStatement>()) {
     return "discard statement";
   }
-  if (IsElse()) {
+  if (Is<ElseStatement>()) {
     return "else statement";
   }
-  if (IsFallthrough()) {
+  if (Is<FallthroughStatement>()) {
     return "fallthrough statement";
   }
-  if (IsIf()) {
+  if (Is<IfStatement>()) {
     return "if statement";
   }
-  if (IsLoop()) {
+  if (Is<LoopStatement>()) {
     return "loop statement";
   }
-  if (IsReturn()) {
+  if (Is<ReturnStatement>()) {
     return "return statement";
   }
-  if (IsSwitch()) {
+  if (Is<SwitchStatement>()) {
     return "switch statement";
   }
-  if (IsVariableDecl()) {
+  if (Is<VariableDeclStatement>()) {
     return "variable declaration";
   }
   return "statement";
-}
-
-const AssignmentStatement* Statement::AsAssign() const {
-  assert(IsAssign());
-  return static_cast<const AssignmentStatement*>(this);
-}
-
-const BlockStatement* Statement::AsBlock() const {
-  assert(IsBlock());
-  return static_cast<const BlockStatement*>(this);
-}
-
-const BreakStatement* Statement::AsBreak() const {
-  assert(IsBreak());
-  return static_cast<const BreakStatement*>(this);
-}
-
-const CallStatement* Statement::AsCall() const {
-  assert(IsCall());
-  return static_cast<const CallStatement*>(this);
-}
-
-const CaseStatement* Statement::AsCase() const {
-  assert(IsCase());
-  return static_cast<const CaseStatement*>(this);
-}
-
-const ContinueStatement* Statement::AsContinue() const {
-  assert(IsContinue());
-  return static_cast<const ContinueStatement*>(this);
-}
-
-const DiscardStatement* Statement::AsDiscard() const {
-  assert(IsDiscard());
-  return static_cast<const DiscardStatement*>(this);
-}
-
-const ElseStatement* Statement::AsElse() const {
-  assert(IsElse());
-  return static_cast<const ElseStatement*>(this);
-}
-
-const FallthroughStatement* Statement::AsFallthrough() const {
-  assert(IsFallthrough());
-  return static_cast<const FallthroughStatement*>(this);
-}
-
-const IfStatement* Statement::AsIf() const {
-  assert(IsIf());
-  return static_cast<const IfStatement*>(this);
-}
-
-const LoopStatement* Statement::AsLoop() const {
-  assert(IsLoop());
-  return static_cast<const LoopStatement*>(this);
-}
-
-const ReturnStatement* Statement::AsReturn() const {
-  assert(IsReturn());
-  return static_cast<const ReturnStatement*>(this);
-}
-
-const SwitchStatement* Statement::AsSwitch() const {
-  assert(IsSwitch());
-  return static_cast<const SwitchStatement*>(this);
-}
-
-const VariableDeclStatement* Statement::AsVariableDecl() const {
-  assert(IsVariableDecl());
-  return static_cast<const VariableDeclStatement*>(this);
-}
-
-AssignmentStatement* Statement::AsAssign() {
-  assert(IsAssign());
-  return static_cast<AssignmentStatement*>(this);
-}
-
-BlockStatement* Statement::AsBlock() {
-  assert(IsBlock());
-  return static_cast<BlockStatement*>(this);
-}
-
-BreakStatement* Statement::AsBreak() {
-  assert(IsBreak());
-  return static_cast<BreakStatement*>(this);
-}
-
-CallStatement* Statement::AsCall() {
-  assert(IsCall());
-  return static_cast<CallStatement*>(this);
-}
-
-CaseStatement* Statement::AsCase() {
-  assert(IsCase());
-  return static_cast<CaseStatement*>(this);
-}
-
-ContinueStatement* Statement::AsContinue() {
-  assert(IsContinue());
-  return static_cast<ContinueStatement*>(this);
-}
-
-DiscardStatement* Statement::AsDiscard() {
-  assert(IsDiscard());
-  return static_cast<DiscardStatement*>(this);
-}
-
-ElseStatement* Statement::AsElse() {
-  assert(IsElse());
-  return static_cast<ElseStatement*>(this);
-}
-
-FallthroughStatement* Statement::AsFallthrough() {
-  assert(IsFallthrough());
-  return static_cast<FallthroughStatement*>(this);
-}
-
-IfStatement* Statement::AsIf() {
-  assert(IsIf());
-  return static_cast<IfStatement*>(this);
-}
-
-LoopStatement* Statement::AsLoop() {
-  assert(IsLoop());
-  return static_cast<LoopStatement*>(this);
-}
-
-ReturnStatement* Statement::AsReturn() {
-  assert(IsReturn());
-  return static_cast<ReturnStatement*>(this);
-}
-
-SwitchStatement* Statement::AsSwitch() {
-  assert(IsSwitch());
-  return static_cast<SwitchStatement*>(this);
-}
-
-VariableDeclStatement* Statement::AsVariableDecl() {
-  assert(IsVariableDecl());
-  return static_cast<VariableDeclStatement*>(this);
 }
 
 }  // namespace ast

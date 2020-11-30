@@ -19,10 +19,19 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "src/ast/assignment_statement.h"
+#include "src/ast/break_statement.h"
+#include "src/ast/case_statement.h"
+#include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/context.h"

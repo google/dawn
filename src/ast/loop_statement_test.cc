@@ -57,7 +57,7 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
 
 TEST_F(LoopStatementTest, IsLoop) {
   LoopStatement l(create<BlockStatement>(), create<BlockStatement>());
-  EXPECT_TRUE(l.IsLoop());
+  EXPECT_TRUE(l.Is<LoopStatement>());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {

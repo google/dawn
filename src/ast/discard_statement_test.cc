@@ -43,7 +43,7 @@ TEST_F(DiscardStatementTest, Creation_WithSource) {
 
 TEST_F(DiscardStatementTest, IsDiscard) {
   DiscardStatement stmt;
-  EXPECT_TRUE(stmt.IsDiscard());
+  EXPECT_TRUE(stmt.Is<DiscardStatement>());
 }
 
 TEST_F(DiscardStatementTest, IsValid) {

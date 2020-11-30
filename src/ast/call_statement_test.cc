@@ -34,7 +34,7 @@ TEST_F(CallStatementTest, Creation) {
 
 TEST_F(CallStatementTest, IsCall) {
   CallStatement c;
-  EXPECT_TRUE(c.IsCall());
+  EXPECT_TRUE(c.Is<CallStatement>());
 }
 
 TEST_F(CallStatementTest, IsValid) {

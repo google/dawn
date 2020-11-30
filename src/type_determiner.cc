@@ -27,7 +27,9 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic.h"
@@ -178,11 +180,11 @@ bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
 }
 
 bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
-  if (!stmt->IsVariableDecl()) {
+  if (!stmt->Is<ast::VariableDeclStatement>()) {
     return true;
   }
 
-  auto* var = stmt->AsVariableDecl()->variable();
+  auto* var = stmt->As<ast::VariableDeclStatement>()->variable();
   // Nothing to do for const
   if (var->is_const()) {
     return true;
@@ -203,39 +205,35 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
 }
 
 bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    auto* a = stmt->AsAssign();
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
   }
-  if (stmt->IsBlock()) {
-    return DetermineStatements(stmt->AsBlock());
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return DetermineStatements(b);
   }
-  if (stmt->IsBreak()) {
+  if (stmt->Is<ast::BreakStatement>()) {
     return true;
   }
-  if (stmt->IsCall()) {
-    return DetermineResultType(stmt->AsCall()->expr());
+  if (auto* c = stmt->As<ast::CallStatement>()) {
+    return DetermineResultType(c->expr());
   }
-  if (stmt->IsCase()) {
-    auto* c = stmt->AsCase();
+  if (auto* c = stmt->As<ast::CaseStatement>()) {
     return DetermineStatements(c->body());
   }
-  if (stmt->IsContinue()) {
+  if (stmt->Is<ast::ContinueStatement>()) {
     return true;
   }
-  if (stmt->IsDiscard()) {
+  if (stmt->Is<ast::DiscardStatement>()) {
     return true;
   }
-  if (stmt->IsElse()) {
-    auto* e = stmt->AsElse();
+  if (auto* e = stmt->As<ast::ElseStatement>()) {
     return DetermineResultType(e->condition()) &&
            DetermineStatements(e->body());
   }
-  if (stmt->IsFallthrough()) {
+  if (stmt->Is<ast::FallthroughStatement>()) {
     return true;
   }
-  if (stmt->IsIf()) {
-    auto* i = stmt->AsIf();
+  if (auto* i = stmt->As<ast::IfStatement>()) {
     if (!DetermineResultType(i->condition()) ||
         !DetermineStatements(i->body())) {
       return false;
@@ -248,17 +246,14 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     }
     return true;
   }
-  if (stmt->IsLoop()) {
-    auto* l = stmt->AsLoop();
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
     return DetermineStatements(l->body()) &&
            DetermineStatements(l->continuing());
   }
-  if (stmt->IsReturn()) {
-    auto* r = stmt->AsReturn();
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return DetermineResultType(r->value());
   }
-  if (stmt->IsSwitch()) {
-    auto* s = stmt->AsSwitch();
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
     if (!DetermineResultType(s->condition())) {
       return false;
     }
@@ -269,8 +264,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     }
     return true;
   }
-  if (stmt->IsVariableDecl()) {
-    auto* v = stmt->AsVariableDecl();
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     variable_stack_.set(v->variable()->name(), v->variable());
     return DetermineResultType(v->variable()->constructor());
   }

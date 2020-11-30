@@ -30,10 +30,6 @@ VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 
 VariableDeclStatement::~VariableDeclStatement() = default;
 
-bool VariableDeclStatement::IsVariableDecl() const {
-  return true;
-}
-
 bool VariableDeclStatement::IsValid() const {
   return variable_ != nullptr && variable_->IsValid();
 }

@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
-  EXPECT_TRUE(body->get(0)->IsReturn());
+  EXPECT_TRUE(body->get(0)->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
-  EXPECT_TRUE(body->get(0)->IsReturn());
+  EXPECT_TRUE(body->get(0)->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
@@ -130,7 +130,7 @@ fn main() -> void { return; })");
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
-  EXPECT_TRUE(body->get(0)->IsReturn());
+  EXPECT_TRUE(body->get(0)->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
@@ -175,7 +175,7 @@ fn main() -> void { return; })");
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
-  EXPECT_TRUE(body->get(0)->IsReturn());
+  EXPECT_TRUE(body->get(0)->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {

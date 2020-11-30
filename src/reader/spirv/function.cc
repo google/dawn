@@ -561,8 +561,8 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   const auto& top = statements_stack_.back();
   auto* cond = create<ast::IdentifierExpression>(guard_name);
   auto* body = create<ast::BlockStatement>();
-  auto* const guard_stmt =
-      AddStatement(create<ast::IfStatement>(cond, body))->AsIf();
+  auto* const guard_stmt = AddStatement(create<ast::IfStatement>(cond, body))
+                               ->As<ast::IfStatement>();
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
                           guard_stmt->set_body(s->statements_);
@@ -574,8 +574,8 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   const auto& top = statements_stack_.back();
   auto* cond = MakeTrue();
   auto* body = create<ast::BlockStatement>();
-  auto* const guard_stmt =
-      AddStatement(create<ast::IfStatement>(cond, body))->AsIf();
+  auto* const guard_stmt = AddStatement(create<ast::IfStatement>(cond, body))
+                               ->As<ast::IfStatement>();
   guard_stmt->set_condition(MakeTrue());
   PushNewStatementBlock(top.construct_, end_id,
                         [guard_stmt](StatementBlock* s) {
@@ -2023,8 +2023,8 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
   auto* cond = MakeExpression(condition_id).expr;
   auto* body = create<ast::BlockStatement>();
-  auto* const if_stmt =
-      AddStatement(create<ast::IfStatement>(cond, body))->AsIf();
+  auto* const if_stmt = AddStatement(create<ast::IfStatement>(cond, body))
+                            ->As<ast::IfStatement>();
 
   // Generate the code for the condition.
 
@@ -2137,7 +2137,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   const auto* branch = block_info.basic_block->terminator();
 
   auto* const switch_stmt =
-      AddStatement(create<ast::SwitchStatement>())->AsSwitch();
+      AddStatement(create<ast::SwitchStatement>())->As<ast::SwitchStatement>();
   const auto selector_id = branch->GetSingleWordInOperand(0);
   // Generate the code for the selector.
   auto selector = MakeExpression(selector_id);
@@ -2255,7 +2255,7 @@ bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
   auto* loop =
       AddStatement(create<ast::LoopStatement>(create<ast::BlockStatement>(),
                                               create<ast::BlockStatement>()))
-          ->AsLoop();
+          ->As<ast::LoopStatement>();
   PushNewStatementBlock(
       construct, construct->end_id,
       [loop](StatementBlock* s) { loop->set_body(s->statements_); });
@@ -2266,11 +2266,11 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
   // A continue construct has the same depth as its associated loop
   // construct. Start a continue construct.
   auto* loop_candidate = LastStatement();
-  if (!loop_candidate->IsLoop()) {
+  if (!loop_candidate->Is<ast::LoopStatement>()) {
     return Fail() << "internal error: starting continue construct, "
                      "expected loop on top of stack";
   }
-  auto* loop = loop_candidate->AsLoop();
+  auto* loop = loop_candidate->As<ast::LoopStatement>();
   PushNewStatementBlock(
       construct, construct->end_id,
       [loop](StatementBlock* s) { loop->set_continuing(s->statements_); });

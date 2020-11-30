@@ -49,7 +49,7 @@ TEST_F(IfStatementTest, Creation_WithSource) {
 
 TEST_F(IfStatementTest, IsIf) {
   IfStatement stmt(nullptr, create<BlockStatement>());
-  EXPECT_TRUE(stmt.IsIf());
+  EXPECT_TRUE(stmt.Is<IfStatement>());
 }
 
 TEST_F(IfStatementTest, IsValid) {

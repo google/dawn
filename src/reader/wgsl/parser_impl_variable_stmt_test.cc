@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsVariableDecl());
+  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsVariableDecl());
+  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, VariableStmt_Const) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsVariableDecl());
+  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
   ASSERT_EQ(e->source().range.begin.line, 1u);
   ASSERT_EQ(e->source().range.begin.column, 7u);

@@ -21,10 +21,14 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -67,52 +71,47 @@ bool BoundArrayAccessorsTransform::Run() {
 }
 
 bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    auto* as = stmt->AsAssign();
+  if (auto* as = stmt->As<ast::AssignmentStatement>()) {
     return ProcessExpression(as->lhs()) && ProcessExpression(as->rhs());
-  } else if (stmt->IsBlock()) {
-    for (auto* s : *(stmt->AsBlock())) {
+  } else if (auto* block = stmt->As<ast::BlockStatement>()) {
+    for (auto* s : *block) {
       if (!ProcessStatement(s)) {
         return false;
       }
     }
-  } else if (stmt->IsBreak()) {
+  } else if (stmt->Is<ast::BreakStatement>()) {
     /* nop */
-  } else if (stmt->IsCall()) {
-    return ProcessExpression(stmt->AsCall()->expr());
-  } else if (stmt->IsCase()) {
-    return ProcessStatement(stmt->AsCase()->body());
-  } else if (stmt->IsContinue()) {
+  } else if (auto* call = stmt->As<ast::CallStatement>()) {
+    return ProcessExpression(call->expr());
+  } else if (auto* kase = stmt->As<ast::CaseStatement>()) {
+    return ProcessStatement(kase->body());
+  } else if (stmt->Is<ast::ContinueStatement>()) {
     /* nop */
-  } else if (stmt->IsDiscard()) {
+  } else if (stmt->Is<ast::DiscardStatement>()) {
     /* nop */
-  } else if (stmt->IsElse()) {
-    auto* e = stmt->AsElse();
+  } else if (auto* e = stmt->As<ast::ElseStatement>()) {
     return ProcessExpression(e->condition()) && ProcessStatement(e->body());
-  } else if (stmt->IsFallthrough()) {
+  } else if (stmt->Is<ast::FallthroughStatement>()) {
     /* nop */
-  } else if (stmt->IsIf()) {
-    auto* e = stmt->AsIf();
-    if (!ProcessExpression(e->condition()) || !ProcessStatement(e->body())) {
+  } else if (auto* i = stmt->As<ast::IfStatement>()) {
+    if (!ProcessExpression(i->condition()) || !ProcessStatement(i->body())) {
       return false;
     }
-    for (auto* s : e->else_statements()) {
+    for (auto* s : i->else_statements()) {
       if (!ProcessStatement(s)) {
         return false;
       }
     }
-  } else if (stmt->IsLoop()) {
-    auto* l = stmt->AsLoop();
+  } else if (auto* l = stmt->As<ast::LoopStatement>()) {
     if (l->has_continuing() && !ProcessStatement(l->continuing())) {
       return false;
     }
     return ProcessStatement(l->body());
-  } else if (stmt->IsReturn()) {
-    if (stmt->AsReturn()->has_value()) {
-      return ProcessExpression(stmt->AsReturn()->value());
+  } else if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    if (r->has_value()) {
+      return ProcessExpression(r->value());
     }
-  } else if (stmt->IsSwitch()) {
-    auto* s = stmt->AsSwitch();
+  } else if (auto* s = stmt->As<ast::SwitchStatement>()) {
     if (!ProcessExpression(s->condition())) {
       return false;
     }
@@ -122,8 +121,8 @@ bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
         return false;
       }
     }
-  } else if (stmt->IsVariableDecl()) {
-    auto* v = stmt->AsVariableDecl()->variable();
+  } else if (auto* vd = stmt->As<ast::VariableDeclStatement>()) {
+    auto* v = vd->variable();
     if (v->has_constructor() && !ProcessExpression(v->constructor())) {
       return false;
     }

@@ -60,9 +60,6 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// @returns the Switch body
   const CaseStatementList& body() const { return body_; }
 
-  /// @returns true if this is a switch statement
-  bool IsSwitch() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

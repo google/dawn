@@ -35,6 +35,7 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
@@ -109,7 +110,7 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 }
 
 bool LastIsFallthrough(const ast::BlockStatement* stmts) {
-  return !stmts->empty() && stmts->last()->IsFallthrough();
+  return !stmts->empty() && stmts->last()->Is<ast::FallthroughStatement>();
 }
 
 // A terminator is anything which will case a SPIR-V terminator to be emitted.
@@ -121,8 +122,11 @@ bool LastIsTerminator(const ast::BlockStatement* stmts) {
   }
 
   auto* last = stmts->last();
-  return last->IsBreak() || last->IsContinue() || last->IsDiscard() ||
-         last->IsReturn() || last->IsFallthrough();
+  return last->Is<ast::BreakStatement>() ||
+         last->Is<ast::ContinueStatement>() ||
+         last->Is<ast::DiscardStatement>() ||
+         last->Is<ast::ReturnStatement>() ||
+         last->Is<ast::FallthroughStatement>();
 }
 
 uint32_t IndexFromName(char name) {
@@ -2359,42 +2363,42 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
 }
 
 bool Builder::GenerateStatement(ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    return GenerateAssignStatement(stmt->AsAssign());
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
+    return GenerateAssignStatement(a);
   }
-  if (stmt->IsBlock()) {
-    return GenerateBlockStatement(stmt->AsBlock());
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return GenerateBlockStatement(b);
   }
-  if (stmt->IsBreak()) {
-    return GenerateBreakStatement(stmt->AsBreak());
+  if (auto* b = stmt->As<ast::BreakStatement>()) {
+    return GenerateBreakStatement(b);
   }
-  if (stmt->IsCall()) {
-    return GenerateCallExpression(stmt->AsCall()->expr()) != 0;
+  if (auto* c = stmt->As<ast::CallStatement>()) {
+    return GenerateCallExpression(c->expr()) != 0;
   }
-  if (stmt->IsContinue()) {
-    return GenerateContinueStatement(stmt->AsContinue());
+  if (auto* c = stmt->As<ast::ContinueStatement>()) {
+    return GenerateContinueStatement(c);
   }
-  if (stmt->IsDiscard()) {
-    return GenerateDiscardStatement(stmt->AsDiscard());
+  if (auto* d = stmt->As<ast::DiscardStatement>()) {
+    return GenerateDiscardStatement(d);
   }
-  if (stmt->IsFallthrough()) {
+  if (stmt->Is<ast::FallthroughStatement>()) {
     // Do nothing here, the fallthrough gets handled by the switch code.
     return true;
   }
-  if (stmt->IsIf()) {
-    return GenerateIfStatement(stmt->AsIf());
+  if (auto* i = stmt->As<ast::IfStatement>()) {
+    return GenerateIfStatement(i);
   }
-  if (stmt->IsLoop()) {
-    return GenerateLoopStatement(stmt->AsLoop());
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
+    return GenerateLoopStatement(l);
   }
-  if (stmt->IsReturn()) {
-    return GenerateReturnStatement(stmt->AsReturn());
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    return GenerateReturnStatement(r);
   }
-  if (stmt->IsSwitch()) {
-    return GenerateSwitchStatement(stmt->AsSwitch());
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return GenerateSwitchStatement(s);
   }
-  if (stmt->IsVariableDecl()) {
-    return GenerateVariableDeclStatement(stmt->AsVariableDecl());
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
+    return GenerateVariableDeclStatement(v);
   }
 
   error_ = "Unknown statement: " + stmt->str();

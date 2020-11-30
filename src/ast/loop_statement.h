@@ -62,9 +62,6 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
     return continuing_ != nullptr && !continuing_->empty();
   }
 
-  /// @returns true if this is a loop statement
-  bool IsLoop() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

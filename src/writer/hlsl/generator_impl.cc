@@ -29,6 +29,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
@@ -75,7 +76,8 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
     return false;
   }
 
-  return stmts->last()->IsBreak() || stmts->last()->IsFallthrough();
+  return stmts->last()->Is<ast::BreakStatement>() ||
+         stmts->last()->Is<ast::FallthroughStatement>();
 }
 
 std::string get_buffer_name(ast::Expression* expr) {
@@ -1601,11 +1603,10 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
     // the for loop into the continuing scope. Then, the variable declarations
     // will be turned into assignments.
     for (auto* s : *stmt->body()) {
-      if (!s->IsVariableDecl()) {
-        continue;
-      }
-      if (!EmitVariable(out, s->AsVariableDecl()->variable(), true)) {
-        return false;
+      if (auto* v = s->As<ast::VariableDeclStatement>()) {
+        if (!EmitVariable(out, v->variable(), true)) {
+          return false;
+        }
       }
     }
   }
@@ -1630,10 +1631,11 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
   for (auto* s : *(stmt->body())) {
     // If we have a continuing block we've already emitted the variable
     // declaration before the loop, so treat it as an assignment.
-    if (s->IsVariableDecl() && stmt->has_continuing()) {
+    auto* decl = s->As<ast::VariableDeclStatement>();
+    if (decl != nullptr && stmt->has_continuing()) {
       make_indent(out);
 
-      auto* var = s->AsVariableDecl()->variable();
+      auto* var = decl->variable();
 
       std::ostringstream pre;
       std::ostringstream constructor_out;
@@ -1963,51 +1965,51 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    return EmitAssign(out, stmt->AsAssign());
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
+    return EmitAssign(out, a);
   }
-  if (stmt->IsBlock()) {
-    return EmitIndentedBlockAndNewline(out, stmt->AsBlock());
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return EmitIndentedBlockAndNewline(out, b);
   }
-  if (stmt->IsBreak()) {
-    return EmitBreak(out, stmt->AsBreak());
+  if (auto* b = stmt->As<ast::BreakStatement>()) {
+    return EmitBreak(out, b);
   }
-  if (stmt->IsCall()) {
+  if (auto* c = stmt->As<ast::CallStatement>()) {
     make_indent(out);
     std::ostringstream pre;
     std::ostringstream call_out;
-    if (!EmitCall(pre, call_out, stmt->AsCall()->expr())) {
+    if (!EmitCall(pre, call_out, c->expr())) {
       return false;
     }
     out << pre.str();
     out << call_out.str() << ";" << std::endl;
     return true;
   }
-  if (stmt->IsContinue()) {
-    return EmitContinue(out, stmt->AsContinue());
+  if (auto* c = stmt->As<ast::ContinueStatement>()) {
+    return EmitContinue(out, c);
   }
-  if (stmt->IsDiscard()) {
-    return EmitDiscard(out, stmt->AsDiscard());
+  if (auto* d = stmt->As<ast::DiscardStatement>()) {
+    return EmitDiscard(out, d);
   }
-  if (stmt->IsFallthrough()) {
+  if (auto* f = stmt->As<ast::FallthroughStatement>()) {
     make_indent(out);
     out << "/* fallthrough */" << std::endl;
     return true;
   }
-  if (stmt->IsIf()) {
-    return EmitIf(out, stmt->AsIf());
+  if (auto* i = stmt->As<ast::IfStatement>()) {
+    return EmitIf(out, i);
   }
-  if (stmt->IsLoop()) {
-    return EmitLoop(out, stmt->AsLoop());
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
+    return EmitLoop(out, l);
   }
-  if (stmt->IsReturn()) {
-    return EmitReturn(out, stmt->AsReturn());
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    return EmitReturn(out, r);
   }
-  if (stmt->IsSwitch()) {
-    return EmitSwitch(out, stmt->AsSwitch());
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return EmitSwitch(out, s);
   }
-  if (stmt->IsVariableDecl()) {
-    return EmitVariable(out, stmt->AsVariableDecl()->variable(), false);
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
+    return EmitVariable(out, v->variable(), false);
   }
 
   error_ = "unknown statement type: " + stmt->str();

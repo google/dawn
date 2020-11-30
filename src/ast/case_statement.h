@@ -70,9 +70,6 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   /// @returns the case body
   BlockStatement* body() { return body_; }
 
-  /// @returns true if this is a case statement
-  bool IsCase() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

@@ -31,7 +31,7 @@ TEST_F(ContinueStatementTest, Creation_WithSource) {
 
 TEST_F(ContinueStatementTest, IsContinue) {
   ContinueStatement stmt;
-  EXPECT_TRUE(stmt.IsContinue());
+  EXPECT_TRUE(stmt.Is<ContinueStatement>());
 }
 
 TEST_F(ContinueStatementTest, IsValid) {

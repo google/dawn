@@ -27,10 +27,6 @@ CallStatement::CallStatement(CallStatement&&) = default;
 
 CallStatement::~CallStatement() = default;
 
-bool CallStatement::IsCall() const {
-  return true;
-}
-
 bool CallStatement::IsValid() const {
   return call_ != nullptr && call_->IsValid();
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -40,8 +41,8 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
   ASSERT_EQ(e->size(), 2u);
-  EXPECT_TRUE(e->get(0)->IsVariableDecl());
-  EXPECT_TRUE(e->get(1)->IsAssign());
+  EXPECT_TRUE(e->get(0)->Is<ast::VariableDeclStatement>());
+  EXPECT_TRUE(e->get(1)->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
@@ -60,7 +61,7 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough) {
   EXPECT_FALSE(e.errored);
   EXPECT_TRUE(e.matched);
   ASSERT_EQ(e->size(), 1u);
-  EXPECT_TRUE(e->get(0)->IsFallthrough());
+  EXPECT_TRUE(e->get(0)->Is<ast::FallthroughStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {

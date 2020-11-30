@@ -47,7 +47,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
   auto* rhs = create<ast::IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(lhs, rhs);
-  EXPECT_TRUE(stmt.IsAssign());
+  EXPECT_TRUE(stmt.Is<AssignmentStatement>());
 }
 
 TEST_F(AssignmentStatementTest, IsValid) {

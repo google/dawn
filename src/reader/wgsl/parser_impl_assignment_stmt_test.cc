@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsAssign());
+  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
   ASSERT_NE(e->lhs(), nullptr);
   ASSERT_NE(e->rhs(), nullptr);
 
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsAssign());
+  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
   ASSERT_NE(e->lhs(), nullptr);
   ASSERT_NE(e->rhs(), nullptr);
 

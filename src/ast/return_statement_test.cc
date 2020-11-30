@@ -41,7 +41,7 @@ TEST_F(ReturnStatementTest, Creation_WithSource) {
 
 TEST_F(ReturnStatementTest, IsReturn) {
   ReturnStatement r;
-  EXPECT_TRUE(r.IsReturn());
+  EXPECT_TRUE(r.Is<ReturnStatement>());
 }
 
 TEST_F(ReturnStatementTest, HasValue_WithoutValue) {

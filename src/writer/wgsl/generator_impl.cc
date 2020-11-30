@@ -796,46 +796,46 @@ bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    return EmitAssign(stmt->AsAssign());
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
+    return EmitAssign(a);
   }
-  if (stmt->IsBlock()) {
-    return EmitIndentedBlockAndNewline(stmt->AsBlock());
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return EmitIndentedBlockAndNewline(b);
   }
-  if (stmt->IsBreak()) {
-    return EmitBreak(stmt->AsBreak());
+  if (auto* b = stmt->As<ast::BreakStatement>()) {
+    return EmitBreak(b);
   }
-  if (stmt->IsCall()) {
+  if (auto* c = stmt->As<ast::CallStatement>()) {
     make_indent();
-    if (!EmitCall(stmt->AsCall()->expr())) {
+    if (!EmitCall(c->expr())) {
       return false;
     }
     out_ << ";" << std::endl;
     return true;
   }
-  if (stmt->IsContinue()) {
-    return EmitContinue(stmt->AsContinue());
+  if (auto* c = stmt->As<ast::ContinueStatement>()) {
+    return EmitContinue(c);
   }
-  if (stmt->IsDiscard()) {
-    return EmitDiscard(stmt->AsDiscard());
+  if (auto* d = stmt->As<ast::DiscardStatement>()) {
+    return EmitDiscard(d);
   }
-  if (stmt->IsFallthrough()) {
-    return EmitFallthrough(stmt->AsFallthrough());
+  if (auto* f = stmt->As<ast::FallthroughStatement>()) {
+    return EmitFallthrough(f);
   }
-  if (stmt->IsIf()) {
-    return EmitIf(stmt->AsIf());
+  if (auto* i = stmt->As<ast::IfStatement>()) {
+    return EmitIf(i);
   }
-  if (stmt->IsLoop()) {
-    return EmitLoop(stmt->AsLoop());
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
+    return EmitLoop(l);
   }
-  if (stmt->IsReturn()) {
-    return EmitReturn(stmt->AsReturn());
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    return EmitReturn(r);
   }
-  if (stmt->IsSwitch()) {
-    return EmitSwitch(stmt->AsSwitch());
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return EmitSwitch(s);
   }
-  if (stmt->IsVariableDecl()) {
-    return EmitVariable(stmt->AsVariableDecl()->variable());
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
+    return EmitVariable(v->variable());
   }
 
   error_ = "unknown statement type: " + stmt->str();

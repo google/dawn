@@ -32,9 +32,6 @@ class BreakStatement : public Castable<BreakStatement, Statement> {
   BreakStatement(BreakStatement&&);
   ~BreakStatement() override;
 
-  /// @returns true if this is an break statement
-  bool IsBreak() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

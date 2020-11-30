@@ -44,7 +44,7 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
   VariableDeclStatement s;
-  EXPECT_TRUE(s.IsVariableDecl());
+  EXPECT_TRUE(s.Is<VariableDeclStatement>());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid) {

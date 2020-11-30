@@ -65,7 +65,7 @@ TEST_F(BlockStatementTest, Creation_WithSource) {
 
 TEST_F(BlockStatementTest, IsBlock) {
   BlockStatement b;
-  EXPECT_TRUE(b.IsBlock());
+  EXPECT_TRUE(b.Is<BlockStatement>());
 }
 
 TEST_F(BlockStatementTest, IsValid) {

@@ -32,9 +32,6 @@ class DiscardStatement : public Castable<DiscardStatement, Statement> {
   DiscardStatement(DiscardStatement&&);
   ~DiscardStatement() override;
 
-  /// @returns true if this is a discard statement
-  bool IsDiscard() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

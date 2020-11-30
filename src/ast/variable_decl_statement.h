@@ -48,9 +48,6 @@ class VariableDeclStatement
   /// @returns the variable
   Variable* variable() const { return variable_; }
 
-  /// @returns true if this is an variable statement
-  bool IsVariableDecl() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

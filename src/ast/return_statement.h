@@ -51,9 +51,6 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   /// @returns true if the return has a value
   bool has_value() const { return value_ != nullptr; }
 
-  /// @returns true if this is a return statement
-  bool IsReturn() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

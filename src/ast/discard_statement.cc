@@ -25,10 +25,6 @@ DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 
 DiscardStatement::~DiscardStatement() = default;
 
-bool DiscardStatement::IsDiscard() const {
-  return true;
-}
-
 bool DiscardStatement::IsValid() const {
   return true;
 }

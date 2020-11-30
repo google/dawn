@@ -57,7 +57,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 
 TEST_F(SwitchStatementTest, IsSwitch) {
   SwitchStatement stmt;
-  EXPECT_TRUE(stmt.IsSwitch());
+  EXPECT_TRUE(stmt.Is<SwitchStatement>());
 }
 
 TEST_F(SwitchStatementTest, IsValid) {

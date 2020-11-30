@@ -30,10 +30,6 @@ ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 
 ReturnStatement::~ReturnStatement() = default;
 
-bool ReturnStatement::IsReturn() const {
-  return true;
-}
-
 bool ReturnStatement::IsValid() const {
   if (value_ != nullptr) {
     return value_->IsValid();

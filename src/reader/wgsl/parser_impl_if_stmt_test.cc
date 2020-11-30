@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, IfStmt) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsIf());
+  ASSERT_TRUE(e->Is<ast::IfStatement>());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
   EXPECT_EQ(e->body()->size(), 2u);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsIf());
+  ASSERT_TRUE(e->Is<ast::IfStatement>());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
   EXPECT_EQ(e->body()->size(), 2u);

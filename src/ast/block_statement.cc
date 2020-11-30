@@ -25,10 +25,6 @@ BlockStatement::BlockStatement(BlockStatement&&) = default;
 
 BlockStatement::~BlockStatement() = default;
 
-bool BlockStatement::IsBlock() const {
-  return true;
-}
-
 bool BlockStatement::IsValid() const {
   for (auto* stmt : *this) {
     if (stmt == nullptr || !stmt->IsValid()) {

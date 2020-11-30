@@ -32,6 +32,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
@@ -80,7 +81,8 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
     return false;
   }
 
-  return stmts->last()->IsBreak() || stmts->last()->IsFallthrough();
+  return stmts->last()->Is<ast::BreakStatement>() ||
+         stmts->last()->Is<ast::FallthroughStatement>();
 }
 
 uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
@@ -1540,11 +1542,10 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     // the for loop into the continuing scope. Then, the variable declarations
     // will be turned into assignments.
     for (auto* s : *(stmt->body())) {
-      if (!s->IsVariableDecl()) {
-        continue;
-      }
-      if (!EmitVariable(s->AsVariableDecl()->variable(), true)) {
-        return false;
+      if (auto* decl = s->As<ast::VariableDeclStatement>()) {
+        if (!EmitVariable(decl->variable(), true)) {
+          return false;
+        }
       }
     }
   }
@@ -1569,10 +1570,11 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   for (auto* s : *(stmt->body())) {
     // If we have a continuing block we've already emitted the variable
     // declaration before the loop, so treat it as an assignment.
-    if (s->IsVariableDecl() && stmt->has_continuing()) {
+    auto* decl = s->As<ast::VariableDeclStatement>();
+    if (decl != nullptr && stmt->has_continuing()) {
       make_indent();
 
-      auto* var = s->AsVariableDecl()->variable();
+      auto* var = decl->variable();
       out_ << var->name() << " = ";
       if (var->constructor() != nullptr) {
         if (!EmitExpression(var->constructor())) {
@@ -1716,48 +1718,48 @@ bool GeneratorImpl::EmitIndentedBlockAndNewline(ast::BlockStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
-  if (stmt->IsAssign()) {
-    return EmitAssign(stmt->AsAssign());
+  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
+    return EmitAssign(a);
   }
-  if (stmt->IsBlock()) {
-    return EmitIndentedBlockAndNewline(stmt->AsBlock());
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return EmitIndentedBlockAndNewline(b);
   }
-  if (stmt->IsBreak()) {
-    return EmitBreak(stmt->AsBreak());
+  if (auto* b = stmt->As<ast::BreakStatement>()) {
+    return EmitBreak(b);
   }
-  if (stmt->IsCall()) {
+  if (auto* c = stmt->As<ast::CallStatement>()) {
     make_indent();
-    if (!EmitCall(stmt->AsCall()->expr())) {
+    if (!EmitCall(c->expr())) {
       return false;
     }
     out_ << ";" << std::endl;
     return true;
   }
-  if (stmt->IsContinue()) {
-    return EmitContinue(stmt->AsContinue());
+  if (auto* c = stmt->As<ast::ContinueStatement>()) {
+    return EmitContinue(c);
   }
-  if (stmt->IsDiscard()) {
-    return EmitDiscard(stmt->AsDiscard());
+  if (auto* d = stmt->As<ast::DiscardStatement>()) {
+    return EmitDiscard(d);
   }
-  if (stmt->IsFallthrough()) {
+  if (auto* f = stmt->As<ast::FallthroughStatement>()) {
     make_indent();
     out_ << "/* fallthrough */" << std::endl;
     return true;
   }
-  if (stmt->IsIf()) {
-    return EmitIf(stmt->AsIf());
+  if (auto* i = stmt->As<ast::IfStatement>()) {
+    return EmitIf(i);
   }
-  if (stmt->IsLoop()) {
-    return EmitLoop(stmt->AsLoop());
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
+    return EmitLoop(l);
   }
-  if (stmt->IsReturn()) {
-    return EmitReturn(stmt->AsReturn());
+  if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    return EmitReturn(r);
   }
-  if (stmt->IsSwitch()) {
-    return EmitSwitch(stmt->AsSwitch());
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return EmitSwitch(s);
   }
-  if (stmt->IsVariableDecl()) {
-    return EmitVariable(stmt->AsVariableDecl()->variable(), false);
+  if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
+    return EmitVariable(v->variable(), false);
   }
 
   error_ = "unknown statement type: " + stmt->str();

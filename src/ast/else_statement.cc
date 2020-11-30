@@ -34,10 +34,6 @@ ElseStatement::ElseStatement(ElseStatement&&) = default;
 
 ElseStatement::~ElseStatement() = default;
 
-bool ElseStatement::IsElse() const {
-  return true;
-}
-
 bool ElseStatement::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {
     return false;

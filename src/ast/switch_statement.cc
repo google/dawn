@@ -29,10 +29,6 @@ SwitchStatement::SwitchStatement(const Source& source,
                                  CaseStatementList body)
     : Base(source), condition_(condition), body_(body) {}
 
-bool SwitchStatement::IsSwitch() const {
-  return true;
-}
-
 SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
 
 SwitchStatement::~SwitchStatement() = default;

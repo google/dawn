@@ -87,9 +87,6 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
     return statements_.end();
   }
 
-  /// @returns true if this is a block statement
-  bool IsBlock() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

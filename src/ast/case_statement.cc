@@ -31,10 +31,6 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
 
-bool CaseStatement::IsCase() const {
-  return true;
-}
-
 bool CaseStatement::IsValid() const {
   return body_ != nullptr && body_->IsValid();
 }

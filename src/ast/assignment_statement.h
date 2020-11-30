@@ -55,9 +55,6 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   /// @returns the right side expression
   Expression* rhs() const { return rhs_; }
 
-  /// @returns true if this is an assignment statement
-  bool IsAssign() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

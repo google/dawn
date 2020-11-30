@@ -31,7 +31,7 @@ TEST_F(BreakStatementTest, Creation_WithSource) {
 
 TEST_F(BreakStatementTest, IsBreak) {
   BreakStatement stmt;
-  EXPECT_TRUE(stmt.IsBreak());
+  EXPECT_TRUE(stmt.Is<BreakStatement>());
 }
 
 TEST_F(BreakStatementTest, IsValid) {

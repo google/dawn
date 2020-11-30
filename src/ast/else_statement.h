@@ -67,9 +67,6 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   /// @returns the else body
   BlockStatement* body() { return body_; }
 
-  /// @returns true if this is a else statement
-  bool IsElse() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

@@ -26,10 +26,6 @@ FallthroughStatement::FallthroughStatement(FallthroughStatement&&) = default;
 
 FallthroughStatement::~FallthroughStatement() = default;
 
-bool FallthroughStatement::IsFallthrough() const {
-  return true;
-}
-
 bool FallthroughStatement::IsValid() const {
   return true;
 }

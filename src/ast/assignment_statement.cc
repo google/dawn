@@ -31,10 +31,6 @@ AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 
 AssignmentStatement::~AssignmentStatement() = default;
 
-bool AssignmentStatement::IsAssign() const {
-  return true;
-}
-
 bool AssignmentStatement::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid())
     return false;
