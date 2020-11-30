@@ -2698,8 +2698,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // So represent a load by a new const definition.
       auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
       // The load result type is the pointee type of its operand.
-      assert(expr.type->IsPointer());
-      expr.type = expr.type->AsPointer()->type();
+      assert(expr.type->Is<ast::type::PointerType>());
+      expr.type = expr.type->As<ast::type::PointerType>()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpCopyObject: {
@@ -3059,7 +3059,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
     assert(ast_pointer_type);
-    assert(ast_pointer_type->IsPointer());
+    assert(ast_pointer_type->Is<ast::type::PointerType>());
     current_expr = TypedExpression{ast_pointer_type, next_expr};
   }
   return current_expr;
@@ -3255,8 +3255,9 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
       if (type) {
         if (type->AsPointer()) {
           const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-          if (ast_type && ast_type->AsPointer()) {
-            info->storage_class = ast_type->AsPointer()->storage_class();
+          if (ast_type && ast_type->As<ast::type::PointerType>()) {
+            info->storage_class =
+                ast_type->As<ast::type::PointerType>()->storage_class();
           }
           switch (inst.opcode()) {
             case SpvOpUndef:
@@ -3298,8 +3299,8 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
   const auto type_id = def_use_mgr_->GetDef(id)->type_id();
   if (type_id) {
     auto* ast_type = parser_impl_.ConvertType(type_id);
-    if (ast_type && ast_type->IsPointer()) {
-      return ast_type->AsPointer()->storage_class();
+    if (ast_type && ast_type->Is<ast::type::PointerType>()) {
+      return ast_type->As<ast::type::PointerType>()->storage_class();
     }
   }
   return ast::StorageClass::kNone;
@@ -3307,10 +3308,10 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
 
 ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
                                                     uint32_t result_id) {
-  if (type->IsPointer()) {
+  if (type->Is<ast::type::PointerType>()) {
     // Remap an old-style storage buffer pointer to a new-style storage
     // buffer pointer.
-    const auto* ast_ptr_type = type->AsPointer();
+    const auto* ast_ptr_type = type->As<ast::type::PointerType>();
     const auto sc = GetStorageClassForPointerValue(result_id);
     if (ast_ptr_type->storage_class() != sc) {
       return parser_impl_.get_module().create<ast::type::PointerType>(

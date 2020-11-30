@@ -446,8 +446,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       return false;
     }
     out_ << ">";
-  } else if (type->IsPointer()) {
-    auto* ptr = type->AsPointer();
+  } else if (type->Is<ast::type::PointerType>()) {
+    auto* ptr = type->As<ast::type::PointerType>();
     out_ << "ptr<" << ptr->storage_class() << ", ";
     if (!EmitType(ptr->type())) {
       return false;

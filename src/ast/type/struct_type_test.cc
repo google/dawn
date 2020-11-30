@@ -27,6 +27,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 
@@ -55,7 +56,7 @@ TEST_F(StructTypeTest, Is) {
   EXPECT_FALSE(ty->Is<F32Type>());
   EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->Is<PointerType>());
   EXPECT_FALSE(ty->IsSampler());
   EXPECT_TRUE(ty->IsStruct());
   EXPECT_FALSE(ty->IsTexture());

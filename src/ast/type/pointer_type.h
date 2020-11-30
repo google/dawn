@@ -36,9 +36,6 @@ class PointerType : public Castable<PointerType, Type> {
   PointerType(PointerType&&);
   ~PointerType() override;
 
-  /// @returns true if the type is a pointer type
-  bool IsPointer() const override;
-
   /// @returns the pointee type
   Type* type() const { return subtype_; }
   /// @returns the storage class of the pointer

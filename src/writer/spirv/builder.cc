@@ -819,7 +819,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 
   // If the source is a pointer we access chain into it. We also access chain
   // into an array of non-scalar types.
-  if (info->source_type->IsPointer() ||
+  if (info->source_type->Is<ast::type::PointerType>() ||
       (info->source_type->Is<ast::type::ArrayType>() &&
        !info->source_type->As<ast::type::ArrayType>()->type()->is_scalar())) {
     info->access_chain_indices.push_back(idx_id);
@@ -854,7 +854,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
   if (data_type->IsStruct()) {
-    if (!info->source_type->IsPointer()) {
+    if (!info->source_type->Is<ast::type::PointerType>()) {
       error_ =
           "Attempting to access a struct member on a non-pointer. Something is "
           "wrong";
@@ -895,7 +895,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       return false;
     }
 
-    if (info->source_type->IsPointer()) {
+    if (info->source_type->Is<ast::type::PointerType>()) {
       auto idx_id = GenerateU32Literal(val);
       if (idx_id == 0) {
         return 0;
@@ -1009,7 +1009,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
     auto* ary_res_type =
         accessors[0]->AsArrayAccessor()->array()->result_type();
 
-    if (!ary_res_type->IsPointer() &&
+    if (!ary_res_type->Is<ast::type::PointerType>() &&
         (ary_res_type->Is<ast::type::ArrayType>() &&
          !ary_res_type->As<ast::type::ArrayType>()->type()->is_scalar())) {
       ast::type::PointerType ptr(ary_res_type, ast::StorageClass::kFunction);
@@ -1087,7 +1087,7 @@ uint32_t Builder::GenerateIdentifierExpression(
 }
 
 uint32_t Builder::GenerateLoadIfNeeded(ast::type::Type* type, uint32_t id) {
-  if (!type->IsPointer()) {
+  if (!type->Is<ast::type::PointerType>()) {
     return id;
   }
 
@@ -1808,7 +1808,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
       error_ = "missing param for runtime array length";
       return 0;
     } else if (!call->params()[0]->IsMemberAccessor()) {
-      if (call->params()[0]->result_type()->IsPointer()) {
+      if (call->params()[0]->result_type()->Is<ast::type::PointerType>()) {
         error_ = "pointer accessors not supported yet";
       } else {
         error_ = "invalid accessor for runtime array length";
@@ -2431,8 +2431,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateMatrixType(type->As<ast::type::MatrixType>(), result)) {
       return 0;
     }
-  } else if (type->IsPointer()) {
-    if (!GeneratePointerType(type->AsPointer(), result)) {
+  } else if (type->Is<ast::type::PointerType>()) {
+    if (!GeneratePointerType(type->As<ast::type::PointerType>(), result)) {
       return 0;
     }
   } else if (type->IsStruct()) {

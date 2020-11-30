@@ -239,9 +239,9 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsPointer());
+  ASSERT_TRUE(t->Is<ast::type::PointerType>());
 
-  auto* ptr = t->AsPointer();
+  auto* ptr = t->As<ast::type::PointerType>();
   ASSERT_TRUE(ptr->type()->Is<ast::type::F32Type>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 }
@@ -253,9 +253,9 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->IsPointer());
+  ASSERT_TRUE(t->Is<ast::type::PointerType>());
 
-  auto* ptr = t->AsPointer();
+  auto* ptr = t->As<ast::type::PointerType>();
   ASSERT_TRUE(ptr->type()->IsVector());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 

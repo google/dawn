@@ -197,7 +197,7 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
   if (type->Is<ast::type::BoolType>()) {
     return 1;
   }
-  if (type->IsPointer()) {
+  if (type->Is<ast::type::PointerType>()) {
     return 0;
   }
   if (type->Is<ast::type::F32Type>() || type->Is<ast::type::I32Type>() ||
@@ -1825,8 +1825,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       return false;
     }
     out_ << mat->columns() << "x" << mat->rows();
-  } else if (type->IsPointer()) {
-    auto* ptr = type->AsPointer();
+  } else if (type->Is<ast::type::PointerType>()) {
+    auto* ptr = type->As<ast::type::PointerType>();
     // TODO(dsinclair): Storage class?
     if (!EmitType(ptr->type(), "")) {
       return false;

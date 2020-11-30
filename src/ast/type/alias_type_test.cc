@@ -59,7 +59,7 @@ TEST_F(AliasTypeTest, Is) {
   EXPECT_FALSE(ty->Is<F32Type>());
   EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->Is<PointerType>());
   EXPECT_FALSE(ty->IsSampler());
   EXPECT_FALSE(ty->IsStruct());
   EXPECT_FALSE(ty->IsTexture());

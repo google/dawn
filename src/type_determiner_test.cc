@@ -438,9 +438,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsPointer());
+  ASSERT_TRUE(acc.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = acc.result_type()->AsPointer();
+  auto* ptr = acc.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -463,9 +463,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsPointer());
+  ASSERT_TRUE(acc.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = acc.result_type()->AsPointer();
+  auto* ptr = acc.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -509,9 +509,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsPointer());
+  ASSERT_TRUE(acc.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = acc.result_type()->AsPointer();
+  auto* ptr = acc.result_type()->As<ast::type::PointerType>();
   ASSERT_TRUE(ptr->type()->IsVector());
   EXPECT_EQ(ptr->type()->AsVector()->size(), 3u);
 }
@@ -538,9 +538,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsPointer());
+  ASSERT_TRUE(acc.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = acc.result_type()->AsPointer();
+  auto* ptr = acc.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -561,9 +561,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsPointer());
+  ASSERT_TRUE(acc.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = acc.result_type()->AsPointer();
+  auto* ptr = acc.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -697,9 +697,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   ast::IdentifierExpression ident("my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
-  EXPECT_TRUE(ident.result_type()->IsPointer());
-  EXPECT_TRUE(
-      ident.result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(ident.result_type()->Is<ast::type::PointerType>());
+  EXPECT_TRUE(ident.result_type()
+                  ->As<ast::type::PointerType>()
+                  ->type()
+                  ->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
@@ -755,9 +757,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->IsPointer());
-  EXPECT_TRUE(
-      my_var->result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(my_var->result_type()->Is<ast::type::PointerType>());
+  EXPECT_TRUE(my_var->result_type()
+                  ->As<ast::type::PointerType>()
+                  ->type()
+                  ->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
@@ -778,9 +782,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->IsPointer());
-  EXPECT_TRUE(
-      my_var->result_type()->AsPointer()->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(my_var->result_type()->Is<ast::type::PointerType>());
+  EXPECT_TRUE(my_var->result_type()
+                  ->As<ast::type::PointerType>()
+                  ->type()
+                  ->Is<ast::type::F32Type>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
@@ -967,9 +973,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   ast::MemberAccessorExpression mem(ident, mem_ident);
   EXPECT_TRUE(td()->DetermineResultType(&mem));
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsPointer());
+  ASSERT_TRUE(mem.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = mem.result_type()->AsPointer();
+  auto* ptr = mem.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -1001,9 +1007,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   ast::MemberAccessorExpression mem(ident, mem_ident);
   EXPECT_TRUE(td()->DetermineResultType(&mem));
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsPointer());
+  ASSERT_TRUE(mem.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = mem.result_type()->AsPointer();
+  auto* ptr = mem.result_type()->As<ast::type::PointerType>();
   EXPECT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 
@@ -1044,9 +1050,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ast::MemberAccessorExpression mem(ident, swizzle);
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsPointer());
+  ASSERT_TRUE(mem.result_type()->Is<ast::type::PointerType>());
 
-  auto* ptr = mem.result_type()->AsPointer();
+  auto* ptr = mem.result_type()->As<ast::type::PointerType>();
   ASSERT_TRUE(ptr->type()->Is<ast::type::F32Type>());
 }
 

@@ -348,9 +348,9 @@ bool TypeDeterminer::DetermineArrayAccessor(
   }
 
   // If we're extracting from a pointer, we return a pointer.
-  if (res->IsPointer()) {
+  if (res->Is<ast::type::PointerType>()) {
     ret = mod_->create<ast::type::PointerType>(
-        ret, res->AsPointer()->storage_class());
+        ret, res->As<ast::type::PointerType>()->storage_class());
   } else if (parent_type->Is<ast::type::ArrayType>() &&
              !parent_type->As<ast::type::ArrayType>()->type()->is_scalar()) {
     // If we extract a non-scalar from an array then we also get a pointer. We
@@ -850,7 +850,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     // the pointer around the variable type.
     if (var->is_const()) {
       expr->set_result_type(var->type());
-    } else if (var->type()->IsPointer()) {
+    } else if (var->type()->Is<ast::type::PointerType>()) {
       expr->set_result_type(var->type());
     } else {
       expr->set_result_type(mod_->create<ast::type::PointerType>(
@@ -1045,9 +1045,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     // If we're extracting from a pointer, we return a pointer.
-    if (res->IsPointer()) {
+    if (res->Is<ast::type::PointerType>()) {
       ret = mod_->create<ast::type::PointerType>(
-          ret, res->AsPointer()->storage_class());
+          ret, res->As<ast::type::PointerType>()->storage_class());
     }
   } else if (data_type->IsVector()) {
     auto* vec = data_type->AsVector();
@@ -1057,9 +1057,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
-      if (res->IsPointer()) {
+      if (res->Is<ast::type::PointerType>()) {
         ret = mod_->create<ast::type::PointerType>(
-            ret, res->AsPointer()->storage_class());
+            ret, res->As<ast::type::PointerType>()->storage_class());
       }
     } else {
       // The vector will have a number of components equal to the length of the

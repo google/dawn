@@ -36,6 +36,7 @@
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/type.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/entry_point_info.h"

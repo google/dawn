@@ -45,6 +45,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
@@ -2073,7 +2074,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       return false;
     }
     out << mat->rows() << "x" << mat->columns();
-  } else if (type->IsPointer()) {
+  } else if (type->Is<ast::type::PointerType>()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
     error_ = "pointers not supported in HLSL";

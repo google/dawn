@@ -42,8 +42,8 @@ Type::Type(Type&&) = default;
 Type::~Type() = default;
 
 Type* Type::UnwrapPtrIfNeeded() {
-  if (IsPointer()) {
-    return AsPointer()->type();
+  if (Is<PointerType>()) {
+    return As<PointerType>()->type();
   }
   return this;
 }
@@ -64,10 +64,6 @@ Type* Type::UnwrapIfNeeded() {
 
 Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
-}
-
-bool Type::IsPointer() const {
-  return false;
 }
 
 bool Type::IsSampler() const {
@@ -146,11 +142,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const PointerType* Type::AsPointer() const {
-  assert(IsPointer());
-  return static_cast<const PointerType*>(this);
-}
-
 const SamplerType* Type::AsSampler() const {
   assert(IsSampler());
   return static_cast<const SamplerType*>(this);
@@ -179,11 +170,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-PointerType* Type::AsPointer() {
-  assert(IsPointer());
-  return static_cast<PointerType*>(this);
 }
 
 SamplerType* Type::AsSampler() {

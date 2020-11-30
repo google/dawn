@@ -1116,14 +1116,15 @@ bool ParserImpl::EmitModuleScopeVariables() {
                          "SPIR-V type with ID: "
                       << var.type_id();
       }
-      if (!ast_type->IsPointer()) {
+      if (!ast_type->Is<ast::type::PointerType>()) {
         return Fail() << "variable with ID " << var.result_id()
                       << " has non-pointer type " << var.type_id();
       }
     }
 
-    auto* ast_store_type = ast_type->AsPointer()->type();
-    auto ast_storage_class = ast_type->AsPointer()->storage_class();
+    auto* ast_store_type = ast_type->As<ast::type::PointerType>()->type();
+    auto ast_storage_class =
+        ast_type->As<ast::type::PointerType>()->storage_class();
     auto* ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
     if (var.NumInOperands() > 1) {

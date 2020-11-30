@@ -23,7 +23,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class PointerType;
 class SamplerType;
 class StructType;
 class TextureType;
@@ -41,8 +40,6 @@ class Type : public Castable<Type> {
   Type(Type&&);
   ~Type() override;
 
-  /// @returns true if the type is a ptr type
-  virtual bool IsPointer() const;
   /// @returns true if the type is a sampler
   virtual bool IsSampler() const;
   /// @returns true if the type is a struct type
@@ -110,8 +107,6 @@ class Type : public Castable<Type> {
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector();
 
-  /// @returns the type as a pointer type
-  const PointerType* AsPointer() const;
   /// @returns the type as a sampler type
   const SamplerType* AsSampler() const;
   /// @returns the type as a struct type
@@ -125,8 +120,6 @@ class Type : public Castable<Type> {
   /// @returns the type as a void type
   const VoidType* AsVoid() const;
 
-  /// @returns the type as a pointer type
-  PointerType* AsPointer();
   /// @returns the type as a sampler type
   SamplerType* AsSampler();
   /// @returns the type as a struct type
