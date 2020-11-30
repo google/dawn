@@ -31,37 +31,37 @@ namespace ast {
 namespace type {
 namespace {
 
-using PointerTypeTest = TestHelper;
+using PointerTest = TestHelper;
 
-TEST_F(PointerTypeTest, Creation) {
-  I32Type i32;
-  PointerType p{&i32, StorageClass::kStorageBuffer};
+TEST_F(PointerTest, Creation) {
+  I32 i32;
+  Pointer p{&i32, StorageClass::kStorageBuffer};
   EXPECT_EQ(p.type(), &i32);
   EXPECT_EQ(p.storage_class(), StorageClass::kStorageBuffer);
 }
 
-TEST_F(PointerTypeTest, Is) {
-  I32Type i32;
-  PointerType p{&i32, StorageClass::kFunction};
+TEST_F(PointerTest, Is) {
+  I32 i32;
+  Pointer p{&i32, StorageClass::kFunction};
   Type* ty = &p;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_TRUE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_TRUE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(PointerTypeTest, TypeName) {
-  I32Type i32;
-  PointerType p{&i32, StorageClass::kWorkgroup};
+TEST_F(PointerTest, TypeName) {
+  I32 i32;
+  Pointer p{&i32, StorageClass::kWorkgroup};
   EXPECT_EQ(p.type_name(), "__ptr_workgroup__i32");
 }
 

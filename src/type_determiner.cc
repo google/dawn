@@ -88,12 +88,12 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
 bool TypeDeterminer::Determine() {
   for (auto& iter : mod_->types()) {
     auto& type = iter.second;
-    if (!type->Is<ast::type::TextureType>() ||
-        !type->Is<ast::type::StorageTextureType>()) {
+    if (!type->Is<ast::type::Texture>() ||
+        !type->Is<ast::type::StorageTexture>()) {
       continue;
     }
     if (!DetermineStorageTextureSubtype(
-            type->As<ast::type::StorageTextureType>())) {
+            type->As<ast::type::StorageTexture>())) {
       set_error(Source{}, "unable to determine storage texture subtype for: " +
                               type->type_name());
       return false;
@@ -330,13 +330,13 @@ bool TypeDeterminer::DetermineArrayAccessor(
   auto* res = expr->array()->result_type();
   auto* parent_type = res->UnwrapAll();
   ast::type::Type* ret = nullptr;
-  if (parent_type->Is<ast::type::ArrayType>()) {
-    ret = parent_type->As<ast::type::ArrayType>()->type();
-  } else if (parent_type->Is<ast::type::VectorType>()) {
-    ret = parent_type->As<ast::type::VectorType>()->type();
-  } else if (parent_type->Is<ast::type::MatrixType>()) {
-    auto* m = parent_type->As<ast::type::MatrixType>();
-    ret = mod_->create<ast::type::VectorType>(m->type(), m->rows());
+  if (parent_type->Is<ast::type::Array>()) {
+    ret = parent_type->As<ast::type::Array>()->type();
+  } else if (parent_type->Is<ast::type::Vector>()) {
+    ret = parent_type->As<ast::type::Vector>()->type();
+  } else if (parent_type->Is<ast::type::Matrix>()) {
+    auto* m = parent_type->As<ast::type::Matrix>();
+    ret = mod_->create<ast::type::Vector>(m->type(), m->rows());
   } else {
     set_error(expr->source(), "invalid parent type (" +
                                   parent_type->type_name() +
@@ -345,16 +345,15 @@ bool TypeDeterminer::DetermineArrayAccessor(
   }
 
   // If we're extracting from a pointer, we return a pointer.
-  if (res->Is<ast::type::PointerType>()) {
-    ret = mod_->create<ast::type::PointerType>(
-        ret, res->As<ast::type::PointerType>()->storage_class());
-  } else if (parent_type->Is<ast::type::ArrayType>() &&
-             !parent_type->As<ast::type::ArrayType>()->type()->is_scalar()) {
+  if (res->Is<ast::type::Pointer>()) {
+    ret = mod_->create<ast::type::Pointer>(
+        ret, res->As<ast::type::Pointer>()->storage_class());
+  } else if (parent_type->Is<ast::type::Array>() &&
+             !parent_type->As<ast::type::Array>()->type()->is_scalar()) {
     // If we extract a non-scalar from an array then we also get a pointer. We
     // will generate a Function storage class variable to store this
     // into.
-    ret =
-        mod_->create<ast::type::PointerType>(ret, ast::StorageClass::kFunction);
+    ret = mod_->create<ast::type::Pointer>(ret, ast::StorageClass::kFunction);
   }
   expr->set_result_type(ret);
 
@@ -516,11 +515,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ident->intrinsic() == ast::Intrinsic::kAny ||
       ident->intrinsic() == ast::Intrinsic::kAll) {
-    expr->func()->set_result_type(mod_->create<ast::type::BoolType>());
+    expr->func()->set_result_type(mod_->create<ast::type::Bool>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
-    expr->func()->set_result_type(mod_->create<ast::type::U32Type>());
+    expr->func()->set_result_type(mod_->create<ast::type::U32>());
     return true;
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
@@ -530,12 +529,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       return false;
     }
 
-    auto* bool_type = mod_->create<ast::type::BoolType>();
+    auto* bool_type = mod_->create<ast::type::Bool>();
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->Is<ast::type::VectorType>()) {
-      expr->func()->set_result_type(mod_->create<ast::type::VectorType>(
-          bool_type, param_type->As<ast::type::VectorType>()->size()));
+    if (param_type->Is<ast::type::Vector>()) {
+      expr->func()->set_result_type(mod_->create<ast::type::Vector>(
+          bool_type, param_type->As<ast::type::Vector>()->size()));
     } else {
       expr->func()->set_result_type(bool_type);
     }
@@ -547,13 +546,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     auto* texture_param = expr->params()[0];
     if (!texture_param->result_type()
              ->UnwrapPtrIfNeeded()
-             ->Is<ast::type::TextureType>()) {
+             ->Is<ast::type::Texture>()) {
       set_error(expr->source(), "invalid first argument for " + ident->name());
       return false;
     }
-    ast::type::TextureType* texture = texture_param->result_type()
-                                          ->UnwrapPtrIfNeeded()
-                                          ->As<ast::type::TextureType>();
+    ast::type::Texture* texture = texture_param->result_type()
+                                      ->UnwrapPtrIfNeeded()
+                                      ->As<ast::type::Texture>();
 
     bool is_array = false;
     switch (texture->dim()) {
@@ -658,34 +657,34 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ident->set_intrinsic_signature(
         std::make_unique<ast::intrinsic::TextureSignature>(param));
 
-    if (texture->Is<ast::type::DepthTextureType>()) {
-      expr->func()->set_result_type(mod_->create<ast::type::F32Type>());
+    if (texture->Is<ast::type::DepthTexture>()) {
+      expr->func()->set_result_type(mod_->create<ast::type::F32>());
       return true;
     }
 
-    if (!texture->Is<ast::type::StorageTextureType>() &&
-        !(texture->Is<ast::type::SampledTextureType>() ||
-          texture->Is<ast::type::MultisampledTextureType>())) {
+    if (!texture->Is<ast::type::StorageTexture>() &&
+        !(texture->Is<ast::type::SampledTexture>() ||
+          texture->Is<ast::type::MultisampledTexture>())) {
       set_error(expr->source(), "invalid texture for " + ident->name());
       return false;
     }
 
     ast::type::Type* type = nullptr;
-    if (texture->Is<ast::type::StorageTextureType>()) {
-      type = texture->As<ast::type::StorageTextureType>()->type();
-    } else if (texture->Is<ast::type::SampledTextureType>()) {
-      type = texture->As<ast::type::SampledTextureType>()->type();
-    } else if (texture->Is<ast::type::MultisampledTextureType>()) {
-      type = texture->As<ast::type::MultisampledTextureType>()->type();
+    if (texture->Is<ast::type::StorageTexture>()) {
+      type = texture->As<ast::type::StorageTexture>()->type();
+    } else if (texture->Is<ast::type::SampledTexture>()) {
+      type = texture->As<ast::type::SampledTexture>()->type();
+    } else if (texture->Is<ast::type::MultisampledTexture>()) {
+      type = texture->As<ast::type::MultisampledTexture>()->type();
     } else {
       set_error(expr->source(), "unknown texture type for texture sampling");
       return false;
     }
-    expr->func()->set_result_type(mod_->create<ast::type::VectorType>(type, 4));
+    expr->func()->set_result_type(mod_->create<ast::type::Vector>(type, 4));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
-    expr->func()->set_result_type(mod_->create<ast::type::F32Type>());
+    expr->func()->set_result_type(mod_->create<ast::type::F32>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
@@ -697,16 +696,16 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
-    if (!param0_type->Is<ast::type::VectorType>() ||
-        !param1_type->Is<ast::type::VectorType>()) {
+    if (!param0_type->Is<ast::type::Vector>() ||
+        !param1_type->Is<ast::type::Vector>()) {
       set_error(expr->source(), "invalid parameter type for " + ident->name());
       return false;
     }
 
-    expr->func()->set_result_type(mod_->create<ast::type::MatrixType>(
-        mod_->create<ast::type::F32Type>(),
-        param0_type->As<ast::type::VectorType>()->size(),
-        param1_type->As<ast::type::VectorType>()->size()));
+    expr->func()->set_result_type(mod_->create<ast::type::Matrix>(
+        mod_->create<ast::type::F32>(),
+        param0_type->As<ast::type::Vector>()->size(),
+        param1_type->As<ast::type::Vector>()->size()));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
@@ -782,7 +781,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           return false;
         }
         if (data->vector_size > 0 &&
-            result_types.back()->As<ast::type::VectorType>()->size() !=
+            result_types.back()->As<ast::type::Vector>()->size() !=
                 data->vector_size) {
           set_error(expr->source(), "incorrect vector size for " +
                                         ident->name() + ". " + "Requires " +
@@ -792,7 +791,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
         break;
       case IntrinsicDataType::kMatrix:
-        if (!result_types.back()->Is<ast::type::MatrixType>()) {
+        if (!result_types.back()->Is<ast::type::Matrix>()) {
           set_error(expr->source(), "incorrect type for " + ident->name() +
                                         ". Requires matrix value");
           return false;
@@ -817,13 +816,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     expr->func()->set_result_type(
         result_types[0]->is_float_scalar()
             ? result_types[0]
-            : result_types[0]->As<ast::type::VectorType>()->type());
+            : result_types[0]->As<ast::type::Vector>()->type());
     return true;
   }
   // The determinant returns the component type of the columns
   if (ident->intrinsic() == ast::Intrinsic::kDeterminant) {
     expr->func()->set_result_type(
-        result_types[0]->As<ast::type::MatrixType>()->type());
+        result_types[0]->As<ast::type::Matrix>()->type());
     return true;
   }
   expr->func()->set_result_type(result_types[0]);
@@ -853,11 +852,11 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     // the pointer around the variable type.
     if (var->is_const()) {
       expr->set_result_type(var->type());
-    } else if (var->type()->Is<ast::type::PointerType>()) {
+    } else if (var->type()->Is<ast::type::Pointer>()) {
       expr->set_result_type(var->type());
     } else {
-      expr->set_result_type(mod_->create<ast::type::PointerType>(
-          var->type(), var->storage_class()));
+      expr->set_result_type(
+          mod_->create<ast::type::Pointer>(var->type(), var->storage_class()));
     }
 
     set_referenced_from_function_if_needed(var);
@@ -1031,8 +1030,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   ast::type::Type* ret = nullptr;
-  if (data_type->Is<ast::type::StructType>()) {
-    auto* strct = data_type->As<ast::type::StructType>()->impl();
+  if (data_type->Is<ast::type::Struct>()) {
+    auto* strct = data_type->As<ast::type::Struct>()->impl();
     auto name = expr->member()->name();
 
     for (auto* member : strct->members()) {
@@ -1048,27 +1047,27 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     // If we're extracting from a pointer, we return a pointer.
-    if (res->Is<ast::type::PointerType>()) {
-      ret = mod_->create<ast::type::PointerType>(
-          ret, res->As<ast::type::PointerType>()->storage_class());
+    if (res->Is<ast::type::Pointer>()) {
+      ret = mod_->create<ast::type::Pointer>(
+          ret, res->As<ast::type::Pointer>()->storage_class());
     }
-  } else if (data_type->Is<ast::type::VectorType>()) {
-    auto* vec = data_type->As<ast::type::VectorType>();
+  } else if (data_type->Is<ast::type::Vector>()) {
+    auto* vec = data_type->As<ast::type::Vector>();
 
     auto size = expr->member()->name().size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
-      if (res->Is<ast::type::PointerType>()) {
-        ret = mod_->create<ast::type::PointerType>(
-            ret, res->As<ast::type::PointerType>()->storage_class());
+      if (res->Is<ast::type::Pointer>()) {
+        ret = mod_->create<ast::type::Pointer>(
+            ret, res->As<ast::type::Pointer>()->storage_class());
       }
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      ret = mod_->create<ast::type::VectorType>(vec->type(), size);
+      ret = mod_->create<ast::type::Vector>(vec->type(), size);
     }
   } else {
     set_error(
@@ -1099,11 +1098,11 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsLogicalAnd() || expr->IsLogicalOr() || expr->IsEqual() ||
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
-    auto* bool_type = mod_->create<ast::type::BoolType>();
+    auto* bool_type = mod_->create<ast::type::Bool>();
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->Is<ast::type::VectorType>()) {
-      expr->set_result_type(mod_->create<ast::type::VectorType>(
-          bool_type, param_type->As<ast::type::VectorType>()->size()));
+    if (param_type->Is<ast::type::Vector>()) {
+      expr->set_result_type(mod_->create<ast::type::Vector>(
+          bool_type, param_type->As<ast::type::Vector>()->size()));
     } else {
       expr->set_result_type(bool_type);
     }
@@ -1115,36 +1114,36 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
-    if (lhs_type->Is<ast::type::MatrixType>() &&
-        rhs_type->Is<ast::type::MatrixType>()) {
-      expr->set_result_type(mod_->create<ast::type::MatrixType>(
-          lhs_type->As<ast::type::MatrixType>()->type(),
-          lhs_type->As<ast::type::MatrixType>()->rows(),
-          rhs_type->As<ast::type::MatrixType>()->columns()));
+    if (lhs_type->Is<ast::type::Matrix>() &&
+        rhs_type->Is<ast::type::Matrix>()) {
+      expr->set_result_type(mod_->create<ast::type::Matrix>(
+          lhs_type->As<ast::type::Matrix>()->type(),
+          lhs_type->As<ast::type::Matrix>()->rows(),
+          rhs_type->As<ast::type::Matrix>()->columns()));
 
-    } else if (lhs_type->Is<ast::type::MatrixType>() &&
-               rhs_type->Is<ast::type::VectorType>()) {
-      auto* mat = lhs_type->As<ast::type::MatrixType>();
+    } else if (lhs_type->Is<ast::type::Matrix>() &&
+               rhs_type->Is<ast::type::Vector>()) {
+      auto* mat = lhs_type->As<ast::type::Matrix>();
       expr->set_result_type(
-          mod_->create<ast::type::VectorType>(mat->type(), mat->rows()));
-    } else if (lhs_type->Is<ast::type::VectorType>() &&
-               rhs_type->Is<ast::type::MatrixType>()) {
-      auto* mat = rhs_type->As<ast::type::MatrixType>();
+          mod_->create<ast::type::Vector>(mat->type(), mat->rows()));
+    } else if (lhs_type->Is<ast::type::Vector>() &&
+               rhs_type->Is<ast::type::Matrix>()) {
+      auto* mat = rhs_type->As<ast::type::Matrix>();
       expr->set_result_type(
-          mod_->create<ast::type::VectorType>(mat->type(), mat->columns()));
-    } else if (lhs_type->Is<ast::type::MatrixType>()) {
+          mod_->create<ast::type::Vector>(mat->type(), mat->columns()));
+    } else if (lhs_type->Is<ast::type::Matrix>()) {
       // matrix * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->Is<ast::type::MatrixType>()) {
+    } else if (rhs_type->Is<ast::type::Matrix>()) {
       // scalar * matrix
       expr->set_result_type(rhs_type);
-    } else if (lhs_type->Is<ast::type::VectorType>() &&
-               rhs_type->Is<ast::type::VectorType>()) {
+    } else if (lhs_type->Is<ast::type::Vector>() &&
+               rhs_type->Is<ast::type::Vector>()) {
       expr->set_result_type(lhs_type);
-    } else if (lhs_type->Is<ast::type::VectorType>()) {
+    } else if (lhs_type->Is<ast::type::Vector>()) {
       // Vector * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->Is<ast::type::VectorType>()) {
+    } else if (rhs_type->Is<ast::type::Vector>()) {
       // Scalar * vector
       expr->set_result_type(rhs_type);
     } else {
@@ -1169,7 +1168,7 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineStorageTextureSubtype(
-    ast::type::StorageTextureType* tex) {
+    ast::type::StorageTexture* tex) {
   if (tex->type() != nullptr) {
     return true;
   }
@@ -1184,7 +1183,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRg32Uint:
     case ast::type::ImageFormat::kRgba16Uint:
     case ast::type::ImageFormat::kRgba32Uint: {
-      tex->set_type(mod_->create<ast::type::U32Type>());
+      tex->set_type(mod_->create<ast::type::U32>());
       return true;
     }
 
@@ -1197,7 +1196,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRg32Sint:
     case ast::type::ImageFormat::kRgba16Sint:
     case ast::type::ImageFormat::kRgba32Sint: {
-      tex->set_type(mod_->create<ast::type::I32Type>());
+      tex->set_type(mod_->create<ast::type::I32>());
       return true;
     }
 
@@ -1218,7 +1217,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(
     case ast::type::ImageFormat::kRg32Float:
     case ast::type::ImageFormat::kRgba16Float:
     case ast::type::ImageFormat::kRgba32Float: {
-      tex->set_type(mod_->create<ast::type::F32Type>());
+      tex->set_type(mod_->create<ast::type::F32>());
       return true;
     }
 

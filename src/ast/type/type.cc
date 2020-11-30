@@ -42,8 +42,8 @@ Type::Type(Type&&) = default;
 Type::~Type() = default;
 
 Type* Type::UnwrapPtrIfNeeded() {
-  if (Is<PointerType>()) {
-    return As<PointerType>()->type();
+  if (Is<Pointer>()) {
+    return As<Pointer>()->type();
   }
   return this;
 }
@@ -51,10 +51,10 @@ Type* Type::UnwrapPtrIfNeeded() {
 Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
-    if (where->Is<AliasType>()) {
-      where = where->As<AliasType>()->type();
-    } else if (where->Is<AccessControlType>()) {
-      where = where->As<AccessControlType>()->type();
+    if (where->Is<Alias>()) {
+      where = where->As<Alias>()->type();
+    } else if (where->Is<AccessControl>()) {
+      where = where->As<AccessControl>()->type();
     } else {
       break;
     }
@@ -75,19 +75,19 @@ uint64_t Type::BaseAlignment(MemoryLayout) const {
 }
 
 bool Type::is_scalar() {
-  return is_float_scalar() || is_integer_scalar() || Is<BoolType>();
+  return is_float_scalar() || is_integer_scalar() || Is<Bool>();
 }
 
 bool Type::is_float_scalar() {
-  return Is<F32Type>();
+  return Is<F32>();
 }
 
 bool Type::is_float_matrix() {
-  return Is<MatrixType>() && As<MatrixType>()->type()->is_float_scalar();
+  return Is<Matrix>() && As<Matrix>()->type()->is_float_scalar();
 }
 
 bool Type::is_float_vector() {
-  return Is<VectorType>() && As<VectorType>()->type()->is_float_scalar();
+  return Is<Vector>() && As<Vector>()->type()->is_float_scalar();
 }
 
 bool Type::is_float_scalar_or_vector() {
@@ -95,25 +95,23 @@ bool Type::is_float_scalar_or_vector() {
 }
 
 bool Type::is_integer_scalar() {
-  return Is<U32Type>() || Is<I32Type>();
+  return Is<U32>() || Is<I32>();
 }
 
 bool Type::is_unsigned_integer_vector() {
-  return Is<VectorType>() && As<VectorType>()->type()->Is<U32Type>();
+  return Is<Vector>() && As<Vector>()->type()->Is<U32>();
 }
 
 bool Type::is_signed_integer_vector() {
-  return Is<VectorType>() && As<VectorType>()->type()->Is<I32Type>();
+  return Is<Vector>() && As<Vector>()->type()->Is<I32>();
 }
 
 bool Type::is_unsigned_scalar_or_vector() {
-  return Is<U32Type>() ||
-         (Is<VectorType>() && As<VectorType>()->type()->Is<U32Type>());
+  return Is<U32>() || (Is<Vector>() && As<Vector>()->type()->Is<U32>());
 }
 
 bool Type::is_signed_scalar_or_vector() {
-  return Is<I32Type>() ||
-         (Is<VectorType>() && As<VectorType>()->type()->Is<I32Type>());
+  return Is<I32>() || (Is<Vector>() && As<Vector>()->type()->Is<I32>());
 }
 
 bool Type::is_integer_scalar_or_vector() {

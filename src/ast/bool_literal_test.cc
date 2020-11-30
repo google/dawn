@@ -28,7 +28,7 @@ namespace {
 using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   BoolLiteral b{&bool_type, true};
   ASSERT_TRUE(b.Is<BoolLiteral>());
   ASSERT_TRUE(b.IsTrue());
@@ -36,7 +36,7 @@ TEST_F(BoolLiteralTest, True) {
 }
 
 TEST_F(BoolLiteralTest, False) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   BoolLiteral b{&bool_type, false};
   ASSERT_TRUE(b.Is<BoolLiteral>());
   ASSERT_FALSE(b.IsTrue());
@@ -44,7 +44,7 @@ TEST_F(BoolLiteralTest, False) {
 }
 
 TEST_F(BoolLiteralTest, Is) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   BoolLiteral b{&bool_type, false};
   Literal* l = &b;
   EXPECT_TRUE(l->Is<BoolLiteral>());
@@ -56,7 +56,7 @@ TEST_F(BoolLiteralTest, Is) {
 }
 
 TEST_F(BoolLiteralTest, ToStr) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   BoolLiteral t{&bool_type, true};
   BoolLiteral f{&bool_type, false};
 

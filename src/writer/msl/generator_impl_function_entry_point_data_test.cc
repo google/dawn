@@ -49,8 +49,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   //   int bar [[attribute(1)]];
   // };
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -101,8 +101,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   //   int bar [[user(locn1)]];
   // };
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
@@ -153,8 +153,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   //   int bar [[user(locn1)]];
   // };
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -204,8 +204,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   //   int bar [[color(1)]];
   // };
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
@@ -253,8 +253,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   //
   // -> Error, not allowed
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -301,8 +301,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   //
   // -> Error not allowed
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
@@ -354,9 +354,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   //   float depth [[depth(any)]];
   // };
 
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::F32 f32;
+  ast::type::Void void_type;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));

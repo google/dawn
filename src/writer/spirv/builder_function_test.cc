@@ -48,7 +48,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
@@ -63,7 +63,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -82,8 +82,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   auto* var_a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
   td.RegisterVariableForTesting(var_a);
@@ -114,7 +114,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
@@ -133,9 +133,9 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::VariableList params;
   auto* var_a = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
@@ -171,7 +171,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -190,7 +190,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
@@ -200,7 +200,7 @@ TEST_F(BuilderTest, FunctionType) {
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func1("a_func", {}, &void_type, create<ast::BlockStatement>());
   ast::Function func2("b_func", {}, &void_type, create<ast::BlockStatement>());
 
@@ -228,8 +228,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   //   return;
   // }
 
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -241,8 +241,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));

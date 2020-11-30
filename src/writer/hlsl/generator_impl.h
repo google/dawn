@@ -301,7 +301,7 @@ class GeneratorImpl {
   /// @param name the struct name
   /// @returns true if the struct is emitted
   bool EmitStructType(std::ostream& out,
-                      const ast::type::StructType* ty,
+                      const ast::type::Struct* ty,
                       const std::string& name);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream

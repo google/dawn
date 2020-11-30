@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_TRUE(e->is_const());
   EXPECT_EQ(e->name(), "a");
   ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 7u);

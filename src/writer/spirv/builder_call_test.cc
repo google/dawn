@@ -40,8 +40,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
 
   ast::VariableList func_params;
   func_params.push_back(
@@ -101,8 +101,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Statement_Call) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
 
   ast::VariableList func_params;
   func_params.push_back(

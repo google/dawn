@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   auto p = parser("a : i32;");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto p = parser("[[offset(2)]] a : i32;");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -84,7 +84,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
 [[offset(4)]] a : i32;)");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);

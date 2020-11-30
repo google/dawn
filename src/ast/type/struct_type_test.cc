@@ -37,42 +37,42 @@ namespace ast {
 namespace type {
 namespace {
 
-using StructTypeTest = TestHelper;
+using StructTest = TestHelper;
 
-TEST_F(StructTypeTest, Creation) {
-  auto* impl = create<Struct>();
+TEST_F(StructTest, Creation) {
+  auto* impl = create<ast::Struct>();
   auto* ptr = impl;
-  StructType s{"S", impl};
+  Struct s{"S", impl};
   EXPECT_EQ(s.impl(), ptr);
 }
 
-TEST_F(StructTypeTest, Is) {
-  auto* impl = create<Struct>();
-  StructType s{"S", impl};
+TEST_F(StructTest, Is) {
+  auto* impl = create<ast::Struct>();
+  Struct s{"S", impl};
   Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_TRUE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_TRUE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(StructTypeTest, TypeName) {
-  auto* impl = create<Struct>();
-  StructType s{"my_struct", impl};
+TEST_F(StructTest, TypeName) {
+  auto* impl = create<ast::Struct>();
+  Struct s{"my_struct", impl};
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSize) {
-  U32Type u32;
+TEST_F(StructTest, MinBufferBindingSize) {
+  U32 u32;
   StructMemberList members;
 
   {
@@ -87,16 +87,16 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
-  U32Type u32;
-  ArrayType arr(&u32, 4);
+TEST_F(StructTest, MinBufferBindingSizeArray) {
+  U32 u32;
+  Array arr(&u32, 4);
   {
     ArrayDecorationList decos;
     decos.push_back(create<StrideDecoration>(4, Source{}));
@@ -121,17 +121,17 @@ TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(32u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(24u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
-  U32Type u32;
-  ArrayType arr(&u32);
+TEST_F(StructTest, MinBufferBindingSizeRuntimeArray) {
+  U32 u32;
+  Array arr(&u32);
   {
     ArrayDecorationList decos;
     decos.push_back(create<StrideDecoration>(4, Source{}));
@@ -156,15 +156,15 @@ TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(12u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
-  U32Type u32;
-  VectorType vec2(&u32, 2);
+TEST_F(StructTest, MinBufferBindingSizeVec2) {
+  U32 u32;
+  Vector vec2(&u32, 2);
 
   StructMemberList members;
   {
@@ -174,16 +174,16 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
-  U32Type u32;
-  VectorType vec3(&u32, 3);
+TEST_F(StructTest, MinBufferBindingSizeVec3) {
+  U32 u32;
+  Vector vec3(&u32, 3);
 
   StructMemberList members;
   {
@@ -193,17 +193,17 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
-  U32Type u32;
-  VectorType vec4(&u32, 4);
+TEST_F(StructTest, MinBufferBindingSizeVec4) {
+  U32 u32;
+  Vector vec4(&u32, 4);
 
   StructMemberList members;
   {
@@ -213,16 +213,16 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignment) {
-  U32Type u32;
+TEST_F(StructTest, BaseAlignment) {
+  U32 u32;
   StructMemberList members;
 
   {
@@ -237,15 +237,15 @@ TEST_F(StructTypeTest, BaseAlignment) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignmentArray) {
-  U32Type u32;
-  ArrayType arr(&u32, 4);
+TEST_F(StructTest, BaseAlignmentArray) {
+  U32 u32;
+  Array arr(&u32, 4);
   {
     ArrayDecorationList decos;
     decos.push_back(create<StrideDecoration>(4, Source{}));
@@ -270,15 +270,15 @@ TEST_F(StructTypeTest, BaseAlignmentArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
-  U32Type u32;
-  ArrayType arr(&u32);
+TEST_F(StructTest, BaseAlignmentRuntimeArray) {
+  U32 u32;
+  Array arr(&u32);
   {
     ArrayDecorationList decos;
     decos.push_back(create<StrideDecoration>(4, Source{}));
@@ -303,14 +303,14 @@ TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignmentVec2) {
-  U32Type u32;
-  VectorType vec2(&u32, 2);
+TEST_F(StructTest, BaseAlignmentVec2) {
+  U32 u32;
+  Vector vec2(&u32, 2);
 
   StructMemberList members;
   {
@@ -320,15 +320,15 @@ TEST_F(StructTypeTest, BaseAlignmentVec2) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignmentVec3) {
-  U32Type u32;
-  VectorType vec3(&u32, 3);
+TEST_F(StructTest, BaseAlignmentVec3) {
+  U32 u32;
+  Vector vec3(&u32, 3);
 
   StructMemberList members;
   {
@@ -338,15 +338,15 @@ TEST_F(StructTypeTest, BaseAlignmentVec3) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(StructTypeTest, BaseAlignmentVec4) {
-  U32Type u32;
-  VectorType vec4(&u32, 4);
+TEST_F(StructTest, BaseAlignmentVec4) {
+  U32 u32;
+  Vector vec4(&u32, 4);
 
   StructMemberList members;
   {
@@ -356,8 +356,8 @@ TEST_F(StructTypeTest, BaseAlignmentVec4) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

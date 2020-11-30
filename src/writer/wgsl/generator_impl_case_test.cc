@@ -31,7 +31,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
@@ -50,7 +50,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());

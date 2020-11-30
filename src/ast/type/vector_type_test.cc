@@ -31,73 +31,73 @@ namespace ast {
 namespace type {
 namespace {
 
-using VectorTypeTest = TestHelper;
+using VectorTest = TestHelper;
 
-TEST_F(VectorTypeTest, Creation) {
-  I32Type i32;
-  VectorType v{&i32, 2};
+TEST_F(VectorTest, Creation) {
+  I32 i32;
+  Vector v{&i32, 2};
   EXPECT_EQ(v.type(), &i32);
   EXPECT_EQ(v.size(), 2u);
 }
 
-TEST_F(VectorTypeTest, Is) {
-  I32Type i32;
-  VectorType v{&i32, 4};
+TEST_F(VectorTest, Is) {
+  I32 i32;
+  Vector v{&i32, 4};
   Type* ty = &v;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_TRUE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_TRUE(ty->Is<Vector>());
 }
 
-TEST_F(VectorTypeTest, TypeName) {
-  I32Type i32;
-  VectorType v{&i32, 3};
+TEST_F(VectorTest, TypeName) {
+  I32 i32;
+  Vector v{&i32, 3};
   EXPECT_EQ(v.type_name(), "__vec_3__i32");
 }
 
-TEST_F(VectorTypeTest, MinBufferBindingSizeVec2) {
-  I32Type i32;
-  VectorType v{&i32, 2};
+TEST_F(VectorTest, MinBufferBindingSizeVec2) {
+  I32 i32;
+  Vector v{&i32, 2};
   EXPECT_EQ(8u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(VectorTypeTest, MinBufferBindingSizeVec3) {
-  I32Type i32;
-  VectorType v{&i32, 3};
+TEST_F(VectorTest, MinBufferBindingSizeVec3) {
+  I32 i32;
+  Vector v{&i32, 3};
   EXPECT_EQ(12u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(VectorTypeTest, MinBufferBindingSizeVec4) {
-  I32Type i32;
-  VectorType v{&i32, 4};
+TEST_F(VectorTest, MinBufferBindingSizeVec4) {
+  I32 i32;
+  Vector v{&i32, 4};
   EXPECT_EQ(16u, v.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(VectorTypeTest, BaseAlignmentVec2) {
-  I32Type i32;
-  VectorType v{&i32, 2};
+TEST_F(VectorTest, BaseAlignmentVec2) {
+  I32 i32;
+  Vector v{&i32, 2};
   EXPECT_EQ(8u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(VectorTypeTest, BaseAlignmentVec3) {
-  I32Type i32;
-  VectorType v{&i32, 3};
+TEST_F(VectorTest, BaseAlignmentVec3) {
+  I32 i32;
+  Vector v{&i32, 3};
   EXPECT_EQ(16u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(VectorTypeTest, BaseAlignmentVec4) {
-  I32Type i32;
-  VectorType v{&i32, 4};
+TEST_F(VectorTest, BaseAlignmentVec4) {
+  I32 i32;
+  Vector v{&i32, 4};
   EXPECT_EQ(16u, v.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 

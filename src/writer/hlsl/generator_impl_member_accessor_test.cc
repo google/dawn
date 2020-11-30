@@ -47,7 +47,7 @@ namespace {
 using HlslGeneratorImplTest_MemberAccessor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
@@ -57,7 +57,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto* strct = create<ast::Struct>();
   strct->set_members(members);
 
-  ast::type::StructType s("Str", strct);
+  ast::type::Struct s("Str", strct);
 
   auto* str_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("str", ast::StorageClass::kPrivate, &s));
@@ -86,8 +86,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.b;
   //
   // -> asfloat(data.Load(4));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -101,7 +101,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -130,8 +130,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a;
   //
   // -> asint(data.Load(0));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -145,7 +145,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -176,9 +176,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> float3x2 _tint_tmp = b;
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 3, 2);
 
   auto* str = create<ast::Struct>();
   str->set_members({
@@ -192,7 +192,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(4, Source{})}),
   });
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* b_var = create<ast::Variable>("b", ast::StorageClass::kPrivate, &mat);
 
@@ -236,9 +236,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // 0.0f, 0.0f, 0.0f);
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]);
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 3, 2);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -252,7 +252,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -292,9 +292,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
   // data.Load2(4 + 16)));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -308,7 +308,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -343,9 +343,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.b.a;
   //
   // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 3, 2);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -359,7 +359,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -390,9 +390,9 @@ TEST_F(
   //
   // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
   // data.Load3(32)));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 3, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
@@ -402,7 +402,7 @@ TEST_F(
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -433,9 +433,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2][1];
   //
   // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 3, 4);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 3, 4);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -449,7 +449,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -484,9 +484,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2];
   //
   // -> asint(data.Load((2 * 4));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::ArrayType ary(&i32, 5);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Array ary(&i32, 5);
   ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
 
   ast::StructMemberList members;
@@ -497,7 +497,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -529,9 +529,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[(2 + 4) - 3];
   //
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::ArrayType ary(&i32, 5);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Array ary(&i32, 5);
   ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
 
   ast::StructMemberList members;
@@ -542,7 +542,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -584,8 +584,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(0, asuint(2.0f));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -599,7 +599,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -633,9 +633,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((2 * 4), asuint(2.3f));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::ArrayType ary(&i32, 5);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Array ary(&i32, 5);
   ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
 
   ast::StructMemberList members;
@@ -646,7 +646,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -684,8 +684,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(0, asuint(2));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -699,7 +699,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -734,10 +734,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load(16));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -751,7 +751,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -781,10 +781,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -798,7 +798,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
+  ast::type::Struct s("Data", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &s));
@@ -846,10 +846,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32)))
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   auto* data_str = create<ast::Struct>();
   data_str->set_members({
@@ -863,9 +863,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -876,7 +876,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
   });
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
@@ -916,10 +916,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32))).xy
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
@@ -936,9 +936,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -947,7 +947,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberDecorationList{
           create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
@@ -990,10 +990,10 @@ TEST_F(
   //
   // -> asfloat(data.Load((4 * 1) + 16 + (2 * 32) + 0))
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   auto* data_str = create<ast::Struct>();
   data_str->set_members({
@@ -1007,9 +1007,9 @@ TEST_F(
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -1018,7 +1018,7 @@ TEST_F(
       ast::StructMemberDecorationList{
           create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
@@ -1060,10 +1060,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load(4 + 16 + (2 * 32)))
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   auto* data_str = create<ast::Struct>();
   data_str->set_members({
@@ -1077,9 +1077,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -1088,7 +1088,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberDecorationList{
           create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
@@ -1131,10 +1131,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   auto* data_str = create<ast::Struct>();
   data_str->set_members({
@@ -1148,9 +1148,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -1159,7 +1159,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberDecorationList{
           create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));
@@ -1213,10 +1213,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((4 * 1) + 16 + (2 * 32) + 0, asuint(1.0f));
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType ivec3(&i32, 3);
-  ast::type::VectorType fvec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector ivec3(&i32, 3);
+  ast::type::Vector fvec3(&f32, 3);
 
   auto* data_str = create<ast::Struct>();
   data_str->set_members({
@@ -1230,9 +1230,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
 
-  ast::type::StructType data("Data", data_str);
+  ast::type::Struct data("Data", data_str);
 
-  ast::type::ArrayType ary(&data, 4);
+  ast::type::Array ary(&data, 4);
   ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str = create<ast::Struct>();
@@ -1241,7 +1241,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberDecorationList{
           create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
-  ast::type::StructType pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct("Pre", pre_str);
 
   auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
       "data", ast::StorageClass::kStorageBuffer, &pre_struct));

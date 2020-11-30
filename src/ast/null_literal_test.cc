@@ -28,7 +28,7 @@ namespace {
 using NullLiteralTest = TestHelper;
 
 TEST_F(NullLiteralTest, Is) {
-  type::I32Type i32;
+  type::I32 i32;
   NullLiteral i{&i32};
   Literal* l = &i;
   EXPECT_FALSE(l->Is<BoolLiteral>());
@@ -40,14 +40,14 @@ TEST_F(NullLiteralTest, Is) {
 }
 
 TEST_F(NullLiteralTest, ToStr) {
-  type::I32Type i32;
+  type::I32 i32;
   NullLiteral i{&i32};
 
   EXPECT_EQ(i.to_str(), "null __i32");
 }
 
 TEST_F(NullLiteralTest, Name_I32) {
-  type::I32Type i32;
+  type::I32 i32;
   NullLiteral i{&i32};
   EXPECT_EQ("__null__i32", i.name());
 }

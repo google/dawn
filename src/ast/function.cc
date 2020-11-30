@@ -282,9 +282,8 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<DecoratedVariable>() ||
-        !unwrapped_type->Is<type::SamplerType>() ||
-        unwrapped_type->As<type::SamplerType>()->kind() != kind) {
+    if (!var->Is<DecoratedVariable>() || !unwrapped_type->Is<type::Sampler>() ||
+        unwrapped_type->As<type::Sampler>()->kind() != kind) {
       continue;
     }
 
@@ -312,14 +311,12 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<DecoratedVariable>() ||
-        !unwrapped_type->Is<type::TextureType>()) {
+    if (!var->Is<DecoratedVariable>() || !unwrapped_type->Is<type::Texture>()) {
       continue;
     }
 
-    if ((multisampled &&
-         !unwrapped_type->Is<type::MultisampledTextureType>()) ||
-        (!multisampled && !unwrapped_type->Is<type::SampledTextureType>())) {
+    if ((multisampled && !unwrapped_type->Is<type::MultisampledTexture>()) ||
+        (!multisampled && !unwrapped_type->Is<type::SampledTexture>())) {
       continue;
     }
 

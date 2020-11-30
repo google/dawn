@@ -51,7 +51,7 @@ using HlslImportData_SingleParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -96,7 +96,7 @@ using HlslImportData_SingleIntParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -117,7 +117,7 @@ using HlslImportData_DualParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -146,8 +146,8 @@ using HlslImportData_DualParam_VectorTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(
@@ -187,7 +187,7 @@ using HlslImportData_DualParam_Int_Test = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -211,7 +211,7 @@ using HlslImportData_TripleParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -244,7 +244,7 @@ using HlslImportData_TripleParam_Int_Test = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -266,8 +266,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"clamp", "clamp"}));
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
 

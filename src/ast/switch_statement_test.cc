@@ -29,7 +29,7 @@ namespace {
 using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 1));
@@ -61,7 +61,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 }
 
 TEST_F(SwitchStatementTest, IsValid) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
@@ -75,7 +75,7 @@ TEST_F(SwitchStatementTest, IsValid) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
@@ -89,7 +89,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
@@ -103,7 +103,7 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
@@ -145,7 +145,7 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 }
 
 TEST_F(SwitchStatementTest, ToStr) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));

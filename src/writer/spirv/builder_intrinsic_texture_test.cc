@@ -1525,19 +1525,18 @@ TEST_P(IntrinsicTextureTest, Call) {
       break;
   }
 
-  ast::type::SamplerType sampler_type{param.sampler_kind};
+  ast::type::Sampler sampler_type{param.sampler_kind};
   ast::Variable* tex = nullptr;
   switch (param.texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       tex = Var("texture", ast::StorageClass::kNone,
-                mod->create<ast::type::SampledTextureType>(
-                    param.texture_dimension, datatype));
+                mod->create<ast::type::SampledTexture>(param.texture_dimension,
+                                                       datatype));
       break;
 
     case ast::intrinsic::test::TextureKind::kDepth:
-      tex = Var(
-          "texture", ast::StorageClass::kNone,
-          mod->create<ast::type::DepthTextureType>(param.texture_dimension));
+      tex = Var("texture", ast::StorageClass::kNone,
+                mod->create<ast::type::DepthTexture>(param.texture_dimension));
       break;
   }
 

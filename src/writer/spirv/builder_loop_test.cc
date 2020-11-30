@@ -61,7 +61,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, Loop_WithoutContinuing) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // loop {
   //   v = 2;
@@ -104,7 +104,7 @@ OpBranch %5
 }
 
 TEST_F(BuilderTest, Loop_WithContinuing) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   // loop {
   //   a = 2;
   //   continuing {

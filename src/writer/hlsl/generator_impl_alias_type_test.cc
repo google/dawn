@@ -26,29 +26,29 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest_AliasType = TestHelper;
+using HlslGeneratorImplTest_Alias = TestHelper;
 
-TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_F32) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("a", &f32);
+TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
+  ast::type::F32 f32;
+  ast::type::Alias alias("a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_NameCollision) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("float", &f32);
+TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
+  ast::type::F32 f32;
+  ast::type::Alias alias("float", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   auto* str = create<ast::Struct>();
   str->set_members({
@@ -59,8 +59,8 @@ TEST_F(HlslGeneratorImplTest_AliasType, EmitAliasType_Struct) {
               create<ast::StructMemberOffsetDecoration>(4, Source{})}),
   });
 
-  ast::type::StructType s("A", str);
-  ast::type::AliasType alias("B", &s);
+  ast::type::Struct s("A", str);
+  ast::type::Alias alias("B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {

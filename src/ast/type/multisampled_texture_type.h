@@ -24,16 +24,15 @@ namespace ast {
 namespace type {
 
 /// A multisampled texture type.
-class MultisampledTextureType
-    : public Castable<MultisampledTextureType, TextureType> {
+class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the multisampled texture
-  MultisampledTextureType(TextureDimension dim, Type* type);
+  MultisampledTexture(TextureDimension dim, Type* type);
   /// Move constructor
-  MultisampledTextureType(MultisampledTextureType&&);
-  ~MultisampledTextureType() override;
+  MultisampledTexture(MultisampledTexture&&);
+  ~MultisampledTexture() override;
 
   /// @returns the subtype of the sampled texture
   Type* type() const { return type_; }

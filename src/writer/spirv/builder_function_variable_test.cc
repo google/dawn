@@ -47,7 +47,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
   b.push_function(Function{});
@@ -66,8 +66,8 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -108,8 +108,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 2);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 2);
 
   auto* rel =
       create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
@@ -158,7 +158,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   // var v : f32 = 1.0;
   // var v2 : f32 = v; // Should generate the load and store automatically.
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
@@ -203,7 +203,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
   // const v2 : f32 = v; // Should generate the load
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
@@ -243,8 +243,8 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
 }
 
 TEST_F(BuilderTest, FunctionVar_Const) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(

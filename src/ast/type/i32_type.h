@@ -24,13 +24,13 @@ namespace ast {
 namespace type {
 
 /// A signed int 32 type.
-class I32Type : public Castable<I32Type, Type> {
+class I32 : public Castable<I32, Type> {
  public:
   /// Constructor
-  I32Type();
+  I32();
   /// Move constructor
-  I32Type(I32Type&&);
-  ~I32Type() override;
+  I32(I32&&);
+  ~I32() override;
 
   /// @returns the name for this type
   std::string type_name() const override;

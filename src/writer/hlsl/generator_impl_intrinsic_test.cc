@@ -72,9 +72,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec2(&f32, 2);
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec2(&f32, 2);
+  ast::type::Vector vec3(&f32, 3);
 
   auto* a = create<ast::Variable>("a", ast::StorageClass::kNone, &vec2);
   auto* b = create<ast::Variable>("b", ast::StorageClass::kNone, &vec3);
@@ -105,8 +105,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("param1"));

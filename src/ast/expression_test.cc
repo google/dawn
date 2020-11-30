@@ -33,23 +33,23 @@ class Expr : public Expression {
 using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, set_result_type) {
-  type::I32Type i32;
+  type::I32 i32;
 
   Expr e;
   e.set_result_type(&i32);
   ASSERT_NE(e.result_type(), nullptr);
-  EXPECT_TRUE(e.result_type()->Is<type::I32Type>());
+  EXPECT_TRUE(e.result_type()->Is<type::I32>());
 }
 
 TEST_F(ExpressionTest, set_result_type_alias) {
-  type::I32Type i32;
-  type::AliasType a("a", &i32);
-  type::AliasType b("b", &a);
+  type::I32 i32;
+  type::Alias a("a", &i32);
+  type::Alias b("b", &a);
 
   Expr e;
   e.set_result_type(&b);
   ASSERT_NE(e.result_type(), nullptr);
-  EXPECT_TRUE(e.result_type()->Is<type::I32Type>());
+  EXPECT_TRUE(e.result_type()->Is<type::I32>());
 }
 
 }  // namespace

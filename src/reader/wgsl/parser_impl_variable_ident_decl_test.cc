@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::F32Type>());
+  ASSERT_TRUE(decl->type->Is<ast::type::F32>());
 
   ASSERT_EQ(decl->source.range.begin.line, 1u);
   ASSERT_EQ(decl->source.range.begin.column, 1u);
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   decos.push_back(&block_deco);
 
   ast::Struct str(decos, members);
-  ast::type::StructType s("S", &str);
+  ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read)]] S");
   p->register_constructed("S", &s);
@@ -104,12 +104,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControlType>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControlType>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadOnly());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
@@ -120,7 +120,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   decos.push_back(&block_deco);
 
   ast::Struct str(decos, members);
-  ast::type::StructType s("S", &str);
+  ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read_write)]] S");
   p->register_constructed("S", &s);
@@ -130,12 +130,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControlType>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControlType>()->IsReadWrite());
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadWrite());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
@@ -146,7 +146,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(decos, members);
-  ast::type::StructType s("S", &str);
+  ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
   p->register_constructed("S", &s);
@@ -158,7 +158,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
@@ -169,7 +169,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(decos, members);
-  ast::type::StructType s("S", &str);
+  ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
   p->register_constructed("S", &s);
@@ -197,7 +197,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
@@ -208,7 +208,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(decos, members);
-  ast::type::StructType s("S", &str);
+  ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[stride(1)]] S");
   p->register_constructed("S", &s);

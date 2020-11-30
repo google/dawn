@@ -27,43 +27,43 @@ using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
   TypeManager tm;
-  auto* t = tm.Get(std::make_unique<type::I32Type>());
+  auto* t = tm.Get(std::make_unique<type::I32>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
   TypeManager tm;
-  auto* t = tm.Get(std::make_unique<type::I32Type>());
+  auto* t = tm.Get(std::make_unique<type::I32>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32>());
 
-  auto* t2 = tm.Get(std::make_unique<type::I32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::I32>());
   EXPECT_EQ(t, t2);
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   TypeManager tm;
-  auto* t = tm.Get(std::make_unique<type::I32Type>());
+  auto* t = tm.Get(std::make_unique<type::I32>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32>());
 
-  auto* t2 = tm.Get(std::make_unique<type::U32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::U32>());
   ASSERT_NE(t2, nullptr);
   EXPECT_NE(t, t2);
-  EXPECT_TRUE(t2->Is<type::U32Type>());
+  EXPECT_TRUE(t2->Is<type::U32>());
 }
 
 TEST_F(TypeManagerTest, ResetClearsPreviousData) {
   TypeManager tm;
-  auto* t = tm.Get(std::make_unique<type::I32Type>());
+  auto* t = tm.Get(std::make_unique<type::I32>());
   ASSERT_NE(t, nullptr);
 
   EXPECT_FALSE(tm.types().empty());
   tm.Reset();
   EXPECT_TRUE(tm.types().empty());
 
-  auto* t2 = tm.Get(std::make_unique<type::I32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::I32>());
   ASSERT_NE(t2, nullptr);
 }
 

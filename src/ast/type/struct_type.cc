@@ -26,18 +26,18 @@ namespace tint {
 namespace ast {
 namespace type {
 
-StructType::StructType(const std::string& name, Struct* impl)
+Struct::Struct(const std::string& name, ast::Struct* impl)
     : name_(name), struct_(impl) {}
 
-StructType::StructType(StructType&&) = default;
+Struct::Struct(Struct&&) = default;
 
-StructType::~StructType() = default;
+Struct::~Struct() = default;
 
-std::string StructType::type_name() const {
+std::string Struct::type_name() const {
   return "__struct_" + name_;
 }
 
-uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+uint64_t Struct::MinBufferBindingSize(MemoryLayout mem_layout) const {
   if (!struct_->members().size()) {
     return 0;
   }
@@ -61,7 +61,7 @@ uint64_t StructType::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return static_cast<uint64_t>(alignment * std::ceil(unaligned / alignment));
 }
 
-uint64_t StructType::BaseAlignment(MemoryLayout mem_layout) const {
+uint64_t Struct::BaseAlignment(MemoryLayout mem_layout) const {
   uint64_t max = 0;
   for (auto* member : struct_->members()) {
     if (member->type()->BaseAlignment(mem_layout) > max) {

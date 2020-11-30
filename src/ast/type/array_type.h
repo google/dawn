@@ -28,18 +28,18 @@ namespace ast {
 namespace type {
 
 /// An array type. If size is zero then it is a runtime array.
-class ArrayType : public Castable<ArrayType, Type> {
+class Array : public Castable<Array, Type> {
  public:
   /// Constructor for runtime array
   /// @param subtype the type of the array elements
-  explicit ArrayType(Type* subtype);
+  explicit Array(Type* subtype);
   /// Constructor
   /// @param subtype the type of the array elements
   /// @param size the number of elements in the array
-  ArrayType(Type* subtype, uint32_t size);
+  Array(Type* subtype, uint32_t size);
   /// Move constructor
-  ArrayType(ArrayType&&);
-  ~ArrayType() override;
+  Array(Array&&);
+  ~Array() override;
 
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime

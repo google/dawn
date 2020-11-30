@@ -21,25 +21,24 @@ namespace tint {
 namespace ast {
 namespace type {
 
-VectorType::VectorType(Type* subtype, uint32_t size)
-    : subtype_(subtype), size_(size) {
+Vector::Vector(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {
   assert(size_ > 1);
   assert(size_ < 5);
 }
 
-VectorType::VectorType(VectorType&&) = default;
+Vector::Vector(Vector&&) = default;
 
-VectorType::~VectorType() = default;
+Vector::~Vector() = default;
 
-std::string VectorType::type_name() const {
+std::string Vector::type_name() const {
   return "__vec_" + std::to_string(size_) + subtype_->type_name();
 }
 
-uint64_t VectorType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+uint64_t Vector::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return size_ * subtype_->MinBufferBindingSize(mem_layout);
 }
 
-uint64_t VectorType::BaseAlignment(MemoryLayout mem_layout) const {
+uint64_t Vector::BaseAlignment(MemoryLayout mem_layout) const {
   if (size_ == 2) {
     return 2 * subtype_->BaseAlignment(mem_layout);
   } else if (size_ == 3 || size_ == 4) {

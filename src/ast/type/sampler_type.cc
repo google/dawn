@@ -30,13 +30,13 @@ std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
   return out;
 }
 
-SamplerType::SamplerType(SamplerKind kind) : kind_(kind) {}
+Sampler::Sampler(SamplerKind kind) : kind_(kind) {}
 
-SamplerType::SamplerType(SamplerType&&) = default;
+Sampler::Sampler(Sampler&&) = default;
 
-SamplerType::~SamplerType() = default;
+Sampler::~Sampler() = default;
 
-std::string SamplerType::type_name() const {
+std::string Sampler::type_name() const {
   return std::string("__sampler_") +
          (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
 }

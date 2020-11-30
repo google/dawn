@@ -30,7 +30,7 @@ ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
   if (type_constructor == nullptr) {
     return nullptr;
   }
-  if (!type_constructor->type()->Is<ast::type::VectorType>()) {
+  if (!type_constructor->type()->Is<ast::type::Vector>()) {
     return nullptr;
   }
   return type_constructor;
@@ -44,8 +44,8 @@ bool PackCoordAndArrayIndex(
     std::function<bool(ast::TypeConstructorExpression*)> callback) {
   uint32_t packed_size;
   ast::type::Type* packed_el_ty;  // Currenly must be f32.
-  if (coords->result_type()->Is<ast::type::VectorType>()) {
-    auto* vec = coords->result_type()->As<ast::type::VectorType>();
+  if (coords->result_type()->Is<ast::type::Vector>()) {
+    auto* vec = coords->result_type()->As<ast::type::Vector>();
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {
@@ -61,7 +61,7 @@ bool PackCoordAndArrayIndex(
   ast::TypeConstructorExpression array_index_cast(packed_el_ty, {array_idx});
   array_index_cast.set_result_type(packed_el_ty);
 
-  ast::type::VectorType packed_ty(packed_el_ty, packed_size);
+  ast::type::Vector packed_ty(packed_el_ty, packed_size);
 
   // If the coordinates are already passed in a vector constructor, extract
   // the elements into the new vector instead of nesting a vector-in-vector.

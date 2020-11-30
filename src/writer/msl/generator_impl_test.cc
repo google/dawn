@@ -48,7 +48,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
@@ -114,47 +114,47 @@ INSTANTIATE_TEST_SUITE_P(
                                    "thread_position_in_grid"}));
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("a", &f32);
+  ast::type::F32 f32;
+  ast::type::Alias alias("a", &f32);
   EXPECT_EQ(4u, gen.calculate_alignment_size(&alias));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_array) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 4);
+  ast::type::F32 f32;
+  ast::type::Array ary(&f32, 4);
   EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(&ary));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_bool) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   EXPECT_EQ(1u, gen.calculate_alignment_size(&bool_type));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_f32) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   EXPECT_EQ(4u, gen.calculate_alignment_size(&f32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_i32) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   EXPECT_EQ(4u, gen.calculate_alignment_size(&i32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_matrix) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::Matrix mat(&f32, 3, 2);
   EXPECT_EQ(4u * 3u * 2u, gen.calculate_alignment_size(&mat));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_pointer) {
-  ast::type::BoolType bool_type;
-  ast::type::PointerType ptr(&bool_type, ast::StorageClass::kPrivate);
+  ast::type::Bool bool_type;
+  ast::type::Pointer ptr(&bool_type, ast::StorageClass::kPrivate);
   EXPECT_EQ(0u, gen.calculate_alignment_size(&ptr));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   ast::StructMemberDecorationList decos;
   decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
@@ -171,15 +171,15 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("S", str);
+  ast::type::Struct s("S", str);
 
   EXPECT_EQ(132u, gen.calculate_alignment_size(&s));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType fvec(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector fvec(&f32, 3);
 
   ast::StructMemberDecorationList decos;
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
@@ -196,7 +196,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto* inner_str = create<ast::Struct>();
   inner_str->set_members(members);
 
-  ast::type::StructType inner_s("Inner", inner_str);
+  ast::type::Struct inner_s("Inner", inner_str);
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>("d", &f32, decos));
@@ -210,13 +210,13 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto* outer_str = create<ast::Struct>();
   outer_str->set_members(members);
 
-  ast::type::StructType outer_s("Outer", outer_str);
+  ast::type::Struct outer_s("Outer", outer_str);
 
   EXPECT_EQ(80u, gen.calculate_alignment_size(&outer_s));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_u32) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
   EXPECT_EQ(4u, gen.calculate_alignment_size(&u32));
 }
 
@@ -232,8 +232,8 @@ using MslVectorSizeBoolTest = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeBoolTest, calculate) {
   auto param = GetParam();
 
-  ast::type::BoolType bool_type;
-  ast::type::VectorType vec(&bool_type, param.elements);
+  ast::type::Bool bool_type;
+  ast::type::Vector vec(&bool_type, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -246,8 +246,8 @@ using MslVectorSizeI32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeI32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&i32, param.elements);
+  ast::type::I32 i32;
+  ast::type::Vector vec(&i32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -260,8 +260,8 @@ using MslVectorSizeU32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeU32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&u32, param.elements);
+  ast::type::U32 u32;
+  ast::type::Vector vec(&u32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -274,8 +274,8 @@ using MslVectorSizeF32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeF32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, param.elements);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,

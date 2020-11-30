@@ -42,7 +42,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, If_Empty) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   // if (true) {
   // }
@@ -69,8 +69,8 @@ OpBranch %3
 }
 
 TEST_F(BuilderTest, If_WithStatements) {
-  ast::type::BoolType bool_type;
-  ast::type::I32Type i32;
+  ast::type::Bool bool_type;
+  ast::type::I32 i32;
 
   // if (true) {
   //   v = 2;
@@ -114,8 +114,8 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElse) {
-  ast::type::BoolType bool_type;
-  ast::type::I32Type i32;
+  ast::type::Bool bool_type;
+  ast::type::I32 i32;
 
   // if (true) {
   //   v = 2;
@@ -176,8 +176,8 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElseIf) {
-  ast::type::BoolType bool_type;
-  ast::type::I32Type i32;
+  ast::type::Bool bool_type;
+  ast::type::I32 i32;
 
   // if (true) {
   //   v = 2;
@@ -246,8 +246,8 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithMultiple) {
-  ast::type::BoolType bool_type;
-  ast::type::I32Type i32;
+  ast::type::Bool bool_type;
+  ast::type::I32 i32;
 
   // if (true) {
   //   v = 2;
@@ -349,7 +349,7 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithBreak) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //     break;
@@ -395,7 +395,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseBreak) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //   } else {
@@ -448,7 +448,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithContinue) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //     continue;
@@ -494,7 +494,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseContinue) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //   } else {
@@ -547,7 +547,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithReturn) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // if (true) {
   //   return;
   // }
@@ -577,7 +577,7 @@ OpReturn
 }
 
 TEST_F(BuilderTest, If_WithReturnValue) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   // if (true) {
   //   return false;
   // }
@@ -614,7 +614,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
   td.RegisterVariableForTesting(var);

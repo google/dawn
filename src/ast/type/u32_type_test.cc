@@ -32,38 +32,38 @@ namespace ast {
 namespace type {
 namespace {
 
-using U32TypeTest = TestHelper;
+using U32Test = TestHelper;
 
-TEST_F(U32TypeTest, Is) {
-  U32Type u;
+TEST_F(U32Test, Is) {
+  U32 u;
   Type* ty = &u;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_TRUE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_TRUE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(U32TypeTest, TypeName) {
-  U32Type u;
+TEST_F(U32Test, TypeName) {
+  U32 u;
   EXPECT_EQ(u.type_name(), "__u32");
 }
 
-TEST_F(U32TypeTest, MinBufferBindingSize) {
-  U32Type u;
+TEST_F(U32Test, MinBufferBindingSize) {
+  U32 u;
   EXPECT_EQ(4u, u.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(U32TypeTest, BaseAlignment) {
-  U32Type u;
+TEST_F(U32Test, BaseAlignment) {
+  U32 u;
   EXPECT_EQ(4u, u.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 

@@ -70,7 +70,7 @@ class GeneratorImpl : public TextGenerator {
   /// Calculates the largest alignment seen within a struct
   /// @param type the struct to calculate
   /// @returns the largest alignment value
-  uint32_t calculate_largest_alignment(ast::type::StructType* type);
+  uint32_t calculate_largest_alignment(ast::type::Struct* type);
 
   /// Handles generating a constructed
   /// @param ty the constructed type to generate
@@ -209,7 +209,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const ast::type::StructType* str);
+  bool EmitStructType(const ast::type::Struct* str);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

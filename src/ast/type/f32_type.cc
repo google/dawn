@@ -18,21 +18,21 @@ namespace tint {
 namespace ast {
 namespace type {
 
-F32Type::F32Type() = default;
+F32::F32() = default;
 
-F32Type::F32Type(F32Type&&) = default;
+F32::F32(F32&&) = default;
 
-F32Type::~F32Type() = default;
+F32::~F32() = default;
 
-std::string F32Type::type_name() const {
+std::string F32::type_name() const {
   return "__f32";
 }
 
-uint64_t F32Type::MinBufferBindingSize(MemoryLayout) const {
+uint64_t F32::MinBufferBindingSize(MemoryLayout) const {
   return 4;
 }
 
-uint64_t F32Type::BaseAlignment(MemoryLayout) const {
+uint64_t F32::BaseAlignment(MemoryLayout) const {
   return 4;
 }
 

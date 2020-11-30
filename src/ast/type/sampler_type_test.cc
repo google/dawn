@@ -32,49 +32,49 @@ namespace ast {
 namespace type {
 namespace {
 
-using SamplerTypeTest = TestHelper;
+using SamplerTest = TestHelper;
 
-TEST_F(SamplerTypeTest, Creation) {
-  SamplerType s{SamplerKind::kSampler};
+TEST_F(SamplerTest, Creation) {
+  Sampler s{SamplerKind::kSampler};
   EXPECT_EQ(s.kind(), SamplerKind::kSampler);
 }
 
-TEST_F(SamplerTypeTest, Creation_ComparisonSampler) {
-  SamplerType s{SamplerKind::kComparisonSampler};
+TEST_F(SamplerTest, Creation_ComparisonSampler) {
+  Sampler s{SamplerKind::kComparisonSampler};
   EXPECT_EQ(s.kind(), SamplerKind::kComparisonSampler);
   EXPECT_TRUE(s.IsComparison());
 }
 
-TEST_F(SamplerTypeTest, Is) {
-  SamplerType s{SamplerKind::kSampler};
+TEST_F(SamplerTest, Is) {
+  Sampler s{SamplerKind::kSampler};
   Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_TRUE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_TRUE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(SamplerTypeTest, TypeName_Sampler) {
-  SamplerType s{SamplerKind::kSampler};
+TEST_F(SamplerTest, TypeName_Sampler) {
+  Sampler s{SamplerKind::kSampler};
   EXPECT_EQ(s.type_name(), "__sampler_sampler");
 }
 
-TEST_F(SamplerTypeTest, TypeName_Comparison) {
-  SamplerType s{SamplerKind::kComparisonSampler};
+TEST_F(SamplerTest, TypeName_Comparison) {
+  Sampler s{SamplerKind::kComparisonSampler};
   EXPECT_EQ(s.type_name(), "__sampler_comparison");
 }
 
-TEST_F(SamplerTypeTest, MinBufferBindingSize) {
-  SamplerType s{SamplerKind::kSampler};
+TEST_F(SamplerTest, MinBufferBindingSize) {
+  Sampler s{SamplerKind::kSampler};
   EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 

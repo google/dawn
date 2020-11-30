@@ -20,24 +20,24 @@ namespace tint {
 namespace ast {
 namespace type {
 
-AliasType::AliasType(const std::string& name, Type* subtype)
+Alias::Alias(const std::string& name, Type* subtype)
     : name_(name), subtype_(subtype) {
   assert(subtype_);
 }
 
-AliasType::AliasType(AliasType&&) = default;
+Alias::Alias(Alias&&) = default;
 
-AliasType::~AliasType() = default;
+Alias::~Alias() = default;
 
-std::string AliasType::type_name() const {
+std::string Alias::type_name() const {
   return "__alias_" + name_ + subtype_->type_name();
 }
 
-uint64_t AliasType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+uint64_t Alias::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return subtype_->MinBufferBindingSize(mem_layout);
 }
 
-uint64_t AliasType::BaseAlignment(MemoryLayout mem_layout) const {
+uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
   return subtype_->BaseAlignment(mem_layout);
 }
 

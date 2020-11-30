@@ -24,16 +24,16 @@ namespace ast {
 namespace type {
 
 /// A matrix type
-class MatrixType : public Castable<MatrixType, Type> {
+class Matrix : public Castable<Matrix, Type> {
  public:
   /// Constructor
   /// @param subtype type matrix type
   /// @param rows the number of rows in the matrix
   /// @param columns the number of columns in the matrix
-  MatrixType(Type* subtype, uint32_t rows, uint32_t columns);
+  Matrix(Type* subtype, uint32_t rows, uint32_t columns);
   /// Move constructor
-  MatrixType(MatrixType&&);
-  ~MatrixType() override;
+  Matrix(Matrix&&);
+  ~Matrix() override;
 
   /// @returns the type of the matrix
   Type* type() const { return subtype_; }

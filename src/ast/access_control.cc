@@ -19,15 +19,15 @@ namespace ast {
 
 std::ostream& operator<<(std::ostream& out, AccessControl access) {
   switch (access) {
-    case AccessControl::kReadOnly: {
+    case ast::AccessControl::kReadOnly: {
       out << "read_only";
       break;
     }
-    case AccessControl::kReadWrite: {
+    case ast::AccessControl::kReadWrite: {
       out << "read_write";
       break;
     }
-    case AccessControl::kWriteOnly: {
+    case ast::AccessControl::kWriteOnly: {
       out << "write_only";
       break;
     }

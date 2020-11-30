@@ -244,7 +244,7 @@ class InspectorHelper {
   ///                     type and offset of a member of the struct
   /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
-  std::unique_ptr<ast::type::StructType> MakeStructType(
+  std::unique_ptr<ast::type::Struct> MakeStructType(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info,
       bool is_block) {
@@ -269,7 +269,7 @@ class InspectorHelper {
 
     auto* str = create<ast::Struct>(decos, members);
 
-    return std::make_unique<ast::type::StructType>(name, str);
+    return std::make_unique<ast::type::Struct>(name, str);
   }
 
   /// Generates types appropriate for using in an uniform buffer
@@ -279,13 +279,13 @@ class InspectorHelper {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for an uniform buffer, and the control type wraps the
   ///          struct.
-  std::tuple<std::unique_ptr<ast::type::StructType>,
-             std::unique_ptr<ast::type::AccessControlType>>
+  std::tuple<std::unique_ptr<ast::type::Struct>,
+             std::unique_ptr<ast::type::AccessControl>>
   MakeUniformBufferTypes(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     auto struct_type = MakeStructType(name, members_info, true);
-    auto access_type = std::make_unique<ast::type::AccessControlType>(
+    auto access_type = std::make_unique<ast::type::AccessControl>(
         ast::AccessControl::kReadOnly, struct_type.get());
     return {std::move(struct_type), std::move(access_type)};
   }
@@ -297,13 +297,13 @@ class InspectorHelper {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a storage buffer, and the control type wraps the
   ///          struct.
-  std::tuple<std::unique_ptr<ast::type::StructType>,
-             std::unique_ptr<ast::type::AccessControlType>>
+  std::tuple<std::unique_ptr<ast::type::Struct>,
+             std::unique_ptr<ast::type::AccessControl>>
   MakeStorageBufferTypes(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     auto struct_type = MakeStructType(name, members_info, false);
-    auto access_type = std::make_unique<ast::type::AccessControlType>(
+    auto access_type = std::make_unique<ast::type::AccessControl>(
         ast::AccessControl::kReadWrite, struct_type.get());
     return {std::move(struct_type), std::move(access_type)};
   }
@@ -315,13 +315,13 @@ class InspectorHelper {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a read-only storage buffer, and the control type
   ///          wraps the struct.
-  std::tuple<std::unique_ptr<ast::type::StructType>,
-             std::unique_ptr<ast::type::AccessControlType>>
+  std::tuple<std::unique_ptr<ast::type::Struct>,
+             std::unique_ptr<ast::type::AccessControl>>
   MakeReadOnlyStorageBufferTypes(
       const std::string& name,
       std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
     auto struct_type = MakeStructType(name, members_info, false);
-    auto access_type = std::make_unique<ast::type::AccessControlType>(
+    auto access_type = std::make_unique<ast::type::AccessControl>(
         ast::AccessControl::kReadOnly, struct_type.get());
     return {std::move(struct_type), std::move(access_type)};
   }
@@ -429,32 +429,32 @@ class InspectorHelper {
                ast::StorageClass::kUniformConstant, set, binding);
   }
 
-  /// Generates a SampledTextureType appropriate for the params
+  /// Generates a SampledTexture appropriate for the params
   /// @param dim the dimensions of the texture
   /// @param type the data type of the sampled texture
   /// @returns the generated SampleTextureType
-  std::unique_ptr<ast::type::SampledTextureType> MakeSampledTextureType(
+  std::unique_ptr<ast::type::SampledTexture> MakeSampledTextureType(
       ast::type::TextureDimension dim,
       ast::type::Type* type) {
-    return std::make_unique<ast::type::SampledTextureType>(dim, type);
+    return std::make_unique<ast::type::SampledTexture>(dim, type);
   }
 
-  /// Generates a DepthTextureType appropriate for the params
+  /// Generates a DepthTexture appropriate for the params
   /// @param dim the dimensions of the texture
-  /// @returns the generated DepthTextureType
-  std::unique_ptr<ast::type::DepthTextureType> MakeDepthTextureType(
+  /// @returns the generated DepthTexture
+  std::unique_ptr<ast::type::DepthTexture> MakeDepthTextureType(
       ast::type::TextureDimension dim) {
-    return std::make_unique<ast::type::DepthTextureType>(dim);
+    return std::make_unique<ast::type::DepthTexture>(dim);
   }
 
-  /// Generates a MultisampledTextureType appropriate for the params
+  /// Generates a MultisampledTexture appropriate for the params
   /// @param dim the dimensions of the texture
   /// @param type the data type of the sampled texture
   /// @returns the generated SampleTextureType
-  std::unique_ptr<ast::type::MultisampledTextureType>
-  MakeMultisampledTextureType(ast::type::TextureDimension dim,
-                              ast::type::Type* type) {
-    return std::make_unique<ast::type::MultisampledTextureType>(dim, type);
+  std::unique_ptr<ast::type::MultisampledTexture> MakeMultisampledTextureType(
+      ast::type::TextureDimension dim,
+      ast::type::Type* type) {
+    return std::make_unique<ast::type::MultisampledTexture>(dim, type);
   }
 
   /// Adds a sampled texture variable to the module
@@ -645,31 +645,31 @@ class InspectorHelper {
   TypeDeterminer* td() { return td_.get(); }
   Inspector* inspector() { return inspector_.get(); }
 
-  ast::type::BoolType* bool_type() { return &bool_type_; }
-  ast::type::F32Type* f32_type() { return &f32_type_; }
-  ast::type::I32Type* i32_type() { return &i32_type_; }
-  ast::type::U32Type* u32_type() { return &u32_type_; }
-  ast::type::ArrayType* u32_array_type(uint32_t count) {
+  ast::type::Bool* bool_type() { return &bool_type_; }
+  ast::type::F32* f32_type() { return &f32_type_; }
+  ast::type::I32* i32_type() { return &i32_type_; }
+  ast::type::U32* u32_type() { return &u32_type_; }
+  ast::type::Array* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
       array_type_memo_[count] =
-          std::make_unique<ast::type::ArrayType>(u32_type(), count);
+          std::make_unique<ast::type::Array>(u32_type(), count);
       ast::ArrayDecorationList decos;
       decos.push_back(create<ast::StrideDecoration>(4, Source{}));
       array_type_memo_[count]->set_decorations(decos);
     }
     return array_type_memo_[count].get();
   }
-  ast::type::VectorType* vec_type(ast::type::Type* type, uint32_t count) {
+  ast::type::Vector* vec_type(ast::type::Type* type, uint32_t count) {
     if (vector_type_memo_.find(std::tie(type, count)) ==
         vector_type_memo_.end()) {
       vector_type_memo_[std::tie(type, count)] =
-          std::make_unique<ast::type::VectorType>(u32_type(), count);
+          std::make_unique<ast::type::Vector>(u32_type(), count);
     }
     return vector_type_memo_[std::tie(type, count)].get();
   }
-  ast::type::VoidType* void_type() { return &void_type_; }
-  ast::type::SamplerType* sampler_type() { return &sampler_type_; }
-  ast::type::SamplerType* comparison_sampler_type() {
+  ast::type::Void* void_type() { return &void_type_; }
+  ast::type::Sampler* sampler_type() { return &sampler_type_; }
+  ast::type::Sampler* comparison_sampler_type() {
     return &comparison_sampler_type_;
   }
 
@@ -688,16 +688,16 @@ class InspectorHelper {
   std::unique_ptr<TypeDeterminer> td_;
   std::unique_ptr<Inspector> inspector_;
 
-  ast::type::BoolType bool_type_;
-  ast::type::F32Type f32_type_;
-  ast::type::I32Type i32_type_;
-  ast::type::U32Type u32_type_;
-  ast::type::VoidType void_type_;
-  ast::type::SamplerType sampler_type_;
-  ast::type::SamplerType comparison_sampler_type_;
-  std::map<uint32_t, std::unique_ptr<ast::type::ArrayType>> array_type_memo_;
+  ast::type::Bool bool_type_;
+  ast::type::F32 f32_type_;
+  ast::type::I32 i32_type_;
+  ast::type::U32 u32_type_;
+  ast::type::Void void_type_;
+  ast::type::Sampler sampler_type_;
+  ast::type::Sampler comparison_sampler_type_;
+  std::map<uint32_t, std::unique_ptr<ast::type::Array>> array_type_memo_;
   std::map<std::tuple<ast::type::Type*, uint32_t>,
-           std::unique_ptr<ast::type::VectorType>>
+           std::unique_ptr<ast::type::Vector>>
       vector_type_memo_;
 };
 
@@ -1234,8 +1234,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeUniformBufferTypes("foo_type", {{i32_type(), 0}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1267,7 +1267,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ast::StructDecorationList decos;
 
   auto* str = create<ast::Struct>(decos, members);
-  auto foo_type = std::make_unique<ast::type::StructType>("foo_type", str);
+  auto foo_type = std::make_unique<ast::type::Struct>("foo_type", str);
 
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 
@@ -1288,8 +1288,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeUniformBufferTypes("foo_type", {{i32_type(), 0}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1315,8 +1315,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeUniformBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1342,8 +1342,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  std::unique_ptr<ast::type::StructType> ub_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> ub_control_type;
+  std::unique_ptr<ast::type::Struct> ub_struct_type;
+  std::unique_ptr<ast::type::AccessControl> ub_control_type;
   std::tie(ub_struct_type, ub_control_type) = MakeUniformBufferTypes(
       "ub_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddUniformBuffer("ub_foo", ub_control_type.get(), 0, 0);
@@ -1401,8 +1401,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeUniformBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1428,8 +1428,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1455,8 +1455,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1482,8 +1482,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-  std::unique_ptr<ast::type::StructType> sb_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> sb_control_type;
+  std::unique_ptr<ast::type::Struct> sb_struct_type;
+  std::unique_ptr<ast::type::AccessControl> sb_control_type;
   std::tie(sb_struct_type, sb_control_type) = MakeStorageBufferTypes(
       "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
@@ -1541,8 +1541,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1568,8 +1568,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1595,8 +1595,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1618,8 +1618,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1647,8 +1647,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
-  std::unique_ptr<ast::type::StructType> sb_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> sb_control_type;
+  std::unique_ptr<ast::type::Struct> sb_struct_type;
+  std::unique_ptr<ast::type::AccessControl> sb_control_type;
   std::tie(sb_struct_type, sb_control_type) = MakeReadOnlyStorageBufferTypes(
       "sb_type", {{i32_type(), 0}, {u32_type(), 4}, {f32_type(), 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
@@ -1707,8 +1707,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1736,8 +1736,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
       "foo_type", {{i32_type(), 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1764,8 +1764,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-  std::unique_ptr<ast::type::StructType> foo_struct_type;
-  std::unique_ptr<ast::type::AccessControlType> foo_control_type;
+  std::unique_ptr<ast::type::Struct> foo_struct_type;
+  std::unique_ptr<ast::type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{i32_type(), 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);

@@ -25,25 +25,25 @@ namespace ast {
 namespace type {
 
 /// An access control type. Holds an access setting and pointer to another type.
-class AccessControlType : public Castable<AccessControlType, Type> {
+class AccessControl : public Castable<AccessControl, Type> {
  public:
   /// Constructor
   /// @param access the access control setting
   /// @param subtype the access controlled type
-  AccessControlType(AccessControl access, Type* subtype);
+  AccessControl(ast::AccessControl access, Type* subtype);
   /// Move constructor
-  AccessControlType(AccessControlType&&);
-  ~AccessControlType() override;
+  AccessControl(AccessControl&&);
+  ~AccessControl() override;
 
   /// @returns true if the access control is read only
-  bool IsReadOnly() const { return access_ == AccessControl::kReadOnly; }
+  bool IsReadOnly() const { return access_ == ast::AccessControl::kReadOnly; }
   /// @returns true if the access control is write only
-  bool IsWriteOnly() const { return access_ == AccessControl::kWriteOnly; }
+  bool IsWriteOnly() const { return access_ == ast::AccessControl::kWriteOnly; }
   /// @returns true if the access control is read/write
-  bool IsReadWrite() const { return access_ == AccessControl::kReadWrite; }
+  bool IsReadWrite() const { return access_ == ast::AccessControl::kReadWrite; }
 
   /// @returns the access control value
-  AccessControl access_control() const { return access_; }
+  ast::AccessControl access_control() const { return access_; }
   /// @returns the subtype type
   Type* type() const { return subtype_; }
 
@@ -61,7 +61,7 @@ class AccessControlType : public Castable<AccessControlType, Type> {
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
  private:
-  AccessControl access_ = AccessControl::kReadOnly;
+  ast::AccessControl access_ = ast::AccessControl::kReadOnly;
   Type* subtype_ = nullptr;
 };
 

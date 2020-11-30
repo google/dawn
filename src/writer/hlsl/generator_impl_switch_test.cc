@@ -35,7 +35,7 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   def_body->append(create<ast::BreakStatement>());
   auto* def = create<ast::CaseStatement>(def_body);
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   ast::CaseSelectorList case_val;
   case_val.push_back(create<ast::SintLiteral>(&i32, 5));
 

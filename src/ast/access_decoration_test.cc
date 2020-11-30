@@ -25,17 +25,17 @@ namespace {
 using AccessDecorationTest = TestHelper;
 
 TEST_F(AccessDecorationTest, Creation) {
-  AccessDecoration d{AccessControl::kWriteOnly, Source{}};
-  EXPECT_EQ(AccessControl::kWriteOnly, d.value());
+  AccessDecoration d{ast::AccessControl::kWriteOnly, Source{}};
+  EXPECT_EQ(ast::AccessControl::kWriteOnly, d.value());
 }
 
 TEST_F(AccessDecorationTest, Is) {
-  AccessDecoration d{AccessControl::kReadWrite, Source{}};
+  AccessDecoration d{ast::AccessControl::kReadWrite, Source{}};
   EXPECT_FALSE(d.IsAccess());
 }
 
 TEST_F(AccessDecorationTest, ToStr) {
-  AccessDecoration d{AccessControl::kReadOnly, Source{}};
+  AccessDecoration d{ast::AccessControl::kReadOnly, Source{}};
   std::ostringstream out;
   d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(AccessDecoration{read}

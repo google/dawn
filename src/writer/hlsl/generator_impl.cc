@@ -219,12 +219,12 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
                                         const ast::type::Type* ty) {
   make_indent(out);
 
-  if (ty->Is<ast::type::AliasType>()) {
-    auto* alias = ty->As<ast::type::AliasType>();
+  if (ty->Is<ast::type::Alias>()) {
+    auto* alias = ty->As<ast::type::Alias>();
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
-    if (alias->type()->Is<ast::type::StructType>()) {
-      if (!EmitStructType(out, alias->type()->As<ast::type::StructType>(),
+    if (alias->type()->Is<ast::type::Struct>()) {
+      if (!EmitStructType(out, alias->type()->As<ast::type::Struct>(),
                           alias->name())) {
         return false;
       }
@@ -235,8 +235,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
       return false;
     }
     out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
-  } else if (ty->Is<ast::type::StructType>()) {
-    auto* str = ty->As<ast::type::StructType>();
+  } else if (ty->Is<ast::type::Struct>()) {
+    auto* str = ty->As<ast::type::Struct>();
     if (!EmitStructType(out, str, str->name())) {
       return false;
     }
@@ -272,9 +272,9 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& pre,
 bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 std::ostream& out,
                                 ast::BitcastExpression* expr) {
-  if (!expr->type()->Is<ast::type::F32Type>() &&
-      !expr->type()->Is<ast::type::I32Type>() &&
-      !expr->type()->Is<ast::type::U32Type>()) {
+  if (!expr->type()->Is<ast::type::F32>() &&
+      !expr->type()->Is<ast::type::I32>() &&
+      !expr->type()->Is<ast::type::U32>()) {
     error_ = "Unable to do bitcast to type " + expr->type()->type_name();
     return false;
   }
@@ -379,12 +379,12 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
-      ((lhs_type->Is<ast::type::VectorType>() &&
-        rhs_type->Is<ast::type::MatrixType>()) ||
-       (lhs_type->Is<ast::type::MatrixType>() &&
-        rhs_type->Is<ast::type::VectorType>()) ||
-       (lhs_type->Is<ast::type::MatrixType>() &&
-        rhs_type->Is<ast::type::MatrixType>()))) {
+      ((lhs_type->Is<ast::type::Vector>() &&
+        rhs_type->Is<ast::type::Matrix>()) ||
+       (lhs_type->Is<ast::type::Matrix>() &&
+        rhs_type->Is<ast::type::Vector>()) ||
+       (lhs_type->Is<ast::type::Matrix>() &&
+        rhs_type->Is<ast::type::Matrix>()))) {
     out << "mul(";
     if (!EmitExpression(pre, out, expr->lhs())) {
       return false;
@@ -618,14 +618,14 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       // out << "(";
 
       // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
-      // if (!param1_type->Is<ast::type::VectorType>()) {
+      // if (!param1_type->Is<ast::type::Vector>()) {
       //   error_ = "invalid param type in outer_product got: " +
       //            param1_type->type_name();
       //   return false;
       // }
 
       // for (uint32_t i = 0; i <
-      // param1_type->As<ast::type::VectorType>()->size(); ++i) {
+      // param1_type->As<ast::type::Vector>()->size(); ++i) {
       //   if (i > 0) {
       //     out << ", ";
       //   }
@@ -921,7 +921,7 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
-  if (expr->type()->Is<ast::type::ArrayType>()) {
+  if (expr->type()->Is<ast::type::Array>()) {
     out << "{";
   } else {
     if (!EmitType(out, expr->type(), "")) {
@@ -950,7 +950,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     }
   }
 
-  if (expr->type()->Is<ast::type::ArrayType>()) {
+  if (expr->type()->Is<ast::type::Array>()) {
     out << "}";
   } else {
     out << ")";
@@ -1231,7 +1231,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->Is<ast::type::ArrayType>()) {
+    if (!v->type()->Is<ast::type::Array>()) {
       out << " " << v->name();
     }
   }
@@ -1298,8 +1298,8 @@ bool GeneratorImpl::EmitEntryPointData(
     emitted_globals.insert(var->name());
 
     auto* type = var->type()->UnwrapIfNeeded();
-    if (type->Is<ast::type::StructType>()) {
-      auto* strct = type->As<ast::type::StructType>();
+    if (type->Is<ast::type::Struct>()) {
+      auto* strct = type->As<ast::type::Struct>();
 
       out << "ConstantBuffer<" << strct->name() << "> " << var->name()
           << " : register(b" << binding->value() << ");" << std::endl;
@@ -1340,11 +1340,11 @@ bool GeneratorImpl::EmitEntryPointData(
     }
     emitted_globals.insert(var->name());
 
-    if (!var->type()->Is<ast::type::AccessControlType>()) {
+    if (!var->type()->Is<ast::type::AccessControl>()) {
       error_ = "access control type required for storage buffer";
       return false;
     }
-    auto* ac = var->type()->As<ast::type::AccessControlType>();
+    auto* ac = var->type()->As<ast::type::AccessControl>();
 
     if (ac->IsReadWrite()) {
       out << "RW";
@@ -1554,18 +1554,18 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
-  if (type->Is<ast::type::BoolType>()) {
+  if (type->Is<ast::type::Bool>()) {
     out << "false";
-  } else if (type->Is<ast::type::F32Type>()) {
+  } else if (type->Is<ast::type::F32>()) {
     out << "0.0f";
-  } else if (type->Is<ast::type::I32Type>()) {
+  } else if (type->Is<ast::type::I32>()) {
     out << "0";
-  } else if (type->Is<ast::type::U32Type>()) {
+  } else if (type->Is<ast::type::U32>()) {
     out << "0u";
-  } else if (type->Is<ast::type::VectorType>()) {
-    return EmitZeroValue(out, type->As<ast::type::VectorType>()->type());
-  } else if (type->Is<ast::type::MatrixType>()) {
-    auto* mat = type->As<ast::type::MatrixType>();
+  } else if (type->Is<ast::type::Vector>()) {
+    return EmitZeroValue(out, type->As<ast::type::Vector>()->type());
+  } else if (type->Is<ast::type::Matrix>()) {
+    auto* mat = type->As<ast::type::Matrix>();
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
       if (i != 0) {
         out << ", ";
@@ -1692,8 +1692,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     first = false;
     if (auto* mem = expr->As<ast::MemberAccessorExpression>()) {
       auto* res_type = mem->structure()->result_type()->UnwrapAll();
-      if (res_type->Is<ast::type::StructType>()) {
-        auto* str_type = res_type->As<ast::type::StructType>()->impl();
+      if (res_type->Is<ast::type::Struct>()) {
+        auto* str_type = res_type->As<ast::type::Struct>()->impl();
         auto* str_member = str_type->get_member(mem->member()->name());
 
         if (!str_member->has_offset_decoration()) {
@@ -1702,7 +1702,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         }
         out << str_member->offset();
 
-      } else if (res_type->Is<ast::type::VectorType>()) {
+      } else if (res_type->Is<ast::type::Vector>()) {
         // This must be a single element swizzle if we've got a vector at this
         // point.
         if (mem->member()->name().size() != 1) {
@@ -1728,15 +1728,15 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       auto* ary_type = ary->array()->result_type()->UnwrapAll();
 
       out << "(";
-      if (ary_type->Is<ast::type::ArrayType>()) {
-        out << ary_type->As<ast::type::ArrayType>()->array_stride();
-      } else if (ary_type->Is<ast::type::VectorType>()) {
+      if (ary_type->Is<ast::type::Array>()) {
+        out << ary_type->As<ast::type::Array>()->array_stride();
+      } else if (ary_type->Is<ast::type::Vector>()) {
         // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
         // have to ask the type for the byte size.
         out << "4";
-      } else if (ary_type->Is<ast::type::MatrixType>()) {
-        auto* mat = ary_type->As<ast::type::MatrixType>();
+      } else if (ary_type->Is<ast::type::Matrix>()) {
+        auto* mat = ary_type->As<ast::type::Matrix>();
         if (mat->columns() == 2) {
           out << "8";
         } else {
@@ -1777,18 +1777,18 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
   bool is_store = rhs != nullptr;
 
   std::string access_method = is_store ? "Store" : "Load";
-  if (result_type->Is<ast::type::VectorType>()) {
+  if (result_type->Is<ast::type::Vector>()) {
     access_method +=
-        std::to_string(result_type->As<ast::type::VectorType>()->size());
-  } else if (result_type->Is<ast::type::MatrixType>()) {
+        std::to_string(result_type->As<ast::type::Vector>()->size());
+  } else if (result_type->Is<ast::type::Matrix>()) {
     access_method +=
-        std::to_string(result_type->As<ast::type::MatrixType>()->rows());
+        std::to_string(result_type->As<ast::type::Matrix>()->rows());
   }
 
   // If we aren't storing then we need to put in the outer cast.
   if (!is_store) {
     if (result_type->is_float_scalar_or_vector() ||
-        result_type->Is<ast::type::MatrixType>()) {
+        result_type->Is<ast::type::Matrix>()) {
       out << "asfloat(";
     } else if (result_type->is_signed_scalar_or_vector()) {
       out << "asint(";
@@ -1808,8 +1808,8 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
     return false;
   }
 
-  if (result_type->Is<ast::type::MatrixType>()) {
-    auto* mat = result_type->As<ast::type::MatrixType>();
+  if (result_type->Is<ast::type::Matrix>()) {
+    auto* mat = result_type->As<ast::type::Matrix>();
 
     // TODO(dsinclair): This is assuming 4 byte elements. Will need to be fixed
     // if we get matrixes of f16 or f64.
@@ -1896,8 +1896,7 @@ bool GeneratorImpl::is_storage_buffer_access(
   auto* data_type = structure->result_type()->UnwrapAll();
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
-  if (data_type->Is<ast::type::VectorType>() &&
-      expr->member()->name().size() > 1) {
+  if (data_type->Is<ast::type::Vector>() && expr->member()->name().size() > 1) {
     return false;
   }
 
@@ -2042,24 +2041,24 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              ast::type::Type* type,
                              const std::string& name) {
-  if (type->Is<ast::type::AliasType>()) {
-    auto* alias = type->As<ast::type::AliasType>();
+  if (type->Is<ast::type::Alias>()) {
+    auto* alias = type->As<ast::type::Alias>();
     out << namer_.NameFor(alias->name());
-  } else if (type->Is<ast::type::ArrayType>()) {
-    auto* ary = type->As<ast::type::ArrayType>();
+  } else if (type->Is<ast::type::Array>()) {
+    auto* ary = type->As<ast::type::Array>();
 
     ast::type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (base_type->Is<ast::type::ArrayType>()) {
-      if (base_type->As<ast::type::ArrayType>()->IsRuntimeArray()) {
+    while (base_type->Is<ast::type::Array>()) {
+      if (base_type->As<ast::type::Array>()->IsRuntimeArray()) {
         // TODO(dsinclair): Support runtime arrays
         // https://bugs.chromium.org/p/tint/issues/detail?id=185
         error_ = "runtime array not supported yet.";
         return false;
       } else {
-        sizes.push_back(base_type->As<ast::type::ArrayType>()->size());
+        sizes.push_back(base_type->As<ast::type::Array>()->size());
       }
-      base_type = base_type->As<ast::type::ArrayType>()->type();
+      base_type = base_type->As<ast::type::Array>()->type();
     }
     if (!EmitType(out, base_type, "")) {
       return false;
@@ -2070,35 +2069,35 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
     }
-  } else if (type->Is<ast::type::BoolType>()) {
+  } else if (type->Is<ast::type::Bool>()) {
     out << "bool";
-  } else if (type->Is<ast::type::F32Type>()) {
+  } else if (type->Is<ast::type::F32>()) {
     out << "float";
-  } else if (type->Is<ast::type::I32Type>()) {
+  } else if (type->Is<ast::type::I32>()) {
     out << "int";
-  } else if (type->Is<ast::type::MatrixType>()) {
-    auto* mat = type->As<ast::type::MatrixType>();
+  } else if (type->Is<ast::type::Matrix>()) {
+    auto* mat = type->As<ast::type::Matrix>();
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }
     out << mat->rows() << "x" << mat->columns();
-  } else if (type->Is<ast::type::PointerType>()) {
+  } else if (type->Is<ast::type::Pointer>()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
     error_ = "pointers not supported in HLSL";
     return false;
-  } else if (type->Is<ast::type::SamplerType>()) {
-    auto* sampler = type->As<ast::type::SamplerType>();
+  } else if (type->Is<ast::type::Sampler>()) {
+    auto* sampler = type->As<ast::type::Sampler>();
     out << "Sampler";
     if (sampler->IsComparison()) {
       out << "Comparison";
     }
     out << "State";
-  } else if (type->Is<ast::type::StructType>()) {
-    out << type->As<ast::type::StructType>()->name();
-  } else if (type->Is<ast::type::TextureType>()) {
-    auto* tex = type->As<ast::type::TextureType>();
-    if (tex->Is<ast::type::StorageTextureType>()) {
+  } else if (type->Is<ast::type::Struct>()) {
+    out << type->As<ast::type::Struct>()->name();
+  } else if (type->Is<ast::type::Texture>()) {
+    auto* tex = type->As<ast::type::Texture>();
+    if (tex->Is<ast::type::StorageTexture>()) {
       out << "RW";
     }
     out << "Texture";
@@ -2130,18 +2129,16 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     }
 
-  } else if (type->Is<ast::type::U32Type>()) {
+  } else if (type->Is<ast::type::U32>()) {
     out << "uint";
-  } else if (type->Is<ast::type::VectorType>()) {
-    auto* vec = type->As<ast::type::VectorType>();
+  } else if (type->Is<ast::type::Vector>()) {
+    auto* vec = type->As<ast::type::Vector>();
     auto size = vec->size();
-    if (vec->type()->Is<ast::type::F32Type>() && size >= 1 && size <= 4) {
+    if (vec->type()->Is<ast::type::F32>() && size >= 1 && size <= 4) {
       out << "float" << size;
-    } else if (vec->type()->Is<ast::type::I32Type>() && size >= 1 &&
-               size <= 4) {
+    } else if (vec->type()->Is<ast::type::I32>() && size >= 1 && size <= 4) {
       out << "int" << size;
-    } else if (vec->type()->Is<ast::type::U32Type>() && size >= 1 &&
-               size <= 4) {
+    } else if (vec->type()->Is<ast::type::U32>() && size >= 1 && size <= 4) {
       out << "uint" << size;
     } else {
       out << "vector<";
@@ -2150,7 +2147,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
       out << ", " << size << ">";
     }
-  } else if (type->Is<ast::type::VoidType>()) {
+  } else if (type->Is<ast::type::Void>()) {
     out << "void";
   } else {
     error_ = "unknown type in EmitType";
@@ -2161,7 +2158,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const ast::type::StructType* str,
+                                   const ast::type::Struct* str,
                                    const std::string& name) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
@@ -2178,7 +2175,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->type()->Is<ast::type::ArrayType>()) {
+    if (!mem->type()->Is<ast::type::Array>()) {
       out << " " << namer_.NameFor(mem->name());
     }
     out << ";" << std::endl;
@@ -2241,7 +2238,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (!EmitType(out, var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->Is<ast::type::ArrayType>()) {
+  if (!var->type()->Is<ast::type::Array>()) {
     out << " " << var->name();
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2298,7 +2295,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     if (!EmitType(out, var->type(), var->name())) {
       return false;
     }
-    if (!var->type()->Is<ast::type::ArrayType>()) {
+    if (!var->type()->Is<ast::type::Array>()) {
       out << " " << var->name();
     }
 

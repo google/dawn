@@ -29,7 +29,7 @@ namespace {
 using HlslGeneratorImplTest_Cast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));
@@ -41,8 +41,8 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));

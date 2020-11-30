@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   auto p = parser("void");
 
   auto& mod = p->get_module();
-  auto* v = mod.create<ast::type::VoidType>();
+  auto* v = mod.create<ast::type::Void>();
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
@@ -43,8 +43,8 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
   auto p = parser("vec2<f32>");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32Type>();
-  auto* vec2 = mod.create<ast::type::VectorType>(f32, 2);
+  auto* f32 = mod.create<ast::type::F32>();
+  auto* vec2 = mod.create<ast::type::Vector>(f32, 2);
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);

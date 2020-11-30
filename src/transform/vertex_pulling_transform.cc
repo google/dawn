@@ -220,7 +220,7 @@ void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
 void VertexPullingTransform::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
-  auto internal_array = std::make_unique<ast::type::ArrayType>(GetU32Type());
+  auto internal_array = std::make_unique<ast::type::Array>(GetU32Type());
   ast::ArrayDecorationList ary_decos;
   ary_decos.push_back(create<ast::StrideDecoration>(4u, Source{}));
   internal_array->set_decorations(std::move(ary_decos));
@@ -238,7 +238,7 @@ void VertexPullingTransform::AddVertexStorageBuffers() {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type = mod_->create<ast::type::StructType>(
+  auto* struct_type = mod_->create<ast::type::Struct>(
       kStructName, create<ast::Struct>(std::move(decos), std::move(members)));
 
   for (uint32_t i = 0; i < vertex_state_->vertex_buffers.size(); ++i) {
@@ -412,20 +412,19 @@ ast::Expression* VertexPullingTransform::AccessVec(uint32_t buffer,
   }
 
   return create<ast::TypeConstructorExpression>(
-      mod_->create<ast::type::VectorType>(base_type, count),
-      std::move(expr_list));
+      mod_->create<ast::type::Vector>(base_type, count), std::move(expr_list));
 }
 
 ast::type::Type* VertexPullingTransform::GetU32Type() {
-  return mod_->create<ast::type::U32Type>();
+  return mod_->create<ast::type::U32>();
 }
 
 ast::type::Type* VertexPullingTransform::GetI32Type() {
-  return mod_->create<ast::type::I32Type>();
+  return mod_->create<ast::type::I32>();
 }
 
 ast::type::Type* VertexPullingTransform::GetF32Type() {
-  return mod_->create<ast::type::F32Type>();
+  return mod_->create<ast::type::F32>();
 }
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;

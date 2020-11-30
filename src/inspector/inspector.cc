@@ -185,16 +185,16 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ruv;
-    if (!var->type()->Is<ast::type::AccessControlType>()) {
+    if (!var->type()->Is<ast::type::AccessControl>()) {
       continue;
     }
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
 
-    if (!unwrapped_type->Is<ast::type::StructType>()) {
+    if (!unwrapped_type->Is<ast::type::Struct>()) {
       continue;
     }
 
-    if (!unwrapped_type->As<ast::type::StructType>()->IsBlockDecorated()) {
+    if (!unwrapped_type->As<ast::type::Struct>()->IsBlockDecorated()) {
       continue;
     }
 
@@ -307,16 +307,16 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rsv;
-    if (!var->type()->Is<ast::type::AccessControlType>()) {
+    if (!var->type()->Is<ast::type::AccessControl>()) {
       continue;
     }
 
-    auto* ac_type = var->type()->As<ast::type::AccessControlType>();
+    auto* ac_type = var->type()->As<ast::type::AccessControl>();
     if (read_only != ac_type->IsReadOnly()) {
       continue;
     }
 
-    if (!var->type()->UnwrapIfNeeded()->Is<ast::type::StructType>()) {
+    if (!var->type()->UnwrapIfNeeded()->Is<ast::type::Struct>()) {
       continue;
     }
 
@@ -353,7 +353,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.binding = binding_info.binding->value();
 
     auto* texture_type =
-        var->type()->UnwrapIfNeeded()->As<ast::type::TextureType>();
+        var->type()->UnwrapIfNeeded()->As<ast::type::Texture>();
     switch (texture_type->dim()) {
       case ast::type::TextureDimension::k1d:
         entry.dim = ResourceBinding::TextureDimension::k1d;
@@ -383,28 +383,28 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 
     ast::type::Type* base_type = nullptr;
     if (multisampled_only) {
-      base_type = texture_type->As<ast::type::MultisampledTextureType>()
+      base_type = texture_type->As<ast::type::MultisampledTexture>()
                       ->type()
                       ->UnwrapIfNeeded();
     } else {
-      base_type = texture_type->As<ast::type::SampledTextureType>()
+      base_type = texture_type->As<ast::type::SampledTexture>()
                       ->type()
                       ->UnwrapIfNeeded();
     }
 
-    if (base_type->Is<ast::type::ArrayType>()) {
-      base_type = base_type->As<ast::type::ArrayType>()->type();
-    } else if (base_type->Is<ast::type::MatrixType>()) {
-      base_type = base_type->As<ast::type::MatrixType>()->type();
-    } else if (base_type->Is<ast::type::VectorType>()) {
-      base_type = base_type->As<ast::type::VectorType>()->type();
+    if (base_type->Is<ast::type::Array>()) {
+      base_type = base_type->As<ast::type::Array>()->type();
+    } else if (base_type->Is<ast::type::Matrix>()) {
+      base_type = base_type->As<ast::type::Matrix>()->type();
+    } else if (base_type->Is<ast::type::Vector>()) {
+      base_type = base_type->As<ast::type::Vector>()->type();
     }
 
-    if (base_type->Is<ast::type::F32Type>()) {
+    if (base_type->Is<ast::type::F32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->Is<ast::type::U32Type>()) {
+    } else if (base_type->Is<ast::type::U32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->Is<ast::type::I32Type>()) {
+    } else if (base_type->Is<ast::type::I32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kSInt;
     } else {
       entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;

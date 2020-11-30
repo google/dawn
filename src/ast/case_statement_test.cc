@@ -29,7 +29,7 @@ namespace {
 using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList b;
   auto* selector = create<SintLiteral>(&i32, 2);
@@ -47,7 +47,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
 }
 
 TEST_F(CaseStatementTest, Creation_u32) {
-  type::U32Type u32;
+  type::U32 u32;
 
   CaseSelectorList b;
   auto* selector = create<SintLiteral>(&u32, 2);
@@ -65,7 +65,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
-  type::I32Type i32;
+  type::I32 i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -88,7 +88,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
-  type::I32Type i32;
+  type::I32 i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -108,7 +108,7 @@ TEST_F(CaseStatementTest, IsValid) {
 }
 
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
-  type::I32Type i32;
+  type::I32 i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -121,7 +121,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
-  type::I32Type i32;
+  type::I32 i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -133,7 +133,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
-  type::I32Type i32;
+  type::I32 i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, -2));
 
@@ -150,7 +150,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
-  type::U32Type u32;
+  type::U32 u32;
   CaseSelectorList b;
   b.push_back(create<UintLiteral>(&u32, 2));
 
@@ -167,7 +167,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
-  type::I32Type i32;
+  type::I32 i32;
 
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 1));

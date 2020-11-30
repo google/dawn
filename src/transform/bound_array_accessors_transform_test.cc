@@ -89,7 +89,7 @@ class BoundArrayAccessorsTest : public testing::Test {
   Context ctx_;
   ast::Module mod_;
   TypeDeterminer td_;
-  ast::type::VoidType void_type_;
+  ast::type::Void void_type_;
   std::unique_ptr<Manager> manager_;
   BoundArrayAccessorsTransform* transform_;
   ast::BlockStatement* body_ = nullptr;
@@ -102,10 +102,10 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   //
   //   -> const b : ptr<function, i32> = a[min(u32(c), 2)]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::ArrayType ary(&f32, 3);
-  ast::type::PointerType ptr_type(&f32, ast::StorageClass::kFunction);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Array ary(&f32, 3);
+  ast::type::Pointer ptr_type(&f32, ast::StorageClass::kFunction);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -141,7 +141,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -152,7 +152,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
@@ -163,10 +163,10 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   //
   // -> var c : f32 = a[min(u32(b[min(u32(i), 4)]), 2)];
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::ArrayType ary3(&f32, 3);
-  ast::type::ArrayType ary5(&f32, 5);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Array ary3(&f32, 3);
+  ast::type::Array ary5(&f32, 5);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -204,7 +204,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
 
   auto* sub = tc->values()[0];
@@ -222,7 +222,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(sub_idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(sub_idx->params()[0]->Is<ast::TypeConstructorExpression>());
   tc = sub_idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], b_access_idx);
 
@@ -239,7 +239,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
@@ -248,9 +248,9 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   //
   // -> var b : f32 = a[1];
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::ArrayType ary(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Array ary(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -278,7 +278,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
@@ -288,9 +288,9 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::ArrayType ary(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Array ary(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -329,7 +329,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -340,7 +340,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
@@ -349,9 +349,9 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   //
   // -> var b : f32 = a[0]
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::ArrayType ary(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Array ary(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -379,7 +379,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
@@ -388,9 +388,9 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   //
   // -> var b : f32 = a[2]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::ArrayType ary(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Array ary(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -418,7 +418,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
@@ -427,9 +427,9 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   //
   // -> var b : f32 = a[1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Vector vec(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -457,7 +457,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
@@ -467,9 +467,9 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Vector vec(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -507,7 +507,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -518,7 +518,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
@@ -527,9 +527,9 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   //
   // -> var b : f32 = a[0]
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Vector vec(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -557,7 +557,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
@@ -566,9 +566,9 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   //
   // -> var b : f32 = a[2]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Vector vec(&f32, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -596,7 +596,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
@@ -605,9 +605,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   //
   // -> var b : f32 = a[2][1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -641,7 +641,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -651,7 +651,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
@@ -661,9 +661,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)][1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -708,7 +708,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -719,7 +719,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -729,7 +729,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
@@ -739,9 +739,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   //
   // -> var b : f32 = a[1][min(u32(c + 2 - 3), 1)]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -794,7 +794,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
-  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -805,10 +805,10 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
@@ -816,9 +816,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   // var b : f32 = a[-1][1]
   //
   // -> var b : f32 = a[0][1]
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -852,7 +852,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -862,7 +862,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 1);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
@@ -870,9 +870,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   // var b : f32 = a[2][-1]
   //
   // -> var b : f32 = a[2][0]
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::I32 i32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -906,7 +906,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 2);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -916,7 +916,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
@@ -925,9 +925,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   //
   // -> var b : f32 = a[2][1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -961,7 +961,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -971,7 +971,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
@@ -980,9 +980,9 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   //
   // -> var b : f32 = a[2][1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::MatrixType mat(&f32, 2, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Matrix mat(&f32, 2, 3);
 
   SetupFunctionAndBody();
   DeclareVariable(
@@ -1016,7 +1016,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -1026,7 +1026,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 // TODO(dsinclair): Implement when constant_id exists

@@ -173,15 +173,15 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
 
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
-  if (ty->Is<ast::type::AliasType>()) {
-    auto* alias = ty->As<ast::type::AliasType>();
+  if (ty->Is<ast::type::Alias>()) {
+    auto* alias = ty->As<ast::type::Alias>();
     out_ << "type " << alias->name() << " = ";
     if (!EmitType(alias->type())) {
       return false;
     }
     out_ << ";" << std::endl;
-  } else if (ty->Is<ast::type::StructType>()) {
-    if (!EmitStructType(ty->As<ast::type::StructType>())) {
+  } else if (ty->Is<ast::type::Struct>()) {
+    if (!EmitStructType(ty->As<ast::type::Struct>())) {
       return false;
     }
   } else {
@@ -399,8 +399,8 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
-  if (type->Is<ast::type::AccessControlType>()) {
-    auto* ac = type->As<ast::type::AccessControlType>();
+  if (type->Is<ast::type::AccessControl>()) {
+    auto* ac = type->As<ast::type::AccessControl>();
 
     out_ << "[[access(";
     if (ac->IsReadOnly()) {
@@ -415,10 +415,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     if (!EmitType(ac->type())) {
       return false;
     }
-  } else if (type->Is<ast::type::AliasType>()) {
-    out_ << type->As<ast::type::AliasType>()->name();
-  } else if (type->Is<ast::type::ArrayType>()) {
-    auto* ary = type->As<ast::type::ArrayType>();
+  } else if (type->Is<ast::type::Alias>()) {
+    out_ << type->As<ast::type::Alias>()->name();
+  } else if (type->Is<ast::type::Array>()) {
+    auto* ary = type->As<ast::type::Array>();
 
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
@@ -435,51 +435,51 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << ", " << ary->size();
 
     out_ << ">";
-  } else if (type->Is<ast::type::BoolType>()) {
+  } else if (type->Is<ast::type::Bool>()) {
     out_ << "bool";
-  } else if (type->Is<ast::type::F32Type>()) {
+  } else if (type->Is<ast::type::F32>()) {
     out_ << "f32";
-  } else if (type->Is<ast::type::I32Type>()) {
+  } else if (type->Is<ast::type::I32>()) {
     out_ << "i32";
-  } else if (type->Is<ast::type::MatrixType>()) {
-    auto* mat = type->As<ast::type::MatrixType>();
+  } else if (type->Is<ast::type::Matrix>()) {
+    auto* mat = type->As<ast::type::Matrix>();
     out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
     if (!EmitType(mat->type())) {
       return false;
     }
     out_ << ">";
-  } else if (type->Is<ast::type::PointerType>()) {
-    auto* ptr = type->As<ast::type::PointerType>();
+  } else if (type->Is<ast::type::Pointer>()) {
+    auto* ptr = type->As<ast::type::Pointer>();
     out_ << "ptr<" << ptr->storage_class() << ", ";
     if (!EmitType(ptr->type())) {
       return false;
     }
     out_ << ">";
-  } else if (type->Is<ast::type::SamplerType>()) {
-    auto* sampler = type->As<ast::type::SamplerType>();
+  } else if (type->Is<ast::type::Sampler>()) {
+    auto* sampler = type->As<ast::type::Sampler>();
     out_ << "sampler";
 
     if (sampler->IsComparison()) {
       out_ << "_comparison";
     }
-  } else if (type->Is<ast::type::StructType>()) {
+  } else if (type->Is<ast::type::Struct>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << type->As<ast::type::StructType>()->name();
-  } else if (type->Is<ast::type::TextureType>()) {
-    auto* texture = type->As<ast::type::TextureType>();
+    out_ << type->As<ast::type::Struct>()->name();
+  } else if (type->Is<ast::type::Texture>()) {
+    auto* texture = type->As<ast::type::Texture>();
 
     out_ << "texture_";
-    if (texture->Is<ast::type::DepthTextureType>()) {
+    if (texture->Is<ast::type::DepthTexture>()) {
       out_ << "depth_";
-    } else if (texture->Is<ast::type::SampledTextureType>()) {
+    } else if (texture->Is<ast::type::SampledTexture>()) {
       /* nothing to emit */
-    } else if (texture->Is<ast::type::MultisampledTextureType>()) {
+    } else if (texture->Is<ast::type::MultisampledTexture>()) {
       out_ << "multisampled_";
-    } else if (texture->Is<ast::type::StorageTextureType>()) {
+    } else if (texture->Is<ast::type::StorageTexture>()) {
       out_ << "storage_";
 
-      auto* storage = texture->As<ast::type::StorageTextureType>();
+      auto* storage = texture->As<ast::type::StorageTexture>();
       if (storage->access() == ast::AccessControl::kReadOnly) {
         out_ << "ro_";
       } else if (storage->access() == ast::AccessControl::kWriteOnly) {
@@ -520,24 +520,24 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
         return false;
     }
 
-    if (texture->Is<ast::type::SampledTextureType>()) {
-      auto* sampled = texture->As<ast::type::SampledTextureType>();
+    if (texture->Is<ast::type::SampledTexture>()) {
+      auto* sampled = texture->As<ast::type::SampledTexture>();
 
       out_ << "<";
       if (!EmitType(sampled->type())) {
         return false;
       }
       out_ << ">";
-    } else if (texture->Is<ast::type::MultisampledTextureType>()) {
-      auto* sampled = texture->As<ast::type::MultisampledTextureType>();
+    } else if (texture->Is<ast::type::MultisampledTexture>()) {
+      auto* sampled = texture->As<ast::type::MultisampledTexture>();
 
       out_ << "<";
       if (!EmitType(sampled->type())) {
         return false;
       }
       out_ << ">";
-    } else if (texture->Is<ast::type::StorageTextureType>()) {
-      auto* storage = texture->As<ast::type::StorageTextureType>();
+    } else if (texture->Is<ast::type::StorageTexture>()) {
+      auto* storage = texture->As<ast::type::StorageTexture>();
 
       out_ << "<";
       if (!EmitImageFormat(storage->image_format())) {
@@ -546,16 +546,16 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << ">";
     }
 
-  } else if (type->Is<ast::type::U32Type>()) {
+  } else if (type->Is<ast::type::U32>()) {
     out_ << "u32";
-  } else if (type->Is<ast::type::VectorType>()) {
-    auto* vec = type->As<ast::type::VectorType>();
+  } else if (type->Is<ast::type::Vector>()) {
+    auto* vec = type->As<ast::type::Vector>();
     out_ << "vec" << vec->size() << "<";
     if (!EmitType(vec->type())) {
       return false;
     }
     out_ << ">";
-  } else if (type->Is<ast::type::VoidType>()) {
+  } else if (type->Is<ast::type::Void>()) {
     out_ << "void";
   } else {
     error_ = "unknown type in EmitType: " + type->type_name();
@@ -565,7 +565,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   return true;
 }
 
-bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
+bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
   auto* impl = str->impl();
   for (auto* deco : impl->decorations()) {
     out_ << "[[";

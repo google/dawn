@@ -23,16 +23,15 @@ namespace tint {
 namespace ast {
 namespace type {
 
-ArrayType::ArrayType(Type* subtype) : subtype_(subtype) {}
+Array::Array(Type* subtype) : subtype_(subtype) {}
 
-ArrayType::ArrayType(Type* subtype, uint32_t size)
-    : subtype_(subtype), size_(size) {}
+Array::Array(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {}
 
-ArrayType::ArrayType(ArrayType&&) = default;
+Array::Array(Array&&) = default;
 
-ArrayType::~ArrayType() = default;
+Array::~Array() = default;
 
-uint64_t ArrayType::MinBufferBindingSize(MemoryLayout mem_layout) const {
+uint64_t Array::MinBufferBindingSize(MemoryLayout mem_layout) const {
   if (!has_array_stride()) {
     // Arrays in buffers are required to have a stride.
     return 0;
@@ -52,7 +51,7 @@ uint64_t ArrayType::MinBufferBindingSize(MemoryLayout mem_layout) const {
   }
 }
 
-uint64_t ArrayType::BaseAlignment(MemoryLayout mem_layout) const {
+uint64_t Array::BaseAlignment(MemoryLayout mem_layout) const {
   if (mem_layout == MemoryLayout::kUniformBuffer) {
     float aligment = 16;  // for a vec4
     float unaligned = static_cast<float>(subtype_->BaseAlignment(mem_layout));
@@ -63,7 +62,7 @@ uint64_t ArrayType::BaseAlignment(MemoryLayout mem_layout) const {
   return 0;
 }
 
-uint32_t ArrayType::array_stride() const {
+uint32_t Array::array_stride() const {
   for (auto* deco : decos_) {
     if (auto* stride = deco->As<StrideDecoration>()) {
       return stride->stride();
@@ -72,7 +71,7 @@ uint32_t ArrayType::array_stride() const {
   return 0;
 }
 
-bool ArrayType::has_array_stride() const {
+bool Array::has_array_stride() const {
   for (auto* deco : decos_) {
     if (deco->Is<StrideDecoration>()) {
       return true;
@@ -81,7 +80,7 @@ bool ArrayType::has_array_stride() const {
   return false;
 }
 
-std::string ArrayType::type_name() const {
+std::string Array::type_name() const {
   assert(subtype_);
 
   std::string type_name = "__array" + subtype_->type_name();

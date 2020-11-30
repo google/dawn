@@ -24,13 +24,13 @@ namespace ast {
 namespace type {
 
 /// A float 32 type
-class F32Type : public Castable<F32Type, Type> {
+class F32 : public Castable<F32, Type> {
  public:
   /// Constructor
-  F32Type();
+  F32();
   /// Move constructor
-  F32Type(F32Type&&);
-  ~F32Type() override;
+  F32(F32&&);
+  ~F32() override;
 
   /// @returns the name for this type
   std::string type_name() const override;

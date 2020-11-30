@@ -30,7 +30,7 @@ namespace {
 using HlslGeneratorImplTest_Call = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(id, {});
@@ -44,7 +44,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 }
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 }
 
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;

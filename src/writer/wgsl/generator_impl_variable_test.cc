@@ -34,7 +34,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
@@ -43,7 +43,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("a", ast::StorageClass::kInput, &f32);
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
@@ -52,7 +52,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(2, Source{}));
@@ -68,7 +68,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::VariableDecorationList decos;
   decos.push_back(
@@ -93,7 +93,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
   v.set_constructor(ident);
 
@@ -105,7 +105,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
   v.set_constructor(ident);
   v.set_is_const(true);

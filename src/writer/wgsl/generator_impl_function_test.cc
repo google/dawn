@@ -47,7 +47,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("my_func", {}, &void_type, body);
 
   gen.increment_indent();
@@ -65,13 +65,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
   params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("my_func", params, &void_type, body);
 
   gen.increment_indent();
@@ -89,7 +89,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
@@ -109,7 +109,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
@@ -130,7 +130,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   body->append(create<ast::DiscardStatement>());
   body->append(create<ast::ReturnStatement>());
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::Function func("my_func", {}, &void_type, body);
   func.add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
@@ -166,8 +166,8 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -179,8 +179,8 @@ TEST_F(WgslGeneratorImplTest,
 
   auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));

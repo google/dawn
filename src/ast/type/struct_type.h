@@ -26,15 +26,15 @@ namespace ast {
 namespace type {
 
 /// A structure type
-class StructType : public Castable<StructType, Type> {
+class Struct : public Castable<Struct, Type> {
  public:
   /// Constructor
   /// @param name the name of the struct
   /// @param impl the struct data
-  StructType(const std::string& name, Struct* impl);
+  Struct(const std::string& name, ast::Struct* impl);
   /// Move constructor
-  StructType(StructType&&);
-  ~StructType() override;
+  Struct(Struct&&);
+  ~Struct() override;
 
   /// @returns the struct name
   const std::string& name() const { return name_; }
@@ -43,7 +43,7 @@ class StructType : public Castable<StructType, Type> {
   bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }
 
   /// @returns the struct name
-  Struct* impl() const { return struct_; }
+  ast::Struct* impl() const { return struct_; }
 
   /// @returns the name for the type
   std::string type_name() const override;
@@ -60,7 +60,7 @@ class StructType : public Castable<StructType, Type> {
 
  private:
   std::string name_;
-  Struct* struct_ = nullptr;
+  ast::Struct* struct_ = nullptr;
 
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 };

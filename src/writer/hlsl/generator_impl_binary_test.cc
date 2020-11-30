@@ -58,7 +58,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
 
 using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto params = GetParam();
 
@@ -80,7 +80,7 @@ TEST_P(HlslBinaryTest, Emit_f32) {
   EXPECT_EQ(result(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_u32) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
 
   auto params = GetParam();
 
@@ -102,7 +102,7 @@ TEST_P(HlslBinaryTest, Emit_u32) {
   EXPECT_EQ(result(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_i32) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto params = GetParam();
 
@@ -145,8 +145,8 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -171,8 +171,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
@@ -196,8 +196,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -214,8 +214,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::ScalarConstructorExpression>(
@@ -232,9 +232,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -258,9 +258,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
 
@@ -285,9 +285,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -370,7 +370,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   //   return 3;
   // }
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -476,7 +476,7 @@ a = (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   // var a : bool = (b && c) || d;
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   auto* b = create<ast::IdentifierExpression>("b");
   auto* c = create<ast::IdentifierExpression>("c");
@@ -505,7 +505,7 @@ bool a = (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   // as<i32>(a && (b || c))
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* a = create<ast::IdentifierExpression>("a");
   auto* b = create<ast::IdentifierExpression>("b");
@@ -532,7 +532,7 @@ if (_tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* func = create<ast::Function>("foo", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());

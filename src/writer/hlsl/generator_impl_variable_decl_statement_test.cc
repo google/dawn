@@ -33,7 +33,7 @@ namespace {
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
   ast::VariableDeclStatement stmt(var);
@@ -44,7 +44,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
@@ -56,8 +56,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 5);
+  ast::type::F32 f32;
+  ast::type::Array ary(&f32, 5);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &ary);
 
@@ -70,7 +70,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Function) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
 
   ast::VariableDeclStatement stmt(var);
@@ -81,7 +81,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
 
   ast::VariableDeclStatement stmt(var);
@@ -95,7 +95,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(ident);
 
@@ -107,8 +107,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList values;
   auto* zero_vec = create<ast::TypeConstructorExpression>(&vec, values);
@@ -124,8 +124,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroMat) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::Matrix mat(&f32, 3, 2);
 
   ast::ExpressionList values;
   auto* zero_mat = create<ast::TypeConstructorExpression>(&mat, values);

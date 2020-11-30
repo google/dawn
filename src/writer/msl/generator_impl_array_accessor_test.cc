@@ -32,7 +32,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* lit = create<ast::SintLiteral>(&i32, 5);
   auto* idx = create<ast::ScalarConstructorExpression>(lit);
   auto* ary = create<ast::IdentifierExpression>("ary");

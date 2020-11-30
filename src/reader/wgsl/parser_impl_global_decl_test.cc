@@ -88,8 +88,8 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::AliasType>());
-  EXPECT_EQ(m.constructed_types()[0]->As<ast::type::AliasType>()->name(), "A");
+  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::Alias>());
+  EXPECT_EQ(m.constructed_types()[0]->As<ast::type::Alias>()->name(), "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -103,12 +103,12 @@ type B = A;)");
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 2u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::StructType>());
-  auto* str = m.constructed_types()[0]->As<ast::type::StructType>();
+  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::Struct>());
+  auto* str = m.constructed_types()[0]->As<ast::type::Struct>();
   EXPECT_EQ(str->name(), "A");
 
-  ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::AliasType>());
-  auto* alias = m.constructed_types()[1]->As<ast::type::AliasType>();
+  ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::Alias>());
+  auto* alias = m.constructed_types()[1]->As<ast::type::Alias>();
   EXPECT_EQ(alias->name(), "B");
   EXPECT_EQ(alias->type(), str);
 }
@@ -164,9 +164,9 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::StructType>());
+  ASSERT_TRUE(t->Is<ast::type::Struct>());
 
-  auto* str = t->As<ast::type::StructType>();
+  auto* str = t->As<ast::type::Struct>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 2u);
 }
@@ -183,16 +183,16 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::StructType>());
+  ASSERT_TRUE(t->Is<ast::type::Struct>());
 
-  auto* str = t->As<ast::type::StructType>();
+  auto* str = t->As<ast::type::Struct>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
   const auto* ty = str->impl()->members()[0]->type();
-  ASSERT_TRUE(ty->Is<ast::type::ArrayType>());
-  const auto* arr = ty->As<ast::type::ArrayType>();
+  ASSERT_TRUE(ty->Is<ast::type::Array>());
+  const auto* arr = ty->As<ast::type::Array>();
   EXPECT_TRUE(arr->has_array_stride());
   EXPECT_EQ(arr->array_stride(), 4u);
 }
@@ -207,9 +207,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::StructType>());
+  ASSERT_TRUE(t->Is<ast::type::Struct>());
 
-  auto* str = t->As<ast::type::StructType>();
+  auto* str = t->As<ast::type::Struct>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());

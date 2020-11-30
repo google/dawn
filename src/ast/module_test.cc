@@ -45,7 +45,7 @@ TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
 }
 
 TEST_F(ModuleTest, LookupFunction) {
-  type::F32Type f32;
+  type::F32 f32;
   Module m;
 
   auto* func =
@@ -65,7 +65,7 @@ TEST_F(ModuleTest, IsValid_Empty) {
 }
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
-  type::F32Type f32;
+  type::F32 f32;
   auto* var = create<Variable>("var", StorageClass::kInput, &f32);
 
   Module m;
@@ -88,8 +88,8 @@ TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Alias) {
-  type::F32Type f32;
-  type::AliasType alias("alias", &f32);
+  type::F32 f32;
+  type::Alias alias("alias", &f32);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -103,9 +103,9 @@ TEST_F(ModuleTest, IsValid_Null_Alias) {
 }
 
 TEST_F(ModuleTest, IsValid_Struct) {
-  type::F32Type f32;
-  type::StructType st("name", {});
-  type::AliasType alias("name", &st);
+  type::F32 f32;
+  type::Struct st("name", {});
+  type::Alias alias("name", &st);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -113,9 +113,9 @@ TEST_F(ModuleTest, IsValid_Struct) {
 }
 
 TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
-  type::F32Type f32;
-  type::StructType st("", {});
-  type::AliasType alias("name", &st);
+  type::F32 f32;
+  type::Struct st("", {});
+  type::Alias alias("name", &st);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -123,7 +123,7 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 }
 
 TEST_F(ModuleTest, IsValid_Function) {
-  type::F32Type f32;
+  type::F32 f32;
   auto* func =
       create<Function>("main", VariableList(), &f32, create<BlockStatement>());
 

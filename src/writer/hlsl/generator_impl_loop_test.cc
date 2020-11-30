@@ -73,7 +73,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
@@ -142,7 +142,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* var = create<ast::Variable>("lhs", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(

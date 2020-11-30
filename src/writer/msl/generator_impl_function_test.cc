@@ -58,7 +58,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Function) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -79,7 +79,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -100,14 +100,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
   params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -127,8 +127,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -181,9 +181,9 @@ fragment frag_main_out frag_main(frag_main_in tint_in [[stage_in]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithInOut_Builtins) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
@@ -235,9 +235,9 @@ fragment frag_main_out frag_main(float4 coord [[position]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
@@ -282,9 +282,9 @@ fragment void frag_main(constant float4& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -298,8 +298,8 @@ TEST_F(MslGeneratorImplTest,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
 
@@ -350,9 +350,9 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -366,8 +366,8 @@ TEST_F(MslGeneratorImplTest,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
 
@@ -421,8 +421,8 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 TEST_F(
     MslGeneratorImplTest,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -508,9 +508,9 @@ fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoints_NoUsedGlobals) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
@@ -577,9 +577,9 @@ fragment ep_1_out ep_1() {
 TEST_F(
     MslGeneratorImplTest,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
@@ -653,9 +653,9 @@ fragment ep_1_out ep_1(float4 coord [[position]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_Uniform) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
@@ -718,9 +718,9 @@ fragment void frag_main(constant float4& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RW_StorageBuffer) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -734,8 +734,8 @@ TEST_F(MslGeneratorImplTest,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
 
@@ -805,9 +805,9 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RO_StorageBuffer) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -821,8 +821,8 @@ TEST_F(MslGeneratorImplTest,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
 
@@ -892,9 +892,9 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoints_WithGlobal_Nested_Return) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
@@ -953,7 +953,7 @@ fragment ep_1_out ep_1() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* func = create<ast::Function>("main", ast::VariableList{}, &void_type,
                                      create<ast::BlockStatement>());
@@ -972,13 +972,13 @@ kernel void main_tint_0() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 5);
+  ast::type::F32 f32;
+  ast::type::Array ary(&f32, 5);
 
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &ary));
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -1016,8 +1016,8 @@ TEST_F(MslGeneratorImplTest,
   //   return;
   // }
 
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -1029,8 +1029,8 @@ TEST_F(MslGeneratorImplTest,
 
   auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));

@@ -38,13 +38,13 @@ class ValidateFunctionTest : public ValidatorTestHelper,
 TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
   ast::VariableList params;
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   auto* func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
@@ -61,7 +61,7 @@ TEST_F(ValidateFunctionTest,
        VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
   // [[stage(vertex)]]
   // fn func -> void {}
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::VariableList params;
   auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "func", params,
@@ -77,13 +77,13 @@ TEST_F(ValidateFunctionTest,
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
   ast::VariableList params;
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   auto* func = create<ast::Function>(Source{Source::Location{12, 34}}, "func",
@@ -98,8 +98,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
 
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> int {}
-  ast::type::VoidType void_type;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::I32 i32;
   ast::VariableList params;
   auto* func =
       create<ast::Function>(Source{Source::Location{12, 34}}, "func", params,
@@ -115,7 +115,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { return; }
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::VariableList params;
 
   auto* body = create<ast::BlockStatement>();
@@ -131,8 +131,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   // fn func -> void { return 2; }
-  ast::type::VoidType void_type;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::I32 i32;
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* return_expr = create<ast::ScalarConstructorExpression>(
@@ -153,8 +153,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   // fn func -> f32 { return 2; }
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* return_expr = create<ast::ScalarConstructorExpression>(
@@ -176,8 +176,8 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
 TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   // fn func -> i32 { return 2; }
   // fn func -> i32 { return 2; }
-  ast::type::VoidType void_type;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::I32 i32;
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -206,8 +206,8 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   // fn func() -> void {func(); return; }
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
@@ -226,7 +226,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   // fn func() -> i32 {var a: i32 = func(); return 2; }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
@@ -251,7 +251,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // [[stage(vertex)]]
   // fn vtx_main() -> i32 { return 0; }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   ast::VariableList params;
   auto* return_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 0));
@@ -273,8 +273,8 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   // [[stage(vertex)]]
   // fn vtx_func(a : i32) -> void { return; }
-  ast::type::I32Type i32;
-  ast::type::VoidType void_type;
+  ast::type::I32 i32;
+  ast::type::Void void_type;
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &i32));
   auto* body = create<ast::BlockStatement>();
@@ -296,7 +296,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
   // [[stage(vertex)]]
   // fn main() -> void { return; }
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -317,7 +317,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   // [[stage(vertex)]]
   // fn vtx_func() -> void { return; }
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -332,7 +332,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
 
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   // fn vtx_func() -> void { return; }
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());

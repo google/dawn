@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 namespace type {
 
-MatrixType::MatrixType(Type* subtype, uint32_t rows, uint32_t columns)
+Matrix::Matrix(Type* subtype, uint32_t rows, uint32_t columns)
     : subtype_(subtype), rows_(rows), columns_(columns) {
   assert(rows > 1);
   assert(rows < 5);
@@ -31,24 +31,24 @@ MatrixType::MatrixType(Type* subtype, uint32_t rows, uint32_t columns)
   assert(columns < 5);
 }
 
-MatrixType::MatrixType(MatrixType&&) = default;
+Matrix::Matrix(Matrix&&) = default;
 
-MatrixType::~MatrixType() = default;
+Matrix::~Matrix() = default;
 
-std::string MatrixType::type_name() const {
+std::string Matrix::type_name() const {
   return "__mat_" + std::to_string(rows_) + "_" + std::to_string(columns_) +
          subtype_->type_name();
 }
 
-uint64_t MatrixType::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  VectorType vec(subtype_, rows_);
+uint64_t Matrix::MinBufferBindingSize(MemoryLayout mem_layout) const {
+  Vector vec(subtype_, rows_);
   return (columns_ - 1) * vec.BaseAlignment(mem_layout) +
          vec.MinBufferBindingSize(mem_layout);
 }
 
-uint64_t MatrixType::BaseAlignment(MemoryLayout mem_layout) const {
-  VectorType vec(subtype_, rows_);
-  ArrayType arr(&vec, columns_);
+uint64_t Matrix::BaseAlignment(MemoryLayout mem_layout) const {
+  Vector vec(subtype_, rows_);
+  Array arr(&vec, columns_);
   return arr.BaseAlignment(mem_layout);
 }
 

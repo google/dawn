@@ -20,38 +20,37 @@ namespace tint {
 namespace ast {
 namespace type {
 
-AccessControlType::AccessControlType(AccessControl access, Type* subtype)
+AccessControl::AccessControl(ast::AccessControl access, Type* subtype)
     : access_(access), subtype_(subtype) {
   assert(subtype_);
-  assert(!subtype_->Is<AccessControlType>());
+  assert(!subtype_->Is<AccessControl>());
 }
 
-AccessControlType::AccessControlType(AccessControlType&&) = default;
+AccessControl::AccessControl(AccessControl&&) = default;
 
-AccessControlType::~AccessControlType() = default;
+AccessControl::~AccessControl() = default;
 
-std::string AccessControlType::type_name() const {
+std::string AccessControl::type_name() const {
   std::string name = "__access_control_";
   switch (access_) {
-    case AccessControl::kReadOnly:
+    case ast::AccessControl::kReadOnly:
       name += "read_only";
       break;
-    case AccessControl::kWriteOnly:
+    case ast::AccessControl::kWriteOnly:
       name += "write_only";
       break;
-    case AccessControl::kReadWrite:
+    case ast::AccessControl::kReadWrite:
       name += "read_write";
       break;
   }
   return name + subtype_->type_name();
 }
 
-uint64_t AccessControlType::MinBufferBindingSize(
-    MemoryLayout mem_layout) const {
+uint64_t AccessControl::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return subtype_->MinBufferBindingSize(mem_layout);
 }
 
-uint64_t AccessControlType::BaseAlignment(MemoryLayout mem_layout) const {
+uint64_t AccessControl::BaseAlignment(MemoryLayout mem_layout) const {
   return subtype_->BaseAlignment(mem_layout);
 }
 

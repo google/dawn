@@ -62,7 +62,7 @@ class ValidatorTest : public ValidatorTestHelper, public testing::Test {};
 
 TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   // 1 = my_var;
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
@@ -77,7 +77,7 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
 
 TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   // b = 2;
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "b");
@@ -95,7 +95,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   // {
   //  b = 2;
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "b");
@@ -114,7 +114,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   // var a :i32 = 2;
   // a = 2
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -136,8 +136,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   //  var a :i32 = 2;
   //  a = 2.3;
   // }
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -164,7 +164,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   //  var a :i32 = 2;
   //  a = 2
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -190,8 +190,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   //  var a :i32 = 2;
   //  a = 2.3;
   // }
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -218,7 +218,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kInput, &f32);
@@ -229,7 +229,7 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kNone, &f32);
@@ -241,7 +241,7 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
 }
 TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kInput, &f32);
@@ -257,7 +257,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
 
 TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
                             ast::StorageClass::kNone, &f32);
@@ -273,7 +273,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   // fn my_func() -> f32 {
   //   not_global_var = 3.14f;
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -303,8 +303,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   //   global_var = 3.14;
   //   return;
   // }
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
 
   auto* global_var =
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
@@ -336,12 +336,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   //   if (true) { var a : f32 = 2.0; }
   //   a = 3.14;
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
@@ -369,7 +369,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   //   var a : f32 = 2.0;
   //   if (true) { a = 3.14; }
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
@@ -379,7 +379,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
 
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
@@ -398,8 +398,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var0 : f32 = 0.1;
   // var global_var1 : i32 = 0;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
   auto* var0 =
       create<ast::Variable>("global_var0", ast::StorageClass::kPrivate, &f32);
   var0->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -420,8 +420,8 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   // var global_var : f32 = 0.1;
   // var global_var : i32 = 0;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
   auto* var0 =
       create<ast::Variable>("global_var", ast::StorageClass::kPrivate, &f32);
   var0->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -445,7 +445,7 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   //  const a :i32 = 2;
   //  a = 2
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -475,8 +475,8 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   //   return 0;
   // }
 
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
   auto* global_var =
       create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
   global_var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -505,9 +505,9 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   //  var a :i32 = 2;
   //  var a :f21 = 2.0;
   // }
-  ast::type::VoidType void_type;
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -537,12 +537,12 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   // if (true) { var a : f32 = 2.0; }
   // var a : f32 = 3.14;
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
@@ -569,7 +569,7 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   // var a : f32 = 3.14;
   // if (true) { var a : f32 = 2.0; }
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var_a_float =
       create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var_a_float->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -579,7 +579,7 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
 
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
   auto* body = create<ast::BlockStatement>();
@@ -598,8 +598,8 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
 TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   // func0 { var a : f32 = 2.0; return; }
   // func1 { var a : f32 = 3.0; return; }
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
   auto* var0 = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var0->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.0)));
@@ -636,7 +636,7 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   // var a :i32;
   // a = 2;
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
 
   td()->RegisterVariableForTesting(var);

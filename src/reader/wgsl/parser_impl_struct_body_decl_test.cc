@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto p = parser("{a : i32;}");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());

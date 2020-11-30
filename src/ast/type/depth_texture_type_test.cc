@@ -34,46 +34,46 @@ namespace ast {
 namespace type {
 namespace {
 
-using DepthTextureTypeTest = TestHelper;
+using DepthTextureTest = TestHelper;
 
-TEST_F(DepthTextureTypeTest, Is) {
-  DepthTextureType d(TextureDimension::kCube);
+TEST_F(DepthTextureTest, Is) {
+  DepthTexture d(TextureDimension::kCube);
   Type* ty = &d;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_TRUE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_TRUE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(DepthTextureTypeTest, IsTextureType) {
-  DepthTextureType d(TextureDimension::kCube);
-  TextureType* ty = &d;
-  EXPECT_TRUE(ty->Is<DepthTextureType>());
-  EXPECT_FALSE(ty->Is<SampledTextureType>());
-  EXPECT_FALSE(ty->Is<StorageTextureType>());
+TEST_F(DepthTextureTest, IsTexture) {
+  DepthTexture d(TextureDimension::kCube);
+  Texture* ty = &d;
+  EXPECT_TRUE(ty->Is<DepthTexture>());
+  EXPECT_FALSE(ty->Is<SampledTexture>());
+  EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
-TEST_F(DepthTextureTypeTest, Dim) {
-  DepthTextureType d(TextureDimension::kCube);
+TEST_F(DepthTextureTest, Dim) {
+  DepthTexture d(TextureDimension::kCube);
   EXPECT_EQ(d.dim(), TextureDimension::kCube);
 }
 
-TEST_F(DepthTextureTypeTest, TypeName) {
-  DepthTextureType d(TextureDimension::kCube);
+TEST_F(DepthTextureTest, TypeName) {
+  DepthTexture d(TextureDimension::kCube);
   EXPECT_EQ(d.type_name(), "__depth_texture_cube");
 }
 
-TEST_F(DepthTextureTypeTest, MinBufferBindingSize) {
-  DepthTextureType d(TextureDimension::kCube);
+TEST_F(DepthTextureTest, MinBufferBindingSize) {
+  DepthTexture d(TextureDimension::kCube);
   EXPECT_EQ(0u, d.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 

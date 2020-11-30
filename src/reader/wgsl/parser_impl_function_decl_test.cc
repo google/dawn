@@ -39,14 +39,14 @@ TEST_F(ParserImplTest, FunctionDecl) {
 
   EXPECT_EQ(f->name(), "main");
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->name(), "a");
   EXPECT_EQ(f->params()[1]->name(), "b");
 
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
@@ -67,10 +67,10 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
   EXPECT_EQ(f->name(), "main");
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 1u);
@@ -105,10 +105,10 @@ fn main() -> void { return; })");
 
   EXPECT_EQ(f->name(), "main");
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 2u);
@@ -150,10 +150,10 @@ fn main() -> void { return; })");
 
   EXPECT_EQ(f->name(), "main");
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   auto& decos = f->decorations();
   ASSERT_EQ(decos.size(), 2u);

@@ -18,11 +18,11 @@ namespace tint {
 namespace ast {
 
 TypesBuilder::TypesBuilder(Module* mod)
-    : bool_(mod->create<type::BoolType>()),
-      f32(mod->create<type::F32Type>()),
-      i32(mod->create<type::I32Type>()),
-      u32(mod->create<type::U32Type>()),
-      void_(mod->create<type::VoidType>()),
+    : bool_(mod->create<type::Bool>()),
+      f32(mod->create<type::F32>()),
+      i32(mod->create<type::I32>()),
+      u32(mod->create<type::U32>()),
+      void_(mod->create<type::Void>()),
       mod_(mod) {}
 
 Builder::Builder(Context* c, Module* m) : ctx(c), mod(m), ty(m) {}

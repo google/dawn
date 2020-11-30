@@ -47,8 +47,8 @@ TEST_F(BuilderTest, Return) {
 }
 
 TEST_F(BuilderTest, Return_WithValue) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -80,7 +80,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::Variable var("param", ast::StorageClass::kFunction, &f32);
 

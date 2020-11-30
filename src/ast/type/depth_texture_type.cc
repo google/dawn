@@ -33,15 +33,15 @@ bool IsValidDepthDimension(TextureDimension dim) {
 
 }  // namespace
 
-DepthTextureType::DepthTextureType(TextureDimension dim) : Base(dim) {
+DepthTexture::DepthTexture(TextureDimension dim) : Base(dim) {
   assert(IsValidDepthDimension(dim));
 }
 
-DepthTextureType::DepthTextureType(DepthTextureType&&) = default;
+DepthTexture::DepthTexture(DepthTexture&&) = default;
 
-DepthTextureType::~DepthTextureType() = default;
+DepthTexture::~DepthTexture() = default;
 
-std::string DepthTextureType::type_name() const {
+std::string DepthTexture::type_name() const {
   std::ostringstream out;
   out << "__depth_texture_" << dim();
   return out.str();

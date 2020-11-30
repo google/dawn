@@ -30,7 +30,7 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMemberList members;
   members.push_back(
       create<StructMember>("a", &i32, StructMemberDecorationList()));
@@ -45,7 +45,7 @@ TEST_F(StructTest, Creation) {
 }
 
 TEST_F(StructTest, Creation_WithDecorations) {
-  type::I32Type i32;
+  type::I32 i32;
 
   StructMemberList members;
   members.push_back(
@@ -65,7 +65,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
-  type::I32Type i32;
+  type::I32 i32;
 
   StructMemberList members;
   members.emplace_back(
@@ -92,7 +92,7 @@ TEST_F(StructTest, IsValid) {
 }
 
 TEST_F(StructTest, IsValid_Null_StructMember) {
-  type::I32Type i32;
+  type::I32 i32;
 
   StructMemberList members;
   members.push_back(
@@ -104,7 +104,7 @@ TEST_F(StructTest, IsValid_Null_StructMember) {
 }
 
 TEST_F(StructTest, IsValid_Invalid_StructMember) {
-  type::I32Type i32;
+  type::I32 i32;
 
   StructMemberList members;
   members.push_back(
@@ -115,7 +115,7 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
 }
 
 TEST_F(StructTest, ToStr) {
-  type::I32Type i32;
+  type::I32 i32;
 
   StructMemberList members;
   members.emplace_back(

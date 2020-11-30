@@ -42,7 +42,7 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   // switch (a) {
   //   default: {}
   // }
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&f32, 3.14f)));
@@ -70,7 +70,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   // switch (a) {
   //   case 1: {}
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -101,7 +101,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   case 1: {}
   //   default: {}
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -143,8 +143,8 @@ TEST_F(ValidateControlBlockTest,
   //   case 1: {}
   //   default: {}
   // }
-  ast::type::U32Type u32;
-  ast::type::I32Type i32;
+  ast::type::U32 u32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -179,8 +179,8 @@ TEST_F(ValidateControlBlockTest,
   //   case -1: {}
   //   default: {}
   // }
-  ast::type::U32Type u32;
-  ast::type::I32Type i32;
+  ast::type::U32 u32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 2)));
@@ -215,7 +215,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   case 2, 2: {}
   //   default: {}
   // }
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3)));
@@ -256,7 +256,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   case 0,1,2,10: {}
   //   default: {}
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -297,7 +297,7 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   // switch (a) {
   //   default: { fallthrough; }
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -327,7 +327,7 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   default: {}
   //   case 5: {}
   // }
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
@@ -358,8 +358,8 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   //   default: {}
   // }
 
-  ast::type::U32Type u32;
-  ast::type::AliasType my_int{"MyInt", &u32};
+  ast::type::U32 u32;
+  ast::type::Alias my_int{"MyInt", &u32};
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &my_int);
   var->set_constructor(create<ast::ScalarConstructorExpression>(

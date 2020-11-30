@@ -47,9 +47,9 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, ArrayAccessor) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
@@ -87,9 +87,9 @@ TEST_F(BuilderTest, ArrayAccessor) {
 }
 
 TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // ary : vec3<f32>;
   // idx : i32;
@@ -133,9 +133,9 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
@@ -179,10 +179,10 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::ArrayType ary4(&vec3, 4);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Array ary4(&vec3, 4);
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
@@ -226,10 +226,10 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 }
 
 TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::ArrayType ary4(&vec3, 4);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Array ary4(&vec3, 4);
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
@@ -273,7 +273,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // my_struct {
   //   a : f32
@@ -288,7 +288,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   members.push_back(create<ast::StructMember>("b", &f32, decos));
 
   auto* s = create<ast::Struct>(members);
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -320,7 +320,7 @@ TEST_F(BuilderTest, MemberAccessor) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // inner_struct {
   //   a : f32
@@ -336,14 +336,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
   inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct("Inner",
-                                     create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -379,7 +378,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // type Inner = struct {
   //   a : f32
@@ -396,15 +395,14 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
   inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct("Inner",
-                                     create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
-  ast::type::AliasType alias("Inner", &inner_struct);
+  ast::type::Alias alias("Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
   outer_members.push_back(create<ast::StructMember>("inner", &alias, decos));
 
-  ast::type::StructType s_type("Outer", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("Outer", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -440,7 +438,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // inner_struct {
   //   a : f32
@@ -457,14 +455,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
   inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct("Inner",
-                                     create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -507,7 +504,7 @@ OpStore %10 %11
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // inner_struct {
   //   a : f32
@@ -524,14 +521,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
   inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
 
-  ast::type::StructType inner_struct("Inner",
-                                     create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::StructType s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
   ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
   ast::Variable store("store", ast::StorageClass::kFunction, &f32);
@@ -578,8 +574,8 @@ OpStore %7 %13
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // ident.y
 
@@ -613,8 +609,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // ident.yx
 
@@ -647,8 +643,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // ident.yxz.xz
 
@@ -685,8 +681,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // ident.yxz.x
 
@@ -722,9 +718,9 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // index.yxz[1]
 
@@ -763,9 +759,9 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // type C = struct {
   //   baz : vec3<f32>
@@ -783,19 +779,19 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   auto* s = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>("baz", &vec3, decos)});
-  ast::type::StructType c_type("C", s);
+  ast::type::Struct c_type("C", s);
 
   s = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>("bar", &c_type, decos)});
-  ast::type::StructType b_type("B", s);
+  ast::type::Struct b_type("B", s);
 
-  ast::type::ArrayType b_ary_type(&b_type, 3);
+  ast::type::Array b_ary_type(&b_type, 3);
 
   s = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>("foo", &b_ary_type, decos)});
-  ast::type::StructType a_type("A", s);
+  ast::type::Struct a_type("A", s);
 
-  ast::type::ArrayType a_ary_type(&a_type, 2);
+  ast::type::Array a_ary_type(&a_type, 2);
 
   ast::Variable var("index", ast::StorageClass::kFunction, &a_ary_type);
 
@@ -859,10 +855,10 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&f32, 2);
-  ast::type::ArrayType arr(&vec, 3);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Vector vec(&f32, 2);
+  ast::type::Array arr(&vec, 3);
 
   ast::ExpressionList ary_params;
   ary_params.push_back(create<ast::TypeConstructorExpression>(
@@ -935,9 +931,9 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  ast::type::F32Type f32;
-  ast::type::U32Type u32;
-  ast::type::VectorType vec(&f32, 2);
+  ast::type::F32 f32;
+  ast::type::U32 u32;
+  ast::type::Vector vec(&f32, 2);
 
   ast::ExpressionList vec_params;
   vec_params.push_back(create<ast::ScalarConstructorExpression>(

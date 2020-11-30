@@ -24,14 +24,14 @@ namespace ast {
 namespace type {
 
 /// A depth texture type.
-class DepthTextureType : public Castable<DepthTextureType, TextureType> {
+class DepthTexture : public Castable<DepthTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  explicit DepthTextureType(TextureDimension dim);
+  explicit DepthTexture(TextureDimension dim);
   /// Move constructor
-  DepthTextureType(DepthTextureType&&);
-  ~DepthTextureType() override;
+  DepthTexture(DepthTexture&&);
+  ~DepthTexture() override;
 
   /// @returns the name for this type
   std::string type_name() const override;

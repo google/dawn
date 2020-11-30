@@ -179,17 +179,15 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
   }
 
   auto* ret_type = expr->array()->result_type()->UnwrapAll();
-  if (!ret_type->Is<ast::type::ArrayType>() &&
-      !ret_type->Is<ast::type::MatrixType>() &&
-      !ret_type->Is<ast::type::VectorType>()) {
+  if (!ret_type->Is<ast::type::Array>() && !ret_type->Is<ast::type::Matrix>() &&
+      !ret_type->Is<ast::type::Vector>()) {
     return true;
   }
 
-  if (ret_type->Is<ast::type::VectorType>() ||
-      ret_type->Is<ast::type::ArrayType>()) {
-    uint32_t size = ret_type->Is<ast::type::VectorType>()
-                        ? ret_type->As<ast::type::VectorType>()->size()
-                        : ret_type->As<ast::type::ArrayType>()->size();
+  if (ret_type->Is<ast::type::Vector>() || ret_type->Is<ast::type::Array>()) {
+    uint32_t size = ret_type->Is<ast::type::Vector>()
+                        ? ret_type->As<ast::type::Vector>()->size()
+                        : ret_type->As<ast::type::Array>()->size();
     if (size == 0) {
       error_ = "invalid 0 size for array or vector";
       return false;
@@ -201,7 +199,7 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
   } else {
     // The row accessor would have been an embedded array accessor and already
     // handled, so we just need to do columns here.
-    uint32_t size = ret_type->As<ast::type::MatrixType>()->columns();
+    uint32_t size = ret_type->As<ast::type::Matrix>()->columns();
     if (!ProcessAccessExpression(expr, size)) {
       return false;
     }
@@ -234,7 +232,7 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
       return false;
     }
   } else {
-    auto* u32 = mod_->create<ast::type::U32Type>();
+    auto* u32 = mod_->create<ast::type::U32>();
 
     ast::ExpressionList cast_expr;
     cast_expr.push_back(expr->idx_expr());

@@ -426,29 +426,28 @@ class Builder {
   /// @param texture the texture to generate
   /// @param result the result operand
   /// @returns true if the texture was successfully generated
-  bool GenerateTextureType(ast::type::TextureType* texture,
-                           const Operand& result);
+  bool GenerateTextureType(ast::type::Texture* texture, const Operand& result);
   /// Generates an array type declaration
   /// @param ary the array to generate
   /// @param result the result operand
   /// @returns true if the array was successfully generated
-  bool GenerateArrayType(ast::type::ArrayType* ary, const Operand& result);
+  bool GenerateArray(ast::type::Array* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand
   /// @returns true if the matrix was successfully generated
-  bool GenerateMatrixType(ast::type::MatrixType* mat, const Operand& result);
+  bool GenerateMatrixType(ast::type::Matrix* mat, const Operand& result);
   /// Generates a pointer type declaration
   /// @param ptr the pointer type to generate
   /// @param result the result operand
   /// @returns true if the pointer was successfully generated
-  bool GeneratePointerType(ast::type::PointerType* ptr, const Operand& result);
+  bool GeneratePointerType(ast::type::Pointer* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
   /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateStructType(ast::type::StructType* struct_type,
+  bool GenerateStructType(ast::type::Struct* struct_type,
                           ast::AccessControl access_control,
                           const Operand& result);
   /// Generates a struct member
@@ -467,7 +466,7 @@ class Builder {
   /// @param vec the vector to generate
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
+  bool GenerateVectorType(ast::type::Vector* vec, const Operand& result);
 
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type

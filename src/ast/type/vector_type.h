@@ -24,15 +24,15 @@ namespace ast {
 namespace type {
 
 /// A vector type.
-class VectorType : public Castable<VectorType, Type> {
+class Vector : public Castable<Vector, Type> {
  public:
   /// Constructor
   /// @param subtype the vector element type
   /// @param size the number of elements in the vector
-  VectorType(Type* subtype, uint32_t size);
+  Vector(Type* subtype, uint32_t size);
   /// Move constructor
-  VectorType(VectorType&&);
-  ~VectorType() override;
+  Vector(Vector&&);
+  ~Vector() override;
 
   /// @returns the type of the vector elements
   Type* type() const { return subtype_; }

@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
   ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->name(), "a");
   EXPECT_EQ(f->params()[1]->name(), "b");
-  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {

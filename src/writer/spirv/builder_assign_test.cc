@@ -43,7 +43,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
@@ -76,8 +76,8 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec);
 
@@ -110,9 +110,9 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec2(&f32, 2);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Vector vec2(&f32, 2);
 
   auto* first = create<ast::TypeConstructorExpression>(
       &vec2, ast::ExpressionList{
@@ -164,8 +164,8 @@ OpStore %1 %13
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -207,7 +207,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 }
 
 TEST_F(BuilderTest, Assign_StructMember) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // my_struct {
   //   a : f32
@@ -222,7 +222,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
   members.push_back(create<ast::StructMember>("b", &f32, decos));
 
   auto* s = create<ast::Struct>(members);
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   ast::Variable v("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -263,8 +263,8 @@ OpStore %8 %9
 }
 
 TEST_F(BuilderTest, Assign_Vector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   ast::Variable v("var", ast::StorageClass::kOutput, &vec3);
 
@@ -308,8 +308,8 @@ TEST_F(BuilderTest, Assign_Vector) {
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByName) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // var.y = 1
 
@@ -352,9 +352,9 @@ OpStore %9 %10
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::I32 i32;
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   // var[1] = 1
 

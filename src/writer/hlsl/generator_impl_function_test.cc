@@ -55,7 +55,7 @@ namespace {
 using HlslGeneratorImplTest_Function = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -74,7 +74,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -93,14 +93,14 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
   params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -119,8 +119,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -169,9 +169,9 @@ frag_main_out frag_main(frag_main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithInOut_Builtins) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
@@ -225,9 +225,9 @@ frag_main_out frag_main(frag_main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_Uniform) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
@@ -271,9 +271,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_UniformStruct) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
@@ -282,7 +282,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Uniforms", str);
+  ast::type::Struct s("Uniforms", str);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("uniforms", ast::StorageClass::kUniform, &s));
@@ -332,9 +332,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer_Read) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -348,8 +348,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
@@ -391,9 +391,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer_Read) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -407,8 +407,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadOnly, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
@@ -450,9 +450,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_StorageBuffer_Store) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -466,8 +466,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
@@ -513,8 +513,8 @@ void frag_main() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
@@ -597,9 +597,9 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoints_NoUsedGlobals) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* depth_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
@@ -662,9 +662,9 @@ ep_1_out ep_1() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
@@ -740,9 +740,9 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_Uniform) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
 
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
@@ -806,10 +806,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_StorageBuffer) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::VectorType vec4(&f32, 4);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &vec4);
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::Vector vec4(&f32, 4);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &vec4);
   auto* coord_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
 
@@ -870,9 +870,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoints_WithGlobal_Nested_Return) {
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
-  ast::type::I32Type i32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
+  ast::type::I32 i32;
 
   auto* bar_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
@@ -928,7 +928,7 @@ ep_1_out ep_1() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* func = create<ast::Function>("GeometryShader", ast::VariableList{},
                                      &void_type, create<ast::BlockStatement>());
@@ -946,7 +946,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_Compute) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -969,7 +969,7 @@ void main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_Compute_WithWorkgroup) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -992,13 +992,13 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 5);
+  ast::type::F32 f32;
+  ast::type::Array ary(&f32, 5);
 
   ast::VariableList params;
   params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &ary));
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
@@ -1033,8 +1033,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   return;
   // }
 
-  ast::type::VoidType void_type;
-  ast::type::F32Type f32;
+  ast::type::Void void_type;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -1046,8 +1046,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* str = create<ast::Struct>(s_decos, members);
 
-  ast::type::StructType s("Data", str);
-  ast::type::AccessControlType ac(ast::AccessControl::kReadWrite, &s);
+  ast::type::Struct s("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var = create<ast::DecoratedVariable>(
       create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));

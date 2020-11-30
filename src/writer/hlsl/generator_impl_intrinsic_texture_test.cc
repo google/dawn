@@ -179,17 +179,17 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
       break;
   }
 
-  ast::type::SamplerType sampler_type{param.sampler_kind};
+  ast::type::Sampler sampler_type{param.sampler_kind};
   switch (param.texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::SampledTextureType>(param.texture_dimension,
-                                                     datatype));
+          mod->create<ast::type::SampledTexture>(param.texture_dimension,
+                                                 datatype));
       break;
 
     case ast::intrinsic::test::TextureKind::kDepth:
       Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::DepthTextureType>(param.texture_dimension));
+          mod->create<ast::type::DepthTexture>(param.texture_dimension));
       break;
   }
 

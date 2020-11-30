@@ -57,7 +57,7 @@ fn main() ->  {  # missing return type
 
 TEST_F(ParserImplTest, GetRegisteredType) {
   auto p = parser("");
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   p->register_constructed("my_alias", &i32);
 
   auto* alias = p->get_constructed("my_alias");

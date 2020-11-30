@@ -32,8 +32,8 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("a", &f32);
+  ast::type::F32 f32;
+  ast::type::Alias alias("a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float a;
@@ -41,8 +41,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("float", &f32);
+  ast::type::F32 f32;
+  ast::type::Alias alias("float", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
@@ -50,8 +50,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   members.push_back(
@@ -64,7 +64,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("a", str);
+  ast::type::Struct s("a", str);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct a {
@@ -75,8 +75,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   members.push_back(
@@ -89,8 +89,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("b", str);
-  ast::type::AliasType alias("a", &s);
+  ast::type::Struct s("b", str);
+  ast::type::Alias alias("a", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef b a;

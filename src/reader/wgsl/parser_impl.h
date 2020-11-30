@@ -34,7 +34,6 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
-#include "src/ast/switch_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/literal.h"
@@ -48,6 +47,7 @@
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
@@ -353,7 +353,7 @@ class ParserImpl {
   /// `struct_decoration_decl*` provided as |decos|.
   /// @returns the struct type or nullptr on error
   /// @param decos the list of decorations for the struct declaration.
-  Maybe<std::unique_ptr<ast::type::StructType>> struct_decl(
+  Maybe<std::unique_ptr<ast::type::Struct>> struct_decl(
       ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members

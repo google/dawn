@@ -30,9 +30,9 @@ namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
-TEST_F(WgslGeneratorImplTest, EmitAliasType_F32) {
-  ast::type::F32Type f32;
-  ast::type::AliasType alias("a", &f32);
+TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
+  ast::type::F32 f32;
+  ast::type::Alias alias("a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type a = f32;
@@ -40,8 +40,8 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   members.push_back(
@@ -54,8 +54,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("A", str);
-  ast::type::AliasType alias("B", &s);
+  ast::type::Struct s("A", str);
+  ast::type::Alias alias("B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
@@ -68,9 +68,9 @@ type B = A;
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitAliasType_ToStruct) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
+TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
+  ast::type::I32 i32;
+  ast::type::F32 f32;
 
   ast::StructMemberList members;
   members.push_back(
@@ -83,8 +83,8 @@ TEST_F(WgslGeneratorImplTest, EmitAliasType_ToStruct) {
   auto* str = create<ast::Struct>();
   str->set_members(members);
 
-  ast::type::StructType s("A", str);
-  ast::type::AliasType alias("B", &s);
+  ast::type::Struct s("A", str);
+  ast::type::Alias alias("B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type B = A;

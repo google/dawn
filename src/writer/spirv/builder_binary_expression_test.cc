@@ -55,7 +55,7 @@ using BinaryArithSignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3));
@@ -79,8 +79,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
 TEST_P(BinaryArithSignedIntegerTest, Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
-  ast::type::VectorType vec3(&i32, 3);
+  ast::type::I32 i32;
+  ast::type::Vector vec3(&i32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -120,7 +120,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::Variable var("param", ast::StorageClass::kFunction, &i32);
 
@@ -170,7 +170,7 @@ using BinaryArithUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3));
@@ -194,8 +194,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
 TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
-  ast::type::VectorType vec3(&u32, 3);
+  ast::type::U32 u32;
+  ast::type::Vector vec3(&u32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -251,7 +251,7 @@ using BinaryArithFloatTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.2f));
@@ -275,8 +275,8 @@ TEST_P(BinaryArithFloatTest, Scalar) {
 TEST_P(BinaryArithFloatTest, Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -326,7 +326,7 @@ using BinaryCompareUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3));
@@ -352,8 +352,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
   auto param = GetParam();
 
-  ast::type::U32Type u32;
-  ast::type::VectorType vec3(&u32, 3);
+  ast::type::U32 u32;
+  ast::type::Vector vec3(&u32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -407,7 +407,7 @@ using BinaryCompareSignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3));
@@ -433,8 +433,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
-  ast::type::VectorType vec3(&i32, 3);
+  ast::type::I32 i32;
+  ast::type::Vector vec3(&i32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -488,7 +488,7 @@ using BinaryCompareFloatTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareFloatTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.2f));
@@ -514,8 +514,8 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 TEST_P(BinaryCompareFloatTest, Vector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -566,8 +566,8 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
 TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
@@ -599,8 +599,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
@@ -631,8 +631,8 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -663,8 +663,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::ScalarConstructorExpression>(
@@ -695,9 +695,9 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -736,9 +736,9 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
 
@@ -778,9 +778,9 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::MatrixType mat3(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Matrix mat3(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
@@ -810,7 +810,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
@@ -855,7 +855,7 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   auto* a_var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
@@ -904,7 +904,7 @@ OpBranch %9
 }
 
 TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
-  ast::type::BoolType bool_ty;
+  ast::type::Bool bool_ty;
 
   // Test an expression like
   //    a || (b && c)
@@ -950,7 +950,7 @@ OpBranch %4
 }
 
 TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
-  ast::type::BoolType bool_ty;
+  ast::type::Bool bool_ty;
 
   // Test an expression like
   //    a && (b || c)
@@ -996,7 +996,7 @@ OpBranch %4
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lhs =
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
@@ -1041,7 +1041,7 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   auto* a_var =
       create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);

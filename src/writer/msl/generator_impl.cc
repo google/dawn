@@ -166,55 +166,54 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-uint32_t GeneratorImpl::calculate_largest_alignment(
-    ast::type::StructType* type) {
-  auto* stct = type->As<ast::type::StructType>()->impl();
+uint32_t GeneratorImpl::calculate_largest_alignment(ast::type::Struct* type) {
+  auto* stct = type->As<ast::type::Struct>()->impl();
   uint32_t largest_alignment = 0;
   for (auto* mem : stct->members()) {
     auto align = calculate_alignment_size(mem->type());
     if (align == 0) {
       return 0;
     }
-    if (!mem->type()->Is<ast::type::StructType>()) {
+    if (!mem->type()->Is<ast::type::Struct>()) {
       largest_alignment = std::max(largest_alignment, align);
     } else {
       largest_alignment = std::max(
-          largest_alignment, calculate_largest_alignment(
-                                 mem->type()->As<ast::type::StructType>()));
+          largest_alignment,
+          calculate_largest_alignment(mem->type()->As<ast::type::Struct>()));
     }
   }
   return largest_alignment;
 }
 
 uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
-  if (type->Is<ast::type::AliasType>()) {
-    return calculate_alignment_size(type->As<ast::type::AliasType>()->type());
+  if (type->Is<ast::type::Alias>()) {
+    return calculate_alignment_size(type->As<ast::type::Alias>()->type());
   }
-  if (type->Is<ast::type::ArrayType>()) {
-    auto* ary = type->As<ast::type::ArrayType>();
+  if (type->Is<ast::type::Array>()) {
+    auto* ary = type->As<ast::type::Array>();
     // TODO(dsinclair): Handle array stride and adjust for alignment.
     uint32_t type_size = calculate_alignment_size(ary->type());
     return ary->size() * type_size;
   }
-  if (type->Is<ast::type::BoolType>()) {
+  if (type->Is<ast::type::Bool>()) {
     return 1;
   }
-  if (type->Is<ast::type::PointerType>()) {
+  if (type->Is<ast::type::Pointer>()) {
     return 0;
   }
-  if (type->Is<ast::type::F32Type>() || type->Is<ast::type::I32Type>() ||
-      type->Is<ast::type::U32Type>()) {
+  if (type->Is<ast::type::F32>() || type->Is<ast::type::I32>() ||
+      type->Is<ast::type::U32>()) {
     return 4;
   }
-  if (type->Is<ast::type::MatrixType>()) {
-    auto* mat = type->As<ast::type::MatrixType>();
+  if (type->Is<ast::type::Matrix>()) {
+    auto* mat = type->As<ast::type::Matrix>();
     // TODO(dsinclair): Handle MatrixStride
     // https://github.com/gpuweb/gpuweb/issues/773
     uint32_t type_size = calculate_alignment_size(mat->type());
     return mat->rows() * mat->columns() * type_size;
   }
-  if (type->Is<ast::type::StructType>()) {
-    auto* stct = type->As<ast::type::StructType>()->impl();
+  if (type->Is<ast::type::Struct>()) {
+    auto* stct = type->As<ast::type::Struct>()->impl();
     uint32_t count = 0;
     uint32_t largest_alignment = 0;
     // Offset decorations in WGSL must be in increasing order.
@@ -228,12 +227,12 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
       if (align == 0) {
         return 0;
       }
-      if (!mem->type()->Is<ast::type::StructType>()) {
+      if (!mem->type()->Is<ast::type::Struct>()) {
         largest_alignment = std::max(largest_alignment, align);
       } else {
         largest_alignment = std::max(
-            largest_alignment, calculate_largest_alignment(
-                                   mem->type()->As<ast::type::StructType>()));
+            largest_alignment,
+            calculate_largest_alignment(mem->type()->As<ast::type::Struct>()));
       }
 
       // Round up to the alignment size
@@ -244,8 +243,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     count = adjust_for_alignment(count, largest_alignment);
     return count;
   }
-  if (type->Is<ast::type::VectorType>()) {
-    auto* vec = type->As<ast::type::VectorType>();
+  if (type->Is<ast::type::Vector>()) {
+    auto* vec = type->As<ast::type::Vector>();
     uint32_t type_size = calculate_alignment_size(vec->type());
     if (vec->size() == 2) {
       return 2 * type_size;
@@ -258,16 +257,16 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
 
-  if (ty->Is<ast::type::AliasType>()) {
-    auto* alias = ty->As<ast::type::AliasType>();
+  if (ty->Is<ast::type::Alias>()) {
+    auto* alias = ty->As<ast::type::Alias>();
 
     out_ << "typedef ";
     if (!EmitType(alias->type(), "")) {
       return false;
     }
     out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
-  } else if (ty->Is<ast::type::StructType>()) {
-    if (!EmitStructType(ty->As<ast::type::StructType>())) {
+  } else if (ty->Is<ast::type::Struct>()) {
+    if (!EmitStructType(ty->As<ast::type::Struct>())) {
       return false;
     }
   } else {
@@ -522,14 +521,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       // out_ << "(";
 
       // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
-      // if (!param1_type->Is<ast::type::VectorType>()) {
+      // if (!param1_type->Is<ast::type::Vector>()) {
       //   error_ = "invalid param type in outer_product got: " +
       //            param1_type->type_name();
       //   return false;
       // }
 
       // for (uint32_t i = 0; i <
-      // param1_type->As<ast::type::VectorType>()->size(); ++i) {
+      // param1_type->As<ast::type::Vector>()->size(); ++i) {
       //   if (i > 0) {
       //     out_ << ", ";
       //   }
@@ -716,7 +715,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     auto dim = params[pidx.texture]
                    ->result_type()
                    ->UnwrapPtrIfNeeded()
-                   ->As<ast::type::TextureType>()
+                   ->As<ast::type::Texture>()
                    ->dim();
     switch (dim) {
       case ast::type::TextureDimension::k2d:
@@ -798,26 +797,26 @@ std::string GeneratorImpl::generate_builtin_name(
       out += ident->name();
       break;
     case ast::Intrinsic::kAbs:
-      if (ident->result_type()->Is<ast::type::F32Type>()) {
+      if (ident->result_type()->Is<ast::type::F32>()) {
         out += "fabs";
-      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
-                 ident->result_type()->Is<ast::type::I32Type>()) {
+      } else if (ident->result_type()->Is<ast::type::U32>() ||
+                 ident->result_type()->Is<ast::type::I32>()) {
         out += "abs";
       }
       break;
     case ast::Intrinsic::kMax:
-      if (ident->result_type()->Is<ast::type::F32Type>()) {
+      if (ident->result_type()->Is<ast::type::F32>()) {
         out += "fmax";
-      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
-                 ident->result_type()->Is<ast::type::I32Type>()) {
+      } else if (ident->result_type()->Is<ast::type::U32>() ||
+                 ident->result_type()->Is<ast::type::I32>()) {
         out += "max";
       }
       break;
     case ast::Intrinsic::kMin:
-      if (ident->result_type()->Is<ast::type::F32Type>()) {
+      if (ident->result_type()->Is<ast::type::F32>()) {
         out += "fmin";
-      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
-                 ident->result_type()->Is<ast::type::I32Type>()) {
+      } else if (ident->result_type()->Is<ast::type::U32>() ||
+                 ident->result_type()->Is<ast::type::I32>()) {
         out += "min";
       }
       break;
@@ -895,7 +894,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->Is<ast::type::ArrayType>()) {
+  if (expr->type()->Is<ast::type::Array>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -924,7 +923,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->Is<ast::type::ArrayType>()) {
+  if (expr->type()->Is<ast::type::Array>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -933,25 +932,25 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
 }
 
 bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
-  if (type->Is<ast::type::BoolType>()) {
+  if (type->Is<ast::type::Bool>()) {
     out_ << "false";
-  } else if (type->Is<ast::type::F32Type>()) {
+  } else if (type->Is<ast::type::F32>()) {
     out_ << "0.0f";
-  } else if (type->Is<ast::type::I32Type>()) {
+  } else if (type->Is<ast::type::I32>()) {
     out_ << "0";
-  } else if (type->Is<ast::type::U32Type>()) {
+  } else if (type->Is<ast::type::U32>()) {
     out_ << "0u";
-  } else if (type->Is<ast::type::VectorType>()) {
-    return EmitZeroValue(type->As<ast::type::VectorType>()->type());
-  } else if (type->Is<ast::type::MatrixType>()) {
-    return EmitZeroValue(type->As<ast::type::MatrixType>()->type());
-  } else if (type->Is<ast::type::ArrayType>()) {
+  } else if (type->Is<ast::type::Vector>()) {
+    return EmitZeroValue(type->As<ast::type::Vector>()->type());
+  } else if (type->Is<ast::type::Matrix>()) {
+    return EmitZeroValue(type->As<ast::type::Matrix>()->type());
+  } else if (type->Is<ast::type::Array>()) {
     out_ << "{";
-    if (!EmitZeroValue(type->As<ast::type::ArrayType>()->type())) {
+    if (!EmitZeroValue(type->As<ast::type::Array>()->type())) {
       return false;
     }
     out_ << "}";
-  } else if (type->Is<ast::type::StructType>()) {
+  } else if (type->Is<ast::type::Struct>()) {
     out_ << "{}";
   } else {
     error_ = "Invalid type for zero emission: " + type->type_name();
@@ -1287,11 +1286,11 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    if (!var->type()->Is<ast::type::AccessControlType>()) {
+    if (!var->type()->Is<ast::type::AccessControl>()) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
     }
-    auto* ac = var->type()->As<ast::type::AccessControlType>();
+    auto* ac = var->type()->As<ast::type::AccessControl>();
     if (ac->IsReadOnly()) {
       out_ << "const ";
     }
@@ -1313,7 +1312,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->Is<ast::type::ArrayType>()) {
+    if (!v->type()->Is<ast::type::Array>()) {
       out_ << " " << v->name();
     }
   }
@@ -1448,11 +1447,11 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    if (!var->type()->Is<ast::type::AccessControlType>()) {
+    if (!var->type()->Is<ast::type::AccessControl>()) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
     }
-    auto* ac = var->type()->As<ast::type::AccessControlType>();
+    auto* ac = var->type()->As<ast::type::AccessControl>();
     if (ac->IsReadOnly()) {
       out_ << "const ";
     }
@@ -1794,21 +1793,21 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
-  if (type->Is<ast::type::AliasType>()) {
-    auto* alias = type->As<ast::type::AliasType>();
+  if (type->Is<ast::type::Alias>()) {
+    auto* alias = type->As<ast::type::Alias>();
     out_ << namer_.NameFor(alias->name());
-  } else if (type->Is<ast::type::ArrayType>()) {
-    auto* ary = type->As<ast::type::ArrayType>();
+  } else if (type->Is<ast::type::Array>()) {
+    auto* ary = type->As<ast::type::Array>();
 
     ast::type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (base_type->Is<ast::type::ArrayType>()) {
-      if (base_type->As<ast::type::ArrayType>()->IsRuntimeArray()) {
+    while (base_type->Is<ast::type::Array>()) {
+      if (base_type->As<ast::type::Array>()->IsRuntimeArray()) {
         sizes.push_back(1);
       } else {
-        sizes.push_back(base_type->As<ast::type::ArrayType>()->size());
+        sizes.push_back(base_type->As<ast::type::Array>()->size());
       }
-      base_type = base_type->As<ast::type::ArrayType>()->type();
+      base_type = base_type->As<ast::type::Array>()->type();
     }
     if (!EmitType(base_type, "")) {
       return false;
@@ -1819,35 +1818,35 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     for (uint32_t size : sizes) {
       out_ << "[" << size << "]";
     }
-  } else if (type->Is<ast::type::BoolType>()) {
+  } else if (type->Is<ast::type::Bool>()) {
     out_ << "bool";
-  } else if (type->Is<ast::type::F32Type>()) {
+  } else if (type->Is<ast::type::F32>()) {
     out_ << "float";
-  } else if (type->Is<ast::type::I32Type>()) {
+  } else if (type->Is<ast::type::I32>()) {
     out_ << "int";
-  } else if (type->Is<ast::type::MatrixType>()) {
-    auto* mat = type->As<ast::type::MatrixType>();
+  } else if (type->Is<ast::type::Matrix>()) {
+    auto* mat = type->As<ast::type::Matrix>();
     if (!EmitType(mat->type(), "")) {
       return false;
     }
     out_ << mat->columns() << "x" << mat->rows();
-  } else if (type->Is<ast::type::PointerType>()) {
-    auto* ptr = type->As<ast::type::PointerType>();
+  } else if (type->Is<ast::type::Pointer>()) {
+    auto* ptr = type->As<ast::type::Pointer>();
     // TODO(dsinclair): Storage class?
     if (!EmitType(ptr->type(), "")) {
       return false;
     }
     out_ << "*";
-  } else if (type->Is<ast::type::SamplerType>()) {
+  } else if (type->Is<ast::type::Sampler>()) {
     out_ << "sampler";
-  } else if (type->Is<ast::type::StructType>()) {
+  } else if (type->Is<ast::type::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << type->As<ast::type::StructType>()->name();
-  } else if (type->Is<ast::type::TextureType>()) {
-    auto* tex = type->As<ast::type::TextureType>();
+    out_ << type->As<ast::type::Struct>()->name();
+  } else if (type->Is<ast::type::Texture>()) {
+    auto* tex = type->As<ast::type::Texture>();
 
-    if (tex->Is<ast::type::DepthTextureType>()) {
+    if (tex->Is<ast::type::DepthTexture>()) {
       out_ << "depth";
     } else {
       out_ << "texture";
@@ -1879,14 +1878,14 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
         error_ = "Invalid texture dimensions";
         return false;
     }
-    if (tex->Is<ast::type::MultisampledTextureType>()) {
+    if (tex->Is<ast::type::MultisampledTexture>()) {
       out_ << "_ms";
     }
     out_ << "<";
-    if (tex->Is<ast::type::DepthTextureType>()) {
+    if (tex->Is<ast::type::DepthTexture>()) {
       out_ << "float, access::sample";
-    } else if (tex->Is<ast::type::StorageTextureType>()) {
-      auto* storage = tex->As<ast::type::StorageTextureType>();
+    } else if (tex->Is<ast::type::StorageTexture>()) {
+      auto* storage = tex->As<ast::type::StorageTexture>();
       if (!EmitType(storage->type(), "")) {
         return false;
       }
@@ -1899,14 +1898,13 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
         error_ = "Invalid access control for storage texture";
         return false;
       }
-    } else if (tex->Is<ast::type::MultisampledTextureType>()) {
-      if (!EmitType(tex->As<ast::type::MultisampledTextureType>()->type(),
-                    "")) {
+    } else if (tex->Is<ast::type::MultisampledTexture>()) {
+      if (!EmitType(tex->As<ast::type::MultisampledTexture>()->type(), "")) {
         return false;
       }
       out_ << ", access::sample";
-    } else if (tex->Is<ast::type::SampledTextureType>()) {
-      if (!EmitType(tex->As<ast::type::SampledTextureType>()->type(), "")) {
+    } else if (tex->Is<ast::type::SampledTexture>()) {
+      if (!EmitType(tex->As<ast::type::SampledTexture>()->type(), "")) {
         return false;
       }
       out_ << ", access::sample";
@@ -1916,15 +1914,15 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     }
     out_ << ">";
 
-  } else if (type->Is<ast::type::U32Type>()) {
+  } else if (type->Is<ast::type::U32>()) {
     out_ << "uint";
-  } else if (type->Is<ast::type::VectorType>()) {
-    auto* vec = type->As<ast::type::VectorType>();
+  } else if (type->Is<ast::type::Vector>()) {
+    auto* vec = type->As<ast::type::Vector>();
     if (!EmitType(vec->type(), "")) {
       return false;
     }
     out_ << vec->size();
-  } else if (type->Is<ast::type::VoidType>()) {
+  } else if (type->Is<ast::type::Void>()) {
     out_ << "void";
   } else {
     error_ = "unknown type in EmitType: " + type->type_name();
@@ -1934,7 +1932,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   return true;
 }
 
-bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
+bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
   // }
@@ -1972,7 +1970,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
     current_offset += size;
 
     // Array member name will be output with the type
-    if (!mem->type()->Is<ast::type::ArrayType>()) {
+    if (!mem->type()->Is<ast::type::Array>()) {
       out_ << " " << namer_.NameFor(mem->name());
     }
     out_ << ";" << std::endl;
@@ -2019,7 +2017,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
   if (!EmitType(var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->Is<ast::type::ArrayType>()) {
+  if (!var->type()->Is<ast::type::Array>()) {
     out_ << " " << var->name();
   }
 
@@ -2060,7 +2058,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   if (!EmitType(var->type(), var->name())) {
     return false;
   }
-  if (!var->type()->Is<ast::type::ArrayType>()) {
+  if (!var->type()->Is<ast::type::Array>()) {
     out_ << " " << var->name();
   }
 

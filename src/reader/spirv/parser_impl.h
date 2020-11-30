@@ -357,7 +357,7 @@ class ParserImpl : Reader {
                                           ast::type::Type* first_operand_type);
 
   /// @returns the registered boolean type.
-  ast::type::Type* BoolType() const { return bool_type_; }
+  ast::type::Type* Bool() const { return bool_type_; }
 
   /// Bookkeeping used for tracking the "position" builtin variable.
   struct BuiltInPositionInfo {
@@ -433,7 +433,7 @@ class ParserImpl : Reader {
   /// @param var the OpVariable instruction
   /// @returns the Tint AST type for the poiner-to-{sampler|texture} or null on
   /// error
-  ast::type::PointerType* GetTypeForHandleVar(
+  ast::type::Pointer* GetTypeForHandleVar(
       const spvtools::opt::Instruction& var);
 
   /// Returns the SPIR-V instruction with the given ID, or nullptr.
@@ -484,7 +484,7 @@ class ParserImpl : Reader {
   /// @param ast_type non-null; the AST type to apply decorations to
   /// @returns true on success.
   bool ApplyArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
-                             ast::type::ArrayType* ast_type);
+                             ast::type::Array* ast_type);
 
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
@@ -592,7 +592,7 @@ class ParserImpl : Reader {
   // usages implied by usages of the memory-object-declaration.
   std::unordered_map<const spvtools::opt::Instruction*, Usage> handle_usage_;
   // The inferred pointer type for the given handle variable.
-  std::unordered_map<const spvtools::opt::Instruction*, ast::type::PointerType*>
+  std::unordered_map<const spvtools::opt::Instruction*, ast::type::Pointer*>
       handle_type_;
 };
 

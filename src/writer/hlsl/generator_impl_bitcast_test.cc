@@ -30,7 +30,7 @@ namespace {
 using HlslGeneratorImplTest_Bitcast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* id = create<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&f32, id);
 
@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* id = create<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&i32, id);
 
@@ -48,7 +48,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
   auto* id = create<ast::IdentifierExpression>("id");
   ast::BitcastExpression bitcast(&u32, id);
 

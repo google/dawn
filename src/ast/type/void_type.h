@@ -24,13 +24,13 @@ namespace ast {
 namespace type {
 
 /// A void type
-class VoidType : public Castable<VoidType, Type> {
+class Void : public Castable<Void, Type> {
  public:
   /// Constructor
-  VoidType();
+  Void();
   /// Move constructor
-  VoidType(VoidType&&);
-  ~VoidType() override;
+  Void(Void&&);
+  ~Void() override;
 
   /// @returns the name for this type
   std::string type_name() const override;

@@ -33,57 +33,57 @@ namespace ast {
 namespace type {
 namespace {
 
-using SampledTextureTypeTest = TestHelper;
+using SampledTextureTest = TestHelper;
 
-TEST_F(SampledTextureTypeTest, Is) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::kCube, &f32);
+TEST_F(SampledTextureTest, Is) {
+  F32 f32;
+  SampledTexture s(TextureDimension::kCube, &f32);
   Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_TRUE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_TRUE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(SampledTextureTypeTest, IsTextureType) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::kCube, &f32);
-  TextureType* ty = &s;
-  EXPECT_FALSE(ty->Is<DepthTextureType>());
-  EXPECT_TRUE(ty->Is<SampledTextureType>());
-  EXPECT_FALSE(ty->Is<StorageTextureType>());
+TEST_F(SampledTextureTest, IsTexture) {
+  F32 f32;
+  SampledTexture s(TextureDimension::kCube, &f32);
+  Texture* ty = &s;
+  EXPECT_FALSE(ty->Is<DepthTexture>());
+  EXPECT_TRUE(ty->Is<SampledTexture>());
+  EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
-TEST_F(SampledTextureTypeTest, Dim) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::k3d, &f32);
+TEST_F(SampledTextureTest, Dim) {
+  F32 f32;
+  SampledTexture s(TextureDimension::k3d, &f32);
   EXPECT_EQ(s.dim(), TextureDimension::k3d);
 }
 
-TEST_F(SampledTextureTypeTest, Type) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::k3d, &f32);
+TEST_F(SampledTextureTest, Type) {
+  F32 f32;
+  SampledTexture s(TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type(), &f32);
 }
 
-TEST_F(SampledTextureTypeTest, TypeName) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::k3d, &f32);
+TEST_F(SampledTextureTest, TypeName) {
+  F32 f32;
+  SampledTexture s(TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
-TEST_F(SampledTextureTypeTest, MinBufferBindingSize) {
-  F32Type f32;
-  SampledTextureType s(TextureDimension::kCube, &f32);
+TEST_F(SampledTextureTest, MinBufferBindingSize) {
+  F32 f32;
+  SampledTexture s(TextureDimension::kCube, &f32);
   EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 

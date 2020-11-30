@@ -33,8 +33,8 @@ namespace {
 using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -48,8 +48,8 @@ TEST_F(FunctionTest, Creation) {
 }
 
 TEST_F(FunctionTest, Creation_WithSource) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -62,8 +62,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
 }
 
 TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   Variable v("var", StorageClass::kInput, &i32);
   Function f("func", VariableList{}, &void_type, create<BlockStatement>());
@@ -82,8 +82,8 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
 }
 
 TEST_F(FunctionTest, GetReferenceLocations) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   DecoratedVariable loc1(create<Variable>("loc1", StorageClass::kInput, &i32));
   loc1.set_decorations({create<LocationDecoration>(0, Source{})});
@@ -118,8 +118,8 @@ TEST_F(FunctionTest, GetReferenceLocations) {
 }
 
 TEST_F(FunctionTest, GetReferenceBuiltins) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   DecoratedVariable loc1(create<Variable>("loc1", StorageClass::kInput, &i32));
   loc1.set_decorations({create<LocationDecoration>(0, Source{})});
@@ -154,7 +154,7 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
 }
 
 TEST_F(FunctionTest, AddDuplicateEntryPoints) {
-  type::VoidType void_type;
+  type::Void void_type;
   Function f("func", VariableList{}, &void_type, create<BlockStatement>());
 
   f.add_ancestor_entry_point("main");
@@ -167,8 +167,8 @@ TEST_F(FunctionTest, AddDuplicateEntryPoints) {
 }
 
 TEST_F(FunctionTest, IsValid) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -182,8 +182,8 @@ TEST_F(FunctionTest, IsValid) {
 }
 
 TEST_F(FunctionTest, IsValid_EmptyName) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -193,7 +193,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
 }
 
 TEST_F(FunctionTest, IsValid_MissingReturnType) {
-  type::I32Type i32;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -203,8 +203,8 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
 }
 
 TEST_F(FunctionTest, IsValid_NullParam) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -215,7 +215,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
 }
 
 TEST_F(FunctionTest, IsValid_InvalidParam) {
-  type::VoidType void_type;
+  type::Void void_type;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, nullptr));
@@ -225,8 +225,8 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
 }
 
 TEST_F(FunctionTest, IsValid_NullBodyStatement) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -241,8 +241,8 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -257,8 +257,8 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(FunctionTest, ToStr) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
@@ -277,8 +277,8 @@ TEST_F(FunctionTest, ToStr) {
 }
 
 TEST_F(FunctionTest, ToStr_WithDecoration) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
@@ -299,8 +299,8 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
 }
 
 TEST_F(FunctionTest, ToStr_WithParams) {
-  type::VoidType void_type;
-  type::I32Type i32;
+  type::Void void_type;
+  type::I32 i32;
 
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
@@ -328,16 +328,16 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 }
 
 TEST_F(FunctionTest, TypeName) {
-  type::VoidType void_type;
+  type::Void void_type;
 
   Function f("func", {}, &void_type, create<BlockStatement>());
   EXPECT_EQ(f.type_name(), "__func__void");
 }
 
 TEST_F(FunctionTest, TypeName_WithParams) {
-  type::VoidType void_type;
-  type::I32Type i32;
-  type::F32Type f32;
+  type::Void void_type;
+  type::I32 i32;
+  type::F32 f32;
 
   VariableList params;
   params.push_back(create<Variable>("var1", StorageClass::kNone, &i32));
@@ -348,7 +348,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
 }
 
 TEST_F(FunctionTest, GetLastStatement) {
-  type::VoidType void_type;
+  type::Void void_type;
 
   VariableList params;
   auto* body = create<BlockStatement>();
@@ -361,7 +361,7 @@ TEST_F(FunctionTest, GetLastStatement) {
 }
 
 TEST_F(FunctionTest, GetLastStatement_nullptr) {
-  type::VoidType void_type;
+  type::Void void_type;
 
   VariableList params;
   auto* body = create<BlockStatement>();
@@ -372,7 +372,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 }
 
 TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
-  type::VoidType void_type;
+  type::Void void_type;
   Function f("f", {}, &void_type, create<BlockStatement>());
   uint32_t x = 0;
   uint32_t y = 0;
@@ -384,7 +384,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 }
 
 TEST_F(FunctionTest, WorkgroupSize) {
-  type::VoidType void_type;
+  type::Void void_type;
   Function f("f", {}, &void_type, create<BlockStatement>());
   f.add_decoration(create<WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 

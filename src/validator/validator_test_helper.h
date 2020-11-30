@@ -55,7 +55,7 @@ class ValidatorTestHelper {
   Context ctx_;
   ast::Module mod_;
   std::unique_ptr<TypeDeterminer> td_;
-  ast::type::VoidType void_type_;
+  ast::type::Void void_type_;
 };
 
 }  // namespace tint

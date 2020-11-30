@@ -41,7 +41,7 @@ class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
   void to_str(std::ostream& out, size_t indent) const override;
 
  private:
-  AccessControl value_ = AccessControl::kReadWrite;
+  AccessControl value_ = ast::AccessControl::kReadWrite;
 };
 
 }  // namespace ast

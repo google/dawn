@@ -46,14 +46,14 @@ enum class TextureDimension {
 std::ostream& operator<<(std::ostream& out, TextureDimension dim);
 
 /// A texture type.
-class TextureType : public Castable<TextureType, Type> {
+class Texture : public Castable<Texture, Type> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  explicit TextureType(TextureDimension dim);
+  explicit Texture(TextureDimension dim);
   /// Move constructor
-  TextureType(TextureType&&);
-  ~TextureType() override;
+  Texture(Texture&&);
+  ~Texture() override;
 
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }

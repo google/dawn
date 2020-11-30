@@ -29,21 +29,21 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto p = parser("type a = i32");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::AliasType>());
-  auto* alias = t->As<ast::type::AliasType>();
-  ASSERT_TRUE(alias->type()->Is<ast::type::I32Type>());
+  ASSERT_TRUE(t->Is<ast::type::Alias>());
+  auto* alias = t->As<ast::type::Alias>();
+  ASSERT_TRUE(alias->type()->Is<ast::type::I32>());
   ASSERT_EQ(alias->type(), i32);
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
-  ast::type::StructType str("B", {});
+  ast::type::Struct str("B", {});
 
   auto p = parser("type a = B");
   p->register_constructed("B", &str);
@@ -53,12 +53,12 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::AliasType>());
-  auto* alias = t->As<ast::type::AliasType>();
+  ASSERT_TRUE(t->Is<ast::type::Alias>());
+  auto* alias = t->As<ast::type::Alias>();
   EXPECT_EQ(alias->name(), "a");
-  ASSERT_TRUE(alias->type()->Is<ast::type::StructType>());
+  ASSERT_TRUE(alias->type()->Is<ast::type::Struct>());
 
-  auto* s = alias->type()->As<ast::type::StructType>();
+  auto* s = alias->type()->As<ast::type::Struct>();
   EXPECT_EQ(s->name(), "B");
 }
 

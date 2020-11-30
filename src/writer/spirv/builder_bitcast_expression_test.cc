@@ -33,8 +33,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Bitcast) {
-  ast::type::U32Type u32;
-  ast::type::F32Type f32;
+  ast::type::U32 u32;
+  ast::type::F32 f32;
 
   ast::BitcastExpression bitcast(&u32,
                                  create<ast::ScalarConstructorExpression>(
@@ -55,7 +55,7 @@ TEST_F(BuilderTest, Bitcast) {
 }
 
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::BitcastExpression bitcast(&f32,
                                  create<ast::ScalarConstructorExpression>(

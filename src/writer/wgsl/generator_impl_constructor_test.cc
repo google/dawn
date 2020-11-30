@@ -36,7 +36,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   auto* lit = create<ast::BoolLiteral>(&bool_type, false);
   ast::ScalarConstructorExpression expr(lit);
 
@@ -45,7 +45,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   auto* lit = create<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(lit);
 
@@ -54,7 +54,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
   auto* lit = create<ast::UintLiteral>(&u32, 56779);
   ast::ScalarConstructorExpression expr(lit);
 
@@ -63,7 +63,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
   auto* lit =
       create<ast::FloatLiteral>(&f32, static_cast<float>((1 << 30) - 4));
@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   auto* lit = create<ast::FloatLiteral>(&f32, -1.2e-5);
   ast::ExpressionList values;
@@ -87,7 +87,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
-  ast::type::BoolType b;
+  ast::type::Bool b;
 
   auto* lit = create<ast::BoolLiteral>(&b, true);
   ast::ExpressionList values;
@@ -100,7 +100,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* lit = create<ast::SintLiteral>(&i32, -12345);
   ast::ExpressionList values;
@@ -113,7 +113,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
 
   auto* lit = create<ast::UintLiteral>(&u32, 12345);
   ast::ExpressionList values;
@@ -126,8 +126,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   auto* lit1 = create<ast::FloatLiteral>(&f32, 1.f);
   auto* lit2 = create<ast::FloatLiteral>(&f32, 2.f);
@@ -144,10 +144,10 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::F32 f32;
+  ast::type::Matrix mat(&f32, 3, 2);
 
-  ast::type::VectorType vec(&f32, 2);
+  ast::type::Vector vec(&f32, 2);
 
   ast::ExpressionList mat_values;
 
@@ -172,9 +172,9 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
-  ast::type::ArrayType ary(&vec, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
+  ast::type::Array ary(&vec, 3);
 
   ast::ExpressionList ary_values;
 

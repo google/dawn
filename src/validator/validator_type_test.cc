@@ -42,8 +42,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   //   rt: array<f32>;
   // };
 
-  ast::type::F32Type f32;
-  ast::type::ArrayType arr(&f32);
+  ast::type::F32 f32;
+  ast::type::Array arr(&f32);
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -57,7 +57,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
-  ast::type::StructType struct_type("Foo", st);
+  ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -69,8 +69,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   //   rt: array<f32>;
   // };
 
-  ast::type::F32Type f32;
-  ast::type::ArrayType arr(&f32);
+  ast::type::F32 f32;
+  ast::type::Array arr(&f32);
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -83,7 +83,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   }
   ast::StructDecorationList decos;
   auto* st = create<ast::Struct>(decos, members);
-  ast::type::StructType struct_type("Foo", st);
+  ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -99,8 +99,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   //   vf: f32;
   // };
 
-  ast::type::F32Type f32;
-  ast::type::ArrayType arr(&f32);
+  ast::type::F32 f32;
+  ast::type::Array arr(&f32);
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -114,7 +114,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
-  ast::type::StructType struct_type("Foo", st);
+  ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -131,9 +131,9 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   //  a: u32;
   //}
 
-  ast::type::F32Type u32;
-  ast::type::ArrayType array(&u32);
-  ast::type::AliasType alias{"RTArr", &array};
+  ast::type::F32 u32;
+  ast::type::Array array(&u32);
+  ast::type::Alias alias{"RTArr", &array};
 
   ast::StructMemberList members;
   {
@@ -149,7 +149,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
-  ast::type::StructType struct_type("s", st);
+  ast::type::Struct struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
   EXPECT_EQ(v()->error(),
@@ -165,9 +165,9 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   //  b: RTArr;
   //}
 
-  ast::type::F32Type u32;
-  ast::type::ArrayType array(&u32);
-  ast::type::AliasType alias{"RTArr", &array};
+  ast::type::F32 u32;
+  ast::type::Array array(&u32);
+  ast::type::Alias alias{"RTArr", &array};
 
   ast::StructMemberList members;
   {
@@ -182,7 +182,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(decos, members);
-  ast::type::StructType struct_type("s", st);
+  ast::type::Struct struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
 }
@@ -190,12 +190,12 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
 TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   /// [[stage(vertex)]]
   // fn func -> void { var a : array<i32>; }
-  ast::type::I32Type i32;
-  ast::type::ArrayType array(&i32);
+  ast::type::I32 i32;
+  ast::type::Array array(&i32);
 
   auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &array);
   ast::VariableList params;
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));

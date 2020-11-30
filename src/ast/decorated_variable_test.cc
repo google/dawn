@@ -33,7 +33,7 @@ namespace {
 using DecoratedVariableTest = TestHelper;
 
 TEST_F(DecoratedVariableTest, Creation) {
-  type::I32Type t;
+  type::I32 t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(var);
 
@@ -48,7 +48,7 @@ TEST_F(DecoratedVariableTest, Creation) {
 
 TEST_F(DecoratedVariableTest, CreationWithSource) {
   Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}};
-  type::F32Type t;
+  type::F32 t;
   auto* var = create<Variable>(s, "i", StorageClass::kPrivate, &t);
   DecoratedVariable dv(var);
 
@@ -62,7 +62,7 @@ TEST_F(DecoratedVariableTest, CreationWithSource) {
 }
 
 TEST_F(DecoratedVariableTest, NoDecorations) {
-  type::I32Type t;
+  type::I32 t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(var);
   EXPECT_FALSE(dv.HasLocationDecoration());
@@ -71,7 +71,7 @@ TEST_F(DecoratedVariableTest, NoDecorations) {
 }
 
 TEST_F(DecoratedVariableTest, WithDecorations) {
-  type::F32Type t;
+  type::F32 t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(var);
 
@@ -88,7 +88,7 @@ TEST_F(DecoratedVariableTest, WithDecorations) {
 }
 
 TEST_F(DecoratedVariableTest, ConstantId) {
-  type::F32Type t;
+  type::F32 t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(var);
 
@@ -100,7 +100,7 @@ TEST_F(DecoratedVariableTest, ConstantId) {
 }
 
 TEST_F(DecoratedVariableTest, IsValid) {
-  type::I32Type t;
+  type::I32 t;
   auto* var = create<Variable>("my_var", StorageClass::kNone, &t);
   DecoratedVariable dv(var);
   EXPECT_TRUE(dv.IsValid());
@@ -112,7 +112,7 @@ TEST_F(DecoratedVariableTest, IsDecorated) {
 }
 
 TEST_F(DecoratedVariableTest, to_str) {
-  type::F32Type t;
+  type::F32 t;
   auto* var = create<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(var);
   dv.set_constructor(create<IdentifierExpression>("expr"));

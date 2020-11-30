@@ -21,19 +21,16 @@ namespace tint {
 namespace ast {
 namespace type {
 
-MultisampledTextureType::MultisampledTextureType(TextureDimension dim,
-                                                 Type* type)
+MultisampledTexture::MultisampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
   assert(type_);
 }
 
-MultisampledTextureType::MultisampledTextureType(MultisampledTextureType&&) =
-    default;
+MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
 
-MultisampledTextureType::~MultisampledTextureType() = default;
+MultisampledTexture::~MultisampledTexture() = default;
 
-
-std::string MultisampledTextureType::type_name() const {
+std::string MultisampledTexture::type_name() const {
   std::ostringstream out;
   out << "__multisampled_texture_" << dim() << type_->type_name();
   return out.str();

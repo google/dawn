@@ -34,14 +34,14 @@ enum class SamplerKind {
 std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
-class SamplerType : public Castable<SamplerType, Type> {
+class Sampler : public Castable<Sampler, Type> {
  public:
   /// Constructor
   /// @param kind the kind of sampler
-  explicit SamplerType(SamplerKind kind);
+  explicit Sampler(SamplerKind kind);
   /// Move constructor
-  SamplerType(SamplerType&&);
-  ~SamplerType() override;
+  Sampler(Sampler&&);
+  ~Sampler() override;
 
   /// @returns the sampler type
   SamplerKind kind() const { return kind_; }

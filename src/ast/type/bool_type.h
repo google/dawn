@@ -24,13 +24,13 @@ namespace ast {
 namespace type {
 
 /// A boolean type
-class BoolType : public Castable<BoolType, Type> {
+class Bool : public Castable<Bool, Type> {
  public:
   /// Constructor
-  BoolType();
+  Bool();
   /// Move constructor
-  BoolType(BoolType&&);
-  ~BoolType() override;
+  Bool(Bool&&);
+  ~Bool() override;
 
   /// @returns the name for this type
   std::string type_name() const override;

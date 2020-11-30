@@ -24,15 +24,15 @@ namespace ast {
 namespace type {
 
 /// A sampled texture type.
-class SampledTextureType : public Castable<SampledTextureType, TextureType> {
+class SampledTexture : public Castable<SampledTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the sampled texture
-  SampledTextureType(TextureDimension dim, Type* type);
+  SampledTexture(TextureDimension dim, Type* type);
   /// Move constructor
-  SampledTextureType(SampledTextureType&&);
-  ~SampledTextureType() override;
+  SampledTexture(SampledTexture&&);
+  ~SampledTexture() override;
 
   /// @returns the subtype of the sampled texture
   Type* type() const { return type_; }

@@ -25,14 +25,14 @@ namespace {
 using ScalarConstructorExpressionTest = TestHelper;
 
 TEST_F(ScalarConstructorExpressionTest, Creation) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, true);
   ScalarConstructorExpression c(b);
   EXPECT_EQ(c.literal(), b);
 }
 
 TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, true);
   ScalarConstructorExpression c(Source{Source::Location{20, 2}}, b);
   auto src = c.source();
@@ -41,7 +41,7 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(ScalarConstructorExpressionTest, IsValid) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, true);
   ScalarConstructorExpression c(b);
   EXPECT_TRUE(c.IsValid());
@@ -53,7 +53,7 @@ TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
 }
 
 TEST_F(ScalarConstructorExpressionTest, ToStr) {
-  type::BoolType bool_type;
+  type::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, true);
   ScalarConstructorExpression c(b);
   std::ostringstream out;

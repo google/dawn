@@ -52,7 +52,7 @@ using MslImportData_SingleParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -95,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"trunc", "trunc"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -113,7 +113,7 @@ using MslImportData_DualParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -143,8 +143,8 @@ using MslImportData_DualParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList type_params;
 
@@ -186,7 +186,7 @@ using MslImportData_DualParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -210,7 +210,7 @@ using MslImportData_TripleParamTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -241,7 +241,7 @@ using MslImportData_TripleParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
@@ -265,8 +265,8 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"clamp", "clamp"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
-  ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 3);
+  ast::type::F32 f32;
+  ast::type::Matrix mat(&f32, 3, 3);
 
   auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
 

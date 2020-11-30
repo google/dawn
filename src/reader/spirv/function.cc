@@ -2013,7 +2013,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
     auto* guard_var = create<ast::Variable>(
-        guard_name, ast::StorageClass::kFunction, parser_impl_.BoolType());
+        guard_name, ast::StorageClass::kFunction, parser_impl_.Bool());
     guard_var->set_constructor(MakeTrue());
     auto* guard_decl = create<ast::VariableDeclStatement>(guard_var);
     AddStatement(guard_decl);
@@ -2700,8 +2700,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // So represent a load by a new const definition.
       auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
       // The load result type is the pointee type of its operand.
-      assert(expr.type->Is<ast::type::PointerType>());
-      expr.type = expr.type->As<ast::type::PointerType>()->type();
+      assert(expr.type->Is<ast::type::Pointer>());
+      expr.type = expr.type->As<ast::type::Pointer>()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpCopyObject: {
@@ -3061,7 +3061,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
     assert(ast_pointer_type);
-    assert(ast_pointer_type->Is<ast::type::PointerType>());
+    assert(ast_pointer_type->Is<ast::type::Pointer>());
     current_expr = TypedExpression{ast_pointer_type, next_expr};
   }
   return current_expr;
@@ -3080,7 +3080,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   TypedExpression current_expr(MakeOperand(inst, 0));
 
   auto make_index = [this](uint32_t literal) {
-    ast::type::U32Type u32;
+    ast::type::U32 u32;
     return create<ast::ScalarConstructorExpression>(
         create<ast::UintLiteral>(&u32, literal));
   };
@@ -3183,13 +3183,13 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
 
 ast::Expression* FunctionEmitter::MakeTrue() const {
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(parser_impl_.BoolType(), true));
+      create<ast::BoolLiteral>(parser_impl_.Bool(), true));
 }
 
 ast::Expression* FunctionEmitter::MakeFalse() const {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(parser_impl_.BoolType(), false));
+      create<ast::BoolLiteral>(parser_impl_.Bool(), false));
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(
@@ -3207,8 +3207,8 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
 
   // Generate an ast::TypeConstructor expression.
   // Assume the literal indices are valid, and there is a valid number of them.
-  ast::type::VectorType* result_type =
-      parser_impl_.ConvertType(inst.type_id())->As<ast::type::VectorType>();
+  ast::type::Vector* result_type =
+      parser_impl_.ConvertType(inst.type_id())->As<ast::type::Vector>();
   ast::ExpressionList values;
   for (uint32_t i = 2; i < inst.NumInOperands(); ++i) {
     const auto index = inst.GetSingleWordInOperand(i);
@@ -3257,9 +3257,9 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
       if (type) {
         if (type->AsPointer()) {
           const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-          if (ast_type && ast_type->As<ast::type::PointerType>()) {
+          if (ast_type && ast_type->As<ast::type::Pointer>()) {
             info->storage_class =
-                ast_type->As<ast::type::PointerType>()->storage_class();
+                ast_type->As<ast::type::Pointer>()->storage_class();
           }
           switch (inst.opcode()) {
             case SpvOpUndef:
@@ -3301,8 +3301,8 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
   const auto type_id = def_use_mgr_->GetDef(id)->type_id();
   if (type_id) {
     auto* ast_type = parser_impl_.ConvertType(type_id);
-    if (ast_type && ast_type->Is<ast::type::PointerType>()) {
-      return ast_type->As<ast::type::PointerType>()->storage_class();
+    if (ast_type && ast_type->Is<ast::type::Pointer>()) {
+      return ast_type->As<ast::type::Pointer>()->storage_class();
     }
   }
   return ast::StorageClass::kNone;
@@ -3310,13 +3310,13 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
 
 ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
                                                     uint32_t result_id) {
-  if (type->Is<ast::type::PointerType>()) {
+  if (type->Is<ast::type::Pointer>()) {
     // Remap an old-style storage buffer pointer to a new-style storage
     // buffer pointer.
-    const auto* ast_ptr_type = type->As<ast::type::PointerType>();
+    const auto* ast_ptr_type = type->As<ast::type::Pointer>();
     const auto sc = GetStorageClassForPointerValue(result_id);
     if (ast_ptr_type->storage_class() != sc) {
-      return parser_impl_.get_module().create<ast::type::PointerType>(
+      return parser_impl_.get_module().create<ast::type::Pointer>(
           ast_ptr_type->type(), sc);
     }
   }
@@ -3558,7 +3558,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
                   << inst.PrettyPrint();
   }
 
-  if (result_type->Is<ast::type::VoidType>()) {
+  if (result_type->Is<ast::type::Void>()) {
     return nullptr != AddStatementForInstruction(
                           create<ast::CallStatement>(call_expr), inst);
   }
@@ -3600,8 +3600,8 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
   // - you can't select over pointers or pointer vectors, unless you also have
   //   a VariablePointers* capability, which is not allowed in by WebGPU.
   auto* op_ty = operand1.type;
-  if (op_ty->Is<ast::type::VectorType>() || op_ty->is_float_scalar() ||
-      op_ty->is_integer_scalar() || op_ty->Is<ast::type::BoolType>()) {
+  if (op_ty->Is<ast::type::Vector>() || op_ty->is_float_scalar() ||
+      op_ty->is_integer_scalar() || op_ty->Is<ast::type::Bool>()) {
     ast::ExpressionList params;
     params.push_back(operand1.expr);
     params.push_back(operand2.expr);
@@ -3711,14 +3711,13 @@ bool FunctionEmitter::EmitSampledImageAccess(
     auto* lod_operand = MakeOperand(inst, arg_index).expr;
     // When sampling from a depth texture, the Lod operand must be an unsigned
     // integer.
-    if (ast::type::PointerType* type =
-            parser_impl_.GetTypeForHandleVar(*image)) {
-      if (ast::type::TextureType* texture_type =
-              type->type()->As<ast::type::TextureType>()) {
-        if (texture_type->Is<ast::type::DepthTextureType>()) {
+    if (ast::type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image)) {
+      if (ast::type::Texture* texture_type =
+              type->type()->As<ast::type::Texture>()) {
+        if (texture_type->Is<ast::type::DepthTexture>()) {
           // Convert it to an unsigned integer type.
           lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
-              ast_module_.create<ast::type::U32Type>(),
+              ast_module_.create<ast::type::U32>(),
               ast::ExpressionList{lod_operand});
         }
       }
@@ -3780,17 +3779,17 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (!raw_coords.type) {
     return {};
   }
-  ast::type::PointerType* type = parser_impl_.GetTypeForHandleVar(*image);
+  ast::type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image);
   if (!parser_impl_.success()) {
     Fail();
     return {};
   }
-  if (!type || !type->type()->Is<ast::type::TextureType>()) {
+  if (!type || !type->type()->Is<ast::type::Texture>()) {
     Fail() << "invalid texture type for " << image->PrettyPrint();
     return {};
   }
   ast::type::TextureDimension dim =
-      type->type()->As<ast::type::TextureType>()->dim();
+      type->type()->As<ast::type::Texture>()->dim();
   // Number of regular coordinates.
   uint32_t num_axes = 0;
   bool is_arrayed = false;
@@ -3829,10 +3828,10 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   assert(num_axes <= 3);
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
-  if (raw_coords.type->Is<ast::type::F32Type>()) {
+  if (raw_coords.type->Is<ast::type::F32>()) {
     num_coords_supplied = 1;
-  } else if (raw_coords.type->Is<ast::type::VectorType>()) {
-    num_coords_supplied = raw_coords.type->As<ast::type::VectorType>()->size();
+  } else if (raw_coords.type->Is<ast::type::Vector>()) {
+    num_coords_supplied = raw_coords.type->As<ast::type::Vector>()->size();
   }
   if (num_coords_supplied == 0) {
     Fail() << "bad or unsupported coordinate type for image access: "
@@ -3867,7 +3866,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
                                                           Swizzle(num_axes));
     // Convert it to an unsigned integer type.
     result.push_back(ast_module_.create<ast::TypeConstructorExpression>(
-        ast_module_.create<ast::type::U32Type>(),
+        ast_module_.create<ast::type::U32>(),
         ast::ExpressionList{array_index}));
   } else {
     if (num_coords_supplied == num_coords_required) {

@@ -40,155 +40,155 @@ namespace ast {
 namespace type {
 namespace {
 
-using AliasTypeTest = TestHelper;
+using AliasTest = TestHelper;
 
-TEST_F(AliasTypeTest, Create) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
+TEST_F(AliasTest, Create) {
+  U32 u32;
+  Alias a{"a_type", &u32};
   EXPECT_EQ(a.name(), "a_type");
   EXPECT_EQ(a.type(), &u32);
 }
 
-TEST_F(AliasTypeTest, Is) {
-  I32Type i32;
+TEST_F(AliasTest, Is) {
+  I32 i32;
 
-  AliasType at{"a", &i32};
+  Alias at{"a", &i32};
   Type* ty = &at;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_TRUE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_TRUE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(AliasTypeTest, TypeName) {
-  I32Type i32;
-  AliasType at{"Particle", &i32};
+TEST_F(AliasTest, TypeName) {
+  I32 i32;
+  Alias at{"Particle", &i32};
   EXPECT_EQ(at.type_name(), "__alias_Particle__i32");
 }
 
-TEST_F(AliasTypeTest, UnwrapIfNeeded_Alias) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
+TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
+  U32 u32;
+  Alias a{"a_type", &u32};
   EXPECT_EQ(a.name(), "a_type");
   EXPECT_EQ(a.type(), &u32);
   EXPECT_EQ(a.UnwrapIfNeeded(), &u32);
   EXPECT_EQ(u32.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapIfNeeded_AccessControl) {
-  U32Type u32;
-  AccessControlType a{AccessControl::kReadOnly, &u32};
+TEST_F(AliasTest, UnwrapIfNeeded_AccessControl) {
+  U32 u32;
+  AccessControl a{ast::AccessControl::kReadOnly, &u32};
   EXPECT_EQ(a.type(), &u32);
   EXPECT_EQ(a.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapIfNeeded_MultiLevel) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
-  AliasType aa{"aa_type", &a};
+TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
+  U32 u32;
+  Alias a{"a_type", &u32};
+  Alias aa{"aa_type", &a};
   EXPECT_EQ(aa.name(), "aa_type");
   EXPECT_EQ(aa.type(), &a);
   EXPECT_EQ(aa.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
-  AccessControlType aa{AccessControl::kReadWrite, &a};
+TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
+  U32 u32;
+  Alias a{"a_type", &u32};
+  AccessControl aa{ast::AccessControl::kReadWrite, &a};
   EXPECT_EQ(aa.type(), &a);
   EXPECT_EQ(aa.UnwrapIfNeeded(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
-  AliasType aa{"aa_type", &a};
-  PointerType paa{&aa, StorageClass::kUniform};
-  AliasType apaa{"paa_type", &paa};
-  AliasType aapaa{"aapaa_type", &apaa};
+TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
+  U32 u32;
+  Alias a{"a_type", &u32};
+  Alias aa{"aa_type", &a};
+  Pointer paa{&aa, StorageClass::kUniform};
+  Alias apaa{"paa_type", &paa};
+  Alias aapaa{"aapaa_type", &apaa};
   EXPECT_EQ(aapaa.name(), "aapaa_type");
   EXPECT_EQ(aapaa.type(), &apaa);
   EXPECT_EQ(aapaa.UnwrapAll(), &u32);
   EXPECT_EQ(u32.UnwrapAll(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
-  AliasType aa{"aa_type", &a};
-  PointerType paa{&aa, StorageClass::kUniform};
-  PointerType ppaa{&paa, StorageClass::kUniform};
-  AliasType appaa{"appaa_type", &ppaa};
+TEST_F(AliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
+  U32 u32;
+  Alias a{"a_type", &u32};
+  Alias aa{"aa_type", &a};
+  Pointer paa{&aa, StorageClass::kUniform};
+  Pointer ppaa{&paa, StorageClass::kUniform};
+  Alias appaa{"appaa_type", &ppaa};
   EXPECT_EQ(appaa.UnwrapAll(), &paa);
 }
 
-TEST_F(AliasTypeTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
-  U32Type u32;
-  AliasType a{"a_type", &u32};
-  AliasType aa{"aa_type", &a};
-  PointerType paa{&aa, StorageClass::kUniform};
-  AliasType apaa{"apaa_type", &paa};
-  AliasType aapaa{"aapaa_type", &apaa};
-  PointerType paapaa{&aapaa, StorageClass::kUniform};
-  AliasType apaapaa{"apaapaa_type", &paapaa};
+TEST_F(AliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
+  U32 u32;
+  Alias a{"a_type", &u32};
+  Alias aa{"aa_type", &a};
+  Pointer paa{&aa, StorageClass::kUniform};
+  Alias apaa{"apaa_type", &paa};
+  Alias aapaa{"aapaa_type", &apaa};
+  Pointer paapaa{&aapaa, StorageClass::kUniform};
+  Alias apaapaa{"apaapaa_type", &paapaa};
   EXPECT_EQ(apaapaa.UnwrapAll(), &paa);
 }
 
-TEST_F(AliasTypeTest, UnwrapAll_AccessControlPointer) {
-  U32Type u32;
-  AccessControlType a{AccessControl::kReadOnly, &u32};
-  PointerType pa{&a, StorageClass::kUniform};
+TEST_F(AliasTest, UnwrapAll_AccessControlPointer) {
+  U32 u32;
+  AccessControl a{ast::AccessControl::kReadOnly, &u32};
+  Pointer pa{&a, StorageClass::kUniform};
   EXPECT_EQ(pa.type(), &a);
   EXPECT_EQ(pa.UnwrapAll(), &u32);
   EXPECT_EQ(u32.UnwrapAll(), &u32);
 }
 
-TEST_F(AliasTypeTest, UnwrapAll_PointerAccessControl) {
-  U32Type u32;
-  PointerType p{&u32, StorageClass::kUniform};
-  AccessControlType a{AccessControl::kReadOnly, &p};
+TEST_F(AliasTest, UnwrapAll_PointerAccessControl) {
+  U32 u32;
+  Pointer p{&u32, StorageClass::kUniform};
+  AccessControl a{ast::AccessControl::kReadOnly, &p};
   EXPECT_EQ(a.type(), &p);
   EXPECT_EQ(a.UnwrapAll(), &u32);
   EXPECT_EQ(u32.UnwrapAll(), &u32);
 }
 
-TEST_F(AliasTypeTest, MinBufferBindingSizeU32) {
-  U32Type u32;
-  AliasType alias{"alias", &u32};
+TEST_F(AliasTest, MinBufferBindingSizeU32) {
+  U32 u32;
+  Alias alias{"alias", &u32};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, MinBufferBindingSizeArray) {
-  U32Type u32;
-  ArrayType array(&u32, 4);
+TEST_F(AliasTest, MinBufferBindingSizeArray) {
+  U32 u32;
+  Array array(&u32, 4);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(decos);
-  AliasType alias{"alias", &array};
+  Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, MinBufferBindingSizeRuntimeArray) {
-  U32Type u32;
-  ArrayType array(&u32);
+TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
+  U32 u32;
+  Array array(&u32);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(decos);
-  AliasType alias{"alias", &array};
+  Alias alias{"alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, MinBufferBindingSizeStruct) {
-  U32Type u32;
+TEST_F(AliasTest, MinBufferBindingSizeStruct) {
+  U32 u32;
   StructMemberList members;
 
   {
@@ -203,41 +203,41 @@ TEST_F(AliasTypeTest, MinBufferBindingSizeStruct) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
-  AliasType alias{"alias", &struct_type};
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
+  Alias alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, alias.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(AliasTypeTest, BaseAlignmentU32) {
-  U32Type u32;
-  AliasType alias{"alias", &u32};
+TEST_F(AliasTest, BaseAlignmentU32) {
+  U32 u32;
+  Alias alias{"alias", &u32};
   EXPECT_EQ(4u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, BaseAlignmentArray) {
-  U32Type u32;
-  ArrayType array(&u32, 4);
+TEST_F(AliasTest, BaseAlignmentArray) {
+  U32 u32;
+  Array array(&u32, 4);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(decos);
-  AliasType alias{"alias", &array};
+  Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, BaseAlignmentRuntimeArray) {
-  U32Type u32;
-  ArrayType array(&u32);
+TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
+  U32 u32;
+  Array array(&u32);
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
   array.set_decorations(decos);
-  AliasType alias{"alias", &array};
+  Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(AliasTypeTest, BaseAlignmentStruct) {
-  U32Type u32;
+TEST_F(AliasTest, BaseAlignmentStruct) {
+  U32 u32;
   StructMemberList members;
 
   {
@@ -252,9 +252,9 @@ TEST_F(AliasTypeTest, BaseAlignmentStruct) {
   }
   StructDecorationList decos;
 
-  auto* str = create<Struct>(decos, members);
-  StructType struct_type("struct_type", str);
-  AliasType alias{"alias", &struct_type};
+  auto* str = create<ast::Struct>(decos, members);
+  Struct struct_type("struct_type", str);
+  Alias alias{"alias", &struct_type};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, alias.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

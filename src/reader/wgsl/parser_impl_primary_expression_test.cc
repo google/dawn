@@ -194,7 +194,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto p = parser("f32(1)");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32Type>();
+  auto* f32 = mod.create<ast::type::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
@@ -216,7 +216,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto p = parser("bitcast<f32>(1)");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32Type>();
+  auto* f32 = mod.create<ast::type::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);

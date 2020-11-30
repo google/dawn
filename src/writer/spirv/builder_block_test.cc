@@ -36,7 +36,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Block) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.

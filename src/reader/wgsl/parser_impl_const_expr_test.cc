@@ -35,8 +35,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type()->Is<ast::type::VectorType>());
-  EXPECT_EQ(t->type()->As<ast::type::VectorType>()->size(), 2u);
+  ASSERT_TRUE(t->type()->Is<ast::type::Vector>());
+  EXPECT_EQ(t->type()->As<ast::type::Vector>()->size(), 2u);
 
   ASSERT_EQ(t->values().size(), 2u);
   auto& v = t->values();

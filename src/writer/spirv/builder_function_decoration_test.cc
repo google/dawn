@@ -40,7 +40,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionDecoration_Stage) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
@@ -64,7 +64,7 @@ using FunctionDecoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(FunctionDecoration_StageTest, Emit) {
   auto params = GetParam();
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(create<ast::StageDecoration>(params.stage, Source{}));
@@ -89,8 +89,8 @@ INSTANTIATE_TEST_SUITE_P(
                                       SpvExecutionModelGLCompute}));
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
@@ -132,8 +132,8 @@ OpName %11 "tint_6d61696e"
 }
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
-  ast::type::F32Type f32;
-  ast::type::VoidType void_type;
+  ast::type::F32 f32;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
@@ -195,7 +195,7 @@ OpName %11 "tint_6d61696e"
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
@@ -208,7 +208,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 }
 
 TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(
@@ -221,7 +221,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
 }
 
 TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
   func.add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
@@ -235,7 +235,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   ast::Function func1("main1", {}, &void_type, create<ast::BlockStatement>());
   func1.add_decoration(

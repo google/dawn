@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
   auto p = parser("a : i32");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
+  auto* i32 = mod.create<ast::type::I32>();
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -52,9 +52,9 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   auto p = parser("a : i32, b: f32, c: vec2<f32>");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32Type>();
-  auto* f32 = mod.create<ast::type::F32Type>();
-  auto* vec2 = mod.create<ast::type::VectorType>(f32, 2);
+  auto* i32 = mod.create<ast::type::I32>();
+  auto* f32 = mod.create<ast::type::F32>();
+  auto* vec2 = mod.create<ast::type::Vector>(f32, 2);
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();

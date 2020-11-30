@@ -21,16 +21,16 @@ namespace tint {
 namespace ast {
 namespace type {
 
-SampledTextureType::SampledTextureType(TextureDimension dim, Type* type)
+SampledTexture::SampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
   assert(type_);
 }
 
-SampledTextureType::SampledTextureType(SampledTextureType&&) = default;
+SampledTexture::SampledTexture(SampledTexture&&) = default;
 
-SampledTextureType::~SampledTextureType() = default;
+SampledTexture::~SampledTexture() = default;
 
-std::string SampledTextureType::type_name() const {
+std::string SampledTexture::type_name() const {
   std::ostringstream out;
   out << "__sampled_texture_" << dim() << type_->type_name();
   return out.str();

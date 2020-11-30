@@ -41,7 +41,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Switch_Empty) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch (1) {
   // }
@@ -68,7 +68,7 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, Switch_WithCase) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch(a) {
   //   case 1:
@@ -147,7 +147,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_WithDefault) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch(true) {
   //   default:
@@ -205,7 +205,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch(a) {
   //   case 1:
@@ -296,7 +296,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch(a) {
   //   case 1:
@@ -388,7 +388,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   // switch(a) {
   //   case 1:
@@ -429,8 +429,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
 }
 
 TEST_F(BuilderTest, Switch_WithNestedBreak) {
-  ast::type::I32Type i32;
-  ast::type::BoolType bool_type;
+  ast::type::I32 i32;
+  ast::type::Bool bool_type;
 
   // switch (a) {
   //   case 1:

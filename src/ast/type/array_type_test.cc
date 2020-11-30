@@ -35,111 +35,111 @@ namespace ast {
 namespace type {
 namespace {
 
-using ArrayTypeTest = TestHelper;
+using ArrayTest = TestHelper;
 
-TEST_F(ArrayTypeTest, CreateSizedArray) {
-  U32Type u32;
-  ArrayType arr{&u32, 3};
+TEST_F(ArrayTest, CreateSizedArray) {
+  U32 u32;
+  Array arr{&u32, 3};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 3u);
-  EXPECT_TRUE(arr.Is<ArrayType>());
+  EXPECT_TRUE(arr.Is<Array>());
   EXPECT_FALSE(arr.IsRuntimeArray());
 }
 
-TEST_F(ArrayTypeTest, CreateRuntimeArray) {
-  U32Type u32;
-  ArrayType arr{&u32};
+TEST_F(ArrayTest, CreateRuntimeArray) {
+  U32 u32;
+  Array arr{&u32};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 0u);
-  EXPECT_TRUE(arr.Is<ArrayType>());
+  EXPECT_TRUE(arr.Is<Array>());
   EXPECT_TRUE(arr.IsRuntimeArray());
 }
 
-TEST_F(ArrayTypeTest, Is) {
-  I32Type i32;
+TEST_F(ArrayTest, Is) {
+  I32 i32;
 
-  ArrayType arr{&i32, 3};
+  Array arr{&i32, 3};
   Type* ty = &arr;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_TRUE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_TRUE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(ArrayTypeTest, TypeName) {
-  I32Type i32;
-  ArrayType arr{&i32};
+TEST_F(ArrayTest, TypeName) {
+  I32 i32;
+  Array arr{&i32};
   EXPECT_EQ(arr.type_name(), "__array__i32");
 }
 
-TEST_F(ArrayTypeTest, TypeName_RuntimeArray) {
-  I32Type i32;
-  ArrayType arr{&i32, 3};
+TEST_F(ArrayTest, TypeName_RuntimeArray) {
+  I32 i32;
+  Array arr{&i32, 3};
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
 }
 
-TEST_F(ArrayTypeTest, TypeName_WithStride) {
-  I32Type i32;
+TEST_F(ArrayTest, TypeName_WithStride) {
+  I32 i32;
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(16, Source{}));
 
-  ArrayType arr{&i32, 3};
+  Array arr{&i32, 3};
   arr.set_decorations(decos);
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
-TEST_F(ArrayTypeTest, MinBufferBindingSizeNoStride) {
-  U32Type u32;
-  ArrayType arr(&u32, 4);
+TEST_F(ArrayTest, MinBufferBindingSizeNoStride) {
+  U32 u32;
+  Array arr(&u32, 4);
   EXPECT_EQ(0u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(ArrayTypeTest, MinBufferBindingSizeArray) {
-  U32Type u32;
+TEST_F(ArrayTest, MinBufferBindingSizeArray) {
+  U32 u32;
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
-  ArrayType arr(&u32, 4);
+  Array arr(&u32, 4);
   arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(ArrayTypeTest, MinBufferBindingSizeRuntimeArray) {
-  U32Type u32;
+TEST_F(ArrayTest, MinBufferBindingSizeRuntimeArray) {
+  U32 u32;
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
-  ArrayType arr(&u32);
+  Array arr(&u32);
   arr.set_decorations(decos);
   EXPECT_EQ(4u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
-TEST_F(ArrayTypeTest, BaseAlignmentArray) {
-  U32Type u32;
+TEST_F(ArrayTest, BaseAlignmentArray) {
+  U32 u32;
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
-  ArrayType arr(&u32, 4);
+  Array arr(&u32, 4);
   arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
-TEST_F(ArrayTypeTest, BaseAlignmentRuntimeArray) {
-  U32Type u32;
+TEST_F(ArrayTest, BaseAlignmentRuntimeArray) {
+  U32 u32;
   ArrayDecorationList decos;
   decos.push_back(create<StrideDecoration>(4, Source{}));
 
-  ArrayType arr(&u32);
+  Array arr(&u32);
   arr.set_decorations(decos);
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));

@@ -415,9 +415,9 @@ TEST_F(IntrinsicBuilderTest, Call_Select) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_1d) {
-  ast::type::StorageTextureType s(ast::type::TextureDimension::k1d,
-                                  ast::AccessControl::kReadOnly,
-                                  ast::type::ImageFormat::kR16Float);
+  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
+                              ast::AccessControl::kReadOnly,
+                              ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
 
@@ -449,9 +449,9 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_1d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
-  ast::type::StorageTextureType s(ast::type::TextureDimension::k2d,
-                                  ast::AccessControl::kReadOnly,
-                                  ast::type::ImageFormat::kR16Float);
+  ast::type::StorageTexture s(ast::type::TextureDimension::k2d,
+                              ast::AccessControl::kReadOnly,
+                              ast::type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
 
@@ -486,7 +486,7 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Storage_RO_2d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
-  ast::type::SampledTextureType s(ast::type::TextureDimension::k1d, ty.f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.f32);
 
   b.push_function(Function{});
 
@@ -516,7 +516,7 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_1d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
-  ast::type::SampledTextureType s(ast::type::TextureDimension::k2d, ty.f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
 
   b.push_function(Function{});
 
@@ -549,8 +549,7 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Sampled_2d) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Multisampled_2d) {
-  ast::type::MultisampledTextureType s(ast::type::TextureDimension::k2d,
-                                       ty.f32);
+  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
 
   b.push_function(Function{});
 
@@ -584,8 +583,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureLoad_Multisampled_2d) {
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
-  ast::type::SamplerType s(ast::type::SamplerKind::kComparisonSampler);
-  ast::type::DepthTextureType t(ast::type::TextureDimension::k2d);
+  ast::type::Sampler s(ast::type::SamplerKind::kComparisonSampler);
+  ast::type::DepthTexture t(ast::type::TextureDimension::k2d);
 
   b.push_function(Function{});
 
@@ -1428,7 +1427,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
@@ -1467,7 +1466,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
   auto expr = Call("arrayLength",
@@ -1500,8 +1499,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
 // TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
 TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
-  ast::type::PointerType ptr(ty.array<f32>(),
-                             ast::StorageClass::kStorageBuffer);
+  ast::type::Pointer ptr(ty.array<f32>(), ast::StorageClass::kStorageBuffer);
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
@@ -1509,7 +1507,7 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members);
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 

@@ -52,7 +52,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -66,7 +66,7 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -80,7 +80,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kInput, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -93,8 +93,8 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithConstructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -128,8 +128,8 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Const) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -162,8 +162,8 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -194,9 +194,9 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec3(&f32, 3);
-  ast::type::VectorType vec2(&f32, 2);
+  ast::type::F32 f32;
+  ast::type::Vector vec3(&f32, 3);
+  ast::type::Vector vec2(&f32, 2);
 
   auto* first = create<ast::TypeConstructorExpression>(
       &vec2, ast::ExpressionList{
@@ -240,7 +240,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(5, Source{}));
@@ -261,7 +261,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(2, Source{}));
@@ -284,7 +284,7 @@ OpDecorate %1 DescriptorSet 3
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   auto* v = create<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
   ast::VariableDecorationList decos;
   decos.push_back(
@@ -306,7 +306,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(1200, Source{}));
@@ -330,7 +330,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(1200, Source{}));
@@ -352,7 +352,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
@@ -376,7 +376,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
@@ -398,7 +398,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
@@ -420,7 +420,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
-  ast::type::U32Type u32;
+  ast::type::U32 u32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(0, Source{}));
@@ -481,15 +481,15 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // };
   // var b : [[access(read)]] A
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &i32, decos));
   members.push_back(create<ast::StructMember>("b", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(members));
-  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
+  ast::type::Struct A("A", create<ast::Struct>(members));
+  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &A};
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
 
@@ -517,15 +517,15 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   // type B = A;
   // var b : [[access(read)]] B
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(members));
-  ast::type::AliasType B("B", &A);
-  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &B};
+  ast::type::Struct A("A", create<ast::Struct>(members));
+  ast::type::Alias B("B", &A);
+  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &B};
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &ac);
 
@@ -551,15 +551,15 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // type B = [[access(read)]] A;
   // var b : B
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(members));
-  ast::type::AccessControlType ac{ast::AccessControl::kReadOnly, &A};
-  ast::type::AliasType B("B", &ac);
+  ast::type::Struct A("A", create<ast::Struct>(members));
+  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &A};
+  ast::type::Alias B("B", &ac);
 
   ast::Variable var("b", ast::StorageClass::kStorageBuffer, &B);
 
@@ -585,15 +585,15 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // var b : [[access(read)]] A
   // var c : [[access(read_write)]] A
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>("a", &i32, decos));
 
-  ast::type::StructType A("A", create<ast::Struct>(members));
-  ast::type::AccessControlType read{ast::AccessControl::kReadOnly, &A};
-  ast::type::AccessControlType rw{ast::AccessControl::kReadWrite, &A};
+  ast::type::Struct A("A", create<ast::Struct>(members));
+  ast::type::AccessControl read{ast::AccessControl::kReadOnly, &A};
+  ast::type::AccessControl rw{ast::AccessControl::kReadWrite, &A};
 
   ast::Variable var_b("b", ast::StorageClass::kStorageBuffer, &read);
   ast::Variable var_c("c", ast::StorageClass::kStorageBuffer, &rw);
@@ -622,9 +622,9 @@ OpName %5 "tint_63"
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
-  ast::type::StorageTextureType type(ast::type::TextureDimension::k2d,
-                                     ast::AccessControl::kReadOnly,
-                                     ast::type::ImageFormat::kR32Uint);
+  ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
+                                 ast::AccessControl::kReadOnly,
+                                 ast::type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
   ast::Variable var_a("a", ast::StorageClass::kUniformConstant, &type);
@@ -642,9 +642,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : texture_storage_wo_2d<r32uint>;
-  ast::type::StorageTextureType type(ast::type::TextureDimension::k2d,
-                                     ast::AccessControl::kWriteOnly,
-                                     ast::type::ImageFormat::kR32Uint);
+  ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
+                                 ast::AccessControl::kWriteOnly,
+                                 ast::type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
   ast::Variable var_a("a", ast::StorageClass::kUniformConstant, &type);

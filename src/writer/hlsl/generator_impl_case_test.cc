@@ -31,7 +31,7 @@ namespace {
 using HlslGeneratorImplTest_Case = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());
@@ -50,7 +50,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(&i32, 5));
@@ -66,7 +66,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::FallthroughStatement>());
@@ -85,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::BreakStatement>());

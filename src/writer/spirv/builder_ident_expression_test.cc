@@ -39,8 +39,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -77,7 +77,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
   td.RegisterVariableForTesting(&v);
@@ -98,8 +98,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -134,7 +134,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
   td.RegisterVariableForTesting(&v);
@@ -159,7 +159,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::Variable var("var", ast::StorageClass::kPrivate, &i32);
 
@@ -189,7 +189,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
   var.set_constructor(create<ast::ScalarConstructorExpression>(

@@ -18,13 +18,13 @@ namespace tint {
 namespace ast {
 namespace type {
 
-VoidType::VoidType() = default;
+Void::Void() = default;
 
-VoidType::VoidType(VoidType&&) = default;
+Void::Void(Void&&) = default;
 
-VoidType::~VoidType() = default;
+Void::~Void() = default;
 
-std::string VoidType::type_name() const {
+std::string Void::type_name() const {
   return "__void";
 }
 

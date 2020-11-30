@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_EQ(e->name(), "a");
-  EXPECT_TRUE(e->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_EQ(e->name(), "a");
-  EXPECT_TRUE(e->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 
   EXPECT_EQ(e->name(), "a");
   ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -124,7 +124,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 
   EXPECT_EQ(e->name(), "a");
   ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);

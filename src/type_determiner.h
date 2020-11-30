@@ -86,7 +86,7 @@ class TypeDeterminer {
   /// Determines the result type based off a storage texture format
   /// @param tex the storage texture
   /// @returns false on error
-  bool DetermineStorageTextureSubtype(ast::type::StorageTextureType* tex);
+  bool DetermineStorageTextureSubtype(ast::type::StorageTexture* tex);
 
   /// Testing method to set a given variable into the type stack
   /// @param var the variable to set

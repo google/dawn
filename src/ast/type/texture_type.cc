@@ -53,11 +53,11 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
   return out;
 }
 
-TextureType::TextureType(TextureDimension dim) : dim_(dim) {}
+Texture::Texture(TextureDimension dim) : dim_(dim) {}
 
-TextureType::TextureType(TextureType&&) = default;
+Texture::Texture(Texture&&) = default;
 
-TextureType::~TextureType() = default;
+Texture::~Texture() = default;
 
 }  // namespace type
 }  // namespace ast

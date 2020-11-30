@@ -66,19 +66,19 @@ enum class ImageFormat {
 std::ostream& operator<<(std::ostream& out, ImageFormat dim);
 
 /// A storage texture type.
-class StorageTextureType : public Castable<StorageTextureType, TextureType> {
+class StorageTexture : public Castable<StorageTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param access the access type for the texture
   /// @param format the image format of the texture
-  StorageTextureType(TextureDimension dim,
-                     AccessControl access,
-                     ImageFormat format);
+  StorageTexture(TextureDimension dim,
+                 ast::AccessControl access,
+                 ImageFormat format);
 
   /// Move constructor
-  StorageTextureType(StorageTextureType&&);
-  ~StorageTextureType() override;
+  StorageTexture(StorageTexture&&);
+  ~StorageTexture() override;
 
   /// @param type the subtype of the storage texture
   void set_type(Type* const type);
@@ -87,7 +87,7 @@ class StorageTextureType : public Castable<StorageTextureType, TextureType> {
   Type* type() const;
 
   /// @returns the storage access
-  AccessControl access() const { return access_; }
+  ast::AccessControl access() const { return access_; }
 
   /// @returns the image format
   ImageFormat image_format() const { return image_format_; }
@@ -97,7 +97,7 @@ class StorageTextureType : public Castable<StorageTextureType, TextureType> {
 
  private:
   Type* type_ = nullptr;
-  AccessControl access_ = AccessControl::kReadOnly;
+  ast::AccessControl access_ = ast::AccessControl::kReadOnly;
   ImageFormat image_format_ = ImageFormat::kRgba32Float;
 };
 

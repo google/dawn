@@ -37,8 +37,8 @@ TEST_F(ParserImplTest, SamplerType_Sampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
-  EXPECT_FALSE(t->As<ast::type::SamplerType>()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::Sampler>());
+  EXPECT_FALSE(t->As<ast::type::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 
@@ -48,8 +48,8 @@ TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
-  EXPECT_TRUE(t->As<ast::type::SamplerType>()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::Sampler>());
+  EXPECT_TRUE(t->As<ast::type::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 

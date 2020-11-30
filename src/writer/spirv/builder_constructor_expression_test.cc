@@ -103,7 +103,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
   // cast<Int>(2.3f)
 
-  ast::type::AliasType alias("Int", ty.i32);
+  ast::type::Alias alias("Int", ty.i32);
 
   ast::TypeConstructorExpression cast(&alias, ExprList(2.3f));
 
@@ -947,7 +947,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
       create<ast::StructMember>("a", ty.f32, decos),
       create<ast::StructMember>("b", ty.vec3<f32>(), decos),
   });
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
 
@@ -1083,7 +1083,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   auto* s = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>("a", ty.f32, decos),
   });
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type);
 
@@ -1496,7 +1496,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
       create<ast::StructMember>("a", ty.f32, decos),
       create<ast::StructMember>("b", ty.vec3<f32>(), decos),
   });
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
 
@@ -1514,7 +1514,7 @@ TEST_F(SpvBuilderConstructorTest,
       create<ast::StructMember>("b", ty.vec3<f32>(), decos),
   });
 
-  ast::type::StructType s_type("my_struct", s);
+  ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type, 2.f, "a", 2.f);
 

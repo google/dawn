@@ -441,7 +441,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
+TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
   auto p = parser(test::Assemble(
       std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
@@ -508,7 +508,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
+TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
   auto p = parser(test::Assemble(
       std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint

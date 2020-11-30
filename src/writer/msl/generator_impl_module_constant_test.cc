@@ -36,8 +36,8 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-  ast::type::F32Type f32;
-  ast::type::ArrayType ary(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Array ary(&f32, 3);
 
   ast::ExpressionList exprs;
   exprs.push_back(create<ast::ScalarConstructorExpression>(
@@ -56,7 +56,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));

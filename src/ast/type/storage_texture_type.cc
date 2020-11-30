@@ -150,26 +150,26 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
   return out;
 }
 
-StorageTextureType::StorageTextureType(TextureDimension dim,
-                                       AccessControl access,
-                                       ImageFormat format)
+StorageTexture::StorageTexture(TextureDimension dim,
+                               ast::AccessControl access,
+                               ImageFormat format)
     : Base(dim), access_(access), image_format_(format) {
   assert(IsValidStorageDimension(dim));
 }
 
-void StorageTextureType::set_type(Type* const type) {
+void StorageTexture::set_type(Type* const type) {
   type_ = type;
 }
 
-Type* StorageTextureType::type() const {
+Type* StorageTexture::type() const {
   return type_;
 }
 
-StorageTextureType::StorageTextureType(StorageTextureType&&) = default;
+StorageTexture::StorageTexture(StorageTexture&&) = default;
 
-StorageTextureType::~StorageTextureType() = default;
+StorageTexture::~StorageTexture() = default;
 
-std::string StorageTextureType::type_name() const {
+std::string StorageTexture::type_name() const {
   std::ostringstream out;
   out << "__storage_texture_" << access_ << "_" << dim() << "_"
       << image_format_;

@@ -56,17 +56,17 @@ bool Module::IsValid() const {
     if (ty == nullptr) {
       return false;
     }
-    if (ty->Is<type::AliasType>()) {
-      auto* alias = ty->As<type::AliasType>();
+    if (ty->Is<type::Alias>()) {
+      auto* alias = ty->As<type::Alias>();
       if (alias->type() == nullptr) {
         return false;
       }
-      if (alias->type()->Is<type::StructType>() &&
-          alias->type()->As<type::StructType>()->name().empty()) {
+      if (alias->type()->Is<type::Struct>() &&
+          alias->type()->As<type::Struct>()->name().empty()) {
         return false;
       }
-    } else if (ty->Is<type::StructType>()) {
-      auto* str = ty->As<type::StructType>();
+    } else if (ty->Is<type::Struct>()) {
+      auto* str = ty->As<type::Struct>();
       if (str->name().empty()) {
         return false;
       }
@@ -91,14 +91,14 @@ std::string Module::to_str() const {
     for (size_t i = 0; i < indent; ++i) {
       out << " ";
     }
-    if (ty->Is<type::AliasType>()) {
-      auto* alias = ty->As<type::AliasType>();
+    if (ty->Is<type::Alias>()) {
+      auto* alias = ty->As<type::Alias>();
       out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
-      if (alias->type()->Is<type::StructType>()) {
-        alias->type()->As<type::StructType>()->impl()->to_str(out, indent);
+      if (alias->type()->Is<type::Struct>()) {
+        alias->type()->As<type::Struct>()->impl()->to_str(out, indent);
       }
-    } else if (ty->Is<type::StructType>()) {
-      auto* str = ty->As<type::StructType>();
+    } else if (ty->Is<type::Struct>()) {
+      auto* str = ty->As<type::Struct>();
       out << str->name() << " ";
       str->impl()->to_str(out, indent);
     }

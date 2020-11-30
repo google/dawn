@@ -18,13 +18,13 @@ namespace tint {
 namespace ast {
 namespace type {
 
-BoolType::BoolType() = default;
+Bool::Bool() = default;
 
-BoolType::BoolType(BoolType&&) = default;
+Bool::Bool(Bool&&) = default;
 
-BoolType::~BoolType() = default;
+Bool::~Bool() = default;
 
-std::string BoolType::type_name() const {
+std::string Bool::type_name() const {
   return "__bool";
 }
 

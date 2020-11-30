@@ -47,7 +47,7 @@ class VertexPullingTransformHelper {
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
     auto* func = create<ast::Function>("main", ast::VariableList{},
-                                       mod_->create<ast::type::VoidType>(),
+                                       mod_->create<ast::type::Void>(),
                                        create<ast::BlockStatement>());
     func->add_decoration(
         create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
@@ -125,7 +125,7 @@ TEST_F(VertexPullingTransformTest, Error_InvalidEntryPoint) {
 
 TEST_F(VertexPullingTransformTest, Error_EntryPointWrongStage) {
   auto* func = create<ast::Function>("main", ast::VariableList{},
-                                     mod()->create<ast::type::VoidType>(),
+                                     mod()->create<ast::type::Void>(),
                                      create<ast::BlockStatement>());
   func->add_decoration(
       create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
@@ -145,7 +145,7 @@ TEST_F(VertexPullingTransformTest, BasicModule) {
 TEST_F(VertexPullingTransformTest, OneAttribute) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
@@ -229,7 +229,7 @@ TEST_F(VertexPullingTransformTest, OneAttribute) {
 TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform(
@@ -314,7 +314,7 @@ TEST_F(VertexPullingTransformTest, OneInstancedAttribute) {
 TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
@@ -400,11 +400,11 @@ TEST_F(VertexPullingTransformTest, OneAttributeDifferentOutputSet) {
 TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
   AddVertexInputVariable(1, "var_b", &f32);
 
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
   {
     auto* vertex_index_var =
         create<ast::DecoratedVariable>(create<ast::Variable>(
@@ -564,10 +564,10 @@ TEST_F(VertexPullingTransformTest, ExistingVertexIndexAndInstanceIndex) {
 TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
-  ast::type::ArrayType vec4_f32{&f32, 4u};
+  ast::type::Array vec4_f32{&f32, 4u};
   AddVertexInputVariable(1, "var_b", &vec4_f32);
 
   InitTransform(
@@ -745,14 +745,14 @@ TEST_F(VertexPullingTransformTest, TwoAttributesSameBuffer) {
 TEST_F(VertexPullingTransformTest, FloatVectorAttributes) {
   InitBasicModule();
 
-  ast::type::F32Type f32;
-  ast::type::ArrayType vec2_f32{&f32, 2u};
+  ast::type::F32 f32;
+  ast::type::Array vec2_f32{&f32, 2u};
   AddVertexInputVariable(0, "var_a", &vec2_f32);
 
-  ast::type::ArrayType vec3_f32{&f32, 3u};
+  ast::type::Array vec3_f32{&f32, 3u};
   AddVertexInputVariable(1, "var_b", &vec3_f32);
 
-  ast::type::ArrayType vec4_f32{&f32, 4u};
+  ast::type::Array vec4_f32{&f32, 4u};
   AddVertexInputVariable(2, "var_c", &vec4_f32);
 
   InitTransform(

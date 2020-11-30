@@ -85,11 +85,11 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
 bool ValidatorImpl::ValidateConstructedTypes(
     const std::vector<ast::type::Type*>& constructed_types) {
   for (auto* const ct : constructed_types) {
-    if (ct->Is<ast::type::StructType>()) {
-      auto* st = ct->As<ast::type::StructType>();
+    if (ct->Is<ast::type::Struct>()) {
+      auto* st = ct->As<ast::type::Struct>();
       for (auto* member : st->impl()->members()) {
-        if (member->type()->UnwrapAll()->Is<ast::type::ArrayType>()) {
-          auto* r = member->type()->UnwrapAll()->As<ast::type::ArrayType>();
+        if (member->type()->UnwrapAll()->Is<ast::type::Array>()) {
+          auto* r = member->type()->UnwrapAll()->As<ast::type::Array>();
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
               add_error(member->source(), "v-0015",
@@ -168,7 +168,7 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         return false;
       }
 
-      if (!func->return_type()->Is<ast::type::VoidType>()) {
+      if (!func->return_type()->Is<ast::type::Void>()) {
         add_error(
             func->source(), "v-0024",
             "Entry point function must return void: '" + func->name() + "'");
@@ -207,7 +207,7 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   }
   variable_stack_.pop_scope();
 
-  if (!current_function_->return_type()->Is<ast::type::VoidType>()) {
+  if (!current_function_->return_type()->Is<ast::type::Void>()) {
     if (!func->get_last_statement() ||
         !func->get_last_statement()->Is<ast::ReturnStatement>()) {
       add_error(func->source(), "v-0002",
@@ -223,7 +223,7 @@ bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
   // https://github.com/gpuweb/gpuweb/issues/996
   ast::type::Type* func_type = current_function_->return_type();
 
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
   auto* ret_type =
       ret->has_value() ? ret->value()->result_type()->UnwrapAll() : &void_type;
 
@@ -265,11 +265,11 @@ bool ValidatorImpl::ValidateDeclStatement(
     return false;
   }
   variable_stack_.set(name, decl->variable());
-  if (decl->variable()->type()->UnwrapAll()->Is<ast::type::ArrayType>()) {
+  if (decl->variable()->type()->UnwrapAll()->Is<ast::type::Array>()) {
     if (decl->variable()
             ->type()
             ->UnwrapAll()
-            ->As<ast::type::ArrayType>()
+            ->As<ast::type::Array>()
             ->IsRuntimeArray()) {
       add_error(decl->source(), "v-0015",
                 "runtime arrays may only appear as the last "
@@ -317,8 +317,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   auto* cond_type = s->condition()->result_type()->UnwrapAll();
-  if (!(cond_type->Is<ast::type::I32Type>() ||
-        cond_type->Is<ast::type::U32Type>())) {
+  if (!(cond_type->Is<ast::type::I32>() || cond_type->Is<ast::type::U32>())) {
     add_error(s->condition()->source(), "v-0025",
               "switch statement selector expression must be of a "
               "scalar integer type");
@@ -345,11 +344,11 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
       }
 
       auto v =
-          static_cast<int32_t>(selector->type()->Is<ast::type::U32Type>()
+          static_cast<int32_t>(selector->type()->Is<ast::type::U32>()
                                    ? selector->As<ast::UintLiteral>()->value()
                                    : selector->As<ast::SintLiteral>()->value());
       if (selector_set.count(v)) {
-        auto v_str = selector->type()->Is<ast::type::U32Type>()
+        auto v_str = selector->type()->Is<ast::type::U32>()
                          ? selector->As<ast::UintLiteral>()->to_str()
                          : selector->As<ast::SintLiteral>()->to_str();
         add_error(case_stmt->source(), "v-0027",

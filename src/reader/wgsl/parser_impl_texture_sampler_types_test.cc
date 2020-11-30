@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
-  ASSERT_FALSE(t->As<ast::type::SamplerType>()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::Sampler>());
+  ASSERT_FALSE(t->As<ast::type::Sampler>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
@@ -55,8 +55,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
-  ASSERT_TRUE(t->As<ast::type::SamplerType>()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::Sampler>());
+  ASSERT_TRUE(t->As<ast::type::Sampler>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
@@ -66,9 +66,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::DepthTextureType>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::DepthTexture>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 
@@ -79,11 +79,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::F32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
 
@@ -94,11 +93,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::I32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::I32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 
@@ -109,11 +107,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::U32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::U32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k3d);
 }
 
@@ -165,11 +162,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::F32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
 
@@ -180,11 +176,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::I32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::I32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 
@@ -195,11 +190,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
-  ASSERT_TRUE(
-      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::U32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
+  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::U32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k3d);
 }
 
@@ -250,12 +244,11 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::MultisampledTextureType>());
-  ASSERT_TRUE(t->As<ast::type::MultisampledTextureType>()
-                  ->type()
-                  ->Is<ast::type::I32Type>());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::MultisampledTexture>());
+  ASSERT_TRUE(
+      t->As<ast::type::MultisampledTexture>()->type()->Is<ast::type::I32>());
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 
@@ -307,13 +300,13 @@ TEST_F(ParserImplTest,
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
             ast::AccessControl::kReadOnly);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
 
@@ -325,13 +318,13 @@ TEST_F(ParserImplTest,
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
             ast::AccessControl::kWriteOnly);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 
@@ -379,13 +372,13 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
             ast::AccessControl::kReadOnly);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
 
@@ -396,13 +389,13 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::Texture>());
+  ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
             ast::AccessControl::kWriteOnly);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
+  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
 

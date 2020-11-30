@@ -29,7 +29,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("id"));

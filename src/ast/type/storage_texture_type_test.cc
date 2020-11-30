@@ -37,107 +37,105 @@ namespace ast {
 namespace type {
 namespace {
 
-using StorageTextureTypeTest = TestHelper;
+using StorageTextureTest = TestHelper;
 
-TEST_F(StorageTextureTypeTest, Is) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
+TEST_F(StorageTextureTest, Is) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
   Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControlType>());
-  EXPECT_FALSE(ty->Is<AliasType>());
-  EXPECT_FALSE(ty->Is<ArrayType>());
-  EXPECT_FALSE(ty->Is<BoolType>());
-  EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->Is<I32Type>());
-  EXPECT_FALSE(ty->Is<MatrixType>());
-  EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->Is<SamplerType>());
-  EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_TRUE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->Is<U32Type>());
-  EXPECT_FALSE(ty->Is<VectorType>());
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_TRUE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(StorageTextureTypeTest, IsTextureType) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
-  TextureType* ty = &s;
-  EXPECT_FALSE(ty->Is<DepthTextureType>());
-  EXPECT_FALSE(ty->Is<SampledTextureType>());
-  EXPECT_TRUE(ty->Is<StorageTextureType>());
+TEST_F(StorageTextureTest, IsTexture) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
+  Texture* ty = &s;
+  EXPECT_FALSE(ty->Is<DepthTexture>());
+  EXPECT_FALSE(ty->Is<SampledTexture>());
+  EXPECT_TRUE(ty->Is<StorageTexture>());
 }
 
-TEST_F(StorageTextureTypeTest, Dim) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
+TEST_F(StorageTextureTest, Dim) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
   EXPECT_EQ(s.dim(), TextureDimension::k2dArray);
 }
 
-TEST_F(StorageTextureTypeTest, Access) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.access(), AccessControl::kReadOnly);
+TEST_F(StorageTextureTest, Access) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
+  EXPECT_EQ(s.access(), ast::AccessControl::kReadOnly);
 }
 
-TEST_F(StorageTextureTypeTest, Format) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
+TEST_F(StorageTextureTest, Format) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
   EXPECT_EQ(s.image_format(), ImageFormat::kRgba32Float);
 }
 
-TEST_F(StorageTextureTypeTest, TypeName) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Float);
+TEST_F(StorageTextureTest, TypeName) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Float);
   EXPECT_EQ(s.type_name(), "__storage_texture_read_only_2d_array_rgba32float");
 }
 
-TEST_F(StorageTextureTypeTest, F32Type) {
+TEST_F(StorageTextureTest, F32) {
   Context ctx;
   Module mod;
-  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
-                                           AccessControl::kReadOnly,
-                                           ImageFormat::kRgba32Float);
+  Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
+                                       ast::AccessControl::kReadOnly,
+                                       ImageFormat::kRgba32Float);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->Is<StorageTextureType>());
-  EXPECT_TRUE(
-      s->As<TextureType>()->As<StorageTextureType>()->type()->Is<F32Type>());
+  ASSERT_TRUE(s->Is<Texture>());
+  ASSERT_TRUE(s->Is<StorageTexture>());
+  EXPECT_TRUE(s->As<Texture>()->As<StorageTexture>()->type()->Is<F32>());
 }
 
-TEST_F(StorageTextureTypeTest, U32Type) {
+TEST_F(StorageTextureTest, U32) {
   Context ctx;
   Module mod;
-  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
-                                           AccessControl::kReadOnly,
-                                           ImageFormat::kRg32Uint);
+  Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
+                                       ast::AccessControl::kReadOnly,
+                                       ImageFormat::kRg32Uint);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->Is<StorageTextureType>());
-  EXPECT_TRUE(s->As<StorageTextureType>()->type()->Is<U32Type>());
+  ASSERT_TRUE(s->Is<Texture>());
+  ASSERT_TRUE(s->Is<StorageTexture>());
+  EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<U32>());
 }
 
-TEST_F(StorageTextureTypeTest, I32Type) {
+TEST_F(StorageTextureTest, I32) {
   Context ctx;
   Module mod;
-  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
-                                           AccessControl::kReadOnly,
-                                           ImageFormat::kRgba32Sint);
+  Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
+                                       ast::AccessControl::kReadOnly,
+                                       ImageFormat::kRgba32Sint);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->Is<StorageTextureType>());
-  EXPECT_TRUE(
-      s->As<TextureType>()->As<StorageTextureType>()->type()->Is<I32Type>());
+  ASSERT_TRUE(s->Is<Texture>());
+  ASSERT_TRUE(s->Is<StorageTexture>());
+  EXPECT_TRUE(s->As<Texture>()->As<StorageTexture>()->type()->Is<I32>());
 }
 
-TEST_F(StorageTextureTypeTest, MinBufferBindingSize) {
-  StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
-                       ImageFormat::kRgba32Sint);
+TEST_F(StorageTextureTest, MinBufferBindingSize) {
+  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
+                   ImageFormat::kRgba32Sint);
   EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 

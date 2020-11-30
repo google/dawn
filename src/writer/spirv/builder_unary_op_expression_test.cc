@@ -39,7 +39,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
-  ast::type::I32Type i32;
+  ast::type::I32 i32;
 
   ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
                               create<ast::ScalarConstructorExpression>(
@@ -58,7 +58,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
-  ast::type::F32Type f32;
+  ast::type::F32 f32;
 
   ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
                               create<ast::ScalarConstructorExpression>(
@@ -77,7 +77,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Not) {
-  ast::type::BoolType bool_type;
+  ast::type::Bool bool_type;
 
   ast::UnaryOpExpression expr(ast::UnaryOp::kNot,
                               create<ast::ScalarConstructorExpression>(
@@ -96,8 +96,8 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  ast::type::F32Type f32;
-  ast::type::VectorType vec(&f32, 3);
+  ast::type::F32 f32;
+  ast::type::Vector vec(&f32, 3);
 
   ast::Variable var("param", ast::StorageClass::kFunction, &vec);
 

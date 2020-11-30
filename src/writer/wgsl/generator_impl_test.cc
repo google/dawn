@@ -30,7 +30,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
-  ast::type::VoidType void_type;
+  ast::type::Void void_type;
 
   mod.AddFunction(create<ast::Function>("my_func", ast::VariableList{},
                                         &void_type,

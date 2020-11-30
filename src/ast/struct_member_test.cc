@@ -28,7 +28,7 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
 
@@ -44,7 +44,7 @@ TEST_F(StructMemberTest, Creation) {
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
-  type::I32Type i32;
+  type::I32 i32;
   Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}};
 
   StructMember st{s, "a", &i32, {}};
@@ -58,13 +58,13 @@ TEST_F(StructMemberTest, CreationWithSource) {
 }
 
 TEST_F(StructMemberTest, IsValid) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMember st{"a", &i32, {}};
   EXPECT_TRUE(st.IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_EmptyName) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMember st{"", &i32, {}};
   EXPECT_FALSE(st.IsValid());
 }
@@ -75,7 +75,7 @@ TEST_F(StructMemberTest, IsValid_NullType) {
 }
 
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
   decorations.push_back(nullptr);
@@ -85,7 +85,7 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
 }
 
 TEST_F(StructMemberTest, ToStr) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
 
@@ -96,7 +96,7 @@ TEST_F(StructMemberTest, ToStr) {
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
-  type::I32Type i32;
+  type::I32 i32;
   StructMember st{"a", &i32, {}};
   std::ostringstream out;
   st.to_str(out, 2);
