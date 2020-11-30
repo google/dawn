@@ -23,7 +23,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class StructType;
 class TextureType;
 class U32Type;
 class VectorType;
@@ -39,8 +38,6 @@ class Type : public Castable<Type> {
   Type(Type&&);
   ~Type() override;
 
-  /// @returns true if the type is a struct type
-  virtual bool IsStruct() const;
   /// @returns true if the type is a texture type
   virtual bool IsTexture() const;
   /// @returns true if the type is a u32 type
@@ -104,8 +101,6 @@ class Type : public Castable<Type> {
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector();
 
-  /// @returns the type as a struct type
-  const StructType* AsStruct() const;
   /// @returns the type as a texture type
   const TextureType* AsTexture() const;
   /// @returns the type as a u32 type
@@ -115,8 +110,6 @@ class Type : public Castable<Type> {
   /// @returns the type as a void type
   const VoidType* AsVoid() const;
 
-  /// @returns the type as a struct type
-  StructType* AsStruct();
   /// @returns the type as a texture type
   TextureType* AsTexture();
   /// @returns the type as a u32 type

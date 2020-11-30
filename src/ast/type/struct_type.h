@@ -42,9 +42,6 @@ class StructType : public Castable<StructType, Type> {
   /// @returns true if the struct has a block decoration
   bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }
 
-  /// @returns true if the type is a struct type
-  bool IsStruct() const override;
-
   /// @returns the struct name
   Struct* impl() const { return struct_; }
 

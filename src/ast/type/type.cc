@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsStruct() const {
-  return false;
-}
-
 bool Type::IsTexture() const {
   return false;
 }
@@ -138,11 +134,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const StructType* Type::AsStruct() const {
-  assert(IsStruct());
-  return static_cast<const StructType*>(this);
-}
-
 const TextureType* Type::AsTexture() const {
   assert(IsTexture());
   return static_cast<const TextureType*>(this);
@@ -161,11 +152,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-StructType* Type::AsStruct() {
-  assert(IsStruct());
-  return static_cast<StructType*>(this);
 }
 
 TextureType* Type::AsTexture() {

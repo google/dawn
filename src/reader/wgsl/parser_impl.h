@@ -46,6 +46,7 @@
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/context.h"

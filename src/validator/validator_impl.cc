@@ -83,8 +83,8 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
 bool ValidatorImpl::ValidateConstructedTypes(
     const std::vector<ast::type::Type*>& constructed_types) {
   for (auto* const ct : constructed_types) {
-    if (ct->IsStruct()) {
-      auto* st = ct->AsStruct();
+    if (ct->Is<ast::type::StructType>()) {
+      auto* st = ct->As<ast::type::StructType>();
       for (auto* member : st->impl()->members()) {
         if (member->type()->UnwrapAll()->Is<ast::type::ArrayType>()) {
           auto* r = member->type()->UnwrapAll()->As<ast::type::ArrayType>();

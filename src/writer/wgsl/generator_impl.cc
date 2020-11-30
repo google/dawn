@@ -178,8 +178,8 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
       return false;
     }
     out_ << ";" << std::endl;
-  } else if (ty->IsStruct()) {
-    if (!EmitStructType(ty->AsStruct())) {
+  } else if (ty->Is<ast::type::StructType>()) {
+    if (!EmitStructType(ty->As<ast::type::StructType>())) {
       return false;
     }
   } else {
@@ -460,10 +460,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     if (sampler->IsComparison()) {
       out_ << "_comparison";
     }
-  } else if (type->IsStruct()) {
+  } else if (type->Is<ast::type::StructType>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << type->AsStruct()->name();
+    out_ << type->As<ast::type::StructType>()->name();
   } else if (type->IsTexture()) {
     auto* texture = type->AsTexture();
 

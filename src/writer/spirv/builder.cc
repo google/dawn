@@ -853,7 +853,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
-  if (data_type->IsStruct()) {
+  if (data_type->Is<ast::type::StructType>()) {
     if (!info->source_type->Is<ast::type::PointerType>()) {
       error_ =
           "Attempting to access a struct member on a non-pointer. Something is "
@@ -861,7 +861,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       return false;
     }
 
-    auto* strct = data_type->AsStruct()->impl();
+    auto* strct = data_type->As<ast::type::StructType>()->impl();
     auto name = expr->member()->name();
 
     uint32_t i = 0;
@@ -1208,8 +1208,12 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       subtype = subtype->As<ast::type::MatrixType>()->type()->UnwrapAll();
     } else if (subtype->Is<ast::type::ArrayType>()) {
       subtype = subtype->As<ast::type::ArrayType>()->type()->UnwrapAll();
-    } else if (subtype->IsStruct()) {
-      subtype = subtype->AsStruct()->impl()->members()[i]->type()->UnwrapAll();
+    } else if (subtype->Is<ast::type::StructType>()) {
+      subtype = subtype->As<ast::type::StructType>()
+                    ->impl()
+                    ->members()[i]
+                    ->type()
+                    ->UnwrapAll();
     }
     if (subtype != sc->result_type()->UnwrapAll()) {
       return false;
@@ -1282,7 +1286,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->Is<ast::type::MatrixType>() ||
-        result_type->Is<ast::type::ArrayType>() || result_type->IsStruct()) {
+        result_type->Is<ast::type::ArrayType>() ||
+        result_type->Is<ast::type::StructType>()) {
       out << "_" << id;
 
       ops.push_back(Operand::Int(id));
@@ -1823,14 +1828,14 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     params.push_back(Operand::Int(struct_id));
 
     auto* type = accessor->structure()->result_type()->UnwrapAll();
-    if (!type->IsStruct()) {
+    if (!type->Is<ast::type::StructType>()) {
       error_ =
           "invalid type (" + type->type_name() + ") for runtime array length";
       return 0;
     }
     // Runtime array must be the last member in the structure
-    params.push_back(
-        Operand::Int(uint32_t(type->AsStruct()->impl()->members().size() - 1)));
+    params.push_back(Operand::Int(uint32_t(
+        type->As<ast::type::StructType>()->impl()->members().size() - 1)));
 
     push_function_inst(spv::Op::OpArrayLength, params);
     return result_id;
@@ -2409,12 +2414,12 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   if (type->Is<ast::type::AccessControlType>()) {
     auto* ac = type->As<ast::type::AccessControlType>();
     auto* subtype = ac->type()->UnwrapIfNeeded();
-    if (!subtype->IsStruct()) {
+    if (!subtype->Is<ast::type::StructType>()) {
       error_ = "Access control attached to non-struct type.";
       return 0;
     }
-    if (!GenerateStructType(subtype->AsStruct(), ac->access_control(),
-                            result)) {
+    if (!GenerateStructType(subtype->As<ast::type::StructType>(),
+                            ac->access_control(), result)) {
       return 0;
     }
   } else if (type->Is<ast::type::ArrayType>()) {
@@ -2435,9 +2440,9 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GeneratePointerType(type->As<ast::type::PointerType>(), result)) {
       return 0;
     }
-  } else if (type->IsStruct()) {
-    if (!GenerateStructType(type->AsStruct(), ast::AccessControl::kReadWrite,
-                            result)) {
+  } else if (type->Is<ast::type::StructType>()) {
+    if (!GenerateStructType(type->As<ast::type::StructType>(),
+                            ast::AccessControl::kReadWrite, result)) {
       return 0;
     }
   } else if (type->IsU32()) {

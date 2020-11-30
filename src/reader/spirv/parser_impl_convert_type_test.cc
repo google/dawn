@@ -570,9 +570,9 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsStruct());
+  EXPECT_TRUE(type->Is<ast::type::StructType>());
   std::stringstream ss;
-  type->AsStruct()->impl()->to_str(ss, 0);
+  type->As<ast::type::StructType>()->impl()->to_str(ss, 0);
   EXPECT_THAT(ss.str(), Eq(R"(Struct{
   StructMember{field0: __u32}
   StructMember{field1: __f32}
@@ -591,9 +591,9 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsStruct());
+  EXPECT_TRUE(type->Is<ast::type::StructType>());
   std::stringstream ss;
-  type->AsStruct()->impl()->to_str(ss, 0);
+  type->As<ast::type::StructType>()->impl()->to_str(ss, 0);
   EXPECT_THAT(ss.str(), Eq(R"(Struct{
   [[block]]
   StructMember{field0: __u32}
@@ -616,9 +616,9 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->IsStruct());
+  EXPECT_TRUE(type->Is<ast::type::StructType>());
   std::stringstream ss;
-  type->AsStruct()->impl()->to_str(ss, 0);
+  type->As<ast::type::StructType>()->impl()->to_str(ss, 0);
   EXPECT_THAT(ss.str(), Eq(R"(Struct{
   StructMember{[[ offset 0 ]] field0: __f32}
   StructMember{[[ offset 8 ]] field1: __vec_2__f32}

@@ -166,19 +166,19 @@ bool GeneratorImpl::Generate() {
 
 uint32_t GeneratorImpl::calculate_largest_alignment(
     ast::type::StructType* type) {
-  auto* stct = type->AsStruct()->impl();
+  auto* stct = type->As<ast::type::StructType>()->impl();
   uint32_t largest_alignment = 0;
   for (auto* mem : stct->members()) {
     auto align = calculate_alignment_size(mem->type());
     if (align == 0) {
       return 0;
     }
-    if (!mem->type()->IsStruct()) {
+    if (!mem->type()->Is<ast::type::StructType>()) {
       largest_alignment = std::max(largest_alignment, align);
     } else {
-      largest_alignment =
-          std::max(largest_alignment,
-                   calculate_largest_alignment(mem->type()->AsStruct()));
+      largest_alignment = std::max(
+          largest_alignment, calculate_largest_alignment(
+                                 mem->type()->As<ast::type::StructType>()));
     }
   }
   return largest_alignment;
@@ -211,8 +211,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     uint32_t type_size = calculate_alignment_size(mat->type());
     return mat->rows() * mat->columns() * type_size;
   }
-  if (type->IsStruct()) {
-    auto* stct = type->AsStruct()->impl();
+  if (type->Is<ast::type::StructType>()) {
+    auto* stct = type->As<ast::type::StructType>()->impl();
     uint32_t count = 0;
     uint32_t largest_alignment = 0;
     // Offset decorations in WGSL must be in increasing order.
@@ -226,12 +226,12 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
       if (align == 0) {
         return 0;
       }
-      if (!mem->type()->IsStruct()) {
+      if (!mem->type()->Is<ast::type::StructType>()) {
         largest_alignment = std::max(largest_alignment, align);
       } else {
-        largest_alignment =
-            std::max(largest_alignment,
-                     calculate_largest_alignment(mem->type()->AsStruct()));
+        largest_alignment = std::max(
+            largest_alignment, calculate_largest_alignment(
+                                   mem->type()->As<ast::type::StructType>()));
       }
 
       // Round up to the alignment size
@@ -264,8 +264,8 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
       return false;
     }
     out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
-  } else if (ty->IsStruct()) {
-    if (!EmitStructType(ty->AsStruct())) {
+  } else if (ty->Is<ast::type::StructType>()) {
+    if (!EmitStructType(ty->As<ast::type::StructType>())) {
       return false;
     }
   } else {
@@ -947,7 +947,7 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
       return false;
     }
     out_ << "}";
-  } else if (type->IsStruct()) {
+  } else if (type->Is<ast::type::StructType>()) {
     out_ << "{}";
   } else {
     error_ = "Invalid type for zero emission: " + type->type_name();
@@ -1834,10 +1834,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     out_ << "*";
   } else if (type->Is<ast::type::SamplerType>()) {
     out_ << "sampler";
-  } else if (type->IsStruct()) {
+  } else if (type->Is<ast::type::StructType>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << type->AsStruct()->name();
+    out_ << type->As<ast::type::StructType>()->name();
   } else if (type->IsTexture()) {
     auto* tex = type->AsTexture();
 

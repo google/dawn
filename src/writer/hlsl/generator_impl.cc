@@ -218,8 +218,9 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     auto* alias = ty->As<ast::type::AliasType>();
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
-    if (alias->type()->IsStruct()) {
-      if (!EmitStructType(out, alias->type()->AsStruct(), alias->name())) {
+    if (alias->type()->Is<ast::type::StructType>()) {
+      if (!EmitStructType(out, alias->type()->As<ast::type::StructType>(),
+                          alias->name())) {
         return false;
       }
       return true;
@@ -229,8 +230,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
       return false;
     }
     out << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
-  } else if (ty->IsStruct()) {
-    auto* str = ty->AsStruct();
+  } else if (ty->Is<ast::type::StructType>()) {
+    auto* str = ty->As<ast::type::StructType>();
     if (!EmitStructType(out, str, str->name())) {
       return false;
     }
@@ -1289,8 +1290,8 @@ bool GeneratorImpl::EmitEntryPointData(
     emitted_globals.insert(var->name());
 
     auto* type = var->type()->UnwrapIfNeeded();
-    if (type->IsStruct()) {
-      auto* strct = type->AsStruct();
+    if (type->Is<ast::type::StructType>()) {
+      auto* strct = type->As<ast::type::StructType>();
 
       out << "ConstantBuffer<" << strct->name() << "> " << var->name()
           << " : register(b" << binding->value() << ");" << std::endl;
@@ -1684,8 +1685,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     if (expr->IsMemberAccessor()) {
       auto* mem = expr->AsMemberAccessor();
       auto* res_type = mem->structure()->result_type()->UnwrapAll();
-      if (res_type->IsStruct()) {
-        auto* str_type = res_type->AsStruct()->impl();
+      if (res_type->Is<ast::type::StructType>()) {
+        auto* str_type = res_type->As<ast::type::StructType>()->impl();
         auto* str_member = str_type->get_member(mem->member()->name());
 
         if (!str_member->has_offset_decoration()) {
@@ -2086,8 +2087,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "Comparison";
     }
     out << "State";
-  } else if (type->IsStruct()) {
-    out << type->AsStruct()->name();
+  } else if (type->Is<ast::type::StructType>()) {
+    out << type->As<ast::type::StructType>()->name();
   } else if (type->IsTexture()) {
     auto* tex = type->AsTexture();
     if (tex->IsStorage()) {

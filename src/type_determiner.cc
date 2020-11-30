@@ -1028,8 +1028,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   ast::type::Type* ret = nullptr;
-  if (data_type->IsStruct()) {
-    auto* strct = data_type->AsStruct()->impl();
+  if (data_type->Is<ast::type::StructType>()) {
+    auto* strct = data_type->As<ast::type::StructType>()->impl();
     auto name = expr->member()->name();
 
     for (auto* member : strct->members()) {

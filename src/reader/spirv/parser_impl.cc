@@ -1381,8 +1381,8 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(original_type,
                                                   std::move(ast_components));
   }
-  if (type->IsStruct()) {
-    auto* struct_ty = type->AsStruct();
+  if (type->Is<ast::type::StructType>()) {
+    auto* struct_ty = type->As<ast::type::StructType>();
     ast::ExpressionList ast_components;
     for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));

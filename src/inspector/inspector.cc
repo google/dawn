@@ -188,11 +188,11 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     }
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
 
-    if (!unwrapped_type->IsStruct()) {
+    if (!unwrapped_type->Is<ast::type::StructType>()) {
       continue;
     }
 
-    if (!unwrapped_type->AsStruct()->IsBlockDecorated()) {
+    if (!unwrapped_type->As<ast::type::StructType>()->IsBlockDecorated()) {
       continue;
     }
 
@@ -314,7 +314,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    if (!var->type()->UnwrapIfNeeded()->IsStruct()) {
+    if (!var->type()->UnwrapIfNeeded()->Is<ast::type::StructType>()) {
       continue;
     }
 

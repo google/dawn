@@ -33,10 +33,6 @@ StructType::StructType(StructType&&) = default;
 
 StructType::~StructType() = default;
 
-bool StructType::IsStruct() const {
-  return true;
-}
-
 std::string StructType::type_name() const {
   return "__struct_" + name_;
 }

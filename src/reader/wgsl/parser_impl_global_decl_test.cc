@@ -103,8 +103,8 @@ type B = A;)");
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 2u);
-  ASSERT_TRUE(m.constructed_types()[0]->IsStruct());
-  auto* str = m.constructed_types()[0]->AsStruct();
+  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::StructType>());
+  auto* str = m.constructed_types()[0]->As<ast::type::StructType>();
   EXPECT_EQ(str->name(), "A");
 
   ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::AliasType>());
@@ -164,9 +164,9 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsStruct());
+  ASSERT_TRUE(t->Is<ast::type::StructType>());
 
-  auto* str = t->AsStruct();
+  auto* str = t->As<ast::type::StructType>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 2u);
 }
@@ -183,9 +183,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsStruct());
+  ASSERT_TRUE(t->Is<ast::type::StructType>());
 
-  auto* str = t->AsStruct();
+  auto* str = t->As<ast::type::StructType>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
@@ -207,9 +207,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->IsStruct());
+  ASSERT_TRUE(t->Is<ast::type::StructType>());
 
-  auto* str = t->AsStruct();
+  auto* str = t->As<ast::type::StructType>();
   EXPECT_EQ(str->name(), "A");
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());
