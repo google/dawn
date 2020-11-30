@@ -30,9 +30,6 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   StageDecoration(ast::PipelineStage stage, const Source& source);
   ~StageDecoration() override;
 
-  /// @returns true if this is a stage decoration
-  bool IsStage() const override;
-
   /// @returns the stage
   ast::PipelineStage value() const { return stage_; }
 

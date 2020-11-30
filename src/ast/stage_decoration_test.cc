@@ -30,9 +30,10 @@ TEST_F(StageDecorationTest, Creation_1param) {
 }
 
 TEST_F(StageDecorationTest, Is) {
-  StageDecoration d{ast::PipelineStage::kFragment, Source{}};
-  EXPECT_FALSE(d.IsWorkgroup());
-  EXPECT_TRUE(d.IsStage());
+  StageDecoration sd{ast::PipelineStage::kFragment, Source{}};
+  Decoration* d = &sd;
+  EXPECT_FALSE(sd.IsWorkgroup());
+  EXPECT_TRUE(d->Is<ast::StageDecoration>());
 }
 
 TEST_F(StageDecorationTest, ToStr) {

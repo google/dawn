@@ -24,7 +24,6 @@
 namespace tint {
 namespace ast {
 
-class StageDecoration;
 class WorkgroupDecoration;
 
 /// A decoration attached to a function
@@ -38,13 +37,9 @@ class FunctionDecoration : public Castable<FunctionDecoration, Decoration> {
   /// @return the decoration kind
   DecorationKind GetKind() const override;
 
-  /// @returns true if this is a stage decoration
-  virtual bool IsStage() const;
   /// @returns true if this is a workgroup decoration
   virtual bool IsWorkgroup() const;
 
-  /// @returns the decoration as a stage decoration
-  const StageDecoration* AsStage() const;
   /// @returns the decoration as a workgroup decoration
   const WorkgroupDecoration* AsWorkgroup() const;
 

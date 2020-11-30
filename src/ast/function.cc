@@ -64,8 +64,8 @@ std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
 
 ast::PipelineStage Function::pipeline_stage() const {
   for (auto* deco : decorations_) {
-    if (deco->IsStage()) {
-      return deco->AsStage()->value();
+    if (auto* stage = deco->As<StageDecoration>()) {
+      return stage->value();
     }
   }
   return ast::PipelineStage::kNone;

@@ -354,8 +354,8 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
       out_ << "workgroup_size(" << std::to_string(x) << ", "
            << std::to_string(y) << ", " << std::to_string(z) << ")";
     }
-    if (deco->IsStage()) {
-      out_ << "stage(" << deco->AsStage()->value() << ")";
+    if (auto* stage = deco->As<ast::StageDecoration>()) {
+      out_ << "stage(" << stage->value() << ")";
     }
     out_ << "]]" << std::endl;
   }

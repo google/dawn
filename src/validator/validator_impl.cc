@@ -23,6 +23,7 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/intrinsic.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
@@ -174,7 +175,7 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
       }
       auto stage_deco_count = 0;
       for (auto* deco : func->decorations()) {
-        if (deco->IsStage()) {
+        if (deco->Is<ast::StageDecoration>()) {
           stage_deco_count++;
         }
       }

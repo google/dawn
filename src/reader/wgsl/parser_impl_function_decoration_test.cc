@@ -259,8 +259,9 @@ TEST_F(ParserImplTest, FunctionDecoration_Stage) {
   ASSERT_FALSE(p->has_error());
   auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
-  ASSERT_TRUE(func_deco->IsStage());
-  EXPECT_EQ(func_deco->AsStage()->value(), ast::PipelineStage::kCompute);
+  ASSERT_TRUE(func_deco->Is<ast::StageDecoration>());
+  EXPECT_EQ(func_deco->As<ast::StageDecoration>()->value(),
+            ast::PipelineStage::kCompute);
 }
 
 TEST_F(ParserImplTest, FunctionDecoration_Stage_MissingValue) {

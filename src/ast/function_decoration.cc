@@ -16,7 +16,6 @@
 
 #include <assert.h>
 
-#include "src/ast/stage_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {
@@ -32,17 +31,8 @@ DecorationKind FunctionDecoration::GetKind() const {
   return Kind;
 }
 
-bool FunctionDecoration::IsStage() const {
-  return false;
-}
-
 bool FunctionDecoration::IsWorkgroup() const {
   return false;
-}
-
-const StageDecoration* FunctionDecoration::AsStage() const {
-  assert(IsStage());
-  return static_cast<const StageDecoration*>(this);
 }
 
 const WorkgroupDecoration* FunctionDecoration::AsWorkgroup() const {

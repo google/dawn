@@ -22,10 +22,6 @@ StageDecoration::StageDecoration(ast::PipelineStage stage, const Source& source)
 
 StageDecoration::~StageDecoration() = default;
 
-bool StageDecoration::IsStage() const {
-  return true;
-}
-
 void StageDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "StageDecoration{" << stage_ << "}" << std::endl;

@@ -16,6 +16,7 @@
 
 #include <sstream>
 
+#include "src/ast/stage_decoration.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -57,9 +58,10 @@ TEST_F(WorkgroupDecorationTest, Creation_3param) {
 }
 
 TEST_F(WorkgroupDecorationTest, Is) {
-  WorkgroupDecoration d{2, 4, 6, Source{}};
-  EXPECT_TRUE(d.IsWorkgroup());
-  EXPECT_FALSE(d.IsStage());
+  WorkgroupDecoration wd{2, 4, 6, Source{}};
+  Decoration* d = &wd;
+  EXPECT_TRUE(wd.IsWorkgroup());
+  EXPECT_FALSE(d->Is<StageDecoration>());
 }
 
 TEST_F(WorkgroupDecorationTest, ToStr) {
