@@ -32,10 +32,6 @@ DecorationKind FunctionDecoration::GetKind() const {
   return Kind;
 }
 
-bool FunctionDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind;
-}
-
 bool FunctionDecoration::IsStage() const {
   return false;
 }

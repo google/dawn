@@ -28,10 +28,6 @@ DecorationKind StageDecoration::GetKind() const {
   return Kind;
 }
 
-bool StageDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool StageDecoration::IsStage() const {
   return true;
 }

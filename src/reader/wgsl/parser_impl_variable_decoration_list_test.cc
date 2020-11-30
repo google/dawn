@@ -31,8 +31,8 @@ TEST_F(ParserImplTest, VariableDecorationList_Parses) {
   ASSERT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 2u);
 
-  auto* deco_0 = ast::As<ast::VariableDecoration>(decos.value[0]);
-  auto* deco_1 = ast::As<ast::VariableDecoration>(decos.value[1]);
+  auto* deco_0 = decos.value[0]->As<ast::VariableDecoration>();
+  auto* deco_1 = decos.value[1]->As<ast::VariableDecoration>();
   ASSERT_NE(deco_0, nullptr);
   ASSERT_NE(deco_1, nullptr);
 

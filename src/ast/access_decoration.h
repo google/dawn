@@ -38,11 +38,6 @@ class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
   /// @return the decoration kind
   DecorationKind GetKind() const override;
 
-  /// @param kind the decoration kind
-  /// @return true if this Decoration is of the (or derives from) the given
-  /// kind.
-  bool IsKind(DecorationKind kind) const override;
-
   /// @returns true if this is an access decoration
   bool IsAccess() const override;
 

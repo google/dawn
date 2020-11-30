@@ -28,10 +28,6 @@ DecorationKind AccessDecoration::GetKind() const {
   return Kind;
 }
 
-bool AccessDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool AccessDecoration::IsAccess() const {
   return true;
 }

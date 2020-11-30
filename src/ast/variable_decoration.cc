@@ -35,10 +35,6 @@ DecorationKind VariableDecoration::GetKind() const {
   return Kind;
 }
 
-bool VariableDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind;
-}
-
 bool VariableDecoration::IsBinding() const {
   return false;
 }

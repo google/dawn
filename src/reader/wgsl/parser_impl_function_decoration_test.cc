@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup) {
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  auto* func_deco = ast::As<ast::FunctionDecoration>(deco.value);
+  auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
   ASSERT_TRUE(func_deco->IsWorkgroup());
 
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_2Param) {
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  auto* func_deco = ast::As<ast::FunctionDecoration>(deco.value);
+  auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr) << p->error();
   ASSERT_TRUE(func_deco->IsWorkgroup());
 
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_3Param) {
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  auto* func_deco = ast::As<ast::FunctionDecoration>(deco.value);
+  auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
   ASSERT_TRUE(func_deco->IsWorkgroup());
 
@@ -257,7 +257,7 @@ TEST_F(ParserImplTest, FunctionDecoration_Stage) {
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  auto* func_deco = ast::As<ast::FunctionDecoration>(deco.value);
+  auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
   ASSERT_TRUE(func_deco->IsStage());
   EXPECT_EQ(func_deco->AsStage()->value(), ast::PipelineStage::kCompute);

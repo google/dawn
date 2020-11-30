@@ -26,10 +26,6 @@ DecorationKind StrideDecoration::GetKind() const {
   return Kind;
 }
 
-bool StrideDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool StrideDecoration::IsStride() const {
   return true;
 }

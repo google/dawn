@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = ast::As<ast::VariableDecoration>(deco.value);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(var_deco->IsLocation());
@@ -101,7 +101,7 @@ TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = ast::As<ast::VariableDecoration>(deco.value);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_TRUE(var_deco->IsBuiltin());
@@ -180,7 +180,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = ast::As<ast::VariableDecoration>(deco.value);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(var_deco->IsBinding());
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = ast::As<ast::VariableDecoration>(deco.value);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var_deco, nullptr);
   ASSERT_TRUE(var_deco->IsSet());

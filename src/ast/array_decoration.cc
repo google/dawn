@@ -31,10 +31,6 @@ DecorationKind ArrayDecoration::GetKind() const {
   return Kind;
 }
 
-bool ArrayDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind;
-}
-
 bool ArrayDecoration::IsStride() const {
   return false;
 }

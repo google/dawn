@@ -28,10 +28,6 @@ DecorationKind LocationDecoration::GetKind() const {
   return Kind;
 }
 
-bool LocationDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool LocationDecoration::IsLocation() const {
   return true;
 }

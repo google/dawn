@@ -27,9 +27,5 @@ DecorationKind StructDecoration::GetKind() const {
   return Kind;
 }
 
-bool StructDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind;
-}
-
 }  // namespace ast
 }  // namespace tint

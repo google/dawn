@@ -54,11 +54,6 @@ class Decoration : public Castable<Decoration, Node> {
   /// @return the decoration kind
   virtual DecorationKind GetKind() const = 0;
 
-  /// @param kind the decoration kind
-  /// @return true if this Decoration is of the (or derives from) the given
-  /// kind.
-  virtual bool IsKind(DecorationKind kind) const = 0;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 
@@ -67,19 +62,6 @@ class Decoration : public Castable<Decoration, Node> {
   /// @param source the source of this decoration
   explicit Decoration(const Source& source) : Base(source) {}
 };
-
-/// As dynamically casts |deco| to the target type |TO|.
-/// @return the cast decoration, or nullptr if |deco| is not of the type |TO|.
-template <typename TO>
-TO* As(Decoration* deco) {
-  if (deco == nullptr) {
-    return nullptr;
-  }
-  if (deco->Is<TO>()) {
-    return static_cast<TO*>(deco);
-  }
-  return nullptr;
-}
 
 /// A list of decorations
 using DecorationList = std::vector<Decoration*>;

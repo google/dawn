@@ -39,10 +39,6 @@ DecorationKind WorkgroupDecoration::GetKind() const {
   return Kind;
 }
 
-bool WorkgroupDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool WorkgroupDecoration::IsWorkgroup() const {
   return true;
 }

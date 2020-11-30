@@ -43,7 +43,7 @@ TEST_P(StructDecorationTest, Parses) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* struct_deco = ast::As<ast::StructDecoration>(deco.value);
+  auto* struct_deco = deco.value->As<ast::StructDecoration>();
   ASSERT_NE(struct_deco, nullptr);
   EXPECT_EQ(struct_deco->IsBlock(), params.is_block);
 }

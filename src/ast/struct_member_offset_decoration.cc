@@ -27,10 +27,6 @@ DecorationKind StructMemberOffsetDecoration::GetKind() const {
   return Kind;
 }
 
-bool StructMemberOffsetDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool StructMemberOffsetDecoration::IsOffset() const {
   return true;
 }

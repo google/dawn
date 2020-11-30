@@ -28,10 +28,6 @@ DecorationKind BuiltinDecoration::GetKind() const {
   return Kind;
 }
 
-bool BuiltinDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool BuiltinDecoration::IsBuiltin() const {
   return true;
 }

@@ -28,10 +28,6 @@ DecorationKind BindingDecoration::GetKind() const {
   return Kind;
 }
 
-bool BindingDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool BindingDecoration::IsBinding() const {
   return true;
 }

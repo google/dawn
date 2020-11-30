@@ -28,10 +28,6 @@ DecorationKind ConstantIdDecoration::GetKind() const {
   return Kind;
 }
 
-bool ConstantIdDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || Base::IsKind(kind);
-}
-
 bool ConstantIdDecoration::IsConstantId() const {
   return true;
 }
