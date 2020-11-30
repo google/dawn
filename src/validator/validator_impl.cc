@@ -344,13 +344,14 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
         return false;
       }
 
-      auto v = static_cast<int32_t>(selector->type()->Is<ast::type::U32Type>()
-                                        ? selector->AsUint()->value()
-                                        : selector->AsSint()->value());
+      auto v =
+          static_cast<int32_t>(selector->type()->Is<ast::type::U32Type>()
+                                   ? selector->As<ast::UintLiteral>()->value()
+                                   : selector->As<ast::SintLiteral>()->value());
       if (selector_set.count(v)) {
         auto v_str = selector->type()->Is<ast::type::U32Type>()
-                         ? selector->AsUint()->to_str()
-                         : selector->AsSint()->to_str();
+                         ? selector->As<ast::UintLiteral>()->to_str()
+                         : selector->As<ast::SintLiteral>()->to_str();
         add_error(case_stmt->source(), "v-0027",
                   "a literal value must not appear more than once in "
                   "the case selectors for a switch statement: '" +

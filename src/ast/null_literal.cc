@@ -21,10 +21,6 @@ NullLiteral::NullLiteral(ast::type::Type* type) : Base(type) {}
 
 NullLiteral::~NullLiteral() = default;
 
-bool NullLiteral::IsNull() const {
-  return true;
-}
-
 std::string NullLiteral::to_str() const {
   return "null " + type()->type_name();
 }

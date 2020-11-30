@@ -145,23 +145,23 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
       continue;
     }
 
-    if (literal->IsBool()) {
-      result[constant_id] = Scalar(literal->AsBool()->IsTrue());
+    if (literal->Is<ast::BoolLiteral>()) {
+      result[constant_id] = Scalar(literal->As<ast::BoolLiteral>()->IsTrue());
       continue;
     }
 
-    if (literal->IsUint()) {
-      result[constant_id] = Scalar(literal->AsUint()->value());
+    if (literal->Is<ast::UintLiteral>()) {
+      result[constant_id] = Scalar(literal->As<ast::UintLiteral>()->value());
       continue;
     }
 
-    if (literal->IsSint()) {
-      result[constant_id] = Scalar(literal->AsSint()->value());
+    if (literal->Is<ast::SintLiteral>()) {
+      result[constant_id] = Scalar(literal->As<ast::SintLiteral>()->value());
       continue;
     }
 
-    if (literal->IsFloat()) {
-      result[constant_id] = Scalar(literal->AsFloat()->value());
+    if (literal->Is<ast::FloatLiteral>()) {
+      result[constant_id] = Scalar(literal->As<ast::FloatLiteral>()->value());
       continue;
     }
 

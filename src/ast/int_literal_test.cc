@@ -14,6 +14,9 @@
 
 #include "src/ast/int_literal.h"
 
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/null_literal.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
@@ -29,13 +32,13 @@ using IntLiteralTest = TestHelper;
 TEST_F(IntLiteralTest, Sint_IsInt) {
   ast::type::I32Type i32;
   SintLiteral i{&i32, 47};
-  ASSERT_TRUE(i.IsInt());
+  ASSERT_TRUE(i.Is<IntLiteral>());
 }
 
 TEST_F(IntLiteralTest, Uint_IsInt) {
   ast::type::I32Type i32;
   UintLiteral i{&i32, 42};
-  EXPECT_TRUE(i.IsInt());
+  EXPECT_TRUE(i.Is<IntLiteral>());
 }
 
 }  // namespace

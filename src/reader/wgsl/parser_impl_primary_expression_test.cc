@@ -60,26 +60,26 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   ASSERT_TRUE(val[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(val[0]->Is<ast::ScalarConstructorExpression>());
   auto* ident = val[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(ident->literal()->IsSint());
-  EXPECT_EQ(ident->literal()->AsSint()->value(), 1);
+  ASSERT_TRUE(ident->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(ident->literal()->As<ast::SintLiteral>()->value(), 1);
 
   ASSERT_TRUE(val[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(val[1]->Is<ast::ScalarConstructorExpression>());
   ident = val[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(ident->literal()->IsSint());
-  EXPECT_EQ(ident->literal()->AsSint()->value(), 2);
+  ASSERT_TRUE(ident->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(ident->literal()->As<ast::SintLiteral>()->value(), 2);
 
   ASSERT_TRUE(val[2]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(val[2]->Is<ast::ScalarConstructorExpression>());
   ident = val[2]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(ident->literal()->IsSint());
-  EXPECT_EQ(ident->literal()->AsSint()->value(), 3);
+  ASSERT_TRUE(ident->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(ident->literal()->As<ast::SintLiteral>()->value(), 3);
 
   ASSERT_TRUE(val[3]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(val[3]->Is<ast::ScalarConstructorExpression>());
   ident = val[3]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(ident->literal()->IsSint());
-  EXPECT_EQ(ident->literal()->AsSint()->value(), 4);
+  ASSERT_TRUE(ident->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(ident->literal()->As<ast::SintLiteral>()->value(), 4);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
@@ -146,8 +146,8 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::ScalarConstructorExpression>());
   auto* init = e->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  EXPECT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  EXPECT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {

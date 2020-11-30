@@ -321,14 +321,14 @@ bool GeneratorImpl::EmitScalarConstructor(
 }
 
 bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
-  if (lit->IsBool()) {
-    out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
-  } else if (lit->IsFloat()) {
-    out_ << FloatToString(lit->AsFloat()->value());
-  } else if (lit->IsSint()) {
-    out_ << lit->AsSint()->value();
-  } else if (lit->IsUint()) {
-    out_ << lit->AsUint()->value() << "u";
+  if (lit->Is<ast::BoolLiteral>()) {
+    out_ << (lit->As<ast::BoolLiteral>()->IsTrue() ? "true" : "false");
+  } else if (lit->Is<ast::FloatLiteral>()) {
+    out_ << FloatToString(lit->As<ast::FloatLiteral>()->value());
+  } else if (lit->Is<ast::SintLiteral>()) {
+    out_ << lit->As<ast::SintLiteral>()->value();
+  } else if (lit->Is<ast::UintLiteral>()) {
+    out_ << lit->As<ast::UintLiteral>()->value() << "u";
   } else {
     error_ = "unknown literal type";
     return false;

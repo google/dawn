@@ -43,8 +43,8 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
   auto* init = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsSint());
-  ASSERT_EQ(init->literal()->AsSint()->value(), 2);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  ASSERT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
@@ -63,8 +63,8 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   ASSERT_TRUE(u->expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* init = u->expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsSint());
-  EXPECT_EQ(init->literal()->AsSint()->value(), 1);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
@@ -93,8 +93,8 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   ASSERT_TRUE(u->expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* init = u->expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsSint());
-  EXPECT_EQ(init->literal()->AsSint()->value(), 1);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {

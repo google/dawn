@@ -47,8 +47,8 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
   auto* c = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(c->literal()->IsSint());
-  EXPECT_EQ(c->literal()->AsSint()->value(), 1);
+  ASSERT_TRUE(c->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(c->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {

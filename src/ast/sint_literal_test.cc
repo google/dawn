@@ -14,9 +14,13 @@
 
 #include "src/ast/sint_literal.h"
 
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/null_literal.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace ast {
@@ -27,18 +31,19 @@ using SintLiteralTest = TestHelper;
 TEST_F(SintLiteralTest, Value) {
   ast::type::I32Type i32;
   SintLiteral i{&i32, 47};
-  ASSERT_TRUE(i.IsSint());
+  ASSERT_TRUE(i.Is<SintLiteral>());
   EXPECT_EQ(i.value(), 47);
 }
 
 TEST_F(SintLiteralTest, Is) {
   ast::type::I32Type i32;
   SintLiteral i{&i32, 42};
-  EXPECT_FALSE(i.IsBool());
-  EXPECT_TRUE(i.IsSint());
-  EXPECT_FALSE(i.IsFloat());
-  EXPECT_FALSE(i.IsUint());
-  EXPECT_FALSE(i.IsNull());
+  Literal* l = &i;
+  EXPECT_FALSE(l->Is<BoolLiteral>());
+  EXPECT_TRUE(l->Is<SintLiteral>());
+  EXPECT_FALSE(l->Is<FloatLiteral>());
+  EXPECT_FALSE(l->Is<UintLiteral>());
+  EXPECT_FALSE(l->Is<NullLiteral>());
 }
 
 TEST_F(SintLiteralTest, ToStr) {

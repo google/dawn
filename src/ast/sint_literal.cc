@@ -22,10 +22,6 @@ SintLiteral::SintLiteral(ast::type::Type* type, int32_t value)
 
 SintLiteral::~SintLiteral() = default;
 
-bool SintLiteral::IsSint() const {
-  return true;
-}
-
 std::string SintLiteral::to_str() const {
   return std::to_string(value_);
 }

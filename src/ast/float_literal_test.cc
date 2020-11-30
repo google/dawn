@@ -14,8 +14,12 @@
 
 #include "src/ast/float_literal.h"
 
+#include "src/ast/bool_literal.h"
+#include "src/ast/null_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace ast {
@@ -26,19 +30,20 @@ using FloatLiteralTest = TestHelper;
 TEST_F(FloatLiteralTest, Value) {
   ast::type::F32Type f32;
   FloatLiteral f{&f32, 47.2f};
-  ASSERT_TRUE(f.IsFloat());
+  ASSERT_TRUE(f.Is<FloatLiteral>());
   EXPECT_EQ(f.value(), 47.2f);
 }
 
 TEST_F(FloatLiteralTest, Is) {
   ast::type::F32Type f32;
   FloatLiteral f{&f32, 42.f};
-  EXPECT_FALSE(f.IsBool());
-  EXPECT_FALSE(f.IsSint());
-  EXPECT_FALSE(f.IsInt());
-  EXPECT_TRUE(f.IsFloat());
-  EXPECT_FALSE(f.IsUint());
-  EXPECT_FALSE(f.IsNull());
+  Literal* l = &f;
+  EXPECT_FALSE(l->Is<BoolLiteral>());
+  EXPECT_FALSE(l->Is<SintLiteral>());
+  EXPECT_FALSE(l->Is<IntLiteral>());
+  EXPECT_TRUE(l->Is<FloatLiteral>());
+  EXPECT_FALSE(l->Is<UintLiteral>());
+  EXPECT_FALSE(l->Is<NullLiteral>());
 }
 
 TEST_F(FloatLiteralTest, ToStr) {

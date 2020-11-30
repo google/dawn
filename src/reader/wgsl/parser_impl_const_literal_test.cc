@@ -32,8 +32,8 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
   EXPECT_FALSE(c.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->IsSint());
-  EXPECT_EQ(c->AsSint()->value(), -234);
+  ASSERT_TRUE(c->Is<ast::SintLiteral>());
+  EXPECT_EQ(c->As<ast::SintLiteral>()->value(), -234);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
@@ -43,8 +43,8 @@ TEST_F(ParserImplTest, ConstLiteral_Uint) {
   EXPECT_FALSE(c.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->IsUint());
-  EXPECT_EQ(c->AsUint()->value(), 234u);
+  ASSERT_TRUE(c->Is<ast::UintLiteral>());
+  EXPECT_EQ(c->As<ast::UintLiteral>()->value(), 234u);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {
@@ -54,8 +54,8 @@ TEST_F(ParserImplTest, ConstLiteral_Float) {
   EXPECT_FALSE(c.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->IsFloat());
-  EXPECT_FLOAT_EQ(c->AsFloat()->value(), 234e12f);
+  ASSERT_TRUE(c->Is<ast::FloatLiteral>());
+  EXPECT_FLOAT_EQ(c->As<ast::FloatLiteral>()->value(), 234e12f);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
@@ -73,8 +73,8 @@ TEST_F(ParserImplTest, ConstLiteral_True) {
   EXPECT_FALSE(c.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->IsBool());
-  EXPECT_TRUE(c->AsBool()->IsTrue());
+  ASSERT_TRUE(c->Is<ast::BoolLiteral>());
+  EXPECT_TRUE(c->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_False) {
@@ -84,8 +84,8 @@ TEST_F(ParserImplTest, ConstLiteral_False) {
   EXPECT_FALSE(c.errored);
   EXPECT_FALSE(p->has_error());
   ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->IsBool());
-  EXPECT_TRUE(c->AsBool()->IsFalse());
+  ASSERT_TRUE(c->Is<ast::BoolLiteral>());
+  EXPECT_TRUE(c->As<ast::BoolLiteral>()->IsFalse());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_NoMatch) {

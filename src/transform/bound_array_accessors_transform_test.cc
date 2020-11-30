@@ -148,8 +148,8 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -229,14 +229,14 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   auto* scalar = sub_idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 4u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 4u);
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -274,8 +274,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -336,8 +336,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -375,8 +375,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -414,8 +414,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -453,8 +453,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -514,8 +514,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -553,8 +553,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -592,8 +592,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -637,8 +637,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -647,8 +647,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -715,8 +715,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -725,8 +725,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -781,8 +781,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
   auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
@@ -801,8 +801,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
   scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -848,8 +848,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -858,8 +858,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 1);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 1);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -902,8 +902,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 2);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 2);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -912,8 +912,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsSint());
-  EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
+  ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
@@ -957,8 +957,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -967,8 +967,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -1012,8 +1012,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
@@ -1022,8 +1022,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
   scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(scalar->literal()->IsUint());
-  EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
+  ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());

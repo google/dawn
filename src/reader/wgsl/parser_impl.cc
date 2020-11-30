@@ -1753,10 +1753,10 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
       return Failure::kErrored;
     if (!cond.matched)
       break;
-    if (!cond->IsInt())
+    if (!cond->Is<ast::IntLiteral>())
       return add_error(t, "invalid case selector must be an integer value");
 
-    selectors.push_back(cond.value->AsInt());
+    selectors.push_back(cond.value->As<ast::IntLiteral>());
   }
 
   if (selectors.empty())

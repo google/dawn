@@ -27,9 +27,6 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
  public:
   ~IntLiteral() override;
 
-  /// @returns true if this is a signed or unsigned integer.
-  bool IsInt() const override;
-
  protected:
   /// Constructor
   /// @param type the type of the literal

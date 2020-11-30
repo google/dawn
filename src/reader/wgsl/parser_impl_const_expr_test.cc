@@ -44,14 +44,14 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   ASSERT_TRUE(v[0]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(v[0]->Is<ast::ScalarConstructorExpression>());
   auto* c = v[0]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(c->literal()->IsFloat());
-  EXPECT_FLOAT_EQ(c->literal()->AsFloat()->value(), 1.);
+  ASSERT_TRUE(c->literal()->Is<ast::FloatLiteral>());
+  EXPECT_FLOAT_EQ(c->literal()->As<ast::FloatLiteral>()->value(), 1.);
 
   ASSERT_TRUE(v[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(v[1]->Is<ast::ScalarConstructorExpression>());
   c = v[1]->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(c->literal()->IsFloat());
-  EXPECT_FLOAT_EQ(c->literal()->AsFloat()->value(), 2.);
+  ASSERT_TRUE(c->literal()->Is<ast::FloatLiteral>());
+  EXPECT_FLOAT_EQ(c->literal()->As<ast::FloatLiteral>()->value(), 2.);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
@@ -117,8 +117,8 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
   ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->Is<ast::ScalarConstructorExpression>());
   auto* c = e->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(c->literal()->IsBool());
-  EXPECT_TRUE(c->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(c->literal()->Is<ast::BoolLiteral>());
+  EXPECT_TRUE(c->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {

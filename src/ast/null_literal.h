@@ -30,9 +30,6 @@ class NullLiteral : public Castable<NullLiteral, Literal> {
   explicit NullLiteral(ast::type::Type* type);
   ~NullLiteral() override;
 
-  /// @returns true if this is a null literal
-  bool IsNull() const override;
-
   /// @returns the name for this literal. This name is unique to this value.
   std::string name() const override;
 

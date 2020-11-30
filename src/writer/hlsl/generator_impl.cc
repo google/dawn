@@ -1538,14 +1538,14 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
-  if (lit->IsBool()) {
-    out << (lit->AsBool()->IsTrue() ? "true" : "false");
-  } else if (lit->IsFloat()) {
-    out << FloatToString(lit->AsFloat()->value()) << "f";
-  } else if (lit->IsSint()) {
-    out << lit->AsSint()->value();
-  } else if (lit->IsUint()) {
-    out << lit->AsUint()->value() << "u";
+  if (lit->Is<ast::BoolLiteral>()) {
+    out << (lit->As<ast::BoolLiteral>()->IsTrue() ? "true" : "false");
+  } else if (lit->Is<ast::FloatLiteral>()) {
+    out << FloatToString(lit->As<ast::FloatLiteral>()->value()) << "f";
+  } else if (lit->Is<ast::SintLiteral>()) {
+    out << lit->As<ast::SintLiteral>()->value();
+  } else if (lit->Is<ast::UintLiteral>()) {
+    out << lit->As<ast::UintLiteral>()->value() << "u";
   } else {
     error_ = "unknown literal type";
     return false;

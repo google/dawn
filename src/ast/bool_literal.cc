@@ -22,10 +22,6 @@ BoolLiteral::BoolLiteral(ast::type::Type* type, bool value)
 
 BoolLiteral::~BoolLiteral() = default;
 
-bool BoolLiteral::IsBool() const {
-  return true;
-}
-
 std::string BoolLiteral::to_str() const {
   return value_ ? "true" : "false";
 }

@@ -31,9 +31,6 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   BoolLiteral(ast::type::Type* type, bool value);
   ~BoolLiteral() override;
 
-  /// @returns true if this is a bool literal
-  bool IsBool() const override;
-
   /// @returns true if the bool literal is true
   bool IsTrue() const { return value_; }
   /// @returns true if the bool literal is false

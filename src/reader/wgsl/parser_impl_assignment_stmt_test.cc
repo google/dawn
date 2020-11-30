@@ -49,8 +49,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 
   auto* init = e->rhs()->As<ast::ScalarConstructorExpression>();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsSint());
-  EXPECT_EQ(init->literal()->AsSint()->value(), 123);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -69,8 +69,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_TRUE(e->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = e->rhs()->As<ast::ScalarConstructorExpression>();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsSint());
-  EXPECT_EQ(init->literal()->AsSint()->value(), 123);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 123);
 
   ASSERT_TRUE(e->lhs()->Is<ast::MemberAccessorExpression>());
   auto* mem = e->lhs()->As<ast::MemberAccessorExpression>();
@@ -86,8 +86,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
   init = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsSint());
-  EXPECT_EQ(init->literal()->AsSint()->value(), 2);
+  ASSERT_TRUE(init->literal()->Is<ast::SintLiteral>());
+  EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 2);
 
   ASSERT_TRUE(ary->array()->Is<ast::MemberAccessorExpression>());
   mem = ary->array()->As<ast::MemberAccessorExpression>();

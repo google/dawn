@@ -21,9 +21,5 @@ IntLiteral::IntLiteral(ast::type::Type* type) : Base(type) {}
 
 IntLiteral::~IntLiteral() = default;
 
-bool IntLiteral::IsInt() const {
-  return true;
-}
-
 }  // namespace ast
 }  // namespace tint

@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
@@ -67,8 +67,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
@@ -90,8 +90,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
@@ -113,8 +113,8 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {

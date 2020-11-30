@@ -14,8 +14,12 @@
 
 #include "src/ast/null_literal.h"
 
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace ast {
@@ -26,12 +30,13 @@ using NullLiteralTest = TestHelper;
 TEST_F(NullLiteralTest, Is) {
   ast::type::I32Type i32;
   NullLiteral i{&i32};
-  EXPECT_FALSE(i.IsBool());
-  EXPECT_FALSE(i.IsSint());
-  EXPECT_FALSE(i.IsFloat());
-  EXPECT_FALSE(i.IsUint());
-  EXPECT_FALSE(i.IsInt());
-  EXPECT_TRUE(i.IsNull());
+  Literal* l = &i;
+  EXPECT_FALSE(l->Is<BoolLiteral>());
+  EXPECT_FALSE(l->Is<SintLiteral>());
+  EXPECT_FALSE(l->Is<FloatLiteral>());
+  EXPECT_FALSE(l->Is<UintLiteral>());
+  EXPECT_FALSE(l->Is<IntLiteral>());
+  EXPECT_TRUE(l->Is<NullLiteral>());
 }
 
 TEST_F(NullLiteralTest, ToStr) {

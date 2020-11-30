@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
@@ -67,8 +67,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
@@ -90,8 +90,8 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
   auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
+  ASSERT_TRUE(init->literal()->Is<ast::BoolLiteral>());
+  ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
 TEST_F(ParserImplTest, MultiplicativeExpression_InvalidLHS) {

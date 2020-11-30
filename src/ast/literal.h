@@ -23,43 +23,10 @@
 namespace tint {
 namespace ast {
 
-class BoolLiteral;
-class FloatLiteral;
-class NullLiteral;
-class SintLiteral;
-class IntLiteral;
-class UintLiteral;
-
 /// Base class for a literal value
 class Literal : public Castable<Literal, Node> {
  public:
   ~Literal() override;
-
-  /// @returns true if this is a bool literal
-  virtual bool IsBool() const;
-  /// @returns true if this is a float literal
-  virtual bool IsFloat() const;
-  /// @returns thre if this is an int literal (either sint or uint)
-  virtual bool IsInt() const;
-  /// @returns true if this is a signed int literal
-  virtual bool IsSint() const;
-  /// @returns true if this is a null literal
-  virtual bool IsNull() const;
-  /// @returns true if this is a unsigned int literal
-  virtual bool IsUint() const;
-
-  /// @returns the literal as a boolean literal
-  BoolLiteral* AsBool();
-  /// @returns the literal as a float literal
-  FloatLiteral* AsFloat();
-  /// @returns the literal as an int literal
-  IntLiteral* AsInt();
-  /// @returns the literal as a signed int literal
-  SintLiteral* AsSint();
-  /// @returns the literal as a null literal
-  NullLiteral* AsNull();
-  /// @returns the literal as a unsigned int literal
-  UintLiteral* AsUint();
 
   /// @returns the type of the literal
   ast::type::Type* type() const { return type_; }

@@ -22,10 +22,6 @@ UintLiteral::UintLiteral(ast::type::Type* type, uint32_t value)
 
 UintLiteral::~UintLiteral() = default;
 
-bool UintLiteral::IsUint() const {
-  return true;
-}
-
 std::string UintLiteral::to_str() const {
   return std::to_string(value_);
 }

@@ -31,9 +31,6 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   FloatLiteral(ast::type::Type* type, float value);
   ~FloatLiteral() override;
 
-  /// @returns true if this is a float literal
-  bool IsFloat() const override;
-
   /// @returns the float literal value
   float value() const { return value_; }
 

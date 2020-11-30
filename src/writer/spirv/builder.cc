@@ -1490,8 +1490,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
          Operand::Int(var->As<ast::DecoratedVariable>()->constant_id())});
   }
 
-  if (lit->IsBool()) {
-    if (lit->AsBool()->IsTrue()) {
+  if (lit->Is<ast::BoolLiteral>()) {
+    if (lit->As<ast::BoolLiteral>()->IsTrue()) {
       push_type(is_spec_constant ? spv::Op::OpSpecConstantTrue
                                  : spv::Op::OpConstantTrue,
                 {Operand::Int(type_id), result});
@@ -1500,19 +1500,19 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                  : spv::Op::OpConstantFalse,
                 {Operand::Int(type_id), result});
     }
-  } else if (lit->IsSint()) {
-    push_type(
-        is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-        {Operand::Int(type_id), result, Operand::Int(lit->AsSint()->value())});
-  } else if (lit->IsUint()) {
-    push_type(
-        is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-        {Operand::Int(type_id), result, Operand::Int(lit->AsUint()->value())});
-  } else if (lit->IsFloat()) {
+  } else if (lit->Is<ast::SintLiteral>()) {
     push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
               {Operand::Int(type_id), result,
-               Operand::Float(lit->AsFloat()->value())});
-  } else if (lit->IsNull()) {
+               Operand::Int(lit->As<ast::SintLiteral>()->value())});
+  } else if (lit->Is<ast::UintLiteral>()) {
+    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+              {Operand::Int(type_id), result,
+               Operand::Int(lit->As<ast::UintLiteral>()->value())});
+  } else if (lit->Is<ast::FloatLiteral>()) {
+    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+              {Operand::Int(type_id), result,
+               Operand::Float(lit->As<ast::FloatLiteral>()->value())});
+  } else if (lit->Is<ast::NullLiteral>()) {
     push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
   } else {
     error_ = "unknown literal type";
@@ -2247,12 +2247,12 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
 
     case_ids.push_back(block_id);
     for (auto* selector : item->selectors()) {
-      if (!selector->IsSint()) {
+      if (!selector->Is<ast::SintLiteral>()) {
         error_ = "expected integer literal for switch case label";
         return false;
       }
 
-      params.push_back(Operand::Int(selector->AsSint()->value()));
+      params.push_back(Operand::Int(selector->As<ast::SintLiteral>()->value()));
       params.push_back(Operand::Int(block_id));
     }
   }
