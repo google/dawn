@@ -44,9 +44,6 @@ class TypeConstructorExpression
   TypeConstructorExpression(TypeConstructorExpression&&);
   ~TypeConstructorExpression() override;
 
-  /// @returns true if this is a type constructor
-  bool IsTypeConstructor() const override;
-
   /// Set the type
   /// @param type the type
   void set_type(type::Type* type) { type_ = type; }

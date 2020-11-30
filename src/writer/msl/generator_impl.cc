@@ -882,10 +882,10 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
-  if (expr->IsScalarConstructor()) {
-    return EmitScalarConstructor(expr->AsScalarConstructor());
+  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
+    return EmitScalarConstructor(scalar);
   }
-  return EmitTypeConstructor(expr->AsTypeConstructor());
+  return EmitTypeConstructor(expr->As<ast::TypeConstructorExpression>());
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {

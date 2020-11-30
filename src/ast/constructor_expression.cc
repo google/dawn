@@ -16,9 +16,6 @@
 
 #include <assert.h>
 
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/type_constructor_expression.h"
-
 namespace tint {
 namespace ast {
 
@@ -30,24 +27,6 @@ ConstructorExpression::ConstructorExpression(ConstructorExpression&&) = default;
 
 ConstructorExpression::ConstructorExpression(const Source& source)
     : Base(source) {}
-
-bool ConstructorExpression::IsScalarConstructor() const {
-  return false;
-}
-
-bool ConstructorExpression::IsTypeConstructor() const {
-  return false;
-}
-
-ScalarConstructorExpression* ConstructorExpression::AsScalarConstructor() {
-  assert(IsScalarConstructor());
-  return static_cast<ScalarConstructorExpression*>(this);
-}
-
-TypeConstructorExpression* ConstructorExpression::AsTypeConstructor() {
-  assert(IsTypeConstructor());
-  return static_cast<TypeConstructorExpression*>(this);
-}
 
 }  // namespace ast
 }  // namespace tint

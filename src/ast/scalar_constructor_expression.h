@@ -41,9 +41,6 @@ class ScalarConstructorExpression
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
 
-  /// @returns true if this is a scalar constructor
-  bool IsScalarConstructor() const override;
-
   /// Set the literal value
   /// @param literal the literal
   void set_literal(Literal* literal) { literal_ = literal; }

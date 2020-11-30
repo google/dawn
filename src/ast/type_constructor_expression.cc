@@ -33,10 +33,6 @@ TypeConstructorExpression::TypeConstructorExpression(
 
 TypeConstructorExpression::~TypeConstructorExpression() = default;
 
-bool TypeConstructorExpression::IsTypeConstructor() const {
-  return true;
-}
-
 bool TypeConstructorExpression::IsValid() const {
   if (values_.empty()) {
     return true;

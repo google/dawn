@@ -35,6 +35,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/context.h"

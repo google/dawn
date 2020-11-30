@@ -831,8 +831,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 }
 
 bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
-  if (expr->IsTypeConstructor()) {
-    auto* ty = expr->AsTypeConstructor();
+  if (auto* ty = expr->As<ast::TypeConstructorExpression>()) {
     for (auto* value : ty->values()) {
       if (!DetermineResultType(value)) {
         return false;
@@ -840,7 +839,8 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
     }
     expr->set_result_type(ty->type());
   } else {
-    expr->set_result_type(expr->AsScalarConstructor()->literal()->type());
+    expr->set_result_type(
+        expr->As<ast::ScalarConstructorExpression>()->literal()->type());
   }
   return true;
 }

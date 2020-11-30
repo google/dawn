@@ -150,9 +150,9 @@ bool BoundArrayAccessorsTransform::ProcessExpression(ast::Expression* expr) {
     }
   } else if (expr->Is<ast::IdentifierExpression>()) {
     /* nop */
-  } else if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    if (c->IsTypeConstructor()) {
-      for (auto* e : c->AsTypeConstructor()->values()) {
+  } else if (expr->Is<ast::ConstructorExpression>()) {
+    if (auto* c = expr->As<ast::TypeConstructorExpression>()) {
+      for (auto* e : c->values()) {
         if (!ProcessExpression(e)) {
           return false;
         }

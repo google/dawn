@@ -904,10 +904,11 @@ bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
 bool GeneratorImpl::EmitConstructor(std::ostream& pre,
                                     std::ostream& out,
                                     ast::ConstructorExpression* expr) {
-  if (expr->IsScalarConstructor()) {
-    return EmitScalarConstructor(pre, out, expr->AsScalarConstructor());
+  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
+    return EmitScalarConstructor(pre, out, scalar);
   }
-  return EmitTypeConstructor(pre, out, expr->AsTypeConstructor());
+  return EmitTypeConstructor(pre, out,
+                             expr->As<ast::TypeConstructorExpression>());
 }
 
 bool GeneratorImpl::EmitScalarConstructor(

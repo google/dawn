@@ -31,10 +31,6 @@ ScalarConstructorExpression::ScalarConstructorExpression(
 
 ScalarConstructorExpression::~ScalarConstructorExpression() = default;
 
-bool ScalarConstructorExpression::IsScalarConstructor() const {
-  return true;
-}
-
 bool ScalarConstructorExpression::IsValid() const {
   return literal_ != nullptr;
 }

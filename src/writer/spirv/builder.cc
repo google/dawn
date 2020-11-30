@@ -1157,12 +1157,11 @@ uint32_t Builder::GenerateConstructorExpression(
     ast::Variable* var,
     ast::ConstructorExpression* expr,
     bool is_global_init) {
-  if (expr->IsScalarConstructor()) {
-    return GenerateLiteralIfNeeded(var, expr->AsScalarConstructor()->literal());
+  if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
+    return GenerateLiteralIfNeeded(var, scalar->literal());
   }
-  if (expr->IsTypeConstructor()) {
-    return GenerateTypeConstructorExpression(expr->AsTypeConstructor(),
-                                             is_global_init);
+  if (auto* type = expr->As<ast::TypeConstructorExpression>()) {
+    return GenerateTypeConstructorExpression(type, is_global_init);
   }
 
   error_ = "unknown constructor expression";
@@ -1178,7 +1177,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     return true;
   }
 
-  auto* tc = constructor->AsTypeConstructor();
+  auto* tc = constructor->As<ast::TypeConstructorExpression>();
   auto* result_type = tc->type()->UnwrapAll();
   for (size_t i = 0; i < tc->values().size(); ++i) {
     auto* e = tc->values()[i];
