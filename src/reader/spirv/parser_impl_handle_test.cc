@@ -794,20 +794,20 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
 
 // Test RegisterHandleUsage, sampled image cases
 
-struct UsageSampledImageCase {
+struct UsageImageAccessCase {
   std::string inst;
   std::string expected_sampler_usage;
   std::string expected_image_usage;
 };
 inline std::ostream& operator<<(std::ostream& out,
-                                const UsageSampledImageCase& c) {
-  out << "UsageSampledImageCase(" << c.inst << ", " << c.expected_sampler_usage
+                                const UsageImageAccessCase& c) {
+  out << "UsageImageAccessCase(" << c.inst << ", " << c.expected_sampler_usage
       << ", " << c.expected_image_usage << ")";
   return out;
 }
 
 using SpvParserTest_RegisterHandleUsage_SampledImage =
-    SpvParserTestBase<::testing::TestWithParam<UsageSampledImageCase>>;
+    SpvParserTestBase<::testing::TestWithParam<UsageImageAccessCase>>;
 
 TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
   const auto assembly = Preamble() + CommonTypes() + R"(
@@ -885,35 +885,35 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageGather
-        UsageSampledImageCase{"%result = OpImageGather "
-                              "%v4float %sampled_image %coords %uint_1",
-                              "Usage(Sampler( ))",
-                              "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{"%result = OpImageGather "
+                             "%v4float %sampled_image %coords %uint_1",
+                             "Usage(Sampler( ))",
+                             "Usage(Texture( is_sampled ))"},
         // OpImageDrefGather
-        UsageSampledImageCase{"%result = OpImageDrefGather "
-                              "%v4float %sampled_image %coords %depth",
-                              "Usage(Sampler( comparison ))",
-                              "Usage(Texture( is_sampled depth ))"},
+        UsageImageAccessCase{"%result = OpImageDrefGather "
+                             "%v4float %sampled_image %coords %depth",
+                             "Usage(Sampler( comparison ))",
+                             "Usage(Texture( is_sampled depth ))"},
 
         // Sample the texture.
 
         // OpImageSampleImplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleImplicitLod "
-                              "%v4float %sampled_image %coords",
-                              "Usage(Sampler( ))",
-                              "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{"%result = OpImageSampleImplicitLod "
+                             "%v4float %sampled_image %coords",
+                             "Usage(Sampler( ))",
+                             "Usage(Texture( is_sampled ))"},
         // OpImageSampleExplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleExplicitLod "
-                              "%v4float %sampled_image %coords Lod %float_null",
-                              "Usage(Sampler( ))",
-                              "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{"%result = OpImageSampleExplicitLod "
+                             "%v4float %sampled_image %coords Lod %float_null",
+                             "Usage(Sampler( ))",
+                             "Usage(Texture( is_sampled ))"},
         // OpImageSampleDrefImplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleDrefImplicitLod "
-                              "%v4float %sampled_image %coords %depth",
-                              "Usage(Sampler( comparison ))",
-                              "Usage(Texture( is_sampled depth ))"},
+        UsageImageAccessCase{"%result = OpImageSampleDrefImplicitLod "
+                             "%v4float %sampled_image %coords %depth",
+                             "Usage(Sampler( comparison ))",
+                             "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleDrefExplicitLod
-        UsageSampledImageCase{
+        UsageImageAccessCase{
             "%result = OpImageSampleDrefExplicitLod "
             "%v4float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
@@ -923,29 +923,29 @@ INSTANTIATE_TEST_SUITE_P(
         // support them.
 
         // OpImageSampleProjImplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleProjImplicitLod "
-                              "%v4float %sampled_image %coords",
-                              "Usage(Sampler( ))",
-                              "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{"%result = OpImageSampleProjImplicitLod "
+                             "%v4float %sampled_image %coords",
+                             "Usage(Sampler( ))",
+                             "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjExplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleProjExplicitLod "
-                              "%v4float %sampled_image %coords Lod %float_null",
-                              "Usage(Sampler( ))",
-                              "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{"%result = OpImageSampleProjExplicitLod "
+                             "%v4float %sampled_image %coords Lod %float_null",
+                             "Usage(Sampler( ))",
+                             "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjDrefImplicitLod
-        UsageSampledImageCase{"%result = OpImageSampleProjDrefImplicitLod "
-                              "%v4float %sampled_image %coords %depth",
-                              "Usage(Sampler( comparison ))",
-                              "Usage(Texture( is_sampled depth ))"},
+        UsageImageAccessCase{"%result = OpImageSampleProjDrefImplicitLod "
+                             "%v4float %sampled_image %coords %depth",
+                             "Usage(Sampler( comparison ))",
+                             "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleProjDrefExplicitLod
-        UsageSampledImageCase{
+        UsageImageAccessCase{
             "%result = OpImageSampleProjDrefExplicitLod "
             "%v4float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
             "Usage(Texture( is_sampled depth ))"},
 
         // OpImageQueryLod
-        UsageSampledImageCase{
+        UsageImageAccessCase{
             "%result = OpImageQueryLod %v2float %sampled_image %coords",
             "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"}));
 
@@ -1188,14 +1188,14 @@ INSTANTIATE_TEST_SUITE_P(Images,
 // Test emission of variables when we have sampled image accesses in
 // executable code.
 
-struct SampledImageCase {
+struct ImageAccessCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;
   std::string spirv_image_access;  // The provoking image access instruction.
   std::string var_decl;            // WGSL variable declaration
   std::string texture_builtin;     // WGSL texture usage.
 };
-inline std::ostream& operator<<(std::ostream& out, const SampledImageCase& c) {
+inline std::ostream& operator<<(std::ostream& out, const ImageAccessCase& c) {
   out << "ImageCase(" << c.spirv_image_type_details << "\n"
       << c.spirv_image_access << "\n"
       << c.var_decl << "\n"
@@ -1204,7 +1204,7 @@ inline std::ostream& operator<<(std::ostream& out, const SampledImageCase& c) {
 }
 
 using SpvParserTest_DeclHandle_SampledImage =
-    SpvParserTestBase<::testing::TestWithParam<SampledImageCase>>;
+    SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
 TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
   const auto assembly = Preamble() + R"(
@@ -1282,7 +1282,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, DISABLED_FunctionParam) {
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageGather,
     SpvParserTest_DeclHandle_SampledImage,
-    ::testing::ValuesIn(std::vector<SampledImageCase>{
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageGather
         // TODO(dneto): OpImageGather with ConstOffset (signed and unsigned)
         // TODO(dneto): OpImageGather with Offset (signed and unsigned)
@@ -1292,7 +1292,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageDrefGather,
     SpvParserTest_DeclHandle_SampledImage,
-    ::testing::ValuesIn(std::vector<SampledImageCase>{
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageDrefGather
         // TODO(dneto): OpImageDrefGather with ConstOffset (signed and
         // unsigned)
@@ -1306,10 +1306,10 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleImplicitLod
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords12",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords12",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1328,7 +1328,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSample}
             (
@@ -1339,10 +1339,10 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleImplicitLod arrayed
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords123",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords123",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1361,7 +1361,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSample}
             (
@@ -1382,7 +1382,7 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleImplicitLod with ConstOffset
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 ConstOffset %offsets2d",
@@ -1417,7 +1417,7 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleImplicitLod arrayed with ConstOffset
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
@@ -1462,10 +1462,10 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleImplicitLod with Bias
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords12 Bias %float_7",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords12 Bias %float_7",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1484,7 +1484,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleBias}
             (
@@ -1496,10 +1496,10 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleImplicitLod arrayed with Bias
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords123 Bias %float_7",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords123 Bias %float_7",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1518,7 +1518,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleBias}
             (
@@ -1542,11 +1542,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleImplicitLod with Bias and ConstOffset
         // TODO(dneto): OpImageSampleImplicitLod with Bias and unsigned
         // ConstOffset
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords12 Bias|ConstOffset "
-                         "%float_7 %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords12 Bias|ConstOffset "
+                        "%float_7 %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1565,7 +1565,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleBias}
             (
@@ -1577,11 +1577,11 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"},
         // OpImageSampleImplicitLod arrayed with Bias
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleImplicitLod "
-                         "%v4float %sampled_image %coords123 Bias|ConstOffset "
-                         "%float_7 %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
+                        "%float_7 %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1600,7 +1600,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleBias}
             (
@@ -1631,14 +1631,14 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleImplicitLod
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown", R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown", R"(
      %sam_dref = OpLoad %sampler %30
      %sampled_dref_image = OpSampledImage %si_ty %im %sam_dref
 
      %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords12
      %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords12 %depth
 )",
-                         R"(
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1666,7 +1666,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_comparison
   })",
-                         R"(
+                        R"(
     VariableDeclStatement{
       VariableConst{
         x_200
@@ -1708,10 +1708,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_DeclHandle_SampledImage,
     ::testing::Values(
         // ImageSampleDrefImplicitLod
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleDrefImplicitLod "
-                         "%v4float %sampled_image %coords12 %depth",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleDrefImplicitLod "
+                        "%v4float %sampled_image %coords12 %depth",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1730,7 +1730,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __depth_texture_2d
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleCompare}
             (
@@ -1741,10 +1741,10 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"},
         // ImageSampleDrefImplicitLod - arrayed
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleDrefImplicitLod "
-                         "%v4float %sampled_image %coords123 %depth",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleDrefImplicitLod "
+                        "%v4float %sampled_image %coords123 %depth",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1763,7 +1763,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __depth_texture_2d_array
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleCompare}
             (
@@ -1784,7 +1784,7 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"},
         // ImageSampleDrefImplicitLod with ConstOffset
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %v4float "
             "%sampled_image %coords12 %depth ConstOffset %offsets2d",
@@ -1819,7 +1819,7 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %v4float "
             "%sampled_image %coords123 %depth ConstOffset %offsets2d",
@@ -1870,10 +1870,10 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleExplicitLod - using Lod
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords12 Lod %float_null",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Lod %float_null",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1892,7 +1892,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
@@ -1904,10 +1904,10 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod arrayed - using Lod
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords123 Lod %float_null",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords123 Lod %float_null",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1926,7 +1926,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
@@ -1950,11 +1950,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleExplicitLod - using Lod and ConstOffset
         // TODO(dneto) OpImageSampleExplicitLod - using Lod and unsigned
         // ConstOffset
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords12 Lod|ConstOffset "
-                         "%float_null %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Lod|ConstOffset "
+                        "%float_null %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -1973,7 +1973,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
@@ -1986,11 +1986,11 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod arrayed - using Lod and ConstOffset
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords123 Lod|ConstOffset "
-                         "%float_null %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords123 Lod|ConstOffset "
+                        "%float_null %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -2009,7 +2009,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleLevel}
             (
@@ -2032,7 +2032,7 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod - using Grad
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Grad %float_7 %float_null",
@@ -2068,7 +2068,7 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod arrayed - using Grad
-        SampledImageCase{
+        ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Grad %float_7 %float_null",
@@ -2116,11 +2116,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleExplicitLod - using Grad and ConstOffset
         // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
         // ConstOffset
-        SampledImageCase{"%float 2D 0 0 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords12 Grad|ConstOffset "
-                         "%float_7 %float_null %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Grad|ConstOffset "
+                        "%float_7 %float_null %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -2139,7 +2139,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleGrad}
             (
@@ -2154,11 +2154,11 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleExplicitLod arrayed - using Grad and ConstOffset
         // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
         // ConstOffset
-        SampledImageCase{"%float 2D 0 1 0 1 Unknown",
-                         "%result = OpImageSampleExplicitLod "
-                         "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                         "%float_7 %float_null %offsets2d",
-                         R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
+                        "%float_7 %float_null %offsets2d",
+                        R"(
   DecoratedVariable{
     Decorations{
       SetDecoration{0}
@@ -2177,7 +2177,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-                         R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleGrad}
             (
@@ -2207,7 +2207,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_DepthTexture,
     SpvParserTest_DeclHandle_SampledImage,
-    ::testing::ValuesIn(std::vector<SampledImageCase>{
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Test a non-depth case.
         // (This is already tested above in the ImageSampleExplicitLod suite,
         // but I'm repeating here for the contrast with the depth case.)
