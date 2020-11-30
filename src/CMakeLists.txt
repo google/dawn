@@ -208,6 +208,8 @@ set(TINT_LIB_SRCS
   ast/variable_decl_statement.h
   ast/workgroup_decoration.cc
   ast/workgroup_decoration.h
+  castable.cc
+  castable.h
   context.cc
   context.h
   diagnostic/diagnostic.cc
@@ -415,6 +417,7 @@ set(TINT_TEST_SRCS
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   ast/workgroup_decoration_test.cc
+  castable_test.cc
   diagnostic/formatter_test.cc
   diagnostic/printer_test.cc
   inspector/inspector_test.cc
