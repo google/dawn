@@ -14,10 +14,6 @@
 
 #include "src/ast/function_decoration.h"
 
-#include <assert.h>
-
-#include "src/ast/workgroup_decoration.h"
-
 namespace tint {
 namespace ast {
 
@@ -29,15 +25,6 @@ FunctionDecoration::~FunctionDecoration() = default;
 
 DecorationKind FunctionDecoration::GetKind() const {
   return Kind;
-}
-
-bool FunctionDecoration::IsWorkgroup() const {
-  return false;
-}
-
-const WorkgroupDecoration* FunctionDecoration::AsWorkgroup() const {
-  assert(IsWorkgroup());
-  return static_cast<const WorkgroupDecoration*>(this);
 }
 
 }  // namespace ast

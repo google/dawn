@@ -45,9 +45,6 @@ class WorkgroupDecoration
   WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
   ~WorkgroupDecoration() override;
 
-  /// @returns true if this is a workgroup decoration
-  bool IsWorkgroup() const override;
-
   /// @returns the workgroup dimensions
   std::tuple<uint32_t, uint32_t, uint32_t> values() const {
     return {x_, y_, z_};

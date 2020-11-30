@@ -346,11 +346,11 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   for (auto* deco : func->decorations()) {
     make_indent();
     out_ << "[[";
-    if (deco->IsWorkgroup()) {
+    if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
       uint32_t x = 0;
       uint32_t y = 0;
       uint32_t z = 0;
-      std::tie(x, y, z) = deco->AsWorkgroup()->values();
+      std::tie(x, y, z) = workgroup->values();
       out_ << "workgroup_size(" << std::to_string(x) << ", "
            << std::to_string(y) << ", " << std::to_string(z) << ")";
     }

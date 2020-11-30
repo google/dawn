@@ -32,12 +32,12 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup) {
   ASSERT_FALSE(p->has_error());
   auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
-  ASSERT_TRUE(func_deco->IsWorkgroup());
+  ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->AsWorkgroup()->values();
+  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
   EXPECT_EQ(x, 4u);
   EXPECT_EQ(y, 1u);
   EXPECT_EQ(z, 1u);
@@ -52,12 +52,12 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_2Param) {
   ASSERT_FALSE(p->has_error());
   auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr) << p->error();
-  ASSERT_TRUE(func_deco->IsWorkgroup());
+  ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->AsWorkgroup()->values();
+  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
   EXPECT_EQ(x, 4u);
   EXPECT_EQ(y, 5u);
   EXPECT_EQ(z, 1u);
@@ -72,12 +72,12 @@ TEST_F(ParserImplTest, FunctionDecoration_Workgroup_3Param) {
   ASSERT_FALSE(p->has_error());
   auto* func_deco = deco.value->As<ast::FunctionDecoration>();
   ASSERT_NE(func_deco, nullptr);
-  ASSERT_TRUE(func_deco->IsWorkgroup());
+  ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->AsWorkgroup()->values();
+  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
   EXPECT_EQ(x, 4u);
   EXPECT_EQ(y, 5u);
   EXPECT_EQ(z, 6u);

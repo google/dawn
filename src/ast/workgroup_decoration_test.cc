@@ -60,7 +60,7 @@ TEST_F(WorkgroupDecorationTest, Creation_3param) {
 TEST_F(WorkgroupDecorationTest, Is) {
   WorkgroupDecoration wd{2, 4, 6, Source{}};
   Decoration* d = &wd;
-  EXPECT_TRUE(wd.IsWorkgroup());
+  EXPECT_TRUE(d->Is<WorkgroupDecoration>());
   EXPECT_FALSE(d->Is<StageDecoration>());
 }
 

@@ -55,8 +55,8 @@ Function::~Function() = default;
 
 std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
   for (auto* deco : decorations_) {
-    if (deco->IsWorkgroup()) {
-      return deco->AsWorkgroup()->values();
+    if (auto* workgroup = deco->As<WorkgroupDecoration>()) {
+      return workgroup->values();
     }
   }
   return {1, 1, 1};

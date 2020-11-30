@@ -38,12 +38,12 @@ TEST_F(ParserImplTest, FunctionDecorationList_Parses) {
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  ASSERT_TRUE(deco_0->IsWorkgroup());
-  std::tie(x, y, z) = deco_0->AsWorkgroup()->values();
+  ASSERT_TRUE(deco_0->Is<ast::WorkgroupDecoration>());
+  std::tie(x, y, z) = deco_0->As<ast::WorkgroupDecoration>()->values();
   EXPECT_EQ(x, 2u);
 
-  ASSERT_TRUE(deco_1->IsWorkgroup());
-  std::tie(x, y, z) = deco_1->AsWorkgroup()->values();
+  ASSERT_TRUE(deco_1->Is<ast::WorkgroupDecoration>());
+  std::tie(x, y, z) = deco_1->As<ast::WorkgroupDecoration>()->values();
   EXPECT_EQ(x, 3u);
   EXPECT_EQ(y, 4u);
   EXPECT_EQ(z, 5u);
