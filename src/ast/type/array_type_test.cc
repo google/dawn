@@ -70,7 +70,7 @@ TEST_F(ArrayTypeTest, Is) {
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->Is<U32Type>());
   EXPECT_FALSE(ty->IsVector());
 }
 

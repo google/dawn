@@ -18,6 +18,7 @@
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -113,7 +114,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
   ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->AsSampled()->type()->IsU32());
+  ASSERT_TRUE(t->As<ast::type::TextureType>()
+                  ->AsSampled()
+                  ->type()
+                  ->Is<ast::type::U32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k3d);
 }
@@ -202,7 +206,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
   ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->AsSampled()->type()->IsU32());
+  ASSERT_TRUE(t->As<ast::type::TextureType>()
+                  ->AsSampled()
+                  ->type()
+                  ->Is<ast::type::U32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k3d);
 }

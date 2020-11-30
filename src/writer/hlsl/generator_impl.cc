@@ -49,6 +49,7 @@
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
@@ -268,7 +269,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 std::ostream& out,
                                 ast::BitcastExpression* expr) {
   if (!expr->type()->Is<ast::type::F32Type>() &&
-      !expr->type()->Is<ast::type::I32Type>() && !expr->type()->IsU32()) {
+      !expr->type()->Is<ast::type::I32Type>() &&
+      !expr->type()->Is<ast::type::U32Type>()) {
     error_ = "Unable to do bitcast to type " + expr->type()->type_name();
     return false;
   }
@@ -1552,7 +1554,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
     out << "0.0f";
   } else if (type->Is<ast::type::I32Type>()) {
     out << "0";
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     out << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(out, type->AsVector()->type());
@@ -2123,7 +2125,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     }
 
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     out << "uint";
   } else if (type->IsVector()) {
     auto* vec = type->AsVector();
@@ -2133,7 +2135,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     } else if (vec->type()->Is<ast::type::I32Type>() && size >= 1 &&
                size <= 4) {
       out << "int" << size;
-    } else if (vec->type()->IsU32() && size >= 1 && size <= 4) {
+    } else if (vec->type()->Is<ast::type::U32Type>() && size >= 1 &&
+               size <= 4) {
       out << "uint" << size;
     } else {
       out << "vector<";

@@ -201,7 +201,7 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     return 0;
   }
   if (type->Is<ast::type::F32Type>() || type->Is<ast::type::I32Type>() ||
-      type->IsU32()) {
+      type->Is<ast::type::U32Type>()) {
     return 4;
   }
   if (type->Is<ast::type::MatrixType>()) {
@@ -796,7 +796,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kAbs:
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fabs";
-      } else if (ident->result_type()->IsU32() ||
+      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
                  ident->result_type()->Is<ast::type::I32Type>()) {
         out += "abs";
       }
@@ -804,7 +804,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kMax:
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fmax";
-      } else if (ident->result_type()->IsU32() ||
+      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
                  ident->result_type()->Is<ast::type::I32Type>()) {
         out += "max";
       }
@@ -812,7 +812,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kMin:
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fmin";
-      } else if (ident->result_type()->IsU32() ||
+      } else if (ident->result_type()->Is<ast::type::U32Type>() ||
                  ident->result_type()->Is<ast::type::I32Type>()) {
         out += "min";
       }
@@ -935,7 +935,7 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     out_ << "0.0f";
   } else if (type->Is<ast::type::I32Type>()) {
     out_ << "0";
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     out_ << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(type->AsVector()->type());
@@ -1909,7 +1909,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     }
     out_ << ">";
 
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     out_ << "uint";
   } else if (type->IsVector()) {
     auto* vec = type->AsVector();

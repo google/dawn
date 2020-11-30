@@ -979,7 +979,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
                   ast_type, static_cast<int32_t>(literal_value)));
-        } else if (ast_type->IsU32()) {
+        } else if (ast_type->Is<ast::type::U32Type>()) {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
                   ast_type, static_cast<uint32_t>(literal_value)));
@@ -1263,7 +1263,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // So canonicalization should map that way too.
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
-  if (ast_type->IsU32()) {
+  if (ast_type->Is<ast::type::U32Type>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 create<ast::UintLiteral>(ast_type, spirv_const->GetU32()))};
@@ -1339,7 +1339,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::BoolLiteral>(type, false));
   }
-  if (type->IsU32()) {
+  if (type->Is<ast::type::U32Type>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::UintLiteral>(type, 0u));
   }
@@ -1446,7 +1446,7 @@ ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
     Fail() << "no type provided";
   }
   auto* i32 = ast_module_.create<ast::type::I32Type>();
-  if (other->Is<ast::type::F32Type>() || other->IsU32() ||
+  if (other->Is<ast::type::F32Type>() || other->Is<ast::type::U32Type>() ||
       other->Is<ast::type::I32Type>()) {
     return i32;
   }
@@ -1465,7 +1465,7 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
     return nullptr;
   }
   auto* u32 = ast_module_.create<ast::type::U32Type>();
-  if (other->Is<ast::type::F32Type>() || other->IsU32() ||
+  if (other->Is<ast::type::F32Type>() || other->Is<ast::type::U32Type>() ||
       other->Is<ast::type::I32Type>()) {
     return u32;
   }

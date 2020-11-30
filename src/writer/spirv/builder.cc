@@ -746,7 +746,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       if (type->Is<ast::type::F32Type>()) {
         ast::FloatLiteral l(type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type->IsU32()) {
+      } else if (type->Is<ast::type::U32Type>()) {
         ast::UintLiteral l(type, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<ast::type::I32Type>()) {
@@ -1403,7 +1403,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
        to_type->Is<ast::type::F32Type>()) ||
       (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
     op = spv::Op::OpConvertSToF;
-  } else if ((from_type->IsU32() && to_type->Is<ast::type::F32Type>()) ||
+  } else if ((from_type->Is<ast::type::U32Type>() &&
+              to_type->Is<ast::type::F32Type>()) ||
              (from_type->is_unsigned_integer_vector() &&
               to_type->is_float_vector())) {
     op = spv::Op::OpConvertUToF;
@@ -1412,21 +1413,25 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
              (from_type->is_float_vector() &&
               to_type->is_signed_integer_vector())) {
     op = spv::Op::OpConvertFToS;
-  } else if ((from_type->Is<ast::type::F32Type>() && to_type->IsU32()) ||
+  } else if ((from_type->Is<ast::type::F32Type>() &&
+              to_type->Is<ast::type::U32Type>()) ||
              (from_type->is_float_vector() &&
               to_type->is_unsigned_integer_vector())) {
     op = spv::Op::OpConvertFToU;
   } else if ((from_type->Is<ast::type::BoolType>() &&
               to_type->Is<ast::type::BoolType>()) ||
-             (from_type->IsU32() && to_type->IsU32()) ||
+             (from_type->Is<ast::type::U32Type>() &&
+              to_type->Is<ast::type::U32Type>()) ||
              (from_type->Is<ast::type::I32Type>() &&
               to_type->Is<ast::type::I32Type>()) ||
              (from_type->Is<ast::type::F32Type>() &&
               to_type->Is<ast::type::F32Type>()) ||
              (from_type->IsVector() && (from_type == to_type))) {
     return val_id;
-  } else if ((from_type->Is<ast::type::I32Type>() && to_type->IsU32()) ||
-             (from_type->IsU32() && to_type->Is<ast::type::I32Type>()) ||
+  } else if ((from_type->Is<ast::type::I32Type>() &&
+              to_type->Is<ast::type::U32Type>()) ||
+             (from_type->Is<ast::type::U32Type>() &&
+              to_type->Is<ast::type::I32Type>()) ||
              (from_type->is_signed_integer_vector() &&
               to_type->is_unsigned_integer_vector()) ||
              (from_type->is_unsigned_integer_vector() &&
@@ -2447,7 +2452,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
                             ast::AccessControl::kReadWrite, result)) {
       return 0;
     }
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
   } else if (type->IsVector()) {
     if (!GenerateVectorType(type->AsVector(), result)) {

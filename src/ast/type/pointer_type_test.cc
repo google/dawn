@@ -23,6 +23,7 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
+#include "src/ast/type/u32_type.h"
 
 namespace tint {
 namespace ast {
@@ -53,7 +54,7 @@ TEST_F(PointerTypeTest, Is) {
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->Is<U32Type>());
   EXPECT_FALSE(ty->IsVector());
 }
 

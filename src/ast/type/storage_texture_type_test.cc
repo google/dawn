@@ -26,6 +26,7 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -50,7 +51,7 @@ TEST_F(StorageTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_TRUE(ty->Is<TextureType>());
-  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->Is<U32Type>());
   EXPECT_FALSE(ty->IsVector());
 }
 
@@ -111,7 +112,8 @@ TEST_F(StorageTextureTypeTest, U32Type) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<TextureType>());
   ASSERT_TRUE(s->As<TextureType>()->IsStorage());
-  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->IsU32());
+  EXPECT_TRUE(
+      s->As<TextureType>()->AsStorage()->type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, I32Type) {

@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, uint_type);
-  ASSERT_TRUE(t->IsU32());
+  ASSERT_TRUE(t->Is<ast::type::U32Type>());
 }
 
 struct VecData {
@@ -528,7 +528,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
 
   auto* a = t->As<ast::type::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->IsU32());
+  ASSERT_TRUE(a->type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {

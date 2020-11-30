@@ -50,7 +50,7 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   auto* t2 = tm.Get(std::make_unique<ast::type::U32Type>());
   ASSERT_NE(t2, nullptr);
   EXPECT_NE(t, t2);
-  EXPECT_TRUE(t2->IsU32());
+  EXPECT_TRUE(t2->Is<ast::type::U32Type>());
 }
 
 TEST_F(TypeManagerTest, ResetClearsPreviousData) {

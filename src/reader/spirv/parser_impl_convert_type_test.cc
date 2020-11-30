@@ -26,6 +26,7 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -117,7 +118,7 @@ TEST_F(SpvParserTest, ConvertType_U32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(3);
-  EXPECT_TRUE(type->IsU32());
+  EXPECT_TRUE(type->Is<ast::type::U32Type>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -225,17 +226,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverU32) {
 
   auto* v2xu32 = p->ConvertType(20);
   EXPECT_TRUE(v2xu32->IsVector());
-  EXPECT_TRUE(v2xu32->AsVector()->type()->IsU32());
+  EXPECT_TRUE(v2xu32->AsVector()->type()->Is<ast::type::U32Type>());
   EXPECT_EQ(v2xu32->AsVector()->size(), 2u);
 
   auto* v3xu32 = p->ConvertType(30);
   EXPECT_TRUE(v3xu32->IsVector());
-  EXPECT_TRUE(v3xu32->AsVector()->type()->IsU32());
+  EXPECT_TRUE(v3xu32->AsVector()->type()->Is<ast::type::U32Type>());
   EXPECT_EQ(v3xu32->AsVector()->size(), 3u);
 
   auto* v4xu32 = p->ConvertType(40);
   EXPECT_TRUE(v4xu32->IsVector());
-  EXPECT_TRUE(v4xu32->AsVector()->type()->IsU32());
+  EXPECT_TRUE(v4xu32->AsVector()->type()->Is<ast::type::U32Type>());
   EXPECT_EQ(v4xu32->AsVector()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
@@ -359,7 +360,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
   EXPECT_FALSE(arr_type->has_array_stride());
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
-  EXPECT_TRUE(elem_type->IsU32());
+  EXPECT_TRUE(elem_type->Is<ast::type::U32Type>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -441,7 +442,7 @@ TEST_F(SpvParserTest, ConvertType_Array) {
   EXPECT_FALSE(arr_type->has_array_stride());
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
-  EXPECT_TRUE(elem_type->IsU32());
+  EXPECT_TRUE(elem_type->Is<ast::type::U32Type>());
   EXPECT_TRUE(p->error().empty());
 }
 

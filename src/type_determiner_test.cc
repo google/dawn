@@ -1756,7 +1756,7 @@ class Intrinsic_TextureOperation
     if (dim == ast::type::TextureDimension::k1d) {
       if (type->Is<ast::type::I32Type>()) {
         return std::make_unique<ast::type::I32Type>();
-      } else if (type->IsU32()) {
+      } else if (type->Is<ast::type::U32Type>()) {
         return std::make_unique<ast::type::U32Type>();
       } else {
         return std::make_unique<ast::type::F32Type>();
@@ -1823,7 +1823,8 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
     EXPECT_TRUE(
         expr.result_type()->AsVector()->type()->Is<ast::type::I32Type>());
   } else {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+    EXPECT_TRUE(
+        expr.result_type()->AsVector()->type()->Is<ast::type::U32Type>());
   }
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
 }
@@ -1895,7 +1896,8 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
     EXPECT_TRUE(
         expr.result_type()->AsVector()->type()->Is<ast::type::I32Type>());
   } else {
-    EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsU32());
+    EXPECT_TRUE(
+        expr.result_type()->AsVector()->type()->Is<ast::type::U32Type>());
   }
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
 }
@@ -2479,7 +2481,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsU32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
@@ -3563,7 +3565,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsU32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
@@ -3922,7 +3924,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
 
   EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->IsU32());
+  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {

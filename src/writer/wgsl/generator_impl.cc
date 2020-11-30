@@ -64,6 +64,7 @@
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
@@ -544,7 +545,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << ">";
     }
 
-  } else if (type->IsU32()) {
+  } else if (type->Is<ast::type::U32Type>()) {
     out_ << "u32";
   } else if (type->IsVector()) {
     auto* vec = type->AsVector();

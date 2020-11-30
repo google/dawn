@@ -36,6 +36,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 
@@ -396,7 +397,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 
     if (base_type->Is<ast::type::F32Type>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->IsU32()) {
+    } else if (base_type->Is<ast::type::U32Type>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
     } else if (base_type->Is<ast::type::I32Type>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kSInt;

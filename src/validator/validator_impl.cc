@@ -316,7 +316,8 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   auto* cond_type = s->condition()->result_type()->UnwrapAll();
-  if (!(cond_type->Is<ast::type::I32Type>() || cond_type->IsU32())) {
+  if (!(cond_type->Is<ast::type::I32Type>() ||
+        cond_type->Is<ast::type::U32Type>())) {
     add_error(s->condition()->source(), "v-0025",
               "switch statement selector expression must be of a "
               "scalar integer type");
@@ -342,12 +343,13 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
         return false;
       }
 
-      auto v = static_cast<int32_t>(selector->type()->IsU32()
+      auto v = static_cast<int32_t>(selector->type()->Is<ast::type::U32Type>()
                                         ? selector->AsUint()->value()
                                         : selector->AsSint()->value());
       if (selector_set.count(v)) {
-        auto v_str = selector->type()->IsU32() ? selector->AsUint()->to_str()
-                                               : selector->AsSint()->to_str();
+        auto v_str = selector->type()->Is<ast::type::U32Type>()
+                         ? selector->AsUint()->to_str()
+                         : selector->AsSint()->to_str();
         add_error(case_stmt->source(), "v-0027",
                   "a literal value must not appear more than once in "
                   "the case selectors for a switch statement: '" +

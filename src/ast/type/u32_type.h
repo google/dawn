@@ -32,9 +32,6 @@ class U32Type : public Castable<U32Type, Type> {
   U32Type(U32Type&&);
   ~U32Type() override;
 
-  /// @returns true if the type is a u32 type
-  bool IsU32() const override;
-
   /// @returns the name for th type
   std::string type_name() const override;
 

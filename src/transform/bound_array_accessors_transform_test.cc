@@ -141,7 +141,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -152,7 +152,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
@@ -204,7 +204,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
 
   auto* sub = tc->values()[0];
@@ -218,7 +218,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(sub_idx->params()[0]->IsConstructor());
   ASSERT_TRUE(sub_idx->params()[0]->AsConstructor()->IsTypeConstructor());
   tc = sub_idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], b_access_idx);
 
@@ -235,7 +235,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
@@ -274,7 +274,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
@@ -325,7 +325,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -336,7 +336,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
@@ -414,7 +414,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
@@ -453,7 +453,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
@@ -503,7 +503,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -514,7 +514,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
@@ -592,7 +592,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
@@ -637,7 +637,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -647,7 +647,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
@@ -704,7 +704,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -715,7 +715,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -725,7 +725,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
@@ -790,7 +790,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(idx->params()[0]->IsConstructor());
   ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
   auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
-  EXPECT_TRUE(tc->type()->IsU32());
+  EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
@@ -801,10 +801,10 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
@@ -957,7 +957,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -967,7 +967,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
@@ -1012,7 +1012,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -1022,7 +1022,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsU32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32Type>());
 }
 
 // TODO(dsinclair): Implement when constant_id exists

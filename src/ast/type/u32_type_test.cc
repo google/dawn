@@ -47,7 +47,7 @@ TEST_F(U32TypeTest, Is) {
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_FALSE(ty->Is<TextureType>());
-  EXPECT_TRUE(ty->IsU32());
+  EXPECT_TRUE(ty->Is<U32Type>());
   EXPECT_FALSE(ty->IsVector());
 }
 
