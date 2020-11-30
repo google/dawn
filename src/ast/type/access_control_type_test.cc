@@ -47,7 +47,7 @@ TEST_F(AccessControlTypeTest, Is) {
   I32Type i32;
 
   AccessControlType at{AccessControl::kReadOnly, &i32};
-  EXPECT_TRUE(at.IsAccessControl());
+  EXPECT_TRUE(at.Is<AccessControlType>());
   EXPECT_FALSE(at.IsAlias());
   EXPECT_FALSE(at.IsArray());
   EXPECT_FALSE(at.IsBool());

@@ -37,7 +37,7 @@ namespace type {
 
 Type::Type() = default;
 
-Type::  Type(Type&&) = default;
+Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 
@@ -52,9 +52,9 @@ Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
     if (where->IsAlias()) {
-          where = where->AsAlias()->type();
-    } else if (where->IsAccessControl()) {
-          where = where->AsAccessControl()->type();
+      where = where->AsAlias()->type();
+    } else if (where->Is<AccessControlType>()) {
+      where = where->As<AccessControlType>()->type();
     } else {
       break;
     }
@@ -64,10 +64,6 @@ Type* Type::UnwrapIfNeeded() {
 
 Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
-}
-
-bool Type::IsAccessControl() const {
-  return false;
 }
 
 bool Type::IsAlias() const {
@@ -174,11 +170,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const AccessControlType* Type::AsAccessControl() const {
-  assert(IsAccessControl());
-  return static_cast<const AccessControlType*>(this);
-}
-
 const AliasType* Type::AsAlias() const {
   assert(IsAlias());
   return static_cast<const AliasType*>(this);
@@ -242,11 +233,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-AccessControlType* Type::AsAccessControl() {
-  assert(IsAccessControl());
-  return static_cast<AccessControlType*>(this);
 }
 
 AliasType* Type::AsAlias() {

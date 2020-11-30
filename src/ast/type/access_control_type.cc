@@ -23,16 +23,12 @@ namespace type {
 AccessControlType::AccessControlType(AccessControl access, Type* subtype)
     : access_(access), subtype_(subtype) {
   assert(subtype_);
-  assert(!subtype_->IsAccessControl());
+  assert(!subtype_->Is<AccessControlType>());
 }
 
 AccessControlType::AccessControlType(AccessControlType&&) = default;
 
 AccessControlType::~AccessControlType() = default;
-
-bool AccessControlType::IsAccessControl() const {
-  return true;
-}
 
 std::string AccessControlType::type_name() const {
   std::string name = "__access_control_";

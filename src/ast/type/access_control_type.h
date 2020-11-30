@@ -35,9 +35,6 @@ class AccessControlType : public Castable<AccessControlType, Type> {
   AccessControlType(AccessControlType&&);
   ~AccessControlType() override;
 
-  /// @returns true if the type is an access control type
-  bool IsAccessControl() const override;
-
   /// @returns true if the access control is read only
   bool IsReadOnly() const { return access_ == AccessControl::kReadOnly; }
   /// @returns true if the access control is write only

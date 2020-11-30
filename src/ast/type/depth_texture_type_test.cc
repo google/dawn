@@ -16,6 +16,8 @@
 
 #include "src/ast/test_helper.h"
 
+#include "src/ast/type/access_control_type.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -25,19 +27,20 @@ using DepthTextureTypeTest = TestHelper;
 
 TEST_F(DepthTextureTypeTest, Is) {
   DepthTextureType d(TextureDimension::kCube);
-  EXPECT_FALSE(d.IsAccessControl());
-  EXPECT_FALSE(d.IsAlias());
-  EXPECT_FALSE(d.IsArray());
-  EXPECT_FALSE(d.IsBool());
-  EXPECT_FALSE(d.IsF32());
-  EXPECT_FALSE(d.IsI32());
-  EXPECT_FALSE(d.IsMatrix());
-  EXPECT_FALSE(d.IsPointer());
-  EXPECT_FALSE(d.IsSampler());
-  EXPECT_FALSE(d.IsStruct());
-  EXPECT_TRUE(d.IsTexture());
-  EXPECT_FALSE(d.IsU32());
-  EXPECT_FALSE(d.IsVector());
+  Type* ty = &d;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_TRUE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(DepthTextureTypeTest, IsTextureType) {

@@ -15,6 +15,7 @@
 #include "src/ast/type/pointer_type.h"
 
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
@@ -34,19 +35,20 @@ TEST_F(PointerTypeTest, Creation) {
 TEST_F(PointerTypeTest, Is) {
   I32Type i32;
   PointerType p{&i32, StorageClass::kFunction};
-  EXPECT_FALSE(p.IsAccessControl());
-  EXPECT_FALSE(p.IsAlias());
-  EXPECT_FALSE(p.IsArray());
-  EXPECT_FALSE(p.IsBool());
-  EXPECT_FALSE(p.IsF32());
-  EXPECT_FALSE(p.IsI32());
-  EXPECT_FALSE(p.IsMatrix());
-  EXPECT_TRUE(p.IsPointer());
-  EXPECT_FALSE(p.IsSampler());
-  EXPECT_FALSE(p.IsStruct());
-  EXPECT_FALSE(p.IsTexture());
-  EXPECT_FALSE(p.IsU32());
-  EXPECT_FALSE(p.IsVector());
+  Type* ty = &p;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_TRUE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(PointerTypeTest, TypeName) {

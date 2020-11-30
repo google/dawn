@@ -2399,8 +2399,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   auto result = result_op();
   auto id = result.to_i();
 
-  if (type->IsAccessControl()) {
-    auto* ac = type->AsAccessControl();
+  if (type->Is<ast::type::AccessControlType>()) {
+    auto* ac = type->As<ast::type::AccessControlType>();
     auto* subtype = ac->type()->UnwrapIfNeeded();
     if (!subtype->IsStruct()) {
       error_ = "Access control attached to non-struct type.";

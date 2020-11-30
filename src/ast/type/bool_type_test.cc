@@ -15,6 +15,7 @@
 #include "src/ast/type/bool_type.h"
 
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 
 namespace tint {
 namespace ast {
@@ -25,19 +26,20 @@ using BoolTypeTest = TestHelper;
 
 TEST_F(BoolTypeTest, Is) {
   BoolType b;
-  EXPECT_FALSE(b.IsAccessControl());
-  EXPECT_FALSE(b.IsAlias());
-  EXPECT_FALSE(b.IsArray());
-  EXPECT_TRUE(b.IsBool());
-  EXPECT_FALSE(b.IsF32());
-  EXPECT_FALSE(b.IsI32());
-  EXPECT_FALSE(b.IsMatrix());
-  EXPECT_FALSE(b.IsPointer());
-  EXPECT_FALSE(b.IsSampler());
-  EXPECT_FALSE(b.IsStruct());
-  EXPECT_FALSE(b.IsTexture());
-  EXPECT_FALSE(b.IsU32());
-  EXPECT_FALSE(b.IsVector());
+  Type* ty = &b;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_TRUE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(BoolTypeTest, TypeName) {

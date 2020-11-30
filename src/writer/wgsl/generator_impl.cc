@@ -394,8 +394,8 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
-  if (type->IsAccessControl()) {
-    auto* ac = type->AsAccessControl();
+  if (type->Is<ast::type::AccessControlType>()) {
+    auto* ac = type->As<ast::type::AccessControlType>();
 
     out_ << "[[access(";
     if (ac->IsReadOnly()) {

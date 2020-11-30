@@ -15,6 +15,7 @@
 #include "src/ast/type/sampled_texture_type.h"
 
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/f32_type.h"
 
 namespace tint {
@@ -27,19 +28,20 @@ using SampledTextureTypeTest = TestHelper;
 TEST_F(SampledTextureTypeTest, Is) {
   F32Type f32;
   SampledTextureType s(TextureDimension::kCube, &f32);
-  EXPECT_FALSE(s.IsAccessControl());
-  EXPECT_FALSE(s.IsAlias());
-  EXPECT_FALSE(s.IsArray());
-  EXPECT_FALSE(s.IsBool());
-  EXPECT_FALSE(s.IsF32());
-  EXPECT_FALSE(s.IsI32());
-  EXPECT_FALSE(s.IsMatrix());
-  EXPECT_FALSE(s.IsPointer());
-  EXPECT_FALSE(s.IsSampler());
-  EXPECT_FALSE(s.IsStruct());
-  EXPECT_TRUE(s.IsTexture());
-  EXPECT_FALSE(s.IsU32());
-  EXPECT_FALSE(s.IsVector());
+  Type* ty = &s;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_TRUE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(SampledTextureTypeTest, IsTextureType) {

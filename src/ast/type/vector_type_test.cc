@@ -15,6 +15,7 @@
 #include "src/ast/type/vector_type.h"
 
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
@@ -34,19 +35,20 @@ TEST_F(VectorTypeTest, Creation) {
 TEST_F(VectorTypeTest, Is) {
   I32Type i32;
   VectorType v{&i32, 4};
-  EXPECT_FALSE(v.IsAccessControl());
-  EXPECT_FALSE(v.IsAlias());
-  EXPECT_FALSE(v.IsArray());
-  EXPECT_FALSE(v.IsBool());
-  EXPECT_FALSE(v.IsF32());
-  EXPECT_FALSE(v.IsI32());
-  EXPECT_FALSE(v.IsMatrix());
-  EXPECT_FALSE(v.IsPointer());
-  EXPECT_FALSE(v.IsSampler());
-  EXPECT_FALSE(v.IsStruct());
-  EXPECT_FALSE(v.IsTexture());
-  EXPECT_FALSE(v.IsU32());
-  EXPECT_TRUE(v.IsVector());
+  Type* ty = &v;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_TRUE(ty->IsVector());
 }
 
 TEST_F(VectorTypeTest, TypeName) {

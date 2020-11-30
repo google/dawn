@@ -21,6 +21,7 @@
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
@@ -43,19 +44,20 @@ TEST_F(StructTypeTest, Creation) {
 TEST_F(StructTypeTest, Is) {
   auto* impl = create<Struct>();
   StructType s{"S", impl};
-  EXPECT_FALSE(s.IsAccessControl());
-  EXPECT_FALSE(s.IsAlias());
-  EXPECT_FALSE(s.IsArray());
-  EXPECT_FALSE(s.IsBool());
-  EXPECT_FALSE(s.IsF32());
-  EXPECT_FALSE(s.IsI32());
-  EXPECT_FALSE(s.IsMatrix());
-  EXPECT_FALSE(s.IsPointer());
-  EXPECT_FALSE(s.IsSampler());
-  EXPECT_TRUE(s.IsStruct());
-  EXPECT_FALSE(s.IsTexture());
-  EXPECT_FALSE(s.IsU32());
-  EXPECT_FALSE(s.IsVector());
+  Type* ty = &s;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_TRUE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(StructTypeTest, TypeName) {

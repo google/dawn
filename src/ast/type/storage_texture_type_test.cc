@@ -18,6 +18,7 @@
 
 #include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -30,19 +31,20 @@ using StorageTextureTypeTest = TestHelper;
 TEST_F(StorageTextureTypeTest, Is) {
   StorageTextureType s(TextureDimension::k2dArray, AccessControl::kReadOnly,
                        ImageFormat::kRgba32Float);
-  EXPECT_FALSE(s.IsAccessControl());
-  EXPECT_FALSE(s.IsAlias());
-  EXPECT_FALSE(s.IsArray());
-  EXPECT_FALSE(s.IsBool());
-  EXPECT_FALSE(s.IsF32());
-  EXPECT_FALSE(s.IsI32());
-  EXPECT_FALSE(s.IsMatrix());
-  EXPECT_FALSE(s.IsPointer());
-  EXPECT_FALSE(s.IsSampler());
-  EXPECT_FALSE(s.IsStruct());
-  EXPECT_TRUE(s.IsTexture());
-  EXPECT_FALSE(s.IsU32());
-  EXPECT_FALSE(s.IsVector());
+  Type* ty = &s;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_TRUE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(StorageTextureTypeTest, IsTextureType) {

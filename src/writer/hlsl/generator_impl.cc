@@ -1328,11 +1328,11 @@ bool GeneratorImpl::EmitEntryPointData(
     }
     emitted_globals.insert(var->name());
 
-    if (!var->type()->IsAccessControl()) {
+    if (!var->type()->Is<ast::type::AccessControlType>()) {
       error_ = "access control type required for storage buffer";
       return false;
     }
-    auto* ac = var->type()->AsAccessControl();
+    auto* ac = var->type()->As<ast::type::AccessControlType>();
 
     if (ac->IsReadWrite()) {
       out << "RW";

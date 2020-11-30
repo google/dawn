@@ -48,19 +48,20 @@ TEST_F(AliasTypeTest, Is) {
   I32Type i32;
 
   AliasType at{"a", &i32};
-  EXPECT_FALSE(at.IsAccessControl());
-  EXPECT_TRUE(at.IsAlias());
-  EXPECT_FALSE(at.IsArray());
-  EXPECT_FALSE(at.IsBool());
-  EXPECT_FALSE(at.IsF32());
-  EXPECT_FALSE(at.IsI32());
-  EXPECT_FALSE(at.IsMatrix());
-  EXPECT_FALSE(at.IsPointer());
-  EXPECT_FALSE(at.IsSampler());
-  EXPECT_FALSE(at.IsStruct());
-  EXPECT_FALSE(at.IsTexture());
-  EXPECT_FALSE(at.IsU32());
-  EXPECT_FALSE(at.IsVector());
+  Type* ty = &at;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_TRUE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(AliasTypeTest, TypeName) {

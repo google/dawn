@@ -181,7 +181,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ruv;
-    if (!var->type()->IsAccessControl()) {
+    if (!var->type()->Is<ast::type::AccessControlType>()) {
       continue;
     }
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
@@ -303,11 +303,11 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rsv;
-    if (!var->type()->IsAccessControl()) {
+    if (!var->type()->Is<ast::type::AccessControlType>()) {
       continue;
     }
 
-    auto* ac_type = var->type()->AsAccessControl();
+    auto* ac_type = var->type()->As<ast::type::AccessControlType>();
     if (read_only != ac_type->IsReadOnly()) {
       continue;
     }

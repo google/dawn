@@ -1282,11 +1282,11 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    if (!var->type()->IsAccessControl()) {
+    if (!var->type()->Is<ast::type::AccessControlType>()) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
     }
-    auto* ac = var->type()->AsAccessControl();
+    auto* ac = var->type()->As<ast::type::AccessControlType>();
     if (ac->IsReadOnly()) {
       out_ << "const ";
     }
@@ -1443,11 +1443,11 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    if (!var->type()->IsAccessControl()) {
+    if (!var->type()->Is<ast::type::AccessControlType>()) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
     }
-    auto* ac = var->type()->AsAccessControl();
+    auto* ac = var->type()->As<ast::type::AccessControlType>();
     if (ac->IsReadOnly()) {
       out_ << "const ";
     }

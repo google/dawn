@@ -15,6 +15,7 @@
 #include "src/ast/type/matrix_type.h"
 
 #include "src/ast/test_helper.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/i32_type.h"
 
 namespace tint {
@@ -35,19 +36,20 @@ TEST_F(MatrixTypeTest, Creation) {
 TEST_F(MatrixTypeTest, Is) {
   I32Type i32;
   MatrixType m{&i32, 2, 3};
-  EXPECT_FALSE(m.IsAccessControl());
-  EXPECT_FALSE(m.IsAlias());
-  EXPECT_FALSE(m.IsArray());
-  EXPECT_FALSE(m.IsBool());
-  EXPECT_FALSE(m.IsF32());
-  EXPECT_FALSE(m.IsI32());
-  EXPECT_TRUE(m.IsMatrix());
-  EXPECT_FALSE(m.IsPointer());
-  EXPECT_FALSE(m.IsSampler());
-  EXPECT_FALSE(m.IsStruct());
-  EXPECT_FALSE(m.IsTexture());
-  EXPECT_FALSE(m.IsU32());
-  EXPECT_FALSE(m.IsVector());
+  Type* ty = &m;
+  EXPECT_FALSE(ty->Is<AccessControlType>());
+  EXPECT_FALSE(ty->IsAlias());
+  EXPECT_FALSE(ty->IsArray());
+  EXPECT_FALSE(ty->IsBool());
+  EXPECT_FALSE(ty->IsF32());
+  EXPECT_FALSE(ty->IsI32());
+  EXPECT_TRUE(ty->IsMatrix());
+  EXPECT_FALSE(ty->IsPointer());
+  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->IsStruct());
+  EXPECT_FALSE(ty->IsTexture());
+  EXPECT_FALSE(ty->IsU32());
+  EXPECT_FALSE(ty->IsVector());
 }
 
 TEST_F(MatrixTypeTest, TypeName) {

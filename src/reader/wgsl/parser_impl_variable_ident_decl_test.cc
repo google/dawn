@@ -103,8 +103,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->IsAccessControl());
-  EXPECT_TRUE(decl->type->AsAccessControl()->IsReadOnly());
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControlType>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControlType>()->IsReadOnly());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
@@ -129,8 +129,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->IsAccessControl());
-  EXPECT_TRUE(decl->type->AsAccessControl()->IsReadWrite());
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControlType>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControlType>()->IsReadWrite());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
