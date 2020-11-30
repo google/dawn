@@ -166,7 +166,7 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         return false;
       }
 
-      if (!func->return_type()->IsVoid()) {
+      if (!func->return_type()->Is<ast::type::VoidType>()) {
         add_error(
             func->source(), "v-0024",
             "Entry point function must return void: '" + func->name() + "'");
@@ -205,7 +205,7 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   }
   variable_stack_.pop_scope();
 
-  if (!current_function_->return_type()->IsVoid()) {
+  if (!current_function_->return_type()->Is<ast::type::VoidType>()) {
     if (!func->get_last_statement() ||
         !func->get_last_statement()->IsReturn()) {
       add_error(func->source(), "v-0002",

@@ -24,10 +24,6 @@ VoidType::VoidType(VoidType&&) = default;
 
 VoidType::~VoidType() = default;
 
-bool VoidType::IsVoid() const {
-  return true;
-}
-
 std::string VoidType::type_name() const {
   return "__void";
 }

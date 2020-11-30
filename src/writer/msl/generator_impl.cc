@@ -1918,7 +1918,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       return false;
     }
     out_ << vec->size();
-  } else if (type->IsVoid()) {
+  } else if (type->Is<ast::type::VoidType>()) {
     out_ << "void";
   } else {
     error_ = "unknown type in EmitType: " + type->type_name();

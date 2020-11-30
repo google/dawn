@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/function.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type/void_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -35,7 +36,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
   ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->name(), "a");
   EXPECT_EQ(f->params()[1]->name(), "b");
-  EXPECT_TRUE(f->return_type()->IsVoid());
+  EXPECT_TRUE(f->return_type()->Is<ast::type::VoidType>());
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {

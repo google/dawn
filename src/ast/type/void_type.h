@@ -32,9 +32,6 @@ class VoidType : public Castable<VoidType, Type> {
   VoidType(VoidType&&);
   ~VoidType() override;
 
-  /// @returns true if the type is a void type
-  bool IsVoid() const override;
-
   /// @returns the name for this type
   std::string type_name() const override;
 };

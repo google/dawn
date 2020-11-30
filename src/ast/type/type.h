@@ -23,8 +23,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class VoidType;
-
 /// Supported memory layouts for calculating sizes
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
@@ -34,9 +32,6 @@ class Type : public Castable<Type> {
   /// Move constructor
   Type(Type&&);
   ~Type() override;
-
-  /// @returns true if the type is a void type
-  virtual bool IsVoid() const;
 
   /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;
@@ -91,12 +86,6 @@ class Type : public Castable<Type> {
   bool is_signed_scalar_or_vector();
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector();
-
-  /// @returns the type as a void type
-  const VoidType* AsVoid() const;
-
-  /// @returns the type as a void type
-  VoidType* AsVoid();
 
  protected:
   Type();

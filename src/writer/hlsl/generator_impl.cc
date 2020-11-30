@@ -51,6 +51,7 @@
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -2150,7 +2151,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
       out << ", " << size << ">";
     }
-  } else if (type->IsVoid()) {
+  } else if (type->Is<ast::type::VoidType>()) {
     out << "void";
   } else {
     error_ = "unknown type in EmitType";

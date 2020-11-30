@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsVoid() const {
-  return false;
-}
-
 uint64_t Type::MinBufferBindingSize(MemoryLayout) const {
   return 0;
 }
@@ -122,16 +118,6 @@ bool Type::is_signed_scalar_or_vector() {
 
 bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
-}
-
-const VoidType* Type::AsVoid() const {
-  assert(IsVoid());
-  return static_cast<const VoidType*>(this);
-}
-
-VoidType* Type::AsVoid() {
-  assert(IsVoid());
-  return static_cast<VoidType*>(this);
 }
 
 }  // namespace type

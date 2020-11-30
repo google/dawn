@@ -2462,7 +2462,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateVectorType(type->As<ast::type::VectorType>(), result)) {
       return 0;
     }
-  } else if (type->IsVoid()) {
+  } else if (type->Is<ast::type::VoidType>()) {
     push_type(spv::Op::OpTypeVoid, {result});
   } else if (type->Is<ast::type::TextureType>()) {
     if (!GenerateTextureType(type->As<ast::type::TextureType>(), result)) {

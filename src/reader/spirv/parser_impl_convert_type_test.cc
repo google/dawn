@@ -28,6 +28,7 @@
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
@@ -91,7 +92,7 @@ TEST_F(SpvParserTest, ConvertType_Void) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(1);
-  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(type->Is<ast::type::VoidType>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -845,7 +846,7 @@ TEST_F(SpvParserTest, ConvertType_Sampler_PretendVoid) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(1);
-  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(type->Is<ast::type::VoidType>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -858,7 +859,7 @@ TEST_F(SpvParserTest, ConvertType_Image_PretendVoid) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(1);
-  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(type->Is<ast::type::VoidType>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -871,7 +872,7 @@ TEST_F(SpvParserTest, ConvertType_SampledImage_PretendVoid) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(1);
-  EXPECT_TRUE(type->IsVoid());
+  EXPECT_TRUE(type->Is<ast::type::VoidType>());
   EXPECT_TRUE(p->error().empty());
 }
 

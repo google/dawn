@@ -59,6 +59,7 @@
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
@@ -3556,7 +3557,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
                   << inst.PrettyPrint();
   }
 
-  if (result_type->IsVoid()) {
+  if (result_type->Is<ast::type::VoidType>()) {
     return nullptr != AddStatementForInstruction(
                           create<ast::CallStatement>(call_expr), inst);
   }

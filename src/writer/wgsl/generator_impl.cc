@@ -66,6 +66,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
@@ -554,7 +555,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       return false;
     }
     out_ << ">";
-  } else if (type->IsVoid()) {
+  } else if (type->Is<ast::type::VoidType>()) {
     out_ << "void";
   } else {
     error_ = "unknown type in EmitType: " + type->type_name();
