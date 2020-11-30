@@ -56,9 +56,6 @@ class DecoratedVariable : public Castable<DecoratedVariable, Variable> {
   /// |HasConstantIdDecoration| has been called first.
   uint32_t constant_id() const;
 
-  /// @returns true if this is a decorated variable
-  bool IsDecorated() const override;
-
   /// @returns true if the name and path are both present
   bool IsValid() const override;
 

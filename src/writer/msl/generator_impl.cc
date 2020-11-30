@@ -1492,11 +1492,13 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
 bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
   bool in_or_out_struct_has_location =
-      var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
+      var->Is<ast::DecoratedVariable>() &&
+      var->As<ast::DecoratedVariable>()->HasLocationDecoration() &&
       (var->storage_class() == ast::StorageClass::kInput ||
        var->storage_class() == ast::StorageClass::kOutput);
   bool in_struct_has_builtin =
-      var->IsDecorated() && var->AsDecorated()->HasBuiltinDecoration() &&
+      var->Is<ast::DecoratedVariable>() &&
+      var->As<ast::DecoratedVariable>()->HasBuiltinDecoration() &&
       var->storage_class() == ast::StorageClass::kOutput;
   return in_or_out_struct_has_location || in_struct_has_builtin;
 }
@@ -2006,7 +2008,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
   make_indent();
 
   // TODO(dsinclair): Handle variable decorations
-  if (var->IsDecorated()) {
+  if (var->Is<ast::DecoratedVariable>()) {
     error_ = "Variable decorations are not handled yet";
     return false;
   }
@@ -2044,7 +2046,8 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   make_indent();
 
-  if (var->IsDecorated() && !var->AsDecorated()->HasConstantIdDecoration()) {
+  if (var->Is<ast::DecoratedVariable>() &&
+      !var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
     error_ = "Decorated const values not valid";
     return false;
   }
@@ -2061,9 +2064,10 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << var->name();
   }
 
-  if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
-    out_ << " [[function_constant(" << var->AsDecorated()->constant_id()
-         << ")]]";
+  if (var->Is<ast::DecoratedVariable>() &&
+      var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
+    out_ << " [[function_constant("
+         << var->As<ast::DecoratedVariable>()->constant_id() << ")]]";
   } else if (var->constructor() != nullptr) {
     out_ << " = ";
     if (!EmitExpression(var->constructor())) {

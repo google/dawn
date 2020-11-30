@@ -122,11 +122,12 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
 
   // Look for an existing vertex index builtin
   for (auto* v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
+    if (!v->Is<ast::DecoratedVariable>() ||
+        v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto* d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->As<ast::DecoratedVariable>()->decorations()) {
       if (d->Is<ast::BuiltinDecoration>() &&
           d->As<ast::BuiltinDecoration>()->value() ==
               ast::Builtin::kVertexIdx) {
@@ -165,11 +166,12 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
 
   // Look for an existing instance index builtin
   for (auto* v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
+    if (!v->Is<ast::DecoratedVariable>() ||
+        v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto* d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->As<ast::DecoratedVariable>()->decorations()) {
       if (d->Is<ast::BuiltinDecoration>() &&
           d->As<ast::BuiltinDecoration>()->value() ==
               ast::Builtin::kInstanceIdx) {
@@ -195,11 +197,12 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
 
 void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
   for (auto*& v : mod_->global_variables()) {
-    if (!v->IsDecorated() || v->storage_class() != ast::StorageClass::kInput) {
+    if (!v->Is<ast::DecoratedVariable>() ||
+        v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
 
-    for (auto* d : v->AsDecorated()->decorations()) {
+    for (auto* d : v->As<ast::DecoratedVariable>()->decorations()) {
       if (auto* l = d->As<ast::LocationDecoration>()) {
         uint32_t location = l->value();
         // This is where the replacement happens. Expressions use identifier

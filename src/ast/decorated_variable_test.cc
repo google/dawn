@@ -108,7 +108,7 @@ TEST_F(DecoratedVariableTest, IsValid) {
 
 TEST_F(DecoratedVariableTest, IsDecorated) {
   DecoratedVariable dv;
-  EXPECT_TRUE(dv.IsDecorated());
+  EXPECT_TRUE(dv.Is<ast::DecoratedVariable>());
 }
 
 TEST_F(DecoratedVariableTest, to_str) {

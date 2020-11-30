@@ -602,8 +602,8 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   make_indent();
 
-  if (var->IsDecorated()) {
-    if (!EmitVariableDecorations(var->AsDecorated())) {
+  if (auto* decorated = var->As<ast::DecoratedVariable>()) {
+    if (!EmitVariableDecorations(decorated)) {
       return false;
     }
   }

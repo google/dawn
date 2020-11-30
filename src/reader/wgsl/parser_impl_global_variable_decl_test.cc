@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   EXPECT_EQ(e->source().range.end.column, 11u);
 
   ASSERT_EQ(e->constructor(), nullptr);
-  ASSERT_FALSE(e->IsDecorated());
+  ASSERT_FALSE(e->Is<ast::DecoratedVariable>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   ASSERT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->constructor()->Is<ast::ScalarConstructorExpression>());
 
-  ASSERT_FALSE(e->IsDecorated());
+  ASSERT_FALSE(e->Is<ast::DecoratedVariable>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsDecorated());
+  ASSERT_TRUE(e->Is<ast::DecoratedVariable>());
 
   EXPECT_EQ(e->name(), "a");
   ASSERT_NE(e->type(), nullptr);
@@ -100,8 +100,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 
   ASSERT_EQ(e->constructor(), nullptr);
 
-  ASSERT_TRUE(e->IsDecorated());
-  auto* v = e->AsDecorated();
+  ASSERT_TRUE(e->Is<ast::DecoratedVariable>());
+  auto* v = e->As<ast::DecoratedVariable>();
 
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);
@@ -120,7 +120,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsDecorated());
+  ASSERT_TRUE(e->Is<ast::DecoratedVariable>());
 
   EXPECT_EQ(e->name(), "a");
   ASSERT_NE(e->type(), nullptr);
@@ -134,8 +134,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 
   ASSERT_EQ(e->constructor(), nullptr);
 
-  ASSERT_TRUE(e->IsDecorated());
-  auto* v = e->AsDecorated();
+  ASSERT_TRUE(e->Is<ast::DecoratedVariable>());
+  auto* v = e->As<ast::DecoratedVariable>();
 
   auto& decorations = v->decorations();
   ASSERT_EQ(decorations.size(), 2u);

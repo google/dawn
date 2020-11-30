@@ -29,8 +29,6 @@
 namespace tint {
 namespace ast {
 
-class DecoratedVariable;
-
 /// A Variable statement.
 ///
 /// An instance of this class represents one of three constructs in WGSL: "var"
@@ -133,14 +131,6 @@ class Variable : public Castable<Variable, Node> {
   void set_is_const(bool val) { is_const_ = val; }
   /// @returns true if this is a constant, false otherwise
   bool is_const() const { return is_const_; }
-
-  /// @returns true if this is a decorated variable
-  virtual bool IsDecorated() const;
-
-  /// @returns the expression as a decorated variable
-  DecoratedVariable* AsDecorated();
-  /// @returns the expression as a decorated variable
-  const DecoratedVariable* AsDecorated() const;
 
   /// @returns true if the name and path are both present
   bool IsValid() const override;

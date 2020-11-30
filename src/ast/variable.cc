@@ -36,20 +36,6 @@ Variable::Variable(Variable&&) = default;
 
 Variable::~Variable() = default;
 
-DecoratedVariable* Variable::AsDecorated() {
-  assert(IsDecorated());
-  return static_cast<DecoratedVariable*>(this);
-}
-
-const DecoratedVariable* Variable::AsDecorated() const {
-  assert(IsDecorated());
-  return static_cast<const DecoratedVariable*>(this);
-}
-
-bool Variable::IsDecorated() const {
-  return false;
-}
-
 bool Variable::IsValid() const {
   if (name_.length() == 0) {
     return false;

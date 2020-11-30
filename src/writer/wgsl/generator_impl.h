@@ -27,6 +27,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"

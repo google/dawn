@@ -69,10 +69,6 @@ uint32_t DecoratedVariable::constant_id() const {
   return 0;
 }
 
-bool DecoratedVariable::IsDecorated() const {
-  return true;
-}
-
 bool DecoratedVariable::IsValid() const {
   return Variable::IsValid();
 }

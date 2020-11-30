@@ -100,11 +100,11 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : module_.global_variables()) {
-    if (!var->IsDecorated()) {
+    auto* decorated = var->As<ast::DecoratedVariable>();
+    if (decorated == nullptr) {
       continue;
     }
 
-    auto* decorated = var->AsDecorated();
     if (!decorated->HasConstantIdDecoration()) {
       continue;
     }

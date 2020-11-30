@@ -747,7 +747,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    if (var->IsDecorated() && var->AsDecorated()->HasConstantIdDecoration()) {
+    if (var->Is<ast::DecoratedVariable>() &&
+        var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
       if (type->Is<ast::type::F32Type>()) {
         ast::FloatLiteral l(type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
@@ -782,8 +783,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   push_type(spv::Op::OpVariable, std::move(ops));
 
-  if (var->IsDecorated()) {
-    for (auto* deco : var->AsDecorated()->decorations()) {
+  if (auto* decorated = var->As<ast::DecoratedVariable>()) {
+    for (auto* deco : decorated->decorations()) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
@@ -1468,8 +1469,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
 
   auto name = lit->name();
   bool is_spec_constant = false;
-  if (var && var->IsDecorated() &&
-      var->AsDecorated()->HasConstantIdDecoration()) {
+  if (var && var->Is<ast::DecoratedVariable>() &&
+      var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
     name = "__spec" + name;
     is_spec_constant = true;
   }
@@ -1483,9 +1484,10 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
   auto result_id = result.to_i();
 
   if (is_spec_constant) {
-    push_annot(spv::Op::OpDecorate,
-               {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
-                Operand::Int(var->AsDecorated()->constant_id())});
+    push_annot(
+        spv::Op::OpDecorate,
+        {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
+         Operand::Int(var->As<ast::DecoratedVariable>()->constant_id())});
   }
 
   if (lit->IsBool()) {
@@ -2701,10 +2703,10 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
   bool has_layout = false;
   for (auto* deco : member->decorations()) {
     if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
-      push_annot(spv::Op::OpMemberDecorate,
-                 {Operand::Int(struct_id), Operand::Int(idx),
-                  Operand::Int(SpvDecorationOffset),
-                  Operand::Int(offset->offset())});
+      push_annot(
+          spv::Op::OpMemberDecorate,
+          {Operand::Int(struct_id), Operand::Int(idx),
+           Operand::Int(SpvDecorationOffset), Operand::Int(offset->offset())});
       has_layout = true;
     } else {
       error_ = "unknown struct member decoration";
