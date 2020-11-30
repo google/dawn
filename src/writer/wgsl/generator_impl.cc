@@ -439,8 +439,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     out_ << "f32";
   } else if (type->Is<ast::type::I32Type>()) {
     out_ << "i32";
-  } else if (type->IsMatrix()) {
-    auto* mat = type->AsMatrix();
+  } else if (type->Is<ast::type::MatrixType>()) {
+    auto* mat = type->As<ast::type::MatrixType>();
     out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
     if (!EmitType(mat->type())) {
       return false;

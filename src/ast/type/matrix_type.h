@@ -35,9 +35,6 @@ class MatrixType : public Castable<MatrixType, Type> {
   MatrixType(MatrixType&&);
   ~MatrixType() override;
 
-  /// @returns true if the type is a matrix type
-  bool IsMatrix() const override;
-
   /// @returns the type of the matrix
   Type* type() const { return subtype_; }
   /// @returns the number of rows in the matrix

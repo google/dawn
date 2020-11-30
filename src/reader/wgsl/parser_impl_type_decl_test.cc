@@ -621,8 +621,8 @@ TEST_P(MatrixTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->IsMatrix());
-  auto* mat = t->AsMatrix();
+  EXPECT_TRUE(t->Is<ast::type::MatrixType>());
+  auto* mat = t->As<ast::type::MatrixType>();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
 }

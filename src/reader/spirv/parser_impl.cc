@@ -1359,8 +1359,8 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(type,
                                                   std::move(ast_components));
   }
-  if (type->IsMatrix()) {
-    const auto* mat_ty = type->AsMatrix();
+  if (type->Is<ast::type::MatrixType>()) {
+    const auto* mat_ty = type->As<ast::type::MatrixType>();
     // Matrix components are columns
     auto* column_ty = ast_module_.create<ast::type::VectorType>(mat_ty->type(),
                                                                 mat_ty->rows());

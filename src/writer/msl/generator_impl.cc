@@ -204,8 +204,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
       type->IsU32()) {
     return 4;
   }
-  if (type->IsMatrix()) {
-    auto* mat = type->AsMatrix();
+  if (type->Is<ast::type::MatrixType>()) {
+    auto* mat = type->As<ast::type::MatrixType>();
     // TODO(dsinclair): Handle MatrixStride
     // https://github.com/gpuweb/gpuweb/issues/773
     uint32_t type_size = calculate_alignment_size(mat->type());
@@ -939,8 +939,8 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     out_ << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(type->AsVector()->type());
-  } else if (type->IsMatrix()) {
-    return EmitZeroValue(type->AsMatrix()->type());
+  } else if (type->Is<ast::type::MatrixType>()) {
+    return EmitZeroValue(type->As<ast::type::MatrixType>()->type());
   } else if (type->Is<ast::type::ArrayType>()) {
     out_ << "{";
     if (!EmitZeroValue(type->As<ast::type::ArrayType>()->type())) {
@@ -1819,8 +1819,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     out_ << "float";
   } else if (type->Is<ast::type::I32Type>()) {
     out_ << "int";
-  } else if (type->IsMatrix()) {
-    auto* mat = type->AsMatrix();
+  } else if (type->Is<ast::type::MatrixType>()) {
+    auto* mat = type->As<ast::type::MatrixType>();
     if (!EmitType(mat->type(), "")) {
       return false;
     }

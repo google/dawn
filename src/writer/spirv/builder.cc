@@ -150,7 +150,8 @@ ast::type::MatrixType* GetNestedMatrixType(ast::type::Type* type) {
   while (type->Is<ast::type::ArrayType>()) {
     type = type->As<ast::type::ArrayType>()->type();
   }
-  return type->IsMatrix() ? type->AsMatrix() : nullptr;
+  return type->Is<ast::type::MatrixType>() ? type->As<ast::type::MatrixType>()
+                                           : nullptr;
 }
 
 uint32_t intrinsic_to_glsl_method(ast::type::Type* type,
@@ -1203,8 +1204,8 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     ast::type::Type* subtype = result_type->UnwrapAll();
     if (subtype->IsVector()) {
       subtype = subtype->AsVector()->type()->UnwrapAll();
-    } else if (subtype->IsMatrix()) {
-      subtype = subtype->AsMatrix()->type()->UnwrapAll();
+    } else if (subtype->Is<ast::type::MatrixType>()) {
+      subtype = subtype->As<ast::type::MatrixType>()->type()->UnwrapAll();
     } else if (subtype->Is<ast::type::ArrayType>()) {
       subtype = subtype->As<ast::type::ArrayType>()->type()->UnwrapAll();
     } else if (subtype->IsStruct()) {
@@ -1280,7 +1281,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result and value types are the same we can just use the object.
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
-    if (result_type == value_type || result_type->IsMatrix() ||
+    if (result_type == value_type || result_type->Is<ast::type::MatrixType>() ||
         result_type->Is<ast::type::ArrayType>() || result_type->IsStruct()) {
       out << "_" << id;
 
@@ -2426,8 +2427,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
   } else if (type->Is<ast::type::I32Type>()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
-  } else if (type->IsMatrix()) {
-    if (!GenerateMatrixType(type->AsMatrix(), result)) {
+  } else if (type->Is<ast::type::MatrixType>()) {
+    if (!GenerateMatrixType(type->As<ast::type::MatrixType>(), result)) {
       return 0;
     }
   } else if (type->IsPointer()) {

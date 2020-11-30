@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsMatrix() const {
-  return false;
-}
-
 bool Type::IsPointer() const {
   return false;
 }
@@ -115,7 +111,7 @@ bool Type::is_float_scalar() {
 }
 
 bool Type::is_float_matrix() {
-  return IsMatrix() && AsMatrix()->type()->is_float_scalar();
+  return Is<MatrixType>() && As<MatrixType>()->type()->is_float_scalar();
 }
 
 bool Type::is_float_vector() {
@@ -148,11 +144,6 @@ bool Type::is_signed_scalar_or_vector() {
 
 bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
-}
-
-const MatrixType* Type::AsMatrix() const {
-  assert(IsMatrix());
-  return static_cast<const MatrixType*>(this);
 }
 
 const PointerType* Type::AsPointer() const {
@@ -188,11 +179,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-MatrixType* Type::AsMatrix() {
-  assert(IsMatrix());
-  return static_cast<MatrixType*>(this);
 }
 
 PointerType* Type::AsPointer() {

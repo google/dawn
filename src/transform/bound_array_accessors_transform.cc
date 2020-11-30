@@ -184,8 +184,8 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
   }
 
   auto* ret_type = expr->array()->result_type()->UnwrapAll();
-  if (!ret_type->Is<ast::type::ArrayType>() && !ret_type->IsMatrix() &&
-      !ret_type->IsVector()) {
+  if (!ret_type->Is<ast::type::ArrayType>() &&
+      !ret_type->Is<ast::type::MatrixType>() && !ret_type->IsVector()) {
     return true;
   }
 
@@ -204,7 +204,7 @@ bool BoundArrayAccessorsTransform::ProcessArrayAccessor(
   } else {
     // The row accessor would have been an embedded array accessor and already
     // handled, so we just need to do columns here.
-    uint32_t size = ret_type->AsMatrix()->columns();
+    uint32_t size = ret_type->As<ast::type::MatrixType>()->columns();
     if (!ProcessAccessExpression(expr, size)) {
       return false;
     }

@@ -337,8 +337,8 @@ bool TypeDeterminer::DetermineArrayAccessor(
     ret = parent_type->As<ast::type::ArrayType>()->type();
   } else if (parent_type->IsVector()) {
     ret = parent_type->AsVector()->type();
-  } else if (parent_type->IsMatrix()) {
-    auto* m = parent_type->AsMatrix();
+  } else if (parent_type->Is<ast::type::MatrixType>()) {
+    auto* m = parent_type->As<ast::type::MatrixType>();
     ret = mod_->create<ast::type::VectorType>(m->type(), m->rows());
   } else {
     set_error(expr->source(), "invalid parent type (" +
@@ -790,7 +790,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
         break;
       case IntrinsicDataType::kMatrix:
-        if (!result_types.back()->IsMatrix()) {
+        if (!result_types.back()->Is<ast::type::MatrixType>()) {
           set_error(expr->source(), "incorrect type for " + ident->name() +
                                         ". Requires matrix value");
           return false;
@@ -819,7 +819,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   // The determinant returns the component type of the columns
   if (ident->intrinsic() == ast::Intrinsic::kDeterminant) {
-    expr->func()->set_result_type(result_types[0]->AsMatrix()->type());
+    expr->func()->set_result_type(
+        result_types[0]->As<ast::type::MatrixType>()->type());
     return true;
   }
   expr->func()->set_result_type(result_types[0]);
@@ -1111,23 +1112,25 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
-    if (lhs_type->IsMatrix() && rhs_type->IsMatrix()) {
+    if (lhs_type->Is<ast::type::MatrixType>() &&
+        rhs_type->Is<ast::type::MatrixType>()) {
       expr->set_result_type(mod_->create<ast::type::MatrixType>(
-          lhs_type->AsMatrix()->type(), lhs_type->AsMatrix()->rows(),
-          rhs_type->AsMatrix()->columns()));
+          lhs_type->As<ast::type::MatrixType>()->type(),
+          lhs_type->As<ast::type::MatrixType>()->rows(),
+          rhs_type->As<ast::type::MatrixType>()->columns()));
 
-    } else if (lhs_type->IsMatrix() && rhs_type->IsVector()) {
-      auto* mat = lhs_type->AsMatrix();
+    } else if (lhs_type->Is<ast::type::MatrixType>() && rhs_type->IsVector()) {
+      auto* mat = lhs_type->As<ast::type::MatrixType>();
       expr->set_result_type(
           mod_->create<ast::type::VectorType>(mat->type(), mat->rows()));
-    } else if (lhs_type->IsVector() && rhs_type->IsMatrix()) {
-      auto* mat = rhs_type->AsMatrix();
+    } else if (lhs_type->IsVector() && rhs_type->Is<ast::type::MatrixType>()) {
+      auto* mat = rhs_type->As<ast::type::MatrixType>();
       expr->set_result_type(
           mod_->create<ast::type::VectorType>(mat->type(), mat->columns()));
-    } else if (lhs_type->IsMatrix()) {
+    } else if (lhs_type->Is<ast::type::MatrixType>()) {
       // matrix * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->IsMatrix()) {
+    } else if (rhs_type->Is<ast::type::MatrixType>()) {
       // scalar * matrix
       expr->set_result_type(rhs_type);
     } else if (lhs_type->IsVector() && rhs_type->IsVector()) {

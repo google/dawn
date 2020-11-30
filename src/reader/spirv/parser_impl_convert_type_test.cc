@@ -276,58 +276,67 @@ TEST_F(SpvParserTest, ConvertType_MatrixOverF32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* m22 = p->ConvertType(22);
-  EXPECT_TRUE(m22->IsMatrix());
-  EXPECT_TRUE(m22->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m22->AsMatrix()->rows(), 2u);
-  EXPECT_EQ(m22->AsMatrix()->columns(), 2u);
+  EXPECT_TRUE(m22->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m22->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m22->As<ast::type::MatrixType>()->rows(), 2u);
+  EXPECT_EQ(m22->As<ast::type::MatrixType>()->columns(), 2u);
 
   auto* m23 = p->ConvertType(23);
-  EXPECT_TRUE(m23->IsMatrix());
-  EXPECT_TRUE(m23->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m23->AsMatrix()->rows(), 2u);
-  EXPECT_EQ(m23->AsMatrix()->columns(), 3u);
+  EXPECT_TRUE(m23->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m23->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m23->As<ast::type::MatrixType>()->rows(), 2u);
+  EXPECT_EQ(m23->As<ast::type::MatrixType>()->columns(), 3u);
 
   auto* m24 = p->ConvertType(24);
-  EXPECT_TRUE(m24->IsMatrix());
-  EXPECT_TRUE(m24->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m24->AsMatrix()->rows(), 2u);
-  EXPECT_EQ(m24->AsMatrix()->columns(), 4u);
+  EXPECT_TRUE(m24->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m24->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m24->As<ast::type::MatrixType>()->rows(), 2u);
+  EXPECT_EQ(m24->As<ast::type::MatrixType>()->columns(), 4u);
 
   auto* m32 = p->ConvertType(32);
-  EXPECT_TRUE(m32->IsMatrix());
-  EXPECT_TRUE(m32->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m32->AsMatrix()->rows(), 3u);
-  EXPECT_EQ(m32->AsMatrix()->columns(), 2u);
+  EXPECT_TRUE(m32->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m32->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m32->As<ast::type::MatrixType>()->rows(), 3u);
+  EXPECT_EQ(m32->As<ast::type::MatrixType>()->columns(), 2u);
 
   auto* m33 = p->ConvertType(33);
-  EXPECT_TRUE(m33->IsMatrix());
-  EXPECT_TRUE(m33->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m33->AsMatrix()->rows(), 3u);
-  EXPECT_EQ(m33->AsMatrix()->columns(), 3u);
+  EXPECT_TRUE(m33->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m33->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m33->As<ast::type::MatrixType>()->rows(), 3u);
+  EXPECT_EQ(m33->As<ast::type::MatrixType>()->columns(), 3u);
 
   auto* m34 = p->ConvertType(34);
-  EXPECT_TRUE(m34->IsMatrix());
-  EXPECT_TRUE(m34->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m34->AsMatrix()->rows(), 3u);
-  EXPECT_EQ(m34->AsMatrix()->columns(), 4u);
+  EXPECT_TRUE(m34->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m34->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m34->As<ast::type::MatrixType>()->rows(), 3u);
+  EXPECT_EQ(m34->As<ast::type::MatrixType>()->columns(), 4u);
 
   auto* m42 = p->ConvertType(42);
-  EXPECT_TRUE(m42->IsMatrix());
-  EXPECT_TRUE(m42->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m42->AsMatrix()->rows(), 4u);
-  EXPECT_EQ(m42->AsMatrix()->columns(), 2u);
+  EXPECT_TRUE(m42->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m42->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m42->As<ast::type::MatrixType>()->rows(), 4u);
+  EXPECT_EQ(m42->As<ast::type::MatrixType>()->columns(), 2u);
 
   auto* m43 = p->ConvertType(43);
-  EXPECT_TRUE(m43->IsMatrix());
-  EXPECT_TRUE(m43->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m43->AsMatrix()->rows(), 4u);
-  EXPECT_EQ(m43->AsMatrix()->columns(), 3u);
+  EXPECT_TRUE(m43->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m43->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m43->As<ast::type::MatrixType>()->rows(), 4u);
+  EXPECT_EQ(m43->As<ast::type::MatrixType>()->columns(), 3u);
 
   auto* m44 = p->ConvertType(44);
-  EXPECT_TRUE(m44->IsMatrix());
-  EXPECT_TRUE(m44->AsMatrix()->type()->Is<ast::type::F32Type>());
-  EXPECT_EQ(m44->AsMatrix()->rows(), 4u);
-  EXPECT_EQ(m44->AsMatrix()->columns(), 4u);
+  EXPECT_TRUE(m44->Is<ast::type::MatrixType>());
+  EXPECT_TRUE(
+      m44->As<ast::type::MatrixType>()->type()->Is<ast::type::F32Type>());
+  EXPECT_EQ(m44->As<ast::type::MatrixType>()->rows(), 4u);
+  EXPECT_EQ(m44->As<ast::type::MatrixType>()->columns(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }

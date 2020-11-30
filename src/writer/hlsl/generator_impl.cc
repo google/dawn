@@ -373,9 +373,10 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
-      ((lhs_type->IsVector() && rhs_type->IsMatrix()) ||
-       (lhs_type->IsMatrix() && rhs_type->IsVector()) ||
-       (lhs_type->IsMatrix() && rhs_type->IsMatrix()))) {
+      ((lhs_type->IsVector() && rhs_type->Is<ast::type::MatrixType>()) ||
+       (lhs_type->Is<ast::type::MatrixType>() && rhs_type->IsVector()) ||
+       (lhs_type->Is<ast::type::MatrixType>() &&
+        rhs_type->Is<ast::type::MatrixType>()))) {
     out << "mul(";
     if (!EmitExpression(pre, out, expr->lhs())) {
       return false;
@@ -1553,8 +1554,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
     out << "0u";
   } else if (type->IsVector()) {
     return EmitZeroValue(out, type->AsVector()->type());
-  } else if (type->IsMatrix()) {
-    auto* mat = type->AsMatrix();
+  } else if (type->Is<ast::type::MatrixType>()) {
+    auto* mat = type->As<ast::type::MatrixType>();
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
       if (i != 0) {
         out << ", ";
@@ -1726,8 +1727,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
         // have to ask the type for the byte size.
         out << "4";
-      } else if (ary_type->IsMatrix()) {
-        auto* mat = ary_type->AsMatrix();
+      } else if (ary_type->Is<ast::type::MatrixType>()) {
+        auto* mat = ary_type->As<ast::type::MatrixType>();
         if (mat->columns() == 2) {
           out << "8";
         } else {
@@ -1770,13 +1771,15 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
   std::string access_method = is_store ? "Store" : "Load";
   if (result_type->IsVector()) {
     access_method += std::to_string(result_type->AsVector()->size());
-  } else if (result_type->IsMatrix()) {
-    access_method += std::to_string(result_type->AsMatrix()->rows());
+  } else if (result_type->Is<ast::type::MatrixType>()) {
+    access_method +=
+        std::to_string(result_type->As<ast::type::MatrixType>()->rows());
   }
 
   // If we aren't storing then we need to put in the outer cast.
   if (!is_store) {
-    if (result_type->is_float_scalar_or_vector() || result_type->IsMatrix()) {
+    if (result_type->is_float_scalar_or_vector() ||
+        result_type->Is<ast::type::MatrixType>()) {
       out << "asfloat(";
     } else if (result_type->is_signed_scalar_or_vector()) {
       out << "asint(";
@@ -1796,8 +1799,8 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
     return false;
   }
 
-  if (result_type->IsMatrix()) {
-    auto* mat = result_type->AsMatrix();
+  if (result_type->Is<ast::type::MatrixType>()) {
+    auto* mat = result_type->As<ast::type::MatrixType>();
 
     // TODO(dsinclair): This is assuming 4 byte elements. Will need to be fixed
     // if we get matrixes of f16 or f64.
@@ -2064,8 +2067,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << "float";
   } else if (type->Is<ast::type::I32Type>()) {
     out << "int";
-  } else if (type->IsMatrix()) {
-    auto* mat = type->AsMatrix();
+  } else if (type->Is<ast::type::MatrixType>()) {
+    auto* mat = type->As<ast::type::MatrixType>();
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }

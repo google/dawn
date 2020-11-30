@@ -35,10 +35,6 @@ MatrixType::MatrixType(MatrixType&&) = default;
 
 MatrixType::~MatrixType() = default;
 
-bool MatrixType::IsMatrix() const {
-  return true;
-}
-
 std::string MatrixType::type_name() const {
   return "__mat_" + std::to_string(rows_) + "_" + std::to_string(columns_) +
          subtype_->type_name();

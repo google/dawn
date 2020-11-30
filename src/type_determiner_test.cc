@@ -1385,9 +1385,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsMatrix());
+  ASSERT_TRUE(expr.result_type()->Is<ast::type::MatrixType>());
 
-  auto* mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->As<ast::type::MatrixType>();
   EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
@@ -1413,9 +1413,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsMatrix());
+  ASSERT_TRUE(expr.result_type()->Is<ast::type::MatrixType>());
 
-  auto* mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->As<ast::type::MatrixType>();
   EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
@@ -1494,9 +1494,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsMatrix());
+  ASSERT_TRUE(expr.result_type()->Is<ast::type::MatrixType>());
 
-  auto* mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->As<ast::type::MatrixType>();
   EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 4u);
   EXPECT_EQ(mat->columns(), 4u);
@@ -2018,9 +2018,9 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   EXPECT_TRUE(td()->DetermineResultType(&expr));
 
   ASSERT_NE(expr.result_type(), nullptr);
-  ASSERT_TRUE(expr.result_type()->IsMatrix());
+  ASSERT_TRUE(expr.result_type()->Is<ast::type::MatrixType>());
 
-  auto* mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->As<ast::type::MatrixType>();
   EXPECT_TRUE(mat->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
