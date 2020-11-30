@@ -316,7 +316,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   auto* cond_type = s->condition()->result_type()->UnwrapAll();
-  if (!(cond_type->IsI32() || cond_type->IsU32())) {
+  if (!(cond_type->Is<ast::type::I32Type>() || cond_type->IsU32())) {
     add_error(s->condition()->source(), "v-0025",
               "switch statement selector expression must be of a "
               "scalar integer type");

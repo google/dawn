@@ -19,6 +19,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
@@ -46,7 +47,7 @@ TEST_F(SamplerTypeTest, Is) {
   EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<BoolType>());
   EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->IsMatrix());
   EXPECT_FALSE(ty->IsPointer());
   EXPECT_TRUE(ty->IsSampler());

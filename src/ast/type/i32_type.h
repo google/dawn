@@ -32,9 +32,6 @@ class I32Type : public Castable<I32Type, Type> {
   I32Type(I32Type&&);
   ~I32Type() override;
 
-  /// @returns true if the type is an i32 type
-  bool IsI32() const override;
-
   /// @returns the name for this type
   std::string type_name() const override;
 

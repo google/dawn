@@ -28,14 +28,14 @@ TEST_F(TypeManagerTest, GetUnregistered) {
   ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->IsI32());
+  EXPECT_TRUE(t->Is<ast::type::I32Type>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
   ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->IsI32());
+  EXPECT_TRUE(t->Is<ast::type::I32Type>());
 
   auto* t2 = tm.Get(std::make_unique<ast::type::I32Type>());
   EXPECT_EQ(t, t2);
@@ -45,7 +45,7 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   ast::TypeManager tm;
   auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->IsI32());
+  EXPECT_TRUE(t->Is<ast::type::I32Type>());
 
   auto* t2 = tm.Get(std::make_unique<ast::type::U32Type>());
   ASSERT_NE(t2, nullptr);

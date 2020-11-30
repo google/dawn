@@ -975,7 +975,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstant: {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
-        if (ast_type->IsI32()) {
+        if (ast_type->Is<ast::type::I32Type>()) {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
                   ast_type, static_cast<int32_t>(literal_value)));
@@ -1267,7 +1267,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
             create<ast::ScalarConstructorExpression>(
                 create<ast::UintLiteral>(ast_type, spirv_const->GetU32()))};
   }
-  if (ast_type->IsI32()) {
+  if (ast_type->Is<ast::type::I32Type>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 create<ast::SintLiteral>(ast_type, spirv_const->GetS32()))};
@@ -1342,7 +1342,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::UintLiteral>(type, 0u));
   }
-  if (type->IsI32()) {
+  if (type->Is<ast::type::I32Type>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::SintLiteral>(type, 0));
   }
@@ -1445,7 +1445,8 @@ ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
     Fail() << "no type provided";
   }
   auto* i32 = ast_module_.create<ast::type::I32Type>();
-  if (other->Is<ast::type::F32Type>() || other->IsU32() || other->IsI32()) {
+  if (other->Is<ast::type::F32Type>() || other->IsU32() ||
+      other->Is<ast::type::I32Type>()) {
     return i32;
   }
   auto* vec_ty = other->AsVector();
@@ -1463,7 +1464,8 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
     return nullptr;
   }
   auto* u32 = ast_module_.create<ast::type::U32Type>();
-  if (other->Is<ast::type::F32Type>() || other->IsU32() || other->IsI32()) {
+  if (other->Is<ast::type::F32Type>() || other->IsU32() ||
+      other->Is<ast::type::I32Type>()) {
     return u32;
   }
   auto* vec_ty = other->AsVector();

@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::AliasType>());
   auto* alias = t->As<ast::type::AliasType>();
-  ASSERT_TRUE(alias->type()->IsI32());
+  ASSERT_TRUE(alias->type()->Is<ast::type::I32Type>());
   ASSERT_EQ(alias->type(), i32);
 }
 

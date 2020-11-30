@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -90,7 +91,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsI32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 
@@ -170,7 +171,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsSampled());
-  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->IsI32());
+  ASSERT_TRUE(t->AsTexture()->AsSampled()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 
@@ -236,7 +237,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->IsTexture());
   ASSERT_TRUE(t->AsTexture()->IsMultisampled());
-  ASSERT_TRUE(t->AsTexture()->AsMultisampled()->type()->IsI32());
+  ASSERT_TRUE(
+      t->AsTexture()->AsMultisampled()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(t->AsTexture()->dim(), ast::type::TextureDimension::k2d);
 }
 

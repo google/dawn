@@ -35,7 +35,7 @@ TEST_F(I32TypeTest, Is) {
   EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<BoolType>());
   EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_TRUE(ty->IsI32());
+  EXPECT_TRUE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->IsMatrix());
   EXPECT_FALSE(ty->IsPointer());
   EXPECT_FALSE(ty->IsSampler());

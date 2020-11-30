@@ -21,6 +21,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
@@ -107,7 +108,7 @@ TEST_F(SpvParserTest, ConvertType_I32) {
   EXPECT_TRUE(p->BuildInternalModule());
 
   auto* type = p->ConvertType(2);
-  EXPECT_TRUE(type->IsI32());
+  EXPECT_TRUE(type->Is<ast::type::I32Type>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -197,17 +198,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverI32) {
 
   auto* v2xi32 = p->ConvertType(20);
   EXPECT_TRUE(v2xi32->IsVector());
-  EXPECT_TRUE(v2xi32->AsVector()->type()->IsI32());
+  EXPECT_TRUE(v2xi32->AsVector()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(v2xi32->AsVector()->size(), 2u);
 
   auto* v3xi32 = p->ConvertType(30);
   EXPECT_TRUE(v3xi32->IsVector());
-  EXPECT_TRUE(v3xi32->AsVector()->type()->IsI32());
+  EXPECT_TRUE(v3xi32->AsVector()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(v3xi32->AsVector()->size(), 3u);
 
   auto* v4xi32 = p->ConvertType(40);
   EXPECT_TRUE(v4xi32->IsVector());
-  EXPECT_TRUE(v4xi32->AsVector()->type()->IsI32());
+  EXPECT_TRUE(v4xi32->AsVector()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(v4xi32->AsVector()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());

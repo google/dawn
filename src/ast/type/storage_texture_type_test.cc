@@ -22,6 +22,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -40,7 +41,7 @@ TEST_F(StorageTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<BoolType>());
   EXPECT_FALSE(ty->Is<F32Type>());
-  EXPECT_FALSE(ty->IsI32());
+  EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->IsMatrix());
   EXPECT_FALSE(ty->IsPointer());
   EXPECT_FALSE(ty->IsSampler());
@@ -93,7 +94,7 @@ TEST_F(StorageTextureTypeTest, F32Type) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->IsTexture());
   ASSERT_TRUE(s->AsTexture()->IsStorage());
-  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->Is<ast::type::F32Type>());
+  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->Is<F32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, U32Type) {
@@ -121,7 +122,7 @@ TEST_F(StorageTextureTypeTest, I32Type) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->IsTexture());
   ASSERT_TRUE(s->AsTexture()->IsStorage());
-  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsI32());
+  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->Is<I32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, MinBufferBindingSize) {

@@ -115,7 +115,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, int_type);
-  ASSERT_TRUE(t->IsI32());
+  ASSERT_TRUE(t->Is<ast::type::I32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {

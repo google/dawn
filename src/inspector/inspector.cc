@@ -29,6 +29,7 @@
 #include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
@@ -396,7 +397,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
     } else if (base_type->IsU32()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->IsI32()) {
+    } else if (base_type->Is<ast::type::I32Type>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kSInt;
     } else {
       entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;

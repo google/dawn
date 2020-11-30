@@ -200,7 +200,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
   if (type->IsPointer()) {
     return 0;
   }
-  if (type->Is<ast::type::F32Type>() || type->IsI32() || type->IsU32()) {
+  if (type->Is<ast::type::F32Type>() || type->Is<ast::type::I32Type>() ||
+      type->IsU32()) {
     return 4;
   }
   if (type->IsMatrix()) {
@@ -796,7 +797,7 @@ std::string GeneratorImpl::generate_builtin_name(
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fabs";
       } else if (ident->result_type()->IsU32() ||
-                 ident->result_type()->IsI32()) {
+                 ident->result_type()->Is<ast::type::I32Type>()) {
         out += "abs";
       }
       break;
@@ -804,7 +805,7 @@ std::string GeneratorImpl::generate_builtin_name(
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fmax";
       } else if (ident->result_type()->IsU32() ||
-                 ident->result_type()->IsI32()) {
+                 ident->result_type()->Is<ast::type::I32Type>()) {
         out += "max";
       }
       break;
@@ -812,7 +813,7 @@ std::string GeneratorImpl::generate_builtin_name(
       if (ident->result_type()->Is<ast::type::F32Type>()) {
         out += "fmin";
       } else if (ident->result_type()->IsU32() ||
-                 ident->result_type()->IsI32()) {
+                 ident->result_type()->Is<ast::type::I32Type>()) {
         out += "min";
       }
       break;
@@ -932,7 +933,7 @@ bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
     out_ << "false";
   } else if (type->Is<ast::type::F32Type>()) {
     out_ << "0.0f";
-  } else if (type->IsI32()) {
+  } else if (type->Is<ast::type::I32Type>()) {
     out_ << "0";
   } else if (type->IsU32()) {
     out_ << "0u";
@@ -1816,7 +1817,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     out_ << "bool";
   } else if (type->Is<ast::type::F32Type>()) {
     out_ << "float";
-  } else if (type->IsI32()) {
+  } else if (type->Is<ast::type::I32Type>()) {
     out_ << "int";
   } else if (type->IsMatrix()) {
     auto* mat = type->AsMatrix();

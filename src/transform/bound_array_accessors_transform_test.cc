@@ -375,7 +375,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
@@ -553,7 +553,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
@@ -848,7 +848,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -858,7 +858,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 1);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
@@ -902,7 +902,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 2);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ary->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
 
   ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
   ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -912,7 +912,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
   ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->IsI32());
+  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32Type>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
