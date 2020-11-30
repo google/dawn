@@ -32,14 +32,5 @@ DecorationKind StructMemberDecoration::GetKind() const {
   return Kind;
 }
 
-bool StructMemberDecoration::IsOffset() const {
-  return false;
-}
-
-StructMemberOffsetDecoration* StructMemberDecoration::AsOffset() {
-  assert(IsOffset());
-  return static_cast<StructMemberOffsetDecoration*>(this);
-}
-
 }  // namespace ast
 }  // namespace tint

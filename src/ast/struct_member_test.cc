@@ -36,7 +36,7 @@ TEST_F(StructMemberTest, Creation) {
   EXPECT_EQ(st.name(), "a");
   EXPECT_EQ(st.type(), &i32);
   EXPECT_EQ(st.decorations().size(), 1u);
-  EXPECT_TRUE(st.decorations()[0]->IsOffset());
+  EXPECT_TRUE(st.decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
   EXPECT_EQ(st.source().range.begin.line, 0u);
   EXPECT_EQ(st.source().range.begin.column, 0u);
   EXPECT_EQ(st.source().range.end.line, 0u);

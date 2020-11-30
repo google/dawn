@@ -34,9 +34,6 @@ class StructMemberOffsetDecoration
   StructMemberOffsetDecoration(uint32_t offset, const Source& source);
   ~StructMemberOffsetDecoration() override;
 
-  /// @returns true if this is an offset decoration
-  bool IsOffset() const override;
-
   /// @returns the offset value
   uint32_t offset() const { return offset_; }
 

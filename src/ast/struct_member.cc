@@ -41,7 +41,7 @@ StructMember::~StructMember() = default;
 
 bool StructMember::has_offset_decoration() const {
   for (auto* deco : decorations_) {
-    if (deco->IsOffset()) {
+    if (deco->Is<ast::StructMemberOffsetDecoration>()) {
       return true;
     }
   }
@@ -50,8 +50,8 @@ bool StructMember::has_offset_decoration() const {
 
 uint32_t StructMember::offset() const {
   for (auto* deco : decorations_) {
-    if (deco->IsOffset()) {
-      return deco->AsOffset()->offset();
+    if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
+      return offset->offset();
     }
   }
   return 0;

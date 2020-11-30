@@ -218,8 +218,8 @@ uint32_t GeneratorImpl::calculate_alignment_size(ast::type::Type* type) {
     // Offset decorations in WGSL must be in increasing order.
     for (auto* mem : stct->members()) {
       for (auto* deco : mem->decorations()) {
-        if (deco->IsOffset()) {
-          count = deco->AsOffset()->offset();
+        if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
+          count = offset->offset();
         }
       }
       auto align = calculate_alignment_size(mem->type());
@@ -1941,8 +1941,8 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
   for (auto* mem : str->impl()->members()) {
     make_indent();
     for (auto* deco : mem->decorations()) {
-      if (deco->IsOffset()) {
-        uint32_t offset = deco->AsOffset()->offset();
+      if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
+        uint32_t offset = o->offset();
         if (offset != current_offset) {
           out_ << "int8_t pad_" << pad_count << "[" << (offset - current_offset)
                << "];" << std::endl;

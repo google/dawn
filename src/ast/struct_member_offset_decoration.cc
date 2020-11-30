@@ -21,10 +21,6 @@ StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset,
                                                            const Source& source)
     : Base(source), offset_(offset) {}
 
-bool StructMemberOffsetDecoration::IsOffset() const {
-  return true;
-}
-
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
 void StructMemberOffsetDecoration::to_str(std::ostream& out,

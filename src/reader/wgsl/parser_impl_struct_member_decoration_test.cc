@@ -32,9 +32,9 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
 
   auto* member_deco = deco.value->As<ast::StructMemberDecoration>();
   ASSERT_NE(member_deco, nullptr);
-  ASSERT_TRUE(member_deco->IsOffset());
+  ASSERT_TRUE(member_deco->Is<ast::StructMemberOffsetDecoration>());
 
-  auto* o = member_deco->AsOffset();
+  auto* o = member_deco->As<ast::StructMemberOffsetDecoration>();
   EXPECT_EQ(o->offset(), 4u);
 }
 

@@ -24,8 +24,6 @@
 namespace tint {
 namespace ast {
 
-class StructMemberOffsetDecoration;
-
 /// A decoration attached to a struct member
 class StructMemberDecoration
     : public Castable<StructMemberDecoration, Decoration> {
@@ -37,12 +35,6 @@ class StructMemberDecoration
 
   /// @return the decoration kind
   DecorationKind GetKind() const override;
-
-  /// @returns true if this is an offset decoration
-  virtual bool IsOffset() const;
-
-  /// @returns the decoration as an offset decoration
-  StructMemberOffsetDecoration* AsOffset();
 
  protected:
   /// Constructor

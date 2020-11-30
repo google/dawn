@@ -63,8 +63,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
 
   auto* result = p->ConvertMemberDecoration(1, 1, {SpvDecorationOffset, 8});
   ASSERT_NE(result, nullptr);
-  EXPECT_TRUE(result->IsOffset());
-  auto* offset_deco = result->AsOffset();
+  EXPECT_TRUE(result->Is<ast::StructMemberOffsetDecoration>());
+  auto* offset_deco = result->As<ast::StructMemberOffsetDecoration>();
   ASSERT_NE(offset_deco, nullptr);
   EXPECT_EQ(offset_deco->offset(), 8u);
   EXPECT_TRUE(p->error().empty());

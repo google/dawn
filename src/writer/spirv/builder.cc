@@ -2696,11 +2696,11 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
 
   bool has_layout = false;
   for (auto* deco : member->decorations()) {
-    if (deco->IsOffset()) {
+    if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
       push_annot(spv::Op::OpMemberDecorate,
                  {Operand::Int(struct_id), Operand::Int(idx),
                   Operand::Int(SpvDecorationOffset),
-                  Operand::Int(deco->AsOffset()->offset())});
+                  Operand::Int(offset->offset())});
       has_layout = true;
     } else {
       error_ = "unknown struct member decoration";

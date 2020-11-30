@@ -580,8 +580,10 @@ bool GeneratorImpl::EmitStructType(const ast::type::StructType* str) {
       make_indent();
 
       // TODO(dsinclair): Split this out when we have more then one
-      assert(deco->IsOffset());
-      out_ << "[[offset(" << deco->AsOffset()->offset() << ")]]" << std::endl;
+      assert(deco->Is<ast::StructMemberOffsetDecoration>());
+      out_ << "[[offset("
+           << deco->As<ast::StructMemberOffsetDecoration>()->offset() << ")]]"
+           << std::endl;
     }
     make_indent();
     out_ << mem->name() << " : ";

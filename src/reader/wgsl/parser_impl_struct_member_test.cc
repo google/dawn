@@ -68,8 +68,10 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   EXPECT_EQ(m->name(), "a");
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 1u);
-  EXPECT_TRUE(m->decorations()[0]->IsOffset());
-  EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
+  EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
+  EXPECT_EQ(
+      m->decorations()[0]->As<ast::StructMemberOffsetDecoration>()->offset(),
+      2u);
 
   ASSERT_EQ(m->source().range.begin.line, 1u);
   ASSERT_EQ(m->source().range.begin.column, 15u);
@@ -97,10 +99,14 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   EXPECT_EQ(m->name(), "a");
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 2u);
-  EXPECT_TRUE(m->decorations()[0]->IsOffset());
-  EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
-  EXPECT_TRUE(m->decorations()[1]->IsOffset());
-  EXPECT_EQ(m->decorations()[1]->AsOffset()->offset(), 4u);
+  EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
+  EXPECT_EQ(
+      m->decorations()[0]->As<ast::StructMemberOffsetDecoration>()->offset(),
+      2u);
+  EXPECT_TRUE(m->decorations()[1]->Is<ast::StructMemberOffsetDecoration>());
+  EXPECT_EQ(
+      m->decorations()[1]->As<ast::StructMemberOffsetDecoration>()->offset(),
+      4u);
 
   ASSERT_EQ(m->source().range.begin.line, 2u);
   ASSERT_EQ(m->source().range.begin.column, 15u);
