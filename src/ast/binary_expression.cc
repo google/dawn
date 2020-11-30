@@ -34,10 +34,6 @@ BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 
 BinaryExpression::~BinaryExpression() = default;
 
-bool BinaryExpression::IsBinary() const {
-  return true;
-}
-
 bool BinaryExpression::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid()) {
     return false;

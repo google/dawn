@@ -31,10 +31,6 @@ ConstructorExpression::ConstructorExpression(ConstructorExpression&&) = default;
 ConstructorExpression::ConstructorExpression(const Source& source)
     : Base(source) {}
 
-bool ConstructorExpression::IsConstructor() const {
-  return true;
-}
-
 bool ConstructorExpression::IsScalarConstructor() const {
   return false;
 }

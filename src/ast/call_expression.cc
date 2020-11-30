@@ -31,10 +31,6 @@ CallExpression::CallExpression(CallExpression&&) = default;
 
 CallExpression::~CallExpression() = default;
 
-bool CallExpression::IsCall() const {
-  return true;
-}
-
 bool CallExpression::IsValid() const {
   if (func_ == nullptr || !func_->IsValid())
     return false;

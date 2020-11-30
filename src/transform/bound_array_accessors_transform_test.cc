@@ -129,25 +129,25 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsCall());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
 
-  auto* idx = ptr->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
 
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -192,45 +192,49 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsCall());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
 
-  auto* idx = ptr->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
 
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
 
   auto* sub = tc->values()[0];
-  ASSERT_TRUE(sub->IsArrayAccessor());
-  ASSERT_TRUE(sub->AsArrayAccessor()->idx_expr()->IsCall());
+  ASSERT_TRUE(sub->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(sub->As<ast::ArrayAccessorExpression>()
+                  ->idx_expr()
+                  ->Is<ast::CallExpression>());
 
-  auto* sub_idx = sub->AsArrayAccessor()->idx_expr()->AsCall();
-  ASSERT_TRUE(sub_idx->func()->IsIdentifier());
-  EXPECT_EQ(sub_idx->func()->AsIdentifier()->name(), "min");
+  auto* sub_idx = sub->As<ast::ArrayAccessorExpression>()
+                      ->idx_expr()
+                      ->As<ast::CallExpression>();
+  ASSERT_TRUE(sub_idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(sub_idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
-  ASSERT_TRUE(sub_idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(sub_idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  tc = sub_idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(sub_idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(sub_idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  tc = sub_idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], b_access_idx);
 
-  ASSERT_TRUE(sub_idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(sub_idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  auto* scalar = sub_idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  auto* scalar = sub_idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 4u);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -265,11 +269,11 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -313,25 +317,25 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsCall());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
 
-  auto* idx = ptr->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
 
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -366,11 +370,11 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
@@ -405,11 +409,11 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -444,11 +448,11 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -492,24 +496,24 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsCall());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
 
-  auto* idx = ptr->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -544,11 +548,11 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
@@ -583,11 +587,11 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
@@ -625,24 +629,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -689,38 +693,38 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
 
-  ASSERT_TRUE(ary->idx_expr()->IsCall());
-  auto* idx = ary->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::CallExpression>());
+  auto* idx = ary->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
 
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  auto* scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  auto* scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -768,35 +772,35 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
 
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
-  ASSERT_TRUE(ptr->idx_expr()->IsCall());
-  auto* idx = ptr->idx_expr()->AsCall();
-  ASSERT_TRUE(idx->func()->IsIdentifier());
-  EXPECT_EQ(idx->func()->AsIdentifier()->name(), "min");
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
+  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
   ASSERT_EQ(idx->params().size(), 2u);
 
-  ASSERT_TRUE(idx->params()[0]->IsConstructor());
-  ASSERT_TRUE(idx->params()[0]->AsConstructor()->IsTypeConstructor());
-  auto* tc = idx->params()[0]->AsConstructor()->AsTypeConstructor();
+  ASSERT_TRUE(idx->params()[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[0]->Is<ast::TypeConstructorExpression>());
+  auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32Type>());
   ASSERT_EQ(tc->values().size(), 1u);
   ASSERT_EQ(tc->values()[0], access_idx);
 
-  ASSERT_TRUE(idx->params()[1]->IsConstructor());
-  ASSERT_TRUE(idx->params()[1]->AsConstructor()->IsScalarConstructor());
-  scalar = idx->params()[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
+  scalar = idx->params()[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -836,24 +840,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 1);
 
@@ -890,24 +894,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 2);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsSint());
   EXPECT_EQ(scalar->literal()->AsSint()->value(), 0);
 
@@ -945,24 +949,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 
@@ -1000,24 +1004,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_TRUE(manager()->Run());
-  ASSERT_TRUE(ptr->IsArrayAccessor());
+  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(ptr->array()->IsArrayAccessor());
-  auto* ary = ptr->array()->AsArrayAccessor();
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* scalar = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* scalar = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 2u);
 
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32Type>());
 
-  ASSERT_TRUE(ptr->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ptr->idx_expr()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->AsConstructor()->AsScalarConstructor();
+  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->IsUint());
   EXPECT_EQ(scalar->literal()->AsUint()->value(), 1u);
 

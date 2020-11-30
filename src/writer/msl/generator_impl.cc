@@ -484,12 +484,13 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
 }
 
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
-  if (!expr->func()->IsIdentifier()) {
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
+
+  if (ident == nullptr) {
     error_ = "invalid function name";
     return 0;
   }
 
-  auto* ident = expr->func()->AsIdentifier();
   if (ident->IsIntrinsic()) {
     const auto& params = expr->params();
     if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
@@ -658,7 +659,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 }
 
 bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
-  auto* ident = expr->func()->AsIdentifier();
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
 
   auto params = expr->params();
   auto* signature = static_cast<const ast::intrinsic::TextureSignature*>(
@@ -1094,29 +1095,29 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
-  if (expr->IsArrayAccessor()) {
-    return EmitArrayAccessor(expr->AsArrayAccessor());
+  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+    return EmitArrayAccessor(a);
   }
-  if (expr->IsBinary()) {
-    return EmitBinary(expr->AsBinary());
+  if (auto* b = expr->As<ast::BinaryExpression>()) {
+    return EmitBinary(b);
   }
-  if (expr->IsBitcast()) {
-    return EmitBitcast(expr->AsBitcast());
+  if (auto* b = expr->As<ast::BitcastExpression>()) {
+    return EmitBitcast(b);
   }
-  if (expr->IsCall()) {
-    return EmitCall(expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return EmitCall(c);
   }
-  if (expr->IsConstructor()) {
-    return EmitConstructor(expr->AsConstructor());
+  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+    return EmitConstructor(c);
   }
-  if (expr->IsIdentifier()) {
-    return EmitIdentifier(expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return EmitIdentifier(i);
   }
-  if (expr->IsMemberAccessor()) {
-    return EmitMemberAccessor(expr->AsMemberAccessor());
+  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+    return EmitMemberAccessor(m);
   }
-  if (expr->IsUnaryOp()) {
-    return EmitUnaryOp(expr->AsUnaryOp());
+  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return EmitUnaryOp(u);
   }
 
   error_ = "unknown expression type: " + expr->str();
@@ -1501,7 +1502,7 @@ bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
-  auto* ident = expr->AsIdentifier();
+  auto* ident = expr->As<ast::IdentifierExpression>();
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
     if (global_is_in_struct(var)) {

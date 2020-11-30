@@ -30,10 +30,6 @@ BitcastExpression::BitcastExpression(const Source& source,
 BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;
 
-bool BitcastExpression::IsBitcast() const {
-  return true;
-}
-
 bool BitcastExpression::IsValid() const {
   if (expr_ == nullptr || !expr_->IsValid())
     return false;

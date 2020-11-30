@@ -135,24 +135,22 @@ bool BoundArrayAccessorsTransform::ProcessStatement(ast::Statement* stmt) {
 }
 
 bool BoundArrayAccessorsTransform::ProcessExpression(ast::Expression* expr) {
-  if (expr->IsArrayAccessor()) {
-    return ProcessArrayAccessor(expr->AsArrayAccessor());
-  } else if (expr->IsBitcast()) {
-    return ProcessExpression(expr->AsBitcast()->expr());
-  } else if (expr->IsCall()) {
-    auto* c = expr->AsCall();
-    if (!ProcessExpression(c->func())) {
+  if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+    return ProcessArrayAccessor(array);
+  } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
+    return ProcessExpression(bitcast->expr());
+  } else if (auto* call = expr->As<ast::CallExpression>()) {
+    if (!ProcessExpression(call->func())) {
       return false;
     }
-    for (auto* e : c->params()) {
+    for (auto* e : call->params()) {
       if (!ProcessExpression(e)) {
         return false;
       }
     }
-  } else if (expr->IsIdentifier()) {
+  } else if (expr->Is<ast::IdentifierExpression>()) {
     /* nop */
-  } else if (expr->IsConstructor()) {
-    auto* c = expr->AsConstructor();
+  } else if (auto* c = expr->As<ast::ConstructorExpression>()) {
     if (c->IsTypeConstructor()) {
       for (auto* e : c->AsTypeConstructor()->values()) {
         if (!ProcessExpression(e)) {
@@ -160,14 +158,12 @@ bool BoundArrayAccessorsTransform::ProcessExpression(ast::Expression* expr) {
         }
       }
     }
-  } else if (expr->IsMemberAccessor()) {
-    auto* m = expr->AsMemberAccessor();
+  } else if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
     return ProcessExpression(m->structure()) && ProcessExpression(m->member());
-  } else if (expr->IsBinary()) {
-    auto* b = expr->AsBinary();
+  } else if (auto* b = expr->As<ast::BinaryExpression>()) {
     return ProcessExpression(b->lhs()) && ProcessExpression(b->rhs());
-  } else if (expr->IsUnaryOp()) {
-    return ProcessExpression(expr->AsUnaryOp()->expr());
+  } else if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return ProcessExpression(u->expr());
   } else {
     error_ = "unknown statement in bound array accessors transform";
     return false;
@@ -217,10 +213,8 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
     ast::ArrayAccessorExpression* expr,
     uint32_t size) {
   // Scalar constructor we can re-write the value to be within bounds.
-  if (expr->idx_expr()->IsConstructor() &&
-      expr->idx_expr()->AsConstructor()->IsScalarConstructor()) {
-    auto* lit =
-        expr->idx_expr()->AsConstructor()->AsScalarConstructor()->literal();
+  if (auto* c = expr->idx_expr()->As<ast::ScalarConstructorExpression>()) {
+    auto* lit = c->literal();
     if (lit->IsSint()) {
       int32_t val = lit->AsSint()->value();
       if (val < 0) {

@@ -33,17 +33,17 @@ TEST_F(ParserImplTest, LogicalAndExpression_Parses) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsBinary());
-  auto* rel = e->AsBinary();
+  ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+  auto* rel = e->As<ast::BinaryExpression>();
   EXPECT_EQ(ast::BinaryOp::kLogicalAnd, rel->op());
 
-  ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
+  auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->name(), "a");
 
-  ASSERT_TRUE(rel->rhs()->IsConstructor());
-  ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
+  auto* init = rel->rhs()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, LogicalAndExpression_NoOr_ReturnsLHS) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsIdentifier());
+  ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
 }  // namespace

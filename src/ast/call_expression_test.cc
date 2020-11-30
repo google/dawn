@@ -49,7 +49,7 @@ TEST_F(CallExpressionTest, Creation_WithSource) {
 TEST_F(CallExpressionTest, IsCall) {
   auto* func = create<IdentifierExpression>("func");
   CallExpression stmt(func, {});
-  EXPECT_TRUE(stmt.IsCall());
+  EXPECT_TRUE(stmt.Is<ast::CallExpression>());
 }
 
 TEST_F(CallExpressionTest, IsValid) {

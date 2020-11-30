@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   ASSERT_EQ(e->source().range.end.column, 6u);
 
   ASSERT_NE(e->variable()->constructor(), nullptr);
-  EXPECT_TRUE(e->variable()->constructor()->IsConstructor());
+  EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {

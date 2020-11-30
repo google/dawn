@@ -59,9 +59,6 @@ class MemberAccessorExpression
   /// @returns the member expression
   IdentifierExpression* member() const { return member_; }
 
-  /// @returns true if this is a member accessor expression
-  bool IsMemberAccessor() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

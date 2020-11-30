@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -33,7 +35,7 @@ TEST_F(ParserImplTest, IfStmt) {
 
   ASSERT_TRUE(e->Is<ast::IfStatement>());
   ASSERT_NE(e->condition(), nullptr);
-  ASSERT_TRUE(e->condition()->IsBinary());
+  ASSERT_TRUE(e->condition()->Is<ast::BinaryExpression>());
   EXPECT_EQ(e->body()->size(), 2u);
   EXPECT_EQ(e->else_statements().size(), 0u);
 }
@@ -48,12 +50,13 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
 
   ASSERT_TRUE(e->Is<ast::IfStatement>());
   ASSERT_NE(e->condition(), nullptr);
-  ASSERT_TRUE(e->condition()->IsBinary());
+  ASSERT_TRUE(e->condition()->Is<ast::BinaryExpression>());
   EXPECT_EQ(e->body()->size(), 2u);
 
   ASSERT_EQ(e->else_statements().size(), 2u);
   ASSERT_NE(e->else_statements()[0]->condition(), nullptr);
-  ASSERT_TRUE(e->else_statements()[0]->condition()->IsIdentifier());
+  ASSERT_TRUE(
+      e->else_statements()[0]->condition()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(e->else_statements()[0]->body()->size(), 1u);
 
   ASSERT_EQ(e->else_statements()[1]->condition(), nullptr);

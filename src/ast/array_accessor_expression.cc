@@ -33,10 +33,6 @@ ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
 
 ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
-bool ArrayAccessorExpression::IsArrayAccessor() const {
-  return true;
-}
-
 bool ArrayAccessorExpression::IsValid() const {
   if (array_ == nullptr || !array_->IsValid())
     return false;

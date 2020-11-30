@@ -46,7 +46,7 @@ TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
 
 TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
   MemberAccessorExpression stmt;
-  EXPECT_TRUE(stmt.IsMemberAccessor());
+  EXPECT_TRUE(stmt.Is<ast::MemberAccessorExpression>());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid) {

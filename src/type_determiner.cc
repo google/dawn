@@ -289,29 +289,29 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return true;
   }
 
-  if (expr->IsArrayAccessor()) {
-    return DetermineArrayAccessor(expr->AsArrayAccessor());
+  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+    return DetermineArrayAccessor(a);
   }
-  if (expr->IsBinary()) {
-    return DetermineBinary(expr->AsBinary());
+  if (auto* b = expr->As<ast::BinaryExpression>()) {
+    return DetermineBinary(b);
   }
-  if (expr->IsBitcast()) {
-    return DetermineBitcast(expr->AsBitcast());
+  if (auto* b = expr->As<ast::BitcastExpression>()) {
+    return DetermineBitcast(b);
   }
-  if (expr->IsCall()) {
-    return DetermineCall(expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return DetermineCall(c);
   }
-  if (expr->IsConstructor()) {
-    return DetermineConstructor(expr->AsConstructor());
+  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+    return DetermineConstructor(c);
   }
-  if (expr->IsIdentifier()) {
-    return DetermineIdentifier(expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return DetermineIdentifier(i);
   }
-  if (expr->IsMemberAccessor()) {
-    return DetermineMemberAccessor(expr->AsMemberAccessor());
+  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+    return DetermineMemberAccessor(m);
   }
-  if (expr->IsUnaryOp()) {
-    return DetermineUnaryOp(expr->AsUnaryOp());
+  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return DetermineUnaryOp(u);
   }
 
   set_error(expr->source(), "unknown expression for type determination");
@@ -380,9 +380,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   // The expression has to be an identifier as you can't store function pointers
   // but, if it isn't we'll just use the normal result determination to be on
   // the safe side.
-  if (expr->func()->IsIdentifier()) {
-    auto* ident = expr->func()->AsIdentifier();
-
+  if (auto* ident = expr->func()->As<ast::IdentifierExpression>()) {
     if (ident->IsIntrinsic()) {
       if (!DetermineIntrinsic(ident, expr)) {
         return false;
@@ -417,7 +415,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   }
 
   if (!expr->func()->result_type()) {
-    auto func_name = expr->func()->AsIdentifier()->name();
+    auto func_name = expr->func()->As<ast::IdentifierExpression>()->name();
     set_error(
         expr->source(),
         "v-0005: function must be declared before use: '" + func_name + "'");

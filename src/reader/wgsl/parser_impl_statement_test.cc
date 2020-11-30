@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
@@ -60,7 +61,7 @@ TEST_F(ParserImplTest, Statement_Return_Value) {
   ASSERT_TRUE(e->Is<ast::ReturnStatement>());
   auto* ret = e->As<ast::ReturnStatement>();
   ASSERT_NE(ret->value(), nullptr);
-  EXPECT_TRUE(ret->value()->IsBinary());
+  EXPECT_TRUE(ret->value()->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Return_MissingSemi) {

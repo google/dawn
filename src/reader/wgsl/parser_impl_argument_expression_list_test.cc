@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -33,7 +34,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
   ASSERT_FALSE(e.errored);
 
   ASSERT_EQ(e.value.size(), 1u);
-  ASSERT_TRUE(e.value[0]->IsIdentifier());
+  ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
@@ -43,9 +44,9 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
   ASSERT_FALSE(e.errored);
 
   ASSERT_EQ(e.value.size(), 3u);
-  ASSERT_TRUE(e.value[0]->IsIdentifier());
-  ASSERT_TRUE(e.value[1]->IsConstructor());
-  ASSERT_TRUE(e.value[2]->IsBinary());
+  ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
+  ASSERT_TRUE(e.value[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e.value[2]->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {

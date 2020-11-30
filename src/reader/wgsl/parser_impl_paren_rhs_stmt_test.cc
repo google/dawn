@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -27,7 +28,7 @@ TEST_F(ParserImplTest, ParenRhsStmt) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsBinary());
+  ASSERT_TRUE(e->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {

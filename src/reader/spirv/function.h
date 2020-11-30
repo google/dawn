@@ -32,6 +32,7 @@
 #include "source/opt/type_manager.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/expression.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"

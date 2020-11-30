@@ -55,9 +55,6 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   /// @returns the expression
   Expression* expr() const { return expr_; }
 
-  /// @returns true if this is a bitcast expression
-  bool IsBitcast() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

@@ -61,9 +61,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// @returns true if this identifier is for an intrinsic
   bool IsIntrinsic() const { return intrinsic_ != Intrinsic::kNone; }
 
-  /// @returns true if this is an identifier expression
-  bool IsIdentifier() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

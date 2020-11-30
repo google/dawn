@@ -394,8 +394,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
     return false;
   }
 
-  if (expr->func()->IsIdentifier()) {
-    auto* ident = expr->func()->AsIdentifier();
+  if (auto* ident = expr->func()->As<ast::IdentifierExpression>()) {
     auto func_name = ident->name();
     if (ident->IsIntrinsic()) {
       // TODO(sarahM0): validate intrinsics - tied with type-determiner
@@ -441,9 +440,8 @@ bool ValidatorImpl::ValidateConstant(const ast::AssignmentStatement* assign) {
     return false;
   }
 
-  if (assign->lhs()->IsIdentifier()) {
+  if (auto* ident = assign->lhs()->As<ast::IdentifierExpression>()) {
     ast::Variable* var;
-    auto* ident = assign->lhs()->AsIdentifier();
     if (variable_stack_.get(ident->name(), &var)) {
       if (var->is_const()) {
         add_error(assign->source(), "v-0021",
@@ -477,12 +475,12 @@ bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
   if (!expr) {
     return false;
   }
-  if (expr->IsIdentifier()) {
-    return ValidateIdentifier(expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return ValidateIdentifier(i);
   }
 
-  if (expr->IsCall()) {
-    return ValidateCallExpr(expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return ValidateCallExpr(c);
   }
   return true;
 }

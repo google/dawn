@@ -82,12 +82,12 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
 
 std::string get_buffer_name(ast::Expression* expr) {
   for (;;) {
-    if (expr->IsIdentifier()) {
-      return expr->AsIdentifier()->name();
-    } else if (expr->IsMemberAccessor()) {
-      expr = expr->AsMemberAccessor()->structure();
-    } else if (expr->IsArrayAccessor()) {
-      expr = expr->AsArrayAccessor()->array();
+    if (auto* ident = expr->As<ast::IdentifierExpression>()) {
+      return ident->name();
+    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+      expr = member->structure();
+    } else if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+      expr = array->array();
     } else {
       break;
     }
@@ -299,8 +299,7 @@ bool GeneratorImpl::EmitAssign(std::ostream& out,
 
   // If the LHS is an accessor into a storage buffer then we have to
   // emit a Store operation instead of an ='s.
-  if (stmt->lhs()->IsMemberAccessor()) {
-    auto* mem = stmt->lhs()->AsMemberAccessor();
+  if (auto* mem = stmt->lhs()->As<ast::MemberAccessorExpression>()) {
     if (is_storage_buffer_access(mem)) {
       std::ostringstream accessor_out;
       if (!EmitStorageBufferAccessor(pre, accessor_out, mem, stmt->rhs())) {
@@ -310,8 +309,7 @@ bool GeneratorImpl::EmitAssign(std::ostream& out,
       out << accessor_out.str() << ";" << std::endl;
       return true;
     }
-  } else if (stmt->lhs()->IsArrayAccessor()) {
-    auto* ary = stmt->lhs()->AsArrayAccessor();
+  } else if (auto* ary = stmt->lhs()->As<ast::ArrayAccessorExpression>()) {
     if (is_storage_buffer_access(ary)) {
       std::ostringstream accessor_out;
       if (!EmitStorageBufferAccessor(pre, accessor_out, ary, stmt->rhs())) {
@@ -577,12 +575,12 @@ std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
 bool GeneratorImpl::EmitCall(std::ostream& pre,
                              std::ostream& out,
                              ast::CallExpression* expr) {
-  if (!expr->func()->IsIdentifier()) {
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
+  if (ident == nullptr) {
     error_ = "invalid function name";
     return 0;
   }
 
-  auto* ident = expr->func()->AsIdentifier();
   if (ident->IsIntrinsic()) {
     const auto& params = expr->params();
     if (ident->intrinsic() == ast::Intrinsic::kSelect) {
@@ -731,7 +729,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
                                     ast::CallExpression* expr) {
   make_indent(out);
 
-  auto* ident = expr->func()->AsIdentifier();
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
 
   auto params = expr->params();
   auto* signature = static_cast<const ast::intrinsic::TextureSignature*>(
@@ -801,7 +799,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
 std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
   std::string out;
-  auto* ident = expr->func()->AsIdentifier();
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
     case ast::Intrinsic::kAsin:
@@ -976,29 +974,29 @@ bool GeneratorImpl::EmitDiscard(std::ostream& out, ast::DiscardStatement*) {
 bool GeneratorImpl::EmitExpression(std::ostream& pre,
                                    std::ostream& out,
                                    ast::Expression* expr) {
-  if (expr->IsArrayAccessor()) {
-    return EmitArrayAccessor(pre, out, expr->AsArrayAccessor());
+  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+    return EmitArrayAccessor(pre, out, a);
   }
-  if (expr->IsBinary()) {
-    return EmitBinary(pre, out, expr->AsBinary());
+  if (auto* b = expr->As<ast::BinaryExpression>()) {
+    return EmitBinary(pre, out, b);
   }
-  if (expr->IsBitcast()) {
-    return EmitBitcast(pre, out, expr->AsBitcast());
+  if (auto* b = expr->As<ast::BitcastExpression>()) {
+    return EmitBitcast(pre, out, b);
   }
-  if (expr->IsCall()) {
-    return EmitCall(pre, out, expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return EmitCall(pre, out, c);
   }
-  if (expr->IsConstructor()) {
-    return EmitConstructor(pre, out, expr->AsConstructor());
+  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+    return EmitConstructor(pre, out, c);
   }
-  if (expr->IsIdentifier()) {
-    return EmitIdentifier(pre, out, expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return EmitIdentifier(pre, out, i);
   }
-  if (expr->IsMemberAccessor()) {
-    return EmitMemberAccessor(pre, out, expr->AsMemberAccessor());
+  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+    return EmitMemberAccessor(pre, out, m);
   }
-  if (expr->IsUnaryOp()) {
-    return EmitUnaryOp(pre, out, expr->AsUnaryOp());
+  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return EmitUnaryOp(pre, out, u);
   }
 
   error_ = "unknown expression type: " + expr->str();
@@ -1016,7 +1014,7 @@ bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
 bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    std::ostream& out,
                                    ast::IdentifierExpression* expr) {
-  auto* ident = expr->AsIdentifier();
+  auto* ident = expr->As<ast::IdentifierExpression>();
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
     if (global_is_in_struct(var)) {
@@ -1683,7 +1681,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
   std::ostringstream out;
   bool first = true;
   for (;;) {
-    if (expr->IsIdentifier()) {
+    if (expr->Is<ast::IdentifierExpression>()) {
       break;
     }
 
@@ -1691,8 +1689,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       out << " + ";
     }
     first = false;
-    if (expr->IsMemberAccessor()) {
-      auto* mem = expr->AsMemberAccessor();
+    if (auto* mem = expr->As<ast::MemberAccessorExpression>()) {
       auto* res_type = mem->structure()->result_type()->UnwrapAll();
       if (res_type->Is<ast::type::StructType>()) {
         auto* str_type = res_type->As<ast::type::StructType>()->impl();
@@ -1726,8 +1723,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       }
 
       expr = mem->structure();
-    } else if (expr->IsArrayAccessor()) {
-      auto* ary = expr->AsArrayAccessor();
+    } else if (auto* ary = expr->As<ast::ArrayAccessorExpression>()) {
       auto* ary_type = ary->array()->result_type()->UnwrapAll();
 
       out << "(";
@@ -1885,10 +1881,10 @@ bool GeneratorImpl::is_storage_buffer_access(
   // If it isn't an array or a member accessor we can stop looking as it won't
   // be a storage buffer.
   auto* ary = expr->array();
-  if (ary->IsMemberAccessor()) {
-    return is_storage_buffer_access(ary->AsMemberAccessor());
-  } else if (ary->IsArrayAccessor()) {
-    return is_storage_buffer_access(ary->AsArrayAccessor());
+  if (auto* member = ary->As<ast::MemberAccessorExpression>()) {
+    return is_storage_buffer_access(member);
+  } else if (auto* array = ary->As<ast::ArrayAccessorExpression>()) {
+    return is_storage_buffer_access(array);
   }
   return false;
 }
@@ -1905,17 +1901,16 @@ bool GeneratorImpl::is_storage_buffer_access(
   }
 
   // Check if this is a storage buffer variable
-  if (structure->IsIdentifier()) {
-    auto* ident = expr->structure()->AsIdentifier();
+  if (auto* ident = expr->structure()->As<ast::IdentifierExpression>()) {
     ast::Variable* var = nullptr;
     if (!global_variables_.get(ident->name(), &var)) {
       return false;
     }
     return var->storage_class() == ast::StorageClass::kStorageBuffer;
-  } else if (structure->IsMemberAccessor()) {
-    return is_storage_buffer_access(structure->AsMemberAccessor());
-  } else if (structure->IsArrayAccessor()) {
-    return is_storage_buffer_access(structure->AsArrayAccessor());
+  } else if (auto* member = structure->As<ast::MemberAccessorExpression>()) {
+    return is_storage_buffer_access(member);
+  } else if (auto* array = structure->As<ast::ArrayAccessorExpression>()) {
+    return is_storage_buffer_access(array);
   }
 
   // Technically I don't think this is possible, but if we don't have a struct

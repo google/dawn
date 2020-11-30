@@ -55,9 +55,6 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
   /// @returns the expression
   Expression* expr() const { return expr_; }
 
-  /// @returns true if this is an as expression
-  bool IsUnaryOp() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

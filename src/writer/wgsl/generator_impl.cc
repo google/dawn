@@ -193,29 +193,29 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
-  if (expr->IsArrayAccessor()) {
-    return EmitArrayAccessor(expr->AsArrayAccessor());
+  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+    return EmitArrayAccessor(a);
   }
-  if (expr->IsBinary()) {
-    return EmitBinary(expr->AsBinary());
+  if (auto* b = expr->As<ast::BinaryExpression>()) {
+    return EmitBinary(b);
   }
-  if (expr->IsBitcast()) {
-    return EmitBitcast(expr->AsBitcast());
+  if (auto* b = expr->As<ast::BitcastExpression>()) {
+    return EmitBitcast(b);
   }
-  if (expr->IsCall()) {
-    return EmitCall(expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return EmitCall(c);
   }
-  if (expr->IsIdentifier()) {
-    return EmitIdentifier(expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return EmitIdentifier(i);
   }
-  if (expr->IsConstructor()) {
-    return EmitConstructor(expr->AsConstructor());
+  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+    return EmitConstructor(c);
   }
-  if (expr->IsMemberAccessor()) {
-    return EmitMemberAccessor(expr->AsMemberAccessor());
+  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+    return EmitMemberAccessor(m);
   }
-  if (expr->IsUnaryOp()) {
-    return EmitUnaryOp(expr->AsUnaryOp());
+  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return EmitUnaryOp(u);
   }
 
   error_ = "unknown expression type";
@@ -337,7 +337,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
-  auto* ident = expr->AsIdentifier();
+  auto* ident = expr->As<ast::IdentifierExpression>();
   out_ << ident->name();
   return true;
 }

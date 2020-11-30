@@ -33,10 +33,6 @@ MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
-bool MemberAccessorExpression::IsMemberAccessor() const {
-  return true;
-}
-
 bool MemberAccessorExpression::IsValid() const {
   if (struct_ == nullptr || !struct_->IsValid()) {
     return false;

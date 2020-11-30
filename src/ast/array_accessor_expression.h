@@ -57,9 +57,6 @@ class ArrayAccessorExpression
   /// @returns the index expression
   Expression* idx_expr() const { return idx_expr_; }
 
-  /// @returns true if this is an array accessor expression
-  bool IsArrayAccessor() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

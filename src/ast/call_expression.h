@@ -54,9 +54,6 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// @returns the parameters
   const ExpressionList& params() const { return params_; }
 
-  /// @returns true if this is a call expression
-  bool IsCall() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_EQ(e->source().range.end.column, 8u);
 
   ASSERT_NE(e->constructor(), nullptr);
-  EXPECT_TRUE(e->constructor()->IsConstructor());
+  EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {

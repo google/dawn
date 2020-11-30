@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
@@ -69,8 +70,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   EXPECT_EQ(e->source().range.end.column, 11u);
 
   ASSERT_NE(e->constructor(), nullptr);
-  ASSERT_TRUE(e->constructor()->IsConstructor());
-  ASSERT_TRUE(e->constructor()->AsConstructor()->IsScalarConstructor());
+  ASSERT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->constructor()->Is<ast::ScalarConstructorExpression>());
 
   ASSERT_FALSE(e->IsDecorated());
 }

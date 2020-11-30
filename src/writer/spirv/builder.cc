@@ -484,29 +484,29 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
 }
 
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
-  if (expr->IsArrayAccessor()) {
-    return GenerateAccessorExpression(expr->AsArrayAccessor());
+  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
+    return GenerateAccessorExpression(a);
   }
-  if (expr->IsBinary()) {
-    return GenerateBinaryExpression(expr->AsBinary());
+  if (auto* b = expr->As<ast::BinaryExpression>()) {
+    return GenerateBinaryExpression(b);
   }
-  if (expr->IsBitcast()) {
-    return GenerateBitcastExpression(expr->AsBitcast());
+  if (auto* b = expr->As<ast::BitcastExpression>()) {
+    return GenerateBitcastExpression(b);
   }
-  if (expr->IsCall()) {
-    return GenerateCallExpression(expr->AsCall());
+  if (auto* c = expr->As<ast::CallExpression>()) {
+    return GenerateCallExpression(c);
   }
-  if (expr->IsConstructor()) {
-    return GenerateConstructorExpression(nullptr, expr->AsConstructor(), false);
+  if (auto* c = expr->As<ast::ConstructorExpression>()) {
+    return GenerateConstructorExpression(nullptr, c, false);
   }
-  if (expr->IsIdentifier()) {
-    return GenerateIdentifierExpression(expr->AsIdentifier());
+  if (auto* i = expr->As<ast::IdentifierExpression>()) {
+    return GenerateIdentifierExpression(i);
   }
-  if (expr->IsMemberAccessor()) {
-    return GenerateAccessorExpression(expr->AsMemberAccessor());
+  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+    return GenerateAccessorExpression(m);
   }
-  if (expr->IsUnaryOp()) {
-    return GenerateUnaryOpExpression(expr->AsUnaryOp());
+  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+    return GenerateUnaryOpExpression(u);
   }
 
   error_ = "unknown expression type: " + expr->str();
@@ -672,13 +672,13 @@ void Builder::GenerateStore(uint32_t to, uint32_t from) {
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   uint32_t init_id = 0;
   if (var->has_constructor()) {
-    if (!var->constructor()->IsConstructor()) {
+    if (!var->constructor()->Is<ast::ConstructorExpression>()) {
       error_ = "scalar constructor expected";
       return false;
     }
 
     init_id = GenerateConstructorExpression(
-        var, var->constructor()->AsConstructor(), true);
+        var, var->constructor()->As<ast::ConstructorExpression>(), true);
     if (init_id == 0) {
       return false;
     }
@@ -981,7 +981,8 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 }
 
 uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
-  assert(expr->IsArrayAccessor() || expr->IsMemberAccessor());
+  assert(expr->Is<ast::ArrayAccessorExpression>() ||
+         expr->Is<ast::MemberAccessorExpression>());
 
   // Gather a list of all the member and array accessors that are in this chain.
   // The list is built in reverse order as that's the order we need to access
@@ -989,12 +990,12 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   std::vector<ast::Expression*> accessors;
   ast::Expression* source = expr;
   while (true) {
-    if (source->IsArrayAccessor()) {
+    if (auto* array = source->As<ast::ArrayAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
-      source = source->AsArrayAccessor()->array();
-    } else if (source->IsMemberAccessor()) {
+      source = array->array();
+    } else if (auto* member = source->As<ast::MemberAccessorExpression>()) {
       accessors.insert(accessors.begin(), source);
-      source = source->AsMemberAccessor()->structure();
+      source = member->structure();
     } else {
       break;
     }
@@ -1010,9 +1011,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   // If our initial access is into an array of non-scalar types, and that array
   // is not a pointer, then we need to load that array into a variable in order
   // to access chain into the array.
-  if (accessors[0]->IsArrayAccessor()) {
-    auto* ary_res_type =
-        accessors[0]->AsArrayAccessor()->array()->result_type();
+  if (auto* array = accessors[0]->As<ast::ArrayAccessorExpression>()) {
+    auto* ary_res_type = array->array()->result_type();
 
     if (!ary_res_type->Is<ast::type::PointerType>() &&
         (ary_res_type->Is<ast::type::ArrayType>() &&
@@ -1043,12 +1043,12 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
   std::vector<uint32_t> access_chain_indices;
   for (auto* accessor : accessors) {
-    if (accessor->IsArrayAccessor()) {
-      if (!GenerateArrayAccessor(accessor->AsArrayAccessor(), &info)) {
+    if (auto* array = accessor->As<ast::ArrayAccessorExpression>()) {
+      if (!GenerateArrayAccessor(array, &info)) {
         return 0;
       }
-    } else if (accessor->IsMemberAccessor()) {
-      if (!GenerateMemberAccessor(accessor->AsMemberAccessor(), &info)) {
+    } else if (auto* member = accessor->As<ast::MemberAccessorExpression>()) {
+      if (!GenerateMemberAccessor(member, &info)) {
         return 0;
       }
 
@@ -1170,19 +1170,20 @@ uint32_t Builder::GenerateConstructorExpression(
 }
 
 bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
-  if (!expr->IsConstructor()) {
+  auto* constructor = expr->As<ast::ConstructorExpression>();
+  if (constructor == nullptr) {
     return false;
   }
-  if (expr->AsConstructor()->IsScalarConstructor()) {
+  if (constructor->Is<ast::ScalarConstructorExpression>()) {
     return true;
   }
 
-  auto* tc = expr->AsConstructor()->AsTypeConstructor();
+  auto* tc = constructor->AsTypeConstructor();
   auto* result_type = tc->type()->UnwrapAll();
   for (size_t i = 0; i < tc->values().size(); ++i) {
     auto* e = tc->values()[i];
 
-    if (!e->IsConstructor()) {
+    if (!e->Is<ast::ConstructorExpression>()) {
       if (is_global_init) {
         error_ = "constructor must be a constant expression";
         return false;
@@ -1197,16 +1198,16 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     }
 
     if (result_type->Is<ast::type::VectorType>() &&
-        !e->AsConstructor()->IsScalarConstructor()) {
+        !e->Is<ast::ScalarConstructorExpression>()) {
       return false;
     }
 
     // This should all be handled by |is_constructor_const| call above
-    if (!e->AsConstructor()->IsScalarConstructor()) {
+    if (!e->Is<ast::ScalarConstructorExpression>()) {
       continue;
     }
 
-    auto* sc = e->AsConstructor()->AsScalarConstructor();
+    auto* sc = e->As<ast::ScalarConstructorExpression>();
     ast::type::Type* subtype = result_type->UnwrapAll();
     if (subtype->Is<ast::type::VectorType>()) {
       subtype = subtype->As<ast::type::VectorType>()->type()->UnwrapAll();
@@ -1279,8 +1280,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   for (auto* e : values) {
     uint32_t id = 0;
     if (constructor_is_const) {
-      id = GenerateConstructorExpression(nullptr, e->AsConstructor(),
-                                         is_global_init);
+      id = GenerateConstructorExpression(
+          nullptr, e->As<ast::ConstructorExpression>(), is_global_init);
     } else {
       id = GenerateExpression(e);
       id = GenerateLoadIfNeeded(e->result_type(), id);
@@ -1751,12 +1752,12 @@ bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
 }
 
 uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
-  if (!expr->func()->IsIdentifier()) {
+  auto* ident = expr->func()->As<ast::IdentifierExpression>();
+
+  if (ident == nullptr) {
     error_ = "invalid function name";
     return 0;
   }
-
-  auto* ident = expr->func()->AsIdentifier();
 
   if (ident->IsIntrinsic()) {
     return GenerateIntrinsic(ident, expr);
@@ -1826,7 +1827,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     if (call->params().empty()) {
       error_ = "missing param for runtime array length";
       return 0;
-    } else if (!call->params()[0]->IsMemberAccessor()) {
+    } else if (!call->params()[0]->Is<ast::MemberAccessorExpression>()) {
       if (call->params()[0]->result_type()->Is<ast::type::PointerType>()) {
         error_ = "pointer accessors not supported yet";
       } else {
@@ -1834,7 +1835,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
       }
       return 0;
     }
-    auto* accessor = call->params()[0]->AsMemberAccessor();
+    auto* accessor = call->params()[0]->As<ast::MemberAccessorExpression>();
     auto struct_id = GenerateExpression(accessor->structure());
     if (struct_id == 0) {
       return 0;

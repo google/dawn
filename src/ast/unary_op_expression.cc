@@ -31,10 +31,6 @@ UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 
 UnaryOpExpression::~UnaryOpExpression() = default;
 
-bool UnaryOpExpression::IsUnaryOp() const {
-  return true;
-}
-
 bool UnaryOpExpression::IsValid() const {
   return expr_ != nullptr && expr_->IsValid();
 }

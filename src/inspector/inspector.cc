@@ -124,13 +124,13 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     }
 
     auto* expression = var->constructor();
-    if (!expression->IsConstructor()) {
+    if (!expression->Is<ast::ConstructorExpression>()) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();
       continue;
     }
 
-    auto* constructor = expression->AsConstructor();
+    auto* constructor = expression->As<ast::ConstructorExpression>();
     if (!constructor->IsScalarConstructor()) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();

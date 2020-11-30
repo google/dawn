@@ -14,18 +14,6 @@
 
 #include "src/ast/expression.h"
 
-#include <assert.h>
-
-#include "src/ast/array_accessor_expression.h"
-#include "src/ast/binary_expression.h"
-#include "src/ast/bitcast_expression.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/constructor_expression.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/unary_op_expression.h"
-
 namespace tint {
 namespace ast {
 
@@ -40,117 +28,6 @@ Expression::~Expression() = default;
 void Expression::set_result_type(type::Type* type) {
   // The expression result should never be an alias or access-controlled type
   result_type_ = type->UnwrapIfNeeded();
-}
-
-bool Expression::IsArrayAccessor() const {
-  return false;
-}
-
-bool Expression::IsBitcast() const {
-  return false;
-}
-
-bool Expression::IsCall() const {
-  return false;
-}
-
-bool Expression::IsIdentifier() const {
-  return false;
-}
-
-bool Expression::IsConstructor() const {
-  return false;
-}
-
-bool Expression::IsMemberAccessor() const {
-  return false;
-}
-
-bool Expression::IsBinary() const {
-  return false;
-}
-
-bool Expression::IsUnaryOp() const {
-  return false;
-}
-const ArrayAccessorExpression* Expression::AsArrayAccessor() const {
-  assert(IsArrayAccessor());
-  return static_cast<const ArrayAccessorExpression*>(this);
-}
-
-const BitcastExpression* Expression::AsBitcast() const {
-  assert(IsBitcast());
-  return static_cast<const BitcastExpression*>(this);
-}
-
-const BinaryExpression* Expression::AsBinary() const {
-  assert(IsBinary());
-  return static_cast<const BinaryExpression*>(this);
-}
-
-const CallExpression* Expression::AsCall() const {
-  assert(IsCall());
-  return static_cast<const CallExpression*>(this);
-}
-
-const ConstructorExpression* Expression::AsConstructor() const {
-  assert(IsConstructor());
-  return static_cast<const ConstructorExpression*>(this);
-}
-
-const IdentifierExpression* Expression::AsIdentifier() const {
-  assert(IsIdentifier());
-  return static_cast<const IdentifierExpression*>(this);
-}
-
-const MemberAccessorExpression* Expression::AsMemberAccessor() const {
-  assert(IsMemberAccessor());
-  return static_cast<const MemberAccessorExpression*>(this);
-}
-
-const UnaryOpExpression* Expression::AsUnaryOp() const {
-  assert(IsUnaryOp());
-  return static_cast<const UnaryOpExpression*>(this);
-}
-
-ArrayAccessorExpression* Expression::AsArrayAccessor() {
-  assert(IsArrayAccessor());
-  return static_cast<ArrayAccessorExpression*>(this);
-}
-
-BitcastExpression* Expression::AsBitcast() {
-  assert(IsBitcast());
-  return static_cast<BitcastExpression*>(this);
-}
-
-BinaryExpression* Expression::AsBinary() {
-  assert(IsBinary());
-  return static_cast<BinaryExpression*>(this);
-}
-
-CallExpression* Expression::AsCall() {
-  assert(IsCall());
-  return static_cast<CallExpression*>(this);
-}
-
-ConstructorExpression* Expression::AsConstructor() {
-  assert(IsConstructor());
-  return static_cast<ConstructorExpression*>(this);
-}
-
-IdentifierExpression* Expression::AsIdentifier() {
-  assert(IsIdentifier());
-  return static_cast<IdentifierExpression*>(this);
-}
-
-MemberAccessorExpression* Expression::AsMemberAccessor() {
-  assert(IsMemberAccessor());
-  return static_cast<MemberAccessorExpression*>(this);
-}
-
-UnaryOpExpression* Expression::AsUnaryOp() {
-  assert(IsUnaryOp());
-  return static_cast<UnaryOpExpression*>(this);
 }
 
 }  // namespace ast

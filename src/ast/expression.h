@@ -25,15 +25,6 @@
 namespace tint {
 namespace ast {
 
-class ArrayAccessorExpression;
-class BinaryExpression;
-class BitcastExpression;
-class CallExpression;
-class IdentifierExpression;
-class ConstructorExpression;
-class MemberAccessorExpression;
-class UnaryOpExpression;
-
 /// Base expression class
 class Expression : public Castable<Expression, Node> {
  public:
@@ -50,57 +41,6 @@ class Expression : public Castable<Expression, Node> {
   std::string result_type_str() const {
     return result_type_ ? result_type_->type_name() : "not set";
   }
-
-  /// @returns true if this is an array accessor expression
-  virtual bool IsArrayAccessor() const;
-  /// @returns true if this is a bitcast expression
-  virtual bool IsBitcast() const;
-  /// @returns true if this is a call expression
-  virtual bool IsCall() const;
-  /// @returns true if this is an identifier expression
-  virtual bool IsIdentifier() const;
-  /// @returns true if this is an constructor expression
-  virtual bool IsConstructor() const;
-  /// @returns true if this is a member accessor expression
-  virtual bool IsMemberAccessor() const;
-  /// @returns true if this is a binary expression
-  virtual bool IsBinary() const;
-  /// @returns true if this is a unary op expression
-  virtual bool IsUnaryOp() const;
-
-  /// @returns the expression as an array accessor
-  const ArrayAccessorExpression* AsArrayAccessor() const;
-  /// @returns the expression as a bitcast
-  const BitcastExpression* AsBitcast() const;
-  /// @returns the expression as a call
-  const CallExpression* AsCall() const;
-  /// @returns the expression as an identifier
-  const IdentifierExpression* AsIdentifier() const;
-  /// @returns the expression as an constructor
-  const ConstructorExpression* AsConstructor() const;
-  /// @returns the expression as a member accessor
-  const MemberAccessorExpression* AsMemberAccessor() const;
-  /// @returns the expression as a binary expression
-  const BinaryExpression* AsBinary() const;
-  /// @returns the expression as a unary op expression
-  const UnaryOpExpression* AsUnaryOp() const;
-
-  /// @returns the expression as an array accessor
-  ArrayAccessorExpression* AsArrayAccessor();
-  /// @returns the expression as a bitcast
-  BitcastExpression* AsBitcast();
-  /// @returns the expression as a call
-  CallExpression* AsCall();
-  /// @returns the expression as an identifier
-  IdentifierExpression* AsIdentifier();
-  /// @returns the expression as an constructor
-  ConstructorExpression* AsConstructor();
-  /// @returns the expression as a member accessor
-  MemberAccessorExpression* AsMemberAccessor();
-  /// @returns the expression as a binary expression
-  BinaryExpression* AsBinary();
-  /// @returns the expression as a unary op expression
-  UnaryOpExpression* AsUnaryOp();
 
  protected:
   /// Constructor

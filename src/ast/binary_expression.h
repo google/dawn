@@ -125,9 +125,6 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   /// @returns the right side expression
   Expression* rhs() const { return rhs_; }
 
-  /// @returns true if this is a op expression
-  bool IsBinary() const override;
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 

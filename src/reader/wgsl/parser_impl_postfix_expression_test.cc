@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
@@ -36,16 +37,16 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsArrayAccessor());
-  auto* ary = e->AsArrayAccessor();
+  ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
+  auto* ary = e->As<ast::ArrayAccessorExpression>();
 
-  ASSERT_TRUE(ary->array()->IsIdentifier());
-  auto* ident = ary->array()->AsIdentifier();
+  ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
+  auto* ident = ary->array()->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->name(), "a");
 
-  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
-  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
-  auto* c = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  auto* c = ary->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(c->literal()->IsSint());
   EXPECT_EQ(c->literal()->AsSint()->value(), 1);
 }
@@ -58,14 +59,14 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsArrayAccessor());
-  auto* ary = e->AsArrayAccessor();
+  ASSERT_TRUE(e->Is<ast::ArrayAccessorExpression>());
+  auto* ary = e->As<ast::ArrayAccessorExpression>();
 
-  ASSERT_TRUE(ary->array()->IsIdentifier());
-  auto* ident = ary->array()->AsIdentifier();
+  ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
+  auto* ident = ary->array()->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->name(), "a");
 
-  ASSERT_TRUE(ary->idx_expr()->IsBinary());
+  ASSERT_TRUE(ary->idx_expr()->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
@@ -106,11 +107,11 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsCall());
-  auto* c = e->AsCall();
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* c = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(c->func()->IsIdentifier());
-  auto* func = c->func()->AsIdentifier();
+  ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
+  auto* func = c->func()->As<ast::IdentifierExpression>();
   EXPECT_EQ(func->name(), "a");
 
   EXPECT_EQ(c->params().size(), 0u);
@@ -124,17 +125,17 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->IsCall());
-  auto* c = e->AsCall();
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* c = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(c->func()->IsIdentifier());
-  auto* func = c->func()->AsIdentifier();
+  ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
+  auto* func = c->func()->As<ast::IdentifierExpression>();
   EXPECT_EQ(func->name(), "test");
 
   EXPECT_EQ(c->params().size(), 3u);
-  EXPECT_TRUE(c->params()[0]->IsConstructor());
-  EXPECT_TRUE(c->params()[1]->IsIdentifier());
-  EXPECT_TRUE(c->params()[2]->IsBinary());
+  EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
+  EXPECT_TRUE(c->params()[1]->Is<ast::IdentifierExpression>());
+  EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
@@ -174,14 +175,14 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsMemberAccessor());
+  ASSERT_TRUE(e->Is<ast::MemberAccessorExpression>());
 
-  auto* m = e->AsMemberAccessor();
-  ASSERT_TRUE(m->structure()->IsIdentifier());
-  EXPECT_EQ(m->structure()->AsIdentifier()->name(), "a");
+  auto* m = e->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(m->structure()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(m->structure()->As<ast::IdentifierExpression>()->name(), "a");
 
-  ASSERT_TRUE(m->member()->IsIdentifier());
-  EXPECT_EQ(m->member()->AsIdentifier()->name(), "b");
+  ASSERT_TRUE(m->member()->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(m->member()->As<ast::IdentifierExpression>()->name(), "b");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
@@ -211,7 +212,7 @@ TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsIdentifier());
+  ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
 }  // namespace

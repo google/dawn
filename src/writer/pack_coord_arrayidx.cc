@@ -26,13 +26,10 @@ namespace writer {
 namespace {
 
 ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
-  if (!expr->IsConstructor())
-    return nullptr;
-  auto* constructor = expr->AsConstructor();
-  if (!constructor->IsTypeConstructor()) {
+  auto* type_constructor = expr->As<ast::TypeConstructorExpression>();
+  if (type_constructor == nullptr) {
     return nullptr;
   }
-  auto* type_constructor = constructor->AsTypeConstructor();
   if (!type_constructor->type()->Is<ast::type::VectorType>()) {
     return nullptr;
   }

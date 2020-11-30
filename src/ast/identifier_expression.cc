@@ -28,10 +28,6 @@ IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
 IdentifierExpression::~IdentifierExpression() = default;
 
-bool IdentifierExpression::IsIdentifier() const {
-  return true;
-}
-
 bool IdentifierExpression::IsValid() const {
   return !name_.empty();
 }

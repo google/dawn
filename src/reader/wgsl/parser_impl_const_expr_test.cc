@@ -31,25 +31,25 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto e = p->expect_const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
-  auto* t = e->AsConstructor()->AsTypeConstructor();
+  auto* t = e->As<ast::TypeConstructorExpression>();
   ASSERT_TRUE(t->type()->Is<ast::type::VectorType>());
   EXPECT_EQ(t->type()->As<ast::type::VectorType>()->size(), 2u);
 
   ASSERT_EQ(t->values().size(), 2u);
   auto& v = t->values();
 
-  ASSERT_TRUE(v[0]->IsConstructor());
-  ASSERT_TRUE(v[0]->AsConstructor()->IsScalarConstructor());
-  auto* c = v[0]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(v[0]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(v[0]->Is<ast::ScalarConstructorExpression>());
+  auto* c = v[0]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(c->literal()->IsFloat());
   EXPECT_FLOAT_EQ(c->literal()->AsFloat()->value(), 1.);
 
-  ASSERT_TRUE(v[1]->IsConstructor());
-  ASSERT_TRUE(v[1]->AsConstructor()->IsScalarConstructor());
-  c = v[1]->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(v[1]->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(v[1]->Is<ast::ScalarConstructorExpression>());
+  c = v[1]->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(c->literal()->IsFloat());
   EXPECT_FLOAT_EQ(c->literal()->AsFloat()->value(), 2.);
 }
@@ -114,9 +114,9 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->IsConstructor());
-  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
-  auto* c = e->AsConstructor()->AsScalarConstructor();
+  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::ScalarConstructorExpression>());
+  auto* c = e->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(c->literal()->IsBool());
   EXPECT_TRUE(c->literal()->AsBool()->IsTrue());
 }

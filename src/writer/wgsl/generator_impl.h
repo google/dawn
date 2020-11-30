@@ -20,7 +20,10 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
@@ -29,6 +32,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -37,6 +41,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/writer/text_generator.h"
 

@@ -29,9 +29,6 @@ class ConstructorExpression
  public:
   ~ConstructorExpression() override;
 
-  /// @returns true if this is an constructor expression
-  bool IsConstructor() const override;
-
   /// @returns true if this is a scalar constructor
   virtual bool IsScalarConstructor() const;
   /// @returns true if this is a type constructor
