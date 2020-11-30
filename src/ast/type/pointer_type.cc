@@ -31,6 +31,8 @@ std::string PointerType::type_name() const {
   return out.str();
 }
 
+PointerType::PointerType(PointerType&&) = default;
+
 PointerType::~PointerType() = default;
 
 }  // namespace type

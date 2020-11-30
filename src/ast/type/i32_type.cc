@@ -20,6 +20,8 @@ namespace type {
 
 I32Type::I32Type() = default;
 
+I32Type::I32Type(I32Type&&) = default;
+
 I32Type::~I32Type() = default;
 
 bool I32Type::IsI32() const {

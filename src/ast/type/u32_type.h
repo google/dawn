@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A unsigned int 32 type.
-class U32Type : public Type {
+class U32Type : public Castable<U32Type, Type> {
  public:
   /// Constructor
   U32Type();

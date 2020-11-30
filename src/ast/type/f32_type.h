@@ -24,12 +24,12 @@ namespace ast {
 namespace type {
 
 /// A float 32 type
-class F32Type : public Type {
+class F32Type : public Castable<F32Type, Type> {
  public:
   /// Constructor
   F32Type();
   /// Move constructor
-  F32Type(F32Type&&) = default;
+  F32Type(F32Type&&);
   ~F32Type() override;
 
   /// @returns true if the type is an f32 type

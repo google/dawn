@@ -31,6 +31,8 @@ MatrixType::MatrixType(Type* subtype, uint32_t rows, uint32_t columns)
   assert(columns < 5);
 }
 
+MatrixType::MatrixType(MatrixType&&) = default;
+
 MatrixType::~MatrixType() = default;
 
 bool MatrixType::IsMatrix() const {

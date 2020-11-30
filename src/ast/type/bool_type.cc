@@ -20,6 +20,8 @@ namespace type {
 
 BoolType::BoolType() = default;
 
+BoolType::BoolType(BoolType&&) = default;
+
 BoolType::~BoolType() = default;
 
 bool BoolType::IsBool() const {

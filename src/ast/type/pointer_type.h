@@ -26,14 +26,14 @@ namespace ast {
 namespace type {
 
 /// A pointer type.
-class PointerType : public Type {
+class PointerType : public Castable<PointerType, Type> {
  public:
   /// Construtor
   /// @param subtype the pointee type
   /// @param storage_class the storage class of the pointer
   explicit PointerType(Type* subtype, StorageClass storage_class);
   /// Move constructor
-  PointerType(PointerType&&) = default;
+  PointerType(PointerType&&);
   ~PointerType() override;
 
   /// @returns true if the type is a pointer type

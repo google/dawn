@@ -24,12 +24,12 @@ namespace ast {
 namespace type {
 
 /// A boolean type
-class BoolType : public Type {
+class BoolType : public Castable<BoolType, Type> {
  public:
   /// Constructor
   BoolType();
   /// Move constructor
-  BoolType(BoolType&&) = default;
+  BoolType(BoolType&&);
   ~BoolType() override;
 
   /// @returns true if the type is a bool type

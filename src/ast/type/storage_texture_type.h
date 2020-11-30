@@ -66,7 +66,7 @@ enum class ImageFormat {
 std::ostream& operator<<(std::ostream& out, ImageFormat dim);
 
 /// A storage texture type.
-class StorageTextureType : public TextureType {
+class StorageTextureType : public Castable<StorageTextureType, TextureType> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

@@ -28,7 +28,7 @@ namespace ast {
 namespace type {
 
 /// An array type. If size is zero then it is a runtime array.
-class ArrayType : public Type {
+class ArrayType : public Castable<ArrayType, Type> {
  public:
   /// Constructor for runtime array
   /// @param subtype the type of the array elements

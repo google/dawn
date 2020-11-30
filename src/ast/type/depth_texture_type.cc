@@ -33,7 +33,7 @@ bool IsValidDepthDimension(TextureDimension dim) {
 
 }  // namespace
 
-DepthTextureType::DepthTextureType(TextureDimension dim) : TextureType(dim) {
+DepthTextureType::DepthTextureType(TextureDimension dim) : Base(dim) {
   assert(IsValidDepthDimension(dim));
 }
 

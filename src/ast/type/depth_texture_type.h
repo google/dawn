@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A depth texture type.
-class DepthTextureType : public TextureType {
+class DepthTextureType : public Castable<DepthTextureType, TextureType> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

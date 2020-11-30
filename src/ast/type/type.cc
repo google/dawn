@@ -37,6 +37,8 @@ namespace type {
 
 Type::Type() = default;
 
+Type::  Type(Type&&) = default;
+
 Type::~Type() = default;
 
 Type* Type::UnwrapPtrIfNeeded() {

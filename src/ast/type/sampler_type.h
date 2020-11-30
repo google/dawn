@@ -34,7 +34,7 @@ enum class SamplerKind {
 std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
-class SamplerType : public Type {
+class SamplerType : public Castable<SamplerType, Type> {
  public:
   /// Constructor
   /// @param kind the kind of sampler

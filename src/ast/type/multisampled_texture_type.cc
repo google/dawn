@@ -23,7 +23,7 @@ namespace type {
 
 MultisampledTextureType::MultisampledTextureType(TextureDimension dim,
                                                  Type* type)
-    : TextureType(dim), type_(type) {
+    : Base(dim), type_(type) {
   assert(type_);
 }
 

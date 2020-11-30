@@ -24,7 +24,8 @@ namespace ast {
 namespace type {
 
 /// A multisampled texture type.
-class MultisampledTextureType : public TextureType {
+class MultisampledTextureType
+    : public Castable<MultisampledTextureType, TextureType> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

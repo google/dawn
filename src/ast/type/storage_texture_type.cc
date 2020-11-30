@@ -153,7 +153,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
 StorageTextureType::StorageTextureType(TextureDimension dim,
                                        AccessControl access,
                                        ImageFormat format)
-    : TextureType(dim), access_(access), image_format_(format) {
+    : Base(dim), access_(access), image_format_(format) {
   assert(IsValidStorageDimension(dim));
 }
 

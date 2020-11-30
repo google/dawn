@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A sampled texture type.
-class SampledTextureType : public TextureType {
+class SampledTextureType : public Castable<SampledTextureType, TextureType> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture

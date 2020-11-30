@@ -25,14 +25,14 @@ namespace ast {
 namespace type {
 
 /// An access control type. Holds an access setting and pointer to another type.
-class AccessControlType : public Type {
+class AccessControlType : public Castable<AccessControlType, Type> {
  public:
   /// Constructor
   /// @param access the access control setting
   /// @param subtype the access controlled type
   AccessControlType(AccessControl access, Type* subtype);
   /// Move constructor
-  AccessControlType(AccessControlType&&) = default;
+  AccessControlType(AccessControlType&&);
   ~AccessControlType() override;
 
   /// @returns true if the type is an access control type

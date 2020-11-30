@@ -20,6 +20,8 @@ namespace type {
 
 F32Type::F32Type() = default;
 
+F32Type::F32Type(F32Type&&) = default;
+
 F32Type::~F32Type() = default;
 
 bool F32Type::IsF32() const {

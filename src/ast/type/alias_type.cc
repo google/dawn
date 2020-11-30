@@ -25,6 +25,8 @@ AliasType::AliasType(const std::string& name, Type* subtype)
   assert(subtype_);
 }
 
+AliasType::AliasType(AliasType&&) = default;
+
 AliasType::~AliasType() = default;
 
 bool AliasType::IsAlias() const {

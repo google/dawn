@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A vector type.
-class VectorType : public Type {
+class VectorType : public Castable<VectorType, Type> {
  public:
   /// Constructor
   /// @param subtype the vector element type

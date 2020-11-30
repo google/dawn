@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A void type
-class VoidType : public Type {
+class VoidType : public Castable<VoidType, Type> {
  public:
   /// Constructor
   VoidType();

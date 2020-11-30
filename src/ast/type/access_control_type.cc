@@ -26,6 +26,8 @@ AccessControlType::AccessControlType(AccessControl access, Type* subtype)
   assert(!subtype_->IsAccessControl());
 }
 
+AccessControlType::AccessControlType(AccessControlType&&) = default;
+
 AccessControlType::~AccessControlType() = default;
 
 bool AccessControlType::IsAccessControl() const {

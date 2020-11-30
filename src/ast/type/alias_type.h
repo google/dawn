@@ -24,14 +24,14 @@ namespace ast {
 namespace type {
 
 /// A type alias type. Holds a name and pointer to another type.
-class AliasType : public Type {
+class AliasType : public Castable<AliasType, Type> {
  public:
   /// Constructor
   /// @param name the alias name
   /// @param subtype the alias'd type
   AliasType(const std::string& name, Type* subtype);
   /// Move constructor
-  AliasType(AliasType&&) = default;
+  AliasType(AliasType&&);
   ~AliasType() override;
 
   /// @returns true if the type is an alias type

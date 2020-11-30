@@ -24,7 +24,7 @@ namespace ast {
 namespace type {
 
 /// A matrix type
-class MatrixType : public Type {
+class MatrixType : public Castable<MatrixType, Type> {
  public:
   /// Constructor
   /// @param subtype type matrix type
@@ -32,7 +32,7 @@ class MatrixType : public Type {
   /// @param columns the number of columns in the matrix
   MatrixType(Type* subtype, uint32_t rows, uint32_t columns);
   /// Move constructor
-  MatrixType(MatrixType&&) = default;
+  MatrixType(MatrixType&&);
   ~MatrixType() override;
 
   /// @returns true if the type is a matrix type

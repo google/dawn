@@ -26,7 +26,7 @@ namespace ast {
 namespace type {
 
 /// A structure type
-class StructType : public Type {
+class StructType : public Castable<StructType, Type> {
  public:
   /// Constructor
   /// @param name the name of the struct

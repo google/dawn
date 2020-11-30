@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "src/castable.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -40,11 +42,11 @@ class VoidType;
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
 /// Base class for a type in the system
-class Type {
+class Type : public Castable<Type> {
  public:
   /// Move constructor
-  Type(Type&&) = default;
-  virtual ~Type();
+  Type(Type&&);
+  ~Type() override;
 
   /// @returns true if the type is an access control type
   virtual bool IsAccessControl() const;

@@ -24,12 +24,12 @@ namespace ast {
 namespace type {
 
 /// A signed int 32 type.
-class I32Type : public Type {
+class I32Type : public Castable<I32Type, Type> {
  public:
   /// Constructor
   I32Type();
   /// Move constructor
-  I32Type(I32Type&&) = default;
+  I32Type(I32Type&&);
   ~I32Type() override;
 
   /// @returns true if the type is an i32 type
