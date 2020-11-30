@@ -1208,6 +1208,8 @@ using SpvParserTest_DeclHandle_SampledImage =
 
 TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
   const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
      OpName %f1 "f1"
      OpName %vf12 "vf12"
      OpName %vf123 "vf123"
