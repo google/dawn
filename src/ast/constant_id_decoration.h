@@ -31,9 +31,6 @@ class ConstantIdDecoration
   ConstantIdDecoration(uint32_t val, const Source& source);
   ~ConstantIdDecoration() override;
 
-  /// @returns true if this is a constant_id decoration
-  bool IsConstantId() const override;
-
   /// @returns the constant id value
   uint32_t value() const { return value_; }
 

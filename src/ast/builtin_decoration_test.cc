@@ -14,6 +14,7 @@
 
 #include "src/ast/builtin_decoration.h"
 
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -32,7 +33,7 @@ TEST_F(BuiltinDecorationTest, Is) {
   Decoration* d = &bd;
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_TRUE(d->Is<BuiltinDecoration>());
-  EXPECT_FALSE(bd.IsConstantId());
+  EXPECT_FALSE(d->Is<ConstantIdDecoration>());
   EXPECT_FALSE(bd.IsLocation());
   EXPECT_FALSE(bd.IsSet());
 }

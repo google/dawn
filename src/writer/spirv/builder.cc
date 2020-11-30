@@ -31,6 +31,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -796,7 +797,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
             spv::Op::OpDecorate,
             {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
              Operand::Int(deco->AsSet()->value())});
-      } else if (deco->IsConstantId()) {
+      } else if (deco->Is<ast::ConstantIdDecoration>()) {
         // Spec constants are handled elsewhere
       } else {
         error_ = "unknown decoration";

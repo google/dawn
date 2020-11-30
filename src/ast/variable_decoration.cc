@@ -16,9 +16,6 @@
 
 #include <assert.h>
 
-#include "src/ast/binding_decoration.h"
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 
@@ -39,17 +36,8 @@ bool VariableDecoration::IsLocation() const {
   return false;
 }
 
-bool VariableDecoration::IsConstantId() const {
-  return false;
-}
-
 bool VariableDecoration::IsSet() const {
   return false;
-}
-
-ConstantIdDecoration* VariableDecoration::AsConstantId() {
-  assert(IsConstantId());
-  return static_cast<ConstantIdDecoration*>(this);
 }
 
 LocationDecoration* VariableDecoration::AsLocation() {

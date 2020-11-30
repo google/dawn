@@ -40,15 +40,11 @@ class VariableDecoration : public Castable<VariableDecoration, Decoration> {
   /// @return the decoration kind
   DecorationKind GetKind() const override;
 
-  /// @returns true if this is a constant id decoration
-  virtual bool IsConstantId() const;
   /// @returns true if this is a location decoration
   virtual bool IsLocation() const;
   /// @returns true if this is a set decoration
   virtual bool IsSet() const;
 
-  /// @returns the decoration as a constant id decoration
-  ConstantIdDecoration* AsConstantId();
   /// @returns the decoration as a location decoration
   LocationDecoration* AsLocation();
   /// @returns the decoration as a set decoration

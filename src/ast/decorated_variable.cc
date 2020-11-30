@@ -51,7 +51,7 @@ bool DecoratedVariable::HasBuiltinDecoration() const {
 
 bool DecoratedVariable::HasConstantIdDecoration() const {
   for (auto* deco : decorations_) {
-    if (deco->IsConstantId()) {
+    if (deco->Is<ConstantIdDecoration>()) {
       return true;
     }
   }
@@ -61,8 +61,8 @@ bool DecoratedVariable::HasConstantIdDecoration() const {
 uint32_t DecoratedVariable::constant_id() const {
   assert(HasConstantIdDecoration());
   for (auto* deco : decorations_) {
-    if (deco->IsConstantId()) {
-      return deco->AsConstantId()->value();
+    if (auto* cid = deco->As<ConstantIdDecoration>()) {
+      return cid->value();
     }
   }
   return 0;

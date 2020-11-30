@@ -649,8 +649,8 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
       out_ << "location(" << deco->AsLocation()->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
-    } else if (deco->IsConstantId()) {
-      out_ << "constant_id(" << deco->AsConstantId()->value() << ")";
+    } else if (auto* cid = deco->As<ast::ConstantIdDecoration>()) {
+      out_ << "constant_id(" << cid->value() << ")";
     } else {
       error_ = "unknown variable decoration";
       return false;
