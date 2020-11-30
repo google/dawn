@@ -747,8 +747,8 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->IsSampler());
-  ASSERT_FALSE(t->AsSampler()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
+  ASSERT_FALSE(t->As<ast::type::SamplerType>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture_Old) {

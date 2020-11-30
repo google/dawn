@@ -42,7 +42,7 @@ TEST_F(MultisampledTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->Is<MatrixType>());
   EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_FALSE(ty->IsSampler());
+  EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->IsStruct());
   EXPECT_TRUE(ty->IsTexture());
   EXPECT_FALSE(ty->IsU32());

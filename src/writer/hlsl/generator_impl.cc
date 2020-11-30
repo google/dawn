@@ -2079,8 +2079,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
     error_ = "pointers not supported in HLSL";
     return false;
-  } else if (type->IsSampler()) {
-    auto* sampler = type->AsSampler();
+  } else if (type->Is<ast::type::SamplerType>()) {
+    auto* sampler = type->As<ast::type::SamplerType>();
     out << "Sampler";
     if (sampler->IsComparison()) {
       out << "Comparison";

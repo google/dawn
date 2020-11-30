@@ -43,9 +43,6 @@ class SamplerType : public Castable<SamplerType, Type> {
   SamplerType(SamplerType&&);
   ~SamplerType() override;
 
-  /// @returns true if the type is a sampler type
-  bool IsSampler() const override;
-
   /// @returns the sampler type
   SamplerKind kind() const { return kind_; }
 

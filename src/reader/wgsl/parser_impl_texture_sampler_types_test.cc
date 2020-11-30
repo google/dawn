@@ -42,8 +42,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->IsSampler());
-  ASSERT_FALSE(t->AsSampler()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
+  ASSERT_FALSE(t->As<ast::type::SamplerType>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
@@ -53,8 +53,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->IsSampler());
-  ASSERT_TRUE(t->AsSampler()->IsComparison());
+  ASSERT_TRUE(t->Is<ast::type::SamplerType>());
+  ASSERT_TRUE(t->As<ast::type::SamplerType>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {

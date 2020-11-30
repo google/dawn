@@ -36,10 +36,6 @@ SamplerType::SamplerType(SamplerType&&) = default;
 
 SamplerType::~SamplerType() = default;
 
-bool SamplerType::IsSampler() const {
-  return true;
-}
-
 std::string SamplerType::type_name() const {
   return std::string("__sampler_") +
          (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");

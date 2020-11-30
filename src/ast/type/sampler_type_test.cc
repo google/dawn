@@ -52,7 +52,7 @@ TEST_F(SamplerTypeTest, Is) {
   EXPECT_FALSE(ty->Is<I32Type>());
   EXPECT_FALSE(ty->Is<MatrixType>());
   EXPECT_FALSE(ty->Is<PointerType>());
-  EXPECT_TRUE(ty->IsSampler());
+  EXPECT_TRUE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->IsStruct());
   EXPECT_FALSE(ty->IsTexture());
   EXPECT_FALSE(ty->IsU32());

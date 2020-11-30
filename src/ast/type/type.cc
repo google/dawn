@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsSampler() const {
-  return false;
-}
-
 bool Type::IsStruct() const {
   return false;
 }
@@ -142,11 +138,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const SamplerType* Type::AsSampler() const {
-  assert(IsSampler());
-  return static_cast<const SamplerType*>(this);
-}
-
 const StructType* Type::AsStruct() const {
   assert(IsStruct());
   return static_cast<const StructType*>(this);
@@ -170,11 +161,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-SamplerType* Type::AsSampler() {
-  assert(IsSampler());
-  return static_cast<SamplerType*>(this);
 }
 
 StructType* Type::AsStruct() {

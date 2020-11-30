@@ -453,8 +453,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       return false;
     }
     out_ << ">";
-  } else if (type->IsSampler()) {
-    auto* sampler = type->AsSampler();
+  } else if (type->Is<ast::type::SamplerType>()) {
+    auto* sampler = type->As<ast::type::SamplerType>();
     out_ << "sampler";
 
     if (sampler->IsComparison()) {

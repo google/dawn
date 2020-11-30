@@ -734,7 +734,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
           break;
       }
     }
-  } else if (!type->IsSampler()) {
+  } else if (!type->Is<ast::type::SamplerType>()) {
     // Certain cases require us to generate a constructor value.
     //
     // 1- ConstantId's must be attached to the OpConstant, if we have a
@@ -2452,7 +2452,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateTextureType(type->AsTexture(), result)) {
       return 0;
     }
-  } else if (type->IsSampler()) {
+  } else if (type->Is<ast::type::SamplerType>()) {
     push_type(spv::Op::OpTypeSampler, {result});
 
     // Register both of the sampler type names. In SPIR-V they're the same

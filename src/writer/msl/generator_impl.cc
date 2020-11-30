@@ -1832,7 +1832,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       return false;
     }
     out_ << "*";
-  } else if (type->IsSampler()) {
+  } else if (type->Is<ast::type::SamplerType>()) {
     out_ << "sampler";
   } else if (type->IsStruct()) {
     // The struct type emits as just the name. The declaration would be emitted

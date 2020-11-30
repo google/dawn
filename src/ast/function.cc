@@ -281,8 +281,8 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->IsDecorated() || !unwrapped_type->IsSampler() ||
-        unwrapped_type->AsSampler()->kind() != kind) {
+    if (!var->IsDecorated() || !unwrapped_type->Is<ast::type::SamplerType>() ||
+        unwrapped_type->As<ast::type::SamplerType>()->kind() != kind) {
       continue;
     }
 
