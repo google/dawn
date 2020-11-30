@@ -712,7 +712,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     auto dim = params[pidx.texture]
                    ->result_type()
                    ->UnwrapPtrIfNeeded()
-                   ->AsTexture()
+                   ->As<ast::type::TextureType>()
                    ->dim();
     switch (dim) {
       case ast::type::TextureDimension::k2d:
@@ -1838,8 +1838,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
     out_ << type->As<ast::type::StructType>()->name();
-  } else if (type->IsTexture()) {
-    auto* tex = type->AsTexture();
+  } else if (type->Is<ast::type::TextureType>()) {
+    auto* tex = type->As<ast::type::TextureType>();
 
     if (tex->IsDepth()) {
       out_ << "depth";

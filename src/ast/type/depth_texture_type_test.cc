@@ -45,7 +45,7 @@ TEST_F(DepthTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<PointerType>());
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_TRUE(ty->IsTexture());
+  EXPECT_TRUE(ty->Is<TextureType>());
   EXPECT_FALSE(ty->IsU32());
   EXPECT_FALSE(ty->IsVector());
 }

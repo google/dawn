@@ -464,8 +464,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
     out_ << type->As<ast::type::StructType>()->name();
-  } else if (type->IsTexture()) {
-    auto* texture = type->AsTexture();
+  } else if (type->Is<ast::type::TextureType>()) {
+    auto* texture = type->As<ast::type::TextureType>();
 
     out_ << "texture_";
     if (texture->IsDepth()) {

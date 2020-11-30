@@ -66,10 +66,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-bool Type::IsTexture() const {
-  return false;
-}
-
 bool Type::IsU32() const {
   return false;
 }
@@ -134,11 +130,6 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
-const TextureType* Type::AsTexture() const {
-  assert(IsTexture());
-  return static_cast<const TextureType*>(this);
-}
-
 const U32Type* Type::AsU32() const {
   assert(IsU32());
   return static_cast<const U32Type*>(this);
@@ -152,11 +143,6 @@ const VectorType* Type::AsVector() const {
 const VoidType* Type::AsVoid() const {
   assert(IsVoid());
   return static_cast<const VoidType*>(this);
-}
-
-TextureType* Type::AsTexture() {
-  assert(IsTexture());
-  return static_cast<TextureType*>(this);
 }
 
 U32Type* Type::AsU32() {

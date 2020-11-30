@@ -61,10 +61,6 @@ TextureType::TextureType(TextureType&&) = default;
 
 TextureType::~TextureType() = default;
 
-bool TextureType::IsTexture() const {
-  return true;
-}
-
 bool TextureType::IsDepth() const {
   return false;
 }

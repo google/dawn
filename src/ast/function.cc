@@ -310,12 +310,14 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->IsDecorated() || !unwrapped_type->IsTexture()) {
+    if (!var->IsDecorated() || !unwrapped_type->Is<ast::type::TextureType>()) {
       continue;
     }
 
-    if ((multisampled && !unwrapped_type->AsTexture()->IsMultisampled()) ||
-        (!multisampled && !unwrapped_type->AsTexture()->IsSampled())) {
+    if ((multisampled &&
+         !unwrapped_type->As<ast::type::TextureType>()->IsMultisampled()) ||
+        (!multisampled &&
+         !unwrapped_type->As<ast::type::TextureType>()->IsSampled())) {
       continue;
     }
 

@@ -3711,7 +3711,8 @@ bool FunctionEmitter::EmitSampledImageAccess(
     // integer.
     if (ast::type::PointerType* type =
             parser_impl_.GetTypeForHandleVar(*image)) {
-      if (ast::type::TextureType* texture_type = type->type()->AsTexture()) {
+      if (ast::type::TextureType* texture_type =
+              type->type()->As<ast::type::TextureType>()) {
         if (texture_type->IsDepth()) {
           // Convert it to an unsigned integer type.
           lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
@@ -3782,11 +3783,12 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     Fail();
     return {};
   }
-  if (!type || !type->type()->IsTexture()) {
+  if (!type || !type->type()->Is<ast::type::TextureType>()) {
     Fail() << "invalid texture type for " << image->PrettyPrint();
     return {};
   }
-  ast::type::TextureDimension dim = type->type()->AsTexture()->dim();
+  ast::type::TextureDimension dim =
+      type->type()->As<ast::type::TextureType>()->dim();
   // Number of regular coordinates.
   uint32_t num_axes = 0;
   bool is_arrayed = false;

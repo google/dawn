@@ -716,10 +716,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                      Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (type->IsTexture()) {
+  } else if (type->Is<ast::type::TextureType>()) {
     // Decorate storage texture variables with NonRead/Writeable if needed.
-    if (type->AsTexture()->IsStorage()) {
-      switch (type->AsTexture()->AsStorage()->access()) {
+    if (type->As<ast::type::TextureType>()->IsStorage()) {
+      switch (type->As<ast::type::TextureType>()->AsStorage()->access()) {
         case ast::AccessControl::kWriteOnly:
           push_annot(
               spv::Op::OpDecorate,
@@ -1917,8 +1917,10 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                        ast::CallExpression* call,
                                        spirv::Operand result_type,
                                        spirv::Operand result_id) {
-  auto* texture_type =
-      call->params()[0]->result_type()->UnwrapAll()->AsTexture();
+  auto* texture_type = call->params()[0]
+                           ->result_type()
+                           ->UnwrapAll()
+                           ->As<ast::type::TextureType>();
 
   auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
       ident->intrinsic_signature());
@@ -2453,8 +2455,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     }
   } else if (type->IsVoid()) {
     push_type(spv::Op::OpTypeVoid, {result});
-  } else if (type->IsTexture()) {
-    if (!GenerateTextureType(type->AsTexture(), result)) {
+  } else if (type->Is<ast::type::TextureType>()) {
+    if (!GenerateTextureType(type->As<ast::type::TextureType>(), result)) {
       return 0;
     }
   } else if (type->Is<ast::type::SamplerType>()) {

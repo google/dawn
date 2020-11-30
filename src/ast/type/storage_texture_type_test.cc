@@ -49,7 +49,7 @@ TEST_F(StorageTextureTypeTest, Is) {
   EXPECT_FALSE(ty->Is<PointerType>());
   EXPECT_FALSE(ty->Is<SamplerType>());
   EXPECT_FALSE(ty->Is<StructType>());
-  EXPECT_TRUE(ty->IsTexture());
+  EXPECT_TRUE(ty->Is<TextureType>());
   EXPECT_FALSE(ty->IsU32());
   EXPECT_FALSE(ty->IsVector());
 }
@@ -95,9 +95,9 @@ TEST_F(StorageTextureTypeTest, F32Type) {
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->IsTexture());
-  ASSERT_TRUE(s->AsTexture()->IsStorage());
-  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->Is<F32Type>());
+  ASSERT_TRUE(s->Is<TextureType>());
+  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
+  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->Is<F32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, U32Type) {
@@ -109,9 +109,9 @@ TEST_F(StorageTextureTypeTest, U32Type) {
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->IsTexture());
-  ASSERT_TRUE(s->AsTexture()->IsStorage());
-  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->IsU32());
+  ASSERT_TRUE(s->Is<TextureType>());
+  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
+  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->IsU32());
 }
 
 TEST_F(StorageTextureTypeTest, I32Type) {
@@ -123,9 +123,9 @@ TEST_F(StorageTextureTypeTest, I32Type) {
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(s->IsTexture());
-  ASSERT_TRUE(s->AsTexture()->IsStorage());
-  EXPECT_TRUE(s->AsTexture()->AsStorage()->type()->Is<I32Type>());
+  ASSERT_TRUE(s->Is<TextureType>());
+  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
+  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->Is<I32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, MinBufferBindingSize) {

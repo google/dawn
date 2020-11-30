@@ -2089,8 +2089,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << "State";
   } else if (type->Is<ast::type::StructType>()) {
     out << type->As<ast::type::StructType>()->name();
-  } else if (type->IsTexture()) {
-    auto* tex = type->AsTexture();
+  } else if (type->Is<ast::type::TextureType>()) {
+    auto* tex = type->As<ast::type::TextureType>();
     if (tex->IsStorage()) {
       out << "RW";
     }

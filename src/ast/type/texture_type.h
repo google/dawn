@@ -60,9 +60,6 @@ class TextureType : public Castable<TextureType, Type> {
   TextureType(TextureType&&);
   ~TextureType() override;
 
-  /// @returns true if the type is a texture type
-  bool IsTexture() const override;
-
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }
 

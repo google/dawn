@@ -350,7 +350,8 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.set->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->type()->UnwrapIfNeeded()->AsTexture();
+    auto* texture_type =
+        var->type()->UnwrapIfNeeded()->As<ast::type::TextureType>();
     switch (texture_type->dim()) {
       case ast::type::TextureDimension::k1d:
         entry.dim = ResourceBinding::TextureDimension::k1d;

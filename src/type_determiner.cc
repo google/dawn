@@ -85,10 +85,12 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
 bool TypeDeterminer::Determine() {
   for (auto& iter : mod_->types()) {
     auto& type = iter.second;
-    if (!type->IsTexture() || !type->AsTexture()->IsStorage()) {
+    if (!type->Is<ast::type::TextureType>() ||
+        !type->As<ast::type::TextureType>()->IsStorage()) {
       continue;
     }
-    if (!DetermineStorageTextureSubtype(type->AsTexture()->AsStorage())) {
+    if (!DetermineStorageTextureSubtype(
+            type->As<ast::type::TextureType>()->AsStorage())) {
       set_error(Source{}, "unable to determine storage texture subtype for: " +
                               type->type_name());
       return false;
@@ -550,12 +552,15 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ast::intrinsic::TextureSignature::Parameters param;
 
     auto* texture_param = expr->params()[0];
-    if (!texture_param->result_type()->UnwrapPtrIfNeeded()->IsTexture()) {
+    if (!texture_param->result_type()
+             ->UnwrapPtrIfNeeded()
+             ->Is<ast::type::TextureType>()) {
       set_error(expr->source(), "invalid first argument for " + ident->name());
       return false;
     }
-    ast::type::TextureType* texture =
-        texture_param->result_type()->UnwrapPtrIfNeeded()->AsTexture();
+    ast::type::TextureType* texture = texture_param->result_type()
+                                          ->UnwrapPtrIfNeeded()
+                                          ->As<ast::type::TextureType>();
 
     bool is_array = false;
     switch (texture->dim()) {
