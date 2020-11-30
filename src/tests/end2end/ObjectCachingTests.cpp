@@ -108,27 +108,21 @@ TEST_P(ObjectCachingTest, PipelineLayoutDeduplication) {
 
 // Test that ShaderModules are correctly deduplicated.
 TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-            })");
-    wgpu::ShaderModule sameModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-            })");
-    wgpu::ShaderModule otherModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = vec4(0.0);
-            })");
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule sameModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule otherModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
@@ -136,25 +130,19 @@ TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
 
 // Test that ComputePipeline are correctly deduplicated wrt. their ShaderModule
 TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-            #version 450
-            shared uint i;
-            void main() {
-                i = 0;
-            })");
-    wgpu::ShaderModule sameModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-            #version 450
-            shared uint i;
-            void main() {
-                i = 0;
-            })");
-    wgpu::ShaderModule otherModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-            #version 450
-            void main() {
-            })");
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        var<workgroup> i : u32;
+        [[stage(compute)]] fn main() -> void {
+            i = 0u;
+        })");
+    wgpu::ShaderModule sameModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        var<workgroup> i : u32;
+        [[stage(compute)]] fn main() -> void {
+            i = 0u;
+        })");
+    wgpu::ShaderModule otherModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[stage(compute)]] fn main() -> void {
+        })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
@@ -194,12 +182,10 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
 
     wgpu::ComputePipelineDescriptor desc;
     desc.computeStage.entryPoint = "main";
-    desc.computeStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-            #version 450
-            shared uint i;
-            void main() {
-                i = 0;
+    desc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            var<workgroup> i : u32;
+            [[stage(compute)]] fn main() -> void {
+                i = 0u;
             })");
 
     desc.layout = pl;
@@ -230,17 +216,14 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnLayout) {
     EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.0);
-            })");
-    desc.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            void main() {
-            })");
+    desc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
+    desc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[stage(fragment)]] fn main() -> void {
+        })");
 
     desc.layout = pl;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
@@ -257,33 +240,28 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnLayout) {
 
 // Test that RenderPipelines are correctly deduplicated wrt. their vertex module
 TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.0);
-            })");
-    wgpu::ShaderModule sameModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.0);
-            })");
-    wgpu::ShaderModule otherModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(1.0);
-            })");
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
+    wgpu::ShaderModule sameModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
+    wgpu::ShaderModule otherModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+        })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            void main() {
+    desc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[stage(fragment)]] fn main() -> void {
             })");
 
     desc.vertexStage.module = module;
@@ -301,34 +279,27 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnVertexModule) {
 
 // Test that RenderPipelines are correctly deduplicated wrt. their fragment module
 TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            void main() {
-            })");
-    wgpu::ShaderModule sameModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            void main() {
-            })");
-    wgpu::ShaderModule otherModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout (location = 0) out vec4 color;
-            void main() {
-                color = vec4(0.0);
-            })");
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[stage(fragment)]] fn main() -> void {
+        })");
+    wgpu::ShaderModule sameModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[stage(fragment)]] fn main() -> void {
+        })");
+    wgpu::ShaderModule otherModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
     EXPECT_EQ(module.Get() == sameModule.Get(), !UsesWire());
 
     utils::ComboRenderPipelineDescriptor desc(device);
-    desc.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.0);
-            })");
+    desc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        })");
 
     desc.cFragmentStage.module = module;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
