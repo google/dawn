@@ -65,8 +65,8 @@ uint64_t ArrayType::BaseAlignment(MemoryLayout mem_layout) const {
 
 uint32_t ArrayType::array_stride() const {
   for (auto* deco : decos_) {
-    if (deco->IsStride()) {
-      return deco->AsStride()->stride();
+    if (auto* stride = deco->As<ast::StrideDecoration>()) {
+      return stride->stride();
     }
   }
   return 0;
@@ -74,7 +74,7 @@ uint32_t ArrayType::array_stride() const {
 
 bool ArrayType::has_array_stride() const {
   for (auto* deco : decos_) {
-    if (deco->IsStride()) {
+    if (deco->Is<ast::StrideDecoration>()) {
       return true;
     }
   }

@@ -31,14 +31,5 @@ DecorationKind ArrayDecoration::GetKind() const {
   return Kind;
 }
 
-bool ArrayDecoration::IsStride() const {
-  return false;
-}
-
-StrideDecoration* ArrayDecoration::AsStride() {
-  assert(IsStride());
-  return static_cast<StrideDecoration*>(this);
-}
-
 }  // namespace ast
 }  // namespace tint

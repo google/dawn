@@ -33,9 +33,6 @@ class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
   StrideDecoration(uint32_t stride, const Source& source);
   ~StrideDecoration() override;
 
-  /// @returns true if this is a stride decoration
-  bool IsStride() const override;
-
   /// @returns the stride value
   uint32_t stride() const { return stride_; }
 

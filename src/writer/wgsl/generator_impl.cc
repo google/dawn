@@ -421,8 +421,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     auto* ary = type->As<ast::type::ArrayType>();
 
     for (auto* deco : ary->decorations()) {
-      if (deco->IsStride()) {
-        out_ << "[[stride(" << deco->AsStride()->stride() << ")]] ";
+      if (auto* stride = deco->As<ast::StrideDecoration>()) {
+        out_ << "[[stride(" << stride->stride() << ")]] ";
       }
     }
 

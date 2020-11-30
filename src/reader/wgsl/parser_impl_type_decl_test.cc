@@ -408,10 +408,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
-  EXPECT_TRUE(decos[0]->IsStride());
-  EXPECT_EQ(decos[0]->AsStride()->stride(), 16u);
-  EXPECT_TRUE(decos[1]->IsStride());
-  EXPECT_EQ(decos[1]->AsStride()->stride(), 32u);
+  EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
+  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
+  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
@@ -429,10 +429,10 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
-  EXPECT_TRUE(decos[0]->IsStride());
-  EXPECT_EQ(decos[0]->AsStride()->stride(), 16u);
-  EXPECT_TRUE(decos[1]->IsStride());
-  EXPECT_EQ(decos[1]->AsStride()->stride(), 32u);
+  EXPECT_TRUE(decos[0]->Is<ast::StrideDecoration>());
+  EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
+  EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {

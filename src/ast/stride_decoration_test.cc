@@ -29,7 +29,7 @@ TEST_F(StrideDecorationTest, Creation) {
 
 TEST_F(StrideDecorationTest, Is) {
   StrideDecoration d{2, Source{}};
-  EXPECT_TRUE(d.IsStride());
+  EXPECT_TRUE(d.Is<StrideDecoration>());
 }
 
 TEST_F(StrideDecorationTest, Source) {

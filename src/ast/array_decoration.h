@@ -37,12 +37,6 @@ class ArrayDecoration : public Castable<ArrayDecoration, Decoration> {
   /// @return the decoration kind
   DecorationKind GetKind() const override;
 
-  /// @returns true if this is a stride decoration
-  virtual bool IsStride() const;
-
-  /// @returns the decoration as a stride decoration
-  StrideDecoration* AsStride();
-
  protected:
   /// Constructor
   /// @param source the source of this decoration

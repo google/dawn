@@ -20,10 +20,6 @@ namespace ast {
 StrideDecoration::StrideDecoration(uint32_t stride, const Source& source)
     : Base(source), stride_(stride) {}
 
-bool StrideDecoration::IsStride() const {
-  return true;
-}
-
 StrideDecoration::~StrideDecoration() = default;
 
 void StrideDecoration::to_str(std::ostream& out, size_t indent) const {
