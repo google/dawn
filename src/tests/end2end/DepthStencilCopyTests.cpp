@@ -28,13 +28,20 @@ class DepthStencilCopyTests : public DawnTest {
         DawnTest::SetUp();
 
         // Draw a square in the bottom left quarter of the screen.
-        mVertexModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-    #version 450
-    void main() {
-        const vec2 pos[6] = vec2[6](vec2(-1.f, -1.f), vec2(0.f, -1.f), vec2(-1.f,  0.f),
-                                    vec2(-1.f,  0.f), vec2(0.f, -1.f), vec2( 0.f,  0.f));
-        gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-    })");
+        mVertexModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                    vec2<f32>(-1.0, -1.0),
+                    vec2<f32>( 0.0, -1.0),
+                    vec2<f32>(-1.0,  0.0),
+                    vec2<f32>(-1.0,  0.0),
+                    vec2<f32>( 0.0, -1.0),
+                    vec2<f32>( 0.0,  0.0));
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
     }
 
     wgpu::Texture CreateDepthStencilTexture(uint32_t width,
@@ -232,14 +239,17 @@ class DepthStencilCopyTests : public DawnTest {
         // Pipeline for a full screen quad.
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
-        pipelineDescriptor.vertexStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(3.f, -1.f), vec2(-1.f, 3.f));
-                        gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-        })");
+        pipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0, -1.0),
+                    vec2<f32>( 3.0, -1.0),
+                    vec2<f32>(-1.0,  3.0));
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
 
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
@@ -619,11 +629,9 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
         // A quad is drawn in the bottom left.
         utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
         renderPipelineDesc.vertexStage.module = mVertexModule;
-        renderPipelineDesc.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-    #version 450
-    void main() {
-    })");
+        renderPipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[stage(fragment)]] fn main() -> void {
+            })");
         renderPipelineDesc.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
         renderPipelineDesc.cDepthStencilState.stencilFront.passOp =
             wgpu::StencilOperation::DecrementClamp;
