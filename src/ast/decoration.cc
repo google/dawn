@@ -23,34 +23,16 @@ std::ostream& operator<<(std::ostream& out, DecorationKind data) {
   switch (data) {
     case DecorationKind::kArray:
       return out << "array";
-    case DecorationKind::kStride:
-      return out << "stride";
     case DecorationKind::kFunction:
       return out << "function";
-    case DecorationKind::kStage:
-      return out << "stage";
-    case DecorationKind::kWorkgroup:
-      return out << "workgroup";
     case DecorationKind::kStruct:
       return out << "struct";
     case DecorationKind::kStructMember:
       return out << "struct member";
-    case DecorationKind::kStructMemberOffset:
-      return out << "offset";
     case DecorationKind::kType:
       return out << "type";
-    case DecorationKind::kAccess:
-      return out << "access";
     case DecorationKind::kVariable:
       return out << "variable";
-    case DecorationKind::kBinding:
-      return out << "binding";
-    case DecorationKind::kBuiltin:
-      return out << "builtin";
-    case DecorationKind::kConstantId:
-      return out << "constant_id";
-    case DecorationKind::kLocation:
-      return out << "location";
   }
   return out << "<unknown>";
 }

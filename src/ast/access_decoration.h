@@ -26,17 +26,11 @@ namespace ast {
 /// An access decoration
 class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kAccess;
-
   /// constructor
   /// @param value the access value
   /// @param source the source of this decoration
   explicit AccessDecoration(AccessControl value, const Source& source);
   ~AccessDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is an access decoration
   bool IsAccess() const override;

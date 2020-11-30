@@ -17,16 +17,10 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind ConstantIdDecoration::Kind;
-
 ConstantIdDecoration::ConstantIdDecoration(uint32_t val, const Source& source)
     : Base(source), value_(val) {}
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
-
-DecorationKind ConstantIdDecoration::GetKind() const {
-  return Kind;
-}
 
 bool ConstantIdDecoration::IsConstantId() const {
   return true;

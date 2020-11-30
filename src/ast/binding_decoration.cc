@@ -17,16 +17,10 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind BindingDecoration::Kind;
-
 BindingDecoration::BindingDecoration(uint32_t val, const Source& source)
     : Base(source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
-
-DecorationKind BindingDecoration::GetKind() const {
-  return Kind;
-}
 
 bool BindingDecoration::IsBinding() const {
   return true;

@@ -26,17 +26,11 @@ namespace ast {
 class LocationDecoration
     : public Castable<LocationDecoration, VariableDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kLocation;
-
   /// constructor
   /// @param value the location value
   /// @param source the source of this decoration
   explicit LocationDecoration(uint32_t value, const Source& source);
   ~LocationDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a location decoration
   bool IsLocation() const override;

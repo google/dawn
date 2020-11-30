@@ -17,16 +17,10 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind StageDecoration::Kind;
-
 StageDecoration::StageDecoration(ast::PipelineStage stage, const Source& source)
     : Base(source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
-
-DecorationKind StageDecoration::GetKind() const {
-  return Kind;
-}
 
 bool StageDecoration::IsStage() const {
   return true;

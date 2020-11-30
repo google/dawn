@@ -28,9 +28,6 @@ namespace ast {
 class WorkgroupDecoration
     : public Castable<WorkgroupDecoration, FunctionDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kWorkgroup;
-
   /// constructor
   /// @param x the workgroup x dimension size
   /// @param source the source of this decoration
@@ -47,9 +44,6 @@ class WorkgroupDecoration
   /// @param source the source of this decoration
   WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
   ~WorkgroupDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a workgroup decoration
   bool IsWorkgroup() const override;

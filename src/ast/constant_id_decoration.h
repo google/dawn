@@ -25,17 +25,11 @@ namespace ast {
 class ConstantIdDecoration
     : public Castable<ConstantIdDecoration, VariableDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kConstantId;
-
   /// constructor
   /// @param val the constant_id value
   /// @param source the source of this decoration
   ConstantIdDecoration(uint32_t val, const Source& source);
   ~ConstantIdDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a constant_id decoration
   bool IsConstantId() const override;

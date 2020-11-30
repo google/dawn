@@ -27,17 +27,11 @@ namespace ast {
 /// A stride decoration
 class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kStride;
-
   /// constructor
   /// @param stride the stride value
   /// @param source the source of this decoration
   StrideDecoration(uint32_t stride, const Source& source);
   ~StrideDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a stride decoration
   bool IsStride() const override;

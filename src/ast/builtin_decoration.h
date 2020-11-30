@@ -25,17 +25,11 @@ namespace ast {
 class BuiltinDecoration
     : public Castable<BuiltinDecoration, VariableDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kBuiltin;
-
   /// constructor
   /// @param builtin the builtin value
   /// @param source the source of this decoration
   BuiltinDecoration(Builtin builtin, const Source& source);
   ~BuiltinDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a builtin decoration
   bool IsBuiltin() const override;

@@ -17,8 +17,6 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind WorkgroupDecoration::Kind;
-
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x, const Source& source)
     : Base(source), x_(x) {}
 
@@ -34,10 +32,6 @@ WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
     : Base(source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
-
-DecorationKind WorkgroupDecoration::GetKind() const {
-  return Kind;
-}
 
 bool WorkgroupDecoration::IsWorkgroup() const {
   return true;

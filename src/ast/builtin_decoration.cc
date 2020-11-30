@@ -17,16 +17,10 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind BuiltinDecoration::Kind;
-
 BuiltinDecoration::BuiltinDecoration(Builtin builtin, const Source& source)
     : Base(source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
-
-DecorationKind BuiltinDecoration::GetKind() const {
-  return Kind;
-}
 
 bool BuiltinDecoration::IsBuiltin() const {
   return true;

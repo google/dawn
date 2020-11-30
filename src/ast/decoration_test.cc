@@ -64,21 +64,20 @@ TEST_F(DecorationTest, Is) {
 
 TEST_F(DecorationTest, Kinds) {
   EXPECT_EQ(ArrayDecoration::Kind, DecorationKind::kArray);
-  EXPECT_EQ(StrideDecoration::Kind, DecorationKind::kStride);
+  EXPECT_EQ(StrideDecoration::Kind, DecorationKind::kArray);
   EXPECT_EQ(FunctionDecoration::Kind, DecorationKind::kFunction);
-  EXPECT_EQ(StageDecoration::Kind, DecorationKind::kStage);
-  EXPECT_EQ(WorkgroupDecoration::Kind, DecorationKind::kWorkgroup);
+  EXPECT_EQ(StageDecoration::Kind, DecorationKind::kFunction);
+  EXPECT_EQ(WorkgroupDecoration::Kind, DecorationKind::kFunction);
   EXPECT_EQ(StructDecoration::Kind, DecorationKind::kStruct);
   EXPECT_EQ(StructMemberDecoration::Kind, DecorationKind::kStructMember);
-  EXPECT_EQ(StructMemberOffsetDecoration::Kind,
-            DecorationKind::kStructMemberOffset);
+  EXPECT_EQ(StructMemberOffsetDecoration::Kind, DecorationKind::kStructMember);
   EXPECT_EQ(TypeDecoration::Kind, DecorationKind::kType);
-  EXPECT_EQ(AccessDecoration::Kind, DecorationKind::kAccess);
+  EXPECT_EQ(AccessDecoration::Kind, DecorationKind::kType);
   EXPECT_EQ(VariableDecoration::Kind, DecorationKind::kVariable);
-  EXPECT_EQ(BindingDecoration::Kind, DecorationKind::kBinding);
-  EXPECT_EQ(BuiltinDecoration::Kind, DecorationKind::kBuiltin);
-  EXPECT_EQ(ConstantIdDecoration::Kind, DecorationKind::kConstantId);
-  EXPECT_EQ(LocationDecoration::Kind, DecorationKind::kLocation);
+  EXPECT_EQ(BindingDecoration::Kind, DecorationKind::kVariable);
+  EXPECT_EQ(BuiltinDecoration::Kind, DecorationKind::kVariable);
+  EXPECT_EQ(ConstantIdDecoration::Kind, DecorationKind::kVariable);
+  EXPECT_EQ(LocationDecoration::Kind, DecorationKind::kVariable);
 }
 
 }  // namespace

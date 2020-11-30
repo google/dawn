@@ -28,20 +28,11 @@ namespace ast {
 /// The decoration kind enumerator
 enum class DecorationKind {
   kArray,
-  /*|*/ kStride,
   kFunction,
-  /*|*/ kStage,
-  /*|*/ kWorkgroup,
   kStruct,
   kStructMember,
-  /*|*/ kStructMemberOffset,
   kType,
-  /*|*/ kAccess,
   kVariable,
-  /*|*/ kBinding,
-  /*|*/ kBuiltin,
-  /*|*/ kConstantId,
-  /*|*/ kLocation,
 };
 
 std::ostream& operator<<(std::ostream& out, DecorationKind data);

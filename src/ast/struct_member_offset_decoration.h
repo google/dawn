@@ -28,18 +28,11 @@ namespace ast {
 class StructMemberOffsetDecoration
     : public Castable<StructMemberOffsetDecoration, StructMemberDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind =
-      DecorationKind::kStructMemberOffset;
-
   /// constructor
   /// @param offset the offset value
   /// @param source the source of this decoration
   StructMemberOffsetDecoration(uint32_t offset, const Source& source);
   ~StructMemberOffsetDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is an offset decoration
   bool IsOffset() const override;

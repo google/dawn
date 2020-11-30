@@ -26,17 +26,11 @@ namespace ast {
 class BindingDecoration
     : public Castable<BindingDecoration, VariableDecoration> {
  public:
-  /// The kind of decoration that this type represents
-  static constexpr const DecorationKind Kind = DecorationKind::kBinding;
-
   /// constructor
   /// @param value the binding value
   /// @param source the source of this decoration
   BindingDecoration(uint32_t value, const Source& source);
   ~BindingDecoration() override;
-
-  /// @return the decoration kind
-  DecorationKind GetKind() const override;
 
   /// @returns true if this is a binding decoration
   bool IsBinding() const override;

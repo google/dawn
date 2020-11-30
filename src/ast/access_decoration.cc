@@ -17,16 +17,10 @@
 namespace tint {
 namespace ast {
 
-constexpr const DecorationKind AccessDecoration::Kind;
-
 AccessDecoration::AccessDecoration(AccessControl val, const Source& source)
     : Base(source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;
-
-DecorationKind AccessDecoration::GetKind() const {
-  return Kind;
-}
 
 bool AccessDecoration::IsAccess() const {
   return true;
