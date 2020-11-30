@@ -1874,7 +1874,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
         error_ = "Invalid texture dimensions";
         return false;
     }
-    if (tex->IsMultisampled()) {
+    if (tex->Is<ast::type::MultisampledTextureType>()) {
       out_ << "_ms";
     }
     out_ << "<";
@@ -1894,8 +1894,9 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
         error_ = "Invalid access control for storage texture";
         return false;
       }
-    } else if (tex->IsMultisampled()) {
-      if (!EmitType(tex->AsMultisampled()->type(), "")) {
+    } else if (tex->Is<ast::type::MultisampledTextureType>()) {
+      if (!EmitType(tex->As<ast::type::MultisampledTextureType>()->type(),
+                    "")) {
         return false;
       }
       out_ << ", access::sample";

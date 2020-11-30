@@ -382,7 +382,9 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 
     ast::type::Type* base_type = nullptr;
     if (multisampled_only) {
-      base_type = texture_type->AsMultisampled()->type()->UnwrapIfNeeded();
+      base_type = texture_type->As<ast::type::MultisampledTextureType>()
+                      ->type()
+                      ->UnwrapIfNeeded();
     } else {
       base_type = texture_type->AsSampled()->type()->UnwrapIfNeeded();
     }

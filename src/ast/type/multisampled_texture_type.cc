@@ -32,9 +32,6 @@ MultisampledTextureType::MultisampledTextureType(MultisampledTextureType&&) =
 
 MultisampledTextureType::~MultisampledTextureType() = default;
 
-bool MultisampledTextureType::IsMultisampled() const {
-  return true;
-}
 
 std::string MultisampledTextureType::type_name() const {
   std::ostringstream out;

@@ -58,7 +58,7 @@ TEST_F(MultisampledTextureTypeTest, IsTextureType) {
   MultisampledTextureType s(TextureDimension::kCube, &f32);
   TextureType* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTextureType>());
-  EXPECT_TRUE(ty->IsMultisampled());
+  EXPECT_TRUE(ty->Is<MultisampledTextureType>());
   EXPECT_FALSE(ty->IsSampled());
   EXPECT_FALSE(ty->IsStorage());
 }

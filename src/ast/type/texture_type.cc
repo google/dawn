@@ -60,19 +60,11 @@ TextureType::TextureType(TextureType&&) = default;
 
 TextureType::~TextureType() = default;
 
-bool TextureType::IsMultisampled() const {
-  return false;
-}
 bool TextureType::IsStorage() const {
   return false;
 }
 bool TextureType::IsSampled() const {
   return false;
-}
-
-const MultisampledTextureType* TextureType::AsMultisampled() const {
-  assert(IsMultisampled());
-  return static_cast<const MultisampledTextureType*>(this);
 }
 
 const SampledTextureType* TextureType::AsSampled() const {
@@ -83,11 +75,6 @@ const SampledTextureType* TextureType::AsSampled() const {
 const StorageTextureType* TextureType::AsStorage() const {
   assert(IsStorage());
   return static_cast<const StorageTextureType*>(this);
-}
-
-MultisampledTextureType* TextureType::AsMultisampled() {
-  assert(IsMultisampled());
-  return static_cast<MultisampledTextureType*>(this);
 }
 
 SampledTextureType* TextureType::AsSampled() {

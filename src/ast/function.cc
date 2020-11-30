@@ -18,6 +18,7 @@
 
 #include "src/ast/decorated_variable.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/workgroup_decoration.h"
 
@@ -315,7 +316,7 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
     }
 
     if ((multisampled &&
-         !unwrapped_type->As<ast::type::TextureType>()->IsMultisampled()) ||
+         !unwrapped_type->Is<ast::type::MultisampledTextureType>()) ||
         (!multisampled &&
          !unwrapped_type->As<ast::type::TextureType>()->IsSampled())) {
       continue;

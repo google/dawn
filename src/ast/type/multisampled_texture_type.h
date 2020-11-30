@@ -35,9 +35,6 @@ class MultisampledTextureType
   MultisampledTextureType(MultisampledTextureType&&);
   ~MultisampledTextureType() override;
 
-  /// @returns true if the type is a sampled texture type
-  bool IsMultisampled() const override;
-
   /// @returns the subtype of the sampled texture
   Type* type() const { return type_; }
 

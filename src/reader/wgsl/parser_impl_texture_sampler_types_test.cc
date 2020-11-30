@@ -263,9 +263,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsMultisampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsMultisampled()
+  ASSERT_TRUE(t->Is<ast::type::MultisampledTextureType>());
+  ASSERT_TRUE(t->As<ast::type::MultisampledTextureType>()
                   ->type()
                   ->Is<ast::type::I32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),

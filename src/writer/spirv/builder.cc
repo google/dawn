@@ -1972,7 +1972,7 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     // TODO(dsinclair): Remove the LOD param from textureLoad on storage
     // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
     if (pidx.level != kNotUsed) {
-      if (texture_type->IsMultisampled()) {
+      if (texture_type->Is<ast::type::MultisampledTextureType>()) {
         spirv_operand_mask |= SpvImageOperandsSampleMask;
       } else {
         spirv_operand_mask |= SpvImageOperandsLodMask;
@@ -2516,7 +2516,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t ms_literal = 0u;
-  if (texture->IsMultisampled()) {
+  if (texture->Is<ast::type::MultisampledTextureType>()) {
     ms_literal = 1u;
   }
 
@@ -2526,8 +2526,8 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t sampled_literal = 2u;
-  if (texture->IsMultisampled() || texture->IsSampled() ||
-      texture->Is<ast::type::DepthTextureType>()) {
+  if (texture->Is<ast::type::MultisampledTextureType>() ||
+      texture->IsSampled() || texture->Is<ast::type::DepthTextureType>()) {
     sampled_literal = 1u;
   }
 
@@ -2543,8 +2543,9 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
     type_id = GenerateTypeIfNeeded(&f32);
   } else if (texture->IsSampled()) {
     type_id = GenerateTypeIfNeeded(texture->AsSampled()->type());
-  } else if (texture->IsMultisampled()) {
-    type_id = GenerateTypeIfNeeded(texture->AsMultisampled()->type());
+  } else if (texture->Is<ast::type::MultisampledTextureType>()) {
+    type_id = GenerateTypeIfNeeded(
+        texture->As<ast::type::MultisampledTextureType>()->type());
   } else if (texture->IsStorage()) {
     if (texture->AsStorage()->access() == ast::AccessControl::kWriteOnly) {
       ast::type::VoidType void_type;

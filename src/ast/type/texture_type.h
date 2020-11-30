@@ -24,8 +24,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class DepthTextureType;
-class MultisampledTextureType;
 class SampledTextureType;
 class StorageTextureType;
 
@@ -63,22 +61,16 @@ class TextureType : public Castable<TextureType, Type> {
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }
 
-  /// @returns ture if this is a multisampled texture
-  virtual bool IsMultisampled() const;
   /// @returns true if this is a storage texture
   virtual bool IsStorage() const;
   /// @returns true if this is a sampled texture
   virtual bool IsSampled() const;
 
-  /// @returns the texture as a multisampled texture
-  const MultisampledTextureType* AsMultisampled() const;
   /// @returns the texture as a sampled texture
   const SampledTextureType* AsSampled() const;
   /// @returns the texture as a storage texture
   const StorageTextureType* AsStorage() const;
 
-  /// @returns the texture as a multisampled texture
-  MultisampledTextureType* AsMultisampled();
   /// @returns the texture as a sampled texture
   SampledTextureType* AsSampled();
   /// @returns the texture as a storage texture
