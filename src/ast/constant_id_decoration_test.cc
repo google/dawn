@@ -33,7 +33,7 @@ TEST_F(ConstantIdDecorationTest, Is) {
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_TRUE(d->Is<ConstantIdDecoration>());
-  EXPECT_FALSE(cd.IsLocation());
+  EXPECT_FALSE(d->Is<LocationDecoration>());
   EXPECT_FALSE(cd.IsSet());
 }
 

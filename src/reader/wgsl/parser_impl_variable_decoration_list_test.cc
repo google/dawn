@@ -36,8 +36,8 @@ TEST_F(ParserImplTest, VariableDecorationList_Parses) {
   ASSERT_NE(deco_0, nullptr);
   ASSERT_NE(deco_1, nullptr);
 
-  ASSERT_TRUE(deco_0->IsLocation());
-  EXPECT_EQ(deco_0->AsLocation()->value(), 4u);
+  ASSERT_TRUE(deco_0->Is<ast::LocationDecoration>());
+  EXPECT_EQ(deco_0->As<ast::LocationDecoration>()->value(), 4u);
   ASSERT_TRUE(deco_1->Is<ast::BuiltinDecoration>());
   EXPECT_EQ(deco_1->As<ast::BuiltinDecoration>()->value(),
             ast::Builtin::kPosition);

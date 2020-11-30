@@ -16,7 +16,6 @@
 
 #include <assert.h>
 
-#include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 
 namespace tint {
@@ -32,17 +31,8 @@ DecorationKind VariableDecoration::GetKind() const {
   return Kind;
 }
 
-bool VariableDecoration::IsLocation() const {
-  return false;
-}
-
 bool VariableDecoration::IsSet() const {
   return false;
-}
-
-LocationDecoration* VariableDecoration::AsLocation() {
-  assert(IsLocation());
-  return static_cast<LocationDecoration*>(this);
 }
 
 SetDecoration* VariableDecoration::AsSet() {

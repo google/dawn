@@ -784,10 +784,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
                     Operand::Int(ConvertBuiltin(builtin->value()))});
-      } else if (deco->IsLocation()) {
+      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
-                    Operand::Int(deco->AsLocation()->value())});
+                    Operand::Int(location->value())});
       } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
         push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),

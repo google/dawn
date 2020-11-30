@@ -34,9 +34,9 @@ TEST_F(ParserImplTest, VariableDecoration_Location) {
   auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(var_deco->IsLocation());
+  ASSERT_TRUE(var_deco->Is<ast::LocationDecoration>());
 
-  auto* loc = var_deco->AsLocation();
+  auto* loc = var_deco->As<ast::LocationDecoration>();
   EXPECT_EQ(loc->value(), 4u);
 }
 

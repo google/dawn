@@ -645,8 +645,8 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
       out_ << "binding(" << binding->value() << ")";
     } else if (deco->IsSet()) {
       out_ << "set(" << deco->AsSet()->value() << ")";
-    } else if (deco->IsLocation()) {
-      out_ << "location(" << deco->AsLocation()->value() << ")";
+    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+      out_ << "location(" << location->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
     } else if (auto* cid = deco->As<ast::ConstantIdDecoration>()) {

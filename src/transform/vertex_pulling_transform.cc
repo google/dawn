@@ -200,18 +200,16 @@ void VertexPullingTransform::ConvertVertexInputVariablesToPrivate() {
     }
 
     for (auto* d : v->AsDecorated()->decorations()) {
-      if (!d->IsLocation()) {
-        continue;
+      if (auto* l = d->As<ast::LocationDecoration>()) {
+        uint32_t location = l->value();
+        // This is where the replacement happens. Expressions use identifier
+        // strings instead of pointers, so we don't need to update any other
+        // place in the AST.
+        v = create<ast::Variable>(v->name(), ast::StorageClass::kPrivate,
+                                  v->type());
+        location_to_var_[location] = v;
+        break;
       }
-
-      uint32_t location = d->AsLocation()->value();
-      // This is where the replacement happens. Expressions use identifier
-      // strings instead of pointers, so we don't need to update any other place
-      // in the AST.
-      v = create<ast::Variable>(v->name(), ast::StorageClass::kPrivate,
-                                v->type());
-      location_to_var_[location] = v;
-      break;
     }
   }
 }

@@ -18,6 +18,7 @@
 
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/location_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -33,7 +34,7 @@ DecoratedVariable::~DecoratedVariable() = default;
 
 bool DecoratedVariable::HasLocationDecoration() const {
   for (auto* deco : decorations_) {
-    if (deco->IsLocation()) {
+    if (deco->Is<LocationDecoration>()) {
       return true;
     }
   }

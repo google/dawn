@@ -1377,15 +1377,14 @@ bool GeneratorImpl::EmitEntryPointData(
       }
 
       out << " " << var->name() << " : ";
-      if (deco->IsLocation()) {
+      if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
           error_ = "invalid location variable for pipeline stage";
           return false;
         }
-        out << "TEXCOORD" << deco->AsLocation()->value();
-      } else if (deco->Is<ast::BuiltinDecoration>()) {
-        auto attr =
-            builtin_to_attribute(deco->As<ast::BuiltinDecoration>()->value());
+        out << "TEXCOORD" << location->value();
+      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
           error_ = "unsupported builtin";
           return false;
@@ -1424,8 +1423,8 @@ bool GeneratorImpl::EmitEntryPointData(
 
       out << " " << var->name() << " : ";
 
-      if (deco->IsLocation()) {
-        auto loc = deco->AsLocation()->value();
+      if (auto* location = deco->As<ast::LocationDecoration>()) {
+        auto loc = location->value();
         if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
           out << "TEXCOORD" << loc;
         } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
@@ -1434,9 +1433,8 @@ bool GeneratorImpl::EmitEntryPointData(
           error_ = "invalid location variable for pipeline stage";
           return false;
         }
-      } else if (deco->Is<ast::BuiltinDecoration>()) {
-        auto attr =
-            builtin_to_attribute(deco->As<ast::BuiltinDecoration>()->value());
+      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
           error_ = "unsupported builtin";
           return false;

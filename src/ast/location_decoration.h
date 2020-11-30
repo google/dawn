@@ -32,9 +32,6 @@ class LocationDecoration
   explicit LocationDecoration(uint32_t value, const Source& source);
   ~LocationDecoration() override;
 
-  /// @returns true if this is a location decoration
-  bool IsLocation() const override;
-
   /// @returns the location value
   uint32_t value() const { return value_; }
 

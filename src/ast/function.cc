@@ -89,8 +89,8 @@ Function::referenced_location_variables() const {
       continue;
     }
     for (auto* deco : var->AsDecorated()->decorations()) {
-      if (deco->IsLocation()) {
-        ret.push_back({var, deco->AsLocation()});
+      if (auto* location = deco->As<LocationDecoration>()) {
+        ret.push_back({var, location});
         break;
       }
     }
