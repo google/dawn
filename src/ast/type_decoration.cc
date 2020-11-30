@@ -31,14 +31,5 @@ DecorationKind TypeDecoration::GetKind() const {
   return Kind;
 }
 
-bool TypeDecoration::IsAccess() const {
-  return false;
-}
-
-AccessDecoration* TypeDecoration::AsAccess() {
-  assert(IsAccess());
-  return static_cast<AccessDecoration*>(this);
-}
-
 }  // namespace ast
 }  // namespace tint

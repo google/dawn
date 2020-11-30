@@ -840,8 +840,8 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = module_.create<ast::type::AccessControlType>(deco->AsAccess()->value(),
-                                                      ty);
+    ty = module_.create<ast::type::AccessControlType>(
+        deco->As<ast::AccessDecoration>()->value(), ty);
   }
 
   return TypedIdentifier{ty, ident.value, ident.source};

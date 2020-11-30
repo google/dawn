@@ -32,9 +32,6 @@ class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
   explicit AccessDecoration(AccessControl value, const Source& source);
   ~AccessDecoration() override;
 
-  /// @returns true if this is an access decoration
-  bool IsAccess() const override;
-
   /// @returns the access control value
   AccessControl value() const { return value_; }
 
