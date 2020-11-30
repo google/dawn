@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// An integer literal. This could be either signed or unsigned.
-class IntLiteral : public Literal {
+class IntLiteral : public Castable<IntLiteral, Literal> {
  public:
   ~IntLiteral() override;
 

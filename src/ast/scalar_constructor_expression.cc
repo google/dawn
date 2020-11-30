@@ -17,15 +17,14 @@
 namespace tint {
 namespace ast {
 
-ScalarConstructorExpression::ScalarConstructorExpression()
-    : ConstructorExpression() {}
+ScalarConstructorExpression::ScalarConstructorExpression() : Base() {}
 
 ScalarConstructorExpression::ScalarConstructorExpression(Literal* literal)
     : literal_(literal) {}
 
 ScalarConstructorExpression::ScalarConstructorExpression(const Source& source,
                                                          Literal* litearl)
-    : ConstructorExpression(source), literal_(litearl) {}
+    : Base(source), literal_(litearl) {}
 
 ScalarConstructorExpression::ScalarConstructorExpression(
     ScalarConstructorExpression&&) = default;

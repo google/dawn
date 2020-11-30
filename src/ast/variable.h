@@ -78,7 +78,7 @@ class DecoratedVariable;
 /// defaulting syntax for a "var" declared inside a function.
 /// The storage class for a "const" is always StorageClass::kNone.
 /// The storage class for a formal parameter is always StorageClass::kNone.
-class Variable : public Node {
+class Variable : public Castable<Variable, Node> {
  public:
   /// Create a new empty variable statement
   Variable();

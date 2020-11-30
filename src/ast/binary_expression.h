@@ -48,7 +48,7 @@ enum class BinaryOp {
 };
 
 /// An binary expression
-class BinaryExpression : public Expression {
+class BinaryExpression : public Castable<BinaryExpression, Expression> {
  public:
   /// Constructor
   BinaryExpression();

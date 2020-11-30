@@ -26,7 +26,7 @@ namespace tint {
 namespace ast {
 
 /// An assignment statement
-class AssignmentStatement : public Statement {
+class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
  public:
   /// Constructor
   AssignmentStatement();

@@ -26,8 +26,10 @@ ConstructorExpression::ConstructorExpression() = default;
 
 ConstructorExpression::~ConstructorExpression() = default;
 
+ConstructorExpression::ConstructorExpression(ConstructorExpression&&) = default;
+
 ConstructorExpression::ConstructorExpression(const Source& source)
-    : Expression(source) {}
+    : Base(source) {}
 
 bool ConstructorExpression::IsConstructor() const {
   return true;

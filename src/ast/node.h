@@ -18,15 +18,16 @@
 #include <ostream>
 #include <string>
 
+#include "src/castable.h"
 #include "src/source.h"
 
 namespace tint {
 namespace ast {
 
 /// AST base class node
-class Node {
+class Node : public Castable<Node> {
  public:
-  virtual ~Node();
+  ~Node() override;
 
   /// @returns the node source data
   const Source& source() const { return source_; }
@@ -53,7 +54,7 @@ class Node {
   /// @param source The input source for the node
   explicit Node(const Source& source);
   /// Move constructor
-  Node(Node&&) = default;
+  Node(Node&&);
 
   /// Writes indent into stream
   /// @param out the stream to write to

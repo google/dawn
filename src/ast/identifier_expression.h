@@ -26,7 +26,7 @@ namespace tint {
 namespace ast {
 
 /// An identifier expression
-class IdentifierExpression : public Expression {
+class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
   /// @param name the name

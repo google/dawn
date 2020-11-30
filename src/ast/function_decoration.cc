@@ -24,8 +24,7 @@ namespace ast {
 
 constexpr const DecorationKind FunctionDecoration::Kind;
 
-FunctionDecoration::FunctionDecoration(const Source& source)
-    : Decoration(source) {}
+FunctionDecoration::FunctionDecoration(const Source& source) : Base(source) {}
 
 FunctionDecoration::~FunctionDecoration() = default;
 

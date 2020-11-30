@@ -39,7 +39,7 @@ class SwitchStatement;
 class VariableDeclStatement;
 
 /// Base statement class
-class Statement : public Node {
+class Statement : public Castable<Statement, Node> {
  public:
   ~Statement() override;
 

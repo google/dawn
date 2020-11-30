@@ -40,7 +40,7 @@ namespace tint {
 namespace ast {
 
 /// A Function statement.
-class Function : public Node {
+class Function : public Castable<Function, Node> {
  public:
   /// Information about a binding
   struct BindingInfo {

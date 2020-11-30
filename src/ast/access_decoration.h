@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// An access decoration
-class AccessDecoration : public TypeDecoration {
+class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kAccess;

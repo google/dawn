@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A boolean literal
-class BoolLiteral : public Literal {
+class BoolLiteral : public Castable<BoolLiteral, Literal> {
  public:
   /// Constructor
   /// @param type the type of the literal

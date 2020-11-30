@@ -27,7 +27,7 @@ namespace tint {
 namespace ast {
 
 /// An else statement
-class ElseStatement : public Statement {
+class ElseStatement : public Castable<ElseStatement, Statement> {
  public:
   /// Constructor
   /// @param body the else body

@@ -22,7 +22,8 @@ namespace tint {
 namespace ast {
 
 /// A builtin decoration
-class BuiltinDecoration : public VariableDecoration {
+class BuiltinDecoration
+    : public Castable<BuiltinDecoration, VariableDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kBuiltin;

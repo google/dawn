@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// An break statement
-class BreakStatement : public Statement {
+class BreakStatement : public Castable<BreakStatement, Statement> {
  public:
   /// Constructor
   BreakStatement();

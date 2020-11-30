@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// The struct decorations
-class StructDecoration : public Decoration {
+class StructDecoration : public Castable<StructDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kStruct;

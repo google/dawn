@@ -17,18 +17,18 @@
 namespace tint {
 namespace ast {
 
-BinaryExpression::BinaryExpression() : Expression() {}
+BinaryExpression::BinaryExpression() : Base() {}
 
 BinaryExpression::BinaryExpression(BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)
-    : Expression(), op_(op), lhs_(lhs), rhs_(rhs) {}
+    : Base(), op_(op), lhs_(lhs), rhs_(rhs) {}
 
 BinaryExpression::BinaryExpression(const Source& source,
                                    BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)
-    : Expression(source), op_(op), lhs_(lhs), rhs_(rhs) {}
+    : Base(source), op_(op), lhs_(lhs), rhs_(rhs) {}
 
 BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 

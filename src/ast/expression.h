@@ -35,7 +35,7 @@ class MemberAccessorExpression;
 class UnaryOpExpression;
 
 /// Base expression class
-class Expression : public Node {
+class Expression : public Castable<Expression, Node> {
  public:
   ~Expression() override;
 
@@ -109,7 +109,7 @@ class Expression : public Node {
   /// @param source the source of the expression
   explicit Expression(const Source& source);
   /// Move constructor
-  Expression(Expression&&) = default;
+  Expression(Expression&&);
 
  private:
   Expression(const Expression&) = delete;

@@ -27,8 +27,7 @@ namespace ast {
 
 constexpr const DecorationKind VariableDecoration::Kind;
 
-VariableDecoration::VariableDecoration(const Source& source)
-    : Decoration(source) {}
+VariableDecoration::VariableDecoration(const Source& source) : Base(source) {}
 
 VariableDecoration::~VariableDecoration() = default;
 

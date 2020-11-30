@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A stride decoration
-class StrideDecoration : public ArrayDecoration {
+class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kStride;

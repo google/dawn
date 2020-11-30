@@ -36,7 +36,7 @@ namespace ast {
 
 Statement::Statement() = default;
 
-Statement::Statement(const Source& source) : Node(source) {}
+Statement::Statement(const Source& source) : Base(source) {}
 
 Statement::Statement(Statement&&) = default;
 

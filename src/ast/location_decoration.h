@@ -23,7 +23,8 @@ namespace tint {
 namespace ast {
 
 /// A location decoration
-class LocationDecoration : public VariableDecoration {
+class LocationDecoration
+    : public Castable<LocationDecoration, VariableDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kLocation;

@@ -29,7 +29,7 @@ namespace tint {
 namespace ast {
 
 /// A struct member statement.
-class StructMember : public Node {
+class StructMember : public Castable<StructMember, Node> {
  public:
   /// Create a new empty struct member statement
   StructMember();

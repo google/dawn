@@ -18,12 +18,12 @@ namespace tint {
 namespace ast {
 
 LoopStatement::LoopStatement(BlockStatement* body, BlockStatement* continuing)
-    : Statement(), body_(body), continuing_(continuing) {}
+    : Base(), body_(body), continuing_(continuing) {}
 
 LoopStatement::LoopStatement(const Source& source,
                              BlockStatement* body,
                              BlockStatement* continuing)
-    : Statement(source), body_(body), continuing_(continuing) {}
+    : Base(source), body_(body), continuing_(continuing) {}
 
 LoopStatement::LoopStatement(LoopStatement&&) = default;
 

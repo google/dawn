@@ -22,7 +22,7 @@ namespace tint {
 namespace ast {
 
 /// A workgroup decoration
-class StageDecoration : public FunctionDecoration {
+class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kStage;

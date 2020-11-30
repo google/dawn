@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A float literal
-class FloatLiteral : public Literal {
+class FloatLiteral : public Castable<FloatLiteral, Literal> {
  public:
   /// Constructor
   /// @param type the type of the literal

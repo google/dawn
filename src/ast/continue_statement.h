@@ -24,7 +24,7 @@ namespace tint {
 namespace ast {
 
 /// An continue statement
-class ContinueStatement : public Statement {
+class ContinueStatement : public Castable<ContinueStatement, Statement> {
  public:
   /// Constructor
   ContinueStatement();

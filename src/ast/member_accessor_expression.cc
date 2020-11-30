@@ -21,12 +21,12 @@ MemberAccessorExpression::MemberAccessorExpression() = default;
 
 MemberAccessorExpression::MemberAccessorExpression(Expression* structure,
                                                    IdentifierExpression* member)
-    : Expression(), struct_(structure), member_(member) {}
+    : Base(), struct_(structure), member_(member) {}
 
 MemberAccessorExpression::MemberAccessorExpression(const Source& source,
                                                    Expression* structure,
                                                    IdentifierExpression* member)
-    : Expression(source), struct_(structure), member_(member) {}
+    : Base(source), struct_(structure), member_(member) {}
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
     default;

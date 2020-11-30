@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-BitcastExpression::BitcastExpression() : Expression() {}
+BitcastExpression::BitcastExpression() : Base() {}
 
 BitcastExpression::BitcastExpression(type::Type* type, Expression* expr)
-    : Expression(), type_(type), expr_(expr) {}
+    : Base(), type_(type), expr_(expr) {}
 
 BitcastExpression::BitcastExpression(const Source& source,
                                      type::Type* type,
                                      Expression* expr)
-    : Expression(source), type_(type), expr_(expr) {}
+    : Base(source), type_(type), expr_(expr) {}
 
 BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;

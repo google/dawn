@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-CallExpression::CallExpression() : Expression() {}
+CallExpression::CallExpression() : Base() {}
 
 CallExpression::CallExpression(Expression* func, ExpressionList params)
-    : Expression(), func_(func), params_(params) {}
+    : Base(), func_(func), params_(params) {}
 
 CallExpression::CallExpression(const Source& source,
                                Expression* func,
                                ExpressionList params)
-    : Expression(source), func_(func), params_(params) {}
+    : Base(source), func_(func), params_(params) {}
 
 CallExpression::CallExpression(CallExpression&&) = default;
 

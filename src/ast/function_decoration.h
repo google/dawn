@@ -28,7 +28,7 @@ class StageDecoration;
 class WorkgroupDecoration;
 
 /// A decoration attached to a function
-class FunctionDecoration : public Decoration {
+class FunctionDecoration : public Castable<FunctionDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kFunction;

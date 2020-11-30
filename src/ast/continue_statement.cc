@@ -17,10 +17,9 @@
 namespace tint {
 namespace ast {
 
-ContinueStatement::ContinueStatement() : Statement() {}
+ContinueStatement::ContinueStatement() : Base() {}
 
-ContinueStatement::ContinueStatement(const Source& source)
-    : Statement(source) {}
+ContinueStatement::ContinueStatement(const Source& source) : Base(source) {}
 
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 

@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-UnaryOpExpression::UnaryOpExpression() : Expression() {}
+UnaryOpExpression::UnaryOpExpression() : Base() {}
 
 UnaryOpExpression::UnaryOpExpression(UnaryOp op, Expression* expr)
-    : Expression(), op_(op), expr_(expr) {}
+    : Base(), op_(op), expr_(expr) {}
 
 UnaryOpExpression::UnaryOpExpression(const Source& source,
                                      UnaryOp op,
                                      Expression* expr)
-    : Expression(source), op_(op), expr_(expr) {}
+    : Base(source), op_(op), expr_(expr) {}
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 

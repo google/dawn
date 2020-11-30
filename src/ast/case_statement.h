@@ -31,7 +31,7 @@ namespace ast {
 using CaseSelectorList = std::vector<IntLiteral*>;
 
 /// A case statement
-class CaseStatement : public Statement {
+class CaseStatement : public Castable<CaseStatement, Statement> {
  public:
   /// Constructor
   /// Creates a default case statement

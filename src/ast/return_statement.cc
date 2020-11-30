@@ -17,15 +17,14 @@
 namespace tint {
 namespace ast {
 
-ReturnStatement::ReturnStatement() : Statement() {}
+ReturnStatement::ReturnStatement() : Base() {}
 
-ReturnStatement::ReturnStatement(const Source& source) : Statement(source) {}
+ReturnStatement::ReturnStatement(const Source& source) : Base(source) {}
 
-ReturnStatement::ReturnStatement(Expression* value)
-    : Statement(), value_(value) {}
+ReturnStatement::ReturnStatement(Expression* value) : Base(), value_(value) {}
 
 ReturnStatement::ReturnStatement(const Source& source, Expression* value)
-    : Statement(source), value_(value) {}
+    : Base(source), value_(value) {}
 
 ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 

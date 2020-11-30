@@ -24,7 +24,7 @@ namespace ast {
 constexpr const DecorationKind StructMemberDecoration::Kind;
 
 StructMemberDecoration::StructMemberDecoration(const Source& source)
-    : Decoration(source) {}
+    : Base(source) {}
 
 StructMemberDecoration::~StructMemberDecoration() = default;
 

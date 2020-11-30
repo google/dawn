@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// An fallthrough statement
-class FallthroughStatement : public Statement {
+class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
  public:
   /// Constructor
   FallthroughStatement();
@@ -29,7 +29,7 @@ class FallthroughStatement : public Statement {
   /// @param source the source information
   explicit FallthroughStatement(const Source& source);
   /// Move constructor
-  FallthroughStatement(FallthroughStatement&&) = default;
+  FallthroughStatement(FallthroughStatement&&);
   ~FallthroughStatement() override;
 
   /// @returns true if this is an fallthrough statement

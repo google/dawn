@@ -23,7 +23,7 @@ namespace ast {
 
 constexpr const DecorationKind TypeDecoration::Kind;
 
-TypeDecoration::TypeDecoration(const Source& source) : Decoration(source) {}
+TypeDecoration::TypeDecoration(const Source& source) : Base(source) {}
 
 TypeDecoration::~TypeDecoration() = default;
 

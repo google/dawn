@@ -19,7 +19,7 @@ namespace ast {
 
 constexpr const DecorationKind StructDecoration::Kind;
 
-StructDecoration::StructDecoration(const Source& source) : Decoration(source) {}
+StructDecoration::StructDecoration(const Source& source) : Base(source) {}
 
 StructDecoration::~StructDecoration() = default;
 

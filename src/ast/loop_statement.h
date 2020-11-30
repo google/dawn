@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A loop statement
-class LoopStatement : public Statement {
+class LoopStatement : public Castable<LoopStatement, Statement> {
  public:
   /// Constructor
   /// @param body the body statements

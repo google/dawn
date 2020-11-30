@@ -25,7 +25,8 @@ namespace tint {
 namespace ast {
 
 /// The struct decorations
-class StructBlockDecoration : public StructDecoration {
+class StructBlockDecoration
+    : public Castable<StructBlockDecoration, StructDecoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

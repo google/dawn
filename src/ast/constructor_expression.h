@@ -24,7 +24,8 @@ class ScalarConstructorExpression;
 class TypeConstructorExpression;
 
 /// Base class for constructor style expressions
-class ConstructorExpression : public Expression {
+class ConstructorExpression
+    : public Castable<ConstructorExpression, Expression> {
  public:
   ~ConstructorExpression() override;
 
@@ -48,7 +49,7 @@ class ConstructorExpression : public Expression {
   /// @param source the constructor source
   explicit ConstructorExpression(const Source& source);
   /// Move constructor
-  ConstructorExpression(ConstructorExpression&&) = default;
+  ConstructorExpression(ConstructorExpression&&);
 
  private:
   ConstructorExpression(const ConstructorExpression&) = delete;

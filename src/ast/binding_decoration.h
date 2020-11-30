@@ -23,7 +23,8 @@ namespace tint {
 namespace ast {
 
 /// A binding decoration
-class BindingDecoration : public VariableDecoration {
+class BindingDecoration
+    : public Castable<BindingDecoration, VariableDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kBinding;

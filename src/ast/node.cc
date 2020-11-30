@@ -23,6 +23,8 @@ Node::Node() = default;
 
 Node::Node(const Source& source) : source_(source) {}
 
+Node::Node(Node&&) = default;
+
 Node::~Node() = default;
 
 void Node::make_indent(std::ostream& out, size_t indent) const {

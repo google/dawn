@@ -25,7 +25,8 @@ namespace tint {
 namespace ast {
 
 /// A type specific constructor
-class TypeConstructorExpression : public ConstructorExpression {
+class TypeConstructorExpression
+    : public Castable<TypeConstructorExpression, ConstructorExpression> {
  public:
   TypeConstructorExpression();
   /// Constructor

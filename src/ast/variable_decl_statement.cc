@@ -17,14 +17,14 @@
 namespace tint {
 namespace ast {
 
-VariableDeclStatement::VariableDeclStatement() : Statement() {}
+VariableDeclStatement::VariableDeclStatement() : Base() {}
 
 VariableDeclStatement::VariableDeclStatement(Variable* variable)
-    : Statement(), variable_(variable) {}
+    : Base(), variable_(variable) {}
 
 VariableDeclStatement::VariableDeclStatement(const Source& source,
                                              Variable* variable)
-    : Statement(source), variable_(variable) {}
+    : Base(source), variable_(variable) {}
 
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 

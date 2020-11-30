@@ -25,7 +25,8 @@ namespace tint {
 namespace ast {
 
 /// An array accessor expression
-class ArrayAccessorExpression : public Expression {
+class ArrayAccessorExpression
+    : public Castable<ArrayAccessorExpression, Expression> {
  public:
   /// Constructor
   ArrayAccessorExpression();

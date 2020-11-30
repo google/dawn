@@ -17,9 +17,9 @@
 namespace tint {
 namespace ast {
 
-BlockStatement::BlockStatement() : Statement() {}
+BlockStatement::BlockStatement() : Base() {}
 
-BlockStatement::BlockStatement(const Source& source) : Statement(source) {}
+BlockStatement::BlockStatement(const Source& source) : Base(source) {}
 
 BlockStatement::BlockStatement(BlockStatement&&) = default;
 

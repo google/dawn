@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A null literal
-class NullLiteral : public Literal {
+class NullLiteral : public Castable<NullLiteral, Literal> {
  public:
   /// Constructor
   /// @param type the type

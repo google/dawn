@@ -28,7 +28,7 @@ namespace ast {
 class AccessDecoration;
 
 /// A decoration attached to a type
-class TypeDecoration : public Decoration {
+class TypeDecoration : public Castable<TypeDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kType;

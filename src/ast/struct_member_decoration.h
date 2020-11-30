@@ -27,7 +27,8 @@ namespace ast {
 class StructMemberOffsetDecoration;
 
 /// A decoration attached to a struct member
-class StructMemberDecoration : public Decoration {
+class StructMemberDecoration
+    : public Castable<StructMemberDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kStructMember;

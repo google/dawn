@@ -47,7 +47,7 @@ enum class DecorationKind {
 std::ostream& operator<<(std::ostream& out, DecorationKind data);
 
 /// The base class for all decorations
-class Decoration : public Node {
+class Decoration : public Castable<Decoration, Node> {
  public:
   ~Decoration() override;
 
@@ -59,19 +59,13 @@ class Decoration : public Node {
   /// kind.
   virtual bool IsKind(DecorationKind kind) const = 0;
 
-  /// @return true if this decoration is of (or derives from) type |TO|
-  template <typename TO>
-  bool Is() const {
-    return IsKind(TO::Kind);
-  }
-
   /// @returns true if the node is valid
   bool IsValid() const override;
 
  protected:
   /// Constructor
   /// @param source the source of this decoration
-  explicit Decoration(const Source& source) : Node(source) {}
+  explicit Decoration(const Source& source) : Base(source) {}
 };
 
 /// As dynamically casts |deco| to the target type |TO|.

@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 FloatLiteral::FloatLiteral(ast::type::Type* type, float value)
-    : Literal(type), value_(value) {}
+    : Base(type), value_(value) {}
 
 FloatLiteral::~FloatLiteral() = default;
 

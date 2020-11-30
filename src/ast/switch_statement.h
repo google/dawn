@@ -27,7 +27,7 @@ namespace tint {
 namespace ast {
 
 /// A switch statement
-class SwitchStatement : public Statement {
+class SwitchStatement : public Castable<SwitchStatement, Statement> {
  public:
   /// Constructor
   SwitchStatement();

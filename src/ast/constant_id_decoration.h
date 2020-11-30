@@ -22,7 +22,8 @@ namespace tint {
 namespace ast {
 
 /// A constant id decoration
-class ConstantIdDecoration : public VariableDecoration {
+class ConstantIdDecoration
+    : public Castable<ConstantIdDecoration, VariableDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kConstantId;

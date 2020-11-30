@@ -17,23 +17,23 @@
 namespace tint {
 namespace ast {
 
-Struct::Struct() : Node() {}
+Struct::Struct() : Base() {}
 
 Struct::Struct(StructMemberList members)
-    : Node(), members_(std::move(members)) {}
+    : Base(), members_(std::move(members)) {}
 
 Struct::Struct(StructDecorationList decorations, StructMemberList members)
-    : Node(),
+    : Base(),
       decorations_(std::move(decorations)),
       members_(std::move(members)) {}
 
 Struct::Struct(const Source& source, StructMemberList members)
-    : Node(source), members_(std::move(members)) {}
+    : Base(source), members_(std::move(members)) {}
 
 Struct::Struct(const Source& source,
                StructDecorationList decorations,
                StructMemberList members)
-    : Node(source),
+    : Base(source),
       decorations_(std::move(decorations)),
       members_(std::move(members)) {}
 

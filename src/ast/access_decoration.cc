@@ -20,7 +20,7 @@ namespace ast {
 constexpr const DecorationKind AccessDecoration::Kind;
 
 AccessDecoration::AccessDecoration(AccessControl val, const Source& source)
-    : TypeDecoration(source), value_(val) {}
+    : Base(source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;
 
@@ -29,7 +29,7 @@ DecorationKind AccessDecoration::GetKind() const {
 }
 
 bool AccessDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || TypeDecoration::IsKind(kind);
+  return kind == Kind || Base::IsKind(kind);
 }
 
 bool AccessDecoration::IsAccess() const {

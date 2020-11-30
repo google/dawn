@@ -32,7 +32,7 @@ class LocationDecoration;
 class SetDecoration;
 
 /// A decoration attached to a variable
-class VariableDecoration : public Decoration {
+class VariableDecoration : public Castable<VariableDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kVariable;

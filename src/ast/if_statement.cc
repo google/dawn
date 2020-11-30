@@ -20,12 +20,12 @@ namespace tint {
 namespace ast {
 
 IfStatement::IfStatement(Expression* condition, BlockStatement* body)
-    : Statement(), condition_(condition), body_(body) {}
+    : Base(), condition_(condition), body_(body) {}
 
 IfStatement::IfStatement(const Source& source,
                          Expression* condition,
                          BlockStatement* body)
-    : Statement(source), condition_(condition), body_(body) {}
+    : Base(source), condition_(condition), body_(body) {}
 
 IfStatement::IfStatement(IfStatement&&) = default;
 

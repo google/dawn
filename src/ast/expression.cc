@@ -31,7 +31,9 @@ namespace ast {
 
 Expression::Expression() = default;
 
-Expression::Expression(const Source& source) : Node(source) {}
+Expression::Expression(const Source& source) : Base(source) {}
+
+Expression::Expression(Expression&&) = default;
 
 Expression::~Expression() = default;
 

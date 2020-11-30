@@ -23,7 +23,7 @@ namespace ast {
 
 constexpr const DecorationKind ArrayDecoration::Kind;
 
-ArrayDecoration::ArrayDecoration(const Source& source) : Decoration(source) {}
+ArrayDecoration::ArrayDecoration(const Source& source) : Base(source) {}
 
 ArrayDecoration::~ArrayDecoration() = default;
 

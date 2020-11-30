@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-AssignmentStatement::AssignmentStatement() : Statement() {}
+AssignmentStatement::AssignmentStatement() : Base() {}
 
 AssignmentStatement::AssignmentStatement(Expression* lhs, Expression* rhs)
-    : Statement(), lhs_(lhs), rhs_(rhs) {}
+    : Base(), lhs_(lhs), rhs_(rhs) {}
 
 AssignmentStatement::AssignmentStatement(const Source& source,
                                          Expression* lhs,
                                          Expression* rhs)
-    : Statement(source), lhs_(lhs), rhs_(rhs) {}
+    : Base(source), lhs_(lhs), rhs_(rhs) {}
 
 AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 

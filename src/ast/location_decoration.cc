@@ -20,7 +20,7 @@ namespace ast {
 constexpr const DecorationKind LocationDecoration::Kind;
 
 LocationDecoration::LocationDecoration(uint32_t val, const Source& source)
-    : VariableDecoration(source), value_(val) {}
+    : Base(source), value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
 
@@ -29,7 +29,7 @@ DecorationKind LocationDecoration::GetKind() const {
 }
 
 bool LocationDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || VariableDecoration::IsKind(kind);
+  return kind == Kind || Base::IsKind(kind);
 }
 
 bool LocationDecoration::IsLocation() const {

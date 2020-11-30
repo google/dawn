@@ -27,7 +27,7 @@ namespace tint {
 namespace ast {
 
 /// A struct statement.
-class Struct : public Node {
+class Struct : public Castable<Struct, Node> {
  public:
   /// Create a new empty struct statement
   Struct();

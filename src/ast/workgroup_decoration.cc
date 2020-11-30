@@ -20,18 +20,18 @@ namespace ast {
 constexpr const DecorationKind WorkgroupDecoration::Kind;
 
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x, const Source& source)
-    : FunctionDecoration(source), x_(x) {}
+    : Base(source), x_(x) {}
 
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
                                          uint32_t y,
                                          const Source& source)
-    : FunctionDecoration(source), x_(x), y_(y) {}
+    : Base(source), x_(x), y_(y) {}
 
 WorkgroupDecoration::WorkgroupDecoration(uint32_t x,
                                          uint32_t y,
                                          uint32_t z,
                                          const Source& source)
-    : FunctionDecoration(source), x_(x), y_(y), z_(z) {}
+    : Base(source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 
@@ -40,7 +40,7 @@ DecorationKind WorkgroupDecoration::GetKind() const {
 }
 
 bool WorkgroupDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || FunctionDecoration::IsKind(kind);
+  return kind == Kind || Base::IsKind(kind);
 }
 
 bool WorkgroupDecoration::IsWorkgroup() const {

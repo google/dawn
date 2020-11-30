@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A signed int literal
-class SintLiteral : public IntLiteral {
+class SintLiteral : public Castable<SintLiteral, IntLiteral> {
  public:
   /// Constructor
   /// @param type the type

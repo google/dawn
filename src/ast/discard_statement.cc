@@ -17,9 +17,11 @@
 namespace tint {
 namespace ast {
 
-DiscardStatement::DiscardStatement() : Statement() {}
+DiscardStatement::DiscardStatement() : Base() {}
 
-DiscardStatement::DiscardStatement(const Source& source) : Statement(source) {}
+DiscardStatement::DiscardStatement(const Source& source) : Base(source) {}
+
+DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 
 DiscardStatement::~DiscardStatement() = default;
 

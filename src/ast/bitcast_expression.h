@@ -26,7 +26,7 @@ namespace tint {
 namespace ast {
 
 /// A bitcast expression
-class BitcastExpression : public Expression {
+class BitcastExpression : public Castable<BitcastExpression, Expression> {
  public:
   /// Constructor
   BitcastExpression();

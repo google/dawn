@@ -17,16 +17,16 @@
 namespace tint {
 namespace ast {
 
-ArrayAccessorExpression::ArrayAccessorExpression() : Expression() {}
+ArrayAccessorExpression::ArrayAccessorExpression() : Base() {}
 
 ArrayAccessorExpression::ArrayAccessorExpression(Expression* array,
                                                  Expression* idx_expr)
-    : Expression(), array_(array), idx_expr_(idx_expr) {}
+    : Base(), array_(array), idx_expr_(idx_expr) {}
 
 ArrayAccessorExpression::ArrayAccessorExpression(const Source& source,
                                                  Expression* array,
                                                  Expression* idx_expr)
-    : Expression(source), array_(array), idx_expr_(idx_expr) {}
+    : Base(source), array_(array), idx_expr_(idx_expr) {}
 
 ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
     default;

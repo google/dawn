@@ -17,18 +17,18 @@
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement(BlockStatement* body) : Statement(), body_(body) {}
+ElseStatement::ElseStatement(BlockStatement* body) : Base(), body_(body) {}
 
 ElseStatement::ElseStatement(Expression* condition, BlockStatement* body)
-    : Statement(), condition_(condition), body_(body) {}
+    : Base(), condition_(condition), body_(body) {}
 
 ElseStatement::ElseStatement(const Source& source, BlockStatement* body)
-    : Statement(source), body_(body) {}
+    : Base(source), body_(body) {}
 
 ElseStatement::ElseStatement(const Source& source,
                              Expression* condition,
                              BlockStatement* body)
-    : Statement(source), condition_(condition), body_(body) {}
+    : Base(source), condition_(condition), body_(body) {}
 
 ElseStatement::ElseStatement(ElseStatement&&) = default;
 

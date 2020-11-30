@@ -27,7 +27,7 @@ namespace tint {
 namespace ast {
 
 /// An if statement
-class IfStatement : public Statement {
+class IfStatement : public Castable<IfStatement, Statement> {
  public:
   /// Constructor
   /// @param condition the if condition

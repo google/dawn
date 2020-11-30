@@ -17,17 +17,16 @@
 namespace tint {
 namespace ast {
 
-TypeConstructorExpression::TypeConstructorExpression()
-    : ConstructorExpression() {}
+TypeConstructorExpression::TypeConstructorExpression() : Base() {}
 
 TypeConstructorExpression::TypeConstructorExpression(type::Type* type,
                                                      ExpressionList values)
-    : ConstructorExpression(), type_(type), values_(std::move(values)) {}
+    : Base(), type_(type), values_(std::move(values)) {}
 
 TypeConstructorExpression::TypeConstructorExpression(const Source& source,
                                                      type::Type* type,
                                                      ExpressionList values)
-    : ConstructorExpression(source), type_(type), values_(std::move(values)) {}
+    : Base(source), type_(type), values_(std::move(values)) {}
 
 TypeConstructorExpression::TypeConstructorExpression(
     TypeConstructorExpression&&) = default;

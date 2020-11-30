@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement(BlockStatement* body) : Statement(), body_(body) {}
+CaseStatement::CaseStatement(BlockStatement* body) : Base(), body_(body) {}
 
 CaseStatement::CaseStatement(CaseSelectorList selectors, BlockStatement* body)
-    : Statement(), selectors_(selectors), body_(body) {}
+    : Base(), selectors_(selectors), body_(body) {}
 
 CaseStatement::CaseStatement(const Source& source,
                              CaseSelectorList selectors,
                              BlockStatement* body)
-    : Statement(source), selectors_(selectors), body_(body) {}
+    : Base(source), selectors_(selectors), body_(body) {}
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;
 

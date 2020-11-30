@@ -24,7 +24,7 @@ namespace ast {
 DecoratedVariable::DecoratedVariable() = default;
 
 DecoratedVariable::DecoratedVariable(Variable* var)
-    : Variable(var->source(), var->name(), var->storage_class(), var->type()) {}
+    : Base(var->source(), var->name(), var->storage_class(), var->type()) {}
 
 DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
 

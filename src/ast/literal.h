@@ -31,7 +31,7 @@ class IntLiteral;
 class UintLiteral;
 
 /// Base class for a literal value
-class Literal : public Node {
+class Literal : public Castable<Literal, Node> {
  public:
   ~Literal() override;
 

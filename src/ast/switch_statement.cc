@@ -19,7 +19,7 @@
 namespace tint {
 namespace ast {
 
-SwitchStatement::SwitchStatement() : Statement() {}
+SwitchStatement::SwitchStatement() : Base() {}
 
 SwitchStatement::SwitchStatement(Expression* condition, CaseStatementList body)
     : condition_(condition), body_(body) {}
@@ -27,7 +27,7 @@ SwitchStatement::SwitchStatement(Expression* condition, CaseStatementList body)
 SwitchStatement::SwitchStatement(const Source& source,
                                  Expression* condition,
                                  CaseStatementList body)
-    : Statement(source), condition_(condition), body_(body) {}
+    : Base(source), condition_(condition), body_(body) {}
 
 bool SwitchStatement::IsSwitch() const {
   return true;

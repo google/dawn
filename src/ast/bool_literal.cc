@@ -18,7 +18,7 @@ namespace tint {
 namespace ast {
 
 BoolLiteral::BoolLiteral(ast::type::Type* type, bool value)
-    : Literal(type), value_(value) {}
+    : Base(type), value_(value) {}
 
 BoolLiteral::~BoolLiteral() = default;
 

@@ -26,7 +26,7 @@ namespace tint {
 namespace ast {
 
 /// A unary op expression
-class UnaryOpExpression : public Expression {
+class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
  public:
   /// Constructor
   UnaryOpExpression();

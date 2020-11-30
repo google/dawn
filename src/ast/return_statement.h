@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A return statement
-class ReturnStatement : public Statement {
+class ReturnStatement : public Castable<ReturnStatement, Statement> {
  public:
   /// Constructor
   ReturnStatement();

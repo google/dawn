@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-IntLiteral::IntLiteral(ast::type::Type* type) : Literal(type) {}
+IntLiteral::IntLiteral(ast::type::Type* type) : Base(type) {}
 
 IntLiteral::~IntLiteral() = default;
 

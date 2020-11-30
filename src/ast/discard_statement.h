@@ -21,7 +21,7 @@ namespace tint {
 namespace ast {
 
 /// A discard statement
-class DiscardStatement : public Statement {
+class DiscardStatement : public Castable<DiscardStatement, Statement> {
  public:
   /// Constructor
   DiscardStatement();
@@ -29,7 +29,7 @@ class DiscardStatement : public Statement {
   /// @param source the discard statement source
   explicit DiscardStatement(const Source& source);
   /// Move constructor
-  DiscardStatement(DiscardStatement&&) = default;
+  DiscardStatement(DiscardStatement&&);
   ~DiscardStatement() override;
 
   /// @returns true if this is a discard statement

@@ -23,7 +23,7 @@ namespace tint {
 namespace ast {
 
 /// A set decoration
-class SetDecoration : public VariableDecoration {
+class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
  public:
   /// constructor
   /// @param value the set value

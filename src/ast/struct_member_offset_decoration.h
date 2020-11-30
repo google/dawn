@@ -25,7 +25,8 @@ namespace tint {
 namespace ast {
 
 /// A struct member offset decoration
-class StructMemberOffsetDecoration : public StructMemberDecoration {
+class StructMemberOffsetDecoration
+    : public Castable<StructMemberOffsetDecoration, StructMemberDecoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind =

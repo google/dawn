@@ -20,7 +20,7 @@ namespace ast {
 constexpr const DecorationKind StageDecoration::Kind;
 
 StageDecoration::StageDecoration(ast::PipelineStage stage, const Source& source)
-    : FunctionDecoration(source), stage_(stage) {}
+    : Base(source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
 
@@ -29,7 +29,7 @@ DecorationKind StageDecoration::GetKind() const {
 }
 
 bool StageDecoration::IsKind(DecorationKind kind) const {
-  return kind == Kind || FunctionDecoration::IsKind(kind);
+  return kind == Kind || Base::IsKind(kind);
 }
 
 bool StageDecoration::IsStage() const {

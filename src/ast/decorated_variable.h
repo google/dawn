@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A Decorated Variable statement.
-class DecoratedVariable : public Variable {
+class DecoratedVariable : public Castable<DecoratedVariable, Variable> {
  public:
   /// Create a new empty decorated variable statement
   DecoratedVariable();

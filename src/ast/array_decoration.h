@@ -27,7 +27,7 @@ namespace ast {
 class StrideDecoration;
 
 /// A decoration attached to an array
-class ArrayDecoration : public Decoration {
+class ArrayDecoration : public Castable<ArrayDecoration, Decoration> {
  public:
   /// The kind of decoration that this type represents
   static constexpr const DecorationKind Kind = DecorationKind::kArray;

@@ -18,11 +18,11 @@ namespace tint {
 namespace ast {
 
 IdentifierExpression::IdentifierExpression(const std::string& name)
-    : Expression(), name_(name) {}
+    : Base(), name_(name) {}
 
 IdentifierExpression::IdentifierExpression(const Source& source,
                                            const std::string& name)
-    : Expression(source), name_(name) {}
+    : Base(source), name_(name) {}
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 

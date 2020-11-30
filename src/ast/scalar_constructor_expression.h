@@ -25,7 +25,8 @@ namespace tint {
 namespace ast {
 
 /// A scalar constructor
-class ScalarConstructorExpression : public ConstructorExpression {
+class ScalarConstructorExpression
+    : public Castable<ScalarConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
   ScalarConstructorExpression();

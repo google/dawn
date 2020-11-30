@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A block statement
-class BlockStatement : public Statement {
+class BlockStatement : public Castable<BlockStatement, Statement> {
  public:
   /// Constructor
   BlockStatement();

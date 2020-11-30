@@ -17,10 +17,12 @@
 namespace tint {
 namespace ast {
 
-FallthroughStatement::FallthroughStatement() : Statement() {}
+FallthroughStatement::FallthroughStatement() : Base() {}
 
 FallthroughStatement::FallthroughStatement(const Source& source)
-    : Statement(source) {}
+    : Base(source) {}
+
+FallthroughStatement::FallthroughStatement(FallthroughStatement&&) = default;
 
 FallthroughStatement::~FallthroughStatement() = default;
 

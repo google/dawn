@@ -17,9 +17,9 @@
 namespace tint {
 namespace ast {
 
-BreakStatement::BreakStatement() : Statement() {}
+BreakStatement::BreakStatement() : Base() {}
 
-BreakStatement::BreakStatement(const Source& source) : Statement(source) {}
+BreakStatement::BreakStatement(const Source& source) : Base(source) {}
 
 BreakStatement::BreakStatement(BreakStatement&&) = default;
 

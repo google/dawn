@@ -25,7 +25,7 @@ namespace tint {
 namespace ast {
 
 /// A call expression
-class CallExpression : public Expression {
+class CallExpression : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
   CallExpression();
