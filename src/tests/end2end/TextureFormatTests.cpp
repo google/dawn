@@ -229,7 +229,11 @@ class TextureFormatTest : public DawnTest {
 
         // Prepare objects needed to sample from texture in the renderpass
         wgpu::RenderPipeline pipeline = CreateSamplePipeline(sampleFormatInfo, renderFormatInfo);
-        wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+
+        // In this test we always use the default values of mag/min/mipmap filter
+        // (FilterMode::Nearest) because integer/unsigned integer textures must be sampled with
+        // FilterMode::Nearest.
+        wgpu::SamplerDescriptor samplerDesc;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
