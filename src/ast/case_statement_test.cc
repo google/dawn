@@ -29,7 +29,7 @@ namespace {
 using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList b;
   auto* selector = create<SintLiteral>(&i32, 2);
@@ -47,7 +47,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
 }
 
 TEST_F(CaseStatementTest, Creation_u32) {
-  ast::type::U32Type u32;
+  type::U32Type u32;
 
   CaseSelectorList b;
   auto* selector = create<SintLiteral>(&u32, 2);
@@ -65,7 +65,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -82,33 +82,33 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  CaseStatement c(create<ast::BlockStatement>());
+  CaseStatement c(create<BlockStatement>());
   c.set_body(body);
   EXPECT_TRUE(c.IsDefault());
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  CaseStatement c(create<ast::BlockStatement>());
+  CaseStatement c(create<BlockStatement>());
   c.set_selectors(b);
   EXPECT_FALSE(c.IsDefault());
 }
 
 TEST_F(CaseStatementTest, IsCase) {
-  CaseStatement c(create<ast::BlockStatement>());
-  EXPECT_TRUE(c.Is<ast::CaseStatement>());
+  CaseStatement c(create<BlockStatement>());
+  EXPECT_TRUE(c.Is<CaseStatement>());
 }
 
 TEST_F(CaseStatementTest, IsValid) {
-  CaseStatement c(create<ast::BlockStatement>());
+  CaseStatement c(create<BlockStatement>());
   EXPECT_TRUE(c.IsValid());
 }
 
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
@@ -121,19 +121,19 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
   auto* body = create<BlockStatement>();
-  body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
+  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
   CaseStatement c({b}, body);
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, -2));
 
@@ -150,7 +150,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
-  ast::type::U32Type u32;
+  type::U32Type u32;
   CaseSelectorList b;
   b.push_back(create<UintLiteral>(&u32, 2));
 
@@ -167,7 +167,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 1));

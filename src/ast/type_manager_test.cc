@@ -20,51 +20,53 @@
 #include "src/ast/type/u32_type.h"
 
 namespace tint {
+namespace ast {
 namespace {
 
 using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
-  ast::TypeManager tm;
-  auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto* t = tm.Get(std::make_unique<type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<ast::type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32Type>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
-  ast::TypeManager tm;
-  auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto* t = tm.Get(std::make_unique<type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<ast::type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32Type>());
 
-  auto* t2 = tm.Get(std::make_unique<ast::type::I32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::I32Type>());
   EXPECT_EQ(t, t2);
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
-  ast::TypeManager tm;
-  auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto* t = tm.Get(std::make_unique<type::I32Type>());
   ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<ast::type::I32Type>());
+  EXPECT_TRUE(t->Is<type::I32Type>());
 
-  auto* t2 = tm.Get(std::make_unique<ast::type::U32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::U32Type>());
   ASSERT_NE(t2, nullptr);
   EXPECT_NE(t, t2);
-  EXPECT_TRUE(t2->Is<ast::type::U32Type>());
+  EXPECT_TRUE(t2->Is<type::U32Type>());
 }
 
 TEST_F(TypeManagerTest, ResetClearsPreviousData) {
-  ast::TypeManager tm;
-  auto* t = tm.Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto* t = tm.Get(std::make_unique<type::I32Type>());
   ASSERT_NE(t, nullptr);
 
   EXPECT_FALSE(tm.types().empty());
   tm.Reset();
   EXPECT_TRUE(tm.types().empty());
 
-  auto* t2 = tm.Get(std::make_unique<ast::type::I32Type>());
+  auto* t2 = tm.Get(std::make_unique<type::I32Type>());
   ASSERT_NE(t2, nullptr);
 }
 
 }  // namespace
+}  // namespace ast
 }  // namespace tint

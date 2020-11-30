@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ast::type::Type* type, uint32_t value)
+UintLiteral::UintLiteral(type::Type* type, uint32_t value)
     : Base(type), value_(value) {}
 
 UintLiteral::~UintLiteral() = default;

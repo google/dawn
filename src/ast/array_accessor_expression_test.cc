@@ -44,7 +44,7 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
 
 TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
   ArrayAccessorExpression exp;
-  EXPECT_TRUE(exp.Is<ast::ArrayAccessorExpression>());
+  EXPECT_TRUE(exp.Is<ArrayAccessorExpression>());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid) {

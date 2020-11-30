@@ -27,11 +27,11 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   /// constructor
   /// @param stage the pipeline stage
   /// @param source the source of this decoration
-  StageDecoration(ast::PipelineStage stage, const Source& source);
+  StageDecoration(PipelineStage stage, const Source& source);
   ~StageDecoration() override;
 
   /// @returns the stage
-  ast::PipelineStage value() const { return stage_; }
+  PipelineStage value() const { return stage_; }
 
   /// Outputs the decoration to the given stream
   /// @param out the stream to write to
@@ -39,7 +39,7 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   void to_str(std::ostream& out, size_t indent) const override;
 
  private:
-  ast::PipelineStage stage_ = ast::PipelineStage::kNone;
+  PipelineStage stage_ = PipelineStage::kNone;
 };
 
 }  // namespace ast

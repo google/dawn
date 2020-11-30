@@ -240,28 +240,28 @@ TextureSignature::~TextureSignature() = default;
 TextureSignature::Parameters::Index::Index() = default;
 TextureSignature::Parameters::Index::Index(const Index&) = default;
 
-bool IsCoarseDerivative(ast::Intrinsic i) {
+bool IsCoarseDerivative(Intrinsic i) {
   return i == Intrinsic::kDpdxCoarse || i == Intrinsic::kDpdyCoarse ||
          i == Intrinsic::kFwidthCoarse;
 }
 
-bool IsFineDerivative(ast::Intrinsic i) {
+bool IsFineDerivative(Intrinsic i) {
   return i == Intrinsic::kDpdxFine || i == Intrinsic::kDpdyFine ||
          i == Intrinsic::kFwidthFine;
 }
 
-bool IsDerivative(ast::Intrinsic i) {
+bool IsDerivative(Intrinsic i) {
   return i == Intrinsic::kDpdx || i == Intrinsic::kDpdy ||
          i == Intrinsic::kFwidth || IsCoarseDerivative(i) ||
          IsFineDerivative(i);
 }
 
-bool IsFloatClassificationIntrinsic(ast::Intrinsic i) {
+bool IsFloatClassificationIntrinsic(Intrinsic i) {
   return i == Intrinsic::kIsFinite || i == Intrinsic::kIsInf ||
          i == Intrinsic::kIsNan || i == Intrinsic::kIsNormal;
 }
 
-bool IsTextureIntrinsic(ast::Intrinsic i) {
+bool IsTextureIntrinsic(Intrinsic i) {
   return i == Intrinsic::kTextureLoad || i == Intrinsic::kTextureSample ||
          i == Intrinsic::kTextureSampleLevel ||
          i == Intrinsic::kTextureSampleBias ||

@@ -25,8 +25,8 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-  auto* expr = create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("func"), ExpressionList{});
+  auto* expr = create<CallExpression>(create<IdentifierExpression>("func"),
+                                      ExpressionList{});
 
   CallStatement c(expr);
   EXPECT_EQ(c.expr(), expr);
@@ -38,8 +38,8 @@ TEST_F(CallStatementTest, IsCall) {
 }
 
 TEST_F(CallStatementTest, IsValid) {
-  CallStatement c(create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("func"), ExpressionList{}));
+  CallStatement c(create<CallExpression>(create<IdentifierExpression>("func"),
+                                         ExpressionList{}));
   EXPECT_TRUE(c.IsValid());
 }
 
@@ -49,13 +49,13 @@ TEST_F(CallStatementTest, IsValid_MissingExpr) {
 }
 
 TEST_F(CallStatementTest, IsValid_InvalidExpr) {
-  CallStatement c(create<ast::CallExpression>());
+  CallStatement c(create<CallExpression>());
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CallStatementTest, ToStr) {
-  CallStatement c(create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("func"), ExpressionList{}));
+  CallStatement c(create<CallExpression>(create<IdentifierExpression>("func"),
+                                         ExpressionList{}));
 
   std::ostringstream out;
   c.to_str(out, 2);

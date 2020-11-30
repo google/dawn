@@ -29,14 +29,14 @@ namespace {
 using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 1));
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  auto* case_stmt = create<CaseStatement>(lit, create<ast::BlockStatement>());
+  auto* case_stmt = create<CaseStatement>(lit, create<BlockStatement>());
   body.push_back(case_stmt);
 
   SwitchStatement stmt(ident, body);
@@ -61,27 +61,27 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 }
 
 TEST_F(SwitchStatementTest, IsValid) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
 
   SwitchStatement stmt(ident, body);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
 
   SwitchStatement stmt;
   stmt.set_body(body);
@@ -89,28 +89,28 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   auto* ident = create<IdentifierExpression>("");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
 
   SwitchStatement stmt(ident, body);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
   body.push_back(nullptr);
 
   SwitchStatement stmt(ident, body);
@@ -120,7 +120,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
   auto* ident = create<IdentifierExpression>("ident");
 
-  auto* case_body = create<ast::BlockStatement>();
+  auto* case_body = create<BlockStatement>();
   case_body->append(nullptr);
 
   CaseStatementList body;
@@ -145,14 +145,14 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 }
 
 TEST_F(SwitchStatementTest, ToStr) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
 
   CaseSelectorList lit;
   lit.push_back(create<SintLiteral>(&i32, 2));
 
   auto* ident = create<IdentifierExpression>("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<ast::BlockStatement>()));
+  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
 
   SwitchStatement stmt(ident, body);
   std::ostringstream out;

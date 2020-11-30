@@ -45,7 +45,7 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 
 TEST_F(BitcastExpressionTest, IsBitcast) {
   BitcastExpression exp;
-  EXPECT_TRUE(exp.Is<ast::BitcastExpression>());
+  EXPECT_TRUE(exp.Is<BitcastExpression>());
 }
 
 TEST_F(BitcastExpressionTest, IsValid) {

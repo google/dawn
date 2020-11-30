@@ -26,19 +26,19 @@ namespace {
 using StageDecorationTest = TestHelper;
 
 TEST_F(StageDecorationTest, Creation_1param) {
-  StageDecoration d{ast::PipelineStage::kFragment, Source{}};
-  EXPECT_EQ(d.value(), ast::PipelineStage::kFragment);
+  StageDecoration d{PipelineStage::kFragment, Source{}};
+  EXPECT_EQ(d.value(), PipelineStage::kFragment);
 }
 
 TEST_F(StageDecorationTest, Is) {
-  StageDecoration sd{ast::PipelineStage::kFragment, Source{}};
+  StageDecoration sd{PipelineStage::kFragment, Source{}};
   Decoration* d = &sd;
   EXPECT_FALSE(d->Is<WorkgroupDecoration>());
   EXPECT_TRUE(d->Is<StageDecoration>());
 }
 
 TEST_F(StageDecorationTest, ToStr) {
-  StageDecoration d{ast::PipelineStage::kFragment, Source{}};
+  StageDecoration d{PipelineStage::kFragment, Source{}};
   std::ostringstream out;
   d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(StageDecoration{fragment}

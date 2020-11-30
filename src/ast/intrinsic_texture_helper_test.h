@@ -121,11 +121,11 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
-                      ast::type::SamplerKind,
-                      ast::type::TextureDimension,
+                      type::SamplerKind,
+                      type::TextureDimension,
                       TextureDataType,
                       const char*,
-                      std::function<ast::ExpressionList(ast::Builder*)>);
+                      std::function<ExpressionList(Builder*)>);
   /// Copy constructor
   TextureOverloadCase(const TextureOverloadCase&);
   /// Destructor
@@ -141,15 +141,15 @@ struct TextureOverloadCase {
   /// The texture kind for the texture parameter
   TextureKind texture_kind;
   /// The sampler kind for the sampler parameter
-  ast::type::SamplerKind sampler_kind;
+  type::SamplerKind sampler_kind;
   /// The dimensions of the texture parameter
-  ast::type::TextureDimension texture_dimension;
+  type::TextureDimension texture_dimension;
   /// The data type of the texture parameter
   TextureDataType texture_data_type;
   /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc
   const char* function;
   /// A function that builds the AST arguments for the overload
-  std::function<ast::ExpressionList(ast::Builder*)> args;
+  std::function<ExpressionList(Builder*)> args;
 };
 
 inline std::ostream& operator<<(std::ostream& out,

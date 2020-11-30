@@ -29,7 +29,7 @@ TEST_F(StructMemberOffsetDecorationTest, Creation) {
 
 TEST_F(StructMemberOffsetDecorationTest, Is) {
   StructMemberOffsetDecoration d{2, Source{}};
-  EXPECT_TRUE(d.Is<ast::StructMemberOffsetDecoration>());
+  EXPECT_TRUE(d.Is<StructMemberOffsetDecoration>());
 }
 
 }  // namespace

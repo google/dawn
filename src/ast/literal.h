@@ -29,7 +29,7 @@ class Literal : public Castable<Literal, Node> {
   ~Literal() override;
 
   /// @returns the type of the literal
-  ast::type::Type* type() const { return type_; }
+  type::Type* type() const { return type_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -48,10 +48,10 @@ class Literal : public Castable<Literal, Node> {
  protected:
   /// Constructor
   /// @param type the type of the literal
-  explicit Literal(ast::type::Type* type);
+  explicit Literal(type::Type* type);
 
  private:
-  ast::type::Type* type_ = nullptr;
+  type::Type* type_ = nullptr;
 };
 
 }  // namespace ast

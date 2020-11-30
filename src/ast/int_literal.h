@@ -30,7 +30,7 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
  protected:
   /// Constructor
   /// @param type the type of the literal
-  explicit IntLiteral(ast::type::Type* type);
+  explicit IntLiteral(type::Type* type);
 };
 
 }  // namespace ast

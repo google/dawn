@@ -38,7 +38,7 @@ TEST_F(IdentifierExpressionTest, Creation_WithSource) {
 
 TEST_F(IdentifierExpressionTest, IsIdentifier) {
   IdentifierExpression i("ident");
-  EXPECT_TRUE(i.Is<ast::IdentifierExpression>());
+  EXPECT_TRUE(i.Is<IdentifierExpression>());
 }
 
 TEST_F(IdentifierExpressionTest, IsValid) {

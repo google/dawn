@@ -77,7 +77,7 @@ TEST_F(DecoratedVariableTest, WithDecorations) {
 
   VariableDecorationList decos;
   decos.push_back(create<LocationDecoration>(1, Source{}));
-  decos.push_back(create<BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
+  decos.push_back(create<BuiltinDecoration>(Builtin::kPosition, Source{}));
   decos.push_back(create<ConstantIdDecoration>(1200, Source{}));
 
   dv.set_decorations(decos);
@@ -108,7 +108,7 @@ TEST_F(DecoratedVariableTest, IsValid) {
 
 TEST_F(DecoratedVariableTest, IsDecorated) {
   DecoratedVariable dv;
-  EXPECT_TRUE(dv.Is<ast::DecoratedVariable>());
+  EXPECT_TRUE(dv.Is<DecoratedVariable>());
 }
 
 TEST_F(DecoratedVariableTest, to_str) {

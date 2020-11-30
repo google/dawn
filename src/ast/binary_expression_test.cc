@@ -48,7 +48,7 @@ TEST_F(BinaryExpressionTest, Creation_WithSource) {
 
 TEST_F(BinaryExpressionTest, IsBinaryal) {
   BinaryExpression r;
-  EXPECT_TRUE(r.Is<ast::BinaryExpression>());
+  EXPECT_TRUE(r.Is<BinaryExpression>());
 }
 
 TEST_F(BinaryExpressionTest, IsValid) {

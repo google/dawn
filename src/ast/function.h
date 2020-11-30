@@ -91,7 +91,7 @@ class Function : public Castable<Function, Node> {
   /// Sets the function decorations
   /// @param decos the decorations to set. This will overwrite any existing
   /// decorations
-  void set_decorations(ast::FunctionDecorationList decos) {
+  void set_decorations(FunctionDecorationList decos) {
     decorations_ = std::move(decos);
   }
   /// Adds a decoration to the function
@@ -107,12 +107,10 @@ class Function : public Castable<Function, Node> {
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() const;
 
   /// @returns the functions pipeline stage or None if not set
-  ast::PipelineStage pipeline_stage() const;
+  PipelineStage pipeline_stage() const;
 
   /// @returns true if this function is an entry point
-  bool IsEntryPoint() const {
-    return pipeline_stage() != ast::PipelineStage::kNone;
-  }
+  bool IsEntryPoint() const { return pipeline_stage() != PipelineStage::kNone; }
 
   /// Adds the given variable to the list of referenced module variables if it
   /// is not already included.

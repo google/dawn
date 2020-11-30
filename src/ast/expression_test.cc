@@ -38,7 +38,7 @@ TEST_F(ExpressionTest, set_result_type) {
   Expr e;
   e.set_result_type(&i32);
   ASSERT_NE(e.result_type(), nullptr);
-  EXPECT_TRUE(e.result_type()->Is<ast::type::I32Type>());
+  EXPECT_TRUE(e.result_type()->Is<type::I32Type>());
 }
 
 TEST_F(ExpressionTest, set_result_type_alias) {
@@ -49,7 +49,7 @@ TEST_F(ExpressionTest, set_result_type_alias) {
   Expr e;
   e.set_result_type(&b);
   ASSERT_NE(e.result_type(), nullptr);
-  EXPECT_TRUE(e.result_type()->Is<ast::type::I32Type>());
+  EXPECT_TRUE(e.result_type()->Is<type::I32Type>());
 }
 
 }  // namespace

@@ -53,7 +53,7 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 
 TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
   TypeConstructorExpression t;
-  EXPECT_TRUE(t.Is<ast::TypeConstructorExpression>());
+  EXPECT_TRUE(t.Is<TypeConstructorExpression>());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid) {

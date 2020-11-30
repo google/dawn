@@ -24,8 +24,8 @@ namespace {
 using AssignmentStatementTest = TestHelper;
 
 TEST_F(AssignmentStatementTest, Creation) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_EQ(stmt.lhs(), lhs);
@@ -33,8 +33,8 @@ TEST_F(AssignmentStatementTest, Creation) {
 }
 
 TEST_F(AssignmentStatementTest, CreationWithSource) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(Source{Source::Location{20, 2}}, lhs, rhs);
   auto src = stmt.source();
@@ -43,23 +43,23 @@ TEST_F(AssignmentStatementTest, CreationWithSource) {
 }
 
 TEST_F(AssignmentStatementTest, IsAssign) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_TRUE(stmt.Is<AssignmentStatement>());
 }
 
 TEST_F(AssignmentStatementTest, IsValid) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt;
   stmt.set_rhs(rhs);
@@ -67,7 +67,7 @@ TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
 
   AssignmentStatement stmt;
   stmt.set_lhs(lhs);
@@ -75,22 +75,22 @@ TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidLHS) {
-  auto* lhs = create<ast::IdentifierExpression>("");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("");
+  auto* rhs = create<IdentifierExpression>("rhs");
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidRHS) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("");
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, ToStr) {
-  auto* lhs = create<ast::IdentifierExpression>("lhs");
-  auto* rhs = create<ast::IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* rhs = create<IdentifierExpression>("rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   std::ostringstream out;

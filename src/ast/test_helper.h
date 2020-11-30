@@ -31,8 +31,8 @@ class TestHelperBase : public BASE {
   TestHelperBase() {}
   ~TestHelperBase() = default;
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
+  /// Creates a new `Node` owned by the Module. When the Module is
+  /// destructed, the `Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>

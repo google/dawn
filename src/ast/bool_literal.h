@@ -28,7 +28,7 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   /// Constructor
   /// @param type the type of the literal
   /// @param value the bool literals value
-  BoolLiteral(ast::type::Type* type, bool value);
+  BoolLiteral(type::Type* type, bool value);
   ~BoolLiteral() override;
 
   /// @returns true if the bool literal is true

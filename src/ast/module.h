@@ -76,7 +76,7 @@ class Module {
   /// @param stage the pipeline stage
   /// @returns the associated function or nullptr if none exists
   Function* FindFunctionByNameAndStage(const std::string& name,
-                                       ast::PipelineStage stage) const;
+                                       PipelineStage stage) const;
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;
@@ -84,23 +84,23 @@ class Module {
   /// @returns a string representation of the module
   std::string to_str() const;
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
+  /// Creates a new `Node` owned by the Module. When the Module is
+  /// destructed, the `Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
-    static_assert(std::is_base_of<ast::Node, T>::value,
-                  "T does not derive from ast::Node");
+  EnableIfIsType<T, Node>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<Node, T>::value,
+                  "T does not derive from Node");
     auto uptr = std::make_unique<T>(std::forward<ARGS>(args)...);
     auto ptr = uptr.get();
     ast_nodes_.emplace_back(std::move(uptr));
     return ptr;
   }
 
-  /// Creates a new `ast::Type` owned by the Module.
+  /// Creates a new `Type` owned by the Module.
   /// When the Module is destructed, owned Module and the returned
-  /// `ast::Type` will also be destructed.
+  /// `Type` will also be destructed.
   /// Types are unique (de-aliased), and so calling create() for the same `T`
   /// and arguments will return the same pointer.
   /// @warning Use this method to acquire a type only if all of its type
@@ -111,28 +111,27 @@ class Module {
   /// @param args the arguments to pass to the type constructor
   /// @returns the de-aliased type pointer
   template <typename T, typename... ARGS>
-  EnableIfIsType<T, ast::type::Type>* create(ARGS&&... args) {
-    static_assert(std::is_base_of<ast::type::Type, T>::value,
-                  "T does not derive from ast::type::Type");
+  EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<type::Type, T>::value,
+                  "T does not derive from type::Type");
     return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
   }
 
   /// Moves the type `ty` to the Module, returning a pointer to the unique
   /// (de-aliased) type.
-  /// When the Module is destructed, the returned `ast::Type` will also be
+  /// When the Module is destructed, the returned `Type` will also be
   /// destructed.
   /// @see create()
   /// @param ty the type to add to the module
   /// @returns the de-aliased type pointer
   template <typename T>
-  EnableIfIsType<T, ast::type::Type>* unique_type(std::unique_ptr<T> ty) {
+  EnableIfIsType<T, type::Type>* unique_type(std::unique_ptr<T> ty) {
     return static_cast<T*>(type_mgr_.Get(std::move(ty)));
   }
 
   /// Returns all the declared types in the module
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, std::unique_ptr<ast::type::Type>>&
-  types() {
+  const std::unordered_map<std::string, std::unique_ptr<type::Type>>& types() {
     return type_mgr_.types();
   }
 
@@ -143,8 +142,8 @@ class Module {
   // The constructed types are owned by the type manager
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
-  std::vector<std::unique_ptr<ast::Node>> ast_nodes_;
-  ast::TypeManager type_mgr_;
+  std::vector<std::unique_ptr<Node>> ast_nodes_;
+  TypeManager type_mgr_;
 };
 
 }  // namespace ast

@@ -28,7 +28,7 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// Constructor
   /// @param type the type
   /// @param value the signed int literals value
-  SintLiteral(ast::type::Type* type, int32_t value);
+  SintLiteral(type::Type* type, int32_t value);
   ~SintLiteral() override;
 
   /// Updates the literals value

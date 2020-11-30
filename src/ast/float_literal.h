@@ -28,7 +28,7 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   /// Constructor
   /// @param type the type of the literal
   /// @param value the float literals value
-  FloatLiteral(ast::type::Type* type, float value);
+  FloatLiteral(type::Type* type, float value);
   ~FloatLiteral() override;
 
   /// @returns the float literal value

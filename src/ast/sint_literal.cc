@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-SintLiteral::SintLiteral(ast::type::Type* type, int32_t value)
+SintLiteral::SintLiteral(type::Type* type, int32_t value)
     : Base(type), value_(value) {}
 
 SintLiteral::~SintLiteral() = default;

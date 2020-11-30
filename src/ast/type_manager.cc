@@ -27,7 +27,7 @@ void TypeManager::Reset() {
   types_.clear();
 }
 
-ast::type::Type* TypeManager::Get(std::unique_ptr<ast::type::Type> type) {
+type::Type* TypeManager::Get(std::unique_ptr<type::Type> type) {
   auto name = type->type_name();
 
   if (types_.find(name) == types_.end()) {

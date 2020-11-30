@@ -28,14 +28,14 @@ namespace {
 using UintLiteralTest = TestHelper;
 
 TEST_F(UintLiteralTest, Value) {
-  ast::type::U32Type u32;
+  type::U32Type u32;
   UintLiteral u{&u32, 47};
   ASSERT_TRUE(u.Is<UintLiteral>());
   EXPECT_EQ(u.value(), 47u);
 }
 
 TEST_F(UintLiteralTest, Is) {
-  ast::type::U32Type u32;
+  type::U32Type u32;
   UintLiteral u{&u32, 42};
   Literal* l = &u;
   EXPECT_FALSE(l->Is<BoolLiteral>());
@@ -46,7 +46,7 @@ TEST_F(UintLiteralTest, Is) {
 }
 
 TEST_F(UintLiteralTest, ToStr) {
-  ast::type::U32Type u32;
+  type::U32Type u32;
   UintLiteral i{&u32, 42};
 
   EXPECT_EQ(i.to_str(), "42");

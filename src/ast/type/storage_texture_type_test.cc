@@ -93,7 +93,7 @@ TEST_F(StorageTextureTypeTest, TypeName) {
 
 TEST_F(StorageTextureTypeTest, F32Type) {
   Context ctx;
-  ast::Module mod;
+  Module mod;
   Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
                                            AccessControl::kReadOnly,
                                            ImageFormat::kRgba32Float);
@@ -108,7 +108,7 @@ TEST_F(StorageTextureTypeTest, F32Type) {
 
 TEST_F(StorageTextureTypeTest, U32Type) {
   Context ctx;
-  ast::Module mod;
+  Module mod;
   Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
                                            AccessControl::kReadOnly,
                                            ImageFormat::kRg32Uint);
@@ -122,7 +122,7 @@ TEST_F(StorageTextureTypeTest, U32Type) {
 
 TEST_F(StorageTextureTypeTest, I32Type) {
   Context ctx;
-  ast::Module mod;
+  Module mod;
   Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
                                            AccessControl::kReadOnly,
                                            ImageFormat::kRgba32Sint);

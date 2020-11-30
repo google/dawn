@@ -57,9 +57,7 @@ class ArrayType : public Castable<ArrayType, Type> {
 
   /// Sets the array decorations
   /// @param decos the decorations to set
-  void set_decorations(ast::ArrayDecorationList decos) {
-    decos_ = std::move(decos);
-  }
+  void set_decorations(ArrayDecorationList decos) { decos_ = std::move(decos); }
   /// @returns the array decorations
   const ArrayDecorationList& decorations() const { return decos_; }
 
@@ -79,7 +77,7 @@ class ArrayType : public Castable<ArrayType, Type> {
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 0;
-  ast::ArrayDecorationList decos_;
+  ArrayDecorationList decos_;
 };
 
 }  // namespace type

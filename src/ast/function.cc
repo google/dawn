@@ -62,13 +62,13 @@ std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
   return {1, 1, 1};
 }
 
-ast::PipelineStage Function::pipeline_stage() const {
+PipelineStage Function::pipeline_stage() const {
   for (auto* deco : decorations_) {
     if (auto* stage = deco->As<StageDecoration>()) {
       return stage->value();
     }
   }
-  return ast::PipelineStage::kNone;
+  return PipelineStage::kNone;
 }
 
 void Function::add_referenced_module_variable(Variable* var) {
@@ -85,7 +85,7 @@ Function::referenced_location_variables() const {
   std::vector<std::pair<Variable*, LocationDecoration*>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (auto* decos = var->As<ast::DecoratedVariable>()) {
+    if (auto* decos = var->As<DecoratedVariable>()) {
       for (auto* deco : decos->decorations()) {
         if (auto* location = deco->As<LocationDecoration>()) {
           ret.push_back({var, location});
@@ -102,17 +102,17 @@ Function::referenced_uniform_variables() const {
   std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<ast::DecoratedVariable>() ||
-        var->storage_class() != ast::StorageClass::kUniform) {
+    if (!var->Is<DecoratedVariable>() ||
+        var->storage_class() != StorageClass::kUniform) {
       continue;
     }
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (auto* deco : var->As<ast::DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
+    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
+      if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+      } else if (auto* s = deco->As<SetDecoration>()) {
         set = s;
       }
     }
@@ -130,17 +130,17 @@ Function::referenced_storagebuffer_variables() const {
   std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<ast::DecoratedVariable>() ||
-        var->storage_class() != ast::StorageClass::kStorageBuffer) {
+    if (!var->Is<DecoratedVariable>() ||
+        var->storage_class() != StorageClass::kStorageBuffer) {
       continue;
     }
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (auto* deco : var->As<ast::DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
+    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
+      if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+      } else if (auto* s = deco->As<SetDecoration>()) {
         set = s;
       }
     }
@@ -158,10 +158,10 @@ Function::referenced_builtin_variables() const {
   std::vector<std::pair<Variable*, BuiltinDecoration*>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<ast::DecoratedVariable>()) {
+    if (!var->Is<DecoratedVariable>()) {
       continue;
     }
-    for (auto* deco : var->As<ast::DecoratedVariable>()->decorations()) {
+    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
       if (auto* builtin = deco->As<BuiltinDecoration>()) {
         ret.push_back({var, builtin});
         break;
@@ -282,18 +282,18 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<ast::DecoratedVariable>() ||
-        !unwrapped_type->Is<ast::type::SamplerType>() ||
-        unwrapped_type->As<ast::type::SamplerType>()->kind() != kind) {
+    if (!var->Is<DecoratedVariable>() ||
+        !unwrapped_type->Is<type::SamplerType>() ||
+        unwrapped_type->As<type::SamplerType>()->kind() != kind) {
       continue;
     }
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (auto* deco : var->As<ast::DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
+    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
+      if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+      } else if (auto* s = deco->As<SetDecoration>()) {
         set = s;
       }
     }
@@ -312,24 +312,23 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<ast::DecoratedVariable>() ||
-        !unwrapped_type->Is<ast::type::TextureType>()) {
+    if (!var->Is<DecoratedVariable>() ||
+        !unwrapped_type->Is<type::TextureType>()) {
       continue;
     }
 
     if ((multisampled &&
-         !unwrapped_type->Is<ast::type::MultisampledTextureType>()) ||
-        (!multisampled &&
-         !unwrapped_type->Is<ast::type::SampledTextureType>())) {
+         !unwrapped_type->Is<type::MultisampledTextureType>()) ||
+        (!multisampled && !unwrapped_type->Is<type::SampledTextureType>())) {
       continue;
     }
 
     BindingDecoration* binding = nullptr;
     SetDecoration* set = nullptr;
-    for (auto* deco : var->As<ast::DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
+    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
+      if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<ast::SetDecoration>()) {
+      } else if (auto* s = deco->As<SetDecoration>()) {
         set = s;
       }
     }

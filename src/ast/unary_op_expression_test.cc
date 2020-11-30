@@ -43,7 +43,7 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
   UnaryOpExpression u;
-  EXPECT_TRUE(u.Is<ast::UnaryOpExpression>());
+  EXPECT_TRUE(u.Is<UnaryOpExpression>());
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid) {

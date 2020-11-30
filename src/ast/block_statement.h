@@ -38,12 +38,12 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
 
   /// Appends a statement to the block
   /// @param stmt the statement to append
-  void append(ast::Statement* stmt) { statements_.push_back(stmt); }
+  void append(Statement* stmt) { statements_.push_back(stmt); }
 
   /// Insert a statement to the block
   /// @param index the index to insert at
   /// @param stmt the statement to insert
-  void insert(size_t index, ast::Statement* stmt) {
+  void insert(size_t index, Statement* stmt) {
     auto offset = static_cast<decltype(statements_)::difference_type>(index);
     statements_.insert(statements_.begin() + offset, stmt);
   }
@@ -54,36 +54,34 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   size_t size() const { return statements_.size(); }
 
   /// @returns the last statement in the block or nullptr if block empty
-  const ast::Statement* last() const {
+  const Statement* last() const {
     return statements_.empty() ? nullptr : statements_.back();
   }
   /// @returns the last statement in the block or nullptr if block empty
-  ast::Statement* last() {
+  Statement* last() {
     return statements_.empty() ? nullptr : statements_.back();
   }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  const ast::Statement* get(size_t idx) const { return statements_[idx]; }
+  const Statement* get(size_t idx) const { return statements_[idx]; }
 
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  ast::Statement* operator[](size_t idx) { return statements_[idx]; }
+  Statement* operator[](size_t idx) { return statements_[idx]; }
   /// Retrieves the statement at |idx|
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at |idx|
-  const ast::Statement* operator[](size_t idx) const {
-    return statements_[idx];
-  }
+  const Statement* operator[](size_t idx) const { return statements_[idx]; }
 
   /// @returns the beginning iterator
-  std::vector<ast::Statement*>::const_iterator begin() const {
+  std::vector<Statement*>::const_iterator begin() const {
     return statements_.begin();
   }
   /// @returns the ending iterator
-  std::vector<ast::Statement*>::const_iterator end() const {
+  std::vector<Statement*>::const_iterator end() const {
     return statements_.end();
   }
 
@@ -98,7 +96,7 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
  private:
   BlockStatement(const BlockStatement&) = delete;
 
-  std::vector<ast::Statement*> statements_;
+  std::vector<Statement*> statements_;
 };
 
 }  // namespace ast

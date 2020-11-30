@@ -18,27 +18,26 @@ namespace tint {
 namespace ast {
 
 TypesBuilder::TypesBuilder(Module* mod)
-    : bool_(mod->create<ast::type::BoolType>()),
-      f32(mod->create<ast::type::F32Type>()),
-      i32(mod->create<ast::type::I32Type>()),
-      u32(mod->create<ast::type::U32Type>()),
-      void_(mod->create<ast::type::VoidType>()),
+    : bool_(mod->create<type::BoolType>()),
+      f32(mod->create<type::F32Type>()),
+      i32(mod->create<type::I32Type>()),
+      u32(mod->create<type::U32Type>()),
+      void_(mod->create<type::VoidType>()),
       mod_(mod) {}
 
-Builder::Builder(tint::Context* c, tint::ast::Module* m)
-    : ctx(c), mod(m), ty(m) {}
+Builder::Builder(Context* c, Module* m) : ctx(c), mod(m), ty(m) {}
 Builder::~Builder() = default;
 
-ast::Variable* Builder::Var(const std::string& name,
-                            ast::StorageClass storage,
-                            ast::type::Type* type) {
-  auto* var = create<ast::Variable>(name, storage, type);
+Variable* Builder::Var(const std::string& name,
+                       StorageClass storage,
+                       type::Type* type) {
+  auto* var = create<Variable>(name, storage, type);
   OnVariableBuilt(var);
   return var;
 }
 
 BuilderWithContextAndModule::BuilderWithContextAndModule()
-    : Builder(new Context(), new ast::Module()) {}
+    : Builder(new Context(), new Module()) {}
 BuilderWithContextAndModule::~BuilderWithContextAndModule() {
   delete ctx;
   delete mod;

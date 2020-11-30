@@ -40,7 +40,7 @@ TEST_F(FunctionTest, Creation) {
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
   auto* var = params[0];
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   EXPECT_EQ(f.name(), "func");
   ASSERT_EQ(f.params().size(), 1u);
   EXPECT_EQ(f.return_type(), &void_type);
@@ -55,7 +55,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
   Function f(Source{Source::Location{20, 2}}, "func", params, &void_type,
-             create<ast::BlockStatement>());
+             create<BlockStatement>());
   auto src = f.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -66,7 +66,7 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   type::I32Type i32;
 
   Variable v("var", StorageClass::kInput, &i32);
-  Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
+  Function f("func", VariableList{}, &void_type, create<BlockStatement>());
 
   f.add_referenced_module_variable(&v);
   ASSERT_EQ(f.referenced_module_variables().size(), 1u);
@@ -85,25 +85,23 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  DecoratedVariable loc1(
-      create<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  loc1.set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  DecoratedVariable loc1(create<Variable>("loc1", StorageClass::kInput, &i32));
+  loc1.set_decorations({create<LocationDecoration>(0, Source{})});
 
-  DecoratedVariable loc2(
-      create<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  loc2.set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  DecoratedVariable loc2(create<Variable>("loc2", StorageClass::kInput, &i32));
+  loc2.set_decorations({create<LocationDecoration>(1, Source{})});
 
   DecoratedVariable builtin1(
-      create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+      create<Variable>("builtin1", StorageClass::kInput, &i32));
   builtin1.set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{})});
+      {create<BuiltinDecoration>(Builtin::kPosition, Source{})});
 
   DecoratedVariable builtin2(
-      create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+      create<Variable>("builtin2", StorageClass::kInput, &i32));
   builtin2.set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
+      {create<BuiltinDecoration>(Builtin::kFragDepth, Source{})});
 
-  Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
+  Function f("func", VariableList{}, &void_type, create<BlockStatement>());
 
   f.add_referenced_module_variable(&loc1);
   f.add_referenced_module_variable(&builtin1);
@@ -123,25 +121,23 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  DecoratedVariable loc1(
-      create<ast::Variable>("loc1", StorageClass::kInput, &i32));
-  loc1.set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  DecoratedVariable loc1(create<Variable>("loc1", StorageClass::kInput, &i32));
+  loc1.set_decorations({create<LocationDecoration>(0, Source{})});
 
-  DecoratedVariable loc2(
-      create<ast::Variable>("loc2", StorageClass::kInput, &i32));
-  loc2.set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  DecoratedVariable loc2(create<Variable>("loc2", StorageClass::kInput, &i32));
+  loc2.set_decorations({create<LocationDecoration>(1, Source{})});
 
   DecoratedVariable builtin1(
-      create<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+      create<Variable>("builtin1", StorageClass::kInput, &i32));
   builtin1.set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{})});
+      {create<BuiltinDecoration>(Builtin::kPosition, Source{})});
 
   DecoratedVariable builtin2(
-      create<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+      create<Variable>("builtin2", StorageClass::kInput, &i32));
   builtin2.set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
+      {create<BuiltinDecoration>(Builtin::kFragDepth, Source{})});
 
-  Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
+  Function f("func", VariableList{}, &void_type, create<BlockStatement>());
 
   f.add_referenced_module_variable(&loc1);
   f.add_referenced_module_variable(&builtin1);
@@ -152,14 +148,14 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   auto ref_locs = f.referenced_builtin_variables();
   ASSERT_EQ(ref_locs.size(), 2u);
   EXPECT_EQ(ref_locs[0].first, &builtin1);
-  EXPECT_EQ(ref_locs[0].second->value(), ast::Builtin::kPosition);
+  EXPECT_EQ(ref_locs[0].second->value(), Builtin::kPosition);
   EXPECT_EQ(ref_locs[1].first, &builtin2);
-  EXPECT_EQ(ref_locs[1].second->value(), ast::Builtin::kFragDepth);
+  EXPECT_EQ(ref_locs[1].second->value(), Builtin::kFragDepth);
 }
 
 TEST_F(FunctionTest, AddDuplicateEntryPoints) {
-  ast::type::VoidType void_type;
-  Function f("func", VariableList{}, &void_type, create<ast::BlockStatement>());
+  type::VoidType void_type;
+  Function f("func", VariableList{}, &void_type, create<BlockStatement>());
 
   f.add_ancestor_entry_point("main");
   ASSERT_EQ(1u, f.ancestor_entry_points().size());
@@ -177,10 +173,10 @@ TEST_F(FunctionTest, IsValid) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(block);
   EXPECT_TRUE(f.IsValid());
 }
@@ -192,7 +188,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f("", params, &void_type, create<ast::BlockStatement>());
+  Function f("", params, &void_type, create<BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -202,7 +198,7 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  Function f("func", params, nullptr, create<ast::BlockStatement>());
+  Function f("func", params, nullptr, create<BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -214,7 +210,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
   params.push_back(nullptr);
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -224,7 +220,7 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, nullptr));
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -235,11 +231,11 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(block);
   EXPECT_FALSE(f.IsValid());
 }
@@ -251,11 +247,11 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
   block->append(nullptr);
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(block);
   EXPECT_FALSE(f.IsValid());
 }
@@ -264,10 +260,10 @@ TEST_F(FunctionTest, ToStr) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", {}, &void_type, create<ast::BlockStatement>());
+  Function f("func", {}, &void_type, create<BlockStatement>());
   f.set_body(block);
 
   std::ostringstream out;
@@ -284,10 +280,10 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", {}, &void_type, create<ast::BlockStatement>());
+  Function f("func", {}, &void_type, create<BlockStatement>());
   f.set_body(block);
   f.add_decoration(create<WorkgroupDecoration>(2, 4, 6, Source{}));
 
@@ -309,10 +305,10 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   VariableList params;
   params.push_back(create<Variable>("var", StorageClass::kNone, &i32));
 
-  auto* block = create<ast::BlockStatement>();
+  auto* block = create<BlockStatement>();
   block->append(create<DiscardStatement>());
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(block);
 
   std::ostringstream out;
@@ -334,7 +330,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 TEST_F(FunctionTest, TypeName) {
   type::VoidType void_type;
 
-  Function f("func", {}, &void_type, create<ast::BlockStatement>());
+  Function f("func", {}, &void_type, create<BlockStatement>());
   EXPECT_EQ(f.type_name(), "__func__void");
 }
 
@@ -347,7 +343,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   params.push_back(create<Variable>("var1", StorageClass::kNone, &i32));
   params.push_back(create<Variable>("var2", StorageClass::kNone, &f32));
 
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
@@ -355,10 +351,10 @@ TEST_F(FunctionTest, GetLastStatement) {
   type::VoidType void_type;
 
   VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<BlockStatement>();
   auto* stmt = create<DiscardStatement>();
   body->append(stmt);
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(body);
 
   EXPECT_EQ(f.get_last_statement(), stmt);
@@ -368,8 +364,8 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
   type::VoidType void_type;
 
   VariableList params;
-  auto* body = create<ast::BlockStatement>();
-  Function f("func", params, &void_type, create<ast::BlockStatement>());
+  auto* body = create<BlockStatement>();
+  Function f("func", params, &void_type, create<BlockStatement>());
   f.set_body(body);
 
   EXPECT_EQ(f.get_last_statement(), nullptr);
@@ -377,7 +373,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 
 TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
   type::VoidType void_type;
-  Function f("f", {}, &void_type, create<ast::BlockStatement>());
+  Function f("f", {}, &void_type, create<BlockStatement>());
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
@@ -389,7 +385,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 
 TEST_F(FunctionTest, WorkgroupSize) {
   type::VoidType void_type;
-  Function f("f", {}, &void_type, create<ast::BlockStatement>());
+  Function f("f", {}, &void_type, create<BlockStatement>());
   f.add_decoration(create<WorkgroupDecoration>(2u, 4u, 6u, Source{}));
 
   uint32_t x = 0;

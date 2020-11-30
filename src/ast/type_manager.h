@@ -39,7 +39,7 @@ class TypeManager {
   /// Get the given type from the type manager
   /// @param type The type to register
   /// @return the pointer to the registered type
-  ast::type::Type* Get(std::unique_ptr<ast::type::Type> type);
+  type::Type* Get(std::unique_ptr<type::Type> type);
 
   /// Get the given type `T` from the type manager
   /// @param args the arguments to pass to the type constructor
@@ -52,13 +52,12 @@ class TypeManager {
 
   /// Returns the type map
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, std::unique_ptr<ast::type::Type>>&
-  types() {
+  const std::unordered_map<std::string, std::unique_ptr<type::Type>>& types() {
     return types_;
   }
 
  private:
-  std::unordered_map<std::string, std::unique_ptr<ast::type::Type>> types_;
+  std::unordered_map<std::string, std::unique_ptr<type::Type>> types_;
 };
 
 }  // namespace ast

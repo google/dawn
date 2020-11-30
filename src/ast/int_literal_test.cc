@@ -30,13 +30,13 @@ namespace {
 using IntLiteralTest = TestHelper;
 
 TEST_F(IntLiteralTest, Sint_IsInt) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   SintLiteral i{&i32, 47};
   ASSERT_TRUE(i.Is<IntLiteral>());
 }
 
 TEST_F(IntLiteralTest, Uint_IsInt) {
-  ast::type::I32Type i32;
+  type::I32Type i32;
   UintLiteral i{&i32, 42};
   EXPECT_TRUE(i.Is<IntLiteral>());
 }

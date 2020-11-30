@@ -28,7 +28,7 @@ namespace {
 using ElseStatementTest = TestHelper;
 
 TEST_F(ElseStatementTest, Creation) {
-  ast::type::BoolType bool_type;
+  type::BoolType bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
   auto* body = create<BlockStatement>();
@@ -55,7 +55,7 @@ TEST_F(ElseStatementTest, IsElse) {
 }
 
 TEST_F(ElseStatementTest, HasCondition) {
-  ast::type::BoolType bool_type;
+  type::BoolType bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
   ElseStatement e(cond, create<BlockStatement>());
@@ -97,14 +97,14 @@ TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>();
-  body->append(create<IfStatement>(nullptr, create<ast::BlockStatement>()));
+  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
 
   ElseStatement e(body);
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, ToStr) {
-  ast::type::BoolType bool_type;
+  type::BoolType bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       create<BoolLiteral>(&bool_type, true));
   auto* body = create<BlockStatement>();

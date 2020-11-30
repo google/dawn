@@ -28,7 +28,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// Constructor
   /// @param type the type of the literal
   /// @param value the uint literals value
-  UintLiteral(ast::type::Type* type, uint32_t value);
+  UintLiteral(type::Type* type, uint32_t value);
   ~UintLiteral() override;
 
   /// Updates the literals value

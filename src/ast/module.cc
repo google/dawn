@@ -37,7 +37,7 @@ Function* Module::FindFunctionByName(const std::string& name) const {
 }
 
 Function* Module::FindFunctionByNameAndStage(const std::string& name,
-                                             ast::PipelineStage stage) const {
+                                             PipelineStage stage) const {
   for (auto* func : functions_) {
     if (func->name() == name && func->pipeline_stage() == stage) {
       return func;
@@ -56,17 +56,17 @@ bool Module::IsValid() const {
     if (ty == nullptr) {
       return false;
     }
-    if (ty->Is<ast::type::AliasType>()) {
-      auto* alias = ty->As<ast::type::AliasType>();
+    if (ty->Is<type::AliasType>()) {
+      auto* alias = ty->As<type::AliasType>();
       if (alias->type() == nullptr) {
         return false;
       }
-      if (alias->type()->Is<ast::type::StructType>() &&
-          alias->type()->As<ast::type::StructType>()->name().empty()) {
+      if (alias->type()->Is<type::StructType>() &&
+          alias->type()->As<type::StructType>()->name().empty()) {
         return false;
       }
-    } else if (ty->Is<ast::type::StructType>()) {
-      auto* str = ty->As<ast::type::StructType>();
+    } else if (ty->Is<type::StructType>()) {
+      auto* str = ty->As<type::StructType>();
       if (str->name().empty()) {
         return false;
       }
@@ -91,14 +91,14 @@ std::string Module::to_str() const {
     for (size_t i = 0; i < indent; ++i) {
       out << " ";
     }
-    if (ty->Is<ast::type::AliasType>()) {
-      auto* alias = ty->As<ast::type::AliasType>();
+    if (ty->Is<type::AliasType>()) {
+      auto* alias = ty->As<type::AliasType>();
       out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
-      if (alias->type()->Is<ast::type::StructType>()) {
-        alias->type()->As<ast::type::StructType>()->impl()->to_str(out, indent);
+      if (alias->type()->Is<type::StructType>()) {
+        alias->type()->As<type::StructType>()->impl()->to_str(out, indent);
       }
-    } else if (ty->Is<ast::type::StructType>()) {
-      auto* str = ty->As<ast::type::StructType>();
+    } else if (ty->Is<type::StructType>()) {
+      auto* str = ty->As<type::StructType>();
       out << str->name() << " ";
       str->impl()->to_str(out, indent);
     }

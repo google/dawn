@@ -28,14 +28,14 @@ namespace {
 using FloatLiteralTest = TestHelper;
 
 TEST_F(FloatLiteralTest, Value) {
-  ast::type::F32Type f32;
+  type::F32Type f32;
   FloatLiteral f{&f32, 47.2f};
   ASSERT_TRUE(f.Is<FloatLiteral>());
   EXPECT_EQ(f.value(), 47.2f);
 }
 
 TEST_F(FloatLiteralTest, Is) {
-  ast::type::F32Type f32;
+  type::F32Type f32;
   FloatLiteral f{&f32, 42.f};
   Literal* l = &f;
   EXPECT_FALSE(l->Is<BoolLiteral>());
@@ -47,14 +47,14 @@ TEST_F(FloatLiteralTest, Is) {
 }
 
 TEST_F(FloatLiteralTest, ToStr) {
-  ast::type::F32Type f32;
+  type::F32Type f32;
   FloatLiteral f{&f32, 42.1f};
 
   EXPECT_EQ(f.to_str(), "42.099998");
 }
 
 TEST_F(FloatLiteralTest, ToName) {
-  ast::type::F32Type f32;
+  type::F32Type f32;
   FloatLiteral f{&f32, 42.1f};
   EXPECT_EQ(f.name(), "__float42.0999985");
 }
