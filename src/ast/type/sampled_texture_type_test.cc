@@ -59,7 +59,7 @@ TEST_F(SampledTextureTypeTest, IsTextureType) {
   SampledTextureType s(TextureDimension::kCube, &f32);
   TextureType* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTextureType>());
-  EXPECT_TRUE(ty->IsSampled());
+  EXPECT_TRUE(ty->Is<SampledTextureType>());
   EXPECT_FALSE(ty->Is<StorageTextureType>());
 }
 

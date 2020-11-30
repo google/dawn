@@ -34,9 +34,6 @@ class SampledTextureType : public Castable<SampledTextureType, TextureType> {
   SampledTextureType(SampledTextureType&&);
   ~SampledTextureType() override;
 
-  /// @returns true if the type is a sampled texture type
-  bool IsSampled() const override;
-
   /// @returns the subtype of the sampled texture
   Type* type() const { return type_; }
 

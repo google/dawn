@@ -24,8 +24,6 @@ namespace tint {
 namespace ast {
 namespace type {
 
-class SampledTextureType;
-
 /// The dimensionality of the texture
 enum class TextureDimension {
   /// Invalid texture
@@ -59,15 +57,6 @@ class TextureType : public Castable<TextureType, Type> {
 
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }
-
-  /// @returns true if this is a sampled texture
-  virtual bool IsSampled() const;
-
-  /// @returns the texture as a sampled texture
-  const SampledTextureType* AsSampled() const;
-
-  /// @returns the texture as a sampled texture
-  SampledTextureType* AsSampled();
 
  private:
   TextureDimension dim_ = TextureDimension::k1d;

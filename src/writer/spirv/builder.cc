@@ -2501,7 +2501,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   if (dim == ast::type::TextureDimension::k1dArray ||
       dim == ast::type::TextureDimension::k1d) {
     dim_literal = SpvDim1D;
-    if (texture->IsSampled()) {
+    if (texture->Is<ast::type::SampledTextureType>()) {
       push_capability(SpvCapabilitySampled1D);
     } else {
       assert(texture->Is<ast::type::StorageTextureType>());
@@ -2528,12 +2528,14 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
 
   uint32_t sampled_literal = 2u;
   if (texture->Is<ast::type::MultisampledTextureType>() ||
-      texture->IsSampled() || texture->Is<ast::type::DepthTextureType>()) {
+      texture->Is<ast::type::SampledTextureType>() ||
+      texture->Is<ast::type::DepthTextureType>()) {
     sampled_literal = 1u;
   }
 
   if (dim == ast::type::TextureDimension::kCubeArray) {
-    if (texture->IsSampled() || texture->Is<ast::type::DepthTextureType>()) {
+    if (texture->Is<ast::type::SampledTextureType>() ||
+        texture->Is<ast::type::DepthTextureType>()) {
       push_capability(SpvCapabilitySampledCubeArray);
     }
   }
@@ -2542,8 +2544,9 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   if (texture->Is<ast::type::DepthTextureType>()) {
     ast::type::F32Type f32;
     type_id = GenerateTypeIfNeeded(&f32);
-  } else if (texture->IsSampled()) {
-    type_id = GenerateTypeIfNeeded(texture->AsSampled()->type());
+  } else if (texture->Is<ast::type::SampledTextureType>()) {
+    type_id = GenerateTypeIfNeeded(
+        texture->As<ast::type::SampledTextureType>()->type());
   } else if (texture->Is<ast::type::MultisampledTextureType>()) {
     type_id = GenerateTypeIfNeeded(
         texture->As<ast::type::MultisampledTextureType>()->type());

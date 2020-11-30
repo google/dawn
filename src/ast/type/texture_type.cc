@@ -59,20 +59,6 @@ TextureType::TextureType(TextureType&&) = default;
 
 TextureType::~TextureType() = default;
 
-bool TextureType::IsSampled() const {
-  return false;
-}
-
-const SampledTextureType* TextureType::AsSampled() const {
-  assert(IsSampled());
-  return static_cast<const SampledTextureType*>(this);
-}
-
-SampledTextureType* TextureType::AsSampled() {
-  assert(IsSampled());
-  return static_cast<SampledTextureType*>(this);
-}
-
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

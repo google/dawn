@@ -472,7 +472,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     out_ << "texture_";
     if (texture->Is<ast::type::DepthTextureType>()) {
       out_ << "depth_";
-    } else if (texture->IsSampled()) {
+    } else if (texture->Is<ast::type::SampledTextureType>()) {
       /* nothing to emit */
     } else if (texture->Is<ast::type::MultisampledTextureType>()) {
       out_ << "multisampled_";
@@ -520,8 +520,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
         return false;
     }
 
-    if (texture->IsSampled()) {
-      auto* sampled = texture->AsSampled();
+    if (texture->Is<ast::type::SampledTextureType>()) {
+      auto* sampled = texture->As<ast::type::SampledTextureType>();
 
       out_ << "<";
       if (!EmitType(sampled->type())) {

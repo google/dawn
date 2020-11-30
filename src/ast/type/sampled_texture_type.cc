@@ -30,10 +30,6 @@ SampledTextureType::SampledTextureType(SampledTextureType&&) = default;
 
 SampledTextureType::~SampledTextureType() = default;
 
-bool SampledTextureType::IsSampled() const {
-  return true;
-}
-
 std::string SampledTextureType::type_name() const {
   std::ostringstream out;
   out << "__sampled_texture_" << dim() << type_->type_name();

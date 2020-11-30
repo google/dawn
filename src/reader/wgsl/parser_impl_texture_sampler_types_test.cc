@@ -80,11 +80,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32_Old) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::F32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k1d);
 }
@@ -97,11 +95,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32_Old) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::I32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k2d);
 }
@@ -114,11 +110,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32_Old) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::U32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::U32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k3d);
 }
@@ -172,11 +166,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::F32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k1d);
 }
@@ -189,11 +181,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::I32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::I32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k2d);
 }
@@ -206,11 +196,9 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::U32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::U32Type>());
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k3d);
 }

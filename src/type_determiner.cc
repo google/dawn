@@ -672,7 +672,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     if (!texture->Is<ast::type::StorageTextureType>() &&
-        !(texture->IsSampled() ||
+        !(texture->Is<ast::type::SampledTextureType>() ||
           texture->Is<ast::type::MultisampledTextureType>())) {
       set_error(expr->source(), "invalid texture for " + ident->name());
       return false;
@@ -681,8 +681,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ast::type::Type* type = nullptr;
     if (texture->Is<ast::type::StorageTextureType>()) {
       type = texture->As<ast::type::StorageTextureType>()->type();
-    } else if (texture->IsSampled()) {
-      type = texture->AsSampled()->type();
+    } else if (texture->Is<ast::type::SampledTextureType>()) {
+      type = texture->As<ast::type::SampledTextureType>()->type();
     } else if (texture->Is<ast::type::MultisampledTextureType>()) {
       type = texture->As<ast::type::MultisampledTextureType>()->type();
     } else {

@@ -1900,8 +1900,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
         return false;
       }
       out_ << ", access::sample";
-    } else if (tex->IsSampled()) {
-      if (!EmitType(tex->AsSampled()->type(), "")) {
+    } else if (tex->Is<ast::type::SampledTextureType>()) {
+      if (!EmitType(tex->As<ast::type::SampledTextureType>()->type(), "")) {
         return false;
       }
       out_ << ", access::sample";

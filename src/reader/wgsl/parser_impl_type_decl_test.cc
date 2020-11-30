@@ -765,11 +765,9 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::F32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
@@ -786,11 +784,9 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   ASSERT_NE(t.value, nullptr);
   EXPECT_EQ(t.value, type);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsSampled());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()
-                  ->AsSampled()
-                  ->type()
-                  ->Is<ast::type::F32Type>());
+  ASSERT_TRUE(t->Is<ast::type::SampledTextureType>());
+  ASSERT_TRUE(
+      t->As<ast::type::SampledTextureType>()->type()->Is<ast::type::F32Type>());
 }
 
 }  // namespace

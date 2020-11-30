@@ -386,7 +386,9 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
                       ->type()
                       ->UnwrapIfNeeded();
     } else {
-      base_type = texture_type->AsSampled()->type()->UnwrapIfNeeded();
+      base_type = texture_type->As<ast::type::SampledTextureType>()
+                      ->type()
+                      ->UnwrapIfNeeded();
     }
 
     if (base_type->Is<ast::type::ArrayType>()) {
