@@ -63,7 +63,7 @@ TEST_F(StorageTextureTypeTest, IsTextureType) {
   TextureType* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTextureType>());
   EXPECT_FALSE(ty->IsSampled());
-  EXPECT_TRUE(ty->IsStorage());
+  EXPECT_TRUE(ty->Is<StorageTextureType>());
 }
 
 TEST_F(StorageTextureTypeTest, Dim) {
@@ -93,44 +93,45 @@ TEST_F(StorageTextureTypeTest, TypeName) {
 TEST_F(StorageTextureTypeTest, F32Type) {
   Context ctx;
   ast::Module mod;
-  ast::type::Type* s = mod.create<StorageTextureType>(
-      TextureDimension::k2dArray, AccessControl::kReadOnly,
-      ImageFormat::kRgba32Float);
+  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
+                                           AccessControl::kReadOnly,
+                                           ImageFormat::kRgba32Float);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
-  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->Is<F32Type>());
+  ASSERT_TRUE(s->Is<StorageTextureType>());
+  EXPECT_TRUE(
+      s->As<TextureType>()->As<StorageTextureType>()->type()->Is<F32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, U32Type) {
   Context ctx;
   ast::Module mod;
-  ast::type::Type* s = mod.create<StorageTextureType>(
-      TextureDimension::k2dArray, AccessControl::kReadOnly,
-      ImageFormat::kRg32Uint);
+  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
+                                           AccessControl::kReadOnly,
+                                           ImageFormat::kRg32Uint);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
-  EXPECT_TRUE(
-      s->As<TextureType>()->AsStorage()->type()->Is<ast::type::U32Type>());
+  ASSERT_TRUE(s->Is<StorageTextureType>());
+  EXPECT_TRUE(s->As<StorageTextureType>()->type()->Is<U32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, I32Type) {
   Context ctx;
   ast::Module mod;
-  ast::type::Type* s = mod.create<StorageTextureType>(
-      TextureDimension::k2dArray, AccessControl::kReadOnly,
-      ImageFormat::kRgba32Sint);
+  Type* s = mod.create<StorageTextureType>(TextureDimension::k2dArray,
+                                           AccessControl::kReadOnly,
+                                           ImageFormat::kRgba32Sint);
   TypeDeterminer td(&ctx, &mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<TextureType>());
-  ASSERT_TRUE(s->As<TextureType>()->IsStorage());
-  EXPECT_TRUE(s->As<TextureType>()->AsStorage()->type()->Is<I32Type>());
+  ASSERT_TRUE(s->Is<StorageTextureType>());
+  EXPECT_TRUE(
+      s->As<TextureType>()->As<StorageTextureType>()->type()->Is<I32Type>());
 }
 
 TEST_F(StorageTextureTypeTest, MinBufferBindingSize) {

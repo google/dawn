@@ -476,10 +476,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       /* nothing to emit */
     } else if (texture->Is<ast::type::MultisampledTextureType>()) {
       out_ << "multisampled_";
-    } else if (texture->IsStorage()) {
+    } else if (texture->Is<ast::type::StorageTextureType>()) {
       out_ << "storage_";
 
-      auto* storage = texture->AsStorage();
+      auto* storage = texture->As<ast::type::StorageTextureType>();
       if (storage->access() == ast::AccessControl::kReadOnly) {
         out_ << "ro_";
       } else if (storage->access() == ast::AccessControl::kWriteOnly) {
@@ -536,8 +536,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
         return false;
       }
       out_ << ">";
-    } else if (texture->IsStorage()) {
-      auto* storage = texture->AsStorage();
+    } else if (texture->Is<ast::type::StorageTextureType>()) {
+      auto* storage = texture->As<ast::type::StorageTextureType>();
 
       out_ << "<";
       if (!EmitImageFormat(storage->image_format())) {

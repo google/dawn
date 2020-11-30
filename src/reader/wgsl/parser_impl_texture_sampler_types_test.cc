@@ -320,10 +320,10 @@ TEST_F(ParserImplTest,
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsStorage());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
             ast::AccessControl::kReadOnly);
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k1d);
@@ -338,10 +338,10 @@ TEST_F(ParserImplTest,
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsStorage());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
             ast::AccessControl::kWriteOnly);
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k2d);
@@ -392,10 +392,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsStorage());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
             ast::AccessControl::kReadOnly);
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k1d);
@@ -409,10 +409,10 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::TextureType>());
-  ASSERT_TRUE(t->As<ast::type::TextureType>()->IsStorage());
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->image_format(),
+  ASSERT_TRUE(t->Is<ast::type::StorageTextureType>());
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::TextureType>()->AsStorage()->access(),
+  EXPECT_EQ(t->As<ast::type::StorageTextureType>()->access(),
             ast::AccessControl::kWriteOnly);
   EXPECT_EQ(t->As<ast::type::TextureType>()->dim(),
             ast::type::TextureDimension::k2d);

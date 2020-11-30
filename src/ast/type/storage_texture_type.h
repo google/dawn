@@ -80,9 +80,6 @@ class StorageTextureType : public Castable<StorageTextureType, TextureType> {
   StorageTextureType(StorageTextureType&&);
   ~StorageTextureType() override;
 
-  /// @returns true if the type is a storage texture type
-  bool IsStorage() const override;
-
   /// @param type the subtype of the storage texture
   void set_type(Type* const type);
 

@@ -23,6 +23,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -59,7 +60,7 @@ TEST_F(SampledTextureTypeTest, IsTextureType) {
   TextureType* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTextureType>());
   EXPECT_TRUE(ty->IsSampled());
-  EXPECT_FALSE(ty->IsStorage());
+  EXPECT_FALSE(ty->Is<StorageTextureType>());
 }
 
 TEST_F(SampledTextureTypeTest, Dim) {

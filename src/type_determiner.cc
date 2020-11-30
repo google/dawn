@@ -87,11 +87,11 @@ bool TypeDeterminer::Determine() {
   for (auto& iter : mod_->types()) {
     auto& type = iter.second;
     if (!type->Is<ast::type::TextureType>() ||
-        !type->As<ast::type::TextureType>()->IsStorage()) {
+        !type->Is<ast::type::StorageTextureType>()) {
       continue;
     }
     if (!DetermineStorageTextureSubtype(
-            type->As<ast::type::TextureType>()->AsStorage())) {
+            type->As<ast::type::StorageTextureType>())) {
       set_error(Source{}, "unable to determine storage texture subtype for: " +
                               type->type_name());
       return false;
@@ -671,7 +671,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       return true;
     }
 
-    if (!texture->IsStorage() &&
+    if (!texture->Is<ast::type::StorageTextureType>() &&
         !(texture->IsSampled() ||
           texture->Is<ast::type::MultisampledTextureType>())) {
       set_error(expr->source(), "invalid texture for " + ident->name());
@@ -679,8 +679,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     ast::type::Type* type = nullptr;
-    if (texture->IsStorage()) {
-      type = texture->AsStorage()->type();
+    if (texture->Is<ast::type::StorageTextureType>()) {
+      type = texture->As<ast::type::StorageTextureType>()->type();
     } else if (texture->IsSampled()) {
       type = texture->AsSampled()->type();
     } else if (texture->Is<ast::type::MultisampledTextureType>()) {

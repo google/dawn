@@ -169,10 +169,6 @@ StorageTextureType::StorageTextureType(StorageTextureType&&) = default;
 
 StorageTextureType::~StorageTextureType() = default;
 
-bool StorageTextureType::IsStorage() const {
-  return true;
-}
-
 std::string StorageTextureType::type_name() const {
   std::ostringstream out;
   out << "__storage_texture_" << access_ << "_" << dim() << "_"

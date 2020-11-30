@@ -718,8 +718,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     ops.push_back(Operand::Int(init_id));
   } else if (type->Is<ast::type::TextureType>()) {
     // Decorate storage texture variables with NonRead/Writeable if needed.
-    if (type->As<ast::type::TextureType>()->IsStorage()) {
-      switch (type->As<ast::type::TextureType>()->AsStorage()->access()) {
+    if (type->Is<ast::type::StorageTextureType>()) {
+      switch (type->As<ast::type::StorageTextureType>()->access()) {
         case ast::AccessControl::kWriteOnly:
           push_annot(
               spv::Op::OpDecorate,
@@ -1964,8 +1964,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   spirv_operands.reserve(4);  // Enough to fit most parameter lists
 
   if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
-    op = texture_type->IsStorage() ? spv::Op::OpImageRead
-                                   : spv::Op::OpImageFetch;
+    op = texture_type->Is<ast::type::StorageTextureType>()
+             ? spv::Op::OpImageRead
+             : spv::Op::OpImageFetch;
     spirv_params.emplace_back(gen_param(pidx.texture));
     spirv_params.emplace_back(gen_param(pidx.coords));
 
@@ -2503,7 +2504,7 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
     if (texture->IsSampled()) {
       push_capability(SpvCapabilitySampled1D);
     } else {
-      assert(texture->IsStorage());
+      assert(texture->Is<ast::type::StorageTextureType>());
       push_capability(SpvCapabilityImage1D);
     }
   }
@@ -2546,12 +2547,14 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   } else if (texture->Is<ast::type::MultisampledTextureType>()) {
     type_id = GenerateTypeIfNeeded(
         texture->As<ast::type::MultisampledTextureType>()->type());
-  } else if (texture->IsStorage()) {
-    if (texture->AsStorage()->access() == ast::AccessControl::kWriteOnly) {
+  } else if (texture->Is<ast::type::StorageTextureType>()) {
+    if (texture->As<ast::type::StorageTextureType>()->access() ==
+        ast::AccessControl::kWriteOnly) {
       ast::type::VoidType void_type;
       type_id = GenerateTypeIfNeeded(&void_type);
     } else {
-      type_id = GenerateTypeIfNeeded(texture->AsStorage()->type());
+      type_id = GenerateTypeIfNeeded(
+          texture->As<ast::type::StorageTextureType>()->type());
     }
   }
   if (type_id == 0u) {
@@ -2559,9 +2562,9 @@ bool Builder::GenerateTextureType(ast::type::TextureType* texture,
   }
 
   uint32_t format_literal = SpvImageFormat_::SpvImageFormatUnknown;
-  if (texture->IsStorage()) {
-    format_literal =
-        convert_image_format_to_spv(texture->AsStorage()->image_format());
+  if (texture->Is<ast::type::StorageTextureType>()) {
+    format_literal = convert_image_format_to_spv(
+        texture->As<ast::type::StorageTextureType>()->image_format());
   }
 
   push_type(spv::Op::OpTypeImage,

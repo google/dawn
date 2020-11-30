@@ -1880,8 +1880,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     out_ << "<";
     if (tex->Is<ast::type::DepthTextureType>()) {
       out_ << "float, access::sample";
-    } else if (tex->IsStorage()) {
-      auto* storage = tex->AsStorage();
+    } else if (tex->Is<ast::type::StorageTextureType>()) {
+      auto* storage = tex->As<ast::type::StorageTextureType>();
       if (!EmitType(storage->type(), "")) {
         return false;
       }

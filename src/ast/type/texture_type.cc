@@ -18,7 +18,6 @@
 
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/storage_texture_type.h"
 
 namespace tint {
 namespace ast {
@@ -60,9 +59,6 @@ TextureType::TextureType(TextureType&&) = default;
 
 TextureType::~TextureType() = default;
 
-bool TextureType::IsStorage() const {
-  return false;
-}
 bool TextureType::IsSampled() const {
   return false;
 }
@@ -72,19 +68,9 @@ const SampledTextureType* TextureType::AsSampled() const {
   return static_cast<const SampledTextureType*>(this);
 }
 
-const StorageTextureType* TextureType::AsStorage() const {
-  assert(IsStorage());
-  return static_cast<const StorageTextureType*>(this);
-}
-
 SampledTextureType* TextureType::AsSampled() {
   assert(IsSampled());
   return static_cast<SampledTextureType*>(this);
-}
-
-StorageTextureType* TextureType::AsStorage() {
-  assert(IsStorage());
-  return static_cast<StorageTextureType*>(this);
 }
 
 }  // namespace type

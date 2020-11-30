@@ -47,6 +47,7 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
@@ -2099,7 +2100,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << type->As<ast::type::StructType>()->name();
   } else if (type->Is<ast::type::TextureType>()) {
     auto* tex = type->As<ast::type::TextureType>();
-    if (tex->IsStorage()) {
+    if (tex->Is<ast::type::StorageTextureType>()) {
       out << "RW";
     }
     out << "Texture";

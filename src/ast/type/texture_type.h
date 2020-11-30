@@ -25,7 +25,6 @@ namespace ast {
 namespace type {
 
 class SampledTextureType;
-class StorageTextureType;
 
 /// The dimensionality of the texture
 enum class TextureDimension {
@@ -61,20 +60,14 @@ class TextureType : public Castable<TextureType, Type> {
   /// @returns the texture dimension
   TextureDimension dim() const { return dim_; }
 
-  /// @returns true if this is a storage texture
-  virtual bool IsStorage() const;
   /// @returns true if this is a sampled texture
   virtual bool IsSampled() const;
 
   /// @returns the texture as a sampled texture
   const SampledTextureType* AsSampled() const;
-  /// @returns the texture as a storage texture
-  const StorageTextureType* AsStorage() const;
 
   /// @returns the texture as a sampled texture
   SampledTextureType* AsSampled();
-  /// @returns the texture as a storage texture
-  StorageTextureType* AsStorage();
 
  private:
   TextureDimension dim_ = TextureDimension::k1d;
