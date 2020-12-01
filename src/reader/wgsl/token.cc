@@ -84,8 +84,6 @@ std::string Token::TypeToName(Type type) {
       return "!=";
     case Token::Type::kMinus:
       return "-";
-    case Token::Type::kNamespace:
-      return "::";
     case Token::Type::kPeriod:
       return ".";
     case Token::Type::kPlus:
@@ -107,22 +105,14 @@ std::string Token::TypeToName(Type type) {
 
     case Token::Type::kArray:
       return "array";
-    case Token::Type::kBinding:
-      return "binding";
     case Token::Type::kBitcast:
       return "bitcast";
-    case Token::Type::kBlock:
-      return "block";
     case Token::Type::kBool:
       return "bool";
     case Token::Type::kBreak:
       return "break";
-    case Token::Type::kBuiltin:
-      return "builtin";
     case Token::Type::kCase:
       return "case";
-    case Token::Type::kCompute:
-      return "compute";
     case Token::Type::kConst:
       return "const";
     case Token::Type::kContinue:
@@ -217,8 +207,6 @@ std::string Token::TypeToName(Type type) {
       return "rgba8unorm";
     case Token::Type::kFormatRgba8UnormSrgb:
       return "rgba8unorm_srgb";
-    case Token::Type::kFragment:
-      return "fragment";
     case Token::Type::kFunction:
       return "function";
     case Token::Type::kI32:
@@ -231,8 +219,6 @@ std::string Token::TypeToName(Type type) {
       return "import";
     case Token::Type::kIn:
       return "in";
-    case Token::Type::kLocation:
-      return "location";
     case Token::Type::kLoop:
       return "loop";
     case Token::Type::kMat2x2:
@@ -253,8 +239,6 @@ std::string Token::TypeToName(Type type) {
       return "mat4x3";
     case Token::Type::kMat4x4:
       return "mat4x4";
-    case Token::Type::kOffset:
-      return "offset";
     case Token::Type::kOut:
       return "out";
     case Token::Type::kPrivate:
@@ -267,14 +251,8 @@ std::string Token::TypeToName(Type type) {
       return "sampler";
     case Token::Type::kComparisonSampler:
       return "sampler_comparison";
-    case Token::Type::kSet:
-      return "set";
     case Token::Type::kStorageBuffer:
       return "storage_buffer";
-    case Token::Type::kStride:
-      return "stride";
-    case Token::Type::kStage:
-      return "stage";
     case Token::Type::kStruct:
       return "struct";
     case Token::Type::kSwitch:
@@ -341,14 +319,10 @@ std::string Token::TypeToName(Type type) {
       return "vec3";
     case Token::Type::kVec4:
       return "vec4";
-    case Token::Type::kVertex:
-      return "vertex";
     case Token::Type::kVoid:
       return "void";
     case Token::Type::kWorkgroup:
       return "workgroup";
-    case Token::Type::kWorkgroupSize:
-      return "workgroup_size";
   }
 
   return "<unknown>";

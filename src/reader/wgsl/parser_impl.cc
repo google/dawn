@@ -91,6 +91,13 @@ constexpr uint32_t kMaxConstExprDepth = 128;
 /// parser on error.
 constexpr size_t const kMaxResynchronizeLookahead = 32;
 
+const char kVertexStage[] = "vertex";
+const char kFragmentStage[] = "fragment";
+const char kComputeStage[] = "compute";
+
+const char kReadAccessControl[] = "read";
+const char kReadWriteAccessControl[] = "read_write";
+
 ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
     return ast::Builtin::kPosition;
@@ -122,10 +129,27 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   return ast::Builtin::kNone;
 }
 
+const char kAccessDecoration[] = "access";
+const char kBindingDecoration[] = "binding";
+const char kBlockDecoration[] = "block";
+const char kBuiltinDecoration[] = "builtin";
+const char kLocationDecoration[] = "location";
+const char kOffsetDecoration[] = "offset";
+const char kSetDecoration[] = "set";
+const char kStageDecoration[] = "stage";
+const char kStrideDecoration[] = "stride";
+const char kWorkgroupSizeDecoration[] = "workgroup_size";
+
 bool is_decoration(Token t) {
-  return t.IsLocation() || t.IsBinding() || t.IsSet() || t.IsBuiltin() ||
-         t.IsWorkgroupSize() || t.IsStage() || t.IsBlock() || t.IsStride() ||
-         t.IsOffset();
+  if (!t.IsIdentifier())
+    return false;
+
+  auto s = t.to_str();
+  return s == kAccessDecoration || s == kBindingDecoration ||
+         s == kBlockDecoration || s == kBuiltinDecoration ||
+         s == kLocationDecoration || s == kOffsetDecoration ||
+         s == kSetDecoration || s == kStageDecoration ||
+         s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
 
 /// Enter-exit counters for block token types.
@@ -850,9 +874,9 @@ Expect<ast::AccessControl> ParserImpl::expect_access_type() {
   if (ident.errored)
     return Failure::kErrored;
 
-  if (ident.value == "read")
+  if (ident.value == kReadAccessControl)
     return {ast::AccessControl::kReadOnly, ident.source};
-  if (ident.value == "read_write")
+  if (ident.value == kReadWriteAccessControl)
     return {ast::AccessControl::kReadWrite, ident.source};
 
   return add_error(ident.source, "invalid value for access decoration");
@@ -1338,15 +1362,24 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 //   | FRAGMENT
 //   | COMPUTE
 Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
-  Source source;
-  if (match(Token::Type::kVertex, &source))
-    return {ast::PipelineStage::kVertex, source};
+  auto t = peek();
+  if (!t.IsIdentifier()) {
+    return add_error(t, "invalid value for stage decoration");
+  }
 
-  if (match(Token::Type::kFragment, &source))
-    return {ast::PipelineStage::kFragment, source};
-
-  if (match(Token::Type::kCompute, &source))
-    return {ast::PipelineStage::kCompute, source};
+  auto s = t.to_str();
+  if (s == kVertexStage) {
+    next();  // Consume the peek
+    return {ast::PipelineStage::kVertex, t.source()};
+  }
+  if (s == kFragmentStage) {
+    next();  // Consume the peek
+    return {ast::PipelineStage::kFragment, t.source()};
+  }
+  if (s == kComputeStage) {
+    next();  // Consume the peek
+    return {ast::PipelineStage::kCompute, t.source()};
+  }
 
   return add_error(peek(), "invalid value for stage decoration");
 }
@@ -2774,7 +2807,13 @@ Expect<ast::Decoration*> ParserImpl::expect_decoration() {
 Maybe<ast::Decoration*> ParserImpl::decoration() {
   using Result = Maybe<ast::Decoration*>;
   auto t = next();
-  if (t.IsIdentifier() && t.to_str() == "access") {
+
+  if (!t.IsIdentifier()) {
+    return Failure::kNoMatch;
+  }
+
+  auto s = t.to_str();
+  if (s == kAccessDecoration) {
     const char* use = "access decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_access_type();
@@ -2784,7 +2823,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::AccessDecoration>(val.value, val.source);
     });
   }
-  if (t.IsLocation()) {
+
+  if (s == kLocationDecoration) {
     const char* use = "location decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2794,7 +2834,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::LocationDecoration>(val.value, val.source);
     });
   }
-  if (t.IsBinding()) {
+
+  if (s == kBindingDecoration) {
     const char* use = "binding decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2804,7 +2845,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::BindingDecoration>(val.value, val.source);
     });
   }
-  if (t.IsSet()) {
+
+  if (s == kSetDecoration) {
     const char* use = "set decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2814,7 +2856,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::SetDecoration>(val.value, val.source);
     });
   }
-  if (t.IsBuiltin()) {
+
+  if (s == kBuiltinDecoration) {
     return expect_paren_block("builtin decoration", [&]() -> Result {
       auto builtin = expect_builtin();
       if (builtin.errored)
@@ -2823,7 +2866,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::BuiltinDecoration>(builtin.value, builtin.source);
     });
   }
-  if (t.IsWorkgroupSize()) {
+
+  if (s == kWorkgroupSizeDecoration) {
     return expect_paren_block("workgroup_size decoration", [&]() -> Result {
       uint32_t x;
       uint32_t y = 1;
@@ -2851,7 +2895,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::WorkgroupDecoration>(x, y, z, t.source());
     });
   }
-  if (t.IsStage()) {
+
+  if (s == kStageDecoration) {
     return expect_paren_block("stage decoration", [&]() -> Result {
       auto stage = expect_pipeline_stage();
       if (stage.errored)
@@ -2860,10 +2905,12 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::StageDecoration>(stage.value, stage.source);
     });
   }
-  if (t.IsBlock()) {
+
+  if (s == kBlockDecoration) {
     return create<ast::StructBlockDecoration>(t.source());
   }
-  if (t.IsStride()) {
+
+  if (s == kStrideDecoration) {
     const char* use = "stride decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_nonzero_positive_sint(use);
@@ -2873,7 +2920,8 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::StrideDecoration>(val.value, t.source());
     });
   }
-  if (t.IsOffset()) {
+
+  if (s == kOffsetDecoration) {
     const char* use = "offset decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
@@ -2883,6 +2931,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       return create<ast::StructMemberOffsetDecoration>(val.value, t.source());
     });
   }
+
   return Failure::kNoMatch;
 }
 

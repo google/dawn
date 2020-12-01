@@ -411,10 +411,6 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kBang;
     pos_ += 1;
     location_.column += 1;
-  } else if (matches(pos_, "::")) {
-    type = Token::Type::kNamespace;
-    pos_ += 2;
-    location_.column += 2;
   } else if (matches(pos_, ":")) {
     type = Token::Type::kColon;
     pos_ += 1;
@@ -497,22 +493,14 @@ Token Lexer::try_punctuation() {
 Token Lexer::check_keyword(const Source& source, const std::string& str) {
   if (str == "array")
     return {Token::Type::kArray, source, "array"};
-  if (str == "binding")
-    return {Token::Type::kBinding, source, "binding"};
   if (str == "bitcast")
     return {Token::Type::kBitcast, source, "bitcast"};
-  if (str == "block")
-    return {Token::Type::kBlock, source, "block"};
   if (str == "bool")
     return {Token::Type::kBool, source, "bool"};
   if (str == "break")
     return {Token::Type::kBreak, source, "break"};
-  if (str == "builtin")
-    return {Token::Type::kBuiltin, source, "builtin"};
   if (str == "case")
     return {Token::Type::kCase, source, "case"};
-  if (str == "compute")
-    return {Token::Type::kCompute, source, "compute"};
   if (str == "const")
     return {Token::Type::kConst, source, "const"};
   if (str == "continue")
@@ -607,8 +595,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kFormatRgba8Unorm, source, "rgba8unorm"};
   if (str == "rgba8unorm_srgb")
     return {Token::Type::kFormatRgba8UnormSrgb, source, "rgba8unorm_srgb"};
-  if (str == "fragment")
-    return {Token::Type::kFragment, source, "fragment"};
   if (str == "function")
     return {Token::Type::kFunction, source, "function"};
   if (str == "i32")
@@ -621,8 +607,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImport, source, "import"};
   if (str == "in")
     return {Token::Type::kIn, source, "in"};
-  if (str == "location")
-    return {Token::Type::kLocation, source, "location"};
   if (str == "loop")
     return {Token::Type::kLoop, source, "loop"};
   if (str == "mat2x2")
@@ -643,8 +627,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kMat4x3, source, "mat4x3"};
   if (str == "mat4x4")
     return {Token::Type::kMat4x4, source, "mat4x4"};
-  if (str == "offset")
-    return {Token::Type::kOffset, source, "offset"};
   if (str == "out")
     return {Token::Type::kOut, source, "out"};
   if (str == "private")
@@ -657,14 +639,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kSampler, source, "sampler"};
   if (str == "sampler_comparison")
     return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
-  if (str == "set")
-    return {Token::Type::kSet, source, "set"};
-  if (str == "stage")
-    return {Token::Type::kStage, source, "stage"};
   if (str == "storage_buffer")
     return {Token::Type::kStorageBuffer, source, "storage_buffer"};
-  if (str == "stride")
-    return {Token::Type::kStride, source, "stride"};
   if (str == "struct")
     return {Token::Type::kStruct, source, "struct"};
   if (str == "switch")
@@ -807,14 +783,10 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kVec3, source, "vec3"};
   if (str == "vec4")
     return {Token::Type::kVec4, source, "vec4"};
-  if (str == "vertex")
-    return {Token::Type::kVertex, source, "vertex"};
   if (str == "void")
     return {Token::Type::kVoid, source, "void"};
   if (str == "workgroup")
     return {Token::Type::kWorkgroup, source, "workgroup"};
-  if (str == "workgroup_size")
-    return {Token::Type::kWorkgroupSize, source, "workgroup_size"};
   return {};
 }
 
