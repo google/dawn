@@ -707,6 +707,7 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 TEST_P(BufferTests, CreateBufferOOM) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
 
     wgpu::BufferDescriptor descriptor;
@@ -724,6 +725,7 @@ TEST_P(BufferTests, CreateBufferOOM) {
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
 
     // TODO(http://crbug.com/dawn/579): PartitionAlloc raises an exception on OOM even with
@@ -773,6 +775,7 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
@@ -809,4 +812,5 @@ DAWN_INSTANTIATE_TEST(BufferTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
