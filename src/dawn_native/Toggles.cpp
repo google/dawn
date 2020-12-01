@@ -144,6 +144,9 @@ namespace dawn_native {
             {Toggle::UseTintGenerator,
              {"use_tint_generator", "Use Tint instead of SPRIV-cross to generate shaders.",
               "https://crbug.com/dawn/548"}},
+            {Toggle::UseTintInspector,
+             {"use_tint_inspector", "Use Tint instead of SPRIV-cross for shader reflection.",
+              "https://crbug.com/dawn/578"}},
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
 

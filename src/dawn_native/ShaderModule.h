@@ -39,6 +39,10 @@ namespace dawn_native {
 
     struct EntryPointMetadata;
 
+    // A map from name to EntryPointMetadata.
+    using EntryPointMetadataTable =
+        std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>>;
+
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor);
     MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
@@ -130,8 +134,7 @@ namespace dawn_native {
         std::vector<uint32_t> mSpirv;
         std::string mWgsl;
 
-        // A map from [name, stage] to EntryPointMetadata.
-        std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>> mEntryPoints;
+        EntryPointMetadataTable mEntryPoints;
     };
 
 }  // namespace dawn_native
