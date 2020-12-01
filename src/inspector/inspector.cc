@@ -124,44 +124,45 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     }
 
     auto* expression = var->constructor();
-    if (!expression->Is<ast::ConstructorExpression>()) {
-      // This is invalid WGSL, but handling gracefully.
-      result[constant_id] = Scalar();
-      continue;
-    }
-
     auto* constructor = expression->As<ast::ConstructorExpression>();
-    if (!constructor->Is<ast::ScalarConstructorExpression>()) {
+    if (constructor == nullptr) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();
       continue;
     }
 
-    auto* literal =
-        constructor->As<ast::ScalarConstructorExpression>()->literal();
+    auto* scalar_constructor =
+        constructor->As<ast::ScalarConstructorExpression>();
+    if (scalar_constructor == nullptr) {
+      // This is invalid WGSL, but handling gracefully.
+      result[constant_id] = Scalar();
+      continue;
+    }
+
+    auto* literal = scalar_constructor->literal();
     if (!literal) {
       // This is invalid WGSL, but handling gracefully.
       result[constant_id] = Scalar();
       continue;
     }
 
-    if (literal->Is<ast::BoolLiteral>()) {
-      result[constant_id] = Scalar(literal->As<ast::BoolLiteral>()->IsTrue());
+    if (auto* l = literal->As<ast::BoolLiteral>()) {
+      result[constant_id] = Scalar(l->IsTrue());
       continue;
     }
 
-    if (literal->Is<ast::UintLiteral>()) {
-      result[constant_id] = Scalar(literal->As<ast::UintLiteral>()->value());
+    if (auto* l = literal->As<ast::UintLiteral>()) {
+      result[constant_id] = Scalar(l->value());
       continue;
     }
 
-    if (literal->Is<ast::SintLiteral>()) {
-      result[constant_id] = Scalar(literal->As<ast::SintLiteral>()->value());
+    if (auto* l = literal->As<ast::SintLiteral>()) {
+      result[constant_id] = Scalar(l->value());
       continue;
     }
 
-    if (literal->Is<ast::FloatLiteral>()) {
-      result[constant_id] = Scalar(literal->As<ast::FloatLiteral>()->value());
+    if (auto* l = literal->As<ast::FloatLiteral>()) {
+      result[constant_id] = Scalar(l->value());
       continue;
     }
 
@@ -190,11 +191,12 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     }
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
 
-    if (!unwrapped_type->Is<ast::type::Struct>()) {
+    auto* str = unwrapped_type->As<ast::type::Struct>();
+    if (str == nullptr) {
       continue;
     }
 
-    if (!unwrapped_type->As<ast::type::Struct>()->IsBlockDecorated()) {
+    if (!str->IsBlockDecorated()) {
       continue;
     }
 
@@ -307,11 +309,12 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rsv;
-    if (!var->type()->Is<ast::type::AccessControl>()) {
+
+    auto* ac_type = var->type()->As<ast::type::AccessControl>();
+    if (ac_type == nullptr) {
       continue;
     }
 
-    auto* ac_type = var->type()->As<ast::type::AccessControl>();
     if (read_only != ac_type->IsReadOnly()) {
       continue;
     }
@@ -392,12 +395,12 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
                       ->UnwrapIfNeeded();
     }
 
-    if (base_type->Is<ast::type::Array>()) {
-      base_type = base_type->As<ast::type::Array>()->type();
-    } else if (base_type->Is<ast::type::Matrix>()) {
-      base_type = base_type->As<ast::type::Matrix>()->type();
-    } else if (base_type->Is<ast::type::Vector>()) {
-      base_type = base_type->As<ast::type::Vector>()->type();
+    if (auto* at = base_type->As<ast::type::Array>()) {
+      base_type = at->type();
+    } else if (auto* mt = base_type->As<ast::type::Matrix>()) {
+      base_type = mt->type();
+    } else if (auto* vt = base_type->As<ast::type::Vector>()) {
+      base_type = vt->type();
     }
 
     if (base_type->Is<ast::type::F32>()) {

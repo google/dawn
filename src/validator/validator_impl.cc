@@ -85,11 +85,9 @@ bool ValidatorImpl::Validate(const ast::Module* module) {
 bool ValidatorImpl::ValidateConstructedTypes(
     const std::vector<ast::type::Type*>& constructed_types) {
   for (auto* const ct : constructed_types) {
-    if (ct->Is<ast::type::Struct>()) {
-      auto* st = ct->As<ast::type::Struct>();
+    if (auto* st = ct->As<ast::type::Struct>()) {
       for (auto* member : st->impl()->members()) {
-        if (member->type()->UnwrapAll()->Is<ast::type::Array>()) {
-          auto* r = member->type()->UnwrapAll()->As<ast::type::Array>();
+        if (auto* r = member->type()->UnwrapAll()->As<ast::type::Array>()) {
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
               add_error(member->source(), "v-0015",
@@ -265,12 +263,9 @@ bool ValidatorImpl::ValidateDeclStatement(
     return false;
   }
   variable_stack_.set(name, decl->variable());
-  if (decl->variable()->type()->UnwrapAll()->Is<ast::type::Array>()) {
-    if (decl->variable()
-            ->type()
-            ->UnwrapAll()
-            ->As<ast::type::Array>()
-            ->IsRuntimeArray()) {
+  if (auto* arr =
+          decl->variable()->type()->UnwrapAll()->As<ast::type::Array>()) {
+    if (arr->IsRuntimeArray()) {
       add_error(decl->source(), "v-0015",
                 "runtime arrays may only appear as the last "
                 "member of a struct: '" +
@@ -317,7 +312,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   auto* cond_type = s->condition()->result_type()->UnwrapAll();
-  if (!(cond_type->Is<ast::type::I32>() || cond_type->Is<ast::type::U32>())) {
+  if (!cond_type->is_integer_scalar()) {
     add_error(s->condition()->source(), "v-0025",
               "switch statement selector expression must be of a "
               "scalar integer type");

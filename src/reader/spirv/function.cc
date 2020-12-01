@@ -2267,11 +2267,11 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
   // A continue construct has the same depth as its associated loop
   // construct. Start a continue construct.
   auto* loop_candidate = LastStatement();
-  if (!loop_candidate->Is<ast::LoopStatement>()) {
+  auto* loop = loop_candidate->As<ast::LoopStatement>();
+  if (loop == nullptr) {
     return Fail() << "internal error: starting continue construct, "
                      "expected loop on top of stack";
   }
-  auto* loop = loop_candidate->As<ast::LoopStatement>();
   PushNewStatementBlock(
       construct, construct->end_id,
       [loop](StatementBlock* s) { loop->set_continuing(s->statements_); });
@@ -3268,10 +3268,10 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
       const auto* type = type_mgr_->GetType(inst.type_id());
       if (type) {
         if (type->AsPointer()) {
-          const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-          if (ast_type && ast_type->As<ast::type::Pointer>()) {
-            info->storage_class =
-                ast_type->As<ast::type::Pointer>()->storage_class();
+          if (const auto* ast_type = parser_impl_.ConvertType(inst.type_id())) {
+            if (auto* ptr = ast_type->As<ast::type::Pointer>()) {
+              info->storage_class = ptr->storage_class();
+            }
           }
           switch (inst.opcode()) {
             case SpvOpUndef:
@@ -3322,10 +3322,9 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
 
 ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
                                                     uint32_t result_id) {
-  if (type->Is<ast::type::Pointer>()) {
+  if (const auto* ast_ptr_type = type->As<ast::type::Pointer>()) {
     // Remap an old-style storage buffer pointer to a new-style storage
     // buffer pointer.
-    const auto* ast_ptr_type = type->As<ast::type::Pointer>();
     const auto sc = GetStorageClassForPointerValue(result_id);
     if (ast_ptr_type->storage_class() != sc) {
       return parser_impl_.get_module().create<ast::type::Pointer>(

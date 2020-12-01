@@ -431,7 +431,7 @@ class Builder {
   /// @param ary the array to generate
   /// @param result the result operand
   /// @returns true if the array was successfully generated
-  bool GenerateArray(ast::type::Array* ary, const Operand& result);
+  bool GenerateArrayType(ast::type::Array* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand

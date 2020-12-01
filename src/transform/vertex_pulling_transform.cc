@@ -128,11 +128,11 @@ void VertexPullingTransform::FindOrInsertVertexIndexIfUsed() {
     }
 
     for (auto* d : v->As<ast::DecoratedVariable>()->decorations()) {
-      if (d->Is<ast::BuiltinDecoration>() &&
-          d->As<ast::BuiltinDecoration>()->value() ==
-              ast::Builtin::kVertexIdx) {
-        vertex_index_name_ = v->name();
-        return;
+      if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
+        if (builtin->value() == ast::Builtin::kVertexIdx) {
+          vertex_index_name_ = v->name();
+          return;
+        }
       }
     }
   }
@@ -172,11 +172,11 @@ void VertexPullingTransform::FindOrInsertInstanceIndexIfUsed() {
     }
 
     for (auto* d : v->As<ast::DecoratedVariable>()->decorations()) {
-      if (d->Is<ast::BuiltinDecoration>() &&
-          d->As<ast::BuiltinDecoration>()->value() ==
-              ast::Builtin::kInstanceIdx) {
-        instance_index_name_ = v->name();
-        return;
+      if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
+        if (builtin->value() == ast::Builtin::kInstanceIdx) {
+          instance_index_name_ = v->name();
+          return;
+        }
       }
     }
   }

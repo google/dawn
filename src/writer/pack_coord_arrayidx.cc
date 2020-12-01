@@ -26,14 +26,12 @@ namespace writer {
 namespace {
 
 ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
-  auto* type_constructor = expr->As<ast::TypeConstructorExpression>();
-  if (type_constructor == nullptr) {
-    return nullptr;
+  if (auto* constructor = expr->As<ast::TypeConstructorExpression>()) {
+    if (constructor->type()->Is<ast::type::Vector>()) {
+      return constructor;
+    }
   }
-  if (!type_constructor->type()->Is<ast::type::Vector>()) {
-    return nullptr;
-  }
-  return type_constructor;
+  return nullptr;
 }
 
 }  // namespace
@@ -44,8 +42,7 @@ bool PackCoordAndArrayIndex(
     std::function<bool(ast::TypeConstructorExpression*)> callback) {
   uint32_t packed_size;
   ast::type::Type* packed_el_ty;  // Currenly must be f32.
-  if (coords->result_type()->Is<ast::type::Vector>()) {
-    auto* vec = coords->result_type()->As<ast::type::Vector>();
+  if (auto* vec = coords->result_type()->As<ast::type::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {

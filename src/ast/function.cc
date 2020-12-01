@@ -104,25 +104,26 @@ Function::referenced_uniform_variables() const {
   std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<DecoratedVariable>() ||
-        var->storage_class() != StorageClass::kUniform) {
+    if (var->storage_class() != StorageClass::kUniform) {
       continue;
     }
 
-    BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
-    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      BindingDecoration* binding = nullptr;
+      SetDecoration* set = nullptr;
+      for (auto* deco : decorated->decorations()) {
+        if (auto* b = deco->As<BindingDecoration>()) {
+          binding = b;
+        } else if (auto* s = deco->As<SetDecoration>()) {
+          set = s;
+        }
       }
-    }
-    if (binding == nullptr || set == nullptr) {
-      continue;
-    }
+      if (binding == nullptr || set == nullptr) {
+        continue;
+      }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+      ret.push_back({var, BindingInfo{binding, set}});
+    }
   }
   return ret;
 }
@@ -132,25 +133,26 @@ Function::referenced_storagebuffer_variables() const {
   std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<DecoratedVariable>() ||
-        var->storage_class() != StorageClass::kStorageBuffer) {
+    if (var->storage_class() != StorageClass::kStorageBuffer) {
       continue;
     }
 
-    BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
-    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      BindingDecoration* binding = nullptr;
+      SetDecoration* set = nullptr;
+      for (auto* deco : decorated->decorations()) {
+        if (auto* b = deco->As<BindingDecoration>()) {
+          binding = b;
+        } else if (auto* s = deco->As<SetDecoration>()) {
+          set = s;
+        }
       }
-    }
-    if (binding == nullptr || set == nullptr) {
-      continue;
-    }
+      if (binding == nullptr || set == nullptr) {
+        continue;
+      }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+      ret.push_back({var, BindingInfo{binding, set}});
+    }
   }
   return ret;
 }
@@ -160,13 +162,12 @@ Function::referenced_builtin_variables() const {
   std::vector<std::pair<Variable*, BuiltinDecoration*>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (!var->Is<DecoratedVariable>()) {
-      continue;
-    }
-    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
-      if (auto* builtin = deco->As<BuiltinDecoration>()) {
-        ret.push_back({var, builtin});
-        break;
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      for (auto* deco : decorated->decorations()) {
+        if (auto* builtin = deco->As<BuiltinDecoration>()) {
+          ret.push_back({var, builtin});
+          break;
+        }
       }
     }
   }
@@ -292,25 +293,28 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<DecoratedVariable>() || !unwrapped_type->Is<type::Sampler>() ||
-        unwrapped_type->As<type::Sampler>()->kind() != kind) {
+    auto* sampler = unwrapped_type->As<type::Sampler>();
+    if (sampler == nullptr || sampler->kind() != kind) {
       continue;
     }
 
-    BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
-    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      BindingDecoration* binding = nullptr;
+      SetDecoration* set = nullptr;
+      for (auto* deco : decorated->decorations()) {
+        if (auto* b = deco->As<BindingDecoration>()) {
+          binding = b;
+        }
+        if (auto* s = deco->As<SetDecoration>()) {
+          set = s;
+        }
       }
-    }
-    if (binding == nullptr || set == nullptr) {
-      continue;
-    }
+      if (binding == nullptr || set == nullptr) {
+        continue;
+      }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+      ret.push_back({var, BindingInfo{binding, set}});
+    }
   }
   return ret;
 }
@@ -321,29 +325,34 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
 
   for (auto* var : referenced_module_variables()) {
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
-    if (!var->Is<DecoratedVariable>() || !unwrapped_type->Is<type::Texture>()) {
+    auto* texture = unwrapped_type->As<type::Texture>();
+    if (texture == nullptr) {
       continue;
     }
 
-    if ((multisampled && !unwrapped_type->Is<type::MultisampledTexture>()) ||
-        (!multisampled && !unwrapped_type->Is<type::SampledTexture>())) {
+    auto is_multisampled = texture->Is<type::MultisampledTexture>();
+    auto is_sampled = texture->Is<type::SampledTexture>();
+
+    if ((multisampled && !is_multisampled) || (!multisampled && !is_sampled)) {
       continue;
     }
 
-    BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
-    for (auto* deco : var->As<DecoratedVariable>()->decorations()) {
-      if (auto* b = deco->As<BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      BindingDecoration* binding = nullptr;
+      SetDecoration* set = nullptr;
+      for (auto* deco : decorated->decorations()) {
+        if (auto* b = deco->As<BindingDecoration>()) {
+          binding = b;
+        } else if (auto* s = deco->As<SetDecoration>()) {
+          set = s;
+        }
       }
-    }
-    if (binding == nullptr || set == nullptr) {
-      continue;
-    }
+      if (binding == nullptr || set == nullptr) {
+        continue;
+      }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+      ret.push_back({var, BindingInfo{binding, set}});
+    }
   }
 
   return ret;

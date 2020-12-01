@@ -152,11 +152,10 @@ uint32_t IndexFromName(char name) {
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
 ast::type::Matrix* GetNestedMatrixType(ast::type::Type* type) {
-  while (type->Is<ast::type::Array>()) {
-    type = type->As<ast::type::Array>()->type();
+  while (auto* arr = type->As<ast::type::Array>()) {
+    type = arr->type();
   }
-  return type->Is<ast::type::Matrix>() ? type->As<ast::type::Matrix>()
-                                       : nullptr;
+  return type->As<ast::type::Matrix>();
 }
 
 uint32_t intrinsic_to_glsl_method(ast::type::Type* type,
@@ -721,10 +720,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                      Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (type->Is<ast::type::Texture>()) {
+  } else if (auto* tex = type->As<ast::type::Texture>()) {
     // Decorate storage texture variables with NonRead/Writeable if needed.
-    if (type->Is<ast::type::StorageTexture>()) {
-      switch (type->As<ast::type::StorageTexture>()->access()) {
+    if (auto* storage = tex->As<ast::type::StorageTexture>()) {
+      switch (storage->access()) {
         case ast::AccessControl::kWriteOnly:
           push_annot(
               spv::Op::OpDecorate,
@@ -747,8 +746,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    if (var->Is<ast::DecoratedVariable>() &&
-        var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
+    auto* decorated = var->As<ast::DecoratedVariable>();
+    if (decorated != nullptr && decorated->HasConstantIdDecoration()) {
       if (type->Is<ast::type::F32>()) {
         ast::FloatLiteral l(type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
@@ -1197,30 +1196,25 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       return false;
     }
 
-    if (result_type->Is<ast::type::Vector>() &&
-        !e->Is<ast::ScalarConstructorExpression>()) {
+    auto* sc = e->As<ast::ScalarConstructorExpression>();
+    if (result_type->Is<ast::type::Vector>() && sc == nullptr) {
       return false;
     }
 
     // This should all be handled by |is_constructor_const| call above
-    if (!e->Is<ast::ScalarConstructorExpression>()) {
+    if (sc == nullptr) {
       continue;
     }
 
-    auto* sc = e->As<ast::ScalarConstructorExpression>();
     ast::type::Type* subtype = result_type->UnwrapAll();
-    if (subtype->Is<ast::type::Vector>()) {
-      subtype = subtype->As<ast::type::Vector>()->type()->UnwrapAll();
-    } else if (subtype->Is<ast::type::Matrix>()) {
-      subtype = subtype->As<ast::type::Matrix>()->type()->UnwrapAll();
-    } else if (subtype->Is<ast::type::Array>()) {
-      subtype = subtype->As<ast::type::Array>()->type()->UnwrapAll();
-    } else if (subtype->Is<ast::type::Struct>()) {
-      subtype = subtype->As<ast::type::Struct>()
-                    ->impl()
-                    ->members()[i]
-                    ->type()
-                    ->UnwrapAll();
+    if (auto* vec = subtype->As<ast::type::Vector>()) {
+      subtype = vec->type()->UnwrapAll();
+    } else if (auto* mat = subtype->As<ast::type::Matrix>()) {
+      subtype = mat->type()->UnwrapAll();
+    } else if (auto* arr = subtype->As<ast::type::Array>()) {
+      subtype = arr->type()->UnwrapAll();
+    } else if (auto* str = subtype->As<ast::type::Struct>()) {
+      subtype = str->impl()->members()[i]->type()->UnwrapAll();
     }
     if (subtype != sc->result_type()->UnwrapAll()) {
       return false;
@@ -1251,15 +1245,17 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   bool can_cast_or_copy = result_type->is_scalar();
 
-  if (result_type->Is<ast::type::Vector>() &&
-      result_type->As<ast::type::Vector>()->type()->is_scalar()) {
-    auto* value_type = values[0]->result_type()->UnwrapAll();
-    can_cast_or_copy =
-        (value_type->Is<ast::type::Vector>() &&
-         value_type->As<ast::type::Vector>()->type()->is_scalar() &&
-         result_type->As<ast::type::Vector>()->size() ==
-             value_type->As<ast::type::Vector>()->size());
+  if (auto* res_vec = result_type->As<ast::type::Vector>()) {
+    if (res_vec->type()->is_scalar()) {
+      auto* value_type = values[0]->result_type()->UnwrapAll();
+      if (auto* val_vec = value_type->As<ast::type::Vector>()) {
+        if (val_vec->type()->is_scalar()) {
+          can_cast_or_copy = res_vec->size() == val_vec->size();
+        }
+      }
+    }
   }
+
   if (can_cast_or_copy) {
     return GenerateCastOrCopyOrPassthrough(result_type, values[0]);
   }
@@ -1272,8 +1268,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   bool result_is_constant_composite = constructor_is_const;
   bool result_is_spec_composite = false;
 
-  if (result_type->Is<ast::type::Vector>()) {
-    result_type = result_type->As<ast::type::Vector>()->type();
+  if (auto* vec = result_type->As<ast::type::Vector>()) {
+    result_type = vec->type();
   }
 
   OperandList ops;
@@ -1321,8 +1317,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     //
     // For cases 1 and 2, if the type is different we also may need to insert
     // a type cast.
-    if (value_type->Is<ast::type::Vector>()) {
-      auto* vec = value_type->As<ast::type::Vector>();
+    if (auto* vec = value_type->As<ast::type::Vector>()) {
       auto* vec_type = vec->type();
 
       auto value_type_id = GenerateTypeIfNeeded(vec_type);
@@ -1488,8 +1483,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
          Operand::Int(var->As<ast::DecoratedVariable>()->constant_id())});
   }
 
-  if (lit->Is<ast::BoolLiteral>()) {
-    if (lit->As<ast::BoolLiteral>()->IsTrue()) {
+  if (auto* l = lit->As<ast::BoolLiteral>()) {
+    if (l->IsTrue()) {
       push_type(is_spec_constant ? spv::Op::OpSpecConstantTrue
                                  : spv::Op::OpConstantTrue,
                 {Operand::Int(type_id), result});
@@ -1498,18 +1493,15 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                  : spv::Op::OpConstantFalse,
                 {Operand::Int(type_id), result});
     }
-  } else if (lit->Is<ast::SintLiteral>()) {
+  } else if (auto* sl = lit->As<ast::SintLiteral>()) {
     push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result,
-               Operand::Int(lit->As<ast::SintLiteral>()->value())});
-  } else if (lit->Is<ast::UintLiteral>()) {
+              {Operand::Int(type_id), result, Operand::Int(sl->value())});
+  } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result,
-               Operand::Int(lit->As<ast::UintLiteral>()->value())});
-  } else if (lit->Is<ast::FloatLiteral>()) {
+              {Operand::Int(type_id), result, Operand::Int(ul->value())});
+  } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
     push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result,
-               Operand::Float(lit->As<ast::FloatLiteral>()->value())});
+              {Operand::Int(type_id), result, Operand::Float(fl->value())});
   } else if (lit->Is<ast::NullLiteral>()) {
     push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
   } else {
@@ -2413,8 +2405,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   }
 
   // The alias is a wrapper around the subtype, so emit the subtype
-  if (type->Is<ast::type::Alias>()) {
-    return GenerateTypeIfNeeded(type->As<ast::type::Alias>()->type());
+  if (auto* alias = type->As<ast::type::Alias>()) {
+    return GenerateTypeIfNeeded(alias->type());
   }
 
   auto val = type_name_to_id_.find(type->type_name());
@@ -2425,8 +2417,7 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   auto result = result_op();
   auto id = result.to_i();
 
-  if (type->Is<ast::type::AccessControl>()) {
-    auto* ac = type->As<ast::type::AccessControl>();
+  if (auto* ac = type->As<ast::type::AccessControl>()) {
     auto* subtype = ac->type()->UnwrapIfNeeded();
     if (!subtype->Is<ast::type::Struct>()) {
       error_ = "Access control attached to non-struct type.";
@@ -2436,8 +2427,8 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
                             ac->access_control(), result)) {
       return 0;
     }
-  } else if (type->Is<ast::type::Array>()) {
-    if (!GenerateArray(type->As<ast::type::Array>(), result)) {
+  } else if (auto* arr = type->As<ast::type::Array>()) {
+    if (!GenerateArrayType(arr, result)) {
       return 0;
     }
   } else if (type->Is<ast::type::Bool>()) {
@@ -2446,29 +2437,28 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
   } else if (type->Is<ast::type::I32>()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
-  } else if (type->Is<ast::type::Matrix>()) {
-    if (!GenerateMatrixType(type->As<ast::type::Matrix>(), result)) {
+  } else if (auto* mat = type->As<ast::type::Matrix>()) {
+    if (!GenerateMatrixType(mat, result)) {
       return 0;
     }
-  } else if (type->Is<ast::type::Pointer>()) {
-    if (!GeneratePointerType(type->As<ast::type::Pointer>(), result)) {
+  } else if (auto* ptr = type->As<ast::type::Pointer>()) {
+    if (!GeneratePointerType(ptr, result)) {
       return 0;
     }
-  } else if (type->Is<ast::type::Struct>()) {
-    if (!GenerateStructType(type->As<ast::type::Struct>(),
-                            ast::AccessControl::kReadWrite, result)) {
+  } else if (auto* str = type->As<ast::type::Struct>()) {
+    if (!GenerateStructType(str, ast::AccessControl::kReadWrite, result)) {
       return 0;
     }
   } else if (type->Is<ast::type::U32>()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
-  } else if (type->Is<ast::type::Vector>()) {
-    if (!GenerateVectorType(type->As<ast::type::Vector>(), result)) {
+  } else if (auto* vec = type->As<ast::type::Vector>()) {
+    if (!GenerateVectorType(vec, result)) {
       return 0;
     }
   } else if (type->Is<ast::type::Void>()) {
     push_type(spv::Op::OpTypeVoid, {result});
-  } else if (type->Is<ast::type::Texture>()) {
-    if (!GenerateTextureType(type->As<ast::type::Texture>(), result)) {
+  } else if (auto* tex = type->As<ast::type::Texture>()) {
+    if (!GenerateTextureType(tex, result)) {
       return 0;
     }
   } else if (type->Is<ast::type::Sampler>()) {
@@ -2546,20 +2536,16 @@ bool Builder::GenerateTextureType(ast::type::Texture* texture,
   if (texture->Is<ast::type::DepthTexture>()) {
     ast::type::F32 f32;
     type_id = GenerateTypeIfNeeded(&f32);
-  } else if (texture->Is<ast::type::SampledTexture>()) {
-    type_id =
-        GenerateTypeIfNeeded(texture->As<ast::type::SampledTexture>()->type());
-  } else if (texture->Is<ast::type::MultisampledTexture>()) {
-    type_id = GenerateTypeIfNeeded(
-        texture->As<ast::type::MultisampledTexture>()->type());
-  } else if (texture->Is<ast::type::StorageTexture>()) {
-    if (texture->As<ast::type::StorageTexture>()->access() ==
-        ast::AccessControl::kWriteOnly) {
+  } else if (auto* s = texture->As<ast::type::SampledTexture>()) {
+    type_id = GenerateTypeIfNeeded(s->type());
+  } else if (auto* ms = texture->As<ast::type::MultisampledTexture>()) {
+    type_id = GenerateTypeIfNeeded(ms->type());
+  } else if (auto* st = texture->As<ast::type::StorageTexture>()) {
+    if (st->access() == ast::AccessControl::kWriteOnly) {
       ast::type::Void void_type;
       type_id = GenerateTypeIfNeeded(&void_type);
     } else {
-      type_id = GenerateTypeIfNeeded(
-          texture->As<ast::type::StorageTexture>()->type());
+      type_id = GenerateTypeIfNeeded(st->type());
     }
   }
   if (type_id == 0u) {
@@ -2567,9 +2553,8 @@ bool Builder::GenerateTextureType(ast::type::Texture* texture,
   }
 
   uint32_t format_literal = SpvImageFormat_::SpvImageFormatUnknown;
-  if (texture->Is<ast::type::StorageTexture>()) {
-    format_literal = convert_image_format_to_spv(
-        texture->As<ast::type::StorageTexture>()->image_format());
+  if (auto* t = texture->As<ast::type::StorageTexture>()) {
+    format_literal = convert_image_format_to_spv(t->image_format());
   }
 
   push_type(spv::Op::OpTypeImage,
@@ -2581,7 +2566,7 @@ bool Builder::GenerateTextureType(ast::type::Texture* texture,
   return true;
 }
 
-bool Builder::GenerateArray(ast::type::Array* ary, const Operand& result) {
+bool Builder::GenerateArrayType(ast::type::Array* ary, const Operand& result) {
   auto elem_type = GenerateTypeIfNeeded(ary->type());
   if (elem_type == 0) {
     return false;

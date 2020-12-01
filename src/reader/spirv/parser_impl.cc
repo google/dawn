@@ -1349,8 +1349,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::FloatLiteral>(type, 0.0f));
   }
-  if (type->Is<ast::type::Vector>()) {
-    const auto* vec_ty = type->As<ast::type::Vector>();
+  if (const auto* vec_ty = type->As<ast::type::Vector>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(vec_ty->type()));
@@ -1358,8 +1357,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(type,
                                                   std::move(ast_components));
   }
-  if (type->Is<ast::type::Matrix>()) {
-    const auto* mat_ty = type->As<ast::type::Matrix>();
+  if (const auto* mat_ty = type->As<ast::type::Matrix>()) {
     // Matrix components are columns
     auto* column_ty =
         ast_module_.create<ast::type::Vector>(mat_ty->type(), mat_ty->rows());
@@ -1370,8 +1368,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(type,
                                                   std::move(ast_components));
   }
-  if (type->Is<ast::type::Array>()) {
-    auto* arr_ty = type->As<ast::type::Array>();
+  if (auto* arr_ty = type->As<ast::type::Array>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));
@@ -1379,8 +1376,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(original_type,
                                                   std::move(ast_components));
   }
-  if (type->Is<ast::type::Struct>()) {
-    auto* struct_ty = type->As<ast::type::Struct>();
+  if (auto* struct_ty = type->As<ast::type::Struct>()) {
     ast::ExpressionList ast_components;
     for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));

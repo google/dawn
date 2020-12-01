@@ -2941,8 +2941,8 @@ std::vector<T*> ParserImpl::take_decorations(ast::DecorationList& in) {
   std::vector<T*> out;
   out.reserve(in.size());
   for (auto* deco : in) {
-    if (deco->Is<T>()) {
-      out.emplace_back(deco->As<T>());
+    if (auto* t = deco->As<T>()) {
+      out.emplace_back(t);
     } else {
       remaining.emplace_back(deco);
     }

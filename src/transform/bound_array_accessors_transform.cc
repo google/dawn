@@ -213,20 +213,20 @@ bool BoundArrayAccessorsTransform::ProcessAccessExpression(
   // Scalar constructor we can re-write the value to be within bounds.
   if (auto* c = expr->idx_expr()->As<ast::ScalarConstructorExpression>()) {
     auto* lit = c->literal();
-    if (lit->Is<ast::SintLiteral>()) {
-      int32_t val = lit->As<ast::SintLiteral>()->value();
+    if (auto* sint = lit->As<ast::SintLiteral>()) {
+      int32_t val = sint->value();
       if (val < 0) {
         val = 0;
       } else if (val >= int32_t(size)) {
         val = int32_t(size) - 1;
       }
-      lit->As<ast::SintLiteral>()->set_value(val);
-    } else if (lit->Is<ast::UintLiteral>()) {
-      uint32_t val = lit->As<ast::UintLiteral>()->value();
+      sint->set_value(val);
+    } else if (auto* uint = lit->As<ast::UintLiteral>()) {
+      uint32_t val = uint->value();
       if (val >= size - 1) {
         val = size - 1;
       }
-      lit->As<ast::UintLiteral>()->set_value(val);
+      uint->set_value(val);
     } else {
       error_ = "unknown scalar constructor type for accessor";
       return false;

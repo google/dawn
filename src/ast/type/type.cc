@@ -42,8 +42,8 @@ Type::Type(Type&&) = default;
 Type::~Type() = default;
 
 Type* Type::UnwrapPtrIfNeeded() {
-  if (Is<Pointer>()) {
-    return As<Pointer>()->type();
+  if (auto* ptr = As<type::Pointer>()) {
+    return ptr->type();
   }
   return this;
 }
@@ -51,10 +51,10 @@ Type* Type::UnwrapPtrIfNeeded() {
 Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
-    if (where->Is<Alias>()) {
-      where = where->As<Alias>()->type();
-    } else if (where->Is<AccessControl>()) {
-      where = where->As<AccessControl>()->type();
+    if (auto* alias = where->As<type::Alias>()) {
+      where = alias->type();
+    } else if (auto* access = where->As<type::AccessControl>()) {
+      where = access->type();
     } else {
       break;
     }

@@ -102,7 +102,7 @@ TEST_F(StorageTextureTest, F32) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<Texture>());
   ASSERT_TRUE(s->Is<StorageTexture>());
-  EXPECT_TRUE(s->As<Texture>()->As<StorageTexture>()->type()->Is<F32>());
+  EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<F32>());
 }
 
 TEST_F(StorageTextureTest, U32) {
@@ -130,7 +130,7 @@ TEST_F(StorageTextureTest, I32) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<Texture>());
   ASSERT_TRUE(s->Is<StorageTexture>());
-  EXPECT_TRUE(s->As<Texture>()->As<StorageTexture>()->type()->Is<I32>());
+  EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
 }
 
 TEST_F(StorageTextureTest, MinBufferBindingSize) {

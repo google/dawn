@@ -88,15 +88,13 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
 bool TypeDeterminer::Determine() {
   for (auto& iter : mod_->types()) {
     auto& type = iter.second;
-    if (!type->Is<ast::type::Texture>() ||
-        !type->Is<ast::type::StorageTexture>()) {
-      continue;
-    }
-    if (!DetermineStorageTextureSubtype(
-            type->As<ast::type::StorageTexture>())) {
-      set_error(Source{}, "unable to determine storage texture subtype for: " +
-                              type->type_name());
-      return false;
+    if (auto* storage = type->As<ast::type::StorageTexture>()) {
+      if (!DetermineStorageTextureSubtype(storage)) {
+        set_error(Source{},
+                  "unable to determine storage texture subtype for: " +
+                      type->type_name());
+        return false;
+      }
     }
   }
 
@@ -180,11 +178,12 @@ bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
 }
 
 bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
-  if (!stmt->Is<ast::VariableDeclStatement>()) {
+  auto* var_decl = stmt->As<ast::VariableDeclStatement>();
+  if (var_decl == nullptr) {
     return true;
   }
 
-  auto* var = stmt->As<ast::VariableDeclStatement>()->variable();
+  auto* var = var_decl->variable();
   // Nothing to do for const
   if (var->is_const()) {
     return true;
@@ -330,13 +329,12 @@ bool TypeDeterminer::DetermineArrayAccessor(
   auto* res = expr->array()->result_type();
   auto* parent_type = res->UnwrapAll();
   ast::type::Type* ret = nullptr;
-  if (parent_type->Is<ast::type::Array>()) {
-    ret = parent_type->As<ast::type::Array>()->type();
-  } else if (parent_type->Is<ast::type::Vector>()) {
-    ret = parent_type->As<ast::type::Vector>()->type();
-  } else if (parent_type->Is<ast::type::Matrix>()) {
-    auto* m = parent_type->As<ast::type::Matrix>();
-    ret = mod_->create<ast::type::Vector>(m->type(), m->rows());
+  if (auto* arr = parent_type->As<ast::type::Array>()) {
+    ret = arr->type();
+  } else if (auto* vec = parent_type->As<ast::type::Vector>()) {
+    ret = vec->type();
+  } else if (auto* mat = parent_type->As<ast::type::Matrix>()) {
+    ret = mod_->create<ast::type::Vector>(mat->type(), mat->rows());
   } else {
     set_error(expr->source(), "invalid parent type (" +
                                   parent_type->type_name() +
@@ -345,15 +343,15 @@ bool TypeDeterminer::DetermineArrayAccessor(
   }
 
   // If we're extracting from a pointer, we return a pointer.
-  if (res->Is<ast::type::Pointer>()) {
-    ret = mod_->create<ast::type::Pointer>(
-        ret, res->As<ast::type::Pointer>()->storage_class());
-  } else if (parent_type->Is<ast::type::Array>() &&
-             !parent_type->As<ast::type::Array>()->type()->is_scalar()) {
-    // If we extract a non-scalar from an array then we also get a pointer. We
-    // will generate a Function storage class variable to store this
-    // into.
-    ret = mod_->create<ast::type::Pointer>(ret, ast::StorageClass::kFunction);
+  if (auto* ptr = res->As<ast::type::Pointer>()) {
+    ret = mod_->create<ast::type::Pointer>(ret, ptr->storage_class());
+  } else if (auto* arr = parent_type->As<ast::type::Array>()) {
+    if (!arr->type()->is_scalar()) {
+      // If we extract a non-scalar from an array then we also get a pointer. We
+      // will generate a Function storage class variable to store this
+      // into.
+      ret = mod_->create<ast::type::Pointer>(ret, ast::StorageClass::kFunction);
+    }
   }
   expr->set_result_type(ret);
 
@@ -532,9 +530,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     auto* bool_type = mod_->create<ast::type::Bool>();
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->Is<ast::type::Vector>()) {
-      expr->func()->set_result_type(mod_->create<ast::type::Vector>(
-          bool_type, param_type->As<ast::type::Vector>()->size()));
+    if (auto* vec = param_type->As<ast::type::Vector>()) {
+      expr->func()->set_result_type(
+          mod_->create<ast::type::Vector>(bool_type, vec->size()));
     } else {
       expr->func()->set_result_type(bool_type);
     }
@@ -662,20 +660,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       return true;
     }
 
-    if (!texture->Is<ast::type::StorageTexture>() &&
-        !(texture->Is<ast::type::SampledTexture>() ||
-          texture->Is<ast::type::MultisampledTexture>())) {
-      set_error(expr->source(), "invalid texture for " + ident->name());
-      return false;
-    }
-
     ast::type::Type* type = nullptr;
-    if (texture->Is<ast::type::StorageTexture>()) {
-      type = texture->As<ast::type::StorageTexture>()->type();
-    } else if (texture->Is<ast::type::SampledTexture>()) {
-      type = texture->As<ast::type::SampledTexture>()->type();
-    } else if (texture->Is<ast::type::MultisampledTexture>()) {
-      type = texture->As<ast::type::MultisampledTexture>()->type();
+    if (auto* storage = texture->As<ast::type::StorageTexture>()) {
+      type = storage->type();
+    } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
+      type = sampled->type();
+    } else if (auto* msampled = texture->As<ast::type::MultisampledTexture>()) {
+      type = msampled->type();
     } else {
       set_error(expr->source(), "unknown texture type for texture sampling");
       return false;
@@ -1030,8 +1021,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   ast::type::Type* ret = nullptr;
-  if (data_type->Is<ast::type::Struct>()) {
-    auto* strct = data_type->As<ast::type::Struct>()->impl();
+  if (auto* ty = data_type->As<ast::type::Struct>()) {
+    auto* strct = ty->impl();
     auto name = expr->member()->name();
 
     for (auto* member : strct->members()) {
@@ -1047,21 +1038,17 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     // If we're extracting from a pointer, we return a pointer.
-    if (res->Is<ast::type::Pointer>()) {
-      ret = mod_->create<ast::type::Pointer>(
-          ret, res->As<ast::type::Pointer>()->storage_class());
+    if (auto* ptr = res->As<ast::type::Pointer>()) {
+      ret = mod_->create<ast::type::Pointer>(ret, ptr->storage_class());
     }
-  } else if (data_type->Is<ast::type::Vector>()) {
-    auto* vec = data_type->As<ast::type::Vector>();
-
+  } else if (auto* vec = data_type->As<ast::type::Vector>()) {
     auto size = expr->member()->name().size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
-      if (res->Is<ast::type::Pointer>()) {
-        ret = mod_->create<ast::type::Pointer>(
-            ret, res->As<ast::type::Pointer>()->storage_class());
+      if (auto* ptr = res->As<ast::type::Pointer>()) {
+        ret = mod_->create<ast::type::Pointer>(ret, ptr->storage_class());
       }
     } else {
       // The vector will have a number of components equal to the length of the
@@ -1100,9 +1087,9 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type = mod_->create<ast::type::Bool>();
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
-    if (param_type->Is<ast::type::Vector>()) {
-      expr->set_result_type(mod_->create<ast::type::Vector>(
-          bool_type, param_type->As<ast::type::Vector>()->size()));
+    if (auto* vec = param_type->As<ast::type::Vector>()) {
+      expr->set_result_type(
+          mod_->create<ast::type::Vector>(bool_type, vec->size()));
     } else {
       expr->set_result_type(bool_type);
     }
@@ -1114,36 +1101,31 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
-    if (lhs_type->Is<ast::type::Matrix>() &&
-        rhs_type->Is<ast::type::Matrix>()) {
+    auto* lhs_mat = lhs_type->As<ast::type::Matrix>();
+    auto* rhs_mat = rhs_type->As<ast::type::Matrix>();
+    auto* lhs_vec = lhs_type->As<ast::type::Vector>();
+    auto* rhs_vec = rhs_type->As<ast::type::Vector>();
+    if (lhs_mat && rhs_mat) {
       expr->set_result_type(mod_->create<ast::type::Matrix>(
-          lhs_type->As<ast::type::Matrix>()->type(),
-          lhs_type->As<ast::type::Matrix>()->rows(),
-          rhs_type->As<ast::type::Matrix>()->columns()));
-
-    } else if (lhs_type->Is<ast::type::Matrix>() &&
-               rhs_type->Is<ast::type::Vector>()) {
-      auto* mat = lhs_type->As<ast::type::Matrix>();
+          lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns()));
+    } else if (lhs_mat && rhs_vec) {
       expr->set_result_type(
-          mod_->create<ast::type::Vector>(mat->type(), mat->rows()));
-    } else if (lhs_type->Is<ast::type::Vector>() &&
-               rhs_type->Is<ast::type::Matrix>()) {
-      auto* mat = rhs_type->As<ast::type::Matrix>();
+          mod_->create<ast::type::Vector>(lhs_mat->type(), lhs_mat->rows()));
+    } else if (lhs_vec && rhs_mat) {
       expr->set_result_type(
-          mod_->create<ast::type::Vector>(mat->type(), mat->columns()));
-    } else if (lhs_type->Is<ast::type::Matrix>()) {
+          mod_->create<ast::type::Vector>(rhs_mat->type(), rhs_mat->columns()));
+    } else if (lhs_mat) {
       // matrix * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->Is<ast::type::Matrix>()) {
+    } else if (rhs_mat) {
       // scalar * matrix
       expr->set_result_type(rhs_type);
-    } else if (lhs_type->Is<ast::type::Vector>() &&
-               rhs_type->Is<ast::type::Vector>()) {
+    } else if (lhs_vec && rhs_vec) {
       expr->set_result_type(lhs_type);
-    } else if (lhs_type->Is<ast::type::Vector>()) {
+    } else if (lhs_vec) {
       // Vector * scalar
       expr->set_result_type(lhs_type);
-    } else if (rhs_type->Is<ast::type::Vector>()) {
+    } else if (rhs_vec) {
       // Scalar * vector
       expr->set_result_type(rhs_type);
     } else {

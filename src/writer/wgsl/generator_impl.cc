@@ -173,15 +173,14 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
 
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
-  if (ty->Is<ast::type::Alias>()) {
-    auto* alias = ty->As<ast::type::Alias>();
+  if (auto* alias = ty->As<ast::type::Alias>()) {
     out_ << "type " << alias->name() << " = ";
     if (!EmitType(alias->type())) {
       return false;
     }
     out_ << ";" << std::endl;
-  } else if (ty->Is<ast::type::Struct>()) {
-    if (!EmitStructType(ty->As<ast::type::Struct>())) {
+  } else if (auto* str = ty->As<ast::type::Struct>()) {
+    if (!EmitStructType(str)) {
       return false;
     }
   } else {
@@ -321,14 +320,14 @@ bool GeneratorImpl::EmitScalarConstructor(
 }
 
 bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
-  if (lit->Is<ast::BoolLiteral>()) {
-    out_ << (lit->As<ast::BoolLiteral>()->IsTrue() ? "true" : "false");
-  } else if (lit->Is<ast::FloatLiteral>()) {
-    out_ << FloatToString(lit->As<ast::FloatLiteral>()->value());
-  } else if (lit->Is<ast::SintLiteral>()) {
-    out_ << lit->As<ast::SintLiteral>()->value();
-  } else if (lit->Is<ast::UintLiteral>()) {
-    out_ << lit->As<ast::UintLiteral>()->value() << "u";
+  if (auto* bl = lit->As<ast::BoolLiteral>()) {
+    out_ << (bl->IsTrue() ? "true" : "false");
+  } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
+    out_ << FloatToString(fl->value());
+  } else if (auto* sl = lit->As<ast::SintLiteral>()) {
+    out_ << sl->value();
+  } else if (auto* ul = lit->As<ast::UintLiteral>()) {
+    out_ << ul->value() << "u";
   } else {
     error_ = "unknown literal type";
     return false;
@@ -399,9 +398,7 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
-  if (type->Is<ast::type::AccessControl>()) {
-    auto* ac = type->As<ast::type::AccessControl>();
-
+  if (auto* ac = type->As<ast::type::AccessControl>()) {
     out_ << "[[access(";
     if (ac->IsReadOnly()) {
       out_ << "read";
@@ -415,11 +412,9 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     if (!EmitType(ac->type())) {
       return false;
     }
-  } else if (type->Is<ast::type::Alias>()) {
-    out_ << type->As<ast::type::Alias>()->name();
-  } else if (type->Is<ast::type::Array>()) {
-    auto* ary = type->As<ast::type::Array>();
-
+  } else if (auto* alias = type->As<ast::type::Alias>()) {
+    out_ << alias->name();
+  } else if (auto* ary = type->As<ast::type::Array>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
         out_ << "[[stride(" << stride->stride() << ")]] ";
@@ -441,34 +436,29 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     out_ << "f32";
   } else if (type->Is<ast::type::I32>()) {
     out_ << "i32";
-  } else if (type->Is<ast::type::Matrix>()) {
-    auto* mat = type->As<ast::type::Matrix>();
+  } else if (auto* mat = type->As<ast::type::Matrix>()) {
     out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
     if (!EmitType(mat->type())) {
       return false;
     }
     out_ << ">";
-  } else if (type->Is<ast::type::Pointer>()) {
-    auto* ptr = type->As<ast::type::Pointer>();
+  } else if (auto* ptr = type->As<ast::type::Pointer>()) {
     out_ << "ptr<" << ptr->storage_class() << ", ";
     if (!EmitType(ptr->type())) {
       return false;
     }
     out_ << ">";
-  } else if (type->Is<ast::type::Sampler>()) {
-    auto* sampler = type->As<ast::type::Sampler>();
+  } else if (auto* sampler = type->As<ast::type::Sampler>()) {
     out_ << "sampler";
 
     if (sampler->IsComparison()) {
       out_ << "_comparison";
     }
-  } else if (type->Is<ast::type::Struct>()) {
+  } else if (auto* str = type->As<ast::type::Struct>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << type->As<ast::type::Struct>()->name();
-  } else if (type->Is<ast::type::Texture>()) {
-    auto* texture = type->As<ast::type::Texture>();
-
+    out_ << str->name();
+  } else if (auto* texture = type->As<ast::type::Texture>()) {
     out_ << "texture_";
     if (texture->Is<ast::type::DepthTexture>()) {
       out_ << "depth_";
@@ -476,10 +466,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       /* nothing to emit */
     } else if (texture->Is<ast::type::MultisampledTexture>()) {
       out_ << "multisampled_";
-    } else if (texture->Is<ast::type::StorageTexture>()) {
+    } else if (auto* storage = texture->As<ast::type::StorageTexture>()) {
       out_ << "storage_";
-
-      auto* storage = texture->As<ast::type::StorageTexture>();
       if (storage->access() == ast::AccessControl::kReadOnly) {
         out_ << "ro_";
       } else if (storage->access() == ast::AccessControl::kWriteOnly) {
@@ -520,25 +508,19 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
         return false;
     }
 
-    if (texture->Is<ast::type::SampledTexture>()) {
-      auto* sampled = texture->As<ast::type::SampledTexture>();
-
+    if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
       out_ << "<";
       if (!EmitType(sampled->type())) {
         return false;
       }
       out_ << ">";
-    } else if (texture->Is<ast::type::MultisampledTexture>()) {
-      auto* sampled = texture->As<ast::type::MultisampledTexture>();
-
+    } else if (auto* ms = texture->As<ast::type::MultisampledTexture>()) {
       out_ << "<";
-      if (!EmitType(sampled->type())) {
+      if (!EmitType(ms->type())) {
         return false;
       }
       out_ << ">";
-    } else if (texture->Is<ast::type::StorageTexture>()) {
-      auto* storage = texture->As<ast::type::StorageTexture>();
-
+    } else if (auto* storage = texture->As<ast::type::StorageTexture>()) {
       out_ << "<";
       if (!EmitImageFormat(storage->image_format())) {
         return false;
@@ -548,8 +530,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 
   } else if (type->Is<ast::type::U32>()) {
     out_ << "u32";
-  } else if (type->Is<ast::type::Vector>()) {
-    auto* vec = type->As<ast::type::Vector>();
+  } else if (auto* vec = type->As<ast::type::Vector>()) {
     out_ << "vec" << vec->size() << "<";
     if (!EmitType(vec->type())) {
       return false;
@@ -580,10 +561,9 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
       make_indent();
 
       // TODO(dsinclair): Split this out when we have more then one
-      assert(deco->Is<ast::StructMemberOffsetDecoration>());
-      out_ << "[[offset("
-           << deco->As<ast::StructMemberOffsetDecoration>()->offset() << ")]]"
-           << std::endl;
+      auto* offset = deco->As<ast::StructMemberOffsetDecoration>();
+      assert(offset != nullptr);
+      out_ << "[[offset(" << offset->offset() << ")]]" << std::endl;
     }
     make_indent();
     out_ << mem->name() << " : ";
@@ -651,8 +631,8 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
       out_ << "location(" << location->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
-    } else if (auto* cid = deco->As<ast::ConstantIdDecoration>()) {
-      out_ << "constant_id(" << cid->value() << ")";
+    } else if (auto* constant = deco->As<ast::ConstantIdDecoration>()) {
+      out_ << "constant_id(" << constant->value() << ")";
     } else {
       error_ = "unknown variable decoration";
       return false;
