@@ -22,6 +22,7 @@
 namespace dawn_native { namespace opengl {
 
     class Device;
+    class PipelineLayout;
 
     std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
 
@@ -47,7 +48,8 @@ namespace dawn_native { namespace opengl {
 
         std::string TranslateToGLSL(const char* entryPointName,
                                     SingleShaderStage stage,
-                                    CombinedSamplerInfo* combinedSamplers) const;
+                                    CombinedSamplerInfo* combinedSamplers,
+                                    const PipelineLayout* layout) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

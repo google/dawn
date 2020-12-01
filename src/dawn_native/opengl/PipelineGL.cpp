@@ -85,7 +85,7 @@ namespace dawn_native { namespace opengl {
         for (SingleShaderStage stage : IterateStages(activeStages)) {
             const ShaderModule* module = ToBackend(stages[stage].module.Get());
             std::string glsl = module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
-                                                       &combinedSamplers[stage]);
+                                                       &combinedSamplers[stage], layout);
             GLuint shader = CreateShader(gl, GLShaderType(stage), glsl.c_str());
             gl.AttachShader(mProgram, shader);
         }
@@ -131,14 +131,15 @@ namespace dawn_native { namespace opengl {
 
                     case wgpu::BindingType::StorageBuffer:
                     case wgpu::BindingType::ReadonlyStorageBuffer: {
-                        GLuint location = gl.GetProgramResourceIndex(
-                            mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
-                        if (location != GL_INVALID_INDEX) {
-                            if (gl.GetVersion().IsES()) {
-                                // TODO(crbug.com/dawn/584): Figure out a substitute for
-                                // glShaderStorageBlockBinding on ES or add additional validation.
-                                ASSERT(false);
-                            } else {
+                        // Since glShaderStorageBlockBinding doesn't exist in OpenGL ES, we skip
+                        // that call and handle it during shader translation by modifying the
+                        // location decoration.
+                        // Contrary to all other binding types, OpenGL ES's SSBO binding index in
+                        // the SSBO table is the value of the location= decoration in GLSL.
+                        if (gl.GetVersion().IsDesktop()) {
+                            GLuint location = gl.GetProgramResourceIndex(
+                                mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
+                            if (location != GL_INVALID_INDEX) {
                                 gl.ShaderStorageBlockBinding(mProgram, location,
                                                              indices[group][bindingIndex]);
                             }

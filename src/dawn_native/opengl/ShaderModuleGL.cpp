@@ -16,8 +16,10 @@
 
 #include "common/Assert.h"
 #include "common/Platform.h"
+#include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/SpirvUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/PipelineLayoutGL.h"
 
 #include <spirv_glsl.hpp>
 
@@ -65,7 +67,8 @@ namespace dawn_native { namespace opengl {
 
     std::string ShaderModule::TranslateToGLSL(const char* entryPointName,
                                               SingleShaderStage stage,
-                                              CombinedSamplerInfo* combinedSamplers) const {
+                                              CombinedSamplerInfo* combinedSamplers,
+                                              const PipelineLayout* layout) const {
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
         // be updated.
         spirv_cross::CompilerGLSL::Options options;
@@ -134,8 +137,19 @@ namespace dawn_native { namespace opengl {
                 }
 
                 compiler.set_name(resourceId, GetBindingName(group, bindingNumber));
-                compiler.unset_decoration(info.id, spv::DecorationBinding);
                 compiler.unset_decoration(info.id, spv::DecorationDescriptorSet);
+                // OpenGL ES has no glShaderStorageBlockBinding call, so we adjust the SSBO binding
+                // decoration here instead.
+                if (version.IsES() && (info.type == wgpu::BindingType::StorageBuffer ||
+                                       info.type == wgpu::BindingType::ReadonlyStorageBuffer)) {
+                    const auto& indices = layout->GetBindingIndexInfo();
+                    BindingIndex bindingIndex =
+                        layout->GetBindGroupLayout(group)->GetBindingIndex(bindingNumber);
+                    compiler.set_decoration(info.id, spv::DecorationBinding,
+                                            indices[group][bindingIndex]);
+                } else {
+                    compiler.unset_decoration(info.id, spv::DecorationBinding);
+                }
             }
         }
 

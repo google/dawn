@@ -1095,6 +1095,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(BindGroupTests, ReallyLargeBindGroup) {
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     std::string interface = "#version 450\n";
     std::string body;
     uint32_t binding = 0;
@@ -1232,4 +1233,5 @@ DAWN_INSTANTIATE_TEST(BindGroupTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
