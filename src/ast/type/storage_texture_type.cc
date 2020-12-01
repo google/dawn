@@ -23,19 +23,6 @@
 namespace tint {
 namespace ast {
 namespace type {
-namespace {
-
-#ifndef NDEBUG
-
-bool IsValidStorageDimension(TextureDimension dim) {
-  return dim == TextureDimension::k1d || dim == TextureDimension::k1dArray ||
-         dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
-         dim == TextureDimension::k3d;
-}
-
-#endif  // NDEBUG
-
-}  // namespace
 
 // Note, these names match the names in the WGSL spec. This behaviour is used
 // in the WGSL writer to emit the texture format names.
@@ -156,9 +143,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
 StorageTexture::StorageTexture(TextureDimension dim,
                                ast::AccessControl access,
                                ImageFormat format)
-    : Base(dim), access_(access), image_format_(format) {
-  assert(IsValidStorageDimension(dim));
-}
+    : Base(dim), access_(access), image_format_(format) {}
 
 void StorageTexture::set_type(Type* const type) {
   type_ = type;
