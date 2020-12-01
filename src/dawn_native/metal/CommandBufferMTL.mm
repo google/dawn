@@ -1031,7 +1031,7 @@ namespace dawn_native { namespace metal {
         id<MTLBuffer> indexBuffer = nullptr;
         uint32_t indexBufferBaseOffset = 0;
         MTLIndexType indexBufferType;
-        uint64_t indexTypeSize = 0;
+        uint64_t indexFormatSize = 0;
 
         StorageBufferLengthTracker storageBufferLengths = {};
         VertexBufferTracker vertexBuffers(&storageBufferLengths);
@@ -1084,7 +1084,7 @@ namespace dawn_native { namespace metal {
                                                  indexType:indexBufferType
                                                indexBuffer:indexBuffer
                                          indexBufferOffset:indexBufferBaseOffset +
-                                                           draw->firstIndex * indexTypeSize
+                                                           draw->firstIndex * indexFormatSize
                                              instanceCount:draw->instanceCount];
                         } else {
                             [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
@@ -1092,7 +1092,7 @@ namespace dawn_native { namespace metal {
                                                  indexType:indexBufferType
                                                indexBuffer:indexBuffer
                                          indexBufferOffset:indexBufferBaseOffset +
-                                                           draw->firstIndex * indexTypeSize
+                                                           draw->firstIndex * indexFormatSize
                                              instanceCount:draw->instanceCount
                                                 baseVertex:draw->baseVertex
                                               baseInstance:draw->firstInstance];
@@ -1196,7 +1196,7 @@ namespace dawn_native { namespace metal {
                     indexBuffer = b->GetMTLBuffer();
                     indexBufferBaseOffset = cmd->offset;
                     indexBufferType = MTLIndexFormat(cmd->format);
-                    indexTypeSize = IndexFormatSize(cmd->format);
+                    indexFormatSize = IndexFormatSize(cmd->format);
                     break;
                 }
 
