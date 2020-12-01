@@ -176,6 +176,66 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
     DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
 }
 
+TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
+    // These tests fails due to crbug.com/tint/63.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsVulkan());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // Related bug : crbug.com/dawn/483
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    constexpr uint32_t kWidth = 1000;
+    constexpr uint32_t kHeight = 1;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+}
+
+TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
+    // These tests fails due to crbug.com/tint/63.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsVulkan());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // Related bug : crbug.com/dawn/483
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    constexpr uint32_t kWidth = 1;
+    constexpr uint32_t kHeight = 1000;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+}
+
+TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
+    // These tests fails due to crbug.com/tint/63.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsVulkan());
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // Related bug : crbug.com/dawn/483
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    constexpr uint32_t kWidth = 899;
+    constexpr uint32_t kHeight = 999;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+}
+
 DAWN_INSTANTIATE_TEST(CopyTextureForBrowserTests,
                       D3D12Backend(),
                       MetalBackend(),

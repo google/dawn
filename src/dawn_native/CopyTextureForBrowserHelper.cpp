@@ -32,50 +32,42 @@
 
 namespace dawn_native {
     namespace {
-
-        // TODO(shaobo.yan@intel.com): Use ANGLE's strategy(render a large triangle) to handle
-        // transform and border interop issue.
+        // TODO(shaobo.yan@intel.com) : Support premultiplay-alpha, flipY.
         static const char sCopyTextureForBrowserVertex[] = R"(
             [[block]] struct Uniforms {
-                [[offset(0)]] rotation : mat4x4<f32>;
+                [[offset(0)]] u_scale : vec2<f32>;
+                [[offset(8)]] u_offset : vec2<f32>;
             };
-            const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
-                vec2<f32>(1.0, 1.0),
-                vec2<f32>(1.0, -1.0),
-                vec2<f32>(-1.0, -1.0),
-                vec2<f32>(1.0, 1.0),
-                vec2<f32>(-1.0, -1.0),
-                vec2<f32>(-1.0, 1.0));
-
-            const texUV : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
-                vec2<f32>(1.0, 0.0),
-                vec2<f32>(1.0, 1.0),
-                vec2<f32>(0.0, 1.0),
-                vec2<f32>(1.0, 0.0),
-                vec2<f32>(0.0, 1.0),
-                vec2<f32>(0.0, 0.0));
-
-            [[location(0)]] var<out> texCoord: vec2<f32>;
+            const texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                vec2<f32>(-0.5, 0.0),
+                vec2<f32>( 1.5, 0.0),
+                vec2<f32>( 0.5, 2.0));
+            [[location(0)]] var<out> v_texcoord: vec2<f32>;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
             [[binding(0), set(0)]] var<uniform> uniforms : Uniforms;
-            [[stage(vertex)]]
-            fn main() -> void {
-                Position = uniforms.rotation * vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-                texCoord = texUV[VertexIndex];
-                return;
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
+
+                # Texture coordinate takes top-left as origin point. We need to map the
+                # texture to triangle carefully.
+                v_texcoord = (texcoord[VertexIndex] * vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
+                    uniforms.u_scale + uniforms.u_offset;
             }
         )";
 
         static const char sPassthrough2D4ChannelFrag[] = R"(
             [[binding(1), set(0)]] var<uniform_constant> mySampler: sampler;
             [[binding(2), set(0)]] var<uniform_constant> myTexture: texture_sampled_2d<f32>;
-            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<in> v_texcoord : vec2<f32>;
             [[location(0)]] var<out> rgbaColor : vec4<f32>;
-            [[stage(fragment)]]
-            fn main() -> void {
-                rgbaColor = textureSample(myTexture, mySampler, texCoord);
-                return;
+            [[stage(fragment)]] fn main() -> void {
+                # Clamp the texcoord and discard the out-of-bound pixels.
+                var clampedTexcoord : vec2<f32> =
+                    clamp(v_texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
+                if (all(clampedTexcoord == v_texcoord)) {
+                    rgbaColor = textureSample(myTexture, mySampler, v_texcoord);
+                }
             }
         )";
 
@@ -224,10 +216,8 @@ namespace dawn_native {
         // TODO(shaobo.yan@intel.com): Will use scale vector and offset vector to replace the
         // 4x4 rotation matrix here.
         const float rotationMatrix[] = {
-            1.0, 0.0, 0.0, 0.0,  //
-            0.0, 1.0, 0.0, 0.0,  //
-            0.0, 0.0, 1.0, 0.0,  //
-            0.0, 0.0, 0.0, 1.0,  //
+            1.0, 1.0,  // scale
+            0.0, 0.0   // offset
         };
 
         BufferDescriptor rotationUniformDesc = {};
@@ -290,7 +280,7 @@ namespace dawn_native {
         // the copy from src texture to dst texture with transformation.
         passEncoder->SetPipeline(pipeline);
         passEncoder->SetBindGroup(0, bindGroup.Get());
-        passEncoder->Draw(6);
+        passEncoder->Draw(3);
         passEncoder->EndPass();
 
         // Finsh encoding.
