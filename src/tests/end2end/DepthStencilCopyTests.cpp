@@ -563,6 +563,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
 TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     // TODO(enga): Figure out why this fails on MacOS Intel Iris.
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
@@ -674,4 +675,5 @@ DAWN_INSTANTIATE_TEST(DepthStencilCopyTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

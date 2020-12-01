@@ -135,4 +135,5 @@ DAWN_INSTANTIATE_TEST(DrawIndexedTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

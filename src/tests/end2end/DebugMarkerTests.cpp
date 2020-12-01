@@ -49,4 +49,5 @@ DAWN_INSTANTIATE_TEST(DebugMarkerTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

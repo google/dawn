@@ -751,5 +751,6 @@ DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend({"vulkan_use_d32s8"}, {}),
                       VulkanBackend({}, {"vulkan_use_d32s8"}));

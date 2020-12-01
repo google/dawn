@@ -122,6 +122,7 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     // TODO(crbug.com/dawn/161): add workaround for OpenGL index buffer offset (could be compute
     // shader that adds it to the draw calls)
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
@@ -163,4 +164,5 @@ DAWN_INSTANTIATE_TEST(DrawIndexedIndirectTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

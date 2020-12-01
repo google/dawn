@@ -407,4 +407,5 @@ DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

@@ -53,6 +53,7 @@ DAWN_INSTANTIATE_TEST(DeprecationTests,
                       MetalBackend(),
                       NullBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class BufferCopyViewDeprecationTests : public DeprecationTests {

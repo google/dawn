@@ -576,6 +576,8 @@ TEST_P(DepthStencilSamplingTest, SampleDepth) {
 
 // Test that sampling a stencil texture with a render/compute pipeline works
 TEST_P(DepthStencilSamplingTest, SampleStencil) {
+    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : kStencilFormats) {
         DoSamplingTest(TestAspect::Stencil, CreateSamplingRenderPipeline({TestAspect::Stencil}, 0),
                        format, kStencilValues);
@@ -588,6 +590,8 @@ TEST_P(DepthStencilSamplingTest, SampleStencil) {
 // Test that sampling a depth/stencil texture at components 1, 2, and 3 yield 0, 0, and 1
 // respectively
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
+    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     // TODO(enga): In Metal, color textures' unspecified default components values
     // are (0, 0, 0, 1). Depth/stencil textures are undefined! Figure out what
     // to do here.
@@ -618,6 +622,8 @@ TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
 
 // Test sampling both depth and stencil with a render/compute pipeline works.
 TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
+    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     wgpu::SamplerDescriptor samplerDesc;
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
@@ -763,4 +769,5 @@ DAWN_INSTANTIATE_TEST(DepthStencilSamplingTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
