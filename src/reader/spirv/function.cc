@@ -3719,6 +3719,14 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       return Fail() << " image gather is not yet supported";
     case SpvOpImageQueryLod:
       return Fail() << " image query Lod is not yet supported";
+    case SpvOpImageFetch:
+      // Read a single texel from a sampled image.
+      builtin_name = "textureLoad";
+      break;
+    case SpvOpImageRead:
+      // Read a single texel from a storage image.
+      builtin_name = "textureLoad";
+      break;
     case SpvOpImageWrite:
       builtin_name = "textureStore";
       if (arg_index < num_args) {

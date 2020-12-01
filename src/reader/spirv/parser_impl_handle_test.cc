@@ -2824,6 +2824,128 @@ INSTANTIATE_TEST_SUITE_P(
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
+    ImageRead_OptionalParams,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // OpImageRead with no extra params
+        {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageRead with ConstOffset
+        {"%float 2D 0 0 0 2 Rgba32f",
+         "%99 = OpImageRead %v4float %im %vu12 ConstOffset %offsets2d",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+              Identifier[not set]{offsets2d}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageFetch_OptionalParams,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // OpImageFetch with no extra params
+        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageFetch %v4float %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageFetch with ConstOffset
+        {"%float 2D 0 0 0 1 Rgba32f",
+         "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %offsets2d",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+              Identifier[not set]{offsets2d}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
     // The SPIR-V result type could be integral but of different signedness
     // than the sampled texel type.  In these cases the result should be
     // converted to match the signedness of the SPIR-V result type.  This
