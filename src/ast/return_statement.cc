@@ -14,6 +14,9 @@
 
 #include "src/ast/return_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -29,6 +32,11 @@ ReturnStatement::ReturnStatement(const Source& source, Expression* value)
 ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 
 ReturnStatement::~ReturnStatement() = default;
+
+ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<ReturnStatement>(ctx->Clone(source()),
+                                           ctx->Clone(value_));
+}
 
 bool ReturnStatement::IsValid() const {
   if (value_ != nullptr) {

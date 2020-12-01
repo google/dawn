@@ -26,6 +26,7 @@ class Expr : public Expression {
  public:
   Expr() : Expression() {}
 
+  Expr* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
   void to_str(std::ostream&, size_t) const override {}
 };

@@ -16,7 +16,9 @@
 
 #include <sstream>
 
+#include "src/ast/clone_context.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/module.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
@@ -211,6 +213,14 @@ bool Function::HasAncestorEntryPoint(const std::string& name) const {
 
 const Statement* Function::get_last_statement() const {
   return body_->last();
+}
+
+Function* Function::Clone(CloneContext* ctx) const {
+  auto* cloned = ctx->mod->create<Function>(
+      ctx->Clone(source()), name_, ctx->Clone(params_),
+      ctx->Clone(return_type_), ctx->Clone(body_));
+  cloned->set_decorations(ctx->Clone(decorations_));
+  return cloned;
 }
 
 bool Function::IsValid() const {

@@ -16,6 +16,8 @@
 
 #include <assert.h>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/vector_type.h"
 
@@ -50,6 +52,10 @@ uint64_t Matrix::BaseAlignment(MemoryLayout mem_layout) const {
   Vector vec(subtype_, rows_);
   Array arr(&vec, columns_);
   return arr.BaseAlignment(mem_layout);
+}
+
+Matrix* Matrix::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Matrix>(ctx->Clone(subtype_), rows_, columns_);
 }
 
 }  // namespace type

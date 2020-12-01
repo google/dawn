@@ -14,6 +14,9 @@
 
 #include "src/ast/type/f32_type.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -34,6 +37,10 @@ uint64_t F32::MinBufferBindingSize(MemoryLayout) const {
 
 uint64_t F32::BaseAlignment(MemoryLayout) const {
   return 4;
+}
+
+F32* F32::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<F32>();
 }
 
 }  // namespace type

@@ -28,7 +28,7 @@ endif()
 
 option(TINT_BUILD_DOCS "Build documentation" ON)
 option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
-option(TINT_BUILD_WGSL_READER "Builde the WGSL input reader" ON)
+option(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
 option(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ON)
 option(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ON)
 option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)

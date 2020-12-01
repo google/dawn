@@ -14,6 +14,9 @@
 
 #include "src/ast/type/sampler_type.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -39,6 +42,10 @@ Sampler::~Sampler() = default;
 std::string Sampler::type_name() const {
   return std::string("__sampler_") +
          (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
+}
+
+Sampler* Sampler::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Sampler>(kind_);
 }
 
 }  // namespace type

@@ -14,6 +14,9 @@
 
 #include "src/ast/struct_member_offset_decoration.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -27,6 +30,12 @@ void StructMemberOffsetDecoration::to_str(std::ostream& out,
                                           size_t indent) const {
   make_indent(out, indent);
   out << "offset " << std::to_string(offset_);
+}
+
+StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
+    CloneContext* ctx) const {
+  return ctx->mod->create<StructMemberOffsetDecoration>(offset_,
+                                                        ctx->Clone(source()));
 }
 
 }  // namespace ast

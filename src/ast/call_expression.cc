@@ -14,6 +14,9 @@
 
 #include "src/ast/call_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,6 +33,11 @@ CallExpression::CallExpression(const Source& source,
 CallExpression::CallExpression(CallExpression&&) = default;
 
 CallExpression::~CallExpression() = default;
+
+CallExpression* CallExpression::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<CallExpression>(
+      ctx->Clone(source()), ctx->Clone(func_), ctx->Clone(params_));
+}
 
 bool CallExpression::IsValid() const {
   if (func_ == nullptr || !func_->IsValid())

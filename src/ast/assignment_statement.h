@@ -55,6 +55,14 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   /// @returns the right side expression
   Expression* rhs() const { return rhs_; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  AssignmentStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

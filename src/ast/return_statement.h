@@ -51,6 +51,14 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   /// @returns true if the return has a value
   bool has_value() const { return value_ != nullptr; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  ReturnStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

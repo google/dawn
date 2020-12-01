@@ -14,6 +14,9 @@
 
 #include "src/ast/member_accessor_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -32,6 +35,12 @@ MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
     default;
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
+
+MemberAccessorExpression* MemberAccessorExpression::Clone(
+    CloneContext* ctx) const {
+  return ctx->mod->create<MemberAccessorExpression>(
+      ctx->Clone(source()), ctx->Clone(struct_), ctx->Clone(member_));
+}
 
 bool MemberAccessorExpression::IsValid() const {
   if (struct_ == nullptr || !struct_->IsValid()) {

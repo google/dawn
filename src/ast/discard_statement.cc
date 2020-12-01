@@ -14,6 +14,9 @@
 
 #include "src/ast/discard_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -24,6 +27,10 @@ DiscardStatement::DiscardStatement(const Source& source) : Base(source) {}
 DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 
 DiscardStatement::~DiscardStatement() = default;
+
+DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<DiscardStatement>(ctx->Clone(source()));
+}
 
 bool DiscardStatement::IsValid() const {
   return true;

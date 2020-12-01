@@ -38,6 +38,14 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   /// @param indent number of spaces to indent the node when writing
   void to_str(std::ostream& out, size_t indent) const override;
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  StageDecoration* Clone(CloneContext* ctx) const override;
+
  private:
   PipelineStage stage_ = PipelineStage::kNone;
 };

@@ -71,6 +71,14 @@ class IfStatement : public Castable<IfStatement, Statement> {
   /// @returns true if there are else statements
   bool has_else_statements() const { return !else_statements_.empty(); }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  IfStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

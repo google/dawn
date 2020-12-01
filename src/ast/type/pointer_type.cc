@@ -14,6 +14,9 @@
 
 #include "src/ast/type/pointer_type.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -30,6 +33,10 @@ std::string Pointer::type_name() const {
 Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;
+
+Pointer* Pointer::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Pointer>(ctx->Clone(subtype_), storage_class_);
+}
 
 }  // namespace type
 }  // namespace ast

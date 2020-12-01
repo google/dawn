@@ -14,6 +14,9 @@
 
 #include "src/ast/bool_literal.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -28,6 +31,10 @@ std::string BoolLiteral::to_str() const {
 
 std::string BoolLiteral::name() const {
   return value_ ? "__bool_true" : "__bool_false";
+}
+
+BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<BoolLiteral>(ctx->Clone(type()), value_);
 }
 
 }  // namespace ast

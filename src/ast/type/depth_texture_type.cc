@@ -17,6 +17,9 @@
 #include <cassert>
 #include <sstream>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -45,6 +48,10 @@ std::string DepthTexture::type_name() const {
   std::ostringstream out;
   out << "__depth_texture_" << dim();
   return out.str();
+}
+
+DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<DepthTexture>(dim());
 }
 
 }  // namespace type

@@ -42,6 +42,9 @@ class Module {
   Module(Module&&);
   ~Module();
 
+  /// @return a deep copy of this module
+  Module Clone();
+
   /// Add a global variable to the module
   /// @param var the variable to add
   void AddGlobalVariable(Variable* var) { global_variables_.push_back(var); }
@@ -134,6 +137,9 @@ class Module {
   const std::unordered_map<std::string, std::unique_ptr<type::Type>>& types() {
     return type_mgr_.types();
   }
+
+  /// @returns all the declared nodes in the module
+  const std::vector<std::unique_ptr<ast::Node>>& nodes() { return ast_nodes_; }
 
  private:
   Module(const Module&) = delete;

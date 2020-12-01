@@ -14,6 +14,9 @@
 
 #include "src/ast/continue_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -24,6 +27,10 @@ ContinueStatement::ContinueStatement(const Source& source) : Base(source) {}
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 
 ContinueStatement::~ContinueStatement() = default;
+
+ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<ContinueStatement>(ctx->Clone(source()));
+}
 
 bool ContinueStatement::IsValid() const {
   return true;

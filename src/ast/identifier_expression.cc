@@ -14,6 +14,9 @@
 
 #include "src/ast/identifier_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -27,6 +30,10 @@ IdentifierExpression::IdentifierExpression(const Source& source,
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
 IdentifierExpression::~IdentifierExpression() = default;
+
+IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<IdentifierExpression>(ctx->Clone(source()), name_);
+}
 
 bool IdentifierExpression::IsValid() const {
   return !name_.empty();

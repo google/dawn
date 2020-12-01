@@ -16,6 +16,7 @@
 
 #include <sstream>
 
+#include "src/ast/clone_context.h"
 #include "src/ast/type/struct_type.h"
 
 namespace tint {
@@ -26,6 +27,23 @@ Module::Module() = default;
 Module::Module(Module&&) = default;
 
 Module::~Module() = default;
+
+Module Module::Clone() {
+  Module out;
+
+  CloneContext ctx(&out);
+  for (auto* ty : constructed_types_) {
+    out.constructed_types_.emplace_back(ctx.Clone(ty));
+  }
+  for (auto* var : global_variables_) {
+    out.global_variables_.emplace_back(ctx.Clone(var));
+  }
+  for (auto* func : functions_) {
+    out.functions_.emplace_back(ctx.Clone(func));
+  }
+
+  return out;
+}
 
 Function* Module::FindFunctionByName(const std::string& name) const {
   for (auto* func : functions_) {

@@ -17,6 +17,9 @@
 #include <cassert>
 #include <sstream>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -174,6 +177,10 @@ std::string StorageTexture::type_name() const {
   out << "__storage_texture_" << access_ << "_" << dim() << "_"
       << image_format_;
   return out.str();
+}
+
+StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<StorageTexture>(dim(), access_, image_format_);
 }
 
 }  // namespace type

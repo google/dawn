@@ -190,6 +190,14 @@ class Function : public Castable<Function, Node> {
   /// @returns the function body
   BlockStatement* body() { return body_; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  Function* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the name and type are both present
   bool IsValid() const override;
 

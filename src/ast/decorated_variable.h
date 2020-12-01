@@ -56,6 +56,14 @@ class DecoratedVariable : public Castable<DecoratedVariable, Variable> {
   /// |HasConstantIdDecoration| has been called first.
   uint32_t constant_id() const;
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  DecoratedVariable* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the name and path are both present
   bool IsValid() const override;
 

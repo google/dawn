@@ -67,6 +67,14 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   /// @returns the else body
   BlockStatement* body() { return body_; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  ElseStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

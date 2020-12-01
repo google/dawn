@@ -14,6 +14,9 @@
 
 #include "src/ast/break_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -24,6 +27,10 @@ BreakStatement::BreakStatement(const Source& source) : Base(source) {}
 BreakStatement::BreakStatement(BreakStatement&&) = default;
 
 BreakStatement::~BreakStatement() = default;
+
+BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<BreakStatement>(ctx->Clone(source()));
+}
 
 bool BreakStatement::IsValid() const {
   return true;

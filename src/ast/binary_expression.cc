@@ -14,6 +14,9 @@
 
 #include "src/ast/binary_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -33,6 +36,11 @@ BinaryExpression::BinaryExpression(const Source& source,
 BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 
 BinaryExpression::~BinaryExpression() = default;
+
+BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<BinaryExpression>(ctx->Clone(source()), op_,
+                                            ctx->Clone(lhs_), ctx->Clone(rhs_));
+}
 
 bool BinaryExpression::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid()) {

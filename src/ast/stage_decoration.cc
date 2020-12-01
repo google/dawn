@@ -14,6 +14,9 @@
 
 #include "src/ast/stage_decoration.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -25,6 +28,10 @@ StageDecoration::~StageDecoration() = default;
 void StageDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "StageDecoration{" << stage_ << "}" << std::endl;
+}
+
+StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<StageDecoration>(stage_, ctx->Clone(source()));
 }
 
 }  // namespace ast

@@ -14,6 +14,9 @@
 
 #include "src/ast/array_accessor_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -32,6 +35,12 @@ ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
     default;
 
 ArrayAccessorExpression::~ArrayAccessorExpression() = default;
+
+ArrayAccessorExpression* ArrayAccessorExpression::Clone(
+    CloneContext* ctx) const {
+  return ctx->mod->create<ArrayAccessorExpression>(ctx->Clone(array_),
+                                                   ctx->Clone(idx_expr_));
+}
 
 bool ArrayAccessorExpression::IsValid() const {
   if (array_ == nullptr || !array_->IsValid())

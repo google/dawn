@@ -17,6 +17,8 @@
 #include <cmath>
 #include <utility>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -77,6 +79,10 @@ uint64_t Struct::BaseAlignment(MemoryLayout mem_layout) const {
     return max;
   }
   return 0;
+}
+
+Struct* Struct::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Struct>(name_, ctx->Clone(struct_));
 }
 
 }  // namespace type

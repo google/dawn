@@ -14,6 +14,8 @@
 
 #include "src/ast/struct.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 #include "src/ast/struct_block_decoration.h"
 
 namespace tint {
@@ -59,6 +61,11 @@ bool Struct::IsBlockDecorated() const {
     }
   }
   return false;
+}
+
+Struct* Struct::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Struct>(
+      ctx->Clone(source()), ctx->Clone(decorations_), ctx->Clone(members_));
 }
 
 bool Struct::IsValid() const {

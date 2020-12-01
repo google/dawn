@@ -14,6 +14,9 @@
 
 #include "src/ast/constant_id_decoration.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -25,6 +28,10 @@ ConstantIdDecoration::~ConstantIdDecoration() = default;
 void ConstantIdDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "ConstantIdDecoration{" << value_ << "}" << std::endl;
+}
+
+ConstantIdDecoration* ConstantIdDecoration::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<ConstantIdDecoration>(value_, ctx->Clone(source()));
 }
 
 }  // namespace ast

@@ -14,6 +14,9 @@
 
 #include "src/ast/case_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,6 +33,11 @@ CaseStatement::CaseStatement(const Source& source,
 CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
+
+CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<CaseStatement>(
+      ctx->Clone(source()), ctx->Clone(selectors_), ctx->Clone(body_));
+}
 
 bool CaseStatement::IsValid() const {
   return body_ != nullptr && body_->IsValid();

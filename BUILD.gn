@@ -251,6 +251,8 @@ source_set("libtint_core_src") {
     "src/ast/call_statement.h",
     "src/ast/case_statement.cc",
     "src/ast/case_statement.h",
+    "src/ast/clone_context.cc",
+    "src/ast/clone_context.h",
     "src/ast/constant_id_decoration.cc",
     "src/ast/constant_id_decoration.h",
     "src/ast/constructor_expression.cc",
@@ -772,6 +774,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/loop_statement_test.cc",
     "src/ast/member_accessor_expression_test.cc",
     "src/ast/module_test.cc",
+    "src/ast/module_clone_test.cc",
     "src/ast/null_literal_test.cc",
     "src/ast/return_statement_test.cc",
     "src/ast/scalar_constructor_expression_test.cc",
@@ -1305,6 +1308,17 @@ if (build_with_chromium) {
       sources = [ "fuzzers/tint_spv_reader_fuzzer.cc" ]
       deps = [
         ":libtint_spv_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+    fuzzer_test("tint_spv_reader_fuzzer") {
+      sources = [ "fuzzers/tint_ast_clone_fuzzer.cc" ]
+      deps = [
+        ":libtint_wgsl_reader_src",
+        ":libtint_wgsl_writer_src",
         ":tint_fuzzer_common",
       ]
     }

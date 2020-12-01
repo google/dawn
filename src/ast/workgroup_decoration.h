@@ -55,6 +55,14 @@ class WorkgroupDecoration
   /// @param indent number of spaces to indent the node when writing
   void to_str(std::ostream& out, size_t indent) const override;
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  WorkgroupDecoration* Clone(CloneContext* ctx) const override;
+
  private:
   uint32_t x_ = 1;
   uint32_t y_ = 1;

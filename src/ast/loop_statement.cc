@@ -14,6 +14,9 @@
 
 #include "src/ast/loop_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -28,6 +31,11 @@ LoopStatement::LoopStatement(const Source& source,
 LoopStatement::LoopStatement(LoopStatement&&) = default;
 
 LoopStatement::~LoopStatement() = default;
+
+LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<LoopStatement>(
+      ctx->Clone(source()), ctx->Clone(body_), ctx->Clone(continuing_));
+}
 
 bool LoopStatement::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {

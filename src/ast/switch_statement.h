@@ -60,6 +60,14 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// @returns the Switch body
   const CaseStatementList& body() const { return body_; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  SwitchStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

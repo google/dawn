@@ -72,6 +72,8 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
+  ast/clone_context.cc
+  ast/clone_context.h
   ast/constant_id_decoration.cc
   ast/constant_id_decoration.h
   ast/constructor_expression.cc
@@ -381,6 +383,7 @@ set(TINT_TEST_SRCS
   ast/loop_statement_test.cc
   ast/member_accessor_expression_test.cc
   ast/module_test.cc
+  ast/module_clone_test.cc
   ast/null_literal_test.cc
   ast/binary_expression_test.cc
   ast/return_statement_test.cc

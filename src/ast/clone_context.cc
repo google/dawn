@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/set_decoration.h"
-
 #include "src/ast/clone_context.h"
-#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
 
-SetDecoration::SetDecoration(uint32_t val, const Source& source)
-    : Base(source), value_(val) {}
-
-SetDecoration::~SetDecoration() = default;
-
-void SetDecoration::to_str(std::ostream& out, size_t indent) const {
-  make_indent(out, indent);
-  out << "SetDecoration{" << value_ << "}" << std::endl;
-}
-
-SetDecoration* SetDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SetDecoration>(value_, ctx->Clone(source()));
-}
+CloneContext::CloneContext(Module* m) : mod(m) {}
+CloneContext::~CloneContext() = default;
 
 }  // namespace ast
 }  // namespace tint

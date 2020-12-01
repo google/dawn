@@ -14,6 +14,9 @@
 
 #include "src/ast/sint_literal.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -28,6 +31,10 @@ std::string SintLiteral::to_str() const {
 
 std::string SintLiteral::name() const {
   return "__sint" + type()->type_name() + "_" + std::to_string(value_);
+}
+
+SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<SintLiteral>(ctx->Clone(type()), value_);
 }
 
 }  // namespace ast

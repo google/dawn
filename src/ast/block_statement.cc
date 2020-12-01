@@ -14,6 +14,9 @@
 
 #include "src/ast/block_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -24,6 +27,12 @@ BlockStatement::BlockStatement(const Source& source) : Base(source) {}
 BlockStatement::BlockStatement(BlockStatement&&) = default;
 
 BlockStatement::~BlockStatement() = default;
+
+BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
+  auto* cloned = ctx->mod->create<BlockStatement>(ctx->Clone(source()));
+  cloned->statements_ = ctx->Clone(statements_);
+  return cloned;
+}
 
 bool BlockStatement::IsValid() const {
   for (auto* stmt : *this) {

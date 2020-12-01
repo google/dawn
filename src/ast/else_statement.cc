@@ -14,6 +14,9 @@
 
 #include "src/ast/else_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -33,6 +36,11 @@ ElseStatement::ElseStatement(const Source& source,
 ElseStatement::ElseStatement(ElseStatement&&) = default;
 
 ElseStatement::~ElseStatement() = default;
+
+ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<ElseStatement>(
+      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
+}
 
 bool ElseStatement::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {

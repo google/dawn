@@ -60,6 +60,11 @@ class AccessControl : public Castable<AccessControl, Type> {
   ///          0 for non-host shareable types.
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  AccessControl* Clone(CloneContext* ctx) const override;
+
  private:
   ast::AccessControl access_ = ast::AccessControl::kReadOnly;
   Type* subtype_ = nullptr;

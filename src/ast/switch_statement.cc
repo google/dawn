@@ -15,6 +15,8 @@
 #include "src/ast/switch_statement.h"
 
 #include "src/ast/case_statement.h"
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
@@ -32,6 +34,11 @@ SwitchStatement::SwitchStatement(const Source& source,
 SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
 
 SwitchStatement::~SwitchStatement() = default;
+
+SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<SwitchStatement>(
+      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
+}
 
 bool SwitchStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid()) {

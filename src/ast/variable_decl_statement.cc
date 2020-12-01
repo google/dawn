@@ -14,6 +14,9 @@
 
 #include "src/ast/variable_decl_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -29,6 +32,11 @@ VariableDeclStatement::VariableDeclStatement(const Source& source,
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 
 VariableDeclStatement::~VariableDeclStatement() = default;
+
+VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<VariableDeclStatement>(ctx->Clone(source()),
+                                                 ctx->Clone(variable_));
+}
 
 bool VariableDeclStatement::IsValid() const {
   return variable_ != nullptr && variable_->IsValid();

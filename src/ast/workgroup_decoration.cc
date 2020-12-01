@@ -14,6 +14,9 @@
 
 #include "src/ast/workgroup_decoration.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -37,6 +40,11 @@ void WorkgroupDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "WorkgroupDecoration{" << x_ << " " << y_ << " " << z_ << "}"
       << std::endl;
+}
+
+WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<WorkgroupDecoration>(x_, y_, z_,
+                                               ctx->Clone(source()));
 }
 
 }  // namespace ast

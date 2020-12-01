@@ -15,7 +15,10 @@
 #include "src/ast/type/array_type.h"
 
 #include <cmath>
+#include <memory>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/type/vector_type.h"
 
@@ -90,6 +93,12 @@ std::string Array::type_name() const {
     type_name += "_stride_" + std::to_string(array_stride());
 
   return type_name;
+}
+
+Array* Array::Clone(CloneContext* ctx) const {
+  auto cloned = std::make_unique<Array>(ctx->Clone(subtype_), size_);
+  cloned->set_decorations(ctx->Clone(decorations()));
+  return ctx->mod->unique_type(std::move(cloned));
 }
 
 }  // namespace type

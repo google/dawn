@@ -132,6 +132,14 @@ class Variable : public Castable<Variable, Node> {
   /// @returns true if this is a constant, false otherwise
   bool is_const() const { return is_const_; }
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  Variable* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the name and path are both present
   bool IsValid() const override;
 

@@ -43,6 +43,14 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// @returns the literal as a string
   std::string to_str() const override;
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  SintLiteral* Clone(CloneContext* ctx) const override;
+
  private:
   int32_t value_;
 };

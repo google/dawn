@@ -14,6 +14,9 @@
 
 #include "src/ast/scalar_constructor_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,6 +33,12 @@ ScalarConstructorExpression::ScalarConstructorExpression(
     ScalarConstructorExpression&&) = default;
 
 ScalarConstructorExpression::~ScalarConstructorExpression() = default;
+
+ScalarConstructorExpression* ScalarConstructorExpression::Clone(
+    CloneContext* ctx) const {
+  return ctx->mod->create<ScalarConstructorExpression>(ctx->Clone(source()),
+                                                       ctx->Clone(literal_));
+}
 
 bool ScalarConstructorExpression::IsValid() const {
   return literal_ != nullptr;

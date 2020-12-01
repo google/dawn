@@ -14,6 +14,9 @@
 
 #include "src/ast/fallthrough_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -25,6 +28,10 @@ FallthroughStatement::FallthroughStatement(const Source& source)
 FallthroughStatement::FallthroughStatement(FallthroughStatement&&) = default;
 
 FallthroughStatement::~FallthroughStatement() = default;
+
+FallthroughStatement* FallthroughStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<FallthroughStatement>(ctx->Clone(source()));
+}
 
 bool FallthroughStatement::IsValid() const {
   return true;

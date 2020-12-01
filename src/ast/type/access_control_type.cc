@@ -16,6 +16,9 @@
 
 #include <assert.h>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -52,6 +55,10 @@ uint64_t AccessControl::MinBufferBindingSize(MemoryLayout mem_layout) const {
 
 uint64_t AccessControl::BaseAlignment(MemoryLayout mem_layout) const {
   return subtype_->BaseAlignment(mem_layout);
+}
+
+AccessControl* AccessControl::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<AccessControl>(access_, ctx->Clone(subtype_));
 }
 
 }  // namespace type

@@ -14,6 +14,9 @@
 
 #include "src/ast/assignment_statement.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,6 +33,11 @@ AssignmentStatement::AssignmentStatement(const Source& source,
 AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 
 AssignmentStatement::~AssignmentStatement() = default;
+
+AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<AssignmentStatement>(
+      ctx->Clone(source()), ctx->Clone(lhs_), ctx->Clone(rhs_));
+}
 
 bool AssignmentStatement::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid())

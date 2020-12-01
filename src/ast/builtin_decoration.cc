@@ -14,6 +14,9 @@
 
 #include "src/ast/builtin_decoration.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -25,6 +28,10 @@ BuiltinDecoration::~BuiltinDecoration() = default;
 void BuiltinDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "BuiltinDecoration{" << builtin_ << "}" << std::endl;
+}
+
+BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<BuiltinDecoration>(builtin_, ctx->Clone(source()));
 }
 
 }  // namespace ast

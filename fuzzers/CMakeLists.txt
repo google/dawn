@@ -26,3 +26,7 @@ endif()
 if (${TINT_BUILD_SPV_READER})
   add_tint_fuzzer(tint_spv_reader_fuzzer)
 endif()
+
+if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+  add_tint_fuzzer(tint_ast_clone_fuzzer)
+endif()

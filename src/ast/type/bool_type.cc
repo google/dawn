@@ -14,6 +14,9 @@
 
 #include "src/ast/type/bool_type.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -26,6 +29,10 @@ Bool::~Bool() = default;
 
 std::string Bool::type_name() const {
   return "__bool";
+}
+
+Bool* Bool::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Bool>();
 }
 
 }  // namespace type

@@ -35,6 +35,11 @@ class DepthTexture : public Castable<DepthTexture, Texture> {
 
   /// @returns the name for this type
   std::string type_name() const override;
+
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  DepthTexture* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace type

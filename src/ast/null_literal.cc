@@ -14,6 +14,9 @@
 
 #include "src/ast/null_literal.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -27,6 +30,10 @@ std::string NullLiteral::to_str() const {
 
 std::string NullLiteral::name() const {
   return "__null" + type()->type_name();
+}
+
+NullLiteral* NullLiteral::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<NullLiteral>(ctx->Clone(type()));
 }
 
 }  // namespace ast

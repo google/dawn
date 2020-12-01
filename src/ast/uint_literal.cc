@@ -14,6 +14,9 @@
 
 #include "src/ast/uint_literal.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -28,6 +31,10 @@ std::string UintLiteral::to_str() const {
 
 std::string UintLiteral::name() const {
   return "__uint" + std::to_string(value_);
+}
+
+UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<UintLiteral>(ctx->Clone(type()), value_);
 }
 
 }  // namespace ast

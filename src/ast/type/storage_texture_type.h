@@ -95,6 +95,11 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @returns the name for this type
   std::string type_name() const override;
 
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  StorageTexture* Clone(CloneContext* ctx) const override;
+
  private:
   Type* type_ = nullptr;
   ast::AccessControl access_ = ast::AccessControl::kReadOnly;

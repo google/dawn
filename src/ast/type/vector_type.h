@@ -52,6 +52,11 @@ class Vector : public Castable<Vector, Type> {
   ///          0 for non-host shareable types.
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  Vector* Clone(CloneContext* ctx) const override;
+
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 2;

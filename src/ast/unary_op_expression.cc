@@ -14,6 +14,9 @@
 
 #include "src/ast/unary_op_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -30,6 +33,11 @@ UnaryOpExpression::UnaryOpExpression(const Source& source,
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 
 UnaryOpExpression::~UnaryOpExpression() = default;
+
+UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<UnaryOpExpression>(ctx->Clone(source()), op_,
+                                             ctx->Clone(expr_));
+}
 
 bool UnaryOpExpression::IsValid() const {
   return expr_ != nullptr && expr_->IsValid();

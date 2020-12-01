@@ -14,7 +14,9 @@
 
 #include "src/ast/if_statement.h"
 
+#include "src/ast/clone_context.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
@@ -30,6 +32,13 @@ IfStatement::IfStatement(const Source& source,
 IfStatement::IfStatement(IfStatement&&) = default;
 
 IfStatement::~IfStatement() = default;
+
+IfStatement* IfStatement::Clone(CloneContext* ctx) const {
+  auto* cloned = ctx->mod->create<IfStatement>(
+      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
+  cloned->else_statements_ = ctx->Clone(else_statements_);
+  return cloned;
+}
 
 bool IfStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid()) {

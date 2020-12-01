@@ -17,6 +17,9 @@
 #include <assert.h>
 #include <cmath>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -46,6 +49,10 @@ uint64_t Vector::BaseAlignment(MemoryLayout mem_layout) const {
   }
 
   return 0;  // vectors are only supposed to have 2, 3, or 4 elements.
+}
+
+Vector* Vector::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Vector>(ctx->Clone(subtype_), size_);
 }
 
 }  // namespace type

@@ -52,6 +52,11 @@ class Alias : public Castable<Alias, Type> {
   ///          0 for non-host shareable types.
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  Alias* Clone(CloneContext* ctx) const override;
+
  private:
   std::string name_;
   Type* subtype_ = nullptr;

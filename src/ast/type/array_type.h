@@ -74,6 +74,11 @@ class Array : public Castable<Array, Type> {
   /// @returns the name for the type
   std::string type_name() const override;
 
+  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned type
+  Array* Clone(CloneContext* ctx) const override;
+
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 0;

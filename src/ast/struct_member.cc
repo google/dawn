@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_member.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 #include "src/ast/struct_member_offset_decoration.h"
 
 namespace tint {
@@ -55,6 +57,11 @@ uint32_t StructMember::offset() const {
     }
   }
   return 0;
+}
+
+StructMember* StructMember::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<StructMember>(
+      ctx->Clone(source()), name_, ctx->Clone(type_), ctx->Clone(decorations_));
 }
 
 bool StructMember::IsValid() const {

@@ -14,6 +14,9 @@
 
 #include "src/ast/type/void_type.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -26,6 +29,10 @@ Void::~Void() = default;
 
 std::string Void::type_name() const {
   return "__void";
+}
+
+Void* Void::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Void>();
 }
 
 }  // namespace type

@@ -17,6 +17,9 @@
 #include <cassert>
 #include <sstream>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -34,6 +37,10 @@ std::string MultisampledTexture::type_name() const {
   std::ostringstream out;
   out << "__multisampled_texture_" << dim() << type_->type_name();
   return out.str();
+}
+
+MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<MultisampledTexture>(dim(), ctx->Clone(type_));
 }
 
 }  // namespace type

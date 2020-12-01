@@ -17,8 +17,10 @@
 #include <cassert>
 
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/clone_context.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
@@ -67,6 +69,18 @@ uint32_t DecoratedVariable::constant_id() const {
     }
   }
   return 0;
+}
+
+DecoratedVariable* DecoratedVariable::Clone(CloneContext* ctx) const {
+  auto* cloned = ctx->mod->create<DecoratedVariable>();
+  cloned->set_source(ctx->Clone(source()));
+  cloned->set_name(name());
+  cloned->set_storage_class(storage_class());
+  cloned->set_type(ctx->Clone(type()));
+  cloned->set_constructor(ctx->Clone(constructor()));
+  cloned->set_is_const(is_const());
+  cloned->set_decorations(ctx->Clone(decorations()));
+  return cloned;
 }
 
 bool DecoratedVariable::IsValid() const {

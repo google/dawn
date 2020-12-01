@@ -32,6 +32,14 @@ class DiscardStatement : public Castable<DiscardStatement, Statement> {
   DiscardStatement(DiscardStatement&&);
   ~DiscardStatement() override;
 
+  /// Clones this node and all transitive child nodes using the `CloneContext`
+  /// `ctx`.
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param ctx the clone context
+  /// @return the newly cloned node
+  DiscardStatement* Clone(CloneContext* ctx) const override;
+
   /// @returns true if the node is valid
   bool IsValid() const override;
 

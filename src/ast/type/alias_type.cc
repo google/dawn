@@ -16,6 +16,9 @@
 
 #include <assert.h>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 namespace type {
@@ -39,6 +42,10 @@ uint64_t Alias::MinBufferBindingSize(MemoryLayout mem_layout) const {
 
 uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
   return subtype_->BaseAlignment(mem_layout);
+}
+
+Alias* Alias::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<Alias>(name_, ctx->Clone(subtype_));
 }
 
 }  // namespace type

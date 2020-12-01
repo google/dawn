@@ -17,6 +17,9 @@
 #include <limits>
 #include <sstream>
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -35,6 +38,10 @@ std::string FloatLiteral::name() const {
   out.precision(std::numeric_limits<float>::max_digits10);
   out << "__float" << value_;
   return out.str();
+}
+
+FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<FloatLiteral>(ctx->Clone(type()), value_);
 }
 
 }  // namespace ast

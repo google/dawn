@@ -15,6 +15,8 @@
 #include "src/ast/call_statement.h"
 
 #include "src/ast/call_expression.h"
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
@@ -26,6 +28,10 @@ CallStatement::CallStatement(CallExpression* call) : Base(), call_(call) {}
 CallStatement::CallStatement(CallStatement&&) = default;
 
 CallStatement::~CallStatement() = default;
+
+CallStatement* CallStatement::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<CallStatement>(ctx->Clone(call_));
+}
 
 bool CallStatement::IsValid() const {
   return call_ != nullptr && call_->IsValid();

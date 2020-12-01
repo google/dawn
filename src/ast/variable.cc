@@ -16,7 +16,9 @@
 
 #include <assert.h>
 
+#include "src/ast/clone_context.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace ast {
@@ -35,6 +37,17 @@ Variable::Variable(const Source& source,
 Variable::Variable(Variable&&) = default;
 
 Variable::~Variable() = default;
+
+Variable* Variable::Clone(CloneContext* ctx) const {
+  auto* cloned = ctx->mod->create<Variable>();
+  cloned->set_source(ctx->Clone(source()));
+  cloned->set_name(name());
+  cloned->set_storage_class(storage_class());
+  cloned->set_type(ctx->Clone(type()));
+  cloned->set_constructor(ctx->Clone(constructor()));
+  cloned->set_is_const(is_const());
+  return cloned;
+}
 
 bool Variable::IsValid() const {
   if (name_.length() == 0) {

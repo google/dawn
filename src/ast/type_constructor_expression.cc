@@ -14,6 +14,9 @@
 
 #include "src/ast/type_constructor_expression.h"
 
+#include "src/ast/clone_context.h"
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
@@ -32,6 +35,12 @@ TypeConstructorExpression::TypeConstructorExpression(
     TypeConstructorExpression&&) = default;
 
 TypeConstructorExpression::~TypeConstructorExpression() = default;
+
+TypeConstructorExpression* TypeConstructorExpression::Clone(
+    CloneContext* ctx) const {
+  return ctx->mod->create<TypeConstructorExpression>(
+      ctx->Clone(source()), ctx->Clone(type_), ctx->Clone(values_));
+}
 
 bool TypeConstructorExpression::IsValid() const {
   if (values_.empty()) {
