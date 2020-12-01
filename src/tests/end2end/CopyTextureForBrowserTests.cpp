@@ -182,6 +182,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 1000;
     constexpr uint32_t kHeight = 1;
@@ -200,6 +201,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 1;
     constexpr uint32_t kHeight = 1000;
@@ -218,6 +220,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 899;
     constexpr uint32_t kHeight = 999;
