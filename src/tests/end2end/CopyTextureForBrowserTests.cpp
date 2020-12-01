@@ -157,9 +157,7 @@ class CopyTextureForBrowserTests : public DawnTest {
 // Verify CopyTextureForBrowserTests works with internal pipeline.
 // The case do copy without any transform.
 TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
-    // These tests fails due to crbug.com/tint/63.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
@@ -177,9 +175,7 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
-    // These tests fails due to crbug.com/tint/63.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
@@ -197,9 +193,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
-    // These tests fails due to crbug.com/tint/63.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
@@ -217,9 +211,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
-    // These tests fails due to crbug.com/tint/63.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     // OpenGL tests fails due to 'WriteTexture' unimplemented.
