@@ -48,6 +48,9 @@ class ClassID {
 /// @see Castable
 class CastableBase {
  public:
+  /// Move constructor
+  CastableBase(CastableBase&&) = default;
+
   virtual ~CastableBase() = default;
 
   /// @returns true if this object is of, or derives from a class with the
