@@ -1601,16 +1601,11 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
   }
 }
 
-ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
+const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleVar(
     const spvtools::opt::Instruction& var) {
   if (!success()) {
     return nullptr;
   }
-  auto where = handle_type_.find(&var);
-  if (where != handle_type_.end()) {
-    return where->second;
-  }
-
   // The WGSL handle type is determined by looking at information from
   // several sources:
   //    - the usage of the handle by image access instructions
@@ -1649,6 +1644,21 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
       Fail() << "invalid type for image or sampler variable: "
              << var.PrettyPrint();
       return nullptr;
+  }
+  return raw_handle_type;
+}
+
+ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
+    const spvtools::opt::Instruction& var) {
+  auto where = handle_type_.find(&var);
+  if (where != handle_type_.end()) {
+    return where->second;
+  }
+
+  const spvtools::opt::Instruction* raw_handle_type =
+      GetSpirvTypeForHandleVar(var);
+  if (!raw_handle_type) {
+    return nullptr;
   }
 
   // The variable could be a sampler or image.
@@ -1788,6 +1798,115 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
   // Remember it for later.
   handle_type_[&var] = result;
   return result;
+}
+
+ast::type::Type* ParserImpl::GetComponentTypeForFormat(
+    ast::type::ImageFormat format) {
+  switch (format) {
+    case ast::type::ImageFormat::kR8Uint:
+    case ast::type::ImageFormat::kR16Uint:
+    case ast::type::ImageFormat::kRg8Uint:
+    case ast::type::ImageFormat::kR32Uint:
+    case ast::type::ImageFormat::kRg16Uint:
+    case ast::type::ImageFormat::kRgba8Uint:
+    case ast::type::ImageFormat::kRg32Uint:
+    case ast::type::ImageFormat::kRgba16Uint:
+    case ast::type::ImageFormat::kRgba32Uint:
+      return ast_module_.create<ast::type::U32>();
+
+    case ast::type::ImageFormat::kR8Sint:
+    case ast::type::ImageFormat::kR16Sint:
+    case ast::type::ImageFormat::kRg8Sint:
+    case ast::type::ImageFormat::kR32Sint:
+    case ast::type::ImageFormat::kRg16Sint:
+    case ast::type::ImageFormat::kRgba8Sint:
+    case ast::type::ImageFormat::kRg32Sint:
+    case ast::type::ImageFormat::kRgba16Sint:
+    case ast::type::ImageFormat::kRgba32Sint:
+      return ast_module_.create<ast::type::I32>();
+
+    case ast::type::ImageFormat::kR8Unorm:
+    case ast::type::ImageFormat::kRg8Unorm:
+    case ast::type::ImageFormat::kRgba8Unorm:
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+    case ast::type::ImageFormat::kBgra8Unorm:
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+    case ast::type::ImageFormat::kR8Snorm:
+    case ast::type::ImageFormat::kRg8Snorm:
+    case ast::type::ImageFormat::kRgba8Snorm:
+    case ast::type::ImageFormat::kR16Float:
+    case ast::type::ImageFormat::kR32Float:
+    case ast::type::ImageFormat::kRg16Float:
+    case ast::type::ImageFormat::kRg11B10Float:
+    case ast::type::ImageFormat::kRg32Float:
+    case ast::type::ImageFormat::kRgba16Float:
+    case ast::type::ImageFormat::kRgba32Float:
+      return ast_module_.create<ast::type::F32>();
+    default:
+      break;
+  }
+  Fail() << "unknown format " << int(format);
+  return nullptr;
+}
+
+ast::type::Type* ParserImpl::GetTexelTypeForFormat(
+    ast::type::ImageFormat format) {
+  auto* component_type = GetComponentTypeForFormat(format);
+  if (!component_type) {
+    return nullptr;
+  }
+
+  switch (format) {
+    case ast::type::ImageFormat::kR16Float:
+    case ast::type::ImageFormat::kR16Sint:
+    case ast::type::ImageFormat::kR16Uint:
+    case ast::type::ImageFormat::kR32Float:
+    case ast::type::ImageFormat::kR32Sint:
+    case ast::type::ImageFormat::kR32Uint:
+    case ast::type::ImageFormat::kR8Sint:
+    case ast::type::ImageFormat::kR8Snorm:
+    case ast::type::ImageFormat::kR8Uint:
+    case ast::type::ImageFormat::kR8Unorm:
+      // One channel
+      return component_type;
+
+    case ast::type::ImageFormat::kRg11B10Float:
+    case ast::type::ImageFormat::kRg16Float:
+    case ast::type::ImageFormat::kRg16Sint:
+    case ast::type::ImageFormat::kRg16Uint:
+    case ast::type::ImageFormat::kRg32Float:
+    case ast::type::ImageFormat::kRg32Sint:
+    case ast::type::ImageFormat::kRg32Uint:
+    case ast::type::ImageFormat::kRg8Sint:
+    case ast::type::ImageFormat::kRg8Snorm:
+    case ast::type::ImageFormat::kRg8Uint:
+    case ast::type::ImageFormat::kRg8Unorm:
+      // Two channels
+      return ast_module_.create<ast::type::Vector>(component_type, 2);
+
+    case ast::type::ImageFormat::kBgra8Unorm:
+    case ast::type::ImageFormat::kBgra8UnormSrgb:
+    case ast::type::ImageFormat::kRgb10A2Unorm:
+    case ast::type::ImageFormat::kRgba16Float:
+    case ast::type::ImageFormat::kRgba16Sint:
+    case ast::type::ImageFormat::kRgba16Uint:
+    case ast::type::ImageFormat::kRgba32Float:
+    case ast::type::ImageFormat::kRgba32Sint:
+    case ast::type::ImageFormat::kRgba32Uint:
+    case ast::type::ImageFormat::kRgba8Sint:
+    case ast::type::ImageFormat::kRgba8Snorm:
+    case ast::type::ImageFormat::kRgba8Uint:
+    case ast::type::ImageFormat::kRgba8Unorm:
+    case ast::type::ImageFormat::kRgba8UnormSrgb:
+      // Four channels
+      return ast_module_.create<ast::type::Vector>(component_type, 4);
+
+    default:
+      break;
+  }
+  Fail() << "unknown format: " << int(format);
+  return nullptr;
 }
 
 bool ParserImpl::RegisterHandleUsage() {

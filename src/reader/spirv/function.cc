@@ -56,6 +56,7 @@
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
@@ -2665,12 +2666,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     return false;
   }
 
-  if (IsSampledImageAccess(inst.opcode())) {
-    return EmitSampledImageAccess(inst);
-  }
-  if (IsRawImageAccess(inst.opcode())) {
-    return Fail() << "raw image access is not implemented yet:"
-                  << inst.PrettyPrint();
+  if (IsSampledImageAccess(inst.opcode()) || IsRawImageAccess(inst.opcode())) {
+    return EmitImageAccess(inst);
   }
 
   switch (inst.opcode()) {
@@ -2889,6 +2886,21 @@ ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
   }
   const char* names[] = {"x", "y", "z", "w"};
   return ast_module_.create<ast::IdentifierExpression>(names[i & 3]);
+}
+
+ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
+  switch (n) {
+    case 1:
+      return ast_module_.create<ast::IdentifierExpression>("x");
+    case 2:
+      return ast_module_.create<ast::IdentifierExpression>("xy");
+    case 3:
+      return ast_module_.create<ast::IdentifierExpression>("xyz");
+    default:
+      break;
+  }
+  Fail() << "invalid swizzle prefix count: " << n;
+  return nullptr;
 }
 
 TypedExpression FunctionEmitter::MakeAccessChain(
@@ -3626,30 +3638,47 @@ void FunctionEmitter::ApplySourceForInstruction(
   }
 }
 
-bool FunctionEmitter::EmitSampledImageAccess(
-    const spvtools::opt::Instruction& inst) {
-  auto* result_type = parser_impl_.ConvertType(inst.type_id());
-
-  // The sampled image operand is always first.
-  const auto sampled_image_id = inst.GetSingleWordInOperand(0);
-  const auto* sampler =
-      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, false);
-  const auto* image =
-      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, true);
-  if (!sampler) {
-    return Fail() << "interal error: couldn't find sampler for "
-                  << inst.PrettyPrint();
-  }
-  if (!image) {
-    return Fail() << "interal error: couldn't find image for "
-                  << inst.PrettyPrint();
-  }
-
+bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
+  uint32_t arg_index = 0;  // The SPIR-V input argument index
   ast::ExpressionList params;
+
+  const auto image_or_sampled_image_operand_id =
+      inst.GetSingleWordInOperand(arg_index);
+  // Form the texture operand.
+  const auto* image = parser_impl_.GetMemoryObjectDeclarationForHandle(
+      image_or_sampled_image_operand_id, true);
+  if (!image) {
+    return Fail() << "internal error: couldn't find image for "
+                  << inst.PrettyPrint();
+  }
   params.push_back(
       create<ast::IdentifierExpression>(namer_.Name(image->result_id())));
-  params.push_back(
-      create<ast::IdentifierExpression>(namer_.Name(sampler->result_id())));
+
+  if (IsSampledImageAccess(inst.opcode())) {
+    // Form the sampler operand.
+    const auto* sampler = parser_impl_.GetMemoryObjectDeclarationForHandle(
+        image_or_sampled_image_operand_id, false);
+    if (!sampler) {
+      return Fail() << "internal error: couldn't find sampler for "
+                    << inst.PrettyPrint();
+    }
+    params.push_back(
+        create<ast::IdentifierExpression>(namer_.Name(sampler->result_id())));
+  }
+
+  ast::type::Pointer* texture_ptr_type =
+      parser_impl_.GetTypeForHandleVar(*image);
+  if (!texture_ptr_type) {
+    return Fail();
+  }
+  ast::type::Texture* texture_type =
+      texture_ptr_type->type()->As<ast::type::Texture>();
+  if (!texture_type) {
+    return Fail();
+  }
+
+  // We're done with the first SPIR-V operand.  Move on to the next.
+  arg_index++;
 
   // Push the coordinates operands.
   // TODO(dneto): For explicit-Lod variations, we may have to convert from
@@ -3662,7 +3691,9 @@ bool FunctionEmitter::EmitSampledImageAccess(
     return false;
   }
   params.insert(params.end(), coords.begin(), coords.end());
-  uint32_t arg_index = 2;  // Skip over texture and coordinate params
+  // Skip the coordinates operand.
+  arg_index++;
+
   const auto num_args = inst.NumInOperands();
 
   std::string builtin_name;
@@ -3688,6 +3719,23 @@ bool FunctionEmitter::EmitSampledImageAccess(
       return Fail() << " image gather is not yet supported";
     case SpvOpImageQueryLod:
       return Fail() << " image query Lod is not yet supported";
+    case SpvOpImageWrite:
+      builtin_name = "textureStore";
+      if (arg_index < num_args) {
+        auto texel = MakeOperand(inst, arg_index);
+        auto* converted_texel =
+            ConvertTexelForStorage(inst, texel, texture_type);
+        if (!converted_texel) {
+          return false;
+        }
+
+        params.push_back(converted_texel);
+        arg_index++;
+      } else {
+        return Fail() << "image write is missing a Texel operand: "
+                      << inst.PrettyPrint();
+      }
+      break;
     default:
       return Fail() << "internal error: sampled image access";
   }
@@ -3711,16 +3759,11 @@ bool FunctionEmitter::EmitSampledImageAccess(
     auto* lod_operand = MakeOperand(inst, arg_index).expr;
     // When sampling from a depth texture, the Lod operand must be an unsigned
     // integer.
-    if (ast::type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image)) {
-      if (ast::type::Texture* texture_type =
-              type->type()->As<ast::type::Texture>()) {
-        if (texture_type->Is<ast::type::DepthTexture>()) {
-          // Convert it to an unsigned integer type.
-          lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
-              ast_module_.create<ast::type::U32>(),
-              ast::ExpressionList{lod_operand});
-        }
-      }
+    if (texture_type->Is<ast::type::DepthTexture>()) {
+      // Convert it to an unsigned integer type.
+      lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
+          ast_module_.create<ast::type::U32>(),
+          ast::ExpressionList{lod_operand});
     }
     params.push_back(lod_operand);
     image_operands_mask ^= SpvImageOperandsLodMask;
@@ -3747,7 +3790,18 @@ bool FunctionEmitter::EmitSampledImageAccess(
 
   auto* ident = create<ast::IdentifierExpression>(builtin_name);
   auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
-  return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
+
+  if (inst.type_id() != 0) {
+    // It returns a value.
+    auto* result_type = parser_impl_.ConvertType(inst.type_id());
+    // TODO(dneto): Convert result signedness if needed. crbug.com/tint/382
+    EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
+  } else {
+    // It's an image write. No value is returned, so make a statement out
+    // of the call.
+    AddStatementForInstruction(create<ast::CallStatement>(call_expr), inst);
+  }
+  return success();
 }
 
 ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
@@ -3828,10 +3882,11 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   assert(num_axes <= 3);
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
-  if (raw_coords.type->Is<ast::type::F32>()) {
+  if (raw_coords.type->is_float_scalar() ||
+      raw_coords.type->is_integer_scalar()) {
     num_coords_supplied = 1;
-  } else if (raw_coords.type->Is<ast::type::Vector>()) {
-    num_coords_supplied = raw_coords.type->As<ast::type::Vector>()->size();
+  } else if (auto* vec_ty = raw_coords.type->As<ast::type::Vector>()) {
+    num_coords_supplied = vec_ty->size();
   }
   if (num_coords_supplied == 0) {
     Fail() << "bad or unsupported coordinate type for image access: "
@@ -3845,20 +3900,15 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     return {};
   }
 
-  auto prefix_swizzle = [this](uint32_t i) {
-    const char* prefix_name[] = {"", "x", "xy", "xyz"};
-    return ast_module_.create<ast::IdentifierExpression>(prefix_name[i & 3]);
-  };
-
   ast::ExpressionList result;
 
-  // TODO(dneto): Convert component type if needed.
+  // TODO(dneto): Convert coordinate component type if needed.
   if (is_arrayed) {
     // The source must be a vector, because it has enough components and has an
     // array component. Use a vector swizzle to get the first `num_axes`
     // components.
     result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
-        raw_coords.expr, prefix_swizzle(num_axes)));
+        raw_coords.expr, PrefixSwizzle(num_axes)));
 
     // Now get the array index.
     ast::Expression* array_index =
@@ -3876,10 +3926,95 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
       // There are more coordinates supplied than needed. So the source type is
       // a vector. Use a vector swizzle to get the first `num_axes` components.
       result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
-          raw_coords.expr, prefix_swizzle(num_axes)));
+          raw_coords.expr, PrefixSwizzle(num_axes)));
     }
   }
   return result;
+}
+
+ast::Expression* FunctionEmitter::ConvertTexelForStorage(
+    const spvtools::opt::Instruction& inst,
+    TypedExpression texel,
+    ast::type::Texture* texture_type) {
+  auto* storage_texture_type = texture_type->As<ast::type::StorageTexture>();
+  auto* src_type = texel.type;
+  if (!storage_texture_type) {
+    Fail() << "writing to other than storage texture: " << inst.PrettyPrint();
+    return nullptr;
+  }
+  const auto format = storage_texture_type->image_format();
+  auto* dest_type = parser_impl_.GetTexelTypeForFormat(format);
+  if (!dest_type) {
+    Fail();
+    return nullptr;
+  }
+  if (src_type == dest_type) {
+    return texel.expr;
+  }
+
+  const uint32_t dest_count =
+      dest_type->is_scalar() ? 1 : dest_type->As<ast::type::Vector>()->size();
+  if (dest_count == 3) {
+    Fail() << "3-channel storage textures are not supported: "
+           << inst.PrettyPrint();
+    return nullptr;
+  }
+  const uint32_t src_count =
+      src_type->is_scalar() ? 1 : src_type->As<ast::type::Vector>()->size();
+  if (src_count < dest_count) {
+    Fail() << "texel has too few components for storage texture: " << src_count
+           << " provided but " << dest_count
+           << " required, in: " << inst.PrettyPrint();
+    return nullptr;
+  }
+  // If the texel has more components than necessary, then we will ignore the
+  // higher-numbered components.
+  auto* texel_prefix = (src_count == dest_count)
+                           ? texel.expr
+                           : ast_module_.create<ast::MemberAccessorExpression>(
+                                 texel.expr, PrefixSwizzle(dest_count));
+
+  if (!(dest_type->is_float_scalar_or_vector() ||
+        dest_type->is_unsigned_scalar_or_vector() ||
+        dest_type->is_signed_scalar_or_vector())) {
+    Fail() << "invalid destination type for storage texture write: "
+           << dest_type->type_name();
+    return nullptr;
+  }
+  if (!(src_type->is_float_scalar_or_vector() ||
+        src_type->is_unsigned_scalar_or_vector() ||
+        src_type->is_signed_scalar_or_vector())) {
+    Fail() << "invalid texel type for storage texture write: "
+           << inst.PrettyPrint();
+    return nullptr;
+  }
+  if (dest_type->is_float_scalar_or_vector() &&
+      !src_type->is_float_scalar_or_vector()) {
+    Fail() << "can only write float or float vector to a storage image with "
+              "floating texel format: "
+           << inst.PrettyPrint();
+    return nullptr;
+  }
+  if (!dest_type->is_float_scalar_or_vector() &&
+      src_type->is_float_scalar_or_vector()) {
+    Fail()
+        << "float or float vector can only be written to a storage image with "
+           "floating texel format: "
+        << inst.PrettyPrint();
+    return nullptr;
+  }
+
+  if (dest_type->is_float_scalar_or_vector()) {
+    return texel_prefix;
+  }
+  // The only remaining cases are signed/unsigned source, and signed/unsigned
+  // destination.
+  if (dest_type->is_unsigned_scalar_or_vector() ==
+      src_type->is_unsigned_scalar_or_vector()) {
+    return texel_prefix;
+  }
+  // We must do a bitcast conversion.
+  return ast_module_.create<ast::BitcastExpression>(dest_type, texel_prefix);
 }
 
 }  // namespace spirv

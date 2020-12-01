@@ -680,6 +680,13 @@ class FunctionEmitter {
   /// @returns the identifier expression for the @p i'th component
   ast::IdentifierExpression* Swizzle(uint32_t i);
 
+  /// Returns an identifier expression for the swizzle name of the first
+  /// @p n elements of a vector.  Emits an error and returns nullptr if @p n
+  /// is out of range, i.e. 4 or higher.
+  /// @param n the number of components in the swizzle
+  /// @returns the swizzle identifier for the first n elements of a vector
+  ast::IdentifierExpression* PrefixSwizzle(uint32_t n);
+
   /// Converts SPIR-V image coordinates from an image access instruction
   /// (e.g. OpImageSampledImplicitLod) into an expression list consisting of
   /// the texture coordinates, and an integral array index if the texture is
@@ -727,10 +734,24 @@ class FunctionEmitter {
   TypedExpression MakeIntrinsicCall(const spvtools::opt::Instruction& inst);
 
   /// Emits a texture builtin function call for a SPIR-V instruction that
-  /// accesses a sampled image.
+  /// accesses an image or sampled image.
   /// @param inst the SPIR-V instruction
   /// @returns an expression
-  bool EmitSampledImageAccess(const spvtools::opt::Instruction& inst);
+  bool EmitImageAccess(const spvtools::opt::Instruction& inst);
+
+  /// Converts the given texel to match the type required for the storage
+  /// texture with the given type. This can generate a swizzle to retain
+  /// only the first few components of the texel vector, and maybe a bitcast
+  /// to convert signedness.  Returns an expression, or emits an error and
+  /// returns nullptr.
+  /// @param inst the image access instruction (used for diagnostics)
+  /// @param texel the texel
+  /// @param texture_type the type of the storage texture
+  /// @returns the texel, after necessary conversion.
+  ast::Expression* ConvertTexelForStorage(
+      const spvtools::opt::Instruction& inst,
+      TypedExpression texel,
+      ast::type::Texture* texture_type);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return

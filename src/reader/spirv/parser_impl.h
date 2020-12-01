@@ -427,6 +427,14 @@ class ParserImpl : Reader {
   /// @returns the handle usage, or an empty usage object.
   Usage GetHandleUsage(uint32_t id) const;
 
+  /// Returns the SPIR-V type for the sampler or image type for the given
+  /// variable in UniformConstant storage class.  Returns null and emits an
+  /// error on failure.
+  /// @param var the OpVariable instruction
+  /// @returns the Tint AST type for the sampler or texture, or null on error
+  const spvtools::opt::Instruction* GetSpirvTypeForHandleVar(
+      const spvtools::opt::Instruction& var);
+
   /// Returns the AST type for the pointer-to-sampler or pointer-to-texture type
   /// for the given variable in UniformConstant storage class.  Returns null and
   /// emits an error on failure.
@@ -435,6 +443,17 @@ class ParserImpl : Reader {
   /// error
   ast::type::Pointer* GetTypeForHandleVar(
       const spvtools::opt::Instruction& var);
+
+  /// Returns the channel component type corresponding to the given image
+  /// format.
+  /// @param format image texel format
+  /// @returns the component type, one of f32, i32, u32
+  ast::type::Type* GetComponentTypeForFormat(ast::type::ImageFormat format);
+
+  /// Returns texel type corresponding to the given image format.
+  /// @param format image texel format
+  /// @returns the texel format
+  ast::type::Type* GetTexelTypeForFormat(ast::type::ImageFormat format);
 
   /// Returns the SPIR-V instruction with the given ID, or nullptr.
   /// @param id the SPIR-V result ID

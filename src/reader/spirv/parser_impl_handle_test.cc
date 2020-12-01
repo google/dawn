@@ -49,17 +49,24 @@ std::string CommonBasicTypes() {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
 
+    %int_0 = OpConstant %int 0
+    %int_1 = OpConstant %int 1
+    %int_2 = OpConstant %int 2
     %int_3 = OpConstant %int 3
     %int_4 = OpConstant %int 4
     %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %uint_2 = OpConstant %uint 2
+    %uint_3 = OpConstant %uint 3
+    %uint_4 = OpConstant %uint 4
     %uint_100 = OpConstant %uint 100
 
     %v2int = OpTypeVector %int 2
-    %v2uint = OpTypeVector %uint 2
-    %v4uint = OpTypeVector %uint 4
+    %v3int = OpTypeVector %int 3
     %v4int = OpTypeVector %int 4
+    %v2uint = OpTypeVector %uint 2
+    %v3uint = OpTypeVector %uint 3
+    %v4uint = OpTypeVector %uint 4
     %v2float = OpTypeVector %float 2
     %v3float = OpTypeVector %float 3
     %v4float = OpTypeVector %float 4
@@ -74,9 +81,18 @@ std::string CommonBasicTypes() {
     %v3float_null = OpConstantNull %v3float
     %v4float_null = OpConstantNull %v4float
 
+    %the_vi12 = OpConstantComposite %v2int %int_1 %int_2
+    %the_vi123 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+    %the_vi1234 = OpConstantComposite %v4int %int_1 %int_2 %int_3 %int_4
+
+    %the_vu12 = OpConstantComposite %v2uint %uint_1 %uint_2
+    %the_vu123 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
+    %the_vu1234 = OpConstantComposite %v4uint %uint_1 %uint_2 %uint_3 %uint_4
+
     %the_vf12 = OpConstantComposite %v2float %float_1 %float_2
     %the_vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
     %the_vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+
 
     %depth = OpConstant %float 0.2
   )";
@@ -219,7 +235,7 @@ TEST_F(SpvParserTest,
      %20 = OpConstantNull %ptr_f_texture_1d
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildInternalModule());
+  ASSERT_TRUE(p->BuildInternalModule()) << assembly;
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
   const auto* image = p->GetMemoryObjectDeclarationForHandle(20, true);
 
@@ -1185,8 +1201,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
     __storage_texture_write_only_1d_rg32float
   })"}));
 
-// Test emission of variables when we have sampled image accesses in
-// executable code.
+// Test emission of variables when we have image accesses in executable code.
 
 struct ImageAccessCase {
   // SPIR-V image type, excluding result ID and opcode
@@ -1203,10 +1218,10 @@ inline std::ostream& operator<<(std::ostream& out, const ImageAccessCase& c) {
   return out;
 }
 
-using SpvParserTest_DeclHandle_SampledImage =
+using SpvParserTest_SampledImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
-TEST_P(SpvParserTest_DeclHandle_SampledImage, Variable) {
+TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
@@ -1281,7 +1296,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, DISABLED_FunctionParam) {
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageGather,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageGather
         // TODO(dneto): OpImageGather with ConstOffset (signed and unsigned)
@@ -1291,7 +1306,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageDrefGather,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageDrefGather
         // TODO(dneto): OpImageDrefGather with ConstOffset (signed and
@@ -1302,7 +1317,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleImplicitLod,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleImplicitLod
@@ -1627,7 +1642,7 @@ INSTANTIATE_TEST_SUITE_P(
     // sampling and depth-refernce sampling.  The texture is a depth-texture,
     // and we use builtins textureSample and textureSampleCompare
     ImageSampleImplicitLod_BothDrefAndNonDref,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleImplicitLod
@@ -1705,7 +1720,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefImplicitLod,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::Values(
         // ImageSampleDrefImplicitLod
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
@@ -1866,7 +1881,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleExplicitLod - using Lod
@@ -2206,7 +2221,7 @@ INSTANTIATE_TEST_SUITE_P(
 // This corresponds to SPIR-V OpSampleExplicitLod and WGSL textureSampleLevel.
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_DepthTexture,
-    SpvParserTest_DeclHandle_SampledImage,
+    SpvParserTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Test a non-depth case.
         // (This is already tested above in the ImageSampleExplicitLod suite,
@@ -2279,6 +2294,551 @@ INSTANTIATE_TEST_SUITE_P(
               }
             )
           })"}}));
+
+using SpvParserTest_ImageAccessTest =
+    SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
+
+TEST_P(SpvParserTest_ImageAccessTest, Variable) {
+  // In this test harness, we only create an image.
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+     OpName %f1 "f1"
+     OpName %vf12 "vf12"
+     OpName %vf123 "vf123"
+     OpName %vf1234 "vf1234"
+     OpName %u1 "u1"
+     OpName %vu12 "vu12"
+     OpName %vu123 "vu123"
+     OpName %vu1234 "vu1234"
+     OpName %i1 "i1"
+     OpName %vi12 "vi12"
+     OpName %vi123 "vi123"
+     OpName %vi1234 "vi1234"
+     OpName %offsets2d "offsets2d"
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %im_ty = OpTypeImage )" +
+                        GetParam().spirv_image_type_details + R"(
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+     %20 = OpVariable %ptr_im_ty UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %f1 = OpCopyObject %float %float_1
+     %vf12 = OpCopyObject %v2float %the_vf12
+     %vf123 = OpCopyObject %v3float %the_vf123
+     %vf1234 = OpCopyObject %v4float %the_vf1234
+
+     %i1 = OpCopyObject %int %int_1
+     %vi12 = OpCopyObject %v2int %the_vi12
+     %vi123 = OpCopyObject %v3int %the_vi123
+     %vi1234 = OpCopyObject %v4int %the_vi1234
+
+     %u1 = OpCopyObject %uint %uint_1
+     %vu12 = OpCopyObject %v2uint %the_vu12
+     %vu123 = OpCopyObject %v3uint %the_vu123
+     %vu1234 = OpCopyObject %v4uint %the_vu1234
+
+     %value_offset = OpCompositeConstruct %v2int %int_3 %int_4
+     %offsets2d = OpCopyObject %v2int %value_offset
+     %im = OpLoad %im_ty %20
+
+)" + GetParam().spirv_image_access +
+                        R"(
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty()) << p->error();
+  const auto module = p->module().to_str();
+  EXPECT_THAT(module, HasSubstr(GetParam().var_decl))
+      << "DECLARATIONS ARE BAD " << module;
+  EXPECT_THAT(module, HasSubstr(GetParam().texture_builtin))
+      << "TEXTURE BUILTIN IS BAD " << module << assembly;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageWrite_OptionalParams,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // OpImageWrite with no extra params
+        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vf1234}
+      )
+    })"},
+        // OpImageWrite with ConstOffset
+        {"%float 2D 0 0 0 2 Rgba32f",
+         "OpImageWrite %im %vu12 %vf1234 ConstOffset %offsets2d",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vf1234}
+        Identifier[not set]{offsets2d}
+      )
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // SPIR-V's texel parameter is a 4-element vector with the component
+    // type matching the sampled type. WGSL's texel parameter might be
+    // scalar or vector, depending on the number of channels in the texture.
+    ImageWrite_ConvertTexelOperand_Arity,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Source 1 component, dest 1 component
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %f1",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_r32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{f1}
+      )
+    })"},
+        // Source 2 component, dest 1 component
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_r32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        MemberAccessor[not set]{
+          Identifier[not set]{vf12}
+          Identifier[not set]{x}
+        }
+      )
+    })"},
+        // Source 3 component, dest 1 component
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf123",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_r32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        MemberAccessor[not set]{
+          Identifier[not set]{vf123}
+          Identifier[not set]{x}
+        }
+      )
+    })"},
+        // Source 4 component, dest 1 component
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_r32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        MemberAccessor[not set]{
+          Identifier[not set]{vf1234}
+          Identifier[not set]{x}
+        }
+      )
+    })"},
+        // Source 2 component, dest 2 component
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rg32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vf12}
+      )
+    })"},
+        // Source 3 component, dest 2 component
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf123",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rg32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        MemberAccessor[not set]{
+          Identifier[not set]{vf123}
+          Identifier[not set]{xy}
+        }
+      )
+    })"},
+        // Source 4 component, dest 2 component
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rg32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        MemberAccessor[not set]{
+          Identifier[not set]{vf1234}
+          Identifier[not set]{xy}
+        }
+      )
+    })"},
+        // WGSL does not support 3-component storage textures.
+        // Source 4 component, dest 4 component
+        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32float
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vf1234}
+      )
+    })"}}));
+
+TEST_F(SpvParserTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+     OpName %f1 "f1"
+     OpName %coords12 "coords12"
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %im_ty = OpTypeImage %void 2D 0 0 0 2 Rgba32f
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+
+     %20 = OpVariable %ptr_im_ty UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %f1 = OpCopyObject %float %float_1
+
+     %coords12 = OpCopyObject %v2float %the_vf12
+
+     %im = OpLoad %im_ty %20
+     OpImageWrite %im %coords12 %f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              Eq("texel has too few components for storage texture: 1 provided "
+                 "but 4 required, in: OpImageWrite %52 %3 %2"))
+      << p->error();
+}
+
+TEST_F(SpvParserTest, ImageWrite_ThreeComponentStorageTexture_IsError) {
+  // SPIR-V doesn't allow a 3-element storage texture format.
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+     OpName %vf123 "vf123"
+     OpName %coords12 "coords12"
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %im_ty = OpTypeImage %void 2D 0 0 0 2 Rgb32f
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+
+     %20 = OpVariable %ptr_im_ty UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %vf123 = OpCopyObject %v3float %the_vf123
+
+     %coords12 = OpCopyObject %v2float %the_vf12
+
+     %im = OpLoad %im_ty %20
+     OpImageWrite %im %coords12 %vf123
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto error = test::AssembleFailure(assembly);
+  EXPECT_THAT(error, HasSubstr("Invalid image format 'Rgb32f'"));
+}
+
+TEST_F(SpvParserTest, ImageWrite_FloatDest_IntegralSrc_IsError) {
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+     OpName %coords12 "coords12"
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %im_ty = OpTypeImage %void 2D 0 0 0 2 R32f
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+
+     %20 = OpVariable %ptr_im_ty UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %f1 = OpCopyObject %float %float_1
+
+     %coords12 = OpCopyObject %v2float %the_vf12
+
+     %im = OpLoad %im_ty %20
+     OpImageWrite %im %coords12 %uint_0
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              Eq("can only write float or float vector to a storage image with "
+                 "floating texel format: OpImageWrite %52 %2 %13"))
+      << p->error();
+}
+
+TEST_F(SpvParserTest, ImageWrite_IntegralDest_FloatSrc_IsError) {
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+     OpName %coords12 "coords12"
+     OpDecorate %20 DescriptorSet 2
+     OpDecorate %20 Binding 1
+)" + CommonBasicTypes() +
+                        R"(
+     %im_ty = OpTypeImage %void 2D 0 0 0 2 R32ui
+     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
+
+     %20 = OpVariable %ptr_im_ty UniformConstant
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %f1 = OpCopyObject %float %float_1
+
+     %coords12 = OpCopyObject %v2float %f1
+
+     %im = OpLoad %im_ty %20
+     OpImageWrite %im %coords12 %f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              Eq("float or float vector can only be written to a storage image "
+                 "with floating texel format: OpImageWrite %52 %2 %51"))
+      << p->error();
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    // Convert texel values when the sampled type of the texture is of the
+    // wrong signedness:
+    //  unsigned int channel type -> signed int sampled texture
+    //  signed int channel type -> unsigned int sampled texture
+    // (It is already a SPIR-V validation rule that floating point texels
+    // must already be used with textures of floating point sampled types)
+    ImageWrite_ConvertTexelOperand_Signedness,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Sampled type is unsigned int, texel is unsigned int
+        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vu1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32uint
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vu1234}
+      )
+    })"},
+        // Sampled type is unsigned int, texel is signed int
+        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vi1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32uint
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Bitcast[not set]<__vec_4__u32>{
+          Identifier[not set]{vi1234}
+        }
+      )
+    })"},
+        // Sampled type is signed int, texel is unsigned int
+        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vu1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32sint
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Bitcast[not set]<__vec_4__i32>{
+          Identifier[not set]{vu1234}
+        }
+      )
+    })"},
+        // Sampled type is signed int, texel is signed int
+        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vi1234",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_write_only_2d_rgba32sint
+  })",
+         R"(Call[not set]{
+      Identifier[not set]{textureStore}
+      (
+        Identifier[not set]{x_20}
+        Identifier[not set]{vu12}
+        Identifier[not set]{vi1234}
+      )
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // The SPIR-V result type could be integral but of different signedness
+    // than the sampled texel type.  In these cases the result should be
+    // converted to match the signedness of the SPIR-V result type.  This
+    // affects any instruction that yields texel values.
+    DISABLED_ImageAccess_ConvertResultSignedness,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>
+                        // OpImageRead
+                        // OpImageFetch
+                        // OpImageGather
+                        // OpImageSampleExplicitLod
+                        // OpImageSampleImplicitLod
+                        // In WGSL, depth-reference sampling only yields
+                        // floating point results in WGSL.
+                        {}));
 
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
@@ -2626,7 +3186,7 @@ INSTANTIATE_TEST_SUITE_P(BadInstructions,
                              {"%float 1D 0 0 0 1 Unknown",
                               "%50 = OpCopyObject %float %float_1",
                               "internal error: couldn't find image for "
-                              "%50 = OpCopyObject %9 %28",
+                              "%50 = OpCopyObject %9 %36",
                               {}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "OpStore %float_var %float_1",
@@ -2645,36 +3205,36 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleImplicitLod "
          // bad type for coordinate: not a number
          "%v4float %sampled_image %float_var",
-         "bad or unsupported coordinate type for image access: %50 = "
-         "OpImageSampleImplicitLod %26 %49 %1",
+         "bad or unsupported coordinate type for image access: %63 = "
+         "OpImageSampleImplicitLod %34 %62 %1",
          {}},
         {"%float 1D 0 1 0 1 Unknown",  // 1DArray
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %50 = OpImageSampleImplicitLod %26 %49 %3",
+         "in: %63 = OpImageSampleImplicitLod %34 %62 %3",
          {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %50 = OpImageSampleImplicitLod %26 %49 %3",
+         "in: %63 = OpImageSampleImplicitLod %34 %62 %3",
          {}},
         {"%float 2D 0 1 0 1 Unknown",  // 2DArray
          "%result = OpImageSampleImplicitLod "
          // 2 component, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %50 = OpImageSampleImplicitLod %26 %49 %4",
+         "in: %63 = OpImageSampleImplicitLod %34 %62 %4",
          {}},
         {"%float 3D 0 0 0 1 Unknown",  // 3D
          "%result = OpImageSampleImplicitLod "
          // 2 components, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %50 = OpImageSampleImplicitLod %26 %49 %4",
+         "in: %63 = OpImageSampleImplicitLod %34 %62 %4",
          {}},
     }));
 
