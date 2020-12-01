@@ -1061,4 +1061,5 @@ DAWN_INSTANTIATE_TEST(ColorStateTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

@@ -102,4 +102,5 @@ DAWN_INSTANTIATE_TEST(ClipSpaceTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

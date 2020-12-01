@@ -1077,6 +1077,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
 TEST_P(CompressedTextureBCFormatTest, UnalignedDynamicUploader) {
     // CopyT2B for compressed texture formats is unimplemented on OpenGL.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     utils::UnalignDynamicUploader(device);
 
@@ -1106,6 +1107,7 @@ DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend(),
                       VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}));
 

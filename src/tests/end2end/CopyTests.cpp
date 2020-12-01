@@ -1612,4 +1612,5 @@ DAWN_INSTANTIATE_TEST(CopyTests_B2B,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

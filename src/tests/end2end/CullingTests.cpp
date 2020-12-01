@@ -136,4 +136,5 @@ DAWN_INSTANTIATE_TEST(CullingTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

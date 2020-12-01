@@ -324,4 +324,5 @@ DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

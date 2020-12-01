@@ -176,4 +176,5 @@ DAWN_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
