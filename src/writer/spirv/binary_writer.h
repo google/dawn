@@ -35,7 +35,7 @@ class BinaryWriter {
   void WriteHeader(uint32_t bound);
 
   /// Writes the given builder data into a binary. Note, this does not emit
-  /// the SPIR-V header. You |must| call |WriteHeader| before |WriteBuilder|
+  /// the SPIR-V header. You **must** call WriteHeader() before WriteBuilder()
   /// if you want the SPIR-V to be emitted.
   /// @param builder the builder to assemble from
   void WriteBuilder(Builder* builder);

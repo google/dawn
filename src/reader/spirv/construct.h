@@ -121,16 +121,16 @@ struct Construct {
   /// The nearest enclosing construct other than itself, or nullptr if
   /// this construct represents the entire function.
   const Construct* const parent = nullptr;
-  /// The nearest enclosing loop construct, if one exists.  Points to |this|
+  /// The nearest enclosing loop construct, if one exists.  Points to `this`
   /// when this is a loop construct.
   const Construct* const enclosing_loop = nullptr;
   /// The nearest enclosing continue construct, if one exists.  Points to
-  /// |this| when this is a contnue construct.
+  /// `this` when this is a contnue construct.
   const Construct* const enclosing_continue = nullptr;
   /// The nearest enclosing loop construct or continue construct or
   /// switch-selection construct, if one exists. The signficance is
   /// that a high level language "break" will branch to the merge block
-  /// of such an enclosing construct.  Points to |this| when this is
+  /// of such an enclosing construct. Points to `this` when this is
   /// a loop construct, a continue construct, or a switch-selection construct.
   const Construct* const enclosing_loop_or_continue_or_switch = nullptr;
 
@@ -143,10 +143,10 @@ struct Construct {
   /// 0 for kFunction, or the id of the block immediately after this construct
   /// in the computed block order.
   const uint32_t end_id = 0;
-  /// The position of block |begin_id| in the computed block order.
+  /// The position of block #begin_id in the computed block order.
   const uint32_t begin_pos = 0;
-  /// The position of block |end_id| in the block order, or the number of
-  /// block order elements if |end_id| is 0.
+  /// The position of block #end_id in the block order, or the number of
+  /// block order elements if #end_id is 0.
   const uint32_t end_pos = 0;
   /// The position of the first block after the WGSL scope corresponding to
   /// this construct.

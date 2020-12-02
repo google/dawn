@@ -144,17 +144,17 @@ struct BlockInfo {
   /// The following fields record relationships among blocks in a selection
   /// construct for an OpBranchConditional instruction.
 
-  /// If not 0, then this block is an if-selection header, and |true_head| is
+  /// If not 0, then this block is an if-selection header, and `true_head` is
   /// the target id of the true branch on the OpBranchConditional, and that
   /// target is inside the if-selection.
   uint32_t true_head = 0;
-  /// If not 0, then this block is an if-selection header, and |false_head|
+  /// If not 0, then this block is an if-selection header, and `false_head`
   /// is the target id of the false branch on the OpBranchConditional, and
   /// that target is inside the if-selection.
   uint32_t false_head = 0;
   /// If not 0, then this block is an if-selection header, and when following
   /// the flow via the true and false branches, control first reconverges at
-  /// the block with ID |premerge_head|, and |premerge_head| is still inside
+  /// the block with ID `premerge_head`, and `premerge_head` is still inside
   /// the if-selection.
   uint32_t premerge_head = 0;
   /// If non-empty, then this block is an if-selection header, and control flow
@@ -164,8 +164,8 @@ struct BlockInfo {
   std::string flow_guard_name = "";
 
   /// The result IDs that this block is responsible for declaring as a
-  /// hoisted variable.  See the |requires_hoisted_def| member of
-  /// DefInfo for an explanation.
+  /// hoisted variable.
+  /// @see DefInfo#requires_hoisted_def
   std::vector<uint32_t> hoisted_ids;
 
   /// A PhiAssignment represents the assignment of a value to the state
@@ -249,7 +249,7 @@ struct DefInfo {
   /// example, pointers.
   bool requires_hoisted_def = false;
 
-  /// If the definition is an OpPhi, then |phi_var| is the name of the
+  /// If the definition is an OpPhi, then `phi_var` is the name of the
   /// variable that stores the value carried from parent basic blocks into
   /// the basic block containing the OpPhi. Otherwise this is the empty string.
   std::string phi_var;
@@ -292,12 +292,12 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
 class FunctionEmitter {
  public:
   /// Creates a FunctionEmitter, and prepares to write to the AST module
-  /// in |pi|.
+  /// in `pi`
   /// @param pi a ParserImpl which has already executed BuildInternalModule
   /// @param function the function to emit
   FunctionEmitter(ParserImpl* pi, const spvtools::opt::Function& function);
   /// Creates a FunctionEmitter, and prepares to write to the AST module
-  /// in |pi|.
+  /// in `pi`
   /// @param pi a ParserImpl which has already executed BuildInternalModule
   /// @param function the function to emit
   /// @param ep_info entry point information for this function, or nullptr
@@ -339,8 +339,8 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitBody();
 
-  /// Records a mapping from block ID to a BlockInfo struct.  Populates
-  /// |block_info_|
+  /// Records a mapping from block ID to a BlockInfo struct.
+  /// Populates `block_info_`
   void RegisterBasicBlocks();
 
   /// Verifies that terminators only branch to labels in the current function.
@@ -348,15 +348,14 @@ class FunctionEmitter {
   /// @returns true if terminators are valid
   bool TerminatorsAreValid();
 
-  /// Populates merge-header cross-links and the |is_continue_entire_loop|
-  /// member of BlockInfo.  Also verifies that merge instructions go to blocks
-  /// in the same function.  Assumes basic blocks have been registered, and
-  /// terminators are valid.
+  /// Populates merge-header cross-links and BlockInfo#is_continue_entire_loop.
+  /// Also verifies that merge instructions go to blocks in the same function.
+  /// Assumes basic blocks have been registered, and terminators are valid.
   /// @returns false if registration fails
   bool RegisterMerges();
 
   /// Determines the output order for the basic blocks in the function.
-  /// Populates |block_order_| and the |pos| block info member.
+  /// Populates `block_order_` and BlockInfo#pos.
   /// Assumes basic blocks have been registered.
   void ComputeBlockOrderAndPositions();
 
@@ -371,7 +370,7 @@ class FunctionEmitter {
   bool VerifyHeaderContinueMergeOrder();
 
   /// Labels each basic block with its nearest enclosing structured construct.
-  /// Populates the |construct| member of BlockInfo, and the |constructs_| list.
+  /// Populates BlockInfo#construct and the `constructs_` list.
   /// Assumes terminators are valid and merges have been registered, block
   /// order has been computed, and each block is labeled with its position.
   /// Checks nesting of structured control flow constructs.
@@ -387,10 +386,9 @@ class FunctionEmitter {
   bool FindSwitchCaseHeaders();
 
   /// Classifies the successor CFG edges for the ordered basic blocks.
-  /// Also checks validity of each edge (populates the |succ_edge| field of
-  /// BlockInfo). Implicitly checks dominance rules for headers and continue
-  /// constructs. Assumes each block has been labeled with its control flow
-  /// construct.
+  /// Also checks validity of each edge (populates BlockInfo#succ_edge).
+  /// Implicitly checks dominance rules for headers and continue constructs.
+  /// Assumes each block has been labeled with its control flow construct.
   /// @returns false on failure
   bool ClassifyCFGEdges();
 
@@ -405,7 +403,7 @@ class FunctionEmitter {
   bool FindIfSelectionInternalHeaders();
 
   /// Creates a DefInfo record for each locally defined SPIR-V ID.
-  /// Populates the |def_info_| mapping with basic results.
+  /// Populates the `def_info_` mapping with basic results.
   /// @returns false on failure
   bool RegisterLocallyDefinedValues();
 
@@ -417,7 +415,7 @@ class FunctionEmitter {
 
   /// Remaps the storage class for the type of a locally-defined value,
   /// if necessary. If it's not a pointer type, or if its storage class
-  /// already matches, then the result is a copy of the |type| argument.
+  /// already matches, then the result is a copy of the `type` argument.
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
   /// @returns an possibly updated type
@@ -429,16 +427,16 @@ class FunctionEmitter {
   ///  - When a SPIR-V instruction might use the dynamically computed value
   ///    only once, but the WGSL code might reference it multiple times.
   ///    For example, this occurs for the vector operands of OpVectorShuffle.
-  ///    In this case the definition's |requires_named_const_def| property is
-  ///    set to true.
+  ///    In this case the definition's DefInfo#requires_named_const_def property
+  ///    is set to true.
   ///  - When a definition and at least one of its uses are not in the
   ///    same structured construct.
-  ///    In this case the definition's |requires_named_const_def| property is
-  ///    set to true.
-  ///  - When a definition is in a construct that does not enclose all the
-  ///    uses.  In this case the definition's |requires_hoisted_def| property
+  ///    In this case the definition's DefInfo#requires_named_const_def property
   ///    is set to true.
-  /// Updates the |def_info_| mapping.
+  ///  - When a definition is in a construct that does not enclose all the
+  ///    uses.  In this case the definition's DefInfo#requires_hoisted_def
+  ///    property is set to true.
+  /// Updates the `def_info_` mapping.
   void FindValuesNeedingNamedOrHoistedDefinition();
 
   /// Emits declarations of function variables.
@@ -483,7 +481,7 @@ class FunctionEmitter {
   bool EmitContinuingStart(const Construct* construct);
 
   /// Emits the non-control-flow parts of a basic block, but only once.
-  /// The |already_emitted| parameter indicates whether the code has already
+  /// The `already_emitted` parameter indicates whether the code has already
   /// been emitted, and is used to signal that this invocation actually emitted
   /// it.
   /// @param block_info the block to emit
@@ -526,12 +524,12 @@ class FunctionEmitter {
 
   /// Returns a new statement to represent the given branch representing a
   /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
-  /// WGSL statement is required, the statement will be nullptr. When |forced|
+  /// WGSL statement is required, the statement will be nullptr. When `forced`
   /// is false, this method tries to avoid emitting a 'break' statement when
   /// that would be redundant in WGSL due to implicit breaking out of a switch.
-  /// When |forced| is true, the method won't try to avoid emitting that break.
+  /// When `forced` is true, the method won't try to avoid emitting that break.
   /// If the control flow edge is an if-break for an if-selection with a
-  /// control flow guard, then return that guard name via |flow_guard_name_ptr|
+  /// control flow guard, then return that guard name via `flow_guard_name_ptr`
   /// when that parameter is not null.
   /// @param src_info the source block
   /// @param dest_info the destination block
@@ -556,8 +554,8 @@ class FunctionEmitter {
 
   /// Emits the statements for an normal-terminator OpBranchConditional
   /// where one branch is a case fall through (the true branch if and only
-  /// if |fall_through_is_true_branch| is true), and the other branch is
-  /// goes to a different destination, named by |other_dest|.
+  /// if `fall_through_is_true_branch` is true), and the other branch is
+  /// goes to a different destination, named by `other_dest`.
   /// @param src_info the basic block from which we're branching
   /// @param cond the branching condition
   /// @param other_edge_kind the edge kind from the source block to the other
@@ -578,15 +576,15 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitStatement(const spvtools::opt::Instruction& inst);
 
-  /// Emits a const definition for the typed value in |ast_expr|, and
-  /// records it as the translation for the result ID from |inst|.
+  /// Emits a const definition for the typed value in `ast_expr`, and
+  /// records it as the translation for the result ID from `inst`.
   /// @param inst the SPIR-V instruction defining the value
   /// @param ast_expr the already-computed AST expression for the value
   /// @returns false if emission failed.
   bool EmitConstDefinition(const spvtools::opt::Instruction& inst,
                            TypedExpression ast_expr);
 
-  /// Emits a write of the typed value in |ast_expr| to a hoisted variable
+  /// Emits a write of the typed value in `ast_expr` to a hoisted variable
   /// for the given SPIR-V ID, if that ID has a hoisted declaration. Otherwise,
   /// emits a const definition instead.
   /// @param inst the SPIR-V instruction defining the value
@@ -677,11 +675,11 @@ class FunctionEmitter {
   /// index into a vector.  Emits an error and returns nullptr if the
   /// index is out of range, i.e. 4 or higher.
   /// @param i index of the subcomponent
-  /// @returns the identifier expression for the @p i'th component
+  /// @returns the identifier expression for the `i`'th component
   ast::IdentifierExpression* Swizzle(uint32_t i);
 
   /// Returns an identifier expression for the swizzle name of the first
-  /// @p n elements of a vector.  Emits an error and returns nullptr if @p n
+  /// `n` elements of a vector.  Emits an error and returns nullptr if `n`
   /// is out of range, i.e. 4 or higher.
   /// @param n the number of components in the swizzle
   /// @returns the swizzle identifier for the first n elements of a vector
@@ -789,7 +787,7 @@ class FunctionEmitter {
 
   /// Sets the source information for the given instruction to the given
   /// node, if the node doesn't already have a source record.  Does nothing
-  /// if |nodes| is null.
+  /// if `node` is null.
   /// @param node the AST node
   /// @param inst the SPIR-V instruction
   void ApplySourceForInstruction(ast::Node* node,

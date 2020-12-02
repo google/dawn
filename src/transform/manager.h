@@ -27,7 +27,7 @@ namespace transform {
 
 /// Manager for the provided passes. The passes will be execute in the
 /// appended order. If any pass fails the manager will return immediately and
-/// the error can be retrieved with the |error| method.
+/// the error can be retrieved with the error() method.
 class Manager {
  public:
   /// Constructor

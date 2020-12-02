@@ -182,7 +182,7 @@ class ParserImpl : Reader {
   /// @returns the list of decorations on the given ID
   DecorationList GetDecorationsFor(uint32_t id) const;
   /// Gets the list of decorations for the member of a struct.  Returns an empty
-  /// list if the |id| is not the ID of a struct, or if the member index is out
+  /// list if the `id` is not the ID of a struct, or if the member index is out
   /// of range, or if the target member has no decorations.
   /// The internal representation must have already been built.
   /// @param id SPIR-V ID of a struct
@@ -308,9 +308,9 @@ class ParserImpl : Reader {
 
   /// Converts a given expression to the signedness demanded for an operand
   /// of the given SPIR-V opcode, if required.  If the operation assumes
-  /// signed integer operands, and |expr| is unsigned, then return an
+  /// signed integer operands, and `expr` is unsigned, then return an
   /// as-cast expression converting it to signed. Otherwise, return
-  /// |expr| itself.  Similarly, convert as required from unsigned
+  /// `expr` itself.  Similarly, convert as required from unsigned
   /// to signed. Assumes all SPIR-V types have been mapped to AST types.
   /// @param op the SPIR-V opcode
   /// @param expr an expression
@@ -480,7 +480,7 @@ class ParserImpl : Reader {
   /// SPIR-V allows distinct struct type definitions for two OpTypeStruct
   /// that otherwise have the same set of members (and struct and member
   /// decorations).  However, the SPIRV-Tools always produces a unique
-  /// |spvtools::opt::analysis::Struct| object in these cases. For this type
+  /// `spvtools::opt::analysis::Struct` object in these cases. For this type
   /// conversion, we need to have the original SPIR-V ID because we can't always
   /// recover it from the optimizer's struct type object. This also lets us
   /// preserve member names, which are given by OpMemberName which is normally
@@ -492,7 +492,7 @@ class ParserImpl : Reader {
       const spvtools::opt::analysis::Struct* struct_ty);
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
   /// The pointer to gl_PerVertex maps to nullptr, and instead is recorded
-  /// in member |builtin_position_|.
+  /// in member #builtin_position_.
   /// @param type_id the SPIR-V ID for the type.
   /// @param ptr_ty the Tint type
   ast::type::Type* ConvertType(uint32_t type_id,

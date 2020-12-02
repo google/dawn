@@ -91,9 +91,9 @@ struct Formatter::State {
   /// newline queues a newline to be written to the printer.
   void newline() { stream << std::endl; }
 
-  /// repeat queues the character c to be writen to the printer n times.
-  /// @param c the character to print |n| times
-  /// @param n the number of times to print character |c|
+  /// repeat queues the character c to be written to the printer n times.
+  /// @param c the character to print `n` times
+  /// @param n the number of times to print character `c`
   void repeat(char c, size_t n) {
     while (n-- > 0) {
       stream << c;

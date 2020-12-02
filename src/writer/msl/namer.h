@@ -30,9 +30,9 @@ class Namer {
   Namer();
   ~Namer();
 
-  /// Returns a sanitized version of |name|
+  /// Returns a sanitized version of `name`
   /// @param name the name to sanitize
-  /// @returns the sanitized version of |name|
+  /// @returns the sanitized version of `name`
   std::string NameFor(const std::string& name);
 
   /// Registers a remapped name.

@@ -54,9 +54,9 @@ class ScopeStack {
   /// @param val the value
   void set(const std::string& name, T val) { stack_.back()[name] = val; }
 
-  /// Checks for the given |name| in the stack
+  /// Checks for the given `name` in the stack
   /// @param name the name to look for
-  /// @returns true if the stack contains |name|
+  /// @returns true if the stack contains `name`
   bool has(const std::string& name) const { return get(name, nullptr); }
 
   /// Retrieves a given name from the stack

@@ -130,19 +130,20 @@ struct VertexStateDescriptor {
 /// This transform will convert those to be assigned from storage buffers
 /// instead. The intention is to allow vertex input to rely on a storage buffer
 /// clamping pass for out of bounds reads. We bind the storage buffers as arrays
-/// of u32, so any read to byte position |p| will actually need to read position
-/// |p / 4|, since sizeof(u32) == 4.
+/// of u32, so any read to byte position `p` will actually need to read position
+/// `p / 4`, since `sizeof(u32) == 4`.
 ///
-/// |VertexFormat| represents the input type of the attribute. This isn't
+/// `VertexFormat` represents the input type of the attribute. This isn't
 /// related to the type of the variable in the shader. For example,
-/// `VertexFormat::kVec2F16` tells us that the buffer will contain f16 elements,
-/// to be read as vec2. In the shader, a user would make a vec2<f32> to be able
-/// to use them. The conversion between f16 and f32 will need to be handled by
-/// us (using unpack functions).
+/// `VertexFormat::kVec2F16` tells us that the buffer will contain `f16`
+/// elements, to be read as vec2. In the shader, a user would make a `vec2<f32>`
+/// to be able to use them. The conversion between `f16` and `f32` will need to
+/// be handled by us (using unpack functions).
 ///
-/// To be clear, there won't be types such as f16 or u8 anywhere in WGSL code,
-/// but these are types that the data may arrive as. We need to convert these
-/// smaller types into the base types such as f32 and u32 for the shader to use.
+/// To be clear, there won't be types such as `f16` or `u8` anywhere in WGSL
+/// code, but these are types that the data may arrive as. We need to convert
+/// these smaller types into the base types such as `f32` and `u32` for the
+/// shader to use.
 class VertexPullingTransform : public Transformer {
  public:
   /// Constructor
@@ -194,11 +195,11 @@ class VertexPullingTransform : public Transformer {
   /// @param value uint value
   ast::Expression* GenUint(uint32_t value);
 
-  /// Generates an expression to read the shader value |kPullingPosVarName|
+  /// Generates an expression to read the shader value `kPullingPosVarName`
   ast::Expression* CreatePullingPositionIdent();
 
   /// Generates an expression reading from a buffer a specific format.
-  /// This reads the value wherever |kPullingPosVarName| points to at the time
+  /// This reads the value wherever `kPullingPosVarName` points to at the time
   /// of the read.
   /// @param buffer the index of the vertex buffer
   /// @param format the format to read
@@ -229,7 +230,7 @@ class VertexPullingTransform : public Transformer {
                                    VertexFormat format);
 
   /// Generates an expression reading a vec2/3/4 from a vertex buffer.
-  /// This reads the value wherever |kPullingPosVarName| points to at the time
+  /// This reads the value wherever `kPullingPosVarName` points to at the time
   /// of the read.
   /// @param buffer the index of the vertex buffer
   /// @param element_stride stride between elements, in bytes

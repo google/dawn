@@ -170,7 +170,7 @@ class Function : public Castable<Function, Node> {
   }
   /// Checks if the given entry point is an ancestor
   /// @param name the entry point name
-  /// @returns true if |name| is an ancestor entry point of this function
+  /// @returns true if `name` is an ancestor entry point of this function
   bool HasAncestorEntryPoint(const std::string& name) const;
 
   /// Sets the return type of the function

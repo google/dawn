@@ -51,7 +51,7 @@ class Formatter {
   /// @param printer the printer used to display the formatted diagnostics
   void format(const List& list, Printer* printer) const;
 
-  /// @return the list of diagnostics |list| formatted to a string.
+  /// @return the list of diagnostics `list` formatted to a string.
   /// @param list the list of diagnostic messages to format
   std::string format(const List& list) const;
 

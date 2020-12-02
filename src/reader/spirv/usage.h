@@ -82,7 +82,7 @@ class Usage {
 
   /// Equality operator
   /// @param other the RHS of the equality test.
-  /// @returns true if |other| is identical to *this
+  /// @returns true if `other` is identical to `*this`
   bool operator==(const Usage& other) const;
 
   /// Adds the usages from another usage object.

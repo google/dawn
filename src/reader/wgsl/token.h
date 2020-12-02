@@ -378,7 +378,7 @@ class Token {
 
   /// Returns true if the token is of the given type
   /// @param t the type to check against.
-  /// @returns true if the token is of type |t|
+  /// @returns true if the token is of type `t`
   bool Is(Type t) const { return type_ == t; }
 
   /// @returns true if the token is uninitialized

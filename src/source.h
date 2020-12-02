@@ -39,7 +39,7 @@ class Source {
     const std::string path;
     /// file content
     const std::string content;
-    /// |content| split by lines
+    /// #content split by lines
     const std::vector<std::string> lines;
   };
 
@@ -58,13 +58,13 @@ class Source {
     /// Constructs a zero initialized Range.
     inline Range() = default;
 
-    /// Constructs a zero-length Range starting at |loc|.
-    /// @param loc the start and end location for the range.
+    /// Constructs a zero-length Range starting at `loc`
+    /// @param loc the start and end location for the range
     inline explicit Range(const Location& loc) : begin(loc), end(loc) {}
 
-    /// Constructs the Range beginning at |b| and ending at |e|.
-    /// @param b the range start location.
-    /// @param e the range end location.
+    /// Constructs the Range beginning at `b` and ending at `e`
+    /// @param b the range start location
+    /// @param e the range end location
     inline Range(const Location& b, const Location& e) : begin(b), end(e) {}
 
     /// The location of the first character in the range.
@@ -76,20 +76,20 @@ class Source {
   /// Constructs the Source with an zero initialized Range and null File.
   inline Source() = default;
 
-  /// Constructs the Source with the Range |rng| and a null File.
+  /// Constructs the Source with the Range `rng` and a null File
   /// @param rng the source range
   inline explicit Source(const Range& rng) : range(rng) {}
 
-  /// Constructs the Source with the Range |loc| and a null File.
+  /// Constructs the Source with the Range `loc` and a null File
   /// @param loc the start and end location for the source range
   inline explicit Source(const Location& loc) : range(Range(loc)) {}
 
-  /// Constructs the Source with the Range |rng| and File |f|.
+  /// Constructs the Source with the Range `rng` and File `f`
   /// @param rng the source range
   /// @param f the source file
   inline Source(const Range& rng, File const* f) : range(rng), file(f) {}
 
-  /// range is the span of text this source refers to in |file|
+  /// range is the span of text this source refers to in #file
   Range range;
   /// file is the source file this source refers to
   File const* file = nullptr;

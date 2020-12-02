@@ -100,7 +100,7 @@ class TypeDeterminer {
   /// @param name the method name to get information on
   /// @param params the parameters to the method call
   /// @param id out parameter for the external call ID. Must not be a nullptr.
-  /// @returns the return type of |name| in |path| or nullptr on error.
+  /// @returns the return type of `name` in `path` or nullptr on error.
   ast::type::Type* GetImportData(const Source& src,
                                  const std::string& path,
                                  const std::string& name,

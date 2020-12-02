@@ -488,7 +488,7 @@ class StructuredTraverser {
 };
 
 /// @param src a source record
-/// @returns true if |src| is a non-default Source
+/// @returns true if `src` is a non-default Source
 bool HasSource(const Source& src) {
   return src.range.begin.line > 0 || src.range.begin.column != 0;
 }

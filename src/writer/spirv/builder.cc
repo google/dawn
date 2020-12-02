@@ -147,8 +147,8 @@ uint32_t IndexFromName(char name) {
   return std::numeric_limits<uint32_t>::max();
 }
 
-/// Returns the matrix type that is |type| or that is wrapped by
-/// one or more levels of an arrays inside of |type|.
+/// Returns the matrix type that is `type` or that is wrapped by
+/// one or more levels of an arrays inside of `type`.
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
 ast::type::Matrix* GetNestedMatrixType(ast::type::Type* type) {

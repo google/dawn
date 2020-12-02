@@ -98,7 +98,7 @@ class ParserImpl {
   /// Expect is the return type of the parser methods that are expected to
   /// return a parsed value of type T, unless there was an parse error.
   /// In the case of a parse error the called method will have called
-  /// |add_error()| and the Expect will have |errored| set to true.
+  /// add_error() and #errored will be set to true.
   template <typename T>
   struct Expect {
     /// An alias to the templated type T.
@@ -130,7 +130,7 @@ class ParserImpl {
 
     /// @return a pointer to the returned value. If T is a pointer or
     /// std::unique_ptr, operator->() automatically dereferences so that the
-    /// return type will always be a pointer to a non-pointer type. |errored|
+    /// return type will always be a pointer to a non-pointer type. #errored
     /// must be false to call.
     inline typename detail::OperatorArrow<T>::type operator->() {
       assert(!errored);
@@ -149,10 +149,10 @@ class ParserImpl {
   /// Maybe is the return type of the parser methods that attempts to match a
   /// grammar and return a parsed value of type T, or may parse part of the
   /// grammar and then hit a parse error.
-  /// In the case of a successful grammar match, the Maybe will have |matched|
+  /// In the case of a successful grammar match, the Maybe will have #matched
   /// set to true.
   /// In the case of a parse error the called method will have called
-  /// |add_error()| and the Maybe will have |errored| set to true.
+  /// add_error() and the Maybe will have #errored set to true.
   template <typename T>
   struct Maybe {
     inline Maybe(std::nullptr_t) = delete;  // NOLINT
@@ -201,7 +201,7 @@ class ParserImpl {
 
     /// @return a pointer to the returned value. If T is a pointer or
     /// std::unique_ptr, operator->() automatically dereferences so that the
-    /// return type will always be a pointer to a non-pointer type. |errored|
+    /// return type will always be a pointer to a non-pointer type. #errored
     /// must be false to call.
     inline typename detail::OperatorArrow<T>::type operator->() {
       assert(!errored);
@@ -274,31 +274,32 @@ class ParserImpl {
   Token next();
   /// @returns the next token without advancing
   Token peek();
-  /// Peeks ahead and returns the token at |idx| head of the current position
+  /// Peeks ahead and returns the token at `idx` head of the current position
   /// @param idx the index of the token to return
-  /// @returns the token |idx| positions ahead without advancing
+  /// @returns the token `idx` positions ahead without advancing
   Token peek(size_t idx);
-  /// Appends an error at |t| with the message |msg|
+  /// Appends an error at `t` with the message `msg`
   /// @param t the token to associate the error with
   /// @param msg the error message
-  /// @return |errored| so that you can combine an add_error call and return on
-  /// the same line.
+  /// @return `Failure::Errored::kError` so that you can combine an add_error()
+  /// call and return on the same line.
   Failure::Errored add_error(const Token& t, const std::string& msg);
-  /// Appends an error raised when parsing |use| at |t| with the message |msg|
+  /// Appends an error raised when parsing `use` at `t` with the message
+  /// `msg`
   /// @param source the source to associate the error with
   /// @param msg the error message
   /// @param use a description of what was being parsed when the error was
   /// raised.
-  /// @return |errored| so that you can combine an add_error call and return on
-  /// the same line.
+  /// @return `Failure::Errored::kError` so that you can combine an add_error()
+  /// call and return on the same line.
   Failure::Errored add_error(const Source& source,
                              const std::string& msg,
                              const std::string& use);
-  /// Appends an error at |source| with the message |msg|
+  /// Appends an error at `source` with the message `msg`
   /// @param source the source to associate the error with
   /// @param msg the error message
-  /// @return |errored| so that you can combine an add_error call and return on
-  /// the same line.
+  /// @return `Failure::Errored::kError` so that you can combine an add_error()
+  /// call and return on the same line.
   Failure::Errored add_error(const Source& source, const std::string& msg);
 
   /// Registers a constructed type into the parser
@@ -307,7 +308,7 @@ class ParserImpl {
   void register_constructed(const std::string& name, ast::type::Type* type);
   /// Retrieves a constructed type
   /// @param name The name to lookup
-  /// @returns the constructed type for |name| or nullptr if not found
+  /// @returns the constructed type for `name` or `nullptr` if not found
   ast::type::Type* get_constructed(const std::string& name);
 
   /// Parses the `translation_unit` grammar element
@@ -316,7 +317,7 @@ class ParserImpl {
   /// @return true on parse success, otherwise an error.
   Expect<bool> expect_global_decl();
   /// Parses a `global_variable_decl` grammar element with the initial
-  /// `variable_decoration_list*` provided as |decos|.
+  /// `variable_decoration_list*` provided as `decos`
   /// @returns the variable parsed or nullptr
   /// @param decos the list of decorations for the variable declaration.
   Maybe<ast::Variable*> global_variable_decl(ast::DecorationList& decos);
@@ -350,7 +351,7 @@ class ParserImpl {
   /// @returns the storage class or StorageClass::kNone if none matched
   Expect<ast::StorageClass> expect_storage_class(const std::string& use);
   /// Parses a `struct_decl` grammar element with the initial
-  /// `struct_decoration_decl*` provided as |decos|.
+  /// `struct_decoration_decl*` provided as `decos`.
   /// @returns the struct type or nullptr on error
   /// @param decos the list of decorations for the struct declaration.
   Maybe<std::unique_ptr<ast::type::Struct>> struct_decl(
@@ -359,13 +360,13 @@ class ParserImpl {
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();
   /// Parses a `struct_member` grammar element with the initial
-  /// `struct_member_decoration_decl+` provided as |decos|, erroring on parse
+  /// `struct_member_decoration_decl+` provided as `decos`, erroring on parse
   /// failure.
   /// @param decos the list of decorations for the struct member.
   /// @returns the struct member or nullptr
   Expect<ast::StructMember*> expect_struct_member(ast::DecorationList& decos);
   /// Parses a `function_decl` grammar element with the initial
-  /// `function_decoration_decl*` provided as |decos|.
+  /// `function_decoration_decl*` provided as `decos`.
   /// @param decos the list of decorations for the function declaration.
   /// @returns the parsed function, nullptr otherwise
   Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
@@ -610,21 +611,21 @@ class ParserImpl {
   template <typename F>
   using ReturnType = typename std::result_of<F()>::type;
 
-  /// ResultType resolves to |T| for a |RESULT| of type Expect<T>.
+  /// ResultType resolves to `T` for a `RESULT` of type Expect<T>.
   template <typename RESULT>
   using ResultType = typename RESULT::type;
 
-  /// @returns true and consumes the next token if it equals |tok|.
+  /// @returns true and consumes the next token if it equals `tok`
   /// @param source if not nullptr, the next token's source is written to this
   /// pointer, regardless of success or error
   bool match(Token::Type tok, Source* source = nullptr);
-  /// Errors if the next token is not equal to |tok|.
+  /// Errors if the next token is not equal to `tok`
   /// Consumes the next token on match.
-  /// expect() also updates |synchronized_|, setting it to `true` if the next
-  /// token is equal to |tok|, otherwise `false`.
+  /// expect() also updates #synchronized_, setting it to `true` if the next
+  /// token is equal to `tok`, otherwise `false`.
   /// @param use a description of what was being parsed if an error was raised.
   /// @param tok the token to test against
-  /// @returns true if the next token equals |tok|.
+  /// @returns true if the next token equals `tok`
   bool expect(const std::string& use, Token::Type tok);
   /// Parses a signed integer from the next token in the stream, erroring if the
   /// next token is not a signed integer.
@@ -651,115 +652,115 @@ class ParserImpl {
   /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed identifier.
   Expect<std::string> expect_ident(const std::string& use);
-  /// Parses a lexical block starting with the token |start| and ending with
-  /// the token |end|. |body| is called to parse the lexical block body between
-  /// the |start| and |end| tokens.
-  /// If the |start| or |end| tokens are not matched then an error is generated
-  /// and a zero-initialized |T| is returned.
-  /// If |body| raises an error while parsing then a zero-initialized |T| is
-  /// returned.
+  /// Parses a lexical block starting with the token `start` and ending with
+  /// the token `end`. `body` is called to parse the lexical block body
+  /// between the `start` and `end` tokens. If the `start` or `end` tokens
+  /// are not matched then an error is generated and a zero-initialized `T` is
+  /// returned. If `body` raises an error while parsing then a zero-initialized
+  /// `T` is returned.
   /// @param start the token that begins the lexical block
   /// @param end the token that ends the lexical block
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
   /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
-  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
   T expect_block(Token::Type start,
                  Token::Type end,
                  const std::string& use,
                  F&& body);
-  /// A convenience function that calls |expect_block| passing
-  /// |Token::Type::kParenLeft| and |Token::Type::kParenRight| for the |start|
-  /// and |end| arguments, respectively.
+  /// A convenience function that calls expect_block() passing
+  /// `Token::Type::kParenLeft` and `Token::Type::kParenRight` for the `start`
+  /// and `end` arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
   /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
-  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
   T expect_paren_block(const std::string& use, F&& body);
-  /// A convenience function that calls |expect_block| passing
-  /// |Token::Type::kBraceLeft| and |Token::Type::kBraceRight| for the |start|
-  /// and |end| arguments, respectively.
+  /// A convenience function that calls `expect_block` passing
+  /// `Token::Type::kBraceLeft` and `Token::Type::kBraceRight` for the `start`
+  /// and `end` arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
   /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
-  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
   T expect_brace_block(const std::string& use, F&& body);
-  /// A convenience function that calls |expect_block| passing
-  /// |Token::Type::kLessThan| and |Token::Type::kGreaterThan| for the |start|
-  /// and |end| arguments, respectively.
+  /// A convenience function that calls `expect_block` passing
+  /// `Token::Type::kLessThan` and `Token::Type::kGreaterThan` for the `start`
+  /// and `end` arguments, respectively.
   /// @param use a description of what was being parsed if an error was raised
   /// @param body a function or lambda that is called to parse the lexical block
   /// body, with the signature: `Expect<Result>()` or `Maybe<Result>()`.
-  /// @return the value returned by |body| if no errors are raised, otherwise
+  /// @return the value returned by `body` if no errors are raised, otherwise
   /// an Expect with error state.
   template <typename F, typename T = ReturnType<F>>
   T expect_lt_gt_block(const std::string& use, F&& body);
 
-  /// sync() calls the function |func|, and attempts to resynchronize the parser
-  /// to the next found resynchronization token if |func| fails.
-  /// If the next found resynchronization token is |tok|, then sync will also
-  /// consume |tok|.
+  /// sync() calls the function `func`, and attempts to resynchronize the
+  /// parser to the next found resynchronization token if `func` fails. If the
+  /// next found resynchronization token is `tok`, then sync will also consume
+  /// `tok`.
   ///
-  /// sync() will transiently add |tok| to the parser's stack of synchronization
-  /// tokens for the duration of the call to |func|. Once |func| returns, |tok|
-  /// is removed from the stack of resynchronization tokens. sync calls may be
-  /// nested, and so the number of resynchronization tokens is equal to the
-  /// number of |sync| calls in the current stack frame.
+  /// sync() will transiently add `tok` to the parser's stack of
+  /// synchronization tokens for the duration of the call to `func`. Once @p
+  /// func returns,
+  /// `tok` is removed from the stack of resynchronization tokens. sync calls
+  /// may be nested, and so the number of resynchronization tokens is equal to
+  /// the number of sync() calls in the current stack frame.
   ///
-  /// sync() updates |synchronized_|, setting it to `true` if the next
-  /// resynchronization token found was |tok|, otherwise `false`.
+  /// sync() updates #synchronized_, setting it to `true` if the next
+  /// resynchronization token found was `tok`, otherwise `false`.
   ///
-  /// @param tok the token to attempt to synchronize the parser to if |func|
+  /// @param tok the token to attempt to synchronize the parser to if `func`
   /// fails.
   /// @param func a function or lambda with the signature: `Expect<Result>()` or
   /// `Maybe<Result>()`.
-  /// @return the value returned by |func|.
+  /// @return the value returned by `func`
   template <typename F, typename T = ReturnType<F>>
   T sync(Token::Type tok, F&& func);
   /// sync_to() attempts to resynchronize the parser to the next found
-  /// resynchronization token or |tok| (whichever comes first).
+  /// resynchronization token or `tok` (whichever comes first).
   ///
-  /// Synchronization tokens are transiently defined by calls to |sync|.
+  /// Synchronization tokens are transiently defined by calls to sync().
   ///
-  /// sync_to() updates |synchronized_|, setting it to `true` if a
-  /// resynchronization token was found and it was |tok|, otherwise `false`.
+  /// sync_to() updates #synchronized_, setting it to `true` if a
+  /// resynchronization token was found and it was `tok`, otherwise `false`.
   ///
   /// @param tok the token to attempt to synchronize the parser to.
   /// @param consume if true and the next found resynchronization token is
-  /// |tok| then sync_to() will also consume |tok|.
-  /// @return the state of |synchronized_|.
+  /// `tok` then sync_to() will also consume `tok`.
+  /// @return the state of #synchronized_.
   /// @see sync().
   bool sync_to(Token::Type tok, bool consume);
-  /// @return true if |t| is in the stack of resynchronization tokens.
+  /// @return true if `t` is in the stack of resynchronization tokens.
   /// @see sync().
   bool is_sync_token(const Token& t) const;
 
-  /// without_error() calls the function |func| muting any grammatical errors
+  /// without_error() calls the function `func` muting any grammatical errors
   /// found while executing the function. This can be used as a best-effort to
   /// produce a meaningful error message when the parser is out of sync.
   /// @param func a function or lambda with the signature: `Expect<Result>()` or
   /// `Maybe<Result>()`.
-  /// @return the value returned by |func|.
+  /// @return the value returned by `func`
   template <typename F, typename T = ReturnType<F>>
   T without_error(F&& func);
 
-  /// Returns all the decorations taken from |list| that matches the type |T|.
-  /// Those that do not match are kept in |list|.
+  /// Returns all the decorations taken from `list` that matches the type `T`.
+  /// Those that do not match are kept in `list`.
   template <typename T>
   std::vector<T*> take_decorations(ast::DecorationList& list);
 
-  /// Downcasts all the decorations in |list| to the type |T|, raising a parser
-  /// error if any of the decorations aren't of the type |T|.
+  /// Downcasts all the decorations in `list` to the type `T`, raising a parser
+  /// error if any of the decorations aren't of the type `T`.
   template <typename T>
   Expect<std::vector<T*>> cast_decorations(ast::DecorationList& list);
 
-  /// Reports an error if the decoration list |list| is not empty.
+  /// Reports an error if the decoration list `list` is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 

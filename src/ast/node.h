@@ -59,7 +59,7 @@ class Node : public Castable<Node> {
   /// @param indent number of spaces to indent the node when writing
   virtual void to_str(std::ostream& out, size_t indent) const = 0;
 
-  /// Convenience wrapper around the |to_str| method.
+  /// Convenience wrapper around the to_str() method.
   /// @returns the node as a string
   std::string str() const;
 

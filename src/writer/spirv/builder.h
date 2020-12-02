@@ -412,7 +412,7 @@ class Builder {
   /// Geneates an OpLoad
   /// @param type the type to load
   /// @param id the variable id to load
-  /// @returns the ID of the loaded value or |id| if type is not a pointer
+  /// @returns the ID of the loaded value or `id` if type is not a pointer
   uint32_t GenerateLoadIfNeeded(ast::type::Type* type, uint32_t id);
   /// Geneates an OpStore
   /// @param to the ID to store too

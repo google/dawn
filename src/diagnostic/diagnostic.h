@@ -28,7 +28,7 @@ namespace diag {
 /// Severity is an enumerator of diagnostic severities.
 enum class Severity { Info, Warning, Error, Fatal };
 
-/// @return true iff |a| is more than, or of equal severity to |b|.
+/// @return true iff `a` is more than, or of equal severity to `b`
 inline bool operator>=(Severity a, Severity b) {
   return static_cast<int>(a) >= static_cast<int>(b);
 }
@@ -57,25 +57,25 @@ class List {
   /// Constructs the list with no elements.
   List();
 
-  /// Copy constructor. Copies the diagnostics from |list| into this list.
+  /// Copy constructor. Copies the diagnostics from `list` into this list.
   /// @param list the list of diagnostics to copy into this list.
   List(std::initializer_list<Diagnostic> list);
 
-  /// Copy constructor. Copies the diagnostics from |list| into this list.
+  /// Copy constructor. Copies the diagnostics from `list` into this list.
   /// @param list the list of diagnostics to copy into this list.
   List(const List& list);
 
-  /// Move constructor. Moves the diagnostics from |list| into this list.
+  /// Move constructor. Moves the diagnostics from `list` into this list.
   /// @param list the list of diagnostics to move into this list.
   List(List&& list);
   ~List();
 
-  /// Assignment operator. Copies the diagnostics from |list| into this list.
+  /// Assignment operator. Copies the diagnostics from `list` into this list.
   /// @param list the list to copy into this list.
   /// @return this list.
   List& operator=(const List& list);
 
-  /// Assignment move operator. Moves the diagnostics from |list| into this
+  /// Assignment move operator. Moves the diagnostics from `list` into this
   /// list.
   /// @param list the list to move into this list.
   /// @return this list.

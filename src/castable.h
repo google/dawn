@@ -39,7 +39,7 @@ class ClassID {
 
   /// Equality operator
   /// @param rhs the ClassID to compare against
-  /// @returns true if this ClassID is equal to @p rhs
+  /// @returns true if this ClassID is equal to `rhs`
   inline bool operator==(ClassID& rhs) const { return id == rhs.id; }
 
  private:
@@ -60,7 +60,7 @@ class CastableBase {
   virtual ~CastableBase() = default;
 
   /// @returns true if this object is of, or derives from a class with the
-  /// ClassID @p id.
+  /// ClassID `id`.
   /// @param id the ClassID to test for
   virtual bool Is(ClassID id) const;
 
@@ -129,7 +129,7 @@ class Castable : public BASE {
   using Base = Castable;
 
   /// @returns true if this object is of, or derives from a class with the
-  /// ClassID @p id.
+  /// ClassID `id`.
   /// @param id the ClassID to test for
   bool Is(ClassID id) const override {
     return ClassID::Of<CLASS>() == id || BASE::Is(id);
@@ -166,8 +166,8 @@ class Castable : public BASE {
   }
 };
 
-/// As() dynamically casts @p obj to the target type `TO`.
-/// @returns the cast object, or nullptr if @p obj is `nullptr` or not of the
+/// As() dynamically casts `obj` to the target type `TO`.
+/// @returns the cast object, or nullptr if `obj` is `nullptr` or not of the
 /// type `TO`.
 /// @param obj the object to cast
 template <typename TO, typename FROM>

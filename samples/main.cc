@@ -248,10 +248,10 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   return true;
 }
 
-/// Copies the content from the file named |filename| to |buffer|,
-/// assuming each element in the file is of type |T|.  If any error occurs,
+/// Copies the content from the file named `input_file` to `buffer`,
+/// assuming each element in the file is of type `T`.  If any error occurs,
 /// writes error messages to the standard error stream and returns false.
-/// Assumes the size of a |T| object is divisible by its required alignment.
+/// Assumes the size of a `T` object is divisible by its required alignment.
 /// @returns true if we successfully read the file.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-template"
@@ -306,11 +306,11 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
   return true;
 }
 
-/// Writes the given |buffer| into the file named as |output_file| using the
-/// given |mode|.  If |filename| is empty or "-", writes to standard output. If
-/// any error occurs, returns false and outputs error message to standard error.
-/// The ContainerT type must have data() and size() methods, like std::string
-/// and std::vector do.
+/// Writes the given `buffer` into the file named as `output_file` using the
+/// given `mode`.  If `output_file` is empty or "-", writes to standard
+/// output. If any error occurs, returns false and outputs error message to
+/// standard error. The ContainerT type must have data() and size() methods,
+/// like `std::string` and `std::vector` do.
 /// @returns true on success
 template <typename ContainerT>
 bool WriteFile(const std::string& output_file,

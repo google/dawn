@@ -162,7 +162,7 @@ struct BlockCounters {
   int paren = 0;    // (   )
 
   /// @return the current enter-exit depth for the given block token type. If
-  /// |t| is not a block token type, then 0 is always returned.
+  /// `t` is not a block token type, then 0 is always returned.
   int consume(const Token& t) {
     if (t.Is(Token::Type::kAttrLeft))
       return attrs++;

@@ -32,6 +32,7 @@ class TypeManager {
   /// Move constructor
   TypeManager(TypeManager&&);
   // Move assignment
+  /// @param rhs the TypeManager to move
   TypeManager& operator=(TypeManager&& rhs);
   ~TypeManager();
 

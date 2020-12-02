@@ -34,8 +34,8 @@ class CloneContext {
   /// Destructor
   ~CloneContext();
 
-  /// Clones the `Node` or `type::Type` @p a into the module #mod if @p a is not
-  /// null. If @p a is null, then Clone() returns null. If @p a has been cloned
+  /// Clones the `Node` or `type::Type` `a` into the module #mod if `a` is not
+  /// null. If `a` is null, then Clone() returns null. If `a` has been cloned
   /// already by this CloneContext then the same cloned pointer is returned.
   /// @note Semantic information such as resolved expression type and intrinsic
   /// information is not cloned.
@@ -56,7 +56,7 @@ class CloneContext {
     return static_cast<T*>(c);
   }
 
-  /// Clones the `Source` @p s into @p mod
+  /// Clones the `Source` `s` into `mod`
   /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
   /// `Source.File`s are owned by the `Module` this should make a copy of the
   /// file.
@@ -64,7 +64,7 @@ class CloneContext {
   /// @return the cloned source
   Source Clone(const Source& s) { return s; }
 
-  /// Clones each of the elements of the vector @p v into the module #mod.
+  /// Clones each of the elements of the vector `v` into the module #mod.
   /// @param v the vector to clone
   /// @return the cloned vector
   template <typename T>

@@ -158,29 +158,29 @@ struct TextureSignature : public Signature {
   const Parameters params;
 };
 
-/// Determines if the given |name| is a coarse derivative
+/// Determines if the given `i` is a coarse derivative
 /// @param i the intrinsic
 /// @returns true if the given derivative is coarse.
 bool IsCoarseDerivative(Intrinsic i);
 
-/// Determines if the given |name| is a fine derivative
+/// Determines if the given `i` is a fine derivative
 /// @param i the intrinsic
 /// @returns true if the given derivative is fine.
 bool IsFineDerivative(Intrinsic i);
 
-/// Determine if the given |name| is a derivative intrinsic
+/// Determine if the given `i` is a derivative intrinsic
 /// @param i the intrinsic
-/// @returns true if the given |name| is a derivative intrinsic
+/// @returns true if the given `i` is a derivative intrinsic
 bool IsDerivative(Intrinsic i);
 
-/// Determines if the given |name| is a float classification intrinsic
+/// Determines if the given `i` is a float classification intrinsic
 /// @param i the intrinsic
-/// @returns true if the given |name| is a float intrinsic
+/// @returns true if the given `i` is a float intrinsic
 bool IsFloatClassificationIntrinsic(Intrinsic i);
 
-/// Determines if the given |name| is a texture operation intrinsic
+/// Determines if the given `i` is a texture operation intrinsic
 /// @param i the intrinsic
-/// @returns true if the given |name| is a texture operation intrinsic
+/// @returns true if the given `i` is a texture operation intrinsic
 bool IsTextureIntrinsic(Intrinsic i);
 
 }  // namespace intrinsic

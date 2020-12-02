@@ -28,9 +28,9 @@ class Namer {
   Namer();
   virtual ~Namer();
 
-  /// Returns a sanitized version of |name|
+  /// Returns a sanitized version of `name`
   /// @param name the name to sanitize
-  /// @returns the sanitized version of |name|
+  /// @returns the sanitized version of `name`
   virtual std::string NameFor(const std::string& name) = 0;
 
   /// Returns if the given name has been mapped already
@@ -49,9 +49,9 @@ class HashingNamer : public Namer {
   HashingNamer();
   ~HashingNamer() override;
 
-  /// Returns a sanitized version of |name|
+  /// Returns a sanitized version of `name`
   /// @param name the name to sanitize
-  /// @returns the sanitized version of |name|
+  /// @returns the sanitized version of `name`
   std::string NameFor(const std::string& name) override;
 };
 
@@ -61,9 +61,9 @@ class NoopNamer : public Namer {
   NoopNamer();
   ~NoopNamer() override;
 
-  /// Returns |name|
+  /// Returns `name`
   /// @param name the name
-  /// @returns |name|
+  /// @returns `name`
   std::string NameFor(const std::string& name) override;
 };
 

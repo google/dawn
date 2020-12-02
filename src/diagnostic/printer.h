@@ -50,7 +50,7 @@ class Printer {
  public:
   /// @returns a diagnostic Printer
   /// @param out the file to print to.
-  /// @param use_colors if true, the printer will use colors if |out| is a
+  /// @param use_colors if true, the printer will use colors if `out` is a
   /// terminal and supports them.
   static std::unique_ptr<Printer> create(FILE* out, bool use_colors);
 
@@ -58,7 +58,7 @@ class Printer {
 
   /// writes the string str to the printer with the given style.
   /// @param str the string to write to the printer
-  /// @param style the style used to print |str|
+  /// @param style the style used to print `str`
   virtual void write(const std::string& str, const Style& style) = 0;
 };
 

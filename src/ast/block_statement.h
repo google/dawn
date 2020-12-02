@@ -62,18 +62,18 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
     return statements_.empty() ? nullptr : statements_.back();
   }
 
-  /// Retrieves the statement at |idx|
+  /// Retrieves the statement at `idx`
   /// @param idx the index. The index is not bounds checked.
-  /// @returns the statement at |idx|
+  /// @returns the statement at `idx`
   const Statement* get(size_t idx) const { return statements_[idx]; }
 
-  /// Retrieves the statement at |idx|
+  /// Retrieves the statement at `idx`
   /// @param idx the index. The index is not bounds checked.
-  /// @returns the statement at |idx|
+  /// @returns the statement at `idx`
   Statement* operator[](size_t idx) { return statements_[idx]; }
-  /// Retrieves the statement at |idx|
+  /// Retrieves the statement at `idx`
   /// @param idx the index. The index is not bounds checked.
-  /// @returns the statement at |idx|
+  /// @returns the statement at `idx`
   const Statement* operator[](size_t idx) const { return statements_[idx]; }
 
   /// @returns the beginning iterator

@@ -40,7 +40,8 @@ class Module {
   Module();
   /// Move constructor
   Module(Module&&);
-  // Move assignment
+  /// Move assignment
+  /// @param rhs the Module to move
   Module& operator=(Module&& rhs);
   ~Module();
 

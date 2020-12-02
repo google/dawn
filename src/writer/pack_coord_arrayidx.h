@@ -31,9 +31,9 @@ namespace writer {
 /// A helper function use to generate texture intrinsic function calls for
 /// backends that expect the texture coordinate and array index to be packed
 /// together into a single 'coordinate' parameter.
-/// PackCoordAndArrayIndex() calls the @p callback function with a vector
-/// expression containing the elements of @p coords followed by the single
-/// element of @p array_idx cast to the @p coords element type.
+/// PackCoordAndArrayIndex() calls the `callback` function with a vector
+/// expression containing the elements of `coords` followed by the single
+/// element of `array_idx` cast to the `coords` element type.
 /// All types must have been assigned to the expressions and their child nodes
 /// before calling.
 /// @param coords the texture coordinates. May be a scalar, `vec2` or `vec3`.

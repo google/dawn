@@ -60,13 +60,13 @@ class ValidatorImpl {
   /// @returns true if an error was encountered
   bool has_error() const { return diags_.contains_errors(); }
 
-  /// Appends an error at @p src with the code @p code and message @p msg
+  /// Appends an error at `src` with the code `code` and message `msg`
   /// @param src the source causing the error
   /// @param code the validation error code
   /// @param msg the error message
   void add_error(const Source& src, const char* code, const std::string& msg);
 
-  /// Appends an error at @p src with the message @p msg
+  /// Appends an error at `src` with the message `msg`
   /// @param src the source causing the error
   /// @param msg the error message
   void add_error(const Source& src, const std::string& msg);
@@ -111,9 +111,9 @@ class ValidatorImpl {
   /// @param assign is the assigment to check if its lhs is a const
   /// @returns false if lhs of assign is a constant identifier
   bool ValidateConstant(const ast::AssignmentStatement* assign);
-  /// Validates declaration name uniquness
-  /// @param decl is the new declartion to be added
-  /// @returns true if no previous decleration with the |decl|'s name
+  /// Validates declaration name uniqueness
+  /// @param decl is the new declaration to be added
+  /// @returns true if no previous declaration with the `decl` 's name
   /// exist in the variable stack
   bool ValidateDeclStatement(const ast::VariableDeclStatement* decl);
   /// Validates return statement

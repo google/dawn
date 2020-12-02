@@ -42,7 +42,7 @@ class Type : public Castable<Type> {
   /// @return the newly cloned type
   virtual Type* Clone(CloneContext* ctx) const = 0;
 
-  /// @returns the name for this type. The |type_name| is unique over all types.
+  /// @returns the name for this type. The type name is unique over all types.
   virtual std::string type_name() const = 0;
 
   /// @param mem_layout type of memory layout to use in calculation.
@@ -55,7 +55,7 @@ class Type : public Castable<Type> {
   ///          0 for non-host shareable types.
   virtual uint64_t BaseAlignment(MemoryLayout mem_layout) const;
 
-  /// @returns the pointee type if this is a pointer, |this| otherwise
+  /// @returns the pointee type if this is a pointer, `this` otherwise
   Type* UnwrapPtrIfNeeded();
 
   /// Removes all levels of aliasing and access control.

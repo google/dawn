@@ -53,7 +53,7 @@ class DecoratedVariable : public Castable<DecoratedVariable, Variable> {
   bool HasConstantIdDecoration() const;
 
   /// @returns the constant_id value for the variable. Assumes that
-  /// |HasConstantIdDecoration| has been called first.
+  /// HasConstantIdDecoration() has been called first.
   uint32_t constant_id() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
