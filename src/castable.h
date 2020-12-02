@@ -27,8 +27,14 @@ class ClassID {
   /// @returns the unique ClassID for the type T.
   template <typename T>
   static ClassID Of() {
-    static char _;
-    return ClassID{reinterpret_cast<uintptr_t>(&_)};
+    // Take the address of a static local variable to produce a unique
+    // identifier for the type T.
+    // We use a short name here as this method is instantiated for every
+    // castable class, and so we'll have a fully qualified name in the
+    // executable symbol table for every castable type. A shorter name produces
+    // a smaller executable when unstripped.
+    static char s;
+    return ClassID{reinterpret_cast<uintptr_t>(&s)};
   }
 
   /// Equality operator
