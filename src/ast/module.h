@@ -40,6 +40,8 @@ class Module {
   Module();
   /// Move constructor
   Module(Module&&);
+  // Move assignment
+  Module& operator=(Module&& rhs);
   ~Module();
 
   /// @return a deep copy of this module

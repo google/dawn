@@ -25,6 +25,7 @@ namespace ast {
 Module::Module() = default;
 
 Module::Module(Module&&) = default;
+Module& Module::operator=(Module&& rhs) = default;
 
 Module::~Module() = default;
 

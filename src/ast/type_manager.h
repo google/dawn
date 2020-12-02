@@ -31,6 +31,8 @@ class TypeManager {
   TypeManager();
   /// Move constructor
   TypeManager(TypeManager&&);
+  // Move assignment
+  TypeManager& operator=(TypeManager&& rhs);
   ~TypeManager();
 
   /// Clears all registered types.

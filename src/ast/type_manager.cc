@@ -21,6 +21,7 @@ namespace ast {
 
 TypeManager::TypeManager() = default;
 TypeManager::TypeManager(TypeManager&&) = default;
+TypeManager& TypeManager::operator=(TypeManager&& rhs) = default;
 TypeManager::~TypeManager() = default;
 
 void TypeManager::Reset() {
