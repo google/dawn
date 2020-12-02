@@ -49,7 +49,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
         &csDesc,
         [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
@@ -116,7 +116,7 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
         &csDesc,
         [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
@@ -164,7 +164,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
         &renderPipelineDescriptor,
         [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
@@ -241,7 +241,7 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
         &renderPipelineDescriptor,
         [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
@@ -275,7 +275,7 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputeP
         &csDesc,
         [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
                       status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
@@ -316,7 +316,7 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPi
         &renderPipelineDescriptor,
         [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            ASSERT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
                       status);
 
             CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
