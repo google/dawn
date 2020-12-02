@@ -26,5 +26,7 @@ gclient sync
 Then generate build files using `gn args out/Debug` or `gn args out/Release`.
 A text editor will appear asking build options, the most common option is `is_debug=true/false`; otherwise `gn args out/Release --list` shows all the possible options.
 
+On macOS you'll want to add the `use_system_xcode=true` in most cases. (and if you're a googler please get XCode from go/xcode).
+
 Then use `ninja -C out/Release` to build dawn and for example `./out/Release/dawn_end2end_tests` to run the tests.
 
