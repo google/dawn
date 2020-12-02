@@ -57,9 +57,6 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   /// @returns true if this is a default statement
   bool IsDefault() const { return selectors_.empty(); }
 
-  /// Sets the case body
-  /// @param body the case body
-  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the case body
   const BlockStatement* body() const { return body_; }
   /// @returns the case body

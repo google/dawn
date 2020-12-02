@@ -796,8 +796,7 @@ class FunctionEmitter {
   /// @returns the last statetment in the top of the statement stack.
   ast::Statement* LastStatement();
 
-  struct StatementBlock;
-  using CompletionAction = std::function<void(StatementBlock*)>;
+  using CompletionAction = std::function<void()>;
 
   // A StatementBlock represents a braced-list of statements while it is being
   // constructed.
@@ -824,16 +823,17 @@ class FunctionEmitter {
     // The list of statements being built, if this construct is not a switch.
     ast::BlockStatement* statements_ = nullptr;
     // The list of switch cases being built, if this construct is a switch.
-    // The algorithm will cache a pointer to the vector.  We want that pointer
-    // to be stable no matter how |statements_stack_| is resized.  That's
-    // why we make this a unique_ptr rather than just a plain vector.
-    std::unique_ptr<ast::CaseStatementList> cases_ = nullptr;
+    ast::CaseStatementList* cases_ = nullptr;
   };
 
   /// Pushes an empty statement block onto the statements stack.
+  /// @param block the block to push into
+  /// @param cases the case list to push into
   /// @param action the completion action for this block
   void PushNewStatementBlock(const Construct* construct,
                              uint32_t end_id,
+                             ast::BlockStatement* block,
+                             ast::CaseStatementList* cases,
                              CompletionAction action);
 
   /// Emits an if-statement whose condition is the given flow guard

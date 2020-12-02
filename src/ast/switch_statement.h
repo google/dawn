@@ -49,9 +49,8 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   /// @returns true if this is a default statement
   bool IsDefault() const { return condition_ == nullptr; }
 
-  /// Sets the switch body
-  /// @param body the switch body
-  void set_body(CaseStatementList body) { body_ = std::move(body); }
+  /// @returns the Switch body
+  CaseStatementList& body() { return body_; }
   /// @returns the Switch body
   const CaseStatementList& body() const { return body_; }
 

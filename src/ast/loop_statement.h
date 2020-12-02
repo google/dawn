@@ -42,17 +42,11 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
   LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
 
-  /// Sets the body statements
-  /// @param body the body statements
-  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the body statements
   const BlockStatement* body() const { return body_; }
   /// @returns the body statements
   BlockStatement* body() { return body_; }
 
-  /// Sets the continuing statements
-  /// @param continuing the continuing statements
-  void set_continuing(BlockStatement* continuing) { continuing_ = continuing; }
   /// @returns the continuing statements
   const BlockStatement* continuing() const { return continuing_; }
   /// @returns the continuing statements

@@ -44,15 +44,8 @@ class IfStatement : public Castable<IfStatement, Statement> {
   IfStatement(IfStatement&&);
   ~IfStatement() override;
 
-  /// Sets the condition for the if statement
-  /// @param condition the condition to set
-  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the if condition or nullptr if none set
   Expression* condition() const { return condition_; }
-
-  /// Sets the if body
-  /// @param body the if body
-  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the if body
   const BlockStatement* body() const { return body_; }
   /// @returns the if body
