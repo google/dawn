@@ -14,8 +14,4 @@
 
 buildconfig = "//build/config/BUILDCONFIG.gn"
 
-check_targets = [
-  "//samples:*",
-  "//source:*",
-  "//third_party:*",
-]
+check_targets = [ "//:*" ]

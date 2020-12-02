@@ -841,6 +841,8 @@ source_set("tint_unittests_core_src") {
   deps = [
     ":gmock_and_gtest",
     ":libtint_core_src",
+    ":libtint_wgsl_reader_src",
+    ":libtint_wgsl_writer_src",
   ]
 }
 
