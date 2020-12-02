@@ -93,6 +93,16 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateCopyTextureForBrowserOptions(
+            const CopyTextureForBrowserOptions* options) {
+            if (options->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR(
+                    "CopyTextureForBrowserOptions: nextInChain must be nullptr");
+            }
+
+            return {};
+        }
+
         RenderPipelineBase* GetOrCreateCopyTextureForBrowserPipeline(DeviceBase* device) {
             InternalPipelineStore* store = device->GetInternalPipelineStore();
 
@@ -162,7 +172,8 @@ namespace dawn_native {
     MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
                                              const TextureCopyView* source,
                                              const TextureCopyView* destination,
-                                             const Extent3D* copySize) {
+                                             const Extent3D* copySize,
+                                             const CopyTextureForBrowserOptions* options) {
         DAWN_TRY(device->ValidateObject(source->texture));
         DAWN_TRY(device->ValidateObject(destination->texture));
 
@@ -179,6 +190,8 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateCopyTextureFormatConversion(source->texture->GetFormat().format,
                                                      destination->texture->GetFormat().format));
+
+        DAWN_TRY(ValidateCopyTextureForBrowserOptions(options));
 
         // TODO(shaobo.yan@intel.com): Support the simplest case for now that source and destination
         // texture has the same size and do full texture blit. Will address sub texture blit in
@@ -197,7 +210,8 @@ namespace dawn_native {
     MaybeError DoCopyTextureForBrowser(DeviceBase* device,
                                        const TextureCopyView* source,
                                        const TextureCopyView* destination,
-                                       const Extent3D* copySize) {
+                                       const Extent3D* copySize,
+                                       const CopyTextureForBrowserOptions* options) {
         // TODO(shaobo.yan@intel.com): In D3D12 and Vulkan, compatible texture format can directly
         // copy to each other. This can be a potential fast path.
         RenderPipelineBase* pipeline = GetOrCreateCopyTextureForBrowserPipeline(device);
@@ -213,20 +227,24 @@ namespace dawn_native {
         bgDesc.entries = bindGroupEntries;
 
         // Prepare binding 0 resource: uniform buffer.
-        // TODO(shaobo.yan@intel.com): Will use scale vector and offset vector to replace the
-        // 4x4 rotation matrix here.
-        const float rotationMatrix[] = {
+        float uniformData[] = {
             1.0, 1.0,  // scale
             0.0, 0.0   // offset
         };
 
-        BufferDescriptor rotationUniformDesc = {};
-        rotationUniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
-        rotationUniformDesc.size = sizeof(rotationMatrix);
-        Ref<BufferBase> rotationUniform = AcquireRef(device->CreateBuffer(&rotationUniformDesc));
+        // Handle flipY.
+        if (options && options->flipY) {
+            uniformData[1] *= -1.0;
+            uniformData[3] += 1.0;
+        }
 
-        device->GetDefaultQueue()->WriteBuffer(rotationUniform.Get(), 0, rotationMatrix,
-                                               sizeof(rotationMatrix));
+        BufferDescriptor uniformDesc = {};
+        uniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+        uniformDesc.size = sizeof(uniformData);
+        Ref<BufferBase> uniformBuffer = AcquireRef(device->CreateBuffer(&uniformDesc));
+
+        device->GetDefaultQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData,
+                                               sizeof(uniformData));
 
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
@@ -242,8 +260,8 @@ namespace dawn_native {
 
         // Set bind group entries.
         bindGroupEntries[0].binding = 0;
-        bindGroupEntries[0].buffer = rotationUniform.Get();
-        bindGroupEntries[0].size = sizeof(rotationMatrix);
+        bindGroupEntries[0].buffer = uniformBuffer.Get();
+        bindGroupEntries[0].size = sizeof(uniformData);
         bindGroupEntries[1].binding = 1;
         bindGroupEntries[1].sampler = sampler.Get();
         bindGroupEntries[2].binding = 2;

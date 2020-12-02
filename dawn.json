@@ -507,6 +507,13 @@
             {"name": "compute stage", "type": "programmable stage descriptor"}
         ]
     },
+    "copy texture for browser options": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "flipY", "type": "bool", "default": "false"}
+        ]
+    },
     "create ready compute pipeline callback": {
         "category": "callback",
         "args": [
@@ -1044,10 +1051,12 @@
             },
             {
                 "name": "copy texture for browser",
+                "extensible": true,
                 "args": [
                     {"name": "source", "type": "texture copy view", "annotation": "const*"},
                     {"name": "destination", "type": "texture copy view", "annotation": "const*"},
-                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
+                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
+                    {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
             }
         ]

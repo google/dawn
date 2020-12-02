@@ -53,11 +53,15 @@ class CopyTextureForBrowserTests : public DawnTest {
                                 uint32_t height,
                                 uint32_t srcTexelsPerRow,
                                 RGBA8* dstData,
-                                uint32_t dstTexelsPerRow) {
-        for (unsigned int y = 0; y < height; ++y) {
-            for (unsigned int x = 0; x < width; ++x) {
-                unsigned int src = x + y * srcTexelsPerRow;
-                unsigned int dst = x + y * dstTexelsPerRow;
+                                uint32_t dstTexelsPerRow,
+                                const wgpu::CopyTextureForBrowserOptions* options) {
+        bool isFlipY = options != nullptr && options->flipY;
+        for (uint32_t y = 0; y < height; ++y) {
+            for (uint32_t x = 0; x < width; ++x) {
+                uint32_t srcYIndex =
+                    isFlipY ? (height - y - 1) * srcTexelsPerRow : y * srcTexelsPerRow;
+                uint32_t src = x + srcYIndex;
+                uint32_t dst = x + y * dstTexelsPerRow;
                 dstData[dst] = srcData[src];
             }
         }
@@ -65,7 +69,8 @@ class CopyTextureForBrowserTests : public DawnTest {
 
     void DoTest(const TextureSpec& srcSpec,
                 const TextureSpec& dstSpec,
-                const wgpu::Extent3D& copySize) {
+                const wgpu::Extent3D& copySize,
+                const wgpu::CopyTextureForBrowserOptions* options) {
         wgpu::TextureDescriptor srcDescriptor;
         srcDescriptor.size = srcSpec.textureSize;
         srcDescriptor.format = kTextureFormat;
@@ -119,7 +124,7 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         // Perform a copy here for testing.
         device.GetDefaultQueue().CopyTextureForBrowser(&srcTextureCopyView, &dstTextureCopyView,
-                                                       &copySize);
+                                                       &copySize, options);
 
         // Texels in single slice.
         const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(
@@ -134,7 +139,7 @@ class CopyTextureForBrowserTests : public DawnTest {
                 (srcSpec.copyOrigin.x + srcSpec.copyOrigin.y * copyLayout.texelBlocksPerRow);
             PackTextureData(&textureArrayCopyData[expectedTexelArrayDataStartIndex], copySize.width,
                             copySize.height, copyLayout.texelBlocksPerRow, expected.data(),
-                            copySize.width);
+                            copySize.width, options);
 
             EXPECT_TEXTURE_RGBA8_EQ(expected.data(), dstTexture, dstSpec.copyOrigin.x,
                                     dstSpec.copyOrigin.y, copySize.width, copySize.height,
@@ -160,7 +165,7 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
@@ -172,14 +177,16 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
     textureSpec.copyOrigin = {0, 0, 0};
     textureSpec.level = 0;
     textureSpec.textureSize = {kWidth, kHeight, 1};
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
@@ -191,14 +198,16 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
     textureSpec.copyOrigin = {0, 0, 0};
     textureSpec.level = 0;
     textureSpec.textureSize = {kWidth, kHeight, 1};
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
@@ -210,14 +219,16 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
     textureSpec.copyOrigin = {0, 0, 0};
     textureSpec.level = 0;
     textureSpec.textureSize = {kWidth, kHeight, 1};
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails due to 'WriteTexture' unimplemented.
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
@@ -229,7 +240,51 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
     textureSpec.copyOrigin = {0, 0, 0};
     textureSpec.level = 0;
     textureSpec.textureSize = {kWidth, kHeight, 1};
-    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1});
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
+}
+
+TEST_P(CopyTextureForBrowserTests, VerifyFlipY) {
+    // Tests skip due to crbug.com/dawn/592.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
+    // Related bug : crbug.com/dawn/483
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    constexpr uint32_t kWidth = 901;
+    constexpr uint32_t kHeight = 1001;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    options.flipY = true;
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
+}
+
+TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
+    // Tests skip due to crbug.com/dawn/592.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    // OpenGL tests fails because 'WriteTexture' is unimplemented.
+    // Related bug : crbug.com/dawn/483
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    constexpr uint32_t kWidth = 1;
+    constexpr uint32_t kHeight = 1001;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, 0};
+    textureSpec.level = 0;
+    textureSpec.textureSize = {kWidth, kHeight, 1};
+
+    wgpu::CopyTextureForBrowserOptions options = {};
+    options.flipY = true;
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, 1}, &options);
 }
 
 DAWN_INSTANTIATE_TEST(CopyTextureForBrowserTests,

@@ -47,7 +47,8 @@ namespace dawn_native {
                           const Extent3D* writeSize);
         void CopyTextureForBrowser(const TextureCopyView* source,
                                    const TextureCopyView* destination,
-                                   const Extent3D* copySize);
+                                   const Extent3D* copySize,
+                                   const CopyTextureForBrowserOptions* options);
 
         void TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);
@@ -68,7 +69,8 @@ namespace dawn_native {
                                         const Extent3D* writeSize);
         MaybeError CopyTextureForBrowserInternal(const TextureCopyView* source,
                                                  const TextureCopyView* destination,
-                                                 const Extent3D* copySize);
+                                                 const Extent3D* copySize,
+                                                 const CopyTextureForBrowserOptions* options);
 
         virtual MaybeError SubmitImpl(uint32_t commandCount,
                                       CommandBufferBase* const* commands) = 0;

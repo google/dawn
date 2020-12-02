@@ -312,18 +312,23 @@ namespace dawn_native {
 
     void QueueBase::CopyTextureForBrowser(const TextureCopyView* source,
                                           const TextureCopyView* destination,
-                                          const Extent3D* copySize) {
-        GetDevice()->ConsumedError(CopyTextureForBrowserInternal(source, destination, copySize));
+                                          const Extent3D* copySize,
+                                          const CopyTextureForBrowserOptions* options) {
+        GetDevice()->ConsumedError(
+            CopyTextureForBrowserInternal(source, destination, copySize, options));
     }
 
-    MaybeError QueueBase::CopyTextureForBrowserInternal(const TextureCopyView* source,
-                                                        const TextureCopyView* destination,
-                                                        const Extent3D* copySize) {
+    MaybeError QueueBase::CopyTextureForBrowserInternal(
+        const TextureCopyView* source,
+        const TextureCopyView* destination,
+        const Extent3D* copySize,
+        const CopyTextureForBrowserOptions* options) {
         if (GetDevice()->IsValidationEnabled()) {
-            DAWN_TRY(ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize));
+            DAWN_TRY(
+                ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize, options));
         }
 
-        return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize);
+        return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize, options);
     }
 
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
