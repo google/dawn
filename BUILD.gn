@@ -773,8 +773,8 @@ source_set("tint_unittests_core_src") {
     "src/ast/location_decoration_test.cc",
     "src/ast/loop_statement_test.cc",
     "src/ast/member_accessor_expression_test.cc",
-    "src/ast/module_test.cc",
     "src/ast/module_clone_test.cc",
+    "src/ast/module_test.cc",
     "src/ast/null_literal_test.cc",
     "src/ast/return_statement_test.cc",
     "src/ast/scalar_constructor_expression_test.cc",
@@ -1314,7 +1314,7 @@ if (build_with_chromium) {
   }
 
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
-    fuzzer_test("tint_spv_reader_fuzzer") {
+    fuzzer_test("tint_ast_clone_fuzzer") {
       sources = [ "fuzzers/tint_ast_clone_fuzzer.cc" ]
       deps = [
         ":libtint_wgsl_reader_src",
