@@ -20,6 +20,8 @@
 #include "src/ast/decorated_variable.h"
 #include "src/ast/module.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::Variable);
+
 namespace tint {
 namespace ast {
 

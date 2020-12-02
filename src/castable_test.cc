@@ -19,39 +19,44 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace {
-
-struct Animal : public Castable<Animal> {
+struct Animal : public tint::Castable<Animal> {
   explicit Animal(std::string n) : name(n) {}
   const std::string name;
 };
 
-struct Amphibian : public Castable<Amphibian, Animal> {
+struct Amphibian : public tint::Castable<Amphibian, Animal> {
   explicit Amphibian(std::string n) : Base(n) {}
 };
 
-struct Mammal : public Castable<Mammal, Animal> {
+struct Mammal : public tint::Castable<Mammal, Animal> {
   explicit Mammal(std::string n) : Base(n) {}
 };
 
-struct Reptile : public Castable<Reptile, Animal> {
+struct Reptile : public tint::Castable<Reptile, Animal> {
   explicit Reptile(std::string n) : Base(n) {}
 };
 
-struct Frog : public Castable<Frog, Amphibian> {
+struct Frog : public tint::Castable<Frog, Amphibian> {
   Frog() : Base("Frog") {}
 };
 
-struct Bear : public Castable<Bear, Mammal> {
+struct Bear : public tint::Castable<Bear, Mammal> {
   Bear() : Base("Bear") {}
 };
 
-struct Gecko : public Castable<Gecko, Reptile> {
+struct Gecko : public tint::Castable<Gecko, Reptile> {
   Gecko() : Base("Gecko") {}
 };
 
-}  // namespace
+TINT_INSTANTIATE_CLASS_ID(Animal);
+TINT_INSTANTIATE_CLASS_ID(Amphibian);
+TINT_INSTANTIATE_CLASS_ID(Mammal);
+TINT_INSTANTIATE_CLASS_ID(Reptile);
+TINT_INSTANTIATE_CLASS_ID(Frog);
+TINT_INSTANTIATE_CLASS_ID(Bear);
+TINT_INSTANTIATE_CLASS_ID(Gecko);
+
+namespace tint {
 
 TEST(CastableBase, Is) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();

@@ -19,6 +19,8 @@
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::type::Texture);
+
 namespace tint {
 namespace ast {
 namespace type {

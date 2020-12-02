@@ -14,6 +14,8 @@
 
 #include "src/ast/int_literal.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::IntLiteral);
+
 namespace tint {
 namespace ast {
 

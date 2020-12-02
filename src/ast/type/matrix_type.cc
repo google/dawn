@@ -21,6 +21,8 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/vector_type.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::type::Matrix);
+
 namespace tint {
 namespace ast {
 namespace type {

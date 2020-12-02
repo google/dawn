@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_decoration.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::StructDecoration);
+
 namespace tint {
 namespace ast {
 

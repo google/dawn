@@ -21,20 +21,28 @@
 
 namespace tint {
 
+/// Helper macro to instantiate the ClassID for `CLASS`.
+#define TINT_INSTANTIATE_CLASS_ID(CLASS) \
+  template <>                            \
+  const char tint::ClassID::Unique<CLASS>::token = 0
+
 /// ClassID represents a unique, comparable identifier for a C++ type.
 class ClassID {
+ private:
+  /// Helper template that holds a single static field, which is used by Of()
+  /// to obtain a unique identifier by taking the field's address.
+  template <typename T>
+  struct Unique {
+    static const char token;
+  };
+
  public:
   /// @returns the unique ClassID for the type T.
   template <typename T>
   static ClassID Of() {
-    // Take the address of a static local variable to produce a unique
-    // identifier for the type T.
-    // We use a short name here as this method is instantiated for every
-    // castable class, and so we'll have a fully qualified name in the
-    // executable symbol table for every castable type. A shorter name produces
-    // a smaller executable when unstripped.
-    static char s;
-    return ClassID{reinterpret_cast<uintptr_t>(&s)};
+    // Take the address of a static variable to produce a unique identifier for
+    // the type T.
+    return ClassID{reinterpret_cast<uintptr_t>(&Unique<T>::token)};
   }
 
   /// Equality operator

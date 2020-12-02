@@ -22,6 +22,8 @@
 #include "src/ast/stride_decoration.h"
 #include "src/ast/type/vector_type.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::type::Array);
+
 namespace tint {
 namespace ast {
 namespace type {

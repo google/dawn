@@ -22,6 +22,8 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/module.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::DecoratedVariable);
+
 namespace tint {
 namespace ast {
 

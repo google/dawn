@@ -16,6 +16,8 @@
 
 #include <assert.h>
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::ConstructorExpression);
+
 namespace tint {
 namespace ast {
 

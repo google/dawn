@@ -14,6 +14,8 @@
 
 #include "src/castable.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::CastableBase);
+
 namespace tint {
 
 bool CastableBase::Is(ClassID id) const {

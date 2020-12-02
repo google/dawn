@@ -18,6 +18,8 @@
 
 #include "src/ast/struct_member_offset_decoration.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMemberDecoration);
+
 namespace tint {
 namespace ast {
 

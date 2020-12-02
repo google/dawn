@@ -18,6 +18,8 @@
 
 #include "src/ast/access_decoration.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::TypeDecoration);
+
 namespace tint {
 namespace ast {
 

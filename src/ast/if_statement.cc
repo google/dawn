@@ -18,6 +18,8 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/module.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::IfStatement);
+
 namespace tint {
 namespace ast {
 

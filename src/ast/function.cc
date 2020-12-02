@@ -25,6 +25,8 @@
 #include "src/ast/type/texture_type.h"
 #include "src/ast/workgroup_decoration.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::Function);
+
 namespace tint {
 namespace ast {
 

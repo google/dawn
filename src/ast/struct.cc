@@ -18,6 +18,8 @@
 #include "src/ast/module.h"
 #include "src/ast/struct_block_decoration.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::Struct);
+
 namespace tint {
 namespace ast {
 

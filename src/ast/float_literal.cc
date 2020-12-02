@@ -20,6 +20,8 @@
 #include "src/ast/clone_context.h"
 #include "src/ast/module.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::ast::FloatLiteral);
+
 namespace tint {
 namespace ast {
 
