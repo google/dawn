@@ -51,6 +51,8 @@ enum class BinaryOp {
 class BinaryExpression : public Castable<BinaryExpression, Expression> {
  public:
   /// Constructor
+  BinaryExpression();
+  /// Constructor
   /// @param op the operation type
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
@@ -68,6 +70,9 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   BinaryExpression(BinaryExpression&&);
   ~BinaryExpression() override;
 
+  /// Sets the binary op type
+  /// @param op the binary op type
+  void set_op(BinaryOp op) { op_ = op; }
   /// @returns the binary op type
   BinaryOp op() const { return op_; }
 
@@ -108,8 +113,15 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   /// @returns true if the op is modulo
   bool IsModulo() const { return op_ == BinaryOp::kModulo; }
 
+  /// Sets the left side of the expression
+  /// @param lhs the left side to set
+  void set_lhs(Expression* lhs) { lhs_ = lhs; }
   /// @returns the left side expression
   Expression* lhs() const { return lhs_; }
+
+  /// Sets the right side of the expression
+  /// @param rhs the right side to set
+  void set_rhs(Expression* rhs) { rhs_ = rhs; }
   /// @returns the right side expression
   Expression* rhs() const { return rhs_; }
 

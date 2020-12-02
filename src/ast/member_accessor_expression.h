@@ -31,6 +31,8 @@ class MemberAccessorExpression
     : public Castable<MemberAccessorExpression, Expression> {
  public:
   /// Constructor
+  MemberAccessorExpression();
+  /// Constructor
   /// @param structure the structure
   /// @param member the member
   MemberAccessorExpression(Expression* structure, IdentifierExpression* member);
@@ -45,8 +47,15 @@ class MemberAccessorExpression
   MemberAccessorExpression(MemberAccessorExpression&&);
   ~MemberAccessorExpression() override;
 
+  /// Sets the structure
+  /// @param structure the structure
+  void set_structure(Expression* structure) { struct_ = structure; }
   /// @returns the structure
   Expression* structure() const { return struct_; }
+
+  /// Sets the member
+  /// @param member the member
+  void set_member(IdentifierExpression* member) { member_ = member; }
   /// @returns the member expression
   IdentifierExpression* member() const { return member_; }
 

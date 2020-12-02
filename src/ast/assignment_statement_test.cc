@@ -61,14 +61,16 @@ TEST_F(AssignmentStatementTest, IsValid) {
 TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
   auto* rhs = create<IdentifierExpression>("rhs");
 
-  AssignmentStatement stmt(nullptr, rhs);
+  AssignmentStatement stmt;
+  stmt.set_rhs(rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
   auto* lhs = create<IdentifierExpression>("lhs");
 
-  AssignmentStatement stmt(lhs, nullptr);
+  AssignmentStatement stmt;
+  stmt.set_lhs(lhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 

@@ -14,7 +14,6 @@
 #include "src/scope_stack.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 
 namespace tint {
@@ -32,8 +31,7 @@ TEST_F(ScopeStackTest, Global) {
 }
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
-  ast::type::F32 f32;
-  ast::Variable v("test", ast::StorageClass::kNone, &f32);
+  ast::Variable v;
   v.set_name("my_var");
 
   ScopeStack<ast::Variable*> s;

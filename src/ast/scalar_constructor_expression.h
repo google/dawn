@@ -29,6 +29,8 @@ class ScalarConstructorExpression
     : public Castable<ScalarConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
+  ScalarConstructorExpression();
+  /// Constructor
   /// @param literal the const literal
   explicit ScalarConstructorExpression(Literal* literal);
   /// Constructor
@@ -39,6 +41,9 @@ class ScalarConstructorExpression
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
 
+  /// Set the literal value
+  /// @param literal the literal
+  void set_literal(Literal* literal) { literal_ = literal; }
   /// @returns the literal value
   Literal* literal() const { return literal_; }
 

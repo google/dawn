@@ -20,6 +20,8 @@
 namespace tint {
 namespace ast {
 
+TypeConstructorExpression::TypeConstructorExpression() : Base() {}
+
 TypeConstructorExpression::TypeConstructorExpression(type::Type* type,
                                                      ExpressionList values)
     : Base(), type_(type), values_(std::move(values)) {}

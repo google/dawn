@@ -51,11 +51,17 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
   ElseStatement(ElseStatement&&);
   ~ElseStatement() override;
 
+  /// Sets the condition for the else statement
+  /// @param condition the condition to set
+  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the else condition or nullptr if none set
   Expression* condition() const { return condition_; }
   /// @returns true if the else has a condition
   bool HasCondition() const { return condition_ != nullptr; }
 
+  /// Sets the else body
+  /// @param body the else body
+  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the else body
   const BlockStatement* body() const { return body_; }
   /// @returns the else body

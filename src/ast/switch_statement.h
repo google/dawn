@@ -30,6 +30,8 @@ namespace ast {
 class SwitchStatement : public Castable<SwitchStatement, Statement> {
  public:
   /// Constructor
+  SwitchStatement();
+  /// Constructor
   /// @param condition the switch condition
   /// @param body the switch body
   SwitchStatement(Expression* condition, CaseStatementList body);
@@ -44,6 +46,9 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   SwitchStatement(SwitchStatement&&);
   ~SwitchStatement() override;
 
+  /// Sets the condition for the switch statement
+  /// @param condition the condition to set
+  void set_condition(Expression* condition) { condition_ = condition; }
   /// @returns the switch condition or nullptr if none set
   Expression* condition() const { return condition_; }
   /// @returns true if this is a default statement

@@ -31,6 +31,8 @@ namespace ast {
 /// A struct member statement.
 class StructMember : public Castable<StructMember, Node> {
  public:
+  /// Create a new empty struct member statement
+  StructMember();
   /// Create a new struct member statement
   /// @param name The struct member name
   /// @param type The struct member type
@@ -52,8 +54,14 @@ class StructMember : public Castable<StructMember, Node> {
 
   ~StructMember() override;
 
+  /// Sets the name
+  /// @param name the name to set
+  void set_name(const std::string& name) { name_ = name; }
   /// @returns the name
   const std::string& name() const { return name_; }
+  /// Sets the type
+  /// @param type the type to set
+  void set_type(type::Type* type) { type_ = type; }
   /// @returns the type
   type::Type* type() const { return type_; }
   /// Sets the decorations

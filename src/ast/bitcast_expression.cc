@@ -20,6 +20,8 @@
 namespace tint {
 namespace ast {
 
+BitcastExpression::BitcastExpression() : Base() {}
+
 BitcastExpression::BitcastExpression(type::Type* type, Expression* expr)
     : Base(), type_(type), expr_(expr) {}
 

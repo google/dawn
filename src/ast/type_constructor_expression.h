@@ -28,10 +28,11 @@ namespace ast {
 class TypeConstructorExpression
     : public Castable<TypeConstructorExpression, ConstructorExpression> {
  public:
+  TypeConstructorExpression();
   /// Constructor
   /// @param type the type
   /// @param values the values
-  TypeConstructorExpression(type::Type* type, ExpressionList values);
+  explicit TypeConstructorExpression(type::Type* type, ExpressionList values);
   /// Constructor
   /// @param source the constructor source
   /// @param type the type
@@ -43,8 +44,15 @@ class TypeConstructorExpression
   TypeConstructorExpression(TypeConstructorExpression&&);
   ~TypeConstructorExpression() override;
 
+  /// Set the type
+  /// @param type the type
+  void set_type(type::Type* type) { type_ = type; }
   /// @returns the type
   type::Type* type() const { return type_; }
+
+  /// Set the values
+  /// @param values the values
+  void set_values(ExpressionList values) { values_ = std::move(values); }
   /// @returns the values
   const ExpressionList& values() const { return values_; }
 

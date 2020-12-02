@@ -181,7 +181,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 
@@ -205,7 +206,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 
@@ -229,7 +231,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
   members.push_back(create<ast::StructMember>("c", &f32, decos));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 
@@ -255,7 +258,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
   ast::StructMemberDecorationList b_deco;
   members.push_back(create<ast::StructMember>("float", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 

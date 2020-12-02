@@ -59,7 +59,7 @@ TEST_F(CallExpressionTest, IsValid) {
 }
 
 TEST_F(CallExpressionTest, IsValid_MissingFunction) {
-  CallExpression stmt(nullptr, {});
+  CallExpression stmt;
   EXPECT_FALSE(stmt.IsValid());
 }
 

@@ -20,6 +20,8 @@
 namespace tint {
 namespace ast {
 
+BinaryExpression::BinaryExpression() : Base() {}
+
 BinaryExpression::BinaryExpression(BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)

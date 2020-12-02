@@ -1745,13 +1745,14 @@ Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
   auto source = t.source();
   next();  // Consume the peek
 
-  ast::CaseSelectorList selector_list;
+  auto* stmt = create<ast::CaseStatement>(create<ast::BlockStatement>());
+  stmt->set_source(source);
   if (t.IsCase()) {
     auto selectors = expect_case_selectors();
     if (selectors.errored)
       return Failure::kErrored;
 
-    selector_list = std::move(selectors.value);
+    stmt->set_selectors(std::move(selectors.value));
   }
 
   const char* use = "case statement";
@@ -1766,7 +1767,9 @@ Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
   if (!body.matched)
     return add_error(body.source, "expected case body");
 
-  return create<ast::CaseStatement>(source, selector_list, body.value);
+  stmt->set_body(body.value);
+
+  return stmt;
 }
 
 // case_selectors

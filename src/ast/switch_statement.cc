@@ -21,6 +21,8 @@
 namespace tint {
 namespace ast {
 
+SwitchStatement::SwitchStatement() : Base() {}
+
 SwitchStatement::SwitchStatement(Expression* condition, CaseStatementList body)
     : condition_(condition), body_(body) {}
 

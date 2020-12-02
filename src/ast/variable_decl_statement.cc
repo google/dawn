@@ -20,6 +20,8 @@
 namespace tint {
 namespace ast {
 
+VariableDeclStatement::VariableDeclStatement() : Base() {}
+
 VariableDeclStatement::VariableDeclStatement(Variable* variable)
     : Base(), variable_(variable) {}
 

@@ -67,8 +67,8 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("Ident"), create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[0]->set_condition(create<IdentifierExpression>("Ident"));
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
 
   IfStatement stmt(cond, body);
@@ -119,8 +119,8 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("Ident"), create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[0]->set_condition(create<IdentifierExpression>("Ident"));
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
   else_stmts.push_back(nullptr);
 
@@ -135,8 +135,8 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(create<IdentifierExpression>(""),
-                                             create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[0]->set_condition(create<IdentifierExpression>(""));
 
   IfStatement stmt(cond, body);
   stmt.set_else_statements(else_stmts);
@@ -164,8 +164,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
 
   ElseStatementList else_stmts;
   else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("ident"), create<BlockStatement>()));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[1]->set_condition(create<IdentifierExpression>("ident"));
 
   IfStatement stmt(cond, body);
   stmt.set_else_statements(else_stmts);
@@ -205,9 +205,11 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   else_body->append(create<DiscardStatement>());
 
   ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("ident"), else_if_body));
-  else_stmts.push_back(create<ElseStatement>(else_body));
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[0]->set_condition(create<IdentifierExpression>("ident"));
+  else_stmts[0]->set_body(else_if_body);
+  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
+  else_stmts[1]->set_body(else_body);
 
   IfStatement stmt(cond, body);
   stmt.set_else_statements(else_stmts);

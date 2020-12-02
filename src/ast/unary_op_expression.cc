@@ -20,6 +20,8 @@
 namespace tint {
 namespace ast {
 
+UnaryOpExpression::UnaryOpExpression() : Base() {}
+
 UnaryOpExpression::UnaryOpExpression(UnaryOp op, Expression* expr)
     : Base(), op_(op), expr_(expr) {}
 

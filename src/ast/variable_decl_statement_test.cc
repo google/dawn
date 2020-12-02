@@ -43,10 +43,7 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 }
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
-  type::F32 f32;
-  auto* var = create<Variable>("a", StorageClass::kNone, &f32);
-
-  VariableDeclStatement s(var);
+  VariableDeclStatement s;
   EXPECT_TRUE(s.Is<VariableDeclStatement>());
 }
 
@@ -65,7 +62,7 @@ TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
-  VariableDeclStatement stmt(nullptr);
+  VariableDeclStatement stmt;
   EXPECT_FALSE(stmt.IsValid());
 }
 

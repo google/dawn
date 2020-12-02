@@ -42,8 +42,7 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
-  auto* ident = create<IdentifierExpression>("ident");
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  UnaryOpExpression u;
   EXPECT_TRUE(u.Is<UnaryOpExpression>());
 }
 
@@ -54,7 +53,8 @@ TEST_F(UnaryOpExpressionTest, IsValid) {
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid_NullExpression) {
-  UnaryOpExpression u(UnaryOp::kNot, nullptr);
+  UnaryOpExpression u;
+  u.set_op(UnaryOp::kNot);
   EXPECT_FALSE(u.IsValid());
 }
 

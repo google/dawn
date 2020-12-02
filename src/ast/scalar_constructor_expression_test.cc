@@ -48,7 +48,7 @@ TEST_F(ScalarConstructorExpressionTest, IsValid) {
 }
 
 TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
-  ScalarConstructorExpression c(nullptr);
+  ScalarConstructorExpression c;
   EXPECT_FALSE(c.IsValid());
 }
 

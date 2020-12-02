@@ -46,11 +46,8 @@ TEST_F(BinaryExpressionTest, Creation_WithSource) {
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(BinaryExpressionTest, IsBinary) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
-
-  BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
+TEST_F(BinaryExpressionTest, IsBinaryal) {
+  BinaryExpression r;
   EXPECT_TRUE(r.Is<BinaryExpression>());
 }
 
@@ -65,7 +62,9 @@ TEST_F(BinaryExpressionTest, IsValid) {
 TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
   auto* rhs = create<IdentifierExpression>("rhs");
 
-  BinaryExpression r(BinaryOp::kEqual, nullptr, rhs);
+  BinaryExpression r;
+  r.set_op(BinaryOp::kEqual);
+  r.set_rhs(rhs);
   EXPECT_FALSE(r.IsValid());
 }
 
@@ -80,7 +79,9 @@ TEST_F(BinaryExpressionTest, IsValid_Invalid_LHS) {
 TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
   auto* lhs = create<IdentifierExpression>("lhs");
 
-  BinaryExpression r(BinaryOp::kEqual, lhs, nullptr);
+  BinaryExpression r;
+  r.set_op(BinaryOp::kEqual);
+  r.set_lhs(lhs);
   EXPECT_FALSE(r.IsValid());
 }
 

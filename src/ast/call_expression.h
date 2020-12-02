@@ -28,6 +28,8 @@ namespace ast {
 class CallExpression : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
+  CallExpression();
+  /// Constructor
   /// @param func the function
   /// @param params the parameters
   CallExpression(Expression* func, ExpressionList params);
@@ -40,8 +42,15 @@ class CallExpression : public Castable<CallExpression, Expression> {
   CallExpression(CallExpression&&);
   ~CallExpression() override;
 
+  /// Sets the func
+  /// @param func the func
+  void set_func(Expression* func) { func_ = func; }
   /// @returns the func
   Expression* func() const { return func_; }
+
+  /// Sets the parameters
+  /// @param params the parameters
+  void set_params(ExpressionList params) { params_ = params; }
   /// @returns the parameters
   const ExpressionList& params() const { return params_; }
 

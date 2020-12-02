@@ -29,6 +29,8 @@ namespace ast {
 class BitcastExpression : public Castable<BitcastExpression, Expression> {
  public:
   /// Constructor
+  BitcastExpression();
+  /// Constructor
   /// @param type the type
   /// @param expr the expr
   BitcastExpression(type::Type* type, Expression* expr);
@@ -41,8 +43,15 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
 
+  /// Sets the type
+  /// @param type the type
+  void set_type(type::Type* type) { type_ = type; }
   /// @returns the left side expression
   type::Type* type() const { return type_; }
+
+  /// Sets the expr
+  /// @param expr the expression
+  void set_expr(Expression* expr) { expr_ = expr; }
   /// @returns the expression
   Expression* expr() const { return expr_; }
 

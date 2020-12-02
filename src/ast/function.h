@@ -50,7 +50,8 @@ class Function : public Castable<Function, Node> {
     SetDecoration* set = nullptr;
   };
 
-  /// Create a function
+  /// Create a new empty function statement
+  Function();  /// Create a function
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
@@ -75,8 +76,15 @@ class Function : public Castable<Function, Node> {
 
   ~Function() override;
 
+  /// Sets the function name
+  /// @param name the name to set
+  void set_name(const std::string& name) { name_ = name; }
   /// @returns the function name
   const std::string& name() { return name_; }
+
+  /// Sets the function parameters
+  /// @param params the function parameters
+  void set_params(VariableList params) { params_ = std::move(params); }
   /// @returns the function params
   const VariableList& params() const { return params_; }
 

@@ -107,8 +107,7 @@ TEST_F(DecoratedVariableTest, IsValid) {
 }
 
 TEST_F(DecoratedVariableTest, IsDecorated) {
-  type::I32 t;
-  DecoratedVariable dv(create<Variable>("my_var", StorageClass::kNone, &t));
+  DecoratedVariable dv;
   EXPECT_TRUE(dv.Is<DecoratedVariable>());
 }
 

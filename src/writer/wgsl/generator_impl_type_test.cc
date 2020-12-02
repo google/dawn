@@ -185,7 +185,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 
@@ -205,7 +206,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str = create<ast::Struct>();
+  str->set_members(members);
 
   ast::type::Struct s("S", str);
 

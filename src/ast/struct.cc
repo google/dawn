@@ -21,6 +21,8 @@
 namespace tint {
 namespace ast {
 
+Struct::Struct() : Base() {}
+
 Struct::Struct(StructMemberList members)
     : Base(), members_(std::move(members)) {}
 

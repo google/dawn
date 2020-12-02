@@ -56,16 +56,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
-  type::I32 i32;
-
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
-
-  auto* ident = create<IdentifierExpression>("ident");
-  CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
-
-  SwitchStatement stmt(ident, body);
+  SwitchStatement stmt;
   EXPECT_TRUE(stmt.Is<SwitchStatement>());
 }
 
@@ -92,7 +83,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   CaseStatementList body;
   body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
 
-  SwitchStatement stmt(nullptr, body);
+  SwitchStatement stmt;
+  stmt.set_body(body);
   EXPECT_FALSE(stmt.IsValid());
 }
 

@@ -29,6 +29,8 @@ namespace ast {
 class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
  public:
   /// Constructor
+  UnaryOpExpression();
+  /// Constructor
   /// @param op the op
   /// @param expr the expr
   UnaryOpExpression(UnaryOp op, Expression* expr);
@@ -41,8 +43,15 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
   UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;
 
+  /// Sets the op
+  /// @param op the op
+  void set_op(UnaryOp op) { op_ = op; }
   /// @returns the op
   UnaryOp op() const { return op_; }
+
+  /// Sets the expr
+  /// @param expr the expression
+  void set_expr(Expression* expr) { expr_ = expr; }
   /// @returns the expression
   Expression* expr() const { return expr_; }
 
