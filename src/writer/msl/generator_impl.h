@@ -54,9 +54,8 @@ namespace msl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param ctx the context, must be non-null
   /// @param module the module to generate
-  GeneratorImpl(Context* ctx, ast::Module* module);
+  explicit GeneratorImpl(ast::Module* module);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise

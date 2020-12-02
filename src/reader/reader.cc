@@ -17,7 +17,7 @@
 namespace tint {
 namespace reader {
 
-Reader::Reader(Context* ctx) : ctx_(*ctx) {}
+Reader::Reader() = default;
 
 Reader::~Reader() = default;
 

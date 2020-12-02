@@ -56,7 +56,7 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
@@ -70,7 +70,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
@@ -84,7 +84,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
   ast::Variable v("var", ast::StorageClass::kInput, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -115,7 +115,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -151,7 +151,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -249,7 +249,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Location 5
 )");
@@ -271,7 +271,7 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Binding 2
 OpDecorate %1 DescriptorSet 3
@@ -294,7 +294,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   dv.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 BuiltIn Position
 )");
@@ -318,7 +318,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
       create<ast::BoolLiteral>(&bool_type, true)));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 1200
 )");
@@ -340,7 +340,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 1200
 )");
@@ -364,7 +364,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
       create<ast::FloatLiteral>(&f32, 2.0)));
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
 )");
@@ -386,7 +386,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
@@ -408,7 +408,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
@@ -430,7 +430,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   v.set_decorations(decos);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_766172"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
@@ -498,10 +498,10 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
 OpMemberDecorate %3 1 NonWritable
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_41"
-OpMemberName %3 0 "tint_61"
-OpMemberName %3 1 "tint_62"
-OpName %1 "tint_62"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpMemberName %3 1 "b"
+OpName %1 "b"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %4
@@ -533,9 +533,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_41"
-OpMemberName %3 0 "tint_61"
-OpName %1 "tint_62"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
@@ -567,9 +567,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_41"
-OpMemberName %3 0 "tint_61"
-OpName %1 "tint_62"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
@@ -603,12 +603,12 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "tint_41"
-OpMemberName %3 0 "tint_61"
-OpName %1 "tint_62"
-OpName %7 "tint_41"
-OpMemberName %7 0 "tint_61"
-OpName %5 "tint_63"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
+OpMemberName %3 0 "a"
+OpName %1 "b"
+OpName %7 "A"
+OpMemberName %7 0 "a"
+OpName %5 "c"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4

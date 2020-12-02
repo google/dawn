@@ -418,8 +418,6 @@ int main(int argc, const char** argv) {
     options.format = Format::kSpvAsm;
   }
 
-  tint::Context ctx(std::make_unique<tint::NoopNamer>());
-
   auto diag_printer = tint::diag::Printer::create(stderr, true);
   tint::diag::Formatter diag_formatter;
 
@@ -435,8 +433,7 @@ int main(int argc, const char** argv) {
     }
     source_file = std::make_unique<tint::Source::File>(
         options.input_filename, std::string(data.begin(), data.end()));
-    reader =
-        std::make_unique<tint::reader::wgsl::Parser>(&ctx, source_file.get());
+    reader = std::make_unique<tint::reader::wgsl::Parser>(source_file.get());
   }
 #endif  // TINT_BUILD_WGSL_READER
 
@@ -449,7 +446,7 @@ int main(int argc, const char** argv) {
     if (!ReadFile<uint32_t>(options.input_filename, &data)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spirv::Parser>(&ctx, data);
+    reader = std::make_unique<tint::reader::spirv::Parser>(data);
   }
   // Handle SPIR-V assembly input, in files ending with .spvasm
   if (options.input_filename.size() > 7 &&
@@ -471,7 +468,7 @@ int main(int argc, const char** argv) {
                         SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spirv::Parser>(&ctx, data);
+    reader = std::make_unique<tint::reader::spirv::Parser>(data);
   }
 #endif  // TINT_BUILD_SPV_READER
 
@@ -490,7 +487,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::TypeDeterminer td(&ctx, &mod);
+  tint::TypeDeterminer td(&mod);
   if (!td.Determine()) {
     std::cerr << "Type Determination: " << td.error() << std::endl;
     return 1;
@@ -509,7 +506,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::transform::Manager transform_manager(&ctx, &mod);
+  tint::transform::Manager transform_manager;
   for (const auto& name : options.transforms) {
     // TODO(dsinclair): The vertex pulling transform requires setup code to
     // be run that needs user input. Should we find a way to support that here
@@ -518,13 +515,13 @@ int main(int argc, const char** argv) {
     if (name == "bound_array_accessors") {
       transform_manager.append(
           std::make_unique<tint::transform::BoundArrayAccessorsTransform>(
-              &ctx, &mod));
+              &mod));
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;
     }
   }
-  if (!transform_manager.Run()) {
+  if (!transform_manager.Run(&mod)) {
     std::cerr << "Transformer: " << transform_manager.error() << std::endl;
     return 1;
   }
@@ -533,29 +530,25 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer =
-        std::make_unique<tint::writer::spirv::Generator>(&ctx, std::move(mod));
+    writer = std::make_unique<tint::writer::spirv::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
-    writer =
-        std::make_unique<tint::writer::wgsl::Generator>(&ctx, std::move(mod));
+    writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
   if (options.format == Format::kMsl) {
-    writer =
-        std::make_unique<tint::writer::msl::Generator>(&ctx, std::move(mod));
+    writer = std::make_unique<tint::writer::msl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
   if (options.format == Format::kHlsl) {
-    writer =
-        std::make_unique<tint::writer::hlsl::Generator>(&ctx, std::move(mod));
+    writer = std::make_unique<tint::writer::hlsl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 

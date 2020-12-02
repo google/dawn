@@ -22,8 +22,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
 
   if (input.size() != 0) {
-    tint::Context ctx;
-    tint::reader::spirv::Parser parser(&ctx, input);
+    tint::reader::spirv::Parser parser(input);
     parser.Parse();
   }
 

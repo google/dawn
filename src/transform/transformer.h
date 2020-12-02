@@ -29,9 +29,8 @@ namespace transform {
 class Transformer {
  public:
   /// Constructor
-  /// @param ctx the Tint context
   /// @param mod the module to transform
-  Transformer(Context* ctx, ast::Module* mod);
+  explicit Transformer(ast::Module* mod);
   virtual ~Transformer();
 
   /// Users of Tint should register the transform with transform manager and
@@ -53,8 +52,6 @@ class Transformer {
     return mod_->create<T>(std::forward<ARGS>(args)...);
   }
 
-  /// The context
-  Context* ctx_ = nullptr;
   /// The module
   ast::Module* mod_ = nullptr;
   /// Any error messages, or blank if no error

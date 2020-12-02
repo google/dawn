@@ -58,8 +58,10 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
-    : ctx_(*ctx), mod_(mod) {}
+TypeDeterminer::TypeDeterminer(ast::Module* mod) : mod_(mod) {}
+
+TypeDeterminer::TypeDeterminer(Context*, ast::Module* mod)
+    : TypeDeterminer(mod) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 

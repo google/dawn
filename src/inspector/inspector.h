@@ -72,10 +72,10 @@ struct ResourceBinding {
 class Inspector {
  public:
   /// Constructor
-  /// DEPRECATED
   /// @param module Shader module to extract information from.
   explicit Inspector(const ast::Module& module);
   /// Constructor
+  /// DEPRECATED
   /// @param ctx the context, must be non-null
   /// @param module Shader module to extract information from.
   Inspector(Context* ctx, const ast::Module& module);
@@ -133,8 +133,6 @@ class Inspector {
       const std::string& entry_point);
 
  private:
-  Context* ctx_ = nullptr;
-  bool context_is_owned_ = false;
   const ast::Module& module_;
   std::string error_;
 

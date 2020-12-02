@@ -21,7 +21,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
 #include "src/ast/module.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 
@@ -31,9 +30,9 @@ namespace spirv {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public ast::BuilderWithContextAndModule, public BASE {
+class TestHelperBase : public ast::BuilderWithModule, public BASE {
  public:
-  TestHelperBase() : td(ctx, mod), b(ctx, mod) {}
+  TestHelperBase() : td(mod), b(mod) {}
   ~TestHelperBase() override = default;
 
   /// The type determiner

@@ -54,8 +54,7 @@ namespace wgsl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param ctx the context, must be non-null
-  explicit GeneratorImpl(Context* ctx);
+  GeneratorImpl();
   ~GeneratorImpl();
 
   /// Generates the result data

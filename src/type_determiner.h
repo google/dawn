@@ -44,6 +44,10 @@ class Variable;
 class TypeDeterminer {
  public:
   /// Constructor
+  /// @param mod the module to update with typing information
+  explicit TypeDeterminer(ast::Module* mod);
+  /// Constructor
+  /// DEPRECATED
   /// @param ctx the tint context, must be non-null
   /// @param mod the module to update with typing information
   TypeDeterminer(Context* ctx, ast::Module* mod);
@@ -128,7 +132,6 @@ class TypeDeterminer {
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
-  Context& ctx_;
   ast::Module* mod_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;

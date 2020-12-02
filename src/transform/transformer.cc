@@ -17,8 +17,7 @@
 namespace tint {
 namespace transform {
 
-Transformer::Transformer(Context* ctx, ast::Module* mod)
-    : ctx_(ctx), mod_(mod) {}
+Transformer::Transformer(ast::Module* mod) : mod_(mod) {}
 
 Transformer::~Transformer() = default;
 

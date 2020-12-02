@@ -41,12 +41,6 @@ class Context {
   explicit Context(std::unique_ptr<Namer> namer);
   /// Destructor
   ~Context();
-
-  /// @returns the namer object
-  Namer* namer() const { return namer_.get(); }
-
- private:
-  std::unique_ptr<Namer> namer_;
 };
 
 }  // namespace tint

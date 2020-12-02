@@ -32,10 +32,10 @@ namespace spirv {
 class Generator : public writer::Writer {
  public:
   /// Constructor
-  /// DEPRECATED
   /// @param module the module to convert
   explicit Generator(ast::Module module);
   /// Constructor
+  /// DEPRECATED
   /// @param ctx the context, must be non-null
   /// @param module the module to convert
   Generator(Context* ctx, ast::Module module);

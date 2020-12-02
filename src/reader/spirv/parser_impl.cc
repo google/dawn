@@ -192,8 +192,8 @@ bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
 
 }  // namespace
 
-ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
-    : Reader(ctx),
+ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
+    : Reader(),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       bool_type_(ast_module_.create<ast::type::Bool>()),

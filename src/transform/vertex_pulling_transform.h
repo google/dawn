@@ -25,7 +25,6 @@
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/variable.h"
-#include "src/context.h"
 #include "src/transform/transformer.h"
 
 namespace tint {
@@ -147,6 +146,10 @@ struct VertexStateDescriptor {
 class VertexPullingTransform : public Transformer {
  public:
   /// Constructor
+  /// @param mod the module to convert to vertex pulling
+  explicit VertexPullingTransform(ast::Module* mod);
+  /// Constructor
+  /// DEPRECATED
   /// @param ctx the tint context
   /// @param mod the module to convert to vertex pulling
   VertexPullingTransform(Context* ctx, ast::Module* mod);

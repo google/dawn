@@ -141,7 +141,7 @@ std::string expected_texture_overload(
 }  // LINT - Ignore the length of this function
 
 class MslGeneratorIntrinsicTextureTest
-    : public ast::BuilderWithContextAndModule,
+    : public ast::BuilderWithModule,
       public testing::TestWithParam<ast::intrinsic::test::TextureOverloadCase> {
  protected:
   void OnVariableBuilt(ast::Variable* var) override {
@@ -149,9 +149,9 @@ class MslGeneratorIntrinsicTextureTest
   }
 
   /// The type determiner
-  TypeDeterminer td{ctx, mod};
+  TypeDeterminer td{mod};
   /// The generator
-  GeneratorImpl gen{ctx, mod};
+  GeneratorImpl gen{mod};
 };
 
 TEST_P(MslGeneratorIntrinsicTextureTest, Call) {

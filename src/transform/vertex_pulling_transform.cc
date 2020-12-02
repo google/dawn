@@ -52,8 +52,11 @@ static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 
 }  // namespace
 
-VertexPullingTransform::VertexPullingTransform(Context* ctx, ast::Module* mod)
-    : Transformer(ctx, mod) {}
+VertexPullingTransform::VertexPullingTransform(ast::Module* mod)
+    : Transformer(mod) {}
+
+VertexPullingTransform::VertexPullingTransform(Context*, ast::Module* mod)
+    : VertexPullingTransform(mod) {}
 
 VertexPullingTransform::~VertexPullingTransform() = default;
 

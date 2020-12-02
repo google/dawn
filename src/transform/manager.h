@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/context.h"
 #include "src/transform/transformer.h"
 
 namespace tint {
@@ -31,6 +32,9 @@ namespace transform {
 class Manager {
  public:
   /// Constructor
+  Manager();
+  /// Constructor
+  /// DEPRECATED
   /// @param context the tint context
   /// @param module the module to transform
   Manager(Context* context, ast::Module* module);
@@ -43,6 +47,11 @@ class Manager {
   }
 
   /// Runs the transforms
+  /// @param module the module to run the transforms on
+  /// @returns true on success; false otherwise
+  bool Run(ast::Module* module);
+  /// Runs the transforms
+  /// DEPRECATED
   /// @returns true on success; false otherwise
   bool Run();
 
@@ -50,9 +59,8 @@ class Manager {
   std::string error() const { return error_; }
 
  private:
-  Context* context_;
-  ast::Module* module_;
   std::vector<std::unique_ptr<Transformer>> transforms_;
+  ast::Module* module_ = nullptr;
 
   std::string error_;
 };

@@ -52,7 +52,7 @@ TEST_F(BuilderTest, Function_Empty) {
   ast::Function func("a_func", {}, &void_type, create<ast::BlockStatement>());
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -71,7 +71,7 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
   ast::Function func("a_func", {}, &void_type, body);
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -97,8 +97,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
+OpName %7 "a_func"
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -122,7 +122,7 @@ TEST_F(BuilderTest, Function_Terminator_Discard) {
   ast::Function func("a_func", {}, &void_type, body);
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -155,9 +155,9 @@ TEST_F(BuilderTest, Function_WithParams) {
   EXPECT_TRUE(td.DetermineFunction(&func));
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "tint_615f66756e63"
-OpName %5 "tint_61"
-OpName %6 "tint_62"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
+OpName %5 "a"
+OpName %6 "b"
 %2 = OpTypeFloat 32
 %3 = OpTypeInt 32 1
 %1 = OpTypeFunction %2 %2 %3
@@ -179,7 +179,7 @@ TEST_F(BuilderTest, Function_WithBody) {
   ast::Function func("a_func", {}, &void_type, body);
 
   ASSERT_TRUE(b.GenerateFunction(&func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -302,13 +302,13 @@ OpEntryPoint GLCompute %7 "a"
 OpEntryPoint GLCompute %17 "b"
 OpExecutionMode %7 LocalSize 1 1 1
 OpExecutionMode %17 LocalSize 1 1 1
-OpName %3 "tint_44617461"
-OpMemberName %3 0 "tint_64"
-OpName %1 "tint_64617461"
-OpName %7 "tint_61"
-OpName %14 "tint_76"
-OpName %17 "tint_62"
-OpName %21 "tint_76"
+OpName %3 "Data"
+OpMemberName %3 0 "d"
+OpName %1 "data"
+OpName %7 "a"
+OpName %14 "v"
+OpName %17 "b"
+OpName %21 "v"
 OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpDecorate %1 Binding 0

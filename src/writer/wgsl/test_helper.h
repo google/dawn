@@ -20,7 +20,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -32,7 +31,7 @@ namespace wgsl {
 template <typename BASE>
 class TestHelperBase : public BASE {
  public:
-  TestHelperBase() : td(&ctx, &mod), gen(&ctx) {}
+  TestHelperBase() : td(&mod), gen() {}
 
   ~TestHelperBase() = default;
 
@@ -45,8 +44,6 @@ class TestHelperBase : public BASE {
     return mod.create<T>(std::forward<ARGS>(args)...);
   }
 
-  /// The context
-  Context ctx;
   /// The module
   ast::Module mod;
   /// The type determiner

@@ -21,9 +21,7 @@
 namespace tint {
 namespace writer {
 
-TextGenerator::TextGenerator(Context* ctx) : ctx_(ctx) {
-  assert(ctx_);
-}
+TextGenerator::TextGenerator() = default;
 
 TextGenerator::~TextGenerator() = default;
 

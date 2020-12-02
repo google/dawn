@@ -116,9 +116,9 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_76"
-OpName %5 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %7 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -180,9 +180,9 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_76"
-OpName %5 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %7 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -263,9 +263,9 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_76"
-OpName %5 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %7 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -355,9 +355,9 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_76"
-OpName %5 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %7 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -477,9 +477,9 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "tint_76"
-OpName %5 "tint_61"
-OpName %7 "tint_615f66756e63"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %7 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3

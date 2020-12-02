@@ -55,7 +55,6 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
-#include "src/context.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
@@ -231,9 +230,8 @@ class ParserImpl {
   };
 
   /// Creates a new parser using the given file
-  /// @param ctx the non-null context object
   /// @param file the input source file to parse
-  ParserImpl(Context* ctx, Source::File const* file);
+  explicit ParserImpl(Source::File const* file);
   ~ParserImpl();
 
   /// Run the parser

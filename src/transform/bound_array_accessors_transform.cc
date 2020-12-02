@@ -49,9 +49,12 @@
 namespace tint {
 namespace transform {
 
-BoundArrayAccessorsTransform::BoundArrayAccessorsTransform(Context* ctx,
+BoundArrayAccessorsTransform::BoundArrayAccessorsTransform(ast::Module* mod)
+    : Transformer(mod) {}
+
+BoundArrayAccessorsTransform::BoundArrayAccessorsTransform(Context*,
                                                            ast::Module* mod)
-    : Transformer(ctx, mod) {}
+    : BoundArrayAccessorsTransform(mod) {}
 
 BoundArrayAccessorsTransform::~BoundArrayAccessorsTransform() = default;
 

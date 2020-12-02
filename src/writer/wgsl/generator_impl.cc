@@ -78,7 +78,7 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-GeneratorImpl::GeneratorImpl(Context* ctx) : TextGenerator(ctx) {}
+GeneratorImpl::GeneratorImpl() : TextGenerator() {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

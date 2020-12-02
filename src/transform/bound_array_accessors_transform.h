@@ -35,9 +35,13 @@ namespace transform {
 class BoundArrayAccessorsTransform : public Transformer {
  public:
   /// Constructor
+  /// @param mod the module transform
+  explicit BoundArrayAccessorsTransform(ast::Module* mod);
+  /// Constructor
+  /// DEPRECATED
   /// @param ctx the Tint context object
   /// @param mod the module transform
-  explicit BoundArrayAccessorsTransform(Context* ctx, ast::Module* mod);
+  BoundArrayAccessorsTransform(Context* ctx, ast::Module* mod);
   ~BoundArrayAccessorsTransform() override;
 
   /// Users of Tint should register the transform with transform manager and

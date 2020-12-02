@@ -86,20 +86,14 @@ struct TypedExpression {
 class ParserImpl : Reader {
  public:
   /// Creates a new parser
-  /// @param ctx the non-null context object
   /// @param input the input data to parse
-  ParserImpl(Context* ctx, const std::vector<uint32_t>& input);
+  explicit ParserImpl(const std::vector<uint32_t>& input);
   /// Destructor
   ~ParserImpl() override;
 
   /// Run the parser
   /// @returns true if the parse was successful, false otherwise.
   bool Parse() override;
-
-  /// @returns the Tint context.
-  Context& context() {
-    return ctx_;  // Inherited from Reader
-  }
 
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() override;

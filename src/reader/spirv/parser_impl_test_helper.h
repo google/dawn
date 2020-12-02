@@ -22,7 +22,6 @@
 
 #include "gtest/gtest.h"
 #include "source/opt/ir_context.h"
-#include "src/context.h"
 #include "src/reader/spirv/parser_impl.h"
 
 namespace tint {
@@ -40,7 +39,7 @@ class SpvParserTestBase : public T {
   /// @param input the SPIR-V binary to parse
   /// @returns a parser for the given binary
   std::unique_ptr<ParserImpl> parser(const std::vector<uint32_t>& input) {
-    return std::make_unique<ParserImpl>(&ctx_, input);
+    return std::make_unique<ParserImpl>(input);
   }
 
   /// Gets the internal representation of the function with the given ID.
@@ -52,9 +51,6 @@ class SpvParserTestBase : public T {
   spvtools::opt::Function* spirv_function(ParserImpl* parser, uint32_t id) {
     return parser->ir_context()->GetFunction(id);
   }
-
- private:
-  Context ctx_;
 };
 
 // Use this form when you don't need to template any further.

@@ -47,8 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::Source::File file("test.wgsl", str);
 
   // Parse the wgsl, create the src module
-  tint::Context ctx;
-  tint::reader::wgsl::ParserImpl parser(&ctx, &file);
+  tint::reader::wgsl::ParserImpl parser(&file);
   parser.set_max_errors(1);
   if (!parser.Parse()) {
     return 0;

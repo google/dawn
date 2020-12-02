@@ -52,15 +52,15 @@ namespace writer {
 namespace spirv {
 namespace {
 
-class IntrinsicBuilderTest : public ast::BuilderWithContextAndModule,
+class IntrinsicBuilderTest : public ast::BuilderWithModule,
                              public testing::Test {
  protected:
   void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
   }
 
-  TypeDeterminer td{ctx, mod};
-  spirv::Builder b{ctx, mod};
+  TypeDeterminer td{mod};
+  spirv::Builder b{mod};
 };
 
 template <typename T>
@@ -646,8 +646,8 @@ TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
-OpName %1 "tint_6964656e74"
-OpName %7 "tint_615f66756e63"
+OpName %1 "ident"
+OpName %7 "a_func"
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -677,7 +677,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -703,7 +703,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeFloat 32
@@ -755,7 +755,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -778,7 +778,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -803,7 +803,7 @@ TEST_F(IntrinsicBuilderTest, Call_Normalize) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeFloat 32
@@ -833,7 +833,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -860,7 +860,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeFloat 32
@@ -895,7 +895,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -919,7 +919,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -946,7 +946,7 @@ TEST_F(IntrinsicBuilderTest, Call_Cross) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeFloat 32
@@ -975,7 +975,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeFloat 32
@@ -1003,7 +1003,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeFloat 32
@@ -1042,7 +1042,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 1
@@ -1068,7 +1068,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 1
@@ -1101,7 +1101,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
@@ -1127,7 +1127,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
@@ -1160,7 +1160,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 1
@@ -1186,7 +1186,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 1
@@ -1220,7 +1220,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
@@ -1246,7 +1246,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
@@ -1280,7 +1280,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 1
@@ -1308,7 +1308,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 1
@@ -1341,7 +1341,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
@@ -1369,7 +1369,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
+OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
@@ -1402,8 +1402,8 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
   EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
-OpName %3 "tint_615f66756e63"
-OpName %5 "tint_766172"
+OpName %3 "a_func"
+OpName %5 "var"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeFloat 32

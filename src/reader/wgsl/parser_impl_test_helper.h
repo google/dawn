@@ -40,14 +40,13 @@ class ParserImplTest : public testing::Test {
   /// @returns the parser implementation
   std::unique_ptr<ParserImpl> parser(const std::string& str) {
     auto file = std::make_unique<Source::File>("test.wgsl", str);
-    auto impl = std::make_unique<ParserImpl>(&ctx_, file.get());
+    auto impl = std::make_unique<ParserImpl>(file.get());
     files_.emplace_back(std::move(file));
     return impl;
   }
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
-  Context ctx_;
 };
 
 /// WGSL Parser test class with param
@@ -63,14 +62,13 @@ class ParserImplTestWithParam : public testing::TestWithParam<T> {
   /// @returns the parser implementation
   std::unique_ptr<ParserImpl> parser(const std::string& str) {
     auto file = std::make_unique<Source::File>("test.wgsl", str);
-    auto impl = std::make_unique<ParserImpl>(&ctx_, file.get());
+    auto impl = std::make_unique<ParserImpl>(file.get());
     files_.emplace_back(std::move(file));
     return impl;
   }
 
  private:
   std::vector<std::unique_ptr<Source::File>> files_;
-  Context ctx_;
 };
 
 }  // namespace wgsl

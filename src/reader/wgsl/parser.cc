@@ -22,8 +22,10 @@ namespace tint {
 namespace reader {
 namespace wgsl {
 
-Parser::Parser(Context* ctx, Source::File const* file)
-    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, file)) {}
+Parser::Parser(Source::File const* file)
+    : Reader(), impl_(std::make_unique<ParserImpl>(file)) {}
+
+Parser::Parser(Context*, Source::File const* file) : Parser(file) {}
 
 Parser::~Parser() = default;
 

@@ -22,7 +22,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 
@@ -34,7 +33,7 @@ namespace hlsl {
 template <typename BODY>
 class TestHelperBase : public BODY {
  public:
-  TestHelperBase() : td(&ctx, &mod), gen(&ctx, &mod) {}
+  TestHelperBase() : td(&mod), gen(&mod) {}
   ~TestHelperBase() = default;
 
   /// @returns the result string
@@ -52,8 +51,6 @@ class TestHelperBase : public BODY {
     return mod.create<T>(std::forward<ARGS>(args)...);
   }
 
-  /// The context
-  Context ctx;
   /// The module
   ast::Module mod;
   /// The type determiner

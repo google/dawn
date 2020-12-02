@@ -22,18 +22,17 @@ namespace hlsl {
 
 Generator::Generator(ast::Module module)
     : Text(std::move(module)),
-      impl_(std::make_unique<GeneratorImpl>(ctx_, &module_)) {}
+      impl_(std::make_unique<GeneratorImpl>(&module_)) {}
 
-Generator::Generator(Context* ctx, ast::Module module)
-    : Text(ctx, std::move(module)),
-      impl_(std::make_unique<GeneratorImpl>(ctx_, &module_)) {}
+Generator::Generator(Context*, ast::Module module)
+    : Generator(std::move(module)) {}
 
 Generator::~Generator() = default;
 
 void Generator::Reset() {
   set_error("");
   out_ = std::ostringstream();
-  impl_ = std::make_unique<GeneratorImpl>(ctx_, &module_);
+  impl_ = std::make_unique<GeneratorImpl>(&module_);
 }
 
 bool Generator::Generate() {

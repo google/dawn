@@ -1491,15 +1491,15 @@ expected_texture_overload_spirv expected_texture_overload(
 }  // NOLINT - Ignore the length of this function
 
 class IntrinsicTextureTest
-    : public ast::BuilderWithContextAndModule,
+    : public ast::BuilderWithModule,
       public testing::TestWithParam<ast::intrinsic::test::TextureOverloadCase> {
  protected:
   void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
   }
 
-  TypeDeterminer td{ctx, mod};
-  spirv::Builder b{ctx, mod};
+  TypeDeterminer td{mod};
+  spirv::Builder b{mod};
 };
 
 INSTANTIATE_TEST_SUITE_P(

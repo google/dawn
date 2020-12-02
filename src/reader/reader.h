@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "src/ast/module.h"
-#include "src/context.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
 
@@ -52,15 +51,11 @@ class Reader {
 
  protected:
   /// Constructor
-  /// @param ctx the context object, must be non-null
-  explicit Reader(Context* ctx);
+  Reader();
 
   /// Sets the diagnostic messages
   /// @param diags the list of diagnostic messages
   void set_diagnostics(const diag::List& diags) { diags_ = diags; }
-
-  /// The Tint context object
-  Context& ctx_;
 
   /// All diagnostic messages from the reader.
   diag::List diags_;

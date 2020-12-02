@@ -20,8 +20,11 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
-Parser::Parser(Context* ctx, const std::vector<uint32_t>& spv_binary)
-    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, spv_binary)) {}
+Parser::Parser(const std::vector<uint32_t>& spv_binary)
+    : Reader(), impl_(std::make_unique<ParserImpl>(spv_binary)) {}
+
+Parser::Parser(Context*, const std::vector<uint32_t>& spv_binary)
+    : Parser(spv_binary) {}
 
 Parser::~Parser() = default;
 

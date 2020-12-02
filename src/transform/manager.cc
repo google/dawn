@@ -19,12 +19,19 @@
 namespace tint {
 namespace transform {
 
-Manager::Manager(Context* context, ast::Module* module)
-    : context_(context), module_(module) {}
+Manager::Manager() = default;
+
+Manager::Manager(Context*, ast::Module* module) : module_(module) {}
 
 Manager::~Manager() = default;
 
 bool Manager::Run() {
+  return Run(module_);
+}
+
+bool Manager::Run(ast::Module* module) {
+  error_ = "";
+
   for (auto& transform : transforms_) {
     if (!transform->Run()) {
       error_ = transform->error();
@@ -32,10 +39,10 @@ bool Manager::Run() {
     }
   }
 
-  if (context_ != nullptr && module_ != nullptr) {
+  if (module != nullptr) {
     // The transformed have potentially inserted nodes into the AST, so the type
     // determinater needs to be run.
-    TypeDeterminer td(context_, module_);
+    TypeDeterminer td(module);
     if (!td.Determine()) {
       error_ = td.error();
       return false;

@@ -186,7 +186,7 @@ struct BlockCounters {
 
 }  // namespace
 
-ParserImpl::ParserImpl(Context*, Source::File const* file)
+ParserImpl::ParserImpl(Source::File const* file)
     : lexer_(std::make_unique<Lexer>(file)) {}
 
 ParserImpl::~ParserImpl() = default;

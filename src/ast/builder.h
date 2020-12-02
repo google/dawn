@@ -38,7 +38,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
-#include "src/context.h"
 
 namespace tint {
 namespace ast {
@@ -186,9 +185,8 @@ class Builder {
   using f32 = float;
 
   /// Constructor
-  /// @param ctx the context to use in the builder
   /// @param mod the module to use in the builder
-  explicit Builder(Context* ctx, Module* mod);
+  explicit Builder(Module* mod);
   virtual ~Builder();
 
   /// @param expr the expression
@@ -444,8 +442,6 @@ class Builder {
   }
 
   /// The builder module
-  Context* const ctx;
-  /// The builder module
   Module* const mod;
   /// The builder types
   const TypesBuilder ty;
@@ -455,12 +451,11 @@ class Builder {
   virtual void OnVariableBuilt(Variable*) {}
 };
 
-/// BuilderWithContextAndModule is a `Builder` that constructs and owns its
-/// `Context` and `Module`.
-class BuilderWithContextAndModule : public Builder {
+/// BuilderWithModule is a `Builder` that constructs and owns its `Module`.
+class BuilderWithModule : public Builder {
  public:
-  BuilderWithContextAndModule();
-  ~BuilderWithContextAndModule() override;
+  BuilderWithModule();
+  ~BuilderWithModule() override;
 };
 
 //! @cond Doxygen_Suppress

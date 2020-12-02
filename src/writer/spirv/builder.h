@@ -83,6 +83,10 @@ class Builder {
   };
 
   /// Constructor
+  /// @param mod the module to generate from
+  explicit Builder(ast::Module* mod);
+  /// Constructor
+  /// DEPRECATED
   /// @param ctx the context, must be non-null
   /// @param mod the module to generate from
   Builder(Context* ctx, ast::Module* mod);
@@ -495,7 +499,6 @@ class Builder {
     return func_name_to_id_[name];
   }
 
-  Context* ctx_ = nullptr;
   ast::Module* mod_;
   std::string error_;
   uint32_t next_id_ = 1;

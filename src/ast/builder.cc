@@ -25,7 +25,8 @@ TypesBuilder::TypesBuilder(Module* mod)
       void_(mod->create<type::Void>()),
       mod_(mod) {}
 
-Builder::Builder(Context* c, Module* m) : ctx(c), mod(m), ty(m) {}
+Builder::Builder(Module* m) : mod(m), ty(m) {}
+
 Builder::~Builder() = default;
 
 Variable* Builder::Var(const std::string& name,
@@ -36,10 +37,9 @@ Variable* Builder::Var(const std::string& name,
   return var;
 }
 
-BuilderWithContextAndModule::BuilderWithContextAndModule()
-    : Builder(new Context(), new Module()) {}
-BuilderWithContextAndModule::~BuilderWithContextAndModule() {
-  delete ctx;
+BuilderWithModule::BuilderWithModule() : Builder(new Module()) {}
+
+BuilderWithModule::~BuilderWithModule() {
   delete mod;
 }
 

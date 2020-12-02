@@ -110,10 +110,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"
-OpName %4 "tint_6d795f6f7574"
-OpName %7 "tint_6d795f7767"
-OpName %11 "tint_6d61696e"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
+OpName %4 "my_out"
+OpName %7 "my_wg"
+OpName %11 "main"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -173,10 +173,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "tint_6d795f696e"
-OpName %4 "tint_6d795f6f7574"
-OpName %7 "tint_6d795f7767"
-OpName %11 "tint_6d61696e"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
+OpName %4 "my_out"
+OpName %7 "my_wg"
+OpName %11 "main"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -252,8 +252,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
 OpEntryPoint Fragment %5 "main2"
 OpExecutionMode %3 OriginUpperLeft
 OpExecutionMode %5 OriginUpperLeft
-OpName %3 "tint_6d61696e31"
-OpName %5 "tint_6d61696e32"
+OpName %3 "main1"
+OpName %5 "main2"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1

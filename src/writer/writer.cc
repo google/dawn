@@ -19,18 +19,9 @@
 namespace tint {
 namespace writer {
 
-Writer::Writer(ast::Module module)
-    : ctx_(new Context()),
-      context_is_owned_(true),
-      module_(std::move(module)) {}
+Writer::Writer(ast::Module module) : module_(std::move(module)) {}
 
-Writer::Writer(Context* ctx, ast::Module module)
-    : ctx_(ctx), context_is_owned_(false), module_(std::move(module)) {}
-
-Writer::~Writer() {
-  if (context_is_owned_)
-    delete ctx_;
-}
+Writer::~Writer() = default;
 
 }  // namespace writer
 }  // namespace tint
