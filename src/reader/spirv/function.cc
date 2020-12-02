@@ -3092,9 +3092,9 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   TypedExpression current_expr(MakeOperand(inst, 0));
 
   auto make_index = [this](uint32_t literal) {
-    ast::type::U32 u32;
+    auto* type = create<ast::type::U32>();
     return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(&u32, literal));
+        create<ast::UintLiteral>(type, literal));
   };
 
   const auto composite = inst.GetSingleWordInOperand(0);
