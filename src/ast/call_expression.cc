@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::CallExpression);
 namespace tint {
 namespace ast {
 
-CallExpression::CallExpression() : Base() {}
-
 CallExpression::CallExpression(Expression* func, ExpressionList params)
     : Base(), func_(func), params_(params) {}
 

@@ -33,7 +33,7 @@ TEST_F(CallStatementTest, Creation) {
 }
 
 TEST_F(CallStatementTest, IsCall) {
-  CallStatement c;
+  CallStatement c(nullptr);
   EXPECT_TRUE(c.Is<CallStatement>());
 }
 
@@ -44,12 +44,13 @@ TEST_F(CallStatementTest, IsValid) {
 }
 
 TEST_F(CallStatementTest, IsValid_MissingExpr) {
-  CallStatement c;
+  CallStatement c(nullptr);
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CallStatementTest, IsValid_InvalidExpr) {
-  CallStatement c(create<CallExpression>());
+  CallExpression stmt(nullptr, {});
+  CallStatement c(&stmt);
   EXPECT_FALSE(c.IsValid());
 }
 

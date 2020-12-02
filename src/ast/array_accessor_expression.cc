@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ArrayAccessorExpression);
 namespace tint {
 namespace ast {
 
-ArrayAccessorExpression::ArrayAccessorExpression() : Base() {}
-
 ArrayAccessorExpression::ArrayAccessorExpression(Expression* array,
                                                  Expression* idx_expr)
     : Base(), array_(array), idx_expr_(idx_expr) {}

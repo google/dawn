@@ -139,7 +139,8 @@ TEST_F(ModuleTest, IsValid_Null_Function) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_Function) {
-  auto* func = create<Function>();
+  VariableList p;
+  auto* func = create<Function>("", p, nullptr, nullptr);
 
   Module m;
   m.AddFunction(func);

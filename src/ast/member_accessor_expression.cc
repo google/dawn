@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::MemberAccessorExpression);
 namespace tint {
 namespace ast {
 
-MemberAccessorExpression::MemberAccessorExpression() = default;
-
 MemberAccessorExpression::MemberAccessorExpression(Expression* structure,
                                                    IdentifierExpression* member)
     : Base(), struct_(structure), member_(member) {}

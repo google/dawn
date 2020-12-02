@@ -87,7 +87,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
 }
 
 TEST_F(StructTest, IsValid) {
-  Struct s;
+  Struct s({});
   EXPECT_TRUE(s.IsValid());
 }
 

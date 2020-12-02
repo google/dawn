@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::UnaryOpExpression);
 namespace tint {
 namespace ast {
 
-UnaryOpExpression::UnaryOpExpression() : Base() {}
-
 UnaryOpExpression::UnaryOpExpression(UnaryOp op, Expression* expr)
     : Base(), op_(op), expr_(expr) {}
 

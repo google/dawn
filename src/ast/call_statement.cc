@@ -23,8 +23,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::CallStatement);
 namespace tint {
 namespace ast {
 
-CallStatement::CallStatement() : Base() {}
-
 CallStatement::CallStatement(CallExpression* call) : Base(), call_(call) {}
 
 CallStatement::CallStatement(CallStatement&&) = default;

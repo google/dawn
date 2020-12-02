@@ -78,8 +78,6 @@ namespace ast {
 /// The storage class for a formal parameter is always StorageClass::kNone.
 class Variable : public Castable<Variable, Node> {
  public:
-  /// Create a new empty variable statement
-  Variable();
   /// Create a variable
   /// @param name the variables name
   /// @param sc the variable storage class
@@ -149,6 +147,10 @@ class Variable : public Castable<Variable, Node> {
   void to_str(std::ostream& out, size_t indent) const override;
 
  protected:
+  /// Constructor
+  /// Used by the DecoratedVariable constructor.
+  Variable();
+
   /// Output information for this variable.
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing

@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BinaryExpression);
 namespace tint {
 namespace ast {
 
-BinaryExpression::BinaryExpression() : Base() {}
-
 BinaryExpression::BinaryExpression(BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)

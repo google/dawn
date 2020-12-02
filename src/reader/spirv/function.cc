@@ -2137,12 +2137,13 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   assert(construct->begin_id == block_info.id);
   const auto* branch = block_info.basic_block->terminator();
 
-  auto* const switch_stmt =
-      AddStatement(create<ast::SwitchStatement>())->As<ast::SwitchStatement>();
   const auto selector_id = branch->GetSingleWordInOperand(0);
   // Generate the code for the selector.
   auto selector = MakeExpression(selector_id);
-  switch_stmt->set_condition(selector.expr);
+
+  ast::CaseStatementList list;
+  auto* swch = create<ast::SwitchStatement>(selector.expr, list);
+  auto* const switch_stmt = AddStatement(swch)->As<ast::SwitchStatement>();
 
   // First, push the statement block for the entire switch.  All the actual
   // work is done by completion actions of the case/default clauses.
@@ -2194,12 +2195,6 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   // Push them on in reverse order.
   const auto last_clause_index = clause_heads.size() - 1;
   for (size_t i = last_clause_index;; --i) {
-    // Create the case clause.  Temporarily put it in the wrong order
-    // on the case statement list.
-    cases->emplace_back(
-        create<ast::CaseStatement>(create<ast::BlockStatement>()));
-    auto* clause = cases->back();
-
     // Create a list of integer literals for the selector values leading to
     // this case clause.
     ast::CaseSelectorList selectors;
@@ -2220,14 +2215,20 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
               create<ast::SintLiteral>(selector.type, value32));
         }
       }
-      clause->set_selectors(selectors);
     }
 
     // Where does this clause end?
     const auto end_id = (i + 1 < clause_heads.size()) ? clause_heads[i + 1]->id
                                                       : construct->end_id;
 
+    // Create the case clause.  Temporarily put it in the wrong order
+    // on the case statement list.
+    cases->emplace_back(create<ast::CaseStatement>(selectors, nullptr));
+    auto* clause = cases->back();
+
     PushNewStatementBlock(construct, end_id, [clause](StatementBlock* s) {
+      // The `set_body` method of CaseStatement can be removed if this set
+      // is removed.
       clause->set_body(s->statements_);
     });
 

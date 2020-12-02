@@ -40,14 +40,16 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  auto* impl = create<ast::Struct>();
+  StructMemberList members;
+  auto* impl = create<ast::Struct>(members);
   auto* ptr = impl;
   Struct s{"S", impl};
   EXPECT_EQ(s.impl(), ptr);
 }
 
 TEST_F(StructTest, Is) {
-  auto* impl = create<ast::Struct>();
+  StructMemberList members;
+  auto* impl = create<ast::Struct>(members);
   Struct s{"S", impl};
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
@@ -66,7 +68,8 @@ TEST_F(StructTest, Is) {
 }
 
 TEST_F(StructTest, TypeName) {
-  auto* impl = create<ast::Struct>();
+  StructMemberList members;
+  auto* impl = create<ast::Struct>(members);
   Struct s{"my_struct", impl};
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }

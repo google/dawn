@@ -28,17 +28,12 @@ namespace ast {
 class CallStatement : public Castable<CallStatement, Statement> {
  public:
   /// Constructor
-  CallStatement();
-  /// Constructor
   /// @param call the function
   explicit CallStatement(CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;
 
-  /// Sets the call expression
-  /// @param call the call
-  void set_expr(CallExpression* call) { call_ = call; }
   /// @returns the call expression
   CallExpression* expr() const { return call_; }
 
