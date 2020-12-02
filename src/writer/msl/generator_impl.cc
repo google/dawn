@@ -1736,7 +1736,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (auto* d = stmt->As<ast::DiscardStatement>()) {
     return EmitDiscard(d);
   }
-  if (auto* f = stmt->As<ast::FallthroughStatement>()) {
+  if (stmt->As<ast::FallthroughStatement>()) {
     make_indent();
     out_ << "/* fallthrough */" << std::endl;
     return true;
