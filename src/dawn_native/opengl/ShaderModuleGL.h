@@ -35,6 +35,9 @@ namespace dawn_native { namespace opengl {
     struct CombinedSampler {
         BindingLocation samplerLocation;
         BindingLocation textureLocation;
+        // OpenGL requires a sampler with texelFetch. If this is true, the developer did not provide
+        // one and Dawn should bind a dummy non-filtering sampler. |samplerLocation| is unused.
+        bool useDummySampler;
         std::string GetName() const;
     };
     bool operator<(const CombinedSampler& a, const CombinedSampler& b);
@@ -49,7 +52,8 @@ namespace dawn_native { namespace opengl {
         std::string TranslateToGLSL(const char* entryPointName,
                                     SingleShaderStage stage,
                                     CombinedSamplerInfo* combinedSamplers,
-                                    const PipelineLayout* layout) const;
+                                    const PipelineLayout* layout,
+                                    bool* needsDummySampler) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

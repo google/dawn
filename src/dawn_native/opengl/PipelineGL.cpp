@@ -17,10 +17,12 @@
 #include "common/BitSetIterator.h"
 #include "common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/Device.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/OpenGLFunctions.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
+#include "dawn_native/opengl/SamplerGL.h"
 #include "dawn_native/opengl/ShaderModuleGL.h"
 
 #include <set>
@@ -42,8 +44,8 @@ namespace dawn_native { namespace opengl {
 
     }  // namespace
 
-    PipelineGL::PipelineGL() {
-    }
+    PipelineGL::PipelineGL() = default;
+    PipelineGL::~PipelineGL() = default;
 
     void PipelineGL::Initialize(const OpenGLFunctions& gl,
                                 const PipelineLayout* layout,
@@ -82,12 +84,23 @@ namespace dawn_native { namespace opengl {
 
         // Create an OpenGL shader for each stage and gather the list of combined samplers.
         PerStage<CombinedSamplerInfo> combinedSamplers;
+        bool needsDummySampler = false;
         for (SingleShaderStage stage : IterateStages(activeStages)) {
             const ShaderModule* module = ToBackend(stages[stage].module.Get());
-            std::string glsl = module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
-                                                       &combinedSamplers[stage], layout);
+            std::string glsl =
+                module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
+                                        &combinedSamplers[stage], layout, &needsDummySampler);
             GLuint shader = CreateShader(gl, GLShaderType(stage), glsl.c_str());
             gl.AttachShader(mProgram, shader);
+        }
+
+        if (needsDummySampler) {
+            SamplerDescriptor desc = {};
+            ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
+            ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
+            ASSERT(desc.mipmapFilter == wgpu::FilterMode::Nearest);
+            mDummySampler = AcquireRef(
+                ToBackend(layout->GetDevice()->GetOrCreateSampler(&desc).AcquireSuccess()));
         }
 
         // Link all the shaders together.
@@ -204,13 +217,18 @@ namespace dawn_native { namespace opengl {
                                          wgpu::TextureComponentType::Float;
                 }
                 {
-                    const BindGroupLayoutBase* bgl =
-                        layout->GetBindGroupLayout(combined.samplerLocation.group);
-                    BindingIndex bindingIndex =
-                        bgl->GetBindingIndex(combined.samplerLocation.binding);
+                    if (combined.useDummySampler) {
+                        mDummySamplerUnits.push_back(textureUnit);
+                    } else {
+                        const BindGroupLayoutBase* bgl =
+                            layout->GetBindGroupLayout(combined.samplerLocation.group);
+                        BindingIndex bindingIndex =
+                            bgl->GetBindingIndex(combined.samplerLocation.binding);
 
-                    GLuint samplerIndex = indices[combined.samplerLocation.group][bindingIndex];
-                    mUnitsForSamplers[samplerIndex].push_back({textureUnit, shouldUseFiltering});
+                        GLuint samplerIndex = indices[combined.samplerLocation.group][bindingIndex];
+                        mUnitsForSamplers[samplerIndex].push_back(
+                            {textureUnit, shouldUseFiltering});
+                    }
                 }
 
                 textureUnit++;
@@ -235,6 +253,10 @@ namespace dawn_native { namespace opengl {
 
     void PipelineGL::ApplyNow(const OpenGLFunctions& gl) {
         gl.UseProgram(mProgram);
+        for (GLuint unit : mDummySamplerUnits) {
+            ASSERT(mDummySampler.Get() != nullptr);
+            gl.BindSampler(unit, mDummySampler->GetNonFilteringHandle());
+        }
     }
 
 }}  // namespace dawn_native::opengl

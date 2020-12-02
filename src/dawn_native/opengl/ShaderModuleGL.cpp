@@ -39,15 +39,19 @@ namespace dawn_native { namespace opengl {
     }
 
     bool operator<(const CombinedSampler& a, const CombinedSampler& b) {
-        return std::tie(a.samplerLocation, a.textureLocation) <
-               std::tie(b.samplerLocation, b.textureLocation);
+        return std::tie(a.useDummySampler, a.samplerLocation, a.textureLocation) <
+               std::tie(b.useDummySampler, a.samplerLocation, b.textureLocation);
     }
 
     std::string CombinedSampler::GetName() const {
         std::ostringstream o;
         o << "dawn_combined";
-        o << "_" << static_cast<uint32_t>(samplerLocation.group) << "_"
-          << static_cast<uint32_t>(samplerLocation.binding);
+        if (useDummySampler) {
+            o << "_dummy_sampler";
+        } else {
+            o << "_" << static_cast<uint32_t>(samplerLocation.group) << "_"
+              << static_cast<uint32_t>(samplerLocation.binding);
+        }
         o << "_with_" << static_cast<uint32_t>(textureLocation.group) << "_"
           << static_cast<uint32_t>(textureLocation.binding);
         return o.str();
@@ -68,7 +72,8 @@ namespace dawn_native { namespace opengl {
     std::string ShaderModule::TranslateToGLSL(const char* entryPointName,
                                               SingleShaderStage stage,
                                               CombinedSamplerInfo* combinedSamplers,
-                                              const PipelineLayout* layout) const {
+                                              const PipelineLayout* layout,
+                                              bool* needsDummySampler) const {
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
         // be updated.
         spirv_cross::CompilerGLSL::Options options;
@@ -92,6 +97,13 @@ namespace dawn_native { namespace opengl {
         compiler.set_common_options(options);
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 
+        // Analyzes all OpImageFetch opcodes and checks if there are instances where
+        // said instruction is used without a combined image sampler.
+        // GLSL does not support texelFetch without a sampler.
+        // To workaround this, we must inject a dummy sampler which can be used to form a sampler2D
+        // at the call-site of texelFetch as necessary.
+        spirv_cross::VariableID dummySamplerId = compiler.build_dummy_sampler_for_combined_images();
+
         // Extract bindings names so that it can be used to get its location in program.
         // Now translate the separate sampler / textures into combined ones and store their info. We
         // need to do this before removing the set and binding decorations.
@@ -101,10 +113,17 @@ namespace dawn_native { namespace opengl {
             combinedSamplers->emplace_back();
 
             CombinedSampler* info = &combinedSamplers->back();
-            info->samplerLocation.group = BindGroupIndex(
-                compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet));
-            info->samplerLocation.binding =
-                BindingNumber(compiler.get_decoration(combined.sampler_id, spv::DecorationBinding));
+            if (combined.sampler_id == dummySamplerId) {
+                *needsDummySampler = true;
+                info->useDummySampler = true;
+                info->samplerLocation = {};
+            } else {
+                info->useDummySampler = false;
+                info->samplerLocation.group = BindGroupIndex(
+                    compiler.get_decoration(combined.sampler_id, spv::DecorationDescriptorSet));
+                info->samplerLocation.binding = BindingNumber(
+                    compiler.get_decoration(combined.sampler_id, spv::DecorationBinding));
+            }
             info->textureLocation.group = BindGroupIndex(
                 compiler.get_decoration(combined.image_id, spv::DecorationDescriptorSet));
             info->textureLocation.binding =

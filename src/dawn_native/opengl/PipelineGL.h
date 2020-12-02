@@ -31,10 +31,12 @@ namespace dawn_native { namespace opengl {
     struct OpenGLFunctions;
     class PersistentPipelineState;
     class PipelineLayout;
+    class Sampler;
 
     class PipelineGL {
       public:
         PipelineGL();
+        ~PipelineGL();
 
         void Initialize(const OpenGLFunctions& gl,
                         const PipelineLayout* layout,
@@ -56,6 +58,10 @@ namespace dawn_native { namespace opengl {
         GLuint mProgram;
         std::vector<std::vector<SamplerUnit>> mUnitsForSamplers;
         std::vector<std::vector<GLuint>> mUnitsForTextures;
+        std::vector<GLuint> mDummySamplerUnits;
+        // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device
+        // destruction complex as it requires the sampler to be destroyed before the sampler cache.
+        Ref<Sampler> mDummySampler;
     };
 
 }}  // namespace dawn_native::opengl
