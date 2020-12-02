@@ -52,11 +52,6 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
 
-  /// Sets the selectors for the case statement
-  /// @param selectors the selectors to set
-  void set_selectors(CaseSelectorList selectors) {
-    selectors_ = std::move(selectors);
-  }
   /// @returns the case selectors, empty if none set
   const CaseSelectorList& selectors() const { return selectors_; }
   /// @returns true if this is a default statement

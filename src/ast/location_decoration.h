@@ -29,7 +29,7 @@ class LocationDecoration
   /// constructor
   /// @param value the location value
   /// @param source the source of this decoration
-  explicit LocationDecoration(uint32_t value, const Source& source);
+  LocationDecoration(uint32_t value, const Source& source);
   ~LocationDecoration() override;
 
   /// @returns the location value

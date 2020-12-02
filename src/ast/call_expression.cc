@@ -20,8 +20,6 @@
 namespace tint {
 namespace ast {
 
-CallExpression::CallExpression() : Base() {}
-
 CallExpression::CallExpression(Expression* func, ExpressionList params)
     : Base(), func_(func), params_(params) {}
 

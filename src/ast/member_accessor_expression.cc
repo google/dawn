@@ -20,8 +20,6 @@
 namespace tint {
 namespace ast {
 
-MemberAccessorExpression::MemberAccessorExpression() = default;
-
 MemberAccessorExpression::MemberAccessorExpression(Expression* structure,
                                                    IdentifierExpression* member)
     : Base(), struct_(structure), member_(member) {}

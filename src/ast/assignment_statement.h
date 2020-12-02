@@ -29,8 +29,6 @@ namespace ast {
 class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
  public:
   /// Constructor
-  AssignmentStatement();
-  /// Constructor
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
   AssignmentStatement(Expression* lhs, Expression* rhs);
@@ -43,15 +41,8 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
   AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;
 
-  /// Sets the left side of the statement
-  /// @param lhs the left side to set
-  void set_lhs(Expression* lhs) { lhs_ = lhs; }
   /// @returns the left side expression
   Expression* lhs() const { return lhs_; }
-
-  /// Sets the right side of the statement
-  /// @param rhs the right side to set
-  void set_rhs(Expression* rhs) { rhs_ = rhs; }
   /// @returns the right side expression
   Expression* rhs() const { return rhs_; }
 

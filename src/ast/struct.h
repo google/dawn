@@ -29,8 +29,6 @@ namespace ast {
 /// A struct statement.
 class Struct : public Castable<Struct, Node> {
  public:
-  /// Create a new empty struct statement
-  Struct();
   /// Create a new struct statement
   /// @param members The struct members
   explicit Struct(StructMemberList members);

@@ -21,8 +21,6 @@
 namespace tint {
 namespace ast {
 
-StructMember::StructMember() = default;
-
 StructMember::StructMember(const std::string& name,
                            type::Type* type,
                            StructMemberDecorationList decorations)

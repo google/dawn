@@ -21,8 +21,6 @@
 namespace tint {
 namespace ast {
 
-CallStatement::CallStatement() : Base() {}
-
 CallStatement::CallStatement(CallExpression* call) : Base(), call_(call) {}
 
 CallStatement::CallStatement(CallStatement&&) = default;

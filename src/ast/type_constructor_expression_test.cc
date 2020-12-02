@@ -52,7 +52,11 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
-  TypeConstructorExpression t;
+  type::F32 f32;
+  ExpressionList expr;
+  expr.push_back(create<IdentifierExpression>("expr"));
+
+  TypeConstructorExpression t(&f32, expr);
   EXPECT_TRUE(t.Is<TypeConstructorExpression>());
 }
 
@@ -77,8 +81,7 @@ TEST_F(TypeConstructorExpressionTest, IsValid_NullType) {
   ExpressionList expr;
   expr.push_back(create<IdentifierExpression>("expr"));
 
-  TypeConstructorExpression t;
-  t.set_values(expr);
+  TypeConstructorExpression t(nullptr, expr);
   EXPECT_FALSE(t.IsValid());
 }
 

@@ -53,14 +53,9 @@ TEST_F(VariableTest, CreationWithSource) {
 }
 
 TEST_F(VariableTest, CreationEmpty) {
-  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}};
-  Variable v;
-  v.set_source(s);
-  v.set_storage_class(StorageClass::kWorkgroup);
-  v.set_name("a_var");
-
   type::I32 t;
-  v.set_type(&t);
+  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}};
+  Variable v(s, "a_var", StorageClass::kWorkgroup, &t);
 
   EXPECT_EQ(v.name(), "a_var");
   EXPECT_EQ(v.storage_class(), StorageClass::kWorkgroup);
@@ -96,7 +91,7 @@ TEST_F(VariableTest, IsValid_MissingType) {
 }
 
 TEST_F(VariableTest, IsValid_MissingBoth) {
-  Variable v;
+  Variable v("", StorageClass::kNone, nullptr);
   EXPECT_FALSE(v.IsValid());
 }
 

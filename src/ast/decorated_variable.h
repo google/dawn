@@ -28,6 +28,7 @@ namespace ast {
 class DecoratedVariable : public Castable<DecoratedVariable, Variable> {
  public:
   /// Create a new empty decorated variable statement
+  /// Note, used by the `Clone` method.
   DecoratedVariable();
   /// Create a decorated variable from an existing variable
   /// @param var the variable to initialize from

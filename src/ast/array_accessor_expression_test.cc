@@ -43,7 +43,10 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
-  ArrayAccessorExpression exp;
+  auto* ary = create<IdentifierExpression>("ary");
+  auto* idx = create<IdentifierExpression>("idx");
+
+  ArrayAccessorExpression exp(ary, idx);
   EXPECT_TRUE(exp.Is<ArrayAccessorExpression>());
 }
 
@@ -58,16 +61,14 @@ TEST_F(ArrayAccessorExpressionTest, IsValid) {
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
   auto* idx = create<IdentifierExpression>("idx");
 
-  ArrayAccessorExpression exp;
-  exp.set_idx_expr(idx);
+  ArrayAccessorExpression exp(nullptr, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
   auto* ary = create<IdentifierExpression>("ary");
 
-  ArrayAccessorExpression exp;
-  exp.set_array(ary);
+  ArrayAccessorExpression exp(ary, nullptr);
   EXPECT_FALSE(exp.IsValid());
 }
 

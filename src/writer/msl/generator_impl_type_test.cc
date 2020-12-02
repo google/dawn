@@ -183,8 +183,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("S", str);
 
@@ -204,8 +203,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("S", str);
 
@@ -221,8 +219,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   ast::type::I32 i32;
   ast::type::F32 f32;
 
-  auto* str = create<ast::Struct>();
-  str->set_members({
+  auto* str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
           "a", &i32,
           ast::StructMemberDecorationList{
@@ -262,8 +259,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
   ast::StructMemberDecorationList b_deco;
   members.push_back(create<ast::StructMember>("float", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("S", str);
 

@@ -90,7 +90,7 @@ TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
-  auto* cond = create<ScalarConstructorExpression>();
+  auto* cond = create<ScalarConstructorExpression>(nullptr);
   ElseStatement e(cond, create<BlockStatement>());
   EXPECT_FALSE(e.IsValid());
 }

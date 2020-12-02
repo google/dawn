@@ -61,8 +61,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &i32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("a", str);
 
@@ -86,8 +85,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &i32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("b", str);
   ast::type::Alias alias("a", &s);

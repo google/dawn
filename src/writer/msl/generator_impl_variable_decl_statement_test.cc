@@ -90,8 +90,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("S", str);
 

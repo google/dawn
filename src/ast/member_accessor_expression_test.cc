@@ -45,7 +45,10 @@ TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
-  MemberAccessorExpression stmt;
+  auto* str = create<IdentifierExpression>("structure");
+  auto* mem = create<IdentifierExpression>("member");
+
+  MemberAccessorExpression stmt(str, mem);
   EXPECT_TRUE(stmt.Is<MemberAccessorExpression>());
 }
 
@@ -60,8 +63,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid) {
 TEST_F(MemberAccessorExpressionTest, IsValid_NullStruct) {
   auto* mem = create<IdentifierExpression>("member");
 
-  MemberAccessorExpression stmt;
-  stmt.set_member(mem);
+  MemberAccessorExpression stmt(nullptr, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -76,8 +78,7 @@ TEST_F(MemberAccessorExpressionTest, IsValid_InvalidStruct) {
 TEST_F(MemberAccessorExpressionTest, IsValid_NullMember) {
   auto* str = create<IdentifierExpression>("structure");
 
-  MemberAccessorExpression stmt;
-  stmt.set_structure(str);
+  MemberAccessorExpression stmt(str, nullptr);
   EXPECT_FALSE(stmt.IsValid());
 }
 

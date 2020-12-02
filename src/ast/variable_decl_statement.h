@@ -30,8 +30,6 @@ class VariableDeclStatement
     : public Castable<VariableDeclStatement, Statement> {
  public:
   /// Constructor
-  VariableDeclStatement();
-  /// Constructor
   /// @param variable the variable
   explicit VariableDeclStatement(Variable* variable);
   /// Constructor
@@ -42,9 +40,6 @@ class VariableDeclStatement
   VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;
 
-  /// Sets the variable
-  /// @param variable the variable to set
-  void set_variable(Variable* variable) { variable_ = variable; }
   /// @returns the variable
   Variable* variable() const { return variable_; }
 

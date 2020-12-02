@@ -29,8 +29,6 @@ class ArrayAccessorExpression
     : public Castable<ArrayAccessorExpression, Expression> {
  public:
   /// Constructor
-  ArrayAccessorExpression();
-  /// Constructor
   /// @param array the array
   /// @param idx_expr the index expression
   ArrayAccessorExpression(Expression* array, Expression* idx_expr);
@@ -45,9 +43,6 @@ class ArrayAccessorExpression
   ArrayAccessorExpression(ArrayAccessorExpression&&);
   ~ArrayAccessorExpression() override;
 
-  /// Sets the array
-  /// @param array the array
-  void set_array(Expression* array) { array_ = array; }
   /// @returns the array
   Expression* array() const { return array_; }
 

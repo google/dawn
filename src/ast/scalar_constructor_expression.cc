@@ -20,8 +20,6 @@
 namespace tint {
 namespace ast {
 
-ScalarConstructorExpression::ScalarConstructorExpression() : Base() {}
-
 ScalarConstructorExpression::ScalarConstructorExpression(Literal* literal)
     : literal_(literal) {}
 

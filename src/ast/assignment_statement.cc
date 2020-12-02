@@ -20,8 +20,6 @@
 namespace tint {
 namespace ast {
 
-AssignmentStatement::AssignmentStatement() : Base() {}
-
 AssignmentStatement::AssignmentStatement(Expression* lhs, Expression* rhs)
     : Base(), lhs_(lhs), rhs_(rhs) {}
 

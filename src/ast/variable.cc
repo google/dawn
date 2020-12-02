@@ -39,11 +39,9 @@ Variable::Variable(Variable&&) = default;
 Variable::~Variable() = default;
 
 Variable* Variable::Clone(CloneContext* ctx) const {
-  auto* cloned = ctx->mod->create<Variable>();
+  auto* cloned =
+      ctx->mod->create<Variable>(name(), storage_class(), ctx->Clone(type()));
   cloned->set_source(ctx->Clone(source()));
-  cloned->set_name(name());
-  cloned->set_storage_class(storage_class());
-  cloned->set_type(ctx->Clone(type()));
   cloned->set_constructor(ctx->Clone(constructor()));
   cloned->set_is_const(is_const());
   return cloned;

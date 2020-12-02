@@ -82,8 +82,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  CaseStatement c(create<BlockStatement>());
-  c.set_body(body);
+  CaseStatement c(body);
   EXPECT_TRUE(c.IsDefault());
 }
 
@@ -92,8 +91,7 @@ TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   CaseSelectorList b;
   b.push_back(create<SintLiteral>(&i32, 2));
 
-  CaseStatement c(create<BlockStatement>());
-  c.set_selectors(b);
+  CaseStatement c(b, create<BlockStatement>());
   EXPECT_FALSE(c.IsDefault());
 }
 

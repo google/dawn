@@ -50,8 +50,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   ast::type::I32 i32;
   ast::type::F32 f32;
 
-  auto* str = create<ast::Struct>();
-  str->set_members({
+  auto* str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>("a", &f32, ast::StructMemberDecorationList{}),
       create<ast::StructMember>(
           "b", &i32,

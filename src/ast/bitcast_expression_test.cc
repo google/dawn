@@ -44,7 +44,10 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 }
 
 TEST_F(BitcastExpressionTest, IsBitcast) {
-  BitcastExpression exp;
+  type::F32 f32;
+  auto* expr = create<IdentifierExpression>("expr");
+
+  BitcastExpression exp(&f32, expr);
   EXPECT_TRUE(exp.Is<BitcastExpression>());
 }
 
@@ -59,16 +62,14 @@ TEST_F(BitcastExpressionTest, IsValid) {
 TEST_F(BitcastExpressionTest, IsValid_MissingType) {
   auto* expr = create<IdentifierExpression>("expr");
 
-  BitcastExpression exp;
-  exp.set_expr(expr);
+  BitcastExpression exp(nullptr, expr);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(BitcastExpressionTest, IsValid_MissingExpr) {
   type::F32 f32;
 
-  BitcastExpression exp;
-  exp.set_type(&f32);
+  BitcastExpression exp(&f32, nullptr);
   EXPECT_FALSE(exp.IsValid());
 }
 

@@ -279,8 +279,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   members.push_back(create<ast::StructMember>(
       "coord", &vec4, ast::StructMemberDecorationList{}));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("Uniforms", str);
 
@@ -345,8 +344,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -404,8 +402,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
@@ -463,8 +460,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>("b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>();
-  str->set_members(members);
+  auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);

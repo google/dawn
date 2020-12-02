@@ -28,8 +28,6 @@
 namespace tint {
 namespace ast {
 
-Function::Function() = default;
-
 Function::Function(const std::string& name,
                    VariableList params,
                    type::Type* return_type,

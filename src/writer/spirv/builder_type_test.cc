@@ -279,7 +279,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto* s = create<ast::Struct>();
+  auto* s = create<ast::Struct>(ast::StructMemberList{});
   ast::type::Struct s_type("S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
