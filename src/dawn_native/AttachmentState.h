@@ -69,6 +69,8 @@ namespace dawn_native {
         wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
 
+        size_t ComputeContentHash() override;
+
       private:
         ~AttachmentState() override;
     };

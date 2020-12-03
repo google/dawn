@@ -14,9 +14,9 @@
 
 #include "dawn_native/ShaderModule.h"
 
-#include "common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/SpirvUtils.h"
@@ -975,20 +975,12 @@ namespace dawn_native {
         return *mEntryPoints.at(entryPoint);
     }
 
-    size_t ShaderModuleBase::HashFunc::operator()(const ShaderModuleBase* module) const {
-        size_t hash = 0;
-
-        HashCombine(&hash, module->mType);
-
-        for (uint32_t word : module->mOriginalSpirv) {
-            HashCombine(&hash, word);
-        }
-
-        for (char c : module->mWgsl) {
-            HashCombine(&hash, c);
-        }
-
-        return hash;
+    size_t ShaderModuleBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
+        recorder.Record(mType);
+        recorder.Record(mOriginalSpirv);
+        recorder.Record(mWgsl);
+        return recorder.GetContentHash();
     }
 
     bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,

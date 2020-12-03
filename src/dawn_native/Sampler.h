@@ -35,10 +35,9 @@ namespace dawn_native {
 
         bool HasCompareFunction() const;
 
-        // Functors necessary for the unordered_set<SamplerBase*>-based cache.
-        struct HashFunc {
-            size_t operator()(const SamplerBase* module) const;
-        };
+        // Functions necessary for the unordered_set<SamplerBase*>-based cache.
+        size_t ComputeContentHash() override;
+
         struct EqualityFunc {
             bool operator()(const SamplerBase* a, const SamplerBase* b) const;
         };

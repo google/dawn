@@ -94,6 +94,8 @@ target_sources(dawn_native PRIVATE
     "ErrorScopeTracker.h"
     "Extensions.cpp"
     "Extensions.h"
+    "ObjectContentHasher.cpp"
+    "ObjectContentHasher.h"
     "Fence.cpp"
     "Fence.h"
     "Format.cpp"

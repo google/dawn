@@ -14,9 +14,9 @@
 
 #include "dawn_native/Pipeline.h"
 
-#include "common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/ShaderModule.h"
 
@@ -142,21 +142,17 @@ namespace dawn_native {
         return bgl;
     }
 
-    // static
-    size_t PipelineBase::HashForCache(const PipelineBase* pipeline) {
-        size_t hash = 0;
+    size_t PipelineBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
+        recorder.Record(mLayout->GetContentHash());
 
-        // The layout is deduplicated so it can be hashed by pointer.
-        HashCombine(&hash, pipeline->mLayout.Get());
-
-        HashCombine(&hash, pipeline->mStageMask);
-        for (SingleShaderStage stage : IterateStages(pipeline->mStageMask)) {
-            // The module is deduplicated so it can be hashed by pointer.
-            HashCombine(&hash, pipeline->mStages[stage].module.Get());
-            HashCombine(&hash, pipeline->mStages[stage].entryPoint);
+        recorder.Record(mStageMask);
+        for (SingleShaderStage stage : IterateStages(mStageMask)) {
+            recorder.Record(mStages[stage].module->GetContentHash());
+            recorder.Record(mStages[stage].entryPoint);
         }
 
-        return hash;
+        return recorder.GetContentHash();
     }
 
     // static

@@ -437,6 +437,9 @@ namespace dawn_native {
         const BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         Ref<BindGroupLayoutBase> result = nullptr;
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
         if (iter != mCaches->bindGroupLayouts.end()) {
@@ -445,6 +448,7 @@ namespace dawn_native {
             BindGroupLayoutBase* backendObj;
             DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
             backendObj->SetIsCachedReference();
+            backendObj->SetContentHash(blueprintHash);
             mCaches->bindGroupLayouts.insert(backendObj);
             result = AcquireRef(backendObj);
         }
@@ -475,6 +479,9 @@ namespace dawn_native {
         const ComputePipelineDescriptor* descriptor) {
         ComputePipelineBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         auto iter = mCaches->computePipelines.find(&blueprint);
         if (iter != mCaches->computePipelines.end()) {
             (*iter)->Reference();
@@ -484,6 +491,7 @@ namespace dawn_native {
         ComputePipelineBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateComputePipelineImpl(descriptor));
         backendObj->SetIsCachedReference();
+        backendObj->SetContentHash(blueprintHash);
         mCaches->computePipelines.insert(backendObj);
         return backendObj;
     }
@@ -498,6 +506,9 @@ namespace dawn_native {
         const PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         auto iter = mCaches->pipelineLayouts.find(&blueprint);
         if (iter != mCaches->pipelineLayouts.end()) {
             (*iter)->Reference();
@@ -507,6 +518,7 @@ namespace dawn_native {
         PipelineLayoutBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreatePipelineLayoutImpl(descriptor));
         backendObj->SetIsCachedReference();
+        backendObj->SetContentHash(blueprintHash);
         mCaches->pipelineLayouts.insert(backendObj);
         return backendObj;
     }
@@ -521,6 +533,9 @@ namespace dawn_native {
         const RenderPipelineDescriptor* descriptor) {
         RenderPipelineBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         auto iter = mCaches->renderPipelines.find(&blueprint);
         if (iter != mCaches->renderPipelines.end()) {
             (*iter)->Reference();
@@ -530,6 +545,7 @@ namespace dawn_native {
         RenderPipelineBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateRenderPipelineImpl(descriptor));
         backendObj->SetIsCachedReference();
+        backendObj->SetContentHash(blueprintHash);
         mCaches->renderPipelines.insert(backendObj);
         return backendObj;
     }
@@ -544,6 +560,9 @@ namespace dawn_native {
         const SamplerDescriptor* descriptor) {
         SamplerBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         auto iter = mCaches->samplers.find(&blueprint);
         if (iter != mCaches->samplers.end()) {
             (*iter)->Reference();
@@ -553,6 +572,7 @@ namespace dawn_native {
         SamplerBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateSamplerImpl(descriptor));
         backendObj->SetIsCachedReference();
+        backendObj->SetContentHash(blueprintHash);
         mCaches->samplers.insert(backendObj);
         return backendObj;
     }
@@ -567,6 +587,9 @@ namespace dawn_native {
         const ShaderModuleDescriptor* descriptor) {
         ShaderModuleBase blueprint(this, descriptor);
 
+        const size_t blueprintHash = blueprint.ComputeContentHash();
+        blueprint.SetContentHash(blueprintHash);
+
         auto iter = mCaches->shaderModules.find(&blueprint);
         if (iter != mCaches->shaderModules.end()) {
             (*iter)->Reference();
@@ -576,6 +599,7 @@ namespace dawn_native {
         ShaderModuleBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateShaderModuleImpl(descriptor));
         backendObj->SetIsCachedReference();
+        backendObj->SetContentHash(blueprintHash);
         mCaches->shaderModules.insert(backendObj);
         return backendObj;
     }
@@ -595,6 +619,7 @@ namespace dawn_native {
 
         Ref<AttachmentState> attachmentState = AcquireRef(new AttachmentState(this, *blueprint));
         attachmentState->SetIsCachedReference();
+        attachmentState->SetContentHash(attachmentState->ComputeContentHash());
         mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }

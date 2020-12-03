@@ -14,8 +14,8 @@
 
 #include "dawn_native/Sampler.h"
 
-#include "common/HashUtils.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cmath>
@@ -84,20 +84,11 @@ namespace dawn_native {
         return mCompareFunction != wgpu::CompareFunction::Undefined;
     }
 
-    size_t SamplerBase::HashFunc::operator()(const SamplerBase* module) const {
-        size_t hash = 0;
-
-        HashCombine(&hash, module->mAddressModeU);
-        HashCombine(&hash, module->mAddressModeV);
-        HashCombine(&hash, module->mAddressModeW);
-        HashCombine(&hash, module->mMagFilter);
-        HashCombine(&hash, module->mMinFilter);
-        HashCombine(&hash, module->mMipmapFilter);
-        HashCombine(&hash, module->mLodMinClamp);
-        HashCombine(&hash, module->mLodMaxClamp);
-        HashCombine(&hash, module->mCompareFunction);
-
-        return hash;
+    size_t SamplerBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
+        recorder.Record(mAddressModeU, mAddressModeV, mAddressModeW, mMagFilter, mMinFilter,
+                        mMipmapFilter, mLodMinClamp, mLodMaxClamp, mCompareFunction);
+        return recorder.GetContentHash();
     }
 
     bool SamplerBase::EqualityFunc::operator()(const SamplerBase* a, const SamplerBase* b) const {

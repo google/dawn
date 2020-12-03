@@ -14,8 +14,8 @@
 
 #include "dawn_native/ComputePipeline.h"
 
-#include "common/HashUtils.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 
 namespace dawn_native {
 
@@ -57,10 +57,6 @@ namespace dawn_native {
     // static
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         return new ComputePipelineBase(device, ObjectBase::kError);
-    }
-
-    size_t ComputePipelineBase::HashFunc::operator()(const ComputePipelineBase* pipeline) const {
-        return PipelineBase::HashForCache(pipeline);
     }
 
     bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,

@@ -15,8 +15,8 @@
 #include "dawn_native/BindGroupLayout.h"
 
 #include "common/BitSetIterator.h"
-#include "common/HashUtils.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
@@ -152,11 +152,6 @@ namespace dawn_native {
 
     namespace {
 
-        void HashCombineBindingInfo(size_t* hash, const BindingInfo& info) {
-            HashCombine(hash, info.hasDynamicOffset, info.visibility, info.type,
-                        info.textureComponentType, info.viewDimension, info.storageTextureFormat,
-                        info.minBufferBindingSize);
-        }
 
         bool operator!=(const BindingInfo& a, const BindingInfo& b) {
             return a.hasDynamicOffset != b.hasDynamicOffset ||          //
@@ -319,15 +314,20 @@ namespace dawn_native {
         return it->second;
     }
 
-    size_t BindGroupLayoutBase::HashFunc::operator()(const BindGroupLayoutBase* bgl) const {
-        size_t hash = 0;
+    size_t BindGroupLayoutBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
         // std::map is sorted by key, so two BGLs constructed in different orders
-        // will still hash the same.
-        for (const auto& it : bgl->mBindingMap) {
-            HashCombine(&hash, it.first, it.second);
-            HashCombineBindingInfo(&hash, bgl->mBindingInfo[it.second]);
+        // will still record the same.
+        for (const auto& it : mBindingMap) {
+            recorder.Record(it.first, it.second);
+
+            const BindingInfo& info = mBindingInfo[it.second];
+            recorder.Record(info.hasDynamicOffset, info.visibility, info.type,
+                            info.textureComponentType, info.viewDimension,
+                            info.storageTextureFormat, info.minBufferBindingSize);
         }
-        return hash;
+
+        return recorder.GetContentHash();
     }
 
     bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,

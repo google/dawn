@@ -35,9 +35,6 @@ namespace dawn_native {
         const EntryPointMetadata& GetMetadata() const;
 
         // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
-        struct HashFunc {
-            size_t operator()(const ComputePipelineBase* pipeline) const;
-        };
         struct EqualityFunc {
             bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
         };

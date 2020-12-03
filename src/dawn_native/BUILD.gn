@@ -218,6 +218,8 @@ source_set("dawn_native_sources") {
     "InternalPipelineStore.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
+    "ObjectContentHasher.cpp",
+    "ObjectContentHasher.h",
     "PassResourceUsage.h",
     "PassResourceUsageTracker.cpp",
     "PassResourceUsageTracker.h",

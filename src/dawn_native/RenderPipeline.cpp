@@ -15,9 +15,9 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include "common/BitSetIterator.h"
-#include "common/HashUtils.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cmath>
@@ -607,63 +607,62 @@ namespace dawn_native {
         return mAttachmentState.Get();
     }
 
-    size_t RenderPipelineBase::HashFunc::operator()(const RenderPipelineBase* pipeline) const {
-        // Hash modules and layout
-        size_t hash = PipelineBase::HashForCache(pipeline);
+    size_t RenderPipelineBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
 
-        // Hierarchically hash the attachment state.
+        // Record modules and layout
+        recorder.Record(PipelineBase::ComputeContentHash());
+
+        // Hierarchically record the attachment state.
         // It contains the attachments set, texture formats, and sample count.
-        HashCombine(&hash, pipeline->mAttachmentState.Get());
+        recorder.Record(mAttachmentState->GetContentHash());
 
-        // Hash attachments
-        for (ColorAttachmentIndex i :
-             IterateBitSet(pipeline->mAttachmentState->GetColorAttachmentsMask())) {
-            const ColorStateDescriptor& desc = *pipeline->GetColorStateDescriptor(i);
-            HashCombine(&hash, desc.writeMask);
-            HashCombine(&hash, desc.colorBlend.operation, desc.colorBlend.srcFactor,
-                        desc.colorBlend.dstFactor);
-            HashCombine(&hash, desc.alphaBlend.operation, desc.alphaBlend.srcFactor,
-                        desc.alphaBlend.dstFactor);
+        // Record attachments
+        for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
+            const ColorStateDescriptor& desc = *GetColorStateDescriptor(i);
+            recorder.Record(desc.writeMask);
+            recorder.Record(desc.colorBlend.operation, desc.colorBlend.srcFactor,
+                            desc.colorBlend.dstFactor);
+            recorder.Record(desc.alphaBlend.operation, desc.alphaBlend.srcFactor,
+                            desc.alphaBlend.dstFactor);
         }
 
-        if (pipeline->mAttachmentState->HasDepthStencilAttachment()) {
-            const DepthStencilStateDescriptor& desc = pipeline->mDepthStencilState;
-            HashCombine(&hash, desc.depthWriteEnabled, desc.depthCompare);
-            HashCombine(&hash, desc.stencilReadMask, desc.stencilWriteMask);
-            HashCombine(&hash, desc.stencilFront.compare, desc.stencilFront.failOp,
-                        desc.stencilFront.depthFailOp, desc.stencilFront.passOp);
-            HashCombine(&hash, desc.stencilBack.compare, desc.stencilBack.failOp,
-                        desc.stencilBack.depthFailOp, desc.stencilBack.passOp);
+        if (mAttachmentState->HasDepthStencilAttachment()) {
+            const DepthStencilStateDescriptor& desc = mDepthStencilState;
+            recorder.Record(desc.depthWriteEnabled, desc.depthCompare);
+            recorder.Record(desc.stencilReadMask, desc.stencilWriteMask);
+            recorder.Record(desc.stencilFront.compare, desc.stencilFront.failOp,
+                            desc.stencilFront.depthFailOp, desc.stencilFront.passOp);
+            recorder.Record(desc.stencilBack.compare, desc.stencilBack.failOp,
+                            desc.stencilBack.depthFailOp, desc.stencilBack.passOp);
         }
 
-        // Hash vertex state
-        HashCombine(&hash, pipeline->mAttributeLocationsUsed);
-        for (VertexAttributeLocation location : IterateBitSet(pipeline->mAttributeLocationsUsed)) {
-            const VertexAttributeInfo& desc = pipeline->GetAttribute(location);
-            HashCombine(&hash, desc.shaderLocation, desc.vertexBufferSlot, desc.offset,
-                        desc.format);
+        // Record vertex state
+        recorder.Record(mAttributeLocationsUsed);
+        for (VertexAttributeLocation location : IterateBitSet(mAttributeLocationsUsed)) {
+            const VertexAttributeInfo& desc = GetAttribute(location);
+            recorder.Record(desc.shaderLocation, desc.vertexBufferSlot, desc.offset, desc.format);
         }
 
-        HashCombine(&hash, pipeline->mVertexBufferSlotsUsed);
-        for (VertexBufferSlot slot : IterateBitSet(pipeline->mVertexBufferSlotsUsed)) {
-            const VertexBufferInfo& desc = pipeline->GetVertexBuffer(slot);
-            HashCombine(&hash, desc.arrayStride, desc.stepMode);
+        recorder.Record(mVertexBufferSlotsUsed);
+        for (VertexBufferSlot slot : IterateBitSet(mVertexBufferSlotsUsed)) {
+            const VertexBufferInfo& desc = GetVertexBuffer(slot);
+            recorder.Record(desc.arrayStride, desc.stepMode);
         }
 
-        HashCombine(&hash, pipeline->mVertexState.indexFormat);
+        recorder.Record(mVertexState.indexFormat);
 
-        // Hash rasterization state
+        // Record rasterization state
         {
-            const RasterizationStateDescriptor& desc = pipeline->mRasterizationState;
-            HashCombine(&hash, desc.frontFace, desc.cullMode);
-            HashCombine(&hash, desc.depthBias, desc.depthBiasSlopeScale, desc.depthBiasClamp);
+            const RasterizationStateDescriptor& desc = mRasterizationState;
+            recorder.Record(desc.frontFace, desc.cullMode);
+            recorder.Record(desc.depthBias, desc.depthBiasSlopeScale, desc.depthBiasClamp);
         }
 
-        // Hash other state
-        HashCombine(&hash, pipeline->mPrimitiveTopology, pipeline->mSampleMask,
-                    pipeline->mAlphaToCoverageEnabled);
+        // Record other state
+        recorder.Record(mPrimitiveTopology, mSampleMask, mAlphaToCoverageEnabled);
 
-        return hash;
+        return recorder.GetContentHash();
     }
 
     bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,

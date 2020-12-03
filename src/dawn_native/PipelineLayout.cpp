@@ -16,10 +16,10 @@
 
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
-#include "common/HashUtils.h"
 #include "common/ityp_stack_vec.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/ShaderModule.h"
 
 namespace dawn_native {
@@ -253,14 +253,15 @@ namespace dawn_native {
         return kMaxBindGroupsTyped;
     }
 
-    size_t PipelineLayoutBase::HashFunc::operator()(const PipelineLayoutBase* pl) const {
-        size_t hash = Hash(pl->mMask);
+    size_t PipelineLayoutBase::ComputeContentHash() {
+        ObjectContentHasher recorder;
+        recorder.Record(mMask);
 
-        for (BindGroupIndex group : IterateBitSet(pl->mMask)) {
-            HashCombine(&hash, pl->GetBindGroupLayout(group));
+        for (BindGroupIndex group : IterateBitSet(mMask)) {
+            recorder.Record(GetBindGroupLayout(group)->GetContentHash());
         }
 
-        return hash;
+        return recorder.GetContentHash();
     }
 
     bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,

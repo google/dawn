@@ -15,8 +15,8 @@
 #include "dawn_native/AttachmentState.h"
 
 #include "common/BitSetIterator.h"
-#include "common/HashUtils.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/Texture.h"
 
 namespace dawn_native {
@@ -128,6 +128,11 @@ namespace dawn_native {
 
     AttachmentState::~AttachmentState() {
         GetDevice()->UncacheAttachmentState(this);
+    }
+
+    size_t AttachmentState::ComputeContentHash() {
+        // TODO(dawn:549): skip this traversal and reuse the blueprint.
+        return AttachmentStateBlueprint::HashFunc()(this);
     }
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>

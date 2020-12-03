@@ -14,6 +14,8 @@
 
 #include "dawn_native/CachedObject.h"
 
+#include "common/Assert.h"
+
 namespace dawn_native {
 
     bool CachedObject::IsCachedReference() const {
@@ -22,6 +24,21 @@ namespace dawn_native {
 
     void CachedObject::SetIsCachedReference() {
         mIsCachedReference = true;
+    }
+
+    size_t CachedObject::HashFunc::operator()(const CachedObject* obj) const {
+        return obj->GetContentHash();
+    }
+
+    size_t CachedObject::GetContentHash() const {
+        ASSERT(mIsContentHashInitialized);
+        return mContentHash;
+    }
+
+    void CachedObject::SetContentHash(size_t contentHash) {
+        ASSERT(!mIsContentHashInitialized);
+        mContentHash = contentHash;
+        mIsContentHashInitialized = true;
     }
 
 }  // namespace dawn_native
