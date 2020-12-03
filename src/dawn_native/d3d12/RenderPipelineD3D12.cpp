@@ -272,6 +272,24 @@ namespace dawn_native { namespace d3d12 {
             return mDepthStencilDescriptor;
         }
 
+        D3D12_INDEX_BUFFER_STRIP_CUT_VALUE ComputeIndexBufferStripCutValue(
+            wgpu::PrimitiveTopology primitiveTopology,
+            wgpu::IndexFormat indexFormat) {
+            if (primitiveTopology != wgpu::PrimitiveTopology::TriangleStrip &&
+                primitiveTopology != wgpu::PrimitiveTopology::LineStrip) {
+                return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+            }
+
+            switch (indexFormat) {
+                case wgpu::IndexFormat::Uint16:
+                    return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF;
+                case wgpu::IndexFormat::Uint32:
+                    return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
+                case wgpu::IndexFormat::Undefined:
+                    return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+            }
+        }
+
     }  // anonymous namespace
 
     ResultOrError<RenderPipeline*> RenderPipeline::Create(
@@ -324,6 +342,9 @@ namespace dawn_native { namespace d3d12 {
         if (GetAttributeLocationsUsed().any()) {
             descriptorD3D12.InputLayout = ComputeInputLayout(&inputElementDescriptors);
         }
+
+        descriptorD3D12.IBStripCutValue = ComputeIndexBufferStripCutValue(
+            GetPrimitiveTopology(), GetVertexStateDescriptor()->indexFormat);
 
         descriptorD3D12.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
         descriptorD3D12.RasterizerState.CullMode = D3D12CullMode(GetCullMode());
