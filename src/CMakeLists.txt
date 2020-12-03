@@ -152,6 +152,7 @@ set(TINT_LIB_SRCS
   ast/struct_member_offset_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
+  ast/traits.h
   ast/type_constructor_expression.h
   ast/type_constructor_expression.cc
   ast/type_decoration.cc
@@ -415,6 +416,7 @@ set(TINT_TEST_SRCS
   ast/type/struct_type_test.cc
   ast/type/u32_type_test.cc
   ast/type/vector_type_test.cc
+  ast/traits_test.cc
   ast/type_constructor_expression_test.cc
   ast/type_manager_test.cc
   ast/uint_literal_test.cc
